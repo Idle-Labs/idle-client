@@ -1,0 +1,65 @@
+.newLink{
+  text-decoration:none !important;
+}
+@-webkit-keyframes newPillContainerAnim {
+    0%{
+      background-color:rgba(0, 54, 255, 0.05);
+    }
+    100%{
+      background-color:rgba(0, 54, 255, 0.15);
+    }
+}
+.newPill{
+  background:linear-gradient(180deg,#01b5eb,#017ed4);
+}
+.mainInput {
+  padding-left: 0 !important;
+  padding-right: 1em !important;
+  background-color: transparent;
+  &:focus {
+    border-color: white !important;
+  }
+  &::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+    color: rgba(0,0,0,0.3) !important;
+  }
+  &::-moz-placeholder { /* Firefox 19+ */
+    color: rgba(0,0,0,0.3) !important;
+  }
+  &:-ms-input-placeholder { /* IE 10+ */
+    color: rgba(0,0,0,0.3) !important;
+  }
+  &:-moz-placeholder { /* Firefox 18- */
+    color: rgba(0,0,0,0.3) !important;
+  }
+}
+.button{
+  border-radius: 0 2rem 2rem 0 !important;
+}
+/* Hide HTML5 Up and Down arrows. */
+input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+.gradientButton{
+  border-radius: 48px !important;
+  background: rgba(0,221,255,1) !important;
+  background: -moz-linear-gradient(left, rgba(0,221,255,1) 0%, rgba(0,169,254,1) 100%) !important;
+  background: -webkit-gradient(left top, right top, color-stop(0%, rgba(0,221,255,1)), color-stop(100%, rgba(0,169,254,1))) !important;
+  background: -webkit-linear-gradient(left, rgba(0,221,255,1) 0%, rgba(0,169,254,1) 100%) !important;
+  background: -o-linear-gradient(left, rgba(0,221,255,1) 0%, rgba(0,169,254,1) 100%) !important;
+  background: -ms-linear-gradient(left, rgba(0,221,255,1) 0%, rgba(0,169,254,1) 100%) !important;
+  background: linear-gradient(to right, rgba(0,221,255,1) 0%, rgba(0,169,254,1) 100%) !important;
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ddff', endColorstr='#00a9fe', GradientType=1 ) !important;
+}
+.gradientButton:before{
+  display:none !important;
+}
+@media (max-width: 30em){
+  .mainInput {
+    padding-left: 0;
+    padding-right: 1em !important;
+  }
+}

@@ -1,0 +1,21 @@
+.footer{
+  background-image:url(/images/footer.png) !important;
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size:100% 80%;
+  height:70vh;
+  min-height:460px;
+}
+@media (max-width: 31em) {
+  .footer{
+    height:auto!important;
+    background-position: center bottom !important;
+    background-size:cover !important;
+  }
+}
+.link{
+  text-decoration:none;
+}
+.link:hover{
+  text-decoration:underline;
+}
