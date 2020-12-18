@@ -143,12 +143,12 @@ class GovernanceUtil {
 
   queueProposal = async (proposalId,callback=null,callbackReceipt=null) => {
     const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
-    await this.functionsUtil.contractMethodSendWrapper(contractName,'queue',[this.functionsUtil.BNify(proposalId)],callback,callbackReceipt);
+    await this.functionsUtil.contractMethodSendWrapper(contractName,'queue',[this.functionsUtil.toBN(proposalId)],callback,callbackReceipt);
   }
 
   executeProposal = async (proposalId,callback=null,callbackReceipt=null) => {
     const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
-    await this.functionsUtil.contractMethodSendWrapper(contractName,'execute',[this.functionsUtil.BNify(proposalId)],callback,callbackReceipt);
+    await this.functionsUtil.contractMethodSendWrapper(contractName,'execute',[this.functionsUtil.toBN(proposalId)],callback,callbackReceipt);
   }
 
   proposeAndVoteFor = async (targets, values, signatures, calldatas, description) => {
