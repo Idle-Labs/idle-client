@@ -141,6 +141,23 @@ class GovernanceUtil {
     return null;
   }
 
+  getTimelockDelay = async () => {
+    // Check for cached data
+    const cachedDataKey = `getTimelockDelay`;
+    const cachedData = this.functionsUtil.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData && !this.functionsUtil.BNify(cachedData).isNaN()){
+      return cachedData;
+    }
+
+    let delay = await this.functionsUtil.genericContractCall('Timelock','delay');
+    if (delay){
+      delay = this.functionsUtil.BNify(delay);
+      return this.functionsUtil.setCachedDataWithLocalStorage(cachedDataKey,delay,null);
+    }
+
+    return null;
+  }
+
   queueProposal = async (proposalId,callback=null,callbackReceipt=null) => {
     const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
     await this.functionsUtil.contractMethodSendWrapper(contractName,'queue',[this.functionsUtil.toBN(proposalId)],callback,callbackReceipt);
@@ -434,6 +451,7 @@ class GovernanceUtil {
       const createdBlockInfo = await this.props.web3.eth.getBlock(createdEvent.blockNumber);
       const createdState = {
         state: "Pending",
+        blockNumber: createdEvent.blockNumber,
         end_time: createdBlockInfo.timestamp,
         start_time: createdBlockInfo.timestamp,
         trx_hash: createdEvent.transactionHash
@@ -442,10 +460,11 @@ class GovernanceUtil {
 
       // Push active state
       const activeState = {
-        state: "Active",
         end_time: null,
-        start_time: createdState.start_time,
-        trx_hash: null
+        trx_hash: null,
+        state: "Active",
+        blockNumber: createdEvent.blockNumber,
+        start_time: createdState.start_time
       };
       p.states.push(activeState);
 
@@ -453,8 +472,9 @@ class GovernanceUtil {
       if (canceledEvent){
         const canceledBlockInfo = await this.props.web3.eth.getBlock(canceledEvent.blockNumber);
         const canceledState = {
-          state: "Canceled",
           end_time: null,
+          state: "Canceled",
+          blockNumber: canceledEvent.blockNumber,
           start_time: canceledBlockInfo.timestamp,
           trx_hash: canceledEvent.transactionHash
         }
@@ -466,17 +486,19 @@ class GovernanceUtil {
         if (queuedEvent){
           const queuedBlockInfo = await this.props.web3.eth.getBlock(queuedEvent.blockNumber);
           const succeededState = {
-            state: "Succeeded",
             end_time: null,
             trx_hash: null,
+            state: "Succeeded",
+            blockNumber: queuedEvent.blockNumber,
             start_time: queuedBlockInfo.timestamp,
           };
 
           const queuedState = {
-            state: "Queued",
             end_time: null,
+            state: "Queued",
+            blockNumber: queuedEvent.blockNumber,
+            trx_hash: queuedEvent.transactionHash,
             start_time: queuedBlockInfo.timestamp,
-            trx_hash: queuedEvent.transactionHash
           };
 
           // Update previous state end_time
@@ -491,8 +513,9 @@ class GovernanceUtil {
         if (executedEvent){
           const executedBlockInfo = await this.props.web3.eth.getBlock(executedEvent.blockNumber);
           const executedState = {
-            state: "Executed",
             end_time: null,
+            state: "Executed",
+            blockNumber: executedEvent.blockNumber,
             start_time: executedBlockInfo.timestamp,
             trx_hash: executedEvent.transactionHash
           }
@@ -511,6 +534,7 @@ class GovernanceUtil {
           state: p.state,
           end_time: null,
           trx_hash: null,
+          blockNumber: p.endBlock,
           start_time: endBlockInfo.timestamp,
         }
         // Update previous state end_time

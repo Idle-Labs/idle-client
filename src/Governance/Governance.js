@@ -22,9 +22,11 @@ class Dashboard extends Component {
     baseRoute:null,
     modalTitle:null,
     activeModal:null,
+    blockNumber:null,
     currentRoute:null,
     modalContent:null,
     pageComponent:null,
+    timelockDelay:null,
     currentSection:null,
     selectedSection:null,
     currentDelegate:null,
@@ -320,6 +322,8 @@ class Dashboard extends Component {
   async loadData(){
     if (this.props.account){
       const [
+        blockNumber,
+        timelockDelay,
         {
           proposalThreshold, proposalMaxOperations
         },
@@ -327,6 +331,8 @@ class Dashboard extends Component {
         balance,
         currentDelegate
       ] = await Promise.all([
+        this.functionsUtil.getBlockNumber(),
+        this.governanceUtil.getTimelockDelay(),
         this.governanceUtil.getProposalParams(),
         this.governanceUtil.getCurrentVotes(this.props.account),
         this.governanceUtil.getTokensBalance(this.props.account),
@@ -336,6 +342,8 @@ class Dashboard extends Component {
       this.setState({
         votes,
         balance,
+        blockNumber,
+        timelockDelay,
         currentDelegate,
         proposalThreshold,
         proposalMaxOperations
@@ -469,7 +477,9 @@ class Dashboard extends Component {
                       votes={this.state.votes}
                       balance={this.state.balance}
                       urlParams={this.state.params}
+                      blockNumber={this.state.blockNumber}
                       loadUserData={this.loadData.bind(this)}
+                      timelockDelay={this.state.timelockDelay}
                       goToSection={this.goToSection.bind(this)}
                       currentDelegate={this.state.currentDelegate}
                       selectedSection={this.state.selectedSection}

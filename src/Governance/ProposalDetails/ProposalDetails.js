@@ -175,7 +175,7 @@ class ProposalDetails extends Component {
     const againstVotesAddrs = proposal.votes.filter( v => (!v.support) ).sort( (a,b) => (this.functionsUtil.BNify(a.votes).lt(this.functionsUtil.BNify(b.votes)) ? 1 : -1) );
 
     const canQueue = proposal.state.toLowerCase() === 'succeeded'; 
-    const canExecute = proposal.state.toLowerCase() === 'queued';
+    const canExecute = proposal.state.toLowerCase() === 'queued' && parseInt(new Date().getTime()/1000)-parseInt(proposal.states[proposal.states.length-1].start_time)>=parseInt(this.props.timelockDelay);
 
     return (
       <Box
