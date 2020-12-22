@@ -75,6 +75,7 @@ class Migrate extends Component {
       return false;
     }
     const amount = e.target.value.length && !isNaN(e.target.value) ? this.functionsUtil.BNify(e.target.value) : this.functionsUtil.BNify(0);
+
     this.checkButtonDisabled(amount);
     this.setState((prevState) => ({
       fastBalanceSelector:{
@@ -120,6 +121,7 @@ class Migrate extends Component {
     const selectedPercentage = this.functionsUtil.BNify(this.state.fastBalanceSelector[this.state.action]).div(100);
 
     switch(this.state.action){
+      case 'migrate':
       case 'redeem':
         amount = this.state.oldIdleTokens ? this.functionsUtil.BNify(this.state.oldIdleTokens).times(selectedPercentage) : null;
       break;
@@ -532,7 +534,7 @@ class Migrate extends Component {
     }
   }
 
-  migrate = async (e,migrationMethod,params) => {
+  migrate = async (e,migrationMethod) => {
     e.preventDefault();
 
     const migrationContractInfo = this.props.tokenConfig.migration.migrationContract;
@@ -634,7 +636,7 @@ class Migrate extends Component {
 
         // Call migration contract function to migrate funds
         const oldIdleTokens = this.state.oldIdleTokens;
-        const toMigrate = this.functionsUtil.integerValue(this.state.oldContractBalance);
+        const toMigrate = this.props.showBalanceSelector ? this.functionsUtil.integerValue(this.functionsUtil.normalizeTokenAmount(this.state.inputValue[this.state.action],this.state.oldContractTokenDecimals)) : this.functionsUtil.integerValue(this.state.oldContractBalance);
         // const toMigrate =  this.functionsUtil.normalizeTokenAmount('1',this.state.oldContractTokenDecimals).toString(); // TEST AMOUNT
 
         let _skipRebalance = typeof this.props.tokenConfig.skipMintForDeposit !== 'undefined' ? this.props.tokenConfig.skipMintForDeposit : this.functionsUtil.getGlobalConfig(['contract','methods','migrate','skipRebalance']);
@@ -665,16 +667,27 @@ class Migrate extends Component {
           migrationParams = migrationParams(toMigrate);
         }
 
-        // console.log('Migration params',oldIdleTokens,minAmountForRebalance,migrationContractInfo.name, migrationMethod, migrationParams);
-
         // Check if Biconomy is enabled
         if (useMetaTx){
           const functionSignature = migrationContract.methods[migrationMethod](...migrationParams).encodeABI();
           this.functionsUtil.sendBiconomyTxWithPersonalSign(migrationContractInfo.name, functionSignature, callbackMigrate, callbackReceiptMigrate);
           // this.functionsUtil.sendBiconomyTx(migrationContractInfo.name, migrationContractInfo.address, functionSignature, callbackMigrate, callbackReceiptMigrate);
         } else {
-          // Send migration tx
-          this.functionsUtil.contractMethodSendWrapper(migrationContractInfo.name, migrationMethod, migrationParams, callbackMigrate, callbackReceiptMigrate);
+
+          const functionInfo = migrationContractInfo.functions.filter( f => f.name === migrationMethod );
+          let usePermit = typeof functionInfo.usePermit !== 'undefined' ? functionInfo.usePermit : false;
+          const nonceMethod = typeof functionInfo.nonceMethod !== 'undefined' ? functionInfo.nonceMethod : false;
+
+          const baseContract = this.functionsUtil.getContractByName(this.props.tokenConfig.name);
+          usePermit = usePermit && nonceMethod && baseContract.methods[nonceMethod];
+
+          if (usePermit){
+            const nonce = await baseContract.methods[nonceMethod](this.props.account).call();
+            this.functionsUtil.sendTxWithPermit(migrationContractInfo.name, migrationMethod, migrationParams, nonce, callbackMigrate, callbackReceiptMigrate);
+          } else {
+            // Send migration tx
+            this.functionsUtil.contractMethodSendWrapper(migrationContractInfo.name, migrationMethod, migrationParams, callbackMigrate, callbackReceiptMigrate);
+          }
         }
 
         // debugger;
@@ -904,7 +917,8 @@ class Migrate extends Component {
             {
               this.state.action === 'migrate' ? (
                 <Flex
-                  mt={3}
+                  mt={1}
+                  mb={3}
                   flexDirection={'column'}
                 >
                   {
@@ -931,27 +945,120 @@ class Migrate extends Component {
                         />
                       </Flex>
                   }
-                  <DashboardCard
-                    cardProps={{
-                      p:3,
-                    }}
-                  >
-                    {
-                      this.state.migrationContractApproved ? (
-                        this.state.processing.migrate.loading ? (
+                  {
+                    this.state.migrationContractApproved ? (
+                      this.state.processing.migrate.loading ? (
+                        <Flex
+                          mt={3}
+                          flexDirection={'column'}
+                        >
+                          <TxProgressBar
+                            web3={this.props.web3}
+                            hash={this.state.processing.migrate.txHash}
+                            endMessage={`Finalizing migration request...`}
+                            cancelTransaction={this.cancelTransaction.bind(this)}
+                            waitText={ this.props.waitText ? this.props.waitText : 'Migration estimated in'}
+                            sendingMessage={ this.props.biconomy && this.state.metaTransactionsEnabled ? 'Sending meta-transaction...' : 'Sending transaction...' }
+                          />
+                        </Flex>
+                      ) : this.props.showBalanceSelector ? (
+                        <Flex
+                          mt={1}
+                          flexDirection={'column'}
+                        >
                           <Flex
+                            mb={3}
+                            width={1}
                             flexDirection={'column'}
                           >
-                            <TxProgressBar
-                              web3={this.props.web3}
-                              hash={this.state.processing.migrate.txHash}
-                              endMessage={`Finalizing migration request...`}
-                              cancelTransaction={this.cancelTransaction.bind(this)}
-                              waitText={ this.props.waitText ? this.props.waitText : 'Migration estimated in'}
-                              sendingMessage={ this.props.biconomy && this.state.metaTransactionsEnabled ? 'Sending meta-transaction...' : 'Sending transaction...' }
+                            {
+                              this.state.oldIdleTokens && (
+                                <Box
+                                  mb={1}
+                                  width={1}
+                                >
+                                  <Flex
+                                    width={1}
+                                    alignItems={'center'}
+                                    flexDirection={'row'}
+                                    justifyContent={'flex-end'}
+                                  >
+                                    <Link
+                                      fontSize={1}
+                                      fontWeight={3}
+                                      color={'dark-gray'}
+                                      textAlign={'right'}
+                                      hoverColor={'copyColor'}
+                                      onClick={ (e) => this.setFastBalanceSelector(100) }
+                                    >
+                                      {this.state.oldIdleTokens.toFixed(6)} {this.props.selectedToken}
+                                    </Link>
+                                  </Flex>
+                                </Box>
+                              )
+                            }
+                            <Input
+                              min={0}
+                              type={"number"}
+                              required={true}
+                              height={'3.4em'}
+                              borderRadius={2}
+                              fontWeight={500}
+                              boxShadow={'none !important'}
+                              placeholder={'Insert amount'}
+                              onChange={this.changeInputValue.bind(this)}
+                              border={`1px solid ${this.props.theme.colors.divider}`}
+                              value={this.state.inputValue[this.state.action] ? this.functionsUtil.BNify(this.state.inputValue[this.state.action]).toFixed() : ''}
                             />
+                            <Flex
+                              mt={2}
+                              alignItems={'center'}
+                              flexDirection={'row'}
+                              justifyContent={'space-between'}
+                            >
+                              {
+                                [25,50,75,100].map( percentage => (
+                                  <FastBalanceSelector
+                                    percentage={percentage}
+                                    key={`selector_${percentage}`}
+                                    onMouseDown={()=>this.setFastBalanceSelector(percentage)}
+                                    isActive={this.state.fastBalanceSelector[this.state.action] === parseInt(percentage)}
+                                  />
+                                ))
+                              }
+                            </Flex>
                           </Flex>
-                        ) : (
+                          <Flex
+                            mt={1}
+                            width={1}
+                            alignItems={'center'}
+                            justifyContent={'center'}
+                          >
+                            {
+                              this.props.tokenConfig.migration.migrationContract.functions.map((functionInfo,i) => {
+                                const functionName = functionInfo.name;
+                                return (
+                                  <RoundButton
+                                    buttonProps={{
+                                      width:[1,0.5],
+                                      mainColor:this.props.theme.colors.migrate
+                                    }}
+                                    key={`migrate_${i}`}
+                                    handleClick={ e => this.migrate(e,functionName) }
+                                  >
+                                    { functionInfo.label }
+                                  </RoundButton>
+                                )
+                              })
+                            }
+                          </Flex>
+                        </Flex>
+                      ) : (
+                        <DashboardCard
+                          cardProps={{
+                            p:3,
+                          }}
+                        >
                           <Flex
                             alignItems={'center'}
                             flexDirection={'column'}
@@ -1058,56 +1165,54 @@ class Migrate extends Component {
                             }
                             </Flex>
                           </Flex>
-                        )
-                      ) : (
-                        this.state.processing.approve.loading ? (
-                          <Flex
-                            flexDirection={'column'}
-                          >
-                            <TxProgressBar
-                              web3={this.props.web3}
-                              waitText={`Approve estimated in`}
-                              hash={this.state.processing.approve.txHash}
-                              endMessage={`Finalizing approve request...`}
-                              cancelTransaction={this.cancelTransaction.bind(this)}
-                            />
-                          </Flex>
-                        ) : (
-                          <Flex
-                            alignItems={'center'}
-                            flexDirection={'column'}
-                          >
-                            <Icon
-                              size={'2.3em'}
-                              name={'LockOpen'}
-                              color={'cellText'}
-                            />
-                            <Text
-                              mt={1}
-                              fontSize={2}
-                              color={'cellText'}
-                              textAlign={'center'}
-                            >
-                              {
-                                this.props.approveText ? this.props.approveText : (
-                                  <>To migrate your { !this.props.isMigrationTool ? 'old' : '' } {this.state.oldTokenName} you need to approve our Smart-Contract first.</>
-                                )
-                              }
-                            </Text>
-                            <RoundButton
-                              buttonProps={{
-                                mt:3,
-                                width:[1,1/2]
-                              }}
-                              handleClick={this.approveMigration.bind(this)}
-                            >
-                              Approve
-                            </RoundButton>
-                          </Flex>
-                        )
+                        </DashboardCard>
                       )
-                    }
-                  </DashboardCard>
+                    ) : this.state.processing.approve.loading ? (
+                      <Flex
+                        flexDirection={'column'}
+                      >
+                        <TxProgressBar
+                          web3={this.props.web3}
+                          waitText={`Approve estimated in`}
+                          hash={this.state.processing.approve.txHash}
+                          endMessage={`Finalizing approve request...`}
+                          cancelTransaction={this.cancelTransaction.bind(this)}
+                        />
+                      </Flex>
+                    ) : (
+                      <Flex
+                        alignItems={'center'}
+                        flexDirection={'column'}
+                      >
+                        <Icon
+                          size={'2.3em'}
+                          name={'LockOpen'}
+                          color={'cellText'}
+                        />
+                        <Text
+                          mt={1}
+                          fontSize={2}
+                          color={'cellText'}
+                          textAlign={'center'}
+                        >
+                          {
+                            this.props.approveText ? this.props.approveText : (
+                              <>To migrate your { !this.props.isMigrationTool ? 'old' : '' } {this.state.oldTokenName} you need to approve our Smart-Contract first.</>
+                            )
+                          }
+                        </Text>
+                        <RoundButton
+                          buttonProps={{
+                            mt:3,
+                            width:[1,1/2]
+                          }}
+                          handleClick={this.approveMigration.bind(this)}
+                        >
+                          Approve
+                        </RoundButton>
+                      </Flex>
+                    )
+                  }
                 </Flex>
               ) : (
                 !this.state.processing[this.state.action].loading ? (

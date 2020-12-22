@@ -2177,6 +2177,43 @@ class FunctionsUtil {
     return null;
   }
 
+  sendTxWithPermit = async (contractName,methodName,methodParams,nonce,callback,callback_receipt) => {
+    const contract = this.getContractByName(contractName);
+
+    if (!contract){
+      callback(null,'Contract not found');
+      return false;
+    }
+
+    if (!contract.methods[methodName]){
+      callback(null,'Method not found');
+      return false;
+    }
+
+    const functionSignature = contract.methods[methodName](...methodParams).encodeABI();
+
+    try{
+      const userAddress = this.props.account;
+      const chainId = this.getGlobalConfig(['network','requiredNetwork']);
+      const messageToSign = this.constructMetaTransactionMessage(nonce, chainId, functionSignature, contract._address);
+
+      const signature = await this.props.web3.eth.personal.sign(
+        "0x" + messageToSign.toString("hex"),
+        userAddress
+      );
+
+      const { r, s, v } = this.getSignatureParameters_v4(signature);
+
+      this.contractMethodSendWrapper(contractName, methodName, methodParams.concat([nonce, r, s, v]), callback, callback_receipt);
+
+      return true;
+    } catch (error) {
+      console.error(error);
+      callback(null,error);
+      return false;
+    }
+  }
+
   sendBiconomyTxWithPersonalSign = async (contractName,functionSignature,callback,callback_receipt) => {
     const contract = this.getContractByName(contractName);
 
@@ -2198,8 +2235,6 @@ class FunctionsUtil {
       );
 
       const { r, s, v } = this.getSignatureParameters_v4(signature);
-
-      // this.customLog('executeMetaTransaction', [userAddress, functionSignature, messageToSign, `${messageToSign.length}`, r, s, v]);
 
       this.contractMethodSendWrapper(contractName, 'executeMetaTransaction', [userAddress, functionSignature, r, s, v], callback, callback_receipt);
 

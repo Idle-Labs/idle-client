@@ -18,6 +18,7 @@ import IdleTokenV2 from '../contracts/IdleTokenV2.json';
 import StrategyPage from '../StrategyPage/StrategyPage';
 import BuyModal from '../utilities/components/BuyModal';
 import IdleTokenV3 from '../contracts/IdleTokenV3.json';
+import BatchDeposit from '../BatchDeposit/BatchDeposit';
 import EarlyRewards from '../contracts/EarlyRewards.json';
 import CurveDeposit from '../abis/curve/CurveDeposit.json';
 import VesterFactory from '../contracts/VesterFactory.json';
@@ -27,7 +28,6 @@ import Comptroller from '../abis/compound/Comptroller.json';
 import IdleController from '../contracts/IdleController.json';
 import TokenMigration from '../TokenMigration/TokenMigration';
 import BatchMigration from '../BatchMigration/BatchMigration';
-// import GovernorAlphaComp from '../contracts/GovernorAlpha.json';
 import { RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
 import IdleProxyMinter from '../contracts/IdleProxyMinter.json';
 import IdleRebalancerV3 from '../contracts/IdleRebalancerV3.json';
@@ -343,12 +343,6 @@ const globalConfigs = {
       address:'0x2256b25CFC8E35c3135664FD03E77595042fe31B' // MAIN
       // address:'0x782cB1dbd0bD4df95c2497819be3984EeA5c2c25' // KOVAN
     },
-    /*
-    GovernanceCompound:{
-      abi:GovernorAlphaComp,
-      address:'0xc0da01a04c3f3e0be433606045bb7017a7323e38'
-    },
-    */
     Comptroller:{
       abi:Comptroller,
       address:'0x3d9819210a31b4961b30ef54be2aed79b9c9cd3b', // Main
@@ -815,6 +809,177 @@ const globalConfigs = {
     }
   },
   tools:{
+    batchDeposit:{
+      enabled:true,
+      claimEnabled:true,
+      depositEnabled:true,
+      icon:'FileDownload',
+      route:'batch-deposit',
+      label:'Batch Deposit',
+      subComponent:BatchDeposit,
+      desc:'Deposit your tokens into the batch and wait until it is converted to the Idle Token V4.',
+      props:{
+        availableTokens:{
+          idleDAIYield:{
+            decimals:18,
+            strategy:'best',
+            baseToken:'DAI',
+            migrationContract:{
+              abi:IdleBatchConverter,
+              name:'IdleBatchConverterDAI',
+              address:'0xe0BfD08dA4DAf8f8BA11d1c3802009E75f963497',
+              functions:[
+                {
+                  name:'deposit',
+                  usePermit:true,
+                  label:'Deposit',
+                  nonceMethod:'nonces'
+                },
+              ]
+            },
+          },
+          idleUSDCYield:{
+            decimals:18,
+            strategy:'best',
+            baseToken:'USDC',
+            migrationContract:{
+              abi:IdleBatchConverter,
+              name:'IdleBatchConverterUSDC',
+              address:'0x86c8b56d124c2a8e7ea8a9e6a7f8ed99dde5cca8',
+              functions:[
+                {
+                  name:'deposit',
+                  label:'Deposit',
+                  usePermit:true,
+                },
+              ]
+            },
+          },
+          idleUSDTYield:{
+            decimals:18,
+            abi:IdleTokenV3,
+            strategy:'best',
+            baseToken:'USDT',
+            migrationContract:{
+              abi:IdleBatchConverter,
+              name:'IdleBatchConverterUSDT',
+              address:'0xee5c50c7c49dec47dde2f9b0233b9e14a8f00cf2',
+              functions:[
+                {
+                  label:'Deposit',
+                  name:'deposit'
+                },
+              ]
+            },
+          },
+          idleSUSDYield:{
+            decimals:18,
+            abi:IdleTokenV3,
+            strategy:'best',
+            baseToken:'SUSD',
+            migrationContract:{
+              abi:IdleBatchConverter,
+              name:'IdleBatchConverterSUSD',
+              address:'0xE2eE519399a49f1A2004a25DA61e82867A69b9b1',
+              functions:[
+                {
+                  label:'Deposit',
+                  name:'deposit'
+                },
+              ]
+            },
+          },
+          idleTUSDYield:{
+            decimals:18,
+            abi:IdleTokenV3,
+            strategy:'best',
+            baseToken:'TUSD',
+            migrationContract:{
+              abi:IdleBatchConverter,
+              name:'IdleBatchConverterTUSD',
+              address:'0x174a273f0ea28e55b6dd13259aa43d262b863a86',
+              functions:[
+                {
+                  usePermit:true,
+                  label:'Deposit',
+                  name:'deposit'
+                },
+              ]
+            },
+          },
+          idleWBTCYield:{
+            decimals:18,
+            abi:IdleTokenV3,
+            strategy:'best',
+            baseToken:'WBTC',
+            migrationContract:{
+              abi:IdleBatchConverter,
+              name:'IdleBatchConverterWBTC',
+              address:'0xbfDC7d97559173B52EF2A2f1bC9BeCf97B0D401D',
+              functions:[
+                {
+                  label:'Deposit',
+                  name:'deposit'
+                },
+              ]
+            },
+          },
+          idleDAISafe:{
+            decimals:18,
+            abi:IdleTokenV3,
+            strategy:'risk',
+            baseToken:'DAI',
+            migrationContract:{
+              abi:IdleBatchConverter,
+              name:'IdleBatchConverterDAISafe',
+              address:'0x08db226d63cE724A6091Ba82D28dFc76ceCa23d8',
+              functions:[
+                {
+                  name:'deposit',
+                  label:'Deposit',
+                  usePermit:true,
+                },
+              ]
+            },
+          },
+          idleUSDCSafe:{
+            decimals:18,
+            abi:IdleTokenV3,
+            strategy:'risk',
+            baseToken:'USDC',
+            migrationContract:{
+              abi:IdleBatchConverter,
+              name:'IdleBatchConverterUSDCSafe',
+              address:'0xA6C89A31D59f9C68D9Cba28d690C5E52058fb472',
+              functions:[
+                {
+                  name:'deposit',
+                  label:'Deposit',
+                  usePermit:true,
+                },
+              ]
+            },
+          },
+          idleUSDTSafe:{
+            decimals:18,
+            abi:IdleTokenV3,
+            strategy:'risk',
+            baseToken:'USDT',
+            migrationContract:{
+              abi:IdleBatchConverter,
+              name:'IdleBatchConverterUSDTSafe',
+              address:'0xd47B96Fb33b79a4Dd81a2bfa676eBB669166f619',
+              functions:[
+                {
+                  label:'Deposit',
+                  name:'deposit'
+                },
+              ]
+            },
+          }
+        }
+      }
+    },
     batchMigration:{
       enabled:true,
       claimEnabled:true,

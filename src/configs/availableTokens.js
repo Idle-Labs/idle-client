@@ -1,6 +1,7 @@
-import ERC20 from '../abis/tokens/DAI.js';
+import DAI from '../abis/tokens/DAI.json';
 import CHAI from '../abis/chai/CHAI.json';
 import cToken from '../abis/compound/cDAI';
+import ERC20 from '../abis/tokens/ERC20.js';
 import aToken from '../abis/aave/AToken.json';
 import yToken from '../abis/dydx/yToken.json';
 import iToken from '../abis/fulcrum/iToken.json';
@@ -12,10 +13,10 @@ const availableTokens = {
   42:{
     best:{
       DAI:{
+        abi:DAI,
         token:'DAI',
         decimals:18,
         enabled:true,
-        abi:ERC20.abi,
         govTokensDisabled:false,
         color:'hsl(40, 95%, 59%)',
         address:'0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
@@ -61,10 +62,10 @@ const availableTokens = {
   1:{ // Mainnet
     best:{
       DAI:{
+        abi:DAI,
         token:'DAI',
         decimals:18,
         enabled:true,
-        abi:ERC20.abi,
         govTokensDisabled:false,
         color:'hsl(40, 95%, 59%)',
         address:'0x6b175474e89094c44da98b954eedeac495271d0f',
@@ -597,10 +598,10 @@ const availableTokens = {
     },
     risk:{
       DAI:{
+        abi:DAI,
         decimals:18,
         token:'DAI',
         enabled:true,
-        abi:ERC20.abi,
         govTokensDisabled:false,
         color:'hsl(40, 95%, 59%)',
         address:'0x6b175474e89094c44da98b954eedeac495271d0f',
