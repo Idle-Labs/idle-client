@@ -519,13 +519,13 @@ class Landing extends Component {
                 flexDirection={['column','row']}
               >
                 <AuditCard
-                  title={'Idle Finance'}
-                  date={'August 12th 2020 — Quantstamp Verified'}
+                  title={'Idle Protocol'}
+                  date={'December 10th 2020 — Quantstamp Verified'}
                   link={'https://certificate.quantstamp.com/full/idle-finance'}
                 />
                 <AuditCard
-                  title={'Idle Goverance'}
-                  date={'November 17th 2020 — Quantstamp Verified'}
+                  title={'Idle Governance'}
+                  date={'November 26th 2020 — Quantstamp Verified'}
                   link={'https://certificate.quantstamp.com/full/idle-goverance'}
                 />
               </Flex>

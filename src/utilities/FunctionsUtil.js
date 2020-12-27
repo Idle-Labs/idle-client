@@ -409,12 +409,14 @@ class FunctionsUtil {
             case 'Receive':
             case 'Swap':
             case 'Migrate':
+            case 'CurveOut':
               avgBuyPrice = idleTokens.times(tokenPrice).plus(prevAvgBuyPrice.times(idleTokensBalance)).div(idleTokensBalance.plus(idleTokens));
             break;
-            case 'Withdraw':
             case 'Send':
             case 'Redeem':
             case 'SwapOut':
+            case 'CurveIn':
+            case 'Withdraw':
               idleTokens = idleTokens.times(this.BNify(-1));
             break;
             default:
@@ -540,11 +542,13 @@ class FunctionsUtil {
             case 'Deposit':
             case 'Receive':
             case 'Migrate':
+            case 'CurveOut':
               amountLent = amountLent.plus(tx.tokenAmount);
             break;
             case 'Send':
             case 'Redeem':
             case 'SwapOut':
+            case 'CurveIn':
             case 'Withdraw':
               amountLent = amountLent.minus(tx.tokenAmount);
             break;
@@ -617,9 +621,9 @@ class FunctionsUtil {
             if (lastRealBlockNumber>=lastCachedBlockNumber){
               // Merge latest Txs with etherscanBaseTxs
               Object.values(latestTxs).forEach((tx) => {
-                const txFound = Object.keys(etherscanBaseTxs.data.result).includes(tx.hash.toLowerCase());
+                const txFound = Object.keys(etherscanBaseTxs.data.result).includes(tx.hashKey);
                 if (!txFound){
-                  etherscanBaseTxs.data.result[tx.hash.toLowerCase()] = tx;
+                  etherscanBaseTxs.data.result[tx.hashKey] = tx;
                 }
               });
 
@@ -753,7 +757,7 @@ class FunctionsUtil {
       const batchMigration = this.getGlobalConfig(['tools','batchMigration','props','availableTokens',tokenConfig.idle.token]);
       const batchMigrationContractAddr = batchMigration && batchMigration.migrationContract ? batchMigration.migrationContract.address : null;
 
-      const curveEnabled = this.getGlobalConfig(['curve','enabled']);
+      // const curveEnabled = this.getGlobalConfig(['curve','enabled']);
       const curveTokenConfig = this.getGlobalConfig(['curve','availableTokens',tokenConfig.idle.token]);
 
       results.forEach( tx => {
@@ -774,15 +778,12 @@ class FunctionsUtil {
         const isRedeemTx = isRightToken && !isMigrationTx && !isDepositInternalTx && tx.contractAddress.toLowerCase() === tokenConfig.address.toLowerCase() && internalTxs.filter(iTx => iTx.contractAddress.toLowerCase() === tokenConfig.idle.address.toLowerCase()).length && tx.to.toLowerCase() === this.props.account.toLowerCase();
         const isWithdrawTx = internalTxs.length>1 && internalTxs.filter(iTx => tokenConfig.protocols.map(p => p.address.toLowerCase()).includes(iTx.contractAddress.toLowerCase()) ).length>0 && tx.contractAddress.toLowerCase() === tokenConfig.idle.address.toLowerCase();
 
-        const isSwapOutTx = !isSendTransferTx && !isWithdrawTx && !isRedeemInternalTx && !etherscanTxs[tx.hash] && tx.from.toLowerCase() === this.props.account.toLowerCase() && tx.contractAddress.toLowerCase() === tokenConfig.idle.address.toLowerCase();
-        const isSwapTx = !isReceiveTransferTx && !isConversionTx && !isDepositInternalTx && !etherscanTxs[tx.hash] && tx.to.toLowerCase() === this.props.account.toLowerCase() && tx.contractAddress.toLowerCase() === tokenConfig.idle.address.toLowerCase();
-
         // const curveDepositTx = internalTxs.find( iTx => (iTx.contractAddress.toLowerCase() === tokenConfig.address.toLowerCase() && iTx.from.toLowerCase() === this.props.account.toLowerCase()) );
         const idleTokenAddress = curveTokenConfig && curveTokenConfig.address ? curveTokenConfig.address : tokenConfig.idle.address;
 
         // Check Curve
         const curveTx = internalTxs.find( tx => (tx.contractAddress.toLowerCase() === curvePoolContract.address.toLowerCase() && (tx.to.toLowerCase() === this.props.account.toLowerCase() || tx.from.toLowerCase() === this.props.account.toLowerCase()) ) );
-        const isCurveTx = curveEnabled && curveTx !== undefined;
+        const isCurveTx = curveTx !== undefined;
 
         const isCurveDepositTx = isCurveTx && tx.contractAddress.toLowerCase() === idleTokenAddress.toLowerCase() && tx.to.toLowerCase() === curveSwapContract.address.toLowerCase() && tx.from.toLowerCase() === this.props.account.toLowerCase() && this.BNify(tx.value).gt(0);
         const isCurveRedeemTx = isCurveTx && tx.contractAddress.toLowerCase() === idleTokenAddress.toLowerCase() && tx.to.toLowerCase() === this.props.account.toLowerCase() && tx.from.toLowerCase() === curveSwapContract.address.toLowerCase() && this.BNify(tx.value).gt(0);
@@ -793,10 +794,13 @@ class FunctionsUtil {
         const isCurveZapIn = isCurveTx && tx.contractAddress.toLowerCase() === curvePoolContract.address.toLowerCase() && tx.to.toLowerCase() === this.props.account.toLowerCase() && tx.from.toLowerCase() === curveZapContract.address.toLowerCase() && this.BNify(tx.value).gt(0);
         const isCurveZapOut = isCurveTx && tx.contractAddress.toLowerCase() === curvePoolContract.address.toLowerCase() && tx.from.toLowerCase() === this.props.account.toLowerCase() && tx.to.toLowerCase() === curveZapContract.address.toLowerCase() && this.BNify(tx.value).gt(0);
 
-        const isCurveTransferOut = curveEnabled && tx.contractAddress.toLowerCase() === curvePoolContract.address.toLowerCase() && !isCurveZapOut && !isCurveRedeemTx && /*internalTxs[internalTxs.length-1] === tx &&*/ tx.from.toLowerCase() === this.props.account.toLowerCase();
-        const isCurveTransferIn = curveEnabled && tx.contractAddress.toLowerCase() === curvePoolContract.address.toLowerCase() && !isCurveZapIn && !isCurveDepositTx && /*internalTxs[internalTxs.length-1] === tx &&*/ tx.to.toLowerCase() === this.props.account.toLowerCase();
+        const isCurveTransferOut = tx.contractAddress.toLowerCase() === curvePoolContract.address.toLowerCase() && !isCurveZapOut && !isCurveRedeemTx && /*internalTxs[internalTxs.length-1] === tx &&*/ tx.from.toLowerCase() === this.props.account.toLowerCase();
+        const isCurveTransferIn = tx.contractAddress.toLowerCase() === curvePoolContract.address.toLowerCase() && !isCurveZapIn && !isCurveDepositTx && /*internalTxs[internalTxs.length-1] === tx &&*/ tx.to.toLowerCase() === this.props.account.toLowerCase();
 
-        // if (tx.hash.toLowerCase() === '0x2aa8f408dd1d4653ef3c5c38a4c9241e615d94b7208bbbe1d2e19b3053fae8de'.toLowerCase()){
+        const isSwapOutTx = !isCurveTx && !isSendTransferTx && !isWithdrawTx && !isRedeemInternalTx && !etherscanTxs[tx.hash] && tx.from.toLowerCase() === this.props.account.toLowerCase() && tx.contractAddress.toLowerCase() === tokenConfig.idle.address.toLowerCase();
+        const isSwapTx = !isCurveTx && !isReceiveTransferTx && !isConversionTx && !isDepositInternalTx && !etherscanTxs[tx.hash] && tx.to.toLowerCase() === this.props.account.toLowerCase() && tx.contractAddress.toLowerCase() === tokenConfig.idle.address.toLowerCase();
+
+        // if (tx.hash.toLowerCase() === '0x599a2e7b0094b0a943ffb1d520cb47598dcf3764145c33824e3b032d91ccc489'.toLowerCase()){
         //   debugger;
         // }
 
@@ -899,6 +903,14 @@ class FunctionsUtil {
                     etherscanTxs[hashKey].tokenSymbol = iTx.tokenSymbol;
                   }
                 break;
+                case 'CurveIn':
+                case 'CurveOut':
+                case 'CurveZapIn':
+                case 'CurveZapOut':
+                case 'CurveDepositIn':
+                case 'CurveDepositOut':
+                  etherscanTxs[hashKey].tokenSymbol = token;
+                break;
                 default:
                 break;
               }
@@ -917,6 +929,8 @@ class FunctionsUtil {
     if (processTxs){
       etherscanTxs = await this.processEtherscanTransactions(etherscanTxs,enabledTokens,processStoredTxs);
     }
+
+    // console.log('etherscanTxs',etherscanTxs);
 
     return etherscanTxs;
   }
@@ -2246,7 +2260,82 @@ class FunctionsUtil {
     }
   }
 
-  sendBiconomyTx = async (contractName,contractAddress,functionSignature,callback,callback_receipt) => {
+  signPermit = async (baseContractName, holder, spenderContractName, methodName, methodParams, nonce, expiry, callback, callback_receipt) => {
+
+    const baseContract = this.getContractByName(baseContractName);
+    const spenderContract = this.getContractByName(spenderContractName);
+
+    if (!baseContract || !spenderContract){
+      callback(null,'Contract not found');
+      return false
+    }
+
+    const result = await this.props.web3.eth.net.getId();
+    const chainId = parseInt(result);
+
+    const domain = [
+      { name: "name", type: "string" },
+      { name: "version", type: "string" },
+      { name: "chainId", type: "uint256" },
+      { name: "verifyingContract", type: "address" }
+    ];
+
+    const permit = [
+      { name: "holder", type: "address" },
+      { name: "spender", type: "address" },
+      { name: "nonce", type: "uint256" },
+      { name: "expiry", type: "uint256" },
+      { name: "allowed", type: "bool" },
+    ];
+
+    const spender = spenderContract._address;
+    const verifyingContract = baseContract._address;
+
+    const domainData = {
+      chainId,
+      version: '1',
+      verifyingContract,
+      name: baseContractName,
+    };
+
+
+    const message = {
+      holder,
+      spender,
+      nonce,
+      expiry,
+      allowed: true,
+    };
+
+    const data = {
+      types: {
+        EIP712Domain: domain,
+        Permit: permit,
+      },
+      primaryType: "Permit",
+      domain: domainData,
+      message: message
+    };
+
+    this.props.web3.currentProvider.send({
+      jsonrpc: '2.0',
+      id: Date.now().toString().substring(9),
+      method: "eth_signTypedData",
+      params: [holder, data],
+      from: holder
+    }, (error, response) => {
+        if (error || (response && response.error)) {
+          return callback(null,error);
+        } else if (response && response.result) {
+          const signedParameters = this.getSignatureParameters_v4(response.result);
+          const { r, s, v } = signedParameters;
+          debugger;
+          this.contractMethodSendWrapper(spenderContractName, methodName, methodParams.concat([nonce, v, r, s]), callback, callback_receipt);
+        }
+      });
+  }
+
+  sendSignedTx = async (contractName,contractAddress,functionSignature,callback,callback_receipt) => {
 
     const EIP712Domain = [
       { name: "name", type: "string" },
@@ -2449,8 +2538,8 @@ class FunctionsUtil {
       break;
       case 'earningsPerc':
         let [amountLent1,redeemableBalance1] = await Promise.all([
-          this.loadAssetField('amountLent',token,tokenConfig,account),
-          this.loadAssetField('redeemableBalance',token,tokenConfig,account)
+          this.loadAssetField('amountLent',token,tokenConfig,account,false),
+          this.loadAssetField('redeemableBalance',token,tokenConfig,account,false)
         ]);
 
         if (amountLent1 && redeemableBalance1 && amountLent1.gt(0)){
@@ -2636,9 +2725,9 @@ class FunctionsUtil {
       break;
       case 'redeemableBalanceCounter':
         let [tokenAPY1,amountLent2,redeemableBalanceStart] = await Promise.all([
-          this.loadAssetField('apy',token,tokenConfig,account),
-          this.loadAssetField('amountLent',token,tokenConfig,account),
-          this.loadAssetField('redeemableBalance',token,tokenConfig,account),
+          this.loadAssetField('apy',token,tokenConfig,account,false),
+          this.loadAssetField('amountLent',token,tokenConfig,account,false),
+          this.loadAssetField('redeemableBalance',token,tokenConfig,account,false),
         ]);
 
         let redeemableBalanceEnd = null;
@@ -2660,10 +2749,14 @@ class FunctionsUtil {
           const govTokenConfig = govTokens[token];
           output = await this.getGovTokenUserBalance(govTokenConfig,account,govTokenAvailableTokens);
         } else {
-          let [idleTokenPrice1,idleTokenBalance2,govTokensBalance] = await Promise.all([
+          let [
+            idleTokenPrice1,
+            idleTokenBalance2,
+            govTokensBalance
+          ] = await Promise.all([
             this.getIdleTokenPrice(tokenConfig),
             this.loadAssetField('idleTokenBalance',token,tokenConfig,account),
-            this.getGovTokensUserTotalBalance(account,govTokenAvailableTokens,token),
+            addGovTokens ? this.getGovTokensUserTotalBalance(account,govTokenAvailableTokens,token) : null,
           ]);
 
           if (idleTokenBalance2 && idleTokenPrice1){
@@ -2677,7 +2770,7 @@ class FunctionsUtil {
 
             output = redeemableBalance;
 
-            // this.customLog('redeemableBalance',token,idleTokenBalance2.toFixed(4),idleTokenPrice1.toFixed(4),tokenBalance.toFixed(4),govTokensBalance.toFixed(4),output.toFixed(4));
+            // console.log('redeemableBalance',token,idleTokenBalance2.toFixed(4),idleTokenPrice1.toFixed(4),tokenBalance.toFixed(4),govTokensBalance ? govTokensBalance.toFixed(4) : null,output.toFixed(4));
           }
         }
       break;
@@ -2699,8 +2792,8 @@ class FunctionsUtil {
       break;
       case 'earnings':
         let [amountLent,redeemableBalance2] = await Promise.all([
-          this.loadAssetField('amountLent',token,tokenConfig,account),
-          this.loadAssetField('redeemableBalance',token,tokenConfig,account)
+          this.loadAssetField('amountLent',token,tokenConfig,account,false),
+          this.loadAssetField('redeemableBalance',token,tokenConfig,account,false)
         ]);
 
         if (!amountLent){
@@ -2711,6 +2804,8 @@ class FunctionsUtil {
         }
 
         output = redeemableBalance2.minus(amountLent);
+
+        // console.log('earnings',token,amountLent.toFixed(5),redeemableBalance2.toFixed(5),output.toFixed(5));
 
         if (output.lt(this.BNify(0))){
           output = this.BNify(0);
@@ -3330,7 +3425,7 @@ class FunctionsUtil {
     // this.customLog('idleTokensBalances',idleTokensBalances);
   }
   getCurveUnevenTokenAmounts = async (amounts,max_burn_amount) => {
-    const curveSwapContract = await this.getCurveSwapContract();
+    const curveSwapContract = await this.getCurveDepositContract();
     if (curveSwapContract){
       const unevenAmounts = await this.genericContractCall(curveSwapContract.name, 'remove_liquidity_imbalance', [amounts, max_burn_amount]);
       // this.customLog('getCurveUnevenTokenAmounts',amounts,max_burn_amount,unevenAmounts);
@@ -3380,7 +3475,7 @@ class FunctionsUtil {
     return availableTokens;
   }
   getCurveAPYContract = async () => {
-    const curveSwapContract = await this.getCurveSwapContract();
+    const curveSwapContract = await this.getCurveDepositContract();
     if (curveSwapContract){
       const blockNumber = await this.getBlockNumber();
       if (blockNumber){
@@ -3416,7 +3511,7 @@ class FunctionsUtil {
     return null;
   }
   getCurveTokenPrice = async (blockNumber='latest',fixDecimals=true) => {
-    const migrationContract = await this.getCurveSwapContract();
+    const migrationContract = await this.getCurveDepositContract();
     let curveTokenPrice = await this.genericContractCall(migrationContract.name,'get_virtual_price',[],{},blockNumber);
     if (curveTokenPrice){
       curveTokenPrice = this.BNify(curveTokenPrice);
@@ -3478,7 +3573,6 @@ class FunctionsUtil {
     }
     return migrationContractInfo;
   }
-
   getCurveIdleTokensAmounts = async (account=null,curveTokenBalance=null,max_slippage=null) => {
     if (!account && this.props.account){
       account = this.props.account;
@@ -3526,7 +3620,7 @@ class FunctionsUtil {
   }
 
   // Get amounts of underlying tokens in the curve pool
-  getCurveTokensAmounts = async (account=null,curveTokenBalance=null,fixDecimals=false) => {
+  getCurveTokensAmounts = async (account=null,curveTokenBalance=null,fixDecimals=false,useCoinIndex=false) => {
 
     if (!account && this.props.account){
       account = this.props.account;
@@ -3564,14 +3658,14 @@ class FunctionsUtil {
         const totalTokenSupply = this.BNify(idleTokenBalance).times(this.BNify(idleTokenPrice));
         let tokenBalance = totalTokenSupply.times(curveTokenShare);
         if (fixDecimals){
-          tokenBalance = this.fixTokenDecimals(tokenBalance,tokenConfig.decimals);
+          tokenBalance = this.fixTokenDecimals(tokenBalance,18);
         }
 
-        tokensBalances[curveTokenConfig.baseToken] = tokenBalance;
+        tokensBalances[curveTokenConfig.baseToken] = useCoinIndex ? this.integerValue(tokenBalance) : tokenBalance;
       });
     }
 
-    return tokensBalances;
+    return useCoinIndex ? Object.values(tokensBalances) : tokensBalances;
   }
 
   // Compile amounts array for Curve
@@ -3586,7 +3680,7 @@ class FunctionsUtil {
       const coinIndex = migrationParams.coinIndex;
       if (idleToken === token && parseFloat(amount)>0){
         const tokenConfig = availableTokens[curveTokenConfig.baseToken];
-        amount = this.fixTokenDecimals(amount,18)
+        amount = this.fixTokenDecimals(amount,18);
         if (!deposit){
           const idleTokenPrice = await this.getIdleTokenPrice(tokenConfig);
           amount = amount.div(idleTokenPrice);
@@ -3609,8 +3703,8 @@ class FunctionsUtil {
   }
   getCurveSlippage = async (token,amount,deposit=true,uneven_amounts=null) => {
     let slippage = null;
-    const migrationContract = await this.getCurveSwapContract();
-    if (migrationContract){
+    const depositContract = await this.getCurveDepositContract();
+    if (depositContract){
 
       const n_coins = this.getGlobalConfig(['curve','params','n_coins']);
 
@@ -3624,9 +3718,12 @@ class FunctionsUtil {
         amounts = await this.getCurveAmounts(token,amount);
       }
 
-      let [virtualPrice,tokenAmount] = await Promise.all([
-        this.genericContractCall(migrationContract.name,'get_virtual_price'),
-        this.genericContractCall(migrationContract.name,'calc_token_amount',[amounts,deposit]),
+      let [
+        virtualPrice,
+        tokenAmount
+      ] = await Promise.all([
+        this.genericContractCall(depositContract.name,'get_virtual_price'),
+        this.genericContractCall(depositContract.name,'calc_token_amount',[amounts,deposit]),
       ]);
 
       if (virtualPrice && tokenAmount){
@@ -3646,7 +3743,7 @@ class FunctionsUtil {
           slippage = amount.div(Sv).minus(1).times(-1);
         }
 
-        // this.customLog('getCurveSlippage',token,deposit,amounts,tokenAmount.toFixed(6),virtualPrice.toFixed(6),Sv.toFixed(6),amount.toFixed(6),slippage.toFixed(6));
+        // console.log('getCurveSlippage',token,deposit,amounts,tokenAmount.toFixed(6),virtualPrice.toFixed(6),Sv.toFixed(6),amount.toFixed(6),slippage.toFixed(6));
 
         return slippage;
       }

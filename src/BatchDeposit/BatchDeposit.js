@@ -172,23 +172,32 @@ class BatchDeposit extends Component {
       };
     });
 
-    const selectedStrategy = availableStrategies[0].value;
+    let selectedStrategy = availableStrategies[0].value;
+    let selectedToken = this.props.urlParams.param2 && this.props.toolProps.availableTokens[this.props.urlParams.param2] ? this.props.urlParams.param2 : null;
+    if (selectedToken){
+      const selectedTokenConfig = this.props.toolProps.availableTokens[selectedToken];
+      selectedToken = selectedTokenConfig.baseToken;
+      selectedStrategy = selectedTokenConfig.strategy;
+    }
 
     this.setState({
       availableStrategies
     },() => {
-      this.selectStrategy(selectedStrategy);
+      this.selectStrategy(selectedStrategy,selectedToken);
     });
+
   }
 
+  /*
   async loadTokens(){
     const selectedToken = this.props.urlParams.param2 && this.props.toolProps.availableTokens[this.props.urlParams.param2] ? this.props.urlParams.param2 : null;
     if (selectedToken){
       this.selectToken(selectedToken);
     }
   }
+  */
 
-  async selectStrategy (selectedStrategy) {
+  async selectStrategy (selectedStrategy,selectedToken=null) {
     const availableTokens = Object.keys(this.props.toolProps.availableTokens)
       .filter(key => this.props.toolProps.availableTokens[key].strategy === selectedStrategy )
       .reduce((obj, key) => {
@@ -206,6 +215,10 @@ class BatchDeposit extends Component {
     this.setState({
       availableTokens,
       selectedStrategy
+    },() => {
+      if (selectedToken){
+        this.selectToken(selectedToken);
+      }
     });
   }
 
@@ -347,12 +360,13 @@ class BatchDeposit extends Component {
 
   render() {
 
-    if (!this.state.availableStrategies){
+    if (!this.state.selectedStrategy){
       return null;
     }
 
     const batchId = this.state.batchDeposits && Object.keys(this.state.batchDeposits).length>0 ? Object.keys(this.state.batchDeposits)[0] : null;
     const batchDeposit = this.state.batchDeposits && Object.values(this.state.batchDeposits).length>0 ? Object.values(this.state.batchDeposits)[0] : null;
+    const strategyDefaultValue = this.state.selectedStrategy ? this.state.availableStrategies.find( s => s.value === this.state.selectedStrategy ) : this.state.availableStrategies[0];
 
     const CustomOptionValue = props => {
       const label = props.label;
@@ -482,11 +496,11 @@ class BatchDeposit extends Component {
               {...this.props}
               name={'strategy'}
               isSearchable={false}
+              defaultValue={strategyDefaultValue}
               CustomOptionValue={CustomOptionValue}
               options={this.state.availableStrategies}
               onChange={this.selectStrategy.bind(this)}
               CustomValueContainer={CustomValueContainer}
-              defaultValue={this.state.availableStrategies[0]}
             />
           </Box>
           {

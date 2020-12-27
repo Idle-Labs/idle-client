@@ -395,19 +395,21 @@ class PortfolioEquityCurve extends Component {
                   return null;
                 }
                 const tokenInfo = this.functionsUtil.getGlobalConfig(['stats','tokens',token]);
-                const tokenName = tokenInfo.name ? tokenInfo.name : token;
-                const color = tokenInfo.color.hex;
-                const balance = point.data.balances[token];
-                let formattedBalance = this.functionsUtil.formatMoney(balance,2);
-                if (parseFloat(balance)>=0.01){
-                  return (
-                    <ChartCustomTooltipRow
-                      label={tokenName}
-                      color={color}
-                      key={`row_${token}`}
-                      value={`${formattedBalance}`}
-                    />
-                  );
+                if (tokenInfo){
+                  const tokenName = tokenInfo.name ? tokenInfo.name : token;
+                  const color = tokenInfo.color.hex;
+                  const balance = point.data.balances[token];
+                  let formattedBalance = this.functionsUtil.formatMoney(balance,2);
+                  if (parseFloat(balance)>=0.01){
+                    return (
+                      <ChartCustomTooltipRow
+                        label={tokenName}
+                        color={color}
+                        key={`row_${token}`}
+                        value={`${formattedBalance}`}
+                      />
+                    );
+                  }
                 }
                 return null;
               })

@@ -92,22 +92,24 @@ class StrategyPage extends Component {
         await this.functionsUtil.asyncForEach(depositedTokens,async (token) => {
           const tokenConfig = this.props.availableTokens[token];
 
-          const [tokenAprs,idleTokenPrice,tokenScore,avgBuyPrice,amountLent] = await Promise.all([
+          const [
+            tokenAprs,
+            tokenScore,
+            amountLent,
+            tokenEarnings
+          ] = await Promise.all([
             this.functionsUtil.getTokenAprs(tokenConfig),
-            this.functionsUtil.getIdleTokenPrice(tokenConfig),
             this.functionsUtil.getTokenScore(tokenConfig,isRisk),
-            this.functionsUtil.getAvgBuyPrice([token],this.props.account),
-            this.functionsUtil.getAmountLent([token],this.props.account)
+            this.functionsUtil.getAmountLent([token],this.props.account),
+            this.functionsUtil.loadAssetField('earnings',token,tokenConfig,this.props.account,false),
           ]);
 
           const amountLentToken = await this.functionsUtil.convertTokenBalance(amountLent[token],token,tokenConfig,isRisk);
 
           const tokenAPY = this.functionsUtil.BNify(tokenAprs.avgApy);
           const tokenWeight = portfolio.tokensBalance[token].tokenBalance.div(portfolio.totalBalance);
-          const tokenEarningsPerc = idleTokenPrice.div(avgBuyPrice[token]).minus(1);
-          const tokenEarnings = amountLentToken ? amountLentToken.times(tokenEarningsPerc) : 0;
 
-          // console.log(token,idleTokenPrice.toFixed(5),avgBuyPrice[token].toFixed(5),amountLentToken.toFixed(5),tokenEarningsPerc.toFixed(5),tokenEarnings.toFixed(5));
+          // console.log(token,tokenEarningsPerc.toFixed(5),amountLentToken.toFixed(5),tokenEarnings.toFixed(5));
 
           if (tokenEarnings){
             totalEarnings = totalEarnings.plus(tokenEarnings);

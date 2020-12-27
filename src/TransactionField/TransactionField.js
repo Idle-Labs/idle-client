@@ -99,12 +99,18 @@ class TransactionField extends Component {
         }
         switch (transaction.action.toLowerCase()) {
           case 'deposit':
+          case 'curveout':
+          case 'curvezapout':
+          case 'curvedepositout':
             icon = "ArrowDownward";
           break;
           case 'boost':
             icon = "TrendingUp";
           break;
           case 'redeem':
+          case 'curvein':
+          case 'curvezapin':
+          case 'curvedepositin':
             icon = "ArrowUpward";
           break;
           case 'send':

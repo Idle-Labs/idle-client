@@ -991,6 +991,10 @@ class DepositRedeem extends Component {
     const showRebalanceOption = showDepositOptions && this.state.canDeposit && skipMintCheckboxEnabled && this.state.action === 'deposit';
     const showAdvancedDepositOptions = showDepositCurve || showRebalanceOption;
 
+    const batchDepositInfo = this.functionsUtil.getGlobalConfig(['tools','batchDeposit']);
+    const batchDepositEnabled = batchDepositInfo.enabled && typeof batchDepositInfo.props.availableTokens[this.props.tokenConfig.idle.token] !== 'undefined';
+    const batchDepositDepositEnabled = batchDepositInfo.depositEnabled;
+
     return (
       <Flex
         width={1}
@@ -1764,6 +1768,34 @@ class DepositRedeem extends Component {
                                               </Flex>
                                             </Box>
                                           )
+                                        }
+                                        {
+                                          (batchDepositEnabled && batchDepositDepositEnabled && !this.props.isMigrationTool) &&
+                                            <Flex
+                                              p={2}
+                                              my={2}
+                                              width={1}
+                                              borderRadius={2}
+                                              alignItems={'center'}
+                                              flexDirection={'row'}
+                                              justifyContent={'center'}
+                                              backgroundColor={'white'}
+                                              border={`1px solid ${this.props.theme.colors.primary}`}
+                                            >
+                                              <Link
+                                                textAlign={'center'}
+                                                hoverColor={'primary'}
+                                                href={`/#/dashboard/tools/${batchDepositInfo.route}/${this.props.tokenConfig.idle.token}`}
+                                              >
+                                                Gas fees too high? Save gas with our Batch Deposit!
+                                              </Link>
+                                              <Icon
+                                                ml={1}
+                                                size={'1em'}
+                                                color={'primary'}
+                                                name={'LocalGasStation'}
+                                              />
+                                            </Flex>
                                         }
                                         <Flex
                                           width={1}

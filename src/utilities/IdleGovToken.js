@@ -108,7 +108,7 @@ class IdleGovToken{
       const idleDistributedPerYearUSD = this.functionsUtil.BNify(conversionRate).times(idleDistribution);
       APR = idleDistributedPerYearUSD.div(tokenPool).times(100);
 
-      // console.log(token,idleDistributedPerYearUSD.toFixed(5),conversionRate.toFixed(5),APR.toFixed(5));
+      // console.log(tokenConfig.idle.token,idleDistributedPerYearUSD.toFixed(5),conversionRate.toFixed(5),APR.toFixed(5));
 
       return this.functionsUtil.setCachedData(cachedDataKey,APR);
     }

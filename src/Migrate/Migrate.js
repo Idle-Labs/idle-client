@@ -11,6 +11,7 @@ import { Box, Flex, Text, Icon, Checkbox, Input, Link, Image } from "rimble-ui";
 class Migrate extends Component {
 
   state = {
+    nonce:0,
     loading:true,
     action:'migrate',
     processing:{
@@ -28,6 +29,7 @@ class Migrate extends Component {
       }
     },
     inputValue:{},
+    usePermit:false,
     oldTokenName:null,
     oldIdleTokens:null,
     skipMigration:false,
@@ -408,6 +410,19 @@ class Migrate extends Component {
       migrationContractApproved
     };
 
+    // If use Permit don't ask for Approve
+    const migrationContractInfo = this.props.tokenConfig.migration.migrationContract;
+    if (migrationContractInfo.functions && migrationContractInfo.functions.length === 1){
+      const functionInfo = migrationContractInfo.functions[0];
+      let usePermit = typeof functionInfo.usePermit !== 'undefined' ? functionInfo.usePermit : false;
+      const nonceMethod = typeof functionInfo.nonceMethod !== 'undefined' ? functionInfo.nonceMethod : false;
+      const permitContract = this.functionsUtil.getContractByName(this.props.tokenConfig.name);
+      usePermit = usePermit && nonceMethod && permitContract && permitContract.methods[nonceMethod] !== undefined;
+      if (usePermit){
+        newState.migrationContractApproved = true;
+      }
+    }
+
     if (this.props.biconomy){
       const biconomyLimits = await this.functionsUtil.checkBiconomyLimits(this.props.account);
       if (biconomyLimits && !biconomyLimits.allowed){
@@ -678,12 +693,13 @@ class Migrate extends Component {
           let usePermit = typeof functionInfo.usePermit !== 'undefined' ? functionInfo.usePermit : false;
           const nonceMethod = typeof functionInfo.nonceMethod !== 'undefined' ? functionInfo.nonceMethod : false;
 
-          const baseContract = this.functionsUtil.getContractByName(this.props.tokenConfig.name);
-          usePermit = usePermit && nonceMethod && baseContract.methods[nonceMethod];
+          const permitContract = this.functionsUtil.getContractByName(this.props.tokenConfig.name);
+          usePermit = usePermit && nonceMethod && permitContract && permitContract.methods[nonceMethod];
 
           if (usePermit){
-            const nonce = await baseContract.methods[nonceMethod](this.props.account).call();
-            this.functionsUtil.sendTxWithPermit(migrationContractInfo.name, migrationMethod, migrationParams, nonce, callbackMigrate, callbackReceiptMigrate);
+            const expiry = 3600;
+            const nonce = await permitContract.methods[nonceMethod](this.props.account).call();
+            this.functionsUtil.signPermit(this.props.tokenConfig.name, this.props.account, migrationContractInfo.name, migrationMethod, migrationParams, nonce, expiry, callbackMigrate, callbackReceiptMigrate);
           } else {
             // Send migration tx
             this.functionsUtil.contractMethodSendWrapper(migrationContractInfo.name, migrationMethod, migrationParams, callbackMigrate, callbackReceiptMigrate);
@@ -1057,6 +1073,7 @@ class Migrate extends Component {
                         <DashboardCard
                           cardProps={{
                             p:3,
+                            mt:2,
                           }}
                         >
                           <Flex
@@ -1169,6 +1186,7 @@ class Migrate extends Component {
                       )
                     ) : this.state.processing.approve.loading ? (
                       <Flex
+                        mt={3}
                         flexDirection={'column'}
                       >
                         <TxProgressBar
@@ -1180,37 +1198,42 @@ class Migrate extends Component {
                         />
                       </Flex>
                     ) : (
-                      <Flex
-                        alignItems={'center'}
-                        flexDirection={'column'}
+                      <DashboardCard
+                        cardProps={{
+                          p:3,
+                          mt:2,
+                        }}
                       >
-                        <Icon
-                          size={'2.3em'}
-                          name={'LockOpen'}
-                          color={'cellText'}
-                        />
-                        <Text
-                          mt={1}
-                          fontSize={2}
-                          color={'cellText'}
-                          textAlign={'center'}
+                        <Flex
+                          alignItems={'center'}
+                          flexDirection={'column'}
                         >
-                          {
-                            this.props.approveText ? this.props.approveText : (
-                              <>To migrate your { !this.props.isMigrationTool ? 'old' : '' } {this.state.oldTokenName} you need to approve our Smart-Contract first.</>
-                            )
-                          }
-                        </Text>
-                        <RoundButton
-                          buttonProps={{
-                            mt:3,
-                            width:[1,1/2]
-                          }}
-                          handleClick={this.approveMigration.bind(this)}
-                        >
-                          Approve
-                        </RoundButton>
-                      </Flex>
+                          <Icon
+                            size={'2.3em'}
+                            name={'LockOpen'}
+                            color={'cellText'}
+                          />
+                          <Text
+                            mt={1}
+                            fontSize={2}
+                            color={'cellText'}
+                            textAlign={'center'}
+                          >
+                            {
+                              this.props.approveText ? this.props.approveText : `To migrate your ${ !this.props.isMigrationTool ? 'old' : '' } ${this.state.oldTokenName} you need to approve our Smart-Contract first.`
+                            }
+                          </Text>
+                          <RoundButton
+                            buttonProps={{
+                              mt:3,
+                              width:[1,1/2]
+                            }}
+                            handleClick={this.approveMigration.bind(this)}
+                          >
+                            Approve
+                          </RoundButton>
+                        </Flex>
+                      </DashboardCard>
                     )
                   }
                 </Flex>

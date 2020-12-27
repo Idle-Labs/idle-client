@@ -278,6 +278,7 @@ class AssetPage extends Component {
         this.loadTokensInfo();
       break;
       case 'redeem':
+        // this.loadTokensInfo();
         const tokenConfig = this.functionsUtil.getGlobalConfig(['curve','poolContract']);
         newState.curveAvailableTokens = {};
         newState.curveTokenConfig = tokenConfig;

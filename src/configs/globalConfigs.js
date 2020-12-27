@@ -8,7 +8,7 @@ import ySUSDv3 from '../abis/iearn/ySUSDv3.json';
 import yTUSDv3 from '../abis/iearn/yTUSDv3.json';
 import Timelock from '../contracts/Timelock.json';
 import CurveZap from '../abis/curve/CurveZap.json';
-import CurveSwap from '../abis/curve/CurveSwap.json';
+// import CurveSwap from '../abis/curve/CurveSwap.json';
 import CurvePool from '../abis/curve/CurvePool.json';
 import NexusMutual from '../NexusMutual/NexusMutual';
 import { Web3Versions } from '@terminal-packages/sdk';
@@ -31,6 +31,7 @@ import BatchMigration from '../BatchMigration/BatchMigration';
 import { RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
 import IdleProxyMinter from '../contracts/IdleProxyMinter.json';
 import IdleRebalancerV3 from '../contracts/IdleRebalancerV3.json';
+import LiquidityGaugeV2 from '../abis/curve/LiquidityGaugeV2.json';
 import IdleBatchConverter from '../contracts/IdleBatchConverter.json';
 import UniswapV2Router02 from '../abis/uniswap/UniswapV2Router02.json';
 import IdleConverterPersonalSignV4 from '../contracts/IdleConverterPersonalSignV4.json';
@@ -39,7 +40,7 @@ const env = process.env;
 
 const globalConfigs = {
   appName: 'Idle',
-  version: 'v5.3',
+  version: 'v5.4',
   baseURL: 'https://idle.finance',
   baseToken: 'ETH',
   countries:{
@@ -187,27 +188,32 @@ const globalConfigs = {
   curve:{
     enabled:false,
     params:{
-      n_coins:4,
+      n_coins:3,
       label:'Curve',
       route:'/dashboard/curve',
       image:'images/protocols/curve.svg',
       imageInactive:'images/protocols/curve-off.svg',
     },
     rates:{
-      path:['apy','day','y'],
+      path:['apy','day','idle'],
       endpoint:'https://www.curve.fi/raw-stats/apys.json'
     },
     poolContract:{
       decimals:18,
       abi:CurvePool,
-      name:'YDAI+YUSDC+YUSDT+YTUSD',
-      token:'YDAI+YUSDC+YUSDT+YTUSD',
-      address:'0xdf5e0e81dff6faf3a7e52ba697820c5e32d806a8'
+      name:'idleDAI+idleUSDC+idleUSDT',
+      token:'idleDAI+idleUSDC+idleUSDT',
+      address:'0x09f4b84a87fc81fc84220fd7287b613b8a9d4c05'
     },
     depositContract:{
       abi:CurveDeposit,
       name:'idleCurveDeposit',
-      address:'0xbbc81d23ea2c3ec7e56d39296f0cbb648873a5d3'
+      address:'0x83f252f036761a1e3d10daca8e16d7b21e3744d7'
+    },
+    gaugeContract:{
+      abi:LiquidityGaugeV2,
+      name:'LiquidityGaugeV2',
+      address:'0xd69ac8d9D25e99446171B5D0B3E4234dAd294890'
     },
     zapContract:{
       abi:CurveZap,
@@ -215,9 +221,9 @@ const globalConfigs = {
       address:'0x456974df1042ba7a46fd49512a8778ac3b840a21'
     },
     migrationContract:{
-      abi:CurveSwap,
-      name:'idleCurveSwap',
-      address:'0x45F783CCE6B7FF23B2ab2D70e416cdb7D6055f51',
+      abi:CurveDeposit,
+      name:'idleCurveDeposit',
+      address:'0x83f252f036761a1e3d10daca8e16d7b21e3744d7',
       functions:[
         {
           label:'Deposit',
@@ -231,43 +237,32 @@ const globalConfigs = {
         enabled:true,
         baseToken:'DAI',
         token:'idleDAIYield',
-        address:'0x16de59092dae5ccf4a1e6439d611fd0653f0bd01',
+        address:'0x3fe7940616e5bc47b0775a0dccf6237893353bb4',
         migrationParams:{
-          n_coins:4,
+          n_coins:3,
           coinIndex:0
         },
       },
       idleUSDCYield:{
-        decimals:6,
+        decimals:18,
         enabled:true,
         baseToken:'USDC',
         token:'idleUSDCYield',
-        address:'0xd6ad7a6750a7593e092a9b218d66c0a814a3436e',
+        address:'0x5274891bEC421B39D23760c04A6755eCB444797C',
         migrationParams:{
-          n_coins:4,
+          n_coins:3,
           coinIndex:1
         },
       },
       idleUSDTYield:{
-        decimals:6,
+        decimals:18,
         enabled:true,
         baseToken:'USDT',
         token:'idleUSDTYield',
-        address:'0x83f798e925bcd4017eb265844fddabb448f1707d',
+        address:'0xF34842d05A1c888Ca02769A633DF37177415C2f8',
         migrationParams:{
-          n_coins:4,
+          n_coins:3,
           coinIndex:2
-        },
-      },
-      idleTUSDYield:{
-        decimals:18,
-        enabled:true,
-        baseToken:'TUSD',
-        token:'idleTUSDYield',
-        address:'0x73a052500105205d34daf004eab301916da8190f',
-        migrationParams:{
-          n_coins:4,
-          coinIndex:3
         },
       },
     }
@@ -616,7 +611,7 @@ const globalConfigs = {
         },
         address:'0xc00e94cb662c3520282e6f5717214004a7f26888',
       },
-      'YDAI+YUSDC+YUSDT+YTUSD':{
+      'idleDAI+idleUSDC+idleUSDT':{
         decimals:18,
         enabled:false,
         name:'Curve.fi',
@@ -810,7 +805,7 @@ const globalConfigs = {
   },
   tools:{
     batchDeposit:{
-      enabled:true,
+      enabled:false,
       claimEnabled:true,
       depositEnabled:true,
       icon:'FileDownload',

@@ -89,11 +89,13 @@ class PortfolioEquity extends Component {
             case 'Deposit':
             case 'Receive':
             case 'Migrate':
+            case 'CurveOut':
               amountLent = amountLent.plus(tokenAmount);
             break;
             case 'Send':
             case 'Redeem':
             case 'SwapOut':
+            case 'CurveIn':
             case 'Withdraw':
               amountLent = amountLent.minus(tokenAmount);
             break;
@@ -221,10 +223,11 @@ class PortfolioEquity extends Component {
         } else {
           filteredBalances.forEach(tx => {
             switch (tx.action){
+              case 'Swap':
               case 'Deposit':
               case 'Migrate':
               case 'Receive':
-              case 'Swap':
+              case 'CurveOut':
                 idleTokenBalance[token] = idleTokenBalance[token].plus(tx.idleTokens);
               break;
               default:

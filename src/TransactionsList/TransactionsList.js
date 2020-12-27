@@ -32,10 +32,10 @@ class TransactionsList extends Component {
         swap:'Swap-In',
         swapout:'Swap-Out',
         withdraw:'Withdraw',
-        // curvein:'CurveIn',
-        // curveout:'CurveOut',
-        // curvezapin:'CurveZapIn',
-        // curvezapout:'CurveZapOut',
+        curvein:'CurveIn',
+        curveout:'CurveOut',
+        curvezapin:'CurveZapIn',
+        curvezapout:'CurveZapOut',
       },
       status:{
         completed:'Completed',
@@ -230,7 +230,7 @@ class TransactionsList extends Component {
       const date = new Date(tx.timeStamp*1000);
       const action = tx.action ? tx.action : this.functionsUtil.getTxAction(tx,tokenConfig);
 
-      const parsedValue = parseFloat(tx.value);
+      const parsedValue = parseFloat(tx.tokenAmount);
 
       const amount = parsedValue ? (this.props.isMobile ? parsedValue.toFixed(4) : parsedValue.toFixed(decimals)) : '-';
       const momentDate = this.functionsUtil.strToMoment(date);
