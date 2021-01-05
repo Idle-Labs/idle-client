@@ -33,7 +33,7 @@ class Migrate extends Component {
     oldTokenName:null,
     oldIdleTokens:null,
     skipMigration:false,
-    buttonDisabled:false,
+    buttonDisabled:true,
     migrationEnabled:null,
     fastBalanceSelector:{},
     oldContractBalance:null,
@@ -78,7 +78,6 @@ class Migrate extends Component {
     }
     const amount = e.target.value.length && !isNaN(e.target.value) ? this.functionsUtil.BNify(e.target.value) : this.functionsUtil.BNify(0);
 
-    this.checkButtonDisabled(amount);
     this.setState((prevState) => ({
       fastBalanceSelector:{
         ...prevState.fastBalanceSelector,
@@ -102,6 +101,7 @@ class Migrate extends Component {
     if (amount){
       buttonDisabled = amount.lte(0);
       switch (this.state.action){
+        case 'migrate':
         case 'redeem':
           buttonDisabled = buttonDisabled || amount.gt(this.state.oldIdleTokens);
         break;
@@ -130,8 +130,6 @@ class Migrate extends Component {
       default:
       break;
     }
-
-    this.checkButtonDisabled(amount);
 
     this.setState((prevState) => ({
       inputValue:{
@@ -274,9 +272,10 @@ class Migrate extends Component {
 
     const accountChanged = prevProps.account !== this.props.account;
     const biconomyChanged = prevProps.biconomy !== this.props.biconomy;
+    const usePermitChanged = prevProps.usePermit !== this.props.usePermit;
     const tokenChanged = prevProps.selectedToken !== this.props.selectedToken || (!prevProps.tokenConfig && this.props.tokenConfig);
 
-    if (tokenChanged || accountChanged || biconomyChanged){
+    if (tokenChanged || accountChanged || biconomyChanged || usePermitChanged){
       this.checkMigration();
     }
 
@@ -284,6 +283,19 @@ class Migrate extends Component {
     const fastBalanceSelectorChanged = this.state.fastBalanceSelector[this.state.action] !== prevState.fastBalanceSelector[this.state.action];
     if (actionChanged || fastBalanceSelectorChanged){
       this.setInputValue();
+    }
+
+    const inputValueChanged = prevState.inputValue !== this.state.inputValue;
+    if (inputValueChanged){
+      this.checkButtonDisabled();
+    }
+
+    const contractApprovedChanged = prevState.migrationContractApproved !== this.state.migrationContractApproved;
+    if (contractApprovedChanged){
+      // console.log(this.props.selectedToken,'contractApprovedChanged',this.state.migrationContractApproved);
+      if (typeof this.props.callbackApprove === 'function'){
+        this.props.callbackApprove();
+      }
     }
   }
 
@@ -312,8 +324,6 @@ class Migrate extends Component {
     if (!this.props.tokenConfig || !this.props.account){
       return false;
     }
-
-    // console.log('checkMigration',this.props.selectedToken,this.props.tokenConfig,this.props.account);
 
     let loading = true;
     this.setState({
@@ -411,16 +421,8 @@ class Migrate extends Component {
     };
 
     // If use Permit don't ask for Approve
-    const migrationContractInfo = this.props.tokenConfig.migration.migrationContract;
-    if (migrationContractInfo.functions && migrationContractInfo.functions.length === 1){
-      const functionInfo = migrationContractInfo.functions[0];
-      let usePermit = typeof functionInfo.usePermit !== 'undefined' ? functionInfo.usePermit : false;
-      const nonceMethod = typeof functionInfo.nonceMethod !== 'undefined' ? functionInfo.nonceMethod : false;
-      const permitContract = this.functionsUtil.getContractByName(this.props.tokenConfig.name);
-      usePermit = usePermit && nonceMethod && permitContract && permitContract.methods[nonceMethod] !== undefined;
-      if (usePermit){
-        newState.migrationContractApproved = true;
-      }
+    if (this.props.usePermit){
+      newState.migrationContractApproved = true;
     }
 
     if (this.props.biconomy){
@@ -429,6 +431,12 @@ class Migrate extends Component {
         newState.biconomyLimitReached = true;
       }
     }
+
+    if (typeof this.props.migrationEnabledCallback === 'function'){
+      this.props.migrationEnabledCallback(migrationEnabled);
+    }
+
+    // console.log('checkMigration',this.props.selectedToken,'usePermit',this.props.usePermit,'migrationContractApproved',newState.migrationContractApproved);
 
     // Set migration contract balance
     return this.setState(newState);
@@ -606,7 +614,7 @@ class Migrate extends Component {
             });
 
             if (this.props.migrationCallback && typeof this.props.migrationCallback === 'function'){
-              this.props.migrationCallback();
+              this.props.migrationCallback(tx);
             }
 
           } else { // Show migration error toast only for real error
@@ -646,6 +654,12 @@ class Migrate extends Component {
             }
           }));
         };
+
+        const callbackPermit = () => {
+          if (typeof this.props.callbackPermit === 'function'){
+            this.props.callbackPermit();
+          }
+        }
 
         const useMetaTx = this.props.biconomy && this.state.metaTransactionsEnabled && !this.state.biconomyLimitReached;
 
@@ -688,18 +702,17 @@ class Migrate extends Component {
           this.functionsUtil.sendBiconomyTxWithPersonalSign(migrationContractInfo.name, functionSignature, callbackMigrate, callbackReceiptMigrate);
           // this.functionsUtil.sendBiconomyTx(migrationContractInfo.name, migrationContractInfo.address, functionSignature, callbackMigrate, callbackReceiptMigrate);
         } else {
-
-          const functionInfo = migrationContractInfo.functions.filter( f => f.name === migrationMethod );
-          let usePermit = typeof functionInfo.usePermit !== 'undefined' ? functionInfo.usePermit : false;
-          const nonceMethod = typeof functionInfo.nonceMethod !== 'undefined' ? functionInfo.nonceMethod : false;
-
           const permitContract = this.functionsUtil.getContractByName(this.props.tokenConfig.name);
-          usePermit = usePermit && nonceMethod && permitContract && permitContract.methods[nonceMethod];
+          const functionInfo = migrationContractInfo.functions.find( f => f.name === migrationMethod );
+          const nonceMethod = this.functionsUtil.getGlobalConfig(['permit',this.props.tokenConfig.name,'nonceMethod']);
 
-          if (usePermit){
-            const expiry = 3600;
+          // debugger;
+
+          if (this.props.usePermit && permitContract){
+            const expiry = Math.round(new Date().getTime() / 1000 + 3600);
             const nonce = await permitContract.methods[nonceMethod](this.props.account).call();
-            this.functionsUtil.signPermit(this.props.tokenConfig.name, this.props.account, migrationContractInfo.name, migrationMethod, migrationParams, nonce, expiry, callbackMigrate, callbackReceiptMigrate);
+            // debugger;
+            this.functionsUtil.signPermit(this.props.tokenConfig.name, this.props.account, migrationContractInfo.name, functionInfo.permitName, migrationParams, nonce, expiry, callbackMigrate, callbackReceiptMigrate, callbackPermit);
           } else {
             // Send migration tx
             this.functionsUtil.contractMethodSendWrapper(migrationContractInfo.name, migrationMethod, migrationParams, callbackMigrate, callbackReceiptMigrate);
@@ -729,9 +742,12 @@ class Migrate extends Component {
       return null;
     }
 
+    const contractApproved = this.props.usePermit || this.state.migrationContractApproved;
     const batchMigrationInfo = this.functionsUtil.getGlobalConfig(['tools','batchMigration']);
     const batchMigrationEnabled = batchMigrationInfo.enabled && typeof batchMigrationInfo.props.availableTokens[this.props.tokenConfig.idle.token] !== 'undefined';
     const batchMigrationDepositEnabled = batchMigrationInfo.depositEnabled;
+
+    // console.log('contractApproved',contractApproved,this.props.usePermit,this.state.migrationContractApproved);
 
     const SkipMigrationComponent = (props) => (
       <DashboardCard
@@ -962,7 +978,7 @@ class Migrate extends Component {
                       </Flex>
                   }
                   {
-                    this.state.migrationContractApproved ? (
+                    contractApproved ? (
                       this.state.processing.migrate.loading ? (
                         <Flex
                           mt={3}
@@ -1057,6 +1073,7 @@ class Migrate extends Component {
                                   <RoundButton
                                     buttonProps={{
                                       width:[1,0.5],
+                                      disabled:this.state.buttonDisabled,
                                       mainColor:this.props.theme.colors.migrate
                                     }}
                                     key={`migrate_${i}`}

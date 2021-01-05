@@ -6,7 +6,6 @@ class ImageButton extends Component {
   render() {
 
     const isMobile = typeof this.props.isMobile !== 'undefined' ? this.props.isMobile : false;
-
     const image = this.props.imageSrc ? (<Image width={'auto'} src={this.props.imageSrc} {...this.props.imageProps} />) : ( this.props.iconName ? (<Icon name={this.props.iconName} {...this.props.iconProps} />) : null );
     const caption = (<Text textAlign={ isMobile ? 'left' : 'center'} fontSize={2} fontWeight={3} color={'dark-gray'}>{this.props.caption}</Text>);
 
@@ -14,16 +13,16 @@ class ImageButton extends Component {
         <Button
           color={'white'}
           borderRadius={3}
-          mainColor={'white'}
-          contrastColor={'white'}
           px={ isMobile ? [3,4] : 4 }
           py={ isMobile ? 0 : [3,4] }
           my={ isMobile ? 2 : [2,2] }
           mx={ isMobile ? 0 : [0,2] }
           onClick={ this.props.handleClick }
           height={ isMobile ? '58px' : ['150px','170px']}
-          width={ this.props.width ? this.props.width : (isMobile ? '100%' : ['150px','170px']) }
-          style={ this.props.buttonStyle ? this.props.buttonStyle : (isMobile ? {justifyContent:'flex-start'} : null) }
+          mainColor={this.props.isActive ? '#f7f8ff' : 'white'}
+          contrastColor={this.props.isActive ? '#f7f8ff' : 'white'}
+          width={this.props.width ? this.props.width : (isMobile ? '100%' : ['150px','170px'])}
+          style={this.props.buttonStyle ? this.props.buttonStyle : (isMobile ? {justifyContent:'flex-start'} : null)}
           {...this.props.buttonProps}
         >
           <>

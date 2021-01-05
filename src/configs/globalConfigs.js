@@ -8,9 +8,11 @@ import ySUSDv3 from '../abis/iearn/ySUSDv3.json';
 import yTUSDv3 from '../abis/iearn/yTUSDv3.json';
 import Timelock from '../contracts/Timelock.json';
 import CurveZap from '../abis/curve/CurveZap.json';
+import CovToken from '../abis/cover/CovToken.json';
 // import CurveSwap from '../abis/curve/CurveSwap.json';
 import CurvePool from '../abis/curve/CurvePool.json';
 import NexusMutual from '../NexusMutual/NexusMutual';
+import CoverMint from '../abis/cover/CoverMint.json';
 import { Web3Versions } from '@terminal-packages/sdk';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import PriceOracle from '../contracts/PriceOracle.json';
@@ -20,20 +22,24 @@ import BuyModal from '../utilities/components/BuyModal';
 import IdleTokenV3 from '../contracts/IdleTokenV3.json';
 import BatchDeposit from '../BatchDeposit/BatchDeposit';
 import EarlyRewards from '../contracts/EarlyRewards.json';
+import CoverProtocol from '../CoverProtocol/CoverProtocol';
 import CurveDeposit from '../abis/curve/CurveDeposit.json';
 import VesterFactory from '../contracts/VesterFactory.json';
 import GovernorAlpha from '../contracts/GovernorAlpha.json';
 import EcosystemFund from '../contracts/EcosystemFund.json';
 import Comptroller from '../abis/compound/Comptroller.json';
+import BalancerPool from '../abis/balancer/BalancerPool.json';
 import IdleController from '../contracts/IdleController.json';
 import TokenMigration from '../TokenMigration/TokenMigration';
 import BatchMigration from '../BatchMigration/BatchMigration';
+import IdleBatchedMint from '../contracts/IdleBatchedMint.json';
 import { RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
 import IdleProxyMinter from '../contracts/IdleProxyMinter.json';
 import IdleRebalancerV3 from '../contracts/IdleRebalancerV3.json';
 import LiquidityGaugeV2 from '../abis/curve/LiquidityGaugeV2.json';
 import IdleBatchConverter from '../contracts/IdleBatchConverter.json';
 import UniswapV2Router02 from '../abis/uniswap/UniswapV2Router02.json';
+import BalancerExchangeProxy from '../abis/balancer/BalancerExchangeProxy.json';
 import IdleConverterPersonalSignV4 from '../contracts/IdleConverterPersonalSignV4.json';
 
 const env = process.env;
@@ -267,6 +273,16 @@ const globalConfigs = {
       },
     }
   },
+  permit:{
+    DAI:{
+      nonceMethod:'nonces',
+      name:'Dai Stablecoin',
+    },
+    USDC:{
+      nonceMethod:'nonces',
+      name:'USD Coin',
+    }
+  },
   govTokens:{
     IDLE:{
       abi:IDLE,
@@ -347,6 +363,10 @@ const globalConfigs = {
       abi:UniswapV2Router02,
       address:'0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
     },
+    BalancerExchangeProxy:{
+      abi:BalancerExchangeProxy,
+      address:'0x3E66B66Fd1d0b02fDa6C811Da9E0547970DB2f21'
+    }
   },
   tokens:{
     DAI:{
@@ -733,7 +753,8 @@ const globalConfigs = {
       1:'Mainnet',
       3:'Ropsten',
       4:'Rinkeby',
-      42:'Kovan'
+      42:'Kovan',
+      1337:'Hardhat'
     },
     isForked:false, // If TRUE the tx confirmation callback is fired on the receipt
     requiredNetwork:1, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
@@ -804,15 +825,59 @@ const globalConfigs = {
     }
   },
   tools:{
+    coverProtocol:{
+      enabled:true,
+      route:'cover-protocol',
+      label:'Cover Protocol',
+      subComponent:CoverProtocol,
+      image:'images/protocols/cover-logo.png',
+      desc:'Buy Coverage for your Idle portfolio or provide liquidity to Cover Protocol',
+      props:{
+        contract:{
+          decimals:18,
+          abi:CoverMint,
+          name:'CoverMint',
+          address:'0x46f2f34742c1d9b9b220aabf0ff26bf59ec9f8a0'
+        },
+        coverages:[
+          {
+            collaterals:['DAI'],
+            expirationTimestamp:1614470400,
+            tokens:{
+              Claim:{
+                abi:CovToken,
+                address:'0xa7dac6774e5e40f56a0bf06af6cf9b1f3d037bcc',
+                balancerPool:{
+                  decimals:18,
+                  abi:BalancerPool,
+                  name:'COVER_IDLE_2021_02_28_DAI_0_CLAIM',
+                  address:'0xeb2b9959c7943eb3c0bdb69ede25247bab4d1c6c',
+                },
+              },
+              NoClaim:{
+                abi:CovToken,
+                address:'0x53df0bfa014b7522299c129c5a7b318f02adb469',
+                balancerPool:{
+                  decimals:18,
+                  abi:BalancerPool,
+                  name:'COVER_IDLE_2021_02_28_DAI_0_NOCLAIM',
+                  address:'0xce0e9e7a1163badb7ee79cfe96b5148e178cab73',
+                }
+              }
+            }
+          },
+        ],
+      }
+    },
     batchDeposit:{
-      enabled:false,
+      enabled:true,
       claimEnabled:true,
       depositEnabled:true,
       icon:'FileDownload',
       route:'batch-deposit',
       label:'Batch Deposit',
       subComponent:BatchDeposit,
-      desc:'Deposit your tokens into the batch and wait until it is converted to the Idle Token V4.',
+      desc:'Deposit your tokens in the batch and wait until it is deposited into the pool to claim your Idle Tokens V4.',
       props:{
         availableTokens:{
           idleDAIYield:{
@@ -820,44 +885,48 @@ const globalConfigs = {
             strategy:'best',
             baseToken:'DAI',
             migrationContract:{
-              abi:IdleBatchConverter,
-              name:'IdleBatchConverterDAI',
-              address:'0xe0BfD08dA4DAf8f8BA11d1c3802009E75f963497',
+              abi:IdleBatchedMint,
+              name:'IdleBatchedMintDAI',
+              // address:'0xe0BfD08dA4DAf8f8BA11d1c3802009E75f963497', // Main
+              address:'0xB9f068bDAe0D7C4796A04f59d0DEF33Ac784AfB4', // Kovan
               functions:[
                 {
-                  name:'deposit',
                   usePermit:true,
+                  name:'deposit',
                   label:'Deposit',
-                  nonceMethod:'nonces'
+                  permitName:'permitAndDeposit'
                 },
               ]
             },
           },
           idleUSDCYield:{
-            decimals:18,
+            decimals:6,
             strategy:'best',
             baseToken:'USDC',
             migrationContract:{
-              abi:IdleBatchConverter,
-              name:'IdleBatchConverterUSDC',
-              address:'0x86c8b56d124c2a8e7ea8a9e6a7f8ed99dde5cca8',
+              abi:IdleBatchedMint,
+              name:'IdleBatchedMintUSDC',
+              // address:'0x86c8b56d124c2a8e7ea8a9e6a7f8ed99dde5cca8', // Main
+              address:'0xA0366268B05740fF16deaD2BF79a8915c24741F7', // Kovan
               functions:[
                 {
+                  usePermit:true,
                   name:'deposit',
                   label:'Deposit',
-                  usePermit:true,
+                  permitName:'permitAndDeposit'
                 },
               ]
             },
           },
+          /*
           idleUSDTYield:{
             decimals:18,
             abi:IdleTokenV3,
             strategy:'best',
             baseToken:'USDT',
             migrationContract:{
-              abi:IdleBatchConverter,
-              name:'IdleBatchConverterUSDT',
+              abi:IdleBatchedMint,
+              name:'IdleBatchedMintUSDT',
               address:'0xee5c50c7c49dec47dde2f9b0233b9e14a8f00cf2',
               functions:[
                 {
@@ -873,8 +942,8 @@ const globalConfigs = {
             strategy:'best',
             baseToken:'SUSD',
             migrationContract:{
-              abi:IdleBatchConverter,
-              name:'IdleBatchConverterSUSD',
+              abi:IdleBatchedMint,
+              name:'IdleBatchedMintSUSD',
               address:'0xE2eE519399a49f1A2004a25DA61e82867A69b9b1',
               functions:[
                 {
@@ -890,8 +959,8 @@ const globalConfigs = {
             strategy:'best',
             baseToken:'TUSD',
             migrationContract:{
-              abi:IdleBatchConverter,
-              name:'IdleBatchConverterTUSD',
+              abi:IdleBatchedMint,
+              name:'IdleBatchedMintTUSD',
               address:'0x174a273f0ea28e55b6dd13259aa43d262b863a86',
               functions:[
                 {
@@ -908,8 +977,8 @@ const globalConfigs = {
             strategy:'best',
             baseToken:'WBTC',
             migrationContract:{
-              abi:IdleBatchConverter,
-              name:'IdleBatchConverterWBTC',
+              abi:IdleBatchedMint,
+              name:'IdleBatchedMintWBTC',
               address:'0xbfDC7d97559173B52EF2A2f1bC9BeCf97B0D401D',
               functions:[
                 {
@@ -925,8 +994,8 @@ const globalConfigs = {
             strategy:'risk',
             baseToken:'DAI',
             migrationContract:{
-              abi:IdleBatchConverter,
-              name:'IdleBatchConverterDAISafe',
+              abi:IdleBatchedMint,
+              name:'IdleBatchedMintDAISafe',
               address:'0x08db226d63cE724A6091Ba82D28dFc76ceCa23d8',
               functions:[
                 {
@@ -943,8 +1012,8 @@ const globalConfigs = {
             strategy:'risk',
             baseToken:'USDC',
             migrationContract:{
-              abi:IdleBatchConverter,
-              name:'IdleBatchConverterUSDCSafe',
+              abi:IdleBatchedMint,
+              name:'IdleBatchedMintUSDCSafe',
               address:'0xA6C89A31D59f9C68D9Cba28d690C5E52058fb472',
               functions:[
                 {
@@ -961,8 +1030,8 @@ const globalConfigs = {
             strategy:'risk',
             baseToken:'USDT',
             migrationContract:{
-              abi:IdleBatchConverter,
-              name:'IdleBatchConverterUSDTSafe',
+              abi:IdleBatchedMint,
+              name:'IdleBatchedMintUSDTSafe',
               address:'0xd47B96Fb33b79a4Dd81a2bfa676eBB669166f619',
               functions:[
                 {
@@ -972,6 +1041,7 @@ const globalConfigs = {
               ]
             },
           }
+          */
         }
       }
     },

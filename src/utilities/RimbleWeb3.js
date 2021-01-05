@@ -1303,6 +1303,9 @@ class RimbleTransaction extends React.Component {
 
         if (call_callback){
           // Update transaction with receipt details
+          if (receipt){
+            transaction.txReceipt = receipt;
+          }
           transaction.recentEvent = "confirmation";
           this.updateTransaction(transaction);
           
@@ -1335,6 +1338,9 @@ class RimbleTransaction extends React.Component {
         }
 
         // Received receipt, met total number of confirmations
+        if (receipt){
+          transaction.txReceipt = receipt;
+        }
         transaction.recentEvent = "receipt";
 
         // If the network is forked use the receipt for confirmation
@@ -1353,8 +1359,11 @@ class RimbleTransaction extends React.Component {
         }
       };
 
+      // const networkId = this.functionsUtil.getGlobalConfig(['network','requiredNetwork']);
+      // const common = { customChain:{ chainId: 1, networkId } };
+
       return contract.methods[contractMethod](...params)
-        .send(value ? { from: account, value, gas  } : { from: account, gas })
+        .send(value ? { from: account, value, gas } : { from: account, gas })
         .on("transactionHash", hash => {
           this.functionsUtil.customLog('txOnTransactionHash', hash);
 

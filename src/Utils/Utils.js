@@ -1,15 +1,11 @@
 import Title from '../Title/Title';
 import React, { Component } from 'react';
 import Breadcrumb from '../Breadcrumb/Breadcrumb';
-import { Flex, Icon, Text, Box } from "rimble-ui";
 import FunctionsUtil from '../utilities/FunctionsUtil';
+import { Flex, Icon, Text, Box, Image } from "rimble-ui";
 import DashboardCard from '../DashboardCard/DashboardCard';
 
 class Utils extends Component {
-
-  state = {
-
-  }
 
   // Utils
   functionsUtil = null;
@@ -119,11 +115,21 @@ class Utils extends Component {
                     <Flex
                       justifyContent={'center'}
                     >
-                      <Icon
-                        my={[0,2]}
-                        size={'3em'}
-                        name={tool.icon}
-                      />
+                      {
+                        tool.image ? (
+                          <Image
+                            my={[0,2]}
+                            height={'2.2em'}
+                            src={tool.image}
+                          />
+                        ) : tool.icon && (
+                          <Icon
+                            my={[0,2]}
+                            size={'3em'}
+                            name={tool.icon}
+                          />
+                        )
+                      }
                     </Flex>
                     <Text
                       fontSize={[2,2]}

@@ -1,6 +1,7 @@
 import DAI from '../abis/tokens/DAI.json';
 import CHAI from '../abis/chai/CHAI.json';
 import cToken from '../abis/compound/cDAI';
+import USDC from '../abis/tokens/USDC.json';
 import ERC20 from '../abis/tokens/ERC20.js';
 import aToken from '../abis/aave/AToken.json';
 import yToken from '../abis/dydx/yToken.json';
@@ -39,12 +40,54 @@ const availableTokens = {
         },
         protocols:[
           {
-            name:'compound',
+            decimals:28,
+            token:'cDAI',
             enabled:true,
             abi:cToken.abi,
+            name:'compound',
             address:'0xf0d0eb522cfa50b716b3b1604c4f0fa6f04376ad',
-            token:'cDAI',
-            decimals:28,
+            functions:{
+              exchangeRate:{
+                name:'exchangeRateStored',
+                params:[]
+              }
+            },
+          }
+        ]
+      },
+      USDC:{
+        abi:USDC,
+        token:'USDC',
+        decimals:6,
+        enabled:true,
+        govTokensDisabled:false,
+        color:'hsl(40, 95%, 59%)',
+        address:'0xb7a4f3e9097c08da09517b5ab877f7a917224ede',
+        deposit:{
+          minAmountForMint:10000,
+        },
+        wyre:{
+          destCurrency:'USDC'
+        },
+        ramp:{
+          swapAsset:'USDC'
+        },
+        defiPrime:{
+          token:'usdc'
+        },
+        idle:{
+          abi:IdleTokenV4,
+          token:'idleUSDCYield',
+          address:'0x0de23D3bc385a74E2196cfE827C8a640B8774B9f',
+        },
+        protocols:[
+          {
+            decimals:16,
+            enabled:true,
+            token:'cUSDC',
+            abi:cToken.abi,
+            name:'compound',
+            address:'0x4a92e71227d294f041bd82dd8f78591b75140d63',
             functions:{
               exchangeRate:{
                 name:'exchangeRateStored',
@@ -55,8 +98,257 @@ const availableTokens = {
         ]
       },
     },
-    risk:{
+  },
+  1337:{
+    best:{
+      DAI:{
+        abi:DAI,
+        token:'DAI',
+        decimals:18,
+        enabled:true,
+        govTokensDisabled:false,
+        color:'hsl(40, 95%, 59%)',
+        address:'0x6b175474e89094c44da98b954eedeac495271d0f',
+        deposit:{
+          minAmountForMint:10000,
+        },
+        wyre:{
+          destCurrency:'DAI'
+        },
+        ramp:{
+          swapAsset:'DAI'
+        },
+        defiPrime:{
+          token:'dai'
+        },
+        idle:{
+          abi:IdleTokenV4,
+          token:'idleDAIYield',
+          address:'0x3fe7940616e5bc47b0775a0dccf6237893353bb4',
+        },
+        migration:{
+          enabled:true,
+          message:'Idle now supports yield farming and governance tokens distribution. Migrate now your DAI with just one click!',
+          oldContract:{
+            abi:IdleTokenV3,
+            token:'idleDAI',
+            name:'idleDAIYieldV3',
+            address:'0x78751b12da02728f467a44eac40f5cbc16bd7934',
+          },
+          oldProtocols:[
+            {
+              name:'dydx',
+              enabled:true,
+              abi:yToken,
+              address:'0xf424b10e1e9691ae5fb530fe4c3e6b9971013d49',
+              token:'yxDAIOld',
+              decimals:18,
+              functions:{
+                exchangeRate:{
+                  name:'price',
+                  params:[]
+                }
+              }
+            }
+          ],
+          migrationContract:{
+            token:'idleDAI',
+            abi:IdleConverterPersonalSignV4,
+            name:'IdleConverterV4',
+            address:'0xa55caa40b32a02becfad1d0d29c4f1cf38c4c743',
+            oldAddresses:[],
+            functions:[
+              {
+                label:'Migrate',
+                name:'migrateFromToIdle'
+              },
+            ]
+          }
+        },
+        protocols:[
+          {
+            enabled:true,
+            abi:cToken.abi,
+            name:'compound',
+            address:'0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643',
+            token:'cDAI',
+            decimals:28,
+            functions:{
+              exchangeRate:{
+                name:'exchangeRateStored',
+                params:[]
+              }
+            },
+          },
+          {
+            abi:iToken,
+            enabled:true,
+            name:'fulcrum',
+            address:'0x493c57c4763932315a328269e1adad09653b9081',
+            token:'iDAI',
+            decimals:18,
+            functions:{
+              exchangeRate:{
+                name:'tokenPrice',
+                params:[]
+              }
+            },
+          },
+          {
+            abi:aToken,
+            name:'aave',
+            enabled:true,
+            address:'0xfC1E690f61EFd961294b3e1Ce3313fBD8aa4f85d',
+            token:'aDAI',
+            decimals:18,
+            functions:{
 
+            }
+          },
+          {
+            abi:CHAI,
+            name:'dsr',
+            enabled:true,
+            address:'0x06AF07097C9Eeb7fD685c692751D5C66dB49c215',
+            token:'CHAI',
+            decimals:18,
+            functions:{
+
+            }
+          },
+          {
+            abi:yToken,
+            name:'dydx',
+            enabled:true,
+            address:'0xb299BCDF056d17Bd1A46185eCA8bCE458B00DC4a',
+            token:'yxDAI',
+            decimals:18,
+            functions:{
+              exchangeRate:{
+                name:'price',
+                params:[]
+              }
+            }
+          }
+        ]
+      },
+      USDC:{
+        decimals:6,
+        token:'USDC',
+        enabled:true,
+        abi:ERC20.abi,
+        govTokensDisabled:false,
+        color:'hsl(211, 67%, 47%)',
+        address:'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+        deposit:{
+          minAmountForMint:10000,
+        },
+        wyre:{
+          destCurrency:'USDC'
+        },
+        defiPrime:{
+          token:'usdc'
+        },
+        idle:{
+          abi:IdleTokenV4,
+          token:'idleUSDCYield',
+          address:'0x5274891bEC421B39D23760c04A6755eCB444797C',
+        },
+        migration:{
+          enabled:true,
+          message:'Idle now supports yield farming and governance tokens distribution. Migrate now your USDC with just one click!',
+          oldContract:{
+            abi:IdleTokenV3,
+            token:'idleUSDC',
+            name:'idleUSDCYieldV3',
+            address:'0x12B98C621E8754Ae70d0fDbBC73D6208bC3e3cA6'
+          },
+          oldProtocols:[
+            {
+              abi:yToken,
+              name:'dydx',
+              enabled:true,
+              address:'0x0d81b042bb9939b4d32cdf7861774c442a2685ce',
+              token:'yxUSDCOld',
+              decimals:18,
+              functions:{
+                exchangeRate:{
+                  name:'price',
+                  params:[]
+                }
+              }
+            }
+          ],
+          migrationContract:{
+            abi:IdleConverterPersonalSignV4,
+            token:'idleUSDC',
+            name:'IdleConverterV4',
+            address:'0xa55caa40b32a02becfad1d0d29c4f1cf38c4c743',
+            oldAddresses:[],
+            functions:[
+              {
+                label:'Migrate',
+                name:'migrateFromToIdle'
+              },
+            ]
+          }
+        },
+        protocols:[
+          {
+            name:'compound',
+            enabled:true,
+            abi:cToken.abi,
+            address:'0x39aa39c021dfbae8fac545936693ac917d5e7563',
+            token:'cUSDC',
+            decimals:16,
+            functions:{
+              exchangeRate:{
+                name:'exchangeRateStored',
+                params:[]
+              }
+            },
+          },
+          {
+            name:'fulcrum',
+            enabled:true,
+            abi:iToken,
+            address:'0xf013406a0b1d544238083df0b93ad0d2cbe0f65f',
+            token:'iUSDC',
+            decimals:18,
+            functions:{
+              exchangeRate:{
+                name:'tokenPrice',
+                params:[]
+              }
+            },
+          },
+          {
+            name:'aave',
+            enabled:true,
+            abi:aToken,
+            address:'0x9bA00D6856a4eDF4665BcA2C2309936572473B7E',
+            token:'aUSDC',
+            decimals:18,
+            functions:{
+              
+            }
+          },
+          {
+            name:'dydx',
+            enabled:true,
+            abi:yToken,
+            address:'0xd2F45883627f26EC34825486ca4c25235A0da0C3',
+            token:'yxUSDC',
+            decimals:18,
+            functions:{
+              exchangeRate:{
+                name:'price',
+                params:[]
+              }
+            }
+          }
+        ]
+      },
     }
   },
   1:{ // Mainnet

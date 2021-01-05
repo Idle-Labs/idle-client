@@ -14,6 +14,7 @@ class CardIconButton extends Component {
        <DashboardCard
          cardProps={cardProps}
          isInteractive={true}
+         isActive={this.props.isActive}
          handleClick={this.props.handleClick}
        >
          <Flex
@@ -22,24 +23,36 @@ class CardIconButton extends Component {
            flexDirection={'row'}
            justifyContent={'center'}
          >
-           <Flex
-             mr={2}
-             p={['4px','7px']}
-             borderRadius={'50%'}
-             alignItems={'center'}
-             justifyContent={'center'}
-             backgroundColor={ this.props.theme.colors.transactions.actionBg.redeem }
-           >
-             <Icon
-               align={'center'}
-               color={'redeem'}
-               name={this.props.icon}
-               size={ this.props.isMobile ? '1.2em' : '1.4em' }
-             />
-           </Flex>
+          {
+            this.props.useIconOnly ? (
+              <Icon
+                align={'center'}
+                name={this.props.icon}
+                size={ this.props.isMobile ? '1.2em' : '1.4em' }
+                color={ this.props.iconColor ? this.props.iconColor : 'redeem' }
+              />
+            ) : (
+             <Flex
+               mr={2}
+               p={['4px','7px']}
+               borderRadius={'50%'}
+               alignItems={'center'}
+               justifyContent={'center'}
+               backgroundColor={ this.props.iconBgColor ? this.props.iconBgColor : this.props.theme.colors.transactions.actionBg.redeem }
+             >
+               <Icon
+                 align={'center'}
+                 name={this.props.icon}
+                 size={ this.props.isMobile ? '1.2em' : '1.4em' }
+                 color={ this.props.iconColor ? this.props.iconColor : 'redeem' }
+               />
+             </Flex>
+            )
+          }
            <Text
              fontWeight={3}
              fontSize={[1,3]}
+             {...this.props.textProps}
            >
              {this.props.text}
            </Text>

@@ -2260,7 +2260,7 @@ class FunctionsUtil {
     }
   }
 
-  signPermit = async (baseContractName, holder, spenderContractName, methodName, methodParams, nonce, expiry, callback, callback_receipt) => {
+  signPermit = async (baseContractName, holder, spenderContractName, methodName, methodParams, nonce, expiry, callback, callback_receipt, callback_permit=null) => {
 
     const baseContract = this.getContractByName(baseContractName);
     const spenderContract = this.getContractByName(spenderContractName);
@@ -2273,14 +2273,14 @@ class FunctionsUtil {
     const result = await this.props.web3.eth.net.getId();
     const chainId = parseInt(result);
 
-    const domain = [
+    const EIP712Domain = [
       { name: "name", type: "string" },
       { name: "version", type: "string" },
       { name: "chainId", type: "uint256" },
       { name: "verifyingContract", type: "address" }
     ];
 
-    const permit = [
+    const Permit = [
       { name: "holder", type: "address" },
       { name: "spender", type: "address" },
       { name: "nonce", type: "uint256" },
@@ -2291,13 +2291,16 @@ class FunctionsUtil {
     const spender = spenderContract._address;
     const verifyingContract = baseContract._address;
 
-    const domainData = {
+    const permitName = this.getGlobalConfig(['permit',baseContractName,'permit','name']) || baseContractName;
+
+    const domain = {
       chainId,
       version: '1',
       verifyingContract,
-      name: baseContractName,
+      name: permitName,
     };
 
+    nonce = parseInt(nonce);
 
     const message = {
       holder,
@@ -2307,32 +2310,37 @@ class FunctionsUtil {
       allowed: true,
     };
 
-    const data = {
+    const data = JSON.stringify({
       types: {
-        EIP712Domain: domain,
-        Permit: permit,
+        EIP712Domain,
+        Permit,
       },
       primaryType: "Permit",
-      domain: domainData,
-      message: message
-    };
+      domain,
+      message
+    });
 
     this.props.web3.currentProvider.send({
+      from: holder,
       jsonrpc: '2.0',
-      id: Date.now().toString().substring(9),
-      method: "eth_signTypedData",
       params: [holder, data],
-      from: holder
+      method: 'eth_signTypedData_v4',
+      id: Date.now().toString().substring(9),
     }, (error, response) => {
-        if (error || (response && response.error)) {
-          return callback(null,error);
-        } else if (response && response.result) {
-          const signedParameters = this.getSignatureParameters_v4(response.result);
-          const { r, s, v } = signedParameters;
-          debugger;
-          this.contractMethodSendWrapper(spenderContractName, methodName, methodParams.concat([nonce, v, r, s]), callback, callback_receipt);
+      console.log(error,response);
+      if (error || (response && response.error)) {
+        return callback(null,error);
+      } else if (response && response.result) {
+        if (typeof callback_permit === 'function'){
+          callback_permit();
         }
-      });
+        const signedParameters = this.getSignatureParameters_v4(response.result);
+        const { r, s, v } = signedParameters;
+        const params = methodParams.concat([nonce, expiry, v, r, s]);
+        console.log(methodName,params);
+        this.contractMethodSendWrapper(spenderContractName, methodName, params, callback, callback_receipt);
+      }
+    });
   }
 
   sendSignedTx = async (contractName,contractAddress,functionSignature,callback,callback_receipt) => {
