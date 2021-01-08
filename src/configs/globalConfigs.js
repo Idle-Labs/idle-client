@@ -275,12 +275,30 @@ const globalConfigs = {
   },
   permit:{
     DAI:{
+      version:1,
+      EIPVersion:null,
       nonceMethod:'nonces',
       name:'Dai Stablecoin',
+      type:[
+        { name: "holder", type: "address" },
+        { name: "spender", type: "address" },
+        { name: "nonce", type: "uint256" },
+        { name: "expiry", type: "uint256" },
+        { name: "allowed", type: "bool" },
+      ]
     },
     USDC:{
-      nonceMethod:'nonces',
+      version:2,
       name:'USD Coin',
+      EIPVersion:2612,
+      nonceMethod:'nonces',
+      type:[
+        { name: "owner", type: "address" },
+        { name: "spender", type: "address" },
+        { name: "value", type: "uint256" },
+        { name: "nonce", type: "uint256" },
+        { name: "deadline", type: "uint256" },
+      ]
     }
   },
   govTokens:{
@@ -826,7 +844,7 @@ const globalConfigs = {
   },
   tools:{
     coverProtocol:{
-      enabled:true,
+      enabled:false,
       route:'cover-protocol',
       label:'Cover Protocol',
       subComponent:CoverProtocol,
@@ -871,13 +889,13 @@ const globalConfigs = {
     },
     batchDeposit:{
       enabled:true,
+      icon:'Storage',
       claimEnabled:true,
       depositEnabled:true,
-      icon:'FileDownload',
       route:'batch-deposit',
       label:'Batch Deposit',
       subComponent:BatchDeposit,
-      desc:'Deposit your tokens in the batch and wait until it is deposited into the pool to claim your Idle Tokens V4.',
+      desc:'Deposit your tokens in the batch and wait until it is executed to claim your Idle Tokens V4',
       props:{
         availableTokens:{
           idleDAIYield:{
@@ -887,12 +905,12 @@ const globalConfigs = {
             migrationContract:{
               abi:IdleBatchedMint,
               name:'IdleBatchedMintDAI',
-              // address:'0xe0BfD08dA4DAf8f8BA11d1c3802009E75f963497', // Main
-              address:'0xB9f068bDAe0D7C4796A04f59d0DEF33Ac784AfB4', // Kovan
+              address:'0x633fb4d38B24dC890b11Db2AE2B248D13F996A79', // Main
+              // address:'0x1B7bA0361A15CCF62521cF7d2Cbb2Ba90b1521a7', // Kovan
               functions:[
                 {
-                  usePermit:true,
                   name:'deposit',
+                  usePermit:true,
                   label:'Deposit',
                   permitName:'permitAndDeposit'
                 },
@@ -906,14 +924,14 @@ const globalConfigs = {
             migrationContract:{
               abi:IdleBatchedMint,
               name:'IdleBatchedMintUSDC',
-              // address:'0x86c8b56d124c2a8e7ea8a9e6a7f8ed99dde5cca8', // Main
-              address:'0xA0366268B05740fF16deaD2BF79a8915c24741F7', // Kovan
+              address:'0x562C4fd96F0652F5Fcfa96b0a33088B5a6eAeE9B', // Main
+              // address:'0x3F35eB839f91b614195a47A593dB46b14cd7EaF8', // Kovan
               functions:[
                 {
-                  usePermit:true,
                   name:'deposit',
                   label:'Deposit',
-                  permitName:'permitAndDeposit'
+                  usePermit:true,
+                  permitName:'permitEIP2612AndDeposit'
                 },
               ]
             },
@@ -1053,7 +1071,7 @@ const globalConfigs = {
       route:'batch-migration',
       label:'Batch Migration',
       subComponent:BatchMigration,
-      desc:'Deposit your Idle Tokens V3 into a batch and wait until it is converted to the Idle Token V4.',
+      desc:'Deposit your Idle Tokens V3 into a batch and wait until it is converted to the Idle Token V4',
       props:{
         availableTokens:{
           idleDAIYield:{

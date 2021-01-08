@@ -1638,6 +1638,7 @@ class FunctionsUtil {
     return globalConfigs;
   }
   getArrayPath = (path,array) => {
+    path = Object.assign([],path);
     if (path.length>0){
       const prop = path.shift();
       if (!path.length){
@@ -2260,6 +2261,69 @@ class FunctionsUtil {
     }
   }
 
+  signPermitEIP2612 = async (contractAddress, erc20Name, owner, spender, value, nonce, deadline, chainId) => {
+    if (chainId === undefined) {
+      const result = await this.props.web3.eth.getChainId();
+      chainId = parseInt(result);
+    }
+
+    const domain = [
+      { name: "name", type: "string" },
+      { name: "version", type: "string" },
+      { name: "chainId", type: "uint256" },
+      { name: "verifyingContract", type: "address" }
+    ];
+
+    const permit = [
+      { name: "owner", type: "address" },
+      { name: "spender", type: "address" },
+      { name: "value", type: "uint256" },
+      { name: "nonce", type: "uint256" },
+      { name: "deadline", type: "uint256" },
+    ];
+
+    const domainData = {
+      version: "2",
+      name: erc20Name,
+      chainId: chainId,
+      verifyingContract: contractAddress
+    };
+
+    const message = {
+      owner,
+      spender,
+      value,
+      nonce,
+      deadline,
+    };
+
+    const data = JSON.stringify({
+      types: {
+        EIP712Domain: domain,
+        Permit: permit,
+      },
+      primaryType: "Permit",
+      domain: domainData,
+      message: message
+    });
+
+    return new Promise((resolve, reject) => {
+      this.props.web3.currentProvider.send({
+        jsonrpc: '2.0',
+        id: Date.now().toString().substring(9),
+        method: "eth_signTypedData_v4",
+        params: [owner, data],
+        from: owner
+      }, (error, res) => {
+        if (error) {
+          return reject(error);
+        }
+
+        resolve(res.result);
+      });
+    });
+  }
+
   signPermit = async (baseContractName, holder, spenderContractName, methodName, methodParams, nonce, expiry, callback, callback_receipt, callback_permit=null) => {
 
     const baseContract = this.getContractByName(baseContractName);
@@ -2271,7 +2335,7 @@ class FunctionsUtil {
     }
 
     const result = await this.props.web3.eth.net.getId();
-    const chainId = parseInt(result);
+    let chainId = parseInt(result);
 
     const EIP712Domain = [
       { name: "name", type: "string" },
@@ -2280,44 +2344,57 @@ class FunctionsUtil {
       { name: "verifyingContract", type: "address" }
     ];
 
-    const Permit = [
-      { name: "holder", type: "address" },
-      { name: "spender", type: "address" },
-      { name: "nonce", type: "uint256" },
-      { name: "expiry", type: "uint256" },
-      { name: "allowed", type: "bool" },
-    ];
+    const permitConfig = this.getGlobalConfig(['permit',baseContractName]);
+
+    const Permit = permitConfig.type;
+    const EIPVersion = permitConfig.EIPVersion;
 
     const spender = spenderContract._address;
     const verifyingContract = baseContract._address;
 
-    const permitName = this.getGlobalConfig(['permit',baseContractName,'permit','name']) || baseContractName;
+    const permitName = permitConfig.name || baseContractName;
 
     const domain = {
       chainId,
-      version: '1',
-      verifyingContract,
       name: permitName,
+      verifyingContract,
+      version: permitConfig.version.toString() || '1',
     };
 
-    nonce = parseInt(nonce);
+    let message = {};
 
-    const message = {
-      holder,
-      spender,
-      nonce,
-      expiry,
-      allowed: true,
-    };
+    switch (EIPVersion){
+      case 2612:
+        const owner = holder;
+        const deadline = expiry;
+        const value = this.integerValue(methodParams[0]);
+        message = {
+          value,
+          nonce,
+          owner,
+          spender,
+          deadline
+        };
+      break;
+      default:
+        message = {
+          holder,
+          nonce,
+          expiry,
+          spender,
+          allowed: true,
+        };
+      break;
+    }
 
     const data = JSON.stringify({
-      types: {
-        EIP712Domain,
-        Permit,
-      },
-      primaryType: "Permit",
       domain,
-      message
+      message,
+      types: {
+        Permit,
+        EIP712Domain
+      },
+      primaryType: 'Permit',
     });
 
     this.props.web3.currentProvider.send({
@@ -2327,7 +2404,6 @@ class FunctionsUtil {
       method: 'eth_signTypedData_v4',
       id: Date.now().toString().substring(9),
     }, (error, response) => {
-      console.log(error,response);
       if (error || (response && response.error)) {
         return callback(null,error);
       } else if (response && response.result) {
@@ -2336,8 +2412,14 @@ class FunctionsUtil {
         }
         const signedParameters = this.getSignatureParameters_v4(response.result);
         const { r, s, v } = signedParameters;
-        const params = methodParams.concat([nonce, expiry, v, r, s]);
-        console.log(methodName,params);
+        const permitParams = [expiry, v, r, s];
+
+        const methodAbi = spenderContract._jsonInterface.find( f => f.name === methodName );
+        const useNonce = methodAbi ? methodAbi.inputs.find( i => i.name === 'nonce' ) : true;
+        if (!isNaN(parseInt(nonce)) && useNonce){
+          permitParams.unshift(nonce);
+        }
+        const params = methodParams.concat(permitParams);
         this.contractMethodSendWrapper(spenderContractName, methodName, params, callback, callback_receipt);
       }
     });
@@ -2964,6 +3046,64 @@ class FunctionsUtil {
     }
 
     return userShare;
+  }
+  getBatchedDeposits = async (account=null) => {
+    account = account || this.props.account;
+    if (!account){
+      return null;
+    }
+    const batchDepositConfig = this.getGlobalConfig(['tools','batchDeposit']);
+    if (!batchDepositConfig.enabled){
+      return null;
+    }
+    const batchedDeposits = {};
+    const availableTokens = batchDepositConfig.props.availableTokens;
+    await this.asyncForEach(Object.keys(availableTokens),async (token) => {
+      const tokenConfig = availableTokens[token];
+      const migrationContract = tokenConfig.migrationContract;
+      await this.props.initContract(migrationContract.name,migrationContract.address,migrationContract.abi);
+      const currBatchIndex = await this.genericContractCall(migrationContract.name,'currBatch');
+      for (let batchIndex = 0; batchIndex <= parseInt(currBatchIndex) ; batchIndex++){
+        let [
+          batchTotal,
+          batchRedeem,
+          batchDeposit
+        ] = await Promise.all([
+          this.genericContractCall(migrationContract.name,'batchTotals',[batchIndex]),
+          this.genericContractCall(migrationContract.name,'batchRedeemedTotals',[batchIndex]),
+          this.genericContractCall(migrationContract.name,'batchDeposits',[this.props.account,batchIndex])
+        ]);
+        let batchTotals = null;
+        let batchRedeems = null;
+        let batchDeposits = null;
+        if (batchTotal && batchTotal !== null){
+          batchTotals = this.fixTokenDecimals(batchTotal,tokenConfig.decimals);
+        }
+        if (batchDeposit !== null){
+          batchRedeem = this.fixTokenDecimals(batchRedeem,18);
+          batchDeposit = this.fixTokenDecimals(batchDeposit,tokenConfig.decimals);
+          if (batchDeposit.gt(0)){
+            batchDeposits = batchDeposit;
+
+            // Calculate redeemable idleTokens
+            batchRedeems = batchDeposit.times(batchRedeem).div(batchTotals);
+            if (batchRedeems.gt(batchRedeem)){
+              batchRedeems = batchRedeem;
+            }
+
+            const status = batchIndex < currBatchIndex && batchRedeems.gt(0) ? 'claimable' : 'pending';
+
+            batchedDeposits[token] = {
+              status,
+              batchTotals,
+              batchRedeems,
+              batchDeposits
+            };
+          }
+        }
+      }
+    });
+    return batchedDeposits;
   }
   getTokenBalance = async (contractName,walletAddr,fixDecimals=true) => {
     if (!walletAddr){

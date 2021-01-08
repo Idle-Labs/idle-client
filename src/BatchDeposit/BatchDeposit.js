@@ -90,13 +90,14 @@ class BatchDeposit extends Component {
       this.selectToken(selectedToken);
     }
 
+    const contractApprovedChanged = prevState.migrationContractApproved !== this.state.migrationContractApproved;
     const selectedTokenChanged = prevState.selectedToken !== this.state.selectedToken;
-    if (selectedTokenChanged){
+    if (selectedTokenChanged || contractApprovedChanged){
       this.checkBatchs();
     }
   }
 
-  async checkBatchs(){
+  async checkBatchs(migrationSucceeded=false){
 
     const migrationContractInfo = this.state.selectedTokenConfig.migrationContract;
 
@@ -107,7 +108,7 @@ class BatchDeposit extends Component {
       usePermit = typeof functionInfo.usePermit !== 'undefined' ? functionInfo.usePermit : false;
       const nonceMethod = this.functionsUtil.getGlobalConfig(['permit',this.state.tokenConfig.name,'nonceMethod']);
       const permitContract = this.functionsUtil.getContractByName(this.state.tokenConfig.name);
-      usePermit = usePermit && nonceMethod && permitContract && permitContract.methods[nonceMethod] !== undefined;
+      usePermit = usePermit && permitContract && (!nonceMethod || permitContract.methods[nonceMethod] !== undefined);
     }
 
     await Promise.all([
@@ -174,13 +175,12 @@ class BatchDeposit extends Component {
     newState.hasDeposited = hasDeposited;
     newState.batchRedeems = batchRedeems;
     newState.batchCompleted = batchCompleted;
+    newState.canDeposit = batchDepositEnabled;
+    newState.migrationSucceeded = migrationSucceeded;
     newState.batchDepositEnabled = batchDepositEnabled;
     newState.canClaim = batchCompleted || hasDeposited;
     newState.action = hasDeposited ? 'redeem' : 'deposit';
-    newState.canDeposit = /*!hasDeposited && */batchDepositEnabled;
     newState.migrationContractApproved = migrationContractApproved;
-
-    // console.log('usePermit',usePermit,'migrationContractApproved',migrationContractApproved);
 
     this.setState(newState);
   }
@@ -384,10 +384,20 @@ class BatchDeposit extends Component {
     });
   }
 
+  async callbackApprove(migrationContractApproved){
+    if (migrationContractApproved !== this.state.migrationContractApproved){
+      this.setState({
+        migrationContractApproved
+      });
+    }
+  }
+
   setAction = (action) => {
     if (action !== null && ['deposit','redeem'].includes(action.toLowerCase())){
+      const migrationSucceeded = false;
       this.setState({
-        action
+        action,
+        migrationSucceeded
       });
     }
   }
@@ -405,10 +415,7 @@ class BatchDeposit extends Component {
   }
 
   migrationCallback = (tx) => {
-    this.checkBatchs();
-    this.setState({
-      migrationSucceeded:true
-    });
+    this.checkBatchs(true);
   }
 
   render() {
@@ -722,7 +729,7 @@ class BatchDeposit extends Component {
                   </Flex>
                 </DashboardCard>
                 {
-                  this.state.migrationEnabled &&
+                  this.state.usePermit && this.state.migrationEnabled && !this.state.migrationSucceeded  &&
                     <DashboardCard
                       cardProps={{
                         py:3,
@@ -875,9 +882,9 @@ class BatchDeposit extends Component {
                         tokenConfig={this.state.tokenConfig}
                         selectedToken={this.state.selectedToken}
                         migrationParams={toMigrate => [toMigrate]}
-                        callbackApprove={this.checkBatchs.bind(this)}
                         selectedStrategy={this.props.selectedStrategy}
                         callbackPermit={this.callbackPermit.bind(this)}
+                        callbackApprove={this.callbackApprove.bind(this)}
                         migrationCallback={this.migrationCallback.bind(this)}
                         migrationEnabledCallback={this.migrationEnabledCallback.bind(this)}
                         migrationText={`Deposit your ${this.state.selectedToken} and wait until it is converted to the new ${this.state.tokenConfig.idle.token}.`}
@@ -914,7 +921,7 @@ class BatchDeposit extends Component {
                                       <Text.span
                                         color={'cellText'}
                                       >
-                                        You have successfully deposited {batchDeposit.toFixed(4)} {this.state.selectedToken}, please wait until the batch is deposited to claim your tokens.
+                                        You have successfully deposited <strong>{batchDeposit.toFixed(4)} {this.state.selectedToken}</strong>, please wait until the batch is executed to claim your tokens.
                                         {
                                           typeof this.state.batchTotals[batchId] !== 'undefined' && 
                                           <Text.span
@@ -1089,7 +1096,7 @@ class BatchDeposit extends Component {
                               <Text.span
                                 color={'cellText'}
                               >
-                                You have successfully deposited {batchDeposit.toFixed(4)} {this.state.selectedToken}, please wait until the batch is deposited to claim your {this.state.tokenConfig.idle.token}.
+                                You have successfully deposited <strong>{batchDeposit.toFixed(4)} {this.state.selectedToken}</strong>, please wait until the batch is executed to claim your {this.state.tokenConfig.idle.token}.
                                 {
                                   typeof this.state.batchTotals[batchId] !== 'undefined' && 
                                   <Text.span

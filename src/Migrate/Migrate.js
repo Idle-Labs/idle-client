@@ -294,7 +294,7 @@ class Migrate extends Component {
     if (contractApprovedChanged){
       // console.log(this.props.selectedToken,'contractApprovedChanged',this.state.migrationContractApproved);
       if (typeof this.props.callbackApprove === 'function'){
-        this.props.callbackApprove();
+        this.props.callbackApprove(this.state.migrationContractApproved);
       }
     }
   }
@@ -705,13 +705,9 @@ class Migrate extends Component {
           const permitContract = this.functionsUtil.getContractByName(this.props.tokenConfig.name);
           const functionInfo = migrationContractInfo.functions.find( f => f.name === migrationMethod );
           const nonceMethod = this.functionsUtil.getGlobalConfig(['permit',this.props.tokenConfig.name,'nonceMethod']);
-
-          // debugger;
-
           if (this.props.usePermit && permitContract){
             const expiry = Math.round(new Date().getTime() / 1000 + 3600);
-            const nonce = await permitContract.methods[nonceMethod](this.props.account).call();
-            // debugger;
+            const nonce = nonceMethod ? await permitContract.methods[nonceMethod](this.props.account).call() : null;
             this.functionsUtil.signPermit(this.props.tokenConfig.name, this.props.account, migrationContractInfo.name, functionInfo.permitName, migrationParams, nonce, expiry, callbackMigrate, callbackReceiptMigrate, callbackPermit);
           } else {
             // Send migration tx

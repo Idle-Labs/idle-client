@@ -8,8 +8,8 @@ import DashboardCard from '../DashboardCard/DashboardCard';
 import PortfolioDonut from '../PortfolioDonut/PortfolioDonut';
 import GenericSelector from '../GenericSelector/GenericSelector';
 import PortfolioEquity from '../PortfolioEquity/PortfolioEquity';
-import { Flex, Box, Heading, Text, Tooltip, Icon } from "rimble-ui";
 import TransactionsList from '../TransactionsList/TransactionsList';
+import { Flex, Box, Heading, Text, Tooltip, Icon } from "rimble-ui";
 import EarningsEstimation from '../EarningsEstimation/EarningsEstimation';
 
 // const env = process.env;
@@ -21,9 +21,11 @@ class StrategyPage extends Component {
     aggregatedValues:[],
     depositedTokens:null,
     remainingTokens:null,
+    batchedDeposits:null,
     portfolioLoaded:false,
     availableGovTokens:null,
     portfolioEquityStartDate:null,
+    batchedDepositsAvailableTokens:null,
     portfolioEquityQuickSelection:'week'
   };
 
@@ -69,13 +71,56 @@ class StrategyPage extends Component {
   }
 
   async loadPortfolio(){
+    const availableTokens = this.props.availableTokens || {};
+
     // Load portfolio if account is set
     if (this.props.account){
-
       const newState = {};
+      const firstBlockNumber = this.functionsUtil.getGlobalConfig(['network','firstBlockNumber']);
 
-      // Get deposited tokens
-      const portfolio = await this.functionsUtil.getAccountPortfolio(this.props.availableTokens,this.props.account);
+      // Load data
+      const [
+        batchedDeposits,
+        tokensToMigrate,
+        portfolio
+      ] = await Promise.all([
+        // Load claimable batches
+        this.functionsUtil.getBatchedDeposits(this.props.account),
+        // Load tokens to be migrated
+        this.functionsUtil.getTokensToMigrate(this.props.selectedStrategy),
+        // Load portfolio
+        this.functionsUtil.getAccountPortfolio(availableTokens,this.props.account),
+        // Load and process Etherscan Txs
+        this.functionsUtil.getEtherscanTxs(this.props.account,firstBlockNumber,'latest',Object.keys(availableTokens))
+      ]);
+
+      newState.batchedDeposits = batchedDeposits && Object.keys(batchedDeposits).length>0 ? batchedDeposits : null;
+
+      if (newState.batchedDeposits){
+        newState.batchedDepositsAvailableTokens = Object.keys(newState.batchedDeposits).reduce( (batchedDepositsAvailableTokens,token) => {
+          const batchInfo = newState.batchedDeposits[token];
+          const tokenConfig = this.functionsUtil.getGlobalConfig(['tools','batchDeposit','props','availableTokens',token]);
+          if (tokenConfig.strategy === this.props.selectedStrategy){
+            switch (batchInfo.status){
+              case 'pending':
+                tokenConfig.statusIcon = 'Timelapse';
+              break;
+              case 'claimable':
+                tokenConfig.statusIcon = 'Done';
+              break;
+              default:
+              break;
+            }
+            tokenConfig.token = token;
+            tokenConfig.status = batchInfo.status;
+            tokenConfig.deposited = batchInfo.batchDeposits;
+            tokenConfig.redeemable = batchInfo.batchRedeems;
+            batchedDepositsAvailableTokens[tokenConfig.baseToken] = tokenConfig;
+          }
+          return batchedDepositsAvailableTokens;
+        },{});
+      }
+
 
       if (portfolio){
         const depositedTokens = Object.keys(portfolio.tokensBalance).filter(token => ( this.functionsUtil.BNify(portfolio.tokensBalance[token].idleTokenBalance).gt(0) ));
@@ -90,7 +135,7 @@ class StrategyPage extends Component {
         let totalAmountLent = this.functionsUtil.BNify(0);
 
         await this.functionsUtil.asyncForEach(depositedTokens,async (token) => {
-          const tokenConfig = this.props.availableTokens[token];
+          const tokenConfig = availableTokens[token];
 
           const [
             tokenAprs,
@@ -129,8 +174,8 @@ class StrategyPage extends Component {
         });
 
         // Add gov tokens to earnings
-        const govTokensTotalBalance = await this.functionsUtil.getGovTokensUserTotalBalance(this.props.account,this.props.availableTokens,'DAI');
-        const govTokensUserBalance = await this.functionsUtil.getGovTokensUserBalances(this.props.account,this.props.availableTokens,null);
+        const govTokensTotalBalance = await this.functionsUtil.getGovTokensUserTotalBalance(this.props.account,availableTokens,'DAI');
+        const govTokensUserBalance = await this.functionsUtil.getGovTokensUserBalances(this.props.account,availableTokens,null);
         const govTokensTotalBalanceTooltip = govTokensUserBalance ? Object.keys(govTokensUserBalance).map( govToken => {
           const balance = govTokensUserBalance[govToken];
           if (balance.gt(0)){
@@ -226,18 +271,11 @@ class StrategyPage extends Component {
         ];
       }
 
-      // Get tokens to migrate
-      const tokensToMigrate = await this.functionsUtil.getTokensToMigrate(this.props.selectedStrategy);
-
       newState.tokensToMigrate = tokensToMigrate;
       newState.portfolioLoaded = true;
 
-      const remainingTokens = Object.keys(this.props.availableTokens).filter(token => (!newState.depositedTokens.includes(token) && !Object.keys(newState.tokensToMigrate).includes(token)) );
+      const remainingTokens = Object.keys(availableTokens).filter(token => (!newState.depositedTokens.includes(token) && !Object.keys(newState.tokensToMigrate).includes(token)) );
       newState.remainingTokens = remainingTokens;
-
-      // Load and process Etherscan Txs
-      const firstBlockNumber = this.functionsUtil.getGlobalConfig(['network','firstBlockNumber']);
-      await this.functionsUtil.getEtherscanTxs(this.props.account,firstBlockNumber,'latest',Object.keys(this.props.availableTokens))
 
       // Portfolio loaded
       this.setStateSafe(newState);
@@ -247,7 +285,7 @@ class StrategyPage extends Component {
         tokensToMigrate:{},
         depositedTokens:[],
         portfolioLoaded:true,
-        remainingTokens:Object.keys(this.props.availableTokens),
+        remainingTokens:Object.keys(availableTokens),
       });
     }
   }
@@ -257,6 +295,7 @@ class StrategyPage extends Component {
     const apyLong = this.functionsUtil.getGlobalConfig(['messages','apyLong']);
     const riskScore = this.functionsUtil.getGlobalConfig(['messages','riskScore']);
     const yieldFarming = this.functionsUtil.getGlobalConfig(['messages','yieldFarming']);
+    const batchDepositConfig = this.functionsUtil.getGlobalConfig(['tools','batchDeposit']);
 
     return (
       <Box width={1}>
@@ -279,7 +318,9 @@ class StrategyPage extends Component {
               text={'Loading portfolio...'}
             />
           ) : (
-            <>
+            <Box
+              width={1}
+            >
               {
                 this.state.depositedTokens.length>0 ? (
                   <Flex
@@ -477,6 +518,157 @@ class StrategyPage extends Component {
                           this.functionsUtil.getGlobalConfig(['strategies',this.props.selectedStrategy,'descLong'])
                       }
                     </Text>
+                  </Flex>
+                )
+              }
+              {
+                this.state.batchedDeposits && (
+                  <Flex
+                    mb={4}
+                    width={1}
+                    id={'batched-deposits'}
+                    flexDirection={'column'}
+                  >
+                    <Title my={[3,4]}>Batched Deposits</Title>
+                    <Flex
+                      width={1}
+                      flexDirection={'column'}
+                    >
+                      <AssetsList
+                        enabledTokens={Object.keys(this.state.batchedDepositsAvailableTokens)}
+                        handleClick={(props) => this.props.goToSection(`tools/${batchDepositConfig.route}/${props.tokenConfig.token}`) }
+                        cols={[
+                          {
+                            title:'TOKEN',
+                            props:{
+                              width:[0.3,0.2]
+                            },
+                            fields:[
+                              {
+                                name:'icon',
+                                props:{
+                                  mr:2,
+                                  height:['1.4em','2.3em']
+                                }
+                              },
+                              {
+                                name:'tokenName'
+                              }
+                            ]
+                          },
+                          /*
+                          {
+                            title:'STRATEGY',
+                            props:{
+                              width:[0.3,0.17]
+                            },
+                            fields:[
+                              {
+                                name:'strategyIcon',
+                                props:{
+                                  mr:2,
+                                  height:['1.4em','2em']
+                                }
+                              },
+                              {
+                                name:'strategyName'
+                              }
+                            ]
+                          },
+                          */
+                          {
+                            mobile:false,
+                            title:'DEPOSITED',
+                            props:{
+                              width:[0.33, 0.21],
+                            },
+                            fields:[
+                              {
+                                name:'custom',
+                                type:'number',
+                                path:['deposited'],
+                                props:{
+                                  decimals: this.props.isMobile ? 6 : 8
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            title:'REDEEMABLE',
+                            props:{
+                              width:[0.35,0.21],
+                              justifyContent:['center','flex-start']
+                            },
+                            fields:[
+                              {
+                                name:'custom',
+                                type:'number',
+                                path:['redeemable'],
+                                props:{
+                                  decimals: this.props.isMobile ? 6 : 8
+                                }
+                              },
+                            ]
+                          },
+                          {
+                            title:'STATUS',
+                            props:{
+                              width:[0.35,0.21],
+                              justifyContent:['center','flex-start']
+                            },
+                            fields:[
+                              {
+                                type:'icon',
+                                name:'custom',
+                                path:['statusIcon'],
+                                props:{
+                                  mr:2,
+                                  size:this.props.isMobile ? '1.2em' : '1.8em'
+                                }
+                              },
+                              {
+                                name:'custom',
+                                path:['status'],
+                                props:{
+                                  style:{
+                                    textTransform:'capitalize'
+                                  }
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            title:'',
+                            mobile:this.props.account === null,
+                            props:{
+                              width:[0.35,0.17],
+                            },
+                            parentProps:{
+                              width:1
+                            },
+                            fields:[
+                              {
+                                name:'button',
+                                label:'Claim',
+                                props:{
+                                  width:1,
+                                  fontSize:3,
+                                  fontWeight:3,
+                                  height:'45px',
+                                  borderRadius:4,
+                                  boxShadow:null,
+                                  mainColor:'migrate',
+                                  size: this.props.isMobile ? 'small' : 'medium',
+                                  handleClick:(props) => this.props.changeToken(props.token)
+                                }
+                              }
+                            ]
+                          }
+                        ]}
+                        {...this.props}
+                        availableTokens={this.state.batchedDepositsAvailableTokens}
+                      />
+                    </Flex>
                   </Flex>
                 )
               }
@@ -1260,7 +1452,7 @@ class StrategyPage extends Component {
                     />
                   </Flex>
               }
-            </>
+            </Box>
           )
         }
       </Box>

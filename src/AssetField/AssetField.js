@@ -717,6 +717,15 @@ class AssetField extends Component {
           }
           output = performanceChartData;
         break;
+        case 'custom':
+          const path = fieldInfo.path;
+          output = this.functionsUtil.getArrayPath(path,this.props.tokenConfig);
+          if (output){
+            this.setStateSafe({
+              [fieldName]:output
+            });
+          }
+        break;
         default:
           output = await this.functionsUtil.loadAssetField(fieldName,this.props.token,this.props.tokenConfig,this.props.account,addGovTokens);
           if (output && setState){
@@ -788,6 +797,20 @@ class AssetField extends Component {
       case 'tokenName':
         output = (
           <Text {...fieldProps}>{this.props.token}</Text>
+        );
+      break;
+      case 'strategyIcon':
+        const strategyIcon = this.functionsUtil.getGlobalConfig(['strategies',this.props.tokenConfig.strategy,'icon']);
+        if (strategyIcon){
+          output = (
+            <Image src={strategyIcon} {...fieldProps} />
+          );
+        }
+      break;
+      case 'strategyName':
+        const strategyName = this.functionsUtil.getGlobalConfig(['strategies',this.props.tokenConfig.strategy,'title']);
+        output = (
+          <Text {...fieldProps}>{strategyName}</Text>
         );
       break;
       case 'tokenBalance':
@@ -1166,6 +1189,27 @@ class AssetField extends Component {
             width={this.state.aprChartWidth}
             height={this.state.aprChartHeight}
           />
+        ) : loader
+      break;
+      case 'custom':
+        let CustomComponent = null;
+        let customValue = this.state[fieldInfo.name];
+        switch (fieldInfo.type){
+          case 'number':
+            customValue = this.functionsUtil.BNify(customValue).toString();
+            CustomComponent = SmartNumber;
+            fieldProps.number = customValue;
+          break;
+          case 'icon':
+            CustomComponent = Icon;
+            fieldProps.name = customValue;
+          break;
+          default:
+            CustomComponent = Text;
+          break;
+        }
+        output = customValue ? (
+          <CustomComponent {...fieldProps}>{customValue}</CustomComponent>
         ) : loader
       break;
       default:
