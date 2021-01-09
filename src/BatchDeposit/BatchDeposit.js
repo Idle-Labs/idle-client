@@ -930,73 +930,7 @@ class BatchDeposit extends Component {
                     </Flex>
                 }
                 {
-                  canExecuteBatch && 
-                    <DashboardCard
-                      cardProps={{
-                        p:2,
-                        mt:3
-                      }}
-                    >
-                      {
-                        this.state.processing.execute.loading ? (
-                          <Flex
-                            width={1}
-                            alignItems={'center'}
-                            flexDirection={'column'}
-                            justifyContent={'center'}
-                          >
-                            <TxProgressBar web3={this.props.web3} waitText={`Batch execution estimated in`} endMessage={`Finalizing batch execution request...`} hash={this.state.processing.execute.txHash} />
-                          </Flex>
-                        ) : this.state.executeSucceeded ? (
-                          <Flex
-                            width={1}
-                            alignItems={'center'}
-                            flexDirection={'column'}
-                            justifyContent={'center'}
-                          >
-                            <Icon
-                              size={'2.3em'}
-                              name={'DoneAll'}
-                              color={this.props.theme.colors.transactions.status.completed}
-                            />
-                            <Text
-                              mt={2}
-                              fontSize={2}
-                              color={'cellText'}
-                              textAlign={'center'}
-                            >
-                              The Batch has been executed!
-                            </Text>
-                          </Flex>
-                        ) : (
-                          <Flex
-                            width={1}
-                            alignItems={'center'}
-                            flexDirection={'column'}
-                            justifyContent={'center'}
-                          >
-                            <Text
-                              fontWeight={500}
-                              display={'block'}
-                              color={'copyColor'}
-                              textAlign={'center'}
-                            >
-                              Batch Pool: {this.state.batchTotals[this.state.currBatchIndex].toFixed(4)} {this.state.selectedToken}
-                            </Text>
-                            <Link
-                              textAlign={'center'}
-                              hoverColor={'primary'}
-                              onClick={this.execute.bind(this)}
-                            >
-                              Execute Batch
-                            </Link>
-                          </Flex>
-                        )
-                      }
-                    </DashboardCard>
-                }
-                {
-                  this.state.showPermitBox && this.state.canDeposit && this.state.usePermit && this.state.migrationEnabled && !this.state.migrationSucceeded ? (
+                  this.state.showPermitBox && this.state.action === 'deposit' && this.state.usePermit && this.state.migrationEnabled && !this.state.migrationSucceeded ? (
                     <DashboardCard
                       cardProps={{
                         py:3,
@@ -1036,7 +970,7 @@ class BatchDeposit extends Component {
                         onChange={ e => this.togglePermitEnabled(e.target.checked) }
                       />
                     </DashboardCard>
-                  ) : !this.state.showPermitBox && this.state.canDeposit && this.state.usePermit && this.state.migrationEnabled && !this.state.migrationSucceeded && (
+                  ) : !this.state.showPermitBox && this.state.action === 'deposit' && this.state.usePermit && this.state.migrationEnabled && !this.state.migrationSucceeded && (
                     <Flex
                       p={0}
                       mt={3}
@@ -1207,7 +1141,7 @@ class BatchDeposit extends Component {
                             flexDirection={'column'}
                           >
                             <Icon
-                              size={'2.3em'}
+                              size={'1.8em'}
                               color={'cellText'}
                               name={'HourglassEmpty'}
                             />
@@ -1241,6 +1175,72 @@ class BatchDeposit extends Component {
                       }
                     </DashboardCard>
                   )
+                }
+                {
+                  canExecuteBatch && 
+                    <DashboardCard
+                      cardProps={{
+                        p:2,
+                        my:3
+                      }}
+                    >
+                      {
+                        this.state.processing.execute.loading ? (
+                          <Flex
+                            width={1}
+                            alignItems={'center'}
+                            flexDirection={'column'}
+                            justifyContent={'center'}
+                          >
+                            <TxProgressBar web3={this.props.web3} waitText={`Batch execution estimated in`} endMessage={`Finalizing batch execution request...`} hash={this.state.processing.execute.txHash} />
+                          </Flex>
+                        ) : this.state.executeSucceeded ? (
+                          <Flex
+                            width={1}
+                            alignItems={'center'}
+                            flexDirection={'column'}
+                            justifyContent={'center'}
+                          >
+                            <Icon
+                              size={'2.3em'}
+                              name={'DoneAll'}
+                              color={this.props.theme.colors.transactions.status.completed}
+                            />
+                            <Text
+                              mt={2}
+                              fontSize={2}
+                              color={'cellText'}
+                              textAlign={'center'}
+                            >
+                              The Batch has been executed!
+                            </Text>
+                          </Flex>
+                        ) : (
+                          <Flex
+                            width={1}
+                            alignItems={'center'}
+                            flexDirection={'column'}
+                            justifyContent={'center'}
+                          >
+                            <Text
+                              fontWeight={500}
+                              display={'block'}
+                              color={'copyColor'}
+                              textAlign={'center'}
+                            >
+                              Batch Pool: {this.state.batchTotals[this.state.currBatchIndex].toFixed(4)} {this.state.selectedToken}
+                            </Text>
+                            <Link
+                              textAlign={'center'}
+                              hoverColor={'primary'}
+                              onClick={this.execute.bind(this)}
+                            >
+                              Execute Batch
+                            </Link>
+                          </Flex>
+                        )
+                      }
+                    </DashboardCard>
                 }
               </Box>
             )
