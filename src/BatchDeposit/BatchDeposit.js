@@ -261,7 +261,7 @@ class BatchDeposit extends Component {
 
     // Init tokens contracts
     const availableStrategiesKeys = {};
-    this.functionsUtil.asyncForEach(Object.keys(this.props.toolProps.availableTokens),async (token) => {
+    await this.functionsUtil.asyncForEach(Object.keys(this.props.toolProps.availableTokens),async (token) => {
       const tokenConfig = this.props.toolProps.availableTokens[token];
       const tokenContract = this.functionsUtil.getContractByName(tokenConfig.token);
       if (!tokenContract && tokenConfig.abi){
@@ -279,20 +279,23 @@ class BatchDeposit extends Component {
       };
     });
 
-    let selectedStrategy = availableStrategies[0].value;
-    let selectedToken = this.props.urlParams.param2 && this.props.toolProps.availableTokens[this.props.urlParams.param2] ? this.props.urlParams.param2 : null;
-    if (selectedToken){
-      const selectedTokenConfig = this.props.toolProps.availableTokens[selectedToken];
-      selectedToken = selectedTokenConfig.baseToken;
-      selectedStrategy = selectedTokenConfig.strategy;
+    // console.log('availableStrategies',availableStrategies);
+
+    if (availableStrategies && availableStrategies.length>0){
+      let selectedStrategy = availableStrategies[0].value;
+      let selectedToken = this.props.urlParams.param2 && this.props.toolProps.availableTokens[this.props.urlParams.param2] ? this.props.urlParams.param2 : null;
+      if (selectedToken){
+        const selectedTokenConfig = this.props.toolProps.availableTokens[selectedToken];
+        selectedToken = selectedTokenConfig.baseToken;
+        selectedStrategy = selectedTokenConfig.strategy;
+      }
+
+      this.setState({
+        availableStrategies
+      },() => {
+        this.selectStrategy(selectedStrategy,selectedToken);
+      });
     }
-
-    this.setState({
-      availableStrategies
-    },() => {
-      this.selectStrategy(selectedStrategy,selectedToken);
-    });
-
   }
 
   /*
@@ -829,69 +832,6 @@ class BatchDeposit extends Component {
                     </Flex>
                   </Flex>
                 </DashboardCard>
-                {
-                  this.state.showPermitBox && this.state.usePermit && this.state.migrationEnabled && !this.state.migrationSucceeded ? (
-                    <DashboardCard
-                      cardProps={{
-                        py:3,
-                        px:2,
-                        mt:3,
-                        display:'flex',
-                        alignItems:'center',
-                        flexDirection:'column',
-                        justifyContent:'center',
-                      }}
-                    >
-                      <Flex
-                        width={1}
-                        alignItems={'center'}
-                        flexDirection={'column'}
-                        justifyContent={'center'}
-                      >
-                        <Icon
-                          size={'1.8em'}
-                          color={'cellText'}
-                          name={'LightbulbOutline'}
-                        />
-                        <Text
-                          mt={1}
-                          fontSize={1}
-                          color={'cellText'}
-                          textAlign={'center'}
-                        >
-                          {this.state.selectedToken} supports Approve and Deposit in a single transaction, disable this feature and try again if you can't deposit in the batch.
-                        </Text>
-                      </Flex>
-                      <Checkbox
-                        mt={1}
-                        required={false}
-                        checked={this.state.permitEnabled}
-                        label={`Approve and Deposit in a single transaction`}
-                        onChange={ e => this.togglePermitEnabled(e.target.checked) }
-                      />
-                    </DashboardCard>
-                  ) : !this.state.showPermitBox && this.state.usePermit && this.state.migrationEnabled && !this.state.migrationSucceeded && (
-                    <Flex
-                      p={2}
-                      mt={3}
-                      width={1}
-                      borderRadius={2}
-                      alignItems={'center'}
-                      flexDirection={'row'}
-                      justifyContent={'center'}
-                      backgroundColor={'white'}
-                      border={`1px solid ${this.props.theme.colors.primary}`}
-                    >
-                      <Link
-                        textAlign={'center'}
-                        hoverColor={'primary'}
-                        onClick={this.showPermitBox.bind(this)}
-                      >
-                        Having trouble with the Batch Deposit?
-                      </Link>
-                    </Flex>
-                  )
-                }
               </Box>
             )
           }
@@ -1054,6 +994,67 @@ class BatchDeposit extends Component {
                         )
                       }
                     </DashboardCard>
+                }
+                {
+                  this.state.showPermitBox && this.state.canDeposit && this.state.usePermit && this.state.migrationEnabled && !this.state.migrationSucceeded ? (
+                    <DashboardCard
+                      cardProps={{
+                        py:3,
+                        px:2,
+                        mt:3,
+                        display:'flex',
+                        alignItems:'center',
+                        flexDirection:'column',
+                        justifyContent:'center',
+                      }}
+                    >
+                      <Flex
+                        width={1}
+                        alignItems={'center'}
+                        flexDirection={'column'}
+                        justifyContent={'center'}
+                      >
+                        <Icon
+                          size={'1.8em'}
+                          color={'cellText'}
+                          name={'LightbulbOutline'}
+                        />
+                        <Text
+                          mt={1}
+                          fontSize={1}
+                          color={'cellText'}
+                          textAlign={'center'}
+                        >
+                          {this.state.selectedToken} supports Approve and Deposit in a single transaction, disable this feature and try again if you can't deposit in the batch.
+                        </Text>
+                      </Flex>
+                      <Checkbox
+                        mt={1}
+                        required={false}
+                        checked={this.state.permitEnabled}
+                        label={`Approve and Deposit in a single transaction`}
+                        onChange={ e => this.togglePermitEnabled(e.target.checked) }
+                      />
+                    </DashboardCard>
+                  ) : !this.state.showPermitBox && this.state.canDeposit && this.state.usePermit && this.state.migrationEnabled && !this.state.migrationSucceeded && (
+                    <Flex
+                      p={0}
+                      mt={3}
+                      width={1}
+                      borderRadius={2}
+                      alignItems={'center'}
+                      flexDirection={'row'}
+                      justifyContent={'center'}
+                    >
+                      <Link
+                        textAlign={'center'}
+                        hoverColor={'primary'}
+                        onClick={this.showPermitBox.bind(this)}
+                      >
+                        Having trouble with the Batch Deposit?
+                      </Link>
+                    </Flex>
+                  )
                 }
                 {
                   this.state.action === 'deposit' ? 
