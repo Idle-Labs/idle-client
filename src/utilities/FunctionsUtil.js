@@ -2521,9 +2521,21 @@ class FunctionsUtil {
       }
     }, null, txData);
   }
+  disableERC20 = (contractName,address,callback,callback_receipt) => {
+    this.props.contractMethodSendWrapper(contractName, 'approve', [
+      address,
+      this.props.web3.utils.toTwosComplement('0') // max uint solidity
+    ],null,(tx)=>{
+      if (typeof callback === 'function'){
+        callback(tx);
+      }
+    }, (tx) => {
+      if (typeof callback_receipt === 'function'){
+        callback_receipt(tx);
+      }
+    });
+  }
   enableERC20 = (contractName,address,callback,callback_receipt) => {
-    // const contract = this.getContractByName(contractName);
-    // this.customLog('enableERC20',contractName,contract,address);
     this.props.contractMethodSendWrapper(contractName, 'approve', [
       address,
       this.props.web3.utils.toTwosComplement('-1') // max uint solidity
@@ -3091,7 +3103,7 @@ class FunctionsUtil {
               batchRedeems = batchRedeem;
             }
 
-            const status = batchIndex < currBatchIndex && batchRedeems.gt(0) ? 'claimable' : 'pending';
+            const status = batchIndex < currBatchIndex && batchRedeems.gt(0) ? 'executed' : 'pending';
 
             batchedDeposits[token] = {
               status,

@@ -14,7 +14,6 @@ function withdraw(uint256 batchId) external
 */
 
 import Migrate from '../Migrate/Migrate';
-import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
 import AssetField from '../AssetField/AssetField';
 import RoundButton from '../RoundButton/RoundButton';
@@ -23,8 +22,8 @@ import AssetSelector from '../AssetSelector/AssetSelector';
 import DashboardCard from '../DashboardCard/DashboardCard';
 import TxProgressBar from '../TxProgressBar/TxProgressBar';
 import GenericSelector from '../GenericSelector/GenericSelector';
-import { Flex, Box, Text, Icon, Link, Checkbox } from "rimble-ui";
 import TransactionField from '../TransactionField/TransactionField';
+import { Flex, Box, Text, Icon, Link, Checkbox, Tooltip } from "rimble-ui";
 
 class BatchDeposit extends Component {
 
@@ -36,6 +35,10 @@ class BatchDeposit extends Component {
     batchDeposits:{},
     tokenConfig:null,
     processing:{
+      execute:{
+        txHash:null,
+        loading:false
+      },
       claim:{
         txHash:null,
         loading:false
@@ -47,10 +50,13 @@ class BatchDeposit extends Component {
     hasDeposited:false,
     permitSigned:false,
     selectedToken:null,
+    showPermitBox:false,
+    currBatchIndex:null,
     batchCompleted:false,
     claimSucceeded:false,
     availableTokens:null,
     selectedStrategy:null,
+    executeSucceeded:false,
     migrationEnabled:false,
     migrationSucceeded:false,
     selectedTokenConfig:null,
@@ -90,26 +96,78 @@ class BatchDeposit extends Component {
       this.selectToken(selectedToken);
     }
 
-    const contractApprovedChanged = prevState.migrationContractApproved !== this.state.migrationContractApproved;
     const selectedTokenChanged = prevState.selectedToken !== this.state.selectedToken;
-    if (selectedTokenChanged || contractApprovedChanged){
+    const executeSucceededChanged = prevState.executeSucceeded !== this.state.executeSucceeded;
+    const contractApprovedChanged = prevState.migrationContractApproved !== this.state.migrationContractApproved;
+    if (selectedTokenChanged || contractApprovedChanged || executeSucceededChanged){
       this.checkBatchs();
     }
+
+  }
+
+  async execute () {
+
+    const loading = true;
+
+    const callbackExecute = (tx,error) => {
+      const txSucceeded = tx.status === 'success';
+
+      // Send Google Analytics event
+      const eventData = {
+        eventAction: 'Execute',
+        eventCategory: 'BatchDeposit',
+      };
+
+      if (error){
+        eventData.eventLabel = this.functionsUtil.getTransactionError(error);
+      }
+
+      // Send Google Analytics event
+      if (error || eventData.status !== 'error'){
+        this.functionsUtil.sendGoogleAnalyticsEvent(eventData);
+      }
+
+      this.setState((prevState) => ({
+        executeSucceeded:txSucceeded,
+        processing: {
+          ...prevState.processing,
+          execute:{
+            txHash:null,
+            loading:false
+          }
+        }
+      }));
+    };
+
+    const callbackReceiptExecute = (tx) => {
+      const txHash = tx.transactionHash;
+      this.setState((prevState) => ({
+        processing: {
+          ...prevState.processing,
+          execute:{
+            ...prevState.processing.execute,
+            txHash
+          }
+        }
+      }));
+    };
+
+    this.props.contractMethodSendWrapper(this.state.selectedTokenConfig.migrationContract.name, 'executeBatch', [false], null, callbackExecute, callbackReceiptExecute);
+
+    this.setState((prevState) => ({
+      processing: {
+        ...prevState.processing,
+        execute:{
+          ...prevState.processing.execute,
+          loading
+        }
+      }
+    }));
   }
 
   async checkBatchs(migrationSucceeded=false){
 
     const migrationContractInfo = this.state.selectedTokenConfig.migrationContract;
-
-    // If use Permit don't ask for Approve
-    let usePermit = false;
-    if (migrationContractInfo.functions && migrationContractInfo.functions.length === 1){
-      const functionInfo = migrationContractInfo.functions[0];
-      usePermit = typeof functionInfo.usePermit !== 'undefined' ? functionInfo.usePermit : false;
-      const nonceMethod = this.functionsUtil.getGlobalConfig(['permit',this.state.tokenConfig.name,'nonceMethod']);
-      const permitContract = this.functionsUtil.getContractByName(this.state.tokenConfig.name);
-      usePermit = usePermit && permitContract && (!nonceMethod || permitContract.methods[nonceMethod] !== undefined);
-    }
 
     await Promise.all([
       this.props.initContract(migrationContractInfo.name,migrationContractInfo.address,migrationContractInfo.abi),
@@ -123,6 +181,16 @@ class BatchDeposit extends Component {
       this.functionsUtil.genericContractCall(this.state.selectedTokenConfig.migrationContract.name,'currBatch'),
       this.functionsUtil.checkTokenApproved(this.state.tokenConfig.name,migrationContractInfo.address,this.props.account)
     ]);
+
+    // If use Permit don't ask for Approve
+    let usePermit = false;
+    if (!migrationContractApproved && migrationContractInfo.functions && migrationContractInfo.functions.length === 1){
+      const functionInfo = migrationContractInfo.functions[0];
+      usePermit = typeof functionInfo.usePermit !== 'undefined' ? functionInfo.usePermit : false;
+      const nonceMethod = this.functionsUtil.getGlobalConfig(['permit',this.state.tokenConfig.name,'nonceMethod']);
+      const permitContract = this.functionsUtil.getContractByName(this.state.tokenConfig.name);
+      usePermit = usePermit && permitContract && (!nonceMethod || permitContract.methods[nonceMethod] !== undefined);
+    }
 
     const newState = {};
     const batchTotals = {};
@@ -170,16 +238,20 @@ class BatchDeposit extends Component {
     const batchDepositEnabled = batchDepositInfo.depositEnabled;
 
     newState.usePermit = usePermit;
+    newState.showPermitBox = false;
     newState.claimSucceeded = false;
+    newState.executeSucceeded = false;
     newState.batchTotals = batchTotals;
     newState.hasDeposited = hasDeposited;
     newState.batchRedeems = batchRedeems;
+    newState.currBatchIndex = currBatchIndex;
     newState.batchCompleted = batchCompleted;
-    newState.canDeposit = batchDepositEnabled;
     newState.migrationSucceeded = migrationSucceeded;
     newState.batchDepositEnabled = batchDepositEnabled;
     newState.canClaim = batchCompleted || hasDeposited;
     newState.action = hasDeposited ? 'redeem' : 'deposit';
+    // Prevent user to deposit if the batch has been completed
+    newState.canDeposit = batchDepositEnabled && !batchCompleted;
     newState.migrationContractApproved = migrationContractApproved;
 
     this.setState(newState);
@@ -258,7 +330,6 @@ class BatchDeposit extends Component {
   }
 
   async selectToken (selectedToken) {
-
     const selectedTokenConfig = this.state.availableTokens[selectedToken];
     const strategyAvailableTokens = this.props.availableStrategies[selectedTokenConfig.strategy];
 
@@ -325,7 +396,7 @@ class BatchDeposit extends Component {
 
       // Send Google Analytics event
       const eventData = {
-        eventCategory: `BatchMigration`,
+        eventCategory: `BatchDeposit`,
         eventAction: 'Claim',
         eventLabel: this.props.selectedToken,
         eventValue: parseInt(claimableValue)
@@ -384,7 +455,14 @@ class BatchDeposit extends Component {
     });
   }
 
+  showPermitBox(){
+    this.setState({
+      showPermitBox:true
+    });
+  }
+
   async callbackApprove(migrationContractApproved){
+    // console.log('callbackApprove',this.state.migrationContractApproved,migrationContractApproved);
     if (migrationContractApproved !== this.state.migrationContractApproved){
       this.setState({
         migrationContractApproved
@@ -425,10 +503,11 @@ class BatchDeposit extends Component {
     }
 
     const usePermit = this.state.permitEnabled && this.state.usePermit;
-    const batchId = this.state.batchDeposits && Object.keys(this.state.batchDeposits).length>0 ? Object.keys(this.state.batchDeposits)[0] : null;
+    // const batchId = this.state.batchDeposits && Object.keys(this.state.batchDeposits).length>0 ? Object.keys(this.state.batchDeposits)[0] : null;
     const batchRedeem = this.state.batchRedeems && Object.values(this.state.batchRedeems).length>0 ? Object.values(this.state.batchRedeems)[0] : null;
     const batchDeposit = this.state.batchDeposits && Object.values(this.state.batchDeposits).length>0 ? Object.values(this.state.batchDeposits)[0] : null;
-    const contractApproved = (usePermit && this.state.permitSigned) || (!usePermit && this.state.migrationContractApproved) || this.state.hasDeposited;
+    const contractApproved = (usePermit && this.state.permitSigned) || (!usePermit && this.state.migrationContractApproved);
+    const canExecuteBatch = this.state.batchTotals && this.state.batchTotals[this.state.currBatchIndex] && this.state.batchTotals[this.state.currBatchIndex].gt(0);
     const strategyDefaultValue = this.state.selectedStrategy ? this.state.availableStrategies.find( s => s.value === this.state.selectedStrategy ) : this.state.availableStrategies[0];
 
     const CustomOptionValue = props => {
@@ -628,12 +707,16 @@ class BatchDeposit extends Component {
               <Box
                 width={1}
               >
-                <IconBox
-                  cardProps={{
-                    mt:3
-                  }}
-                  text={'You will start earning gov tokens after the batch is migrated'}
-                />
+                {
+                  /*
+                  <IconBox
+                    cardProps={{
+                      mt:3
+                    }}
+                    text={'You will start earning gov tokens after the batch is executed'}
+                  />
+                  */
+                }
                 <DashboardCard
                   cardProps={{
                     p:3,
@@ -662,7 +745,7 @@ class BatchDeposit extends Component {
                         textAlign={'left'}
                       >
                         {
-                          usePermit ? 'Sign Permit for gas-less transaction' : 'Approve the batch deposit contract'
+                          usePermit ? 'Sign Approve message' : 'Approve the batch deposit contract'
                         }
                       </Text>
                     </Flex>
@@ -703,7 +786,7 @@ class BatchDeposit extends Component {
                         color={'cellText'}
                         textAlign={'left'}
                       >
-                        Wait for the batch to be deposited
+                        Wait for the batch to be executed
                       </Text>
                     </Flex>
                     <Flex
@@ -717,19 +800,37 @@ class BatchDeposit extends Component {
                         name={ this.state.claimSucceeded ? 'CheckBox' : 'Looks4'}
                         color={ this.state.claimSucceeded ? this.props.theme.colors.transactions.status.completed : 'cellText'}
                       />
-                      <Text
-                        ml={2}
-                        fontSize={2}
-                        color={'cellText'}
-                        textAlign={'left'}
+                      <Flex
+                        width={1}
+                        alignItems={'center'}
+                        flexDirection={'row'}
+                        justifyContent={'flex-start'}
                       >
-                        Claim your {this.state.tokenConfig.idle.token}
-                      </Text>
+                        <Text
+                          ml={1}
+                          fontSize={2}
+                          color={'cellText'}
+                          textAlign={'left'}
+                        >
+                          Claim your {this.state.tokenConfig.idle.token}
+                        </Text>
+                        <Tooltip
+                          placement={'top'}
+                          message={`You will start earning gov tokens after the batch is executed and you claim your ${this.state.tokenConfig.idle.token}`}
+                        >
+                          <Icon
+                            ml={1}
+                            size={'1.1em'}
+                            color={'cellTitle'}
+                            name={'InfoOutline'}
+                          />
+                        </Tooltip>
+                      </Flex>
                     </Flex>
                   </Flex>
                 </DashboardCard>
                 {
-                  this.state.usePermit && this.state.migrationEnabled && !this.state.migrationSucceeded  &&
+                  this.state.showPermitBox && this.state.usePermit && this.state.migrationEnabled && !this.state.migrationSucceeded ? (
                     <DashboardCard
                       cardProps={{
                         py:3,
@@ -749,8 +850,8 @@ class BatchDeposit extends Component {
                       >
                         <Icon
                           size={'1.8em'}
-                          name={'Warning'}
                           color={'cellText'}
+                          name={'LightbulbOutline'}
                         />
                         <Text
                           mt={1}
@@ -758,17 +859,38 @@ class BatchDeposit extends Component {
                           color={'cellText'}
                           textAlign={'center'}
                         >
-                          {this.state.selectedToken} contract supports Permit Signature, please disable it if you can't deposit.
+                          {this.state.selectedToken} supports Approve and Deposit in a single transaction, disable this feature and try again if you can't deposit in the batch.
                         </Text>
                       </Flex>
                       <Checkbox
                         mt={1}
                         required={false}
                         checked={this.state.permitEnabled}
-                        label={`Deposit with Permit Signature`}
+                        label={`Approve and Deposit in a single transaction`}
                         onChange={ e => this.togglePermitEnabled(e.target.checked) }
                       />
                     </DashboardCard>
+                  ) : !this.state.showPermitBox && this.state.usePermit && this.state.migrationEnabled && !this.state.migrationSucceeded && (
+                    <Flex
+                      p={2}
+                      mt={3}
+                      width={1}
+                      borderRadius={2}
+                      alignItems={'center'}
+                      flexDirection={'row'}
+                      justifyContent={'center'}
+                      backgroundColor={'white'}
+                      border={`1px solid ${this.props.theme.colors.primary}`}
+                    >
+                      <Link
+                        textAlign={'center'}
+                        hoverColor={'primary'}
+                        onClick={this.showPermitBox.bind(this)}
+                      >
+                        Having trouble with the Batch Deposit?
+                      </Link>
+                    </Flex>
+                  )
                 }
               </Box>
             )
@@ -777,7 +899,7 @@ class BatchDeposit extends Component {
             this.props.account && this.state.availableTokens && this.state.selectedToken && (
               <Box width={1}>
                 {
-                  this.state.migrationContractApproved && this.state.canClaim && 
+                  (contractApproved || this.state.canClaim) && 
                     <Flex
                       mt={2}
                       flexDirection={'column'}
@@ -868,6 +990,72 @@ class BatchDeposit extends Component {
                     </Flex>
                 }
                 {
+                  canExecuteBatch && 
+                    <DashboardCard
+                      cardProps={{
+                        p:2,
+                        mt:3
+                      }}
+                    >
+                      {
+                        this.state.processing.execute.loading ? (
+                          <Flex
+                            width={1}
+                            alignItems={'center'}
+                            flexDirection={'column'}
+                            justifyContent={'center'}
+                          >
+                            <TxProgressBar web3={this.props.web3} waitText={`Batch execution estimated in`} endMessage={`Finalizing batch execution request...`} hash={this.state.processing.execute.txHash} />
+                          </Flex>
+                        ) : this.state.executeSucceeded ? (
+                          <Flex
+                            width={1}
+                            alignItems={'center'}
+                            flexDirection={'column'}
+                            justifyContent={'center'}
+                          >
+                            <Icon
+                              size={'2.3em'}
+                              name={'DoneAll'}
+                              color={this.props.theme.colors.transactions.status.completed}
+                            />
+                            <Text
+                              mt={2}
+                              fontSize={2}
+                              color={'cellText'}
+                              textAlign={'center'}
+                            >
+                              The Batch has been executed!
+                            </Text>
+                          </Flex>
+                        ) : (
+                          <Flex
+                            width={1}
+                            alignItems={'center'}
+                            flexDirection={'column'}
+                            justifyContent={'center'}
+                          >
+                            <Text
+                              fontWeight={500}
+                              display={'block'}
+                              color={'copyColor'}
+                              textAlign={'center'}
+                            >
+                              Batch Pool: {this.state.batchTotals[this.state.currBatchIndex].toFixed(4)} {this.state.selectedToken}
+                            </Text>
+                            <Link
+                              textAlign={'center'}
+                              hoverColor={'primary'}
+                              onClick={this.execute.bind(this)}
+                            >
+                              Execute Batch
+                            </Link>
+                          </Flex>
+                        )
+                      }
+                    </DashboardCard>
+                }
+                {
                   this.state.action === 'deposit' ? 
                     this.state.batchDepositEnabled ? (
                       <Migrate
@@ -895,89 +1083,24 @@ class BatchDeposit extends Component {
                             my:3
                           }}
                         >
-                          {
-                            batchId ? (
-                              <Flex
-                                alignItems={'center'}
-                                flexDirection={'column'}
-                              >
-                                <Icon
-                                  size={'2.3em'}
-                                  color={'cellText'}
-                                  name={'HourglassEmpty'}
-                                />
-                                <Text
-                                  mt={2}
-                                  fontSize={2}
-                                  color={'cellText'}
-                                  textAlign={'center'}
-                                >
-                                  {
-                                    this.state.batchCompleted ? (
-                                      <Text.span
-                                        color={'cellText'}
-                                      >The batch has been deposited, click on the "Claim" button to withdraw your tokens.</Text.span>
-                                    ) : (
-                                      <Text.span
-                                        color={'cellText'}
-                                      >
-                                        You have successfully deposited <strong>{batchDeposit.toFixed(4)} {this.state.selectedToken}</strong>, please wait until the batch is executed to claim your tokens.
-                                        {
-                                          typeof this.state.batchTotals[batchId] !== 'undefined' && 
-                                          <Text.span
-                                            fontWeight={500}
-                                            display={'block'}
-                                            color={'copyColor'}
-                                            textAlign={'center'}
-                                          >
-                                            Batch pool: {this.state.batchTotals[batchId].toFixed(4)} {this.state.selectedToken}
-                                          </Text.span>
-                                        }
-                                      </Text.span>
-                                    )
-                                  }
-                                </Text>
-                              </Flex>
-                            ) : this.state.migrationSucceeded ? (
-                              <Flex
-                                alignItems={'center'}
-                                flexDirection={'column'}
-                              >
-                                <Icon
-                                  size={'2.3em'}
-                                  name={'DoneAll'}
-                                  color={this.props.theme.colors.transactions.status.completed}
-                                />
-                                <Text
-                                  mt={2}
-                                  fontSize={2}
-                                  color={'cellText'}
-                                  textAlign={'center'}
-                                >
-                                  You have successfully deposited your {this.state.selectedToken} into the batch!
-                                </Text>
-                              </Flex>
-                            ) : (
-                              <Flex
-                                alignItems={'center'}
-                                flexDirection={'column'}
-                              >
-                                <Icon
-                                  size={'2.3em'}
-                                  name={'MoneyOff'}
-                                  color={'cellText'}
-                                />
-                                <Text
-                                  mt={2}
-                                  fontSize={2}
-                                  color={'cellText'}
-                                  textAlign={'center'}
-                                >
-                                  You don't have any {this.state.selectedToken} in your wallet.
-                                </Text>
-                              </Flex>
-                            )
-                          }
+                          <Flex
+                            alignItems={'center'}
+                            flexDirection={'column'}
+                          >
+                            <Icon
+                              size={'2.3em'}
+                              name={'MoneyOff'}
+                              color={'cellText'}
+                            />
+                            <Text
+                              mt={2}
+                              fontSize={2}
+                              color={'cellText'}
+                              textAlign={'center'}
+                            >
+                              You don't have any {this.state.selectedToken} in your wallet.
+                            </Text>
+                          </Flex>
                         </DashboardCard>
                       </Migrate>
                     ) : (
@@ -1057,7 +1180,7 @@ class BatchDeposit extends Component {
                               color={'cellText'}
                               textAlign={'center'}
                             >
-                              The batch has been deposited!<br />You can now claim your {batchRedeem.toFixed(4)} {this.state.tokenConfig.idle.token}.
+                              The Batch has been executed!<br />You can now claim your {batchRedeem.toFixed(4)} {this.state.tokenConfig.idle.token}
                             </Text>
                             <Flex
                               width={1}
@@ -1098,15 +1221,17 @@ class BatchDeposit extends Component {
                               >
                                 You have successfully deposited <strong>{batchDeposit.toFixed(4)} {this.state.selectedToken}</strong>, please wait until the batch is executed to claim your {this.state.tokenConfig.idle.token}.
                                 {
+                                  /*
                                   typeof this.state.batchTotals[batchId] !== 'undefined' && 
-                                  <Text.span
-                                    fontWeight={500}
-                                    display={'block'}
-                                    color={'copyColor'}
-                                    textAlign={'center'}
-                                  >
-                                    Batch pool: {this.state.batchTotals[batchId].toFixed(4)} {this.state.selectedToken}
-                                  </Text.span>
+                                    <Text.span
+                                      fontWeight={500}
+                                      display={'block'}
+                                      color={'copyColor'}
+                                      textAlign={'center'}
+                                    >
+                                      Batch pool: {this.state.batchTotals[batchId].toFixed(4)} {this.state.selectedToken}
+                                    </Text.span>
+                                  */
                                 }
                               </Text.span>
                             </Text>

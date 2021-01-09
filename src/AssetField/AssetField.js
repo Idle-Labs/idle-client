@@ -1203,6 +1203,16 @@ class AssetField extends Component {
           case 'icon':
             CustomComponent = Icon;
             fieldProps.name = customValue;
+            const customFieldName = Object.values(fieldInfo.path).pop();
+            if (this.props.tokenConfig[`${customFieldName}Props`]){
+              const customFieldProps = this.props.tokenConfig[`${customFieldName}Props`];
+              // Replace props
+              if (customFieldProps && Object.keys(customFieldProps).length){
+                Object.keys(customFieldProps).forEach(p => {
+                  fieldProps[p] = customFieldProps[p];
+                });
+              }
+            }
           break;
           default:
             CustomComponent = Text;

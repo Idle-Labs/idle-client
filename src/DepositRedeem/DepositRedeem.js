@@ -280,6 +280,7 @@ class DepositRedeem extends Component {
         tokenApproved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken,this.props.tokenConfig.idle.address,this.props.account);
       }
     }
+
     return tokenApproved;
   }
 
@@ -995,6 +996,8 @@ class DepositRedeem extends Component {
     const batchDepositEnabled = batchDepositInfo.enabled && typeof batchDepositInfo.props.availableTokens[this.props.tokenConfig.idle.token] !== 'undefined';
     const batchDepositDepositEnabled = batchDepositInfo.depositEnabled;
 
+    const showBatchDeposit = batchDepositEnabled && batchDepositDepositEnabled && !this.props.isMigrationTool && this.state.action === 'deposit';
+
     return (
       <Flex
         width={1}
@@ -1410,6 +1413,34 @@ class DepositRedeem extends Component {
                       </DashboardCard>
                     }
                     {
+                      showBatchDeposit &&
+                        <Flex
+                          p={2}
+                          mt={3}
+                          width={1}
+                          borderRadius={2}
+                          alignItems={'center'}
+                          flexDirection={'row'}
+                          justifyContent={'center'}
+                          backgroundColor={'white'}
+                          border={`1px solid ${this.props.theme.colors.primary}`}
+                        >
+                          <Link
+                            textAlign={'center'}
+                            hoverColor={'primary'}
+                            href={`/#/dashboard/tools/${batchDepositInfo.route}/${this.props.tokenConfig.idle.token}`}
+                          >
+                            Gas fees too high? Save gas with our Batch Deposit!
+                          </Link>
+                          <Icon
+                            ml={1}
+                            size={'1em'}
+                            color={'primary'}
+                            name={'LocalGasStation'}
+                          />
+                        </Flex>
+                    }
+                    {
                       showRedeemCurve && this.state.canRedeem && (
                         <Flex
                           width={1}
@@ -1768,34 +1799,6 @@ class DepositRedeem extends Component {
                                               </Flex>
                                             </Box>
                                           )
-                                        }
-                                        {
-                                          (batchDepositEnabled && batchDepositDepositEnabled && !this.props.isMigrationTool) &&
-                                            <Flex
-                                              p={2}
-                                              my={2}
-                                              width={1}
-                                              borderRadius={2}
-                                              alignItems={'center'}
-                                              flexDirection={'row'}
-                                              justifyContent={'center'}
-                                              backgroundColor={'white'}
-                                              border={`1px solid ${this.props.theme.colors.primary}`}
-                                            >
-                                              <Link
-                                                textAlign={'center'}
-                                                hoverColor={'primary'}
-                                                href={`/#/dashboard/tools/${batchDepositInfo.route}/${this.props.tokenConfig.idle.token}`}
-                                              >
-                                                Gas fees too high? Save gas with our Batch Deposit!
-                                              </Link>
-                                              <Icon
-                                                ml={1}
-                                                size={'1em'}
-                                                color={'primary'}
-                                                name={'LocalGasStation'}
-                                              />
-                                            </Flex>
                                         }
                                         <Flex
                                           width={1}

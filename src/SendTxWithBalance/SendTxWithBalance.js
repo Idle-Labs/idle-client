@@ -292,10 +292,6 @@ class SendTxWithBalance extends Component {
 
   render() {
 
-    // if (!this.props.tokenConfig.token){
-    //   return null;
-    // }
-
     return (
       <Flex
         width={1}

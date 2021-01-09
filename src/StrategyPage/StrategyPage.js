@@ -105,8 +105,11 @@ class StrategyPage extends Component {
               case 'pending':
                 tokenConfig.statusIcon = 'Timelapse';
               break;
-              case 'claimable':
+              case 'executed':
                 tokenConfig.statusIcon = 'Done';
+                tokenConfig.statusIconProps = {
+                  color:this.props.theme.colors.transactions.status.completed
+                };
               break;
               default:
               break;
@@ -536,7 +539,6 @@ class StrategyPage extends Component {
                     >
                       <AssetsList
                         enabledTokens={Object.keys(this.state.batchedDepositsAvailableTokens)}
-                        handleClick={(props) => this.props.goToSection(`tools/${batchDepositConfig.route}/${props.tokenConfig.token}`) }
                         cols={[
                           {
                             title:'TOKEN',
@@ -588,7 +590,13 @@ class StrategyPage extends Component {
                                 type:'number',
                                 path:['deposited'],
                                 props:{
-                                  decimals: this.props.isMobile ? 6 : 8
+                                  decimals: 4
+                                }
+                              },
+                              {
+                                name:'tokenName',
+                                props:{
+                                  ml:2
                                 }
                               }
                             ]
@@ -605,9 +613,17 @@ class StrategyPage extends Component {
                                 type:'number',
                                 path:['redeemable'],
                                 props:{
-                                  decimals: this.props.isMobile ? 6 : 8
+                                  decimals: 4
                                 }
                               },
+                              {
+                                type:'text',
+                                name:'custom',
+                                path:['token'],
+                                props:{
+                                  ml:2
+                                }
+                              }
                             ]
                           },
                           {
@@ -650,6 +666,9 @@ class StrategyPage extends Component {
                               {
                                 name:'button',
                                 label:'Claim',
+                                funcProps:{
+                                  disabled:(props) => (props.tokenConfig.status === 'pending')
+                                },
                                 props:{
                                   width:1,
                                   fontSize:3,
@@ -659,7 +678,7 @@ class StrategyPage extends Component {
                                   boxShadow:null,
                                   mainColor:'migrate',
                                   size: this.props.isMobile ? 'small' : 'medium',
-                                  handleClick:(props) => this.props.changeToken(props.token)
+                                  handleClick:(props) => this.props.goToSection(`tools/${batchDepositConfig.route}/${props.tokenConfig.token}`)
                                 }
                               }
                             ]

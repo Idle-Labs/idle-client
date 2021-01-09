@@ -409,8 +409,12 @@ class Migrate extends Component {
     
     loading = false;
 
+    // If use Permit don't ask for Approve
+    const usePermit = this.props.usePermit;
+
     const newState = {
       loading,
+      usePermit,
       oldTokenName,
       oldIdleTokens,
       migrationEnabled,
@@ -419,11 +423,6 @@ class Migrate extends Component {
       oldContractTokenDecimals,
       migrationContractApproved
     };
-
-    // If use Permit don't ask for Approve
-    if (this.props.usePermit){
-      newState.migrationContractApproved = true;
-    }
 
     if (this.props.biconomy){
       const biconomyLimits = await this.functionsUtil.checkBiconomyLimits(this.props.account);
@@ -1019,7 +1018,7 @@ class Migrate extends Component {
                                       hoverColor={'copyColor'}
                                       onClick={ (e) => this.setFastBalanceSelector(100) }
                                     >
-                                      {this.state.oldIdleTokens.toFixed(6)} {this.props.selectedToken}
+                                      Balance: {this.state.oldIdleTokens.toFixed(6)} {this.props.selectedToken}
                                     </Link>
                                   </Flex>
                                 </Box>

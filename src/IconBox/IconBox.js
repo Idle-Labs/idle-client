@@ -22,16 +22,22 @@ class IconBox extends Component {
             name={this.props.icon ? this.props.icon : 'InfoOutline'}
             {...this.props.iconProps}
           />
-          <Text
-            mt={2}
-            fontSize={2}
-            color={'cellText'}
-            textAlign={'center'}
-            dangerouslySetInnerHTML={{
-              __html:this.props.text
-            }}
-            {...this.props.textProps}
-          />
+          {
+            this.props.text && 
+              <Text
+                mt={2}
+                fontSize={2}
+                color={'cellText'}
+                textAlign={'center'}
+                dangerouslySetInnerHTML={{
+                  __html:this.props.text
+                }}
+                {...this.props.textProps}
+              />
+          }
+          {
+            this.props.children
+          }
         </Flex>
       </DashboardCard>
     );
