@@ -791,6 +791,17 @@ class BatchDeposit extends Component {
                       >
                         Wait for the batch to be executed
                       </Text>
+                        <Tooltip
+                          placement={'top'}
+                          message={`Batches are executed twice a week`}
+                        >
+                          <Icon
+                            ml={1}
+                            size={'1.1em'}
+                            color={'cellTitle'}
+                            name={'InfoOutline'}
+                          />
+                        </Tooltip>
                     </Flex>
                     <Flex
                       mt={2}
