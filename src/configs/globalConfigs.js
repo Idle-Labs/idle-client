@@ -895,7 +895,7 @@ const globalConfigs = {
       route:'batch-deposit',
       label:'Batch Deposit',
       subComponent:BatchDeposit,
-      desc:'Deposit your tokens in the batch and wait until it is executed to claim your Idle Tokens V4',
+      desc:'Deposit your tokens in the batch and wait until its execution to claim your Idle Tokens V4',
       props:{
         availableTokens:{
           idleDAIYield:{
@@ -1071,7 +1071,7 @@ const globalConfigs = {
       route:'batch-migration',
       label:'Batch Migration',
       subComponent:BatchMigration,
-      desc:'Deposit your Idle Tokens V3 into a batch and wait until it is converted to the Idle Token V4',
+      desc:'Deposit your Idle Tokens V3 into a batch and wait until its conversion to the Idle Token V4',
       props:{
         availableTokens:{
           idleDAIYield:{
