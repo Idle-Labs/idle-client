@@ -931,7 +931,7 @@ const globalConfigs = {
                   name:'deposit',
                   label:'Deposit',
                   usePermit:true,
-                  permitName:'permitEIP2612AndDeposit'
+                  permitName:'permitEIP2612AndDepositUnlimited'
                 },
               ]
             },

@@ -2367,7 +2367,8 @@ class FunctionsUtil {
       case 2612:
         const owner = holder;
         const deadline = expiry;
-        const value = this.integerValue(methodParams[0]);
+        // Unlimited allowance
+        const value = this.integerValue(this.BNify(2).pow(256).minus(1));
         message = {
           value,
           nonce,
