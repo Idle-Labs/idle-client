@@ -1026,7 +1026,7 @@ class BatchDeposit extends Component {
                         <DashboardCard
                           cardProps={{
                             p:3,
-                            my:3
+                            mt:3
                           }}
                         >
                           <Flex
