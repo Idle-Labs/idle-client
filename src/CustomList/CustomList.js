@@ -1,11 +1,11 @@
 import { Flex } from "rimble-ui";
 import React, { Component } from 'react';
 import TableRow from '../TableRow/TableRow';
-import AssetField from '../AssetField/AssetField';
+import CustomField from '../CustomField/CustomField';
 import TableHeader from '../TableHeader/TableHeader';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 
-class AssetsList extends Component {
+class CustomList extends Component {
 
   state = {};
 
@@ -30,34 +30,24 @@ class AssetsList extends Component {
 
   render() {
 
-    let enabledTokens = this.props.enabledTokens;
-    if (!enabledTokens || !enabledTokens.length){
-      enabledTokens = Object.keys(this.props.availableTokens);
-    }
-
     return (
-      <Flex id="assets-list-container" width={1} flexDirection={'column'}>
+      <Flex id="custom-list-container" width={1} flexDirection={'column'}>
         <TableHeader
           {...this.props}
           cols={this.props.cols}
           isMobile={this.props.isMobile}
         />
-        <Flex id="assets-list" flexDirection={'column'}>
+        <Flex id="custom-list" flexDirection={'column'}>
           {
-            enabledTokens.map(token => {
-              const tokenConfig = this.props.availableTokens[token];
-              if (!tokenConfig){
-                return null;
-              }
+            this.props.rows.map( (row,rowIndex) => {
               return (
                 <TableRow
-                  token={token}
+                  row={row}
                   {...this.props}
-                  key={`asset-${token}`}
-                  tokenConfig={tokenConfig}
-                  rowId={`asset-col-${token}`}
-                  cardId={`asset-card-${token}`}
-                  fieldComponent={this.props.fieldComponent || AssetField}
+                  key={`asset-${rowIndex}`}
+                  fieldComponent={CustomField}
+                  rowId={`asset-col-${rowIndex}`}
+                  cardId={`asset-card-${rowIndex}`}
                 />
               );
             })
@@ -68,4 +58,4 @@ class AssetsList extends Component {
   }
 }
 
-export default AssetsList;
+export default CustomList;

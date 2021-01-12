@@ -236,7 +236,7 @@ const availableTokens = {
         decimals:6,
         token:'USDC',
         enabled:true,
-        abi:ERC20.abi,
+        abi:USDC,
         govTokensDisabled:false,
         color:'hsl(211, 67%, 47%)',
         address:'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',

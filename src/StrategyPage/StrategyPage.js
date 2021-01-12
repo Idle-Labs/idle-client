@@ -3,22 +3,26 @@ import CountUp from 'react-countup';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import AssetsList from '../AssetsList/AssetsList';
+import CustomList from '../CustomList/CustomList';
+import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import DashboardCard from '../DashboardCard/DashboardCard';
 import PortfolioDonut from '../PortfolioDonut/PortfolioDonut';
 import GenericSelector from '../GenericSelector/GenericSelector';
 import PortfolioEquity from '../PortfolioEquity/PortfolioEquity';
 import TransactionsList from '../TransactionsList/TransactionsList';
-import { Flex, Box, Heading, Text, Tooltip, Icon } from "rimble-ui";
 import EarningsEstimation from '../EarningsEstimation/EarningsEstimation';
+import { Flex, Box, Heading, Text, Tooltip, Icon, Image } from "rimble-ui";
 
 // const env = process.env;
 
 class StrategyPage extends Component {
 
   state = {
+    portfolio:null,
     tokensToMigrate:{},
     aggregatedValues:[],
+    activeCoverages:null,
     depositedTokens:null,
     remainingTokens:null,
     batchedDeposits:null,
@@ -80,10 +84,13 @@ class StrategyPage extends Component {
 
       // Load data
       const [
+        activeCoverages,
         batchedDeposits,
         tokensToMigrate,
         portfolio
       ] = await Promise.all([
+        // Load active coverages
+        this.functionsUtil.getActiveCoverages(this.props.account),
         // Load claimable batches
         this.functionsUtil.getBatchedDeposits(this.props.account),
         // Load tokens to be migrated
@@ -93,6 +100,23 @@ class StrategyPage extends Component {
         // Load and process Etherscan Txs
         this.functionsUtil.getEtherscanTxs(this.props.account,firstBlockNumber,'latest',Object.keys(availableTokens))
       ]);
+
+      newState.portfolio = portfolio;
+
+      newState.activeCoverages = activeCoverages && activeCoverages.length>0 ? activeCoverages.map( c => {
+        const statusColors = this.props.theme.colors.transactions.status;
+        const statusIcon = c.status === 'Expired' ? 'Error' : 'VerifiedUser';
+        const statusColor = c.status === 'Expired' ? statusColors.failed : statusColors.completed;
+        const portfolioCoverage = portfolio.totalBalance.gt(0) ? c.balance.div(portfolio.totalBalance).times(100).toFixed(2)+'%' : 'N/A';
+        const statusIconProps = {
+          color:statusColor
+        };
+        return Object.assign(c,{
+          statusIcon,
+          statusIconProps,
+          portfolioCoverage
+        });
+      }) : null;
 
       newState.batchedDeposits = batchedDeposits && Object.keys(batchedDeposits).length>0 ? batchedDeposits : null;
 
@@ -104,6 +128,9 @@ class StrategyPage extends Component {
             switch (batchInfo.status){
               case 'pending':
                 tokenConfig.statusIcon = 'Timelapse';
+                tokenConfig.statusIconProps = {
+                  color:this.props.theme.colors.transactions.status.pending
+                };
               break;
               case 'executed':
                 tokenConfig.statusIcon = 'Done';
@@ -299,6 +326,7 @@ class StrategyPage extends Component {
     const riskScore = this.functionsUtil.getGlobalConfig(['messages','riskScore']);
     const yieldFarming = this.functionsUtil.getGlobalConfig(['messages','yieldFarming']);
     const batchDepositConfig = this.functionsUtil.getGlobalConfig(['tools','batchDeposit']);
+    const coverProtocolConfig = this.functionsUtil.getGlobalConfig(['tools','coverProtocol']);
 
     return (
       <Box width={1}>
@@ -525,10 +553,209 @@ class StrategyPage extends Component {
                 )
               }
               {
+                (this.state.activeCoverages || (coverProtocolConfig.enabled && this.state.portfolio && this.state.portfolio.totalBalance.gt(0))) && (
+                  <Flex
+                    width={1}
+                    mb={[0,3]}
+                    id={'active-coverages'}
+                    flexDirection={'column'}
+                  >
+                    <Title my={[3,4]}>Active Coverages</Title>
+                    <Flex
+                      width={1}
+                      alignItems={'center'}
+                      flexDirection={'column'}
+                      justifyContent={'center'}
+                    >
+                    {
+                      this.state.activeCoverages ? (
+                        <CustomList
+                          rows={this.state.activeCoverages}
+                          cols={[
+                            {
+                              title:'PROTOCOL',
+                              props:{
+                                width:[0.37,0.2]
+                              },
+                              fields:[
+                                {
+                                  type:'image',
+                                  path:['protocolImage'],
+                                  props:{
+                                    mr:[1,2],
+                                    size:this.props.isMobile ? '1.2em' : '1.8em'
+                                  }
+                                },
+                                {
+                                  type:'text',
+                                  path:['protocolName'],
+                                }
+                              ]
+                            },
+                            {
+                              title:'BALANCE',
+                              props:{
+                                width:[0.37, 0.23],
+                              },
+                              fields:[
+                                {
+                                  type:'number',
+                                  path:['balance'],
+                                  props:{
+                                    decimals: 4,
+                                  }
+                                },
+                                {
+                                  type:'text',
+                                  path:['token'],
+                                  props:{
+                                    ml:[1,2]
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              mobile:false,
+                              title:'EXPIRATION DATE',
+                              props:{
+                                width:0.23,
+                                justifyContent:['center','flex-start']
+                              },
+                              fields:[
+                                {
+                                  type:'text',
+                                  path:['expirationDate'],
+                                  props:{
+                                    
+                                  }
+                                },
+                              ]
+                            },
+                            {
+                              mobile:false,
+                              title:'PORTFOLIO COVERAGE',
+                              props:{
+                                width:0.23,
+                                justifyContent:['center','flex-start']
+                              },
+                              fields:[
+                                {
+                                  type:'text',
+                                  path:['portfolioCoverage'],
+                                  props:{
+                                    
+                                  }
+                                },
+                              ]
+                            },
+                            {
+                              title:'STATUS',
+                              props:{
+                                width:[0.26,0.15],
+                                justifyContent:['center','flex-start']
+                              },
+                              fields:[
+                                {
+                                  type:'icon',
+                                  name:'custom',
+                                  path:['statusIcon'],
+                                  props:{
+                                    mr:2,
+                                    size:this.props.isMobile ? '1.2em' : '1.8em'
+                                  }
+                                },
+                                {
+                                  name:'custom',
+                                  path:['status'],
+                                  props:{
+                                    style:{
+                                      textTransform:'capitalize'
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          ]}
+                          {...this.props}
+                        />
+                      ) : (
+                        <DashboardCard
+                          cardProps={{
+                            py:3,
+                            px:[3,4],
+                            width:[1,'auto'],
+                          }}
+                        >
+                          <Flex
+                            alignItems={'center'}
+                            flexDirection={'column'}
+                            justifyContent={'center'}
+                          >
+                            <Image
+                              mb={2}
+                              height={['1.8em','2.2em']}
+                              src={coverProtocolConfig.image}
+                            />
+                            <Text
+                              mb={1}
+                              fontSize={[2,4]}
+                              fontWeight={500}
+                              textAlign={'center'}
+                            >
+                              You don't have an active coverage
+                            </Text>
+                            <Text
+                              mb={2}
+                              color={'blue'}
+                              fontSize={[1,2]}
+                              fontWeight={500}
+                              hoverColor={'blue'}
+                              textAlign={'center'}
+                            >
+                              Cover Protocol provides coverage against Smart-Contract attacks
+                            </Text>
+                            <RoundButton
+                              buttonProps={{
+                                mt:1,
+                                width:'auto',
+                                minHeight:'40px',
+                                mainColor:'redeem',
+                                size:this.props.isMobile ? 'small' : 'medium'
+                              }}
+                              handleClick={ e => this.props.goToSection(`tools/${coverProtocolConfig.route}/Claim`) }
+                            >
+                              <Flex
+                                alignItems={'center'}
+                                flexDirection={'row'}
+                                justifyContent={'center'}
+                              >
+                                <Text
+                                  color={'white'}
+                                  fontSize={[1,2]}
+                                  fontWeight={500}
+                                >
+                                  Get Covered
+                                </Text>
+                                <Icon
+                                  ml={1}
+                                  size={'1.3em'}
+                                  name={'KeyboardArrowRight'}
+                                />
+                              </Flex>
+                            </RoundButton>
+                          </Flex>
+                        </DashboardCard>
+                      )
+                    }
+                    </Flex>
+                  </Flex>
+                )
+              }
+              {
                 this.state.batchedDeposits && (
                   <Flex
-                    mb={4}
                     width={1}
+                    mb={[0,3]}
                     id={'batched-deposits'}
                     flexDirection={'column'}
                   >
@@ -558,26 +785,6 @@ class StrategyPage extends Component {
                               }
                             ]
                           },
-                          /*
-                          {
-                            title:'STRATEGY',
-                            props:{
-                              width:[0.3,0.17]
-                            },
-                            fields:[
-                              {
-                                name:'strategyIcon',
-                                props:{
-                                  mr:2,
-                                  height:['1.4em','2em']
-                                }
-                              },
-                              {
-                                name:'strategyName'
-                              }
-                            ]
-                          },
-                          */
                           {
                             mobile:false,
                             title:'DEPOSITED',
@@ -604,7 +811,7 @@ class StrategyPage extends Component {
                           {
                             title:'REDEEMABLE',
                             props:{
-                              width:[0.35,0.21],
+                              width:[0.44,0.23],
                               justifyContent:['center','flex-start']
                             },
                             fields:[
@@ -629,12 +836,13 @@ class StrategyPage extends Component {
                           {
                             title:'STATUS',
                             props:{
-                              width:[0.35,0.21],
+                              width:[0.26,0.19],
                               justifyContent:['center','flex-start']
                             },
                             fields:[
                               {
                                 type:'icon',
+                                mobile:false,
                                 name:'custom',
                                 path:['statusIcon'],
                                 props:{

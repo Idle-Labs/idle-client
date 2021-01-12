@@ -844,7 +844,7 @@ const globalConfigs = {
   },
   tools:{
     coverProtocol:{
-      enabled:false,
+      enabled:true,
       route:'cover-protocol',
       label:'Cover Protocol',
       subComponent:CoverProtocol,
@@ -859,26 +859,28 @@ const globalConfigs = {
         },
         coverages:[
           {
-            collaterals:['DAI'],
+            collateral:'DAI',
             expirationTimestamp:1614470400,
             tokens:{
               Claim:{
                 abi:CovToken,
+                name:'COVER_IDLE_2021_02_28_DAI_0_CLAIM',
                 address:'0xa7dac6774e5e40f56a0bf06af6cf9b1f3d037bcc',
                 balancerPool:{
                   decimals:18,
                   abi:BalancerPool,
-                  name:'COVER_IDLE_2021_02_28_DAI_0_CLAIM',
+                  name:'BAL_COVER_IDLE_2021_02_28_DAI_0_CLAIM',
                   address:'0xeb2b9959c7943eb3c0bdb69ede25247bab4d1c6c',
-                },
+                }
               },
               NoClaim:{
                 abi:CovToken,
+                name:'COVER_IDLE_2021_02_28_DAI_0_NOCLAIM',
                 address:'0x53df0bfa014b7522299c129c5a7b318f02adb469',
                 balancerPool:{
                   decimals:18,
                   abi:BalancerPool,
-                  name:'COVER_IDLE_2021_02_28_DAI_0_NOCLAIM',
+                  name:'BAL_COVER_IDLE_2021_02_28_DAI_0_NOCLAIM',
                   address:'0xce0e9e7a1163badb7ee79cfe96b5148e178cab73',
                 }
               }

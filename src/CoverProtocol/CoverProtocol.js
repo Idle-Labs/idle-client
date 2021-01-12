@@ -52,116 +52,23 @@ class CoverProtocol extends Component {
 
     const selectedCoverageChanged = prevState.selectedCoverage !== this.state.selectedCoverage;
     if (selectedCoverageChanged){
-      const selectedToken = this.state.selectedCoverage.collaterals[0];
+      const selectedToken = this.state.selectedCoverage.collateral;
       const tokenConfig = Object.values(this.props.availableStrategies)[0][selectedToken];
       const tokenBalance = await this.functionsUtil.getTokenBalance(selectedToken,this.props.account);
+      const selectedAction = !this.state.selectedAction ? (this.props.urlParams.param2 || null) : this.state.selectedAction;
       this.setState({
         tokenConfig,
         tokenBalance,
-        selectedToken
+        selectedToken,
+        selectedAction
       });
     }
 
     const contractApprovedChanged = prevState.contractApproved !== this.state.contractApproved;
-    const swapInfoChanged = JSON.stringify(prevState.swapInfo) !== JSON.stringify(this.state.swapInfo);
     const selectedActionChanged = prevState.selectedAction !== this.state.selectedAction;
-    if (selectedActionChanged || swapInfoChanged || contractApprovedChanged){
-      const steps = [];
-      let infoBox = null;
-      let tokenAmount = null;
-      let contractInfo = null;
-      let collateralAmount = null;
-      let approveDescription = null;
-      switch (this.state.selectedAction){
-        case 'Mint':
-          contractInfo = this.props.toolProps.contract;
-          approveDescription = `Approve the Cover Protocol contract`;
-          infoBox = {
-            text:`Stake ${this.state.selectedToken} to mint both Claim and No-Claim tokens in a 1:1 ratio`
-          };
-          // Add Approve Step
-          steps.push({
-            icon:'LooksOne',
-            description:approveDescription,
-            completed:this.state.contractApproved
-          });
-          // Add Mint Step
-          steps.push({
-            icon:'LooksTwo',
-            completed:false,
-            description:`Mint Claim and No-Claim tokens`
-          });
-        break;
-        case 'NoClaim':
-          contractInfo = this.state.selectedCoverage.tokens[this.state.selectedAction].balancerPool;
-          if (this.state.swapInfo){
-            collateralAmount = this.functionsUtil.fixTokenDecimals(this.state.swapInfo.amount,this.state.tokenConfig.decimals);
-            tokenAmount = this.functionsUtil.fixTokenDecimals(this.state.swapInfo.tokenAmountOut,contractInfo.decimals);
-            infoBox = {
-              text:`By providing <strong>${collateralAmount.toFixed(4)} ${this.state.selectedToken}</strong> your No-Claim tokens will pay out <strong>~${tokenAmount.toFixed(4)} ${this.state.selectedToken}</strong> if there is no successful attack on the protocol by the expiry date.<br /><small><a href="https://docs.coverprotocol.com/product/claims-guidelines" target="_blank" rel="nofollow noopener noreferrer">Read more</a> to understand how claims are assessed and paid out by Cover Protocol.</small>`
-            };
-          } else {
-            infoBox = {
-              text:`No-Claim tokens will pay out 1 ${this.state.selectedToken} for each token you hold if there is no successful attack on the protocol by the expiry date.<br /><small><a href="https://docs.coverprotocol.com/product/claims-guidelines" target="_blank" rel="nofollow noopener noreferrer">Read more</a> to understand how claims are assessed and paid out by Cover Protocol.</small>`
-            };
-          }
-
-          // Add Approve Step
-          approveDescription = `Approve the Claim Balancer Pool contract`;
-          steps.push({
-            icon:'LooksOne',
-            description:approveDescription,
-            completed:this.state.contractApproved
-          });
-          // Add Mint Step
-          steps.push({
-            icon:'LooksTwo',
-            completed:false,
-            description:`Buy No-Claim tokens with your ${this.state.selectedToken}`
-          });
-        break;
-        case 'Claim':
-          contractInfo = this.state.selectedCoverage.tokens[this.state.selectedAction].balancerPool;
-          if (this.state.swapInfo){
-            collateralAmount = this.functionsUtil.fixTokenDecimals(this.state.swapInfo.amount,this.state.tokenConfig.decimals);
-            tokenAmount = this.functionsUtil.fixTokenDecimals(this.state.swapInfo.tokenAmountOut,contractInfo.decimals);
-            const portfolioCoveredPerc = 32;//this.state.portfolio && this.state.portfolio.totalBalance.gt(0) ? tokenAmount.div(this.state.portfolio.totalBalance).times(100) : null;
-            infoBox = {
-              text:`By providing <strong>${collateralAmount.toFixed(4)} ${this.state.selectedToken}</strong> your Claim tokens will pay out <strong>~${tokenAmount.toFixed(4)} ${this.state.selectedToken}</strong>${ portfolioCoveredPerc ? ` <strong>(${portfolioCoveredPerc}% of your portfolio)</strong>` : '' } in the event that there is a successful attack on the protocol before the expiry date.<br /><small><a href="https://docs.coverprotocol.com/product/claims-guidelines" target="_blank" rel="nofollow noopener noreferrer">Read more</a> to understand how claims are assessed and paid out by Cover Protocol.</small>`
-            };
-          } else {
-            infoBox = {
-              text:`Claim tokens will pay out 1 ${this.state.selectedToken} for each token you hold in the event that there is a successful attack on the protocol before the expiry date.<br /><small><a href="https://docs.coverprotocol.com/product/claims-guidelines" target="_blank" rel="nofollow noopener noreferrer">Read more</a> to understand how claims are assessed and paid out by Cover Protocol.</small>`
-            };
-          }
-
-          // Add Approve Step
-          approveDescription = `Approve the No-Claim Balancer Pool contract`;
-          steps.push({
-            icon:'LooksOne',
-            description:approveDescription,
-            completed:this.state.contractApproved
-          });
-          // Add Mint Step
-          steps.push({
-            icon:'LooksTwo',
-            completed:false,
-            description:`Buy Claim tokens with your ${this.state.selectedToken}`
-          });
-        break;
-        default:
-        break;
-      }
-      if (contractInfo){
-        const transactionSucceeded = false;
-        this.setState({
-          steps,
-          infoBox,
-          contractInfo,
-          approveDescription,
-          transactionSucceeded
-        });
-      }
+    const inputValueChanged = prevState.inputValue !== this.state.inputValue && this.state.inputValue.gt(0);
+    if (selectedActionChanged || inputValueChanged || contractApprovedChanged){
+      this.updateData();
     }
 
     const contractInfoChanged = JSON.stringify(prevState.contractInfo) !== JSON.stringify(this.state.contractInfo);
@@ -181,10 +88,8 @@ class CoverProtocol extends Component {
       ] = await Promise.all([
         this.functionsUtil.genericContractCall(this.state.contractInfo.name,'getSwapFee'),
         this.functionsUtil.genericContractCall(this.state.contractInfo.name,'getBalance',[balancerTokenConfig.address]),
-        this.functionsUtil.genericContractCall(this.state.contractInfo.name,'getSpotPrice',[this.state.tokenConfig.address,balancerTokenConfig.address]),
+        this.functionsUtil.genericContractCall(this.state.contractInfo.name,'getSpotPrice',[this.state.tokenConfig.address,balancerTokenConfig.address])
       ]);
-
-      // console.log('getSwapInfo',this.state.contractInfo.name,balancerTokenConfig.address,swapFee,covTokens,tokenPrice);
 
       if (tokenPrice && swapFee && covTokens){
         swapFee = this.functionsUtil.fixTokenDecimals(swapFee,18);
@@ -287,11 +192,12 @@ class CoverProtocol extends Component {
 
   async transactionSucceeded(tx,amount,params){
     let infoBox = null;
+    const dashboardUrl = `#${this.functionsUtil.getGlobalConfig(['dashboard','baseRoute'])}/best`;
     const fixedAmount = this.functionsUtil.fixTokenDecimals(amount,this.state.tokenConfig.decimals);
     switch (this.state.selectedAction){
       case 'Mint':
-        const mintedClaimLog = tx.receipt.logs.find( log => log.address.toLowerCase() === this.state.selectedCoverage.tokens['Claim'].address );
-        const mintedNoClaimLog = tx.receipt.logs.find( log => log.address.toLowerCase() === this.state.selectedCoverage.tokens['NoClaim'].address );
+        const mintedClaimLog = tx.txReceipt.logs.find( log => log.address.toLowerCase() === this.state.selectedCoverage.tokens['Claim'].address );
+        const mintedNoClaimLog = tx.txReceipt.logs.find( log => log.address.toLowerCase() === this.state.selectedCoverage.tokens['NoClaim'].address );
         const mintedClaimAmount = mintedClaimLog ? this.functionsUtil.fixTokenDecimals(parseInt(mintedClaimLog.data,16),this.state.contractInfo.decimals) : fixedAmount;
         const mintedNoClaimAmount = mintedNoClaimLog ? this.functionsUtil.fixTokenDecimals(parseInt(mintedNoClaimLog.data,16),this.state.contractInfo.decimals) : fixedAmount;
         infoBox = {
@@ -299,31 +205,31 @@ class CoverProtocol extends Component {
           iconProps:{
             color:this.props.theme.colors.transactions.status.completed
           },
-          text:`You have successfully minted <strong>${mintedClaimAmount.toFixed(4)} Claim</strong> and <strong>${mintedNoClaimAmount.toFixed(4)} No-Claim</strong> tokens<br /><small><a href="${this.functionsUtil.getEtherscanTransactionUrl(tx.transactionHash)}" rel="nofollow noopener noreferrer" target="_blank">View in Etherscan</a></small>`
+          text:`You have successfully minted <strong>${mintedClaimAmount.toFixed(4)} Claim</strong> and <strong>${mintedNoClaimAmount.toFixed(4)} No-Claim</strong> tokens<br /><a href="${dashboardUrl}" styles="text-align:center;font-size:14px;color:${this.props.theme.colors.primary}">Go to Dashboard</a>`
         }
       break;
       case 'Claim':
         const claimTokenConfig = this.state.selectedCoverage.tokens[this.state.selectedAction];
-        const claimTokensLog = tx.receipt.logs.find( log => log.address.toLowerCase() === claimTokenConfig.address );
+        const claimTokensLog = tx.txReceipt.logs.find( log => log.address.toLowerCase() === claimTokenConfig.address );
         const receivedClaimAmount = claimTokensLog ? this.functionsUtil.fixTokenDecimals(parseInt(claimTokensLog.data,16),claimTokenConfig.balancerPool.decimals) : this.functionsUtil.fixTokenDecimals(params[3],claimTokenConfig.balancerPool.decimals);
         infoBox = {
           icon:'DoneAll',
           iconProps:{
             color:this.props.theme.colors.transactions.status.completed
           },
-          text:`You have successfully bought <strong>${receivedClaimAmount.toFixed(4)} ${this.state.selectedAction}</strong> tokens, you are now covered in the event that there is a successful attack on the protocol<br /><small><a href="${this.functionsUtil.getEtherscanTransactionUrl(tx.transactionHash)}" rel="nofollow noopener noreferrer" target="_blank">View in Etherscan</a></small>`
+          text:`You have successfully bought <strong>${receivedClaimAmount.toFixed(4)} ${this.state.selectedAction}</strong> tokens, you are now covered in the event that there is a successful attack on the protocol<br /><a href="${dashboardUrl}" styles="text-align:center;font-size:14px;color:${this.props.theme.colors.primary}">Go to Dashboard</a>`
         }
       break;
       case 'NoClaim':
         const noClaimTokenConfig = this.state.selectedCoverage.tokens[this.state.selectedAction];
-        const noClaimTokensLog = tx.receipt.logs.find( log => log.address.toLowerCase() === noClaimTokenConfig.address );
+        const noClaimTokensLog = tx.txReceipt.logs.find( log => log.address.toLowerCase() === noClaimTokenConfig.address );
         const receivedNoClaimAmount = noClaimTokensLog ? this.functionsUtil.fixTokenDecimals(parseInt(noClaimTokensLog.data,16),noClaimTokenConfig.balancerPool.decimals) : this.functionsUtil.fixTokenDecimals(params[3],noClaimTokenConfig.balancerPool.decimals);
         infoBox = {
           icon:'DoneAll',
           iconProps:{
             color:this.props.theme.colors.transactions.status.completed
           },
-          text:`You have successfully bought <strong>${receivedNoClaimAmount.toFixed(4)} ${this.state.selectedAction}</strong> tokens, you will be rewarded if there is no successful attack on the protocol by the expiry date<br /><small><a href="${this.functionsUtil.getEtherscanTransactionUrl(tx.transactionHash)}" rel="nofollow noopener noreferrer" target="_blank">View in Etherscan</a></small>`
+          text:`You have successfully bought <strong>${receivedNoClaimAmount.toFixed(4)} ${this.state.selectedAction}</strong> tokens, you will be rewarded if there is no successful attack on the protocol by the expiry date<br /><a href="${dashboardUrl}" styles="text-align:center;font-size:14px;color:${this.props.theme.colors.primary}">Go to Dashboard</a>`
         }
       break;
       default:
@@ -336,12 +242,160 @@ class CoverProtocol extends Component {
 
     const transactionSucceeded = true;
     const tokenBalance = await this.functionsUtil.getTokenBalance(this.state.selectedToken,this.props.account);
+
+    console.log('transactionSucceeded',infoBox);
+
     this.setState({
       steps,
       infoBox,
       tokenBalance,
       transactionSucceeded
     });
+  }
+
+  async updateData(){
+    const steps = [];
+    let infoBox = null;
+    let tokenAmount = null;
+    let contractInfo = null;
+    let collateralAmount = null;
+    let approveDescription = null;
+
+    const claimTokenConfig = this.state.selectedCoverage.tokens['Claim'];
+    const noClaimTokenConfig = this.state.selectedCoverage.tokens['NoClaim'];
+
+    await Promise.all([
+      this.props.initContract(claimTokenConfig.name,claimTokenConfig.address,claimTokenConfig.abi),
+      this.props.initContract(noClaimTokenConfig.name,noClaimTokenConfig.address,noClaimTokenConfig.abi),
+      this.props.initContract(claimTokenConfig.balancerPool.name,claimTokenConfig.balancerPool.address,claimTokenConfig.balancerPool.abi),
+      this.props.initContract(noClaimTokenConfig.balancerPool.name,noClaimTokenConfig.balancerPool.address,noClaimTokenConfig.balancerPool.abi)
+    ]);
+
+    // Get Claim token balance
+    const claimTokenBalance = await this.functionsUtil.getTokenBalance(claimTokenConfig.name,this.props.account);
+
+    // Get No-Claim token balance
+    const noClaimTokenBalance = await this.functionsUtil.getTokenBalance(noClaimTokenConfig.name,this.props.account);
+
+    // Check if user has both Claim and No-Claim tokens
+    const hasMintedTokens = claimTokenBalance && noClaimTokenBalance && claimTokenBalance.gt(0) && noClaimTokenBalance.gt(0);
+
+    // Get Claim token balance
+    const balancerPoolClaimBalance = await this.functionsUtil.getTokenBalance(claimTokenConfig.name,this.props.account);
+
+    // Get Claim token balance
+    const balancerPoolNoClaimBalance = await this.functionsUtil.getTokenBalance(noClaimTokenConfig.name,this.props.account);
+
+    switch (this.state.selectedAction){
+      case 'Mint':
+        contractInfo = this.props.toolProps.contract;
+
+        approveDescription = `Approve the Cover Protocol contract`;
+        infoBox = {
+          icon:'MonetizationOn',
+          text:`Stake ${this.state.selectedToken} to mint both Claim and No-Claim tokens in a 1:1 ratio`
+        };
+        // Add Approve Step
+        steps.push({
+          icon:'LooksOne',
+          description:approveDescription,
+          completed:this.state.contractApproved
+        });
+        // Add Mint Step
+        steps.push({
+          icon:'LooksTwo',
+          completed:hasMintedTokens,
+          description:`Mint Claim and No-Claim tokens`
+        });
+        // Add Liquidity to Balancer Step
+        steps.push({
+          icon:'Looks3',
+          description:`Add your Claim tokens to the Balancer Pool`,
+          completed:balancerPoolClaimBalance && balancerPoolClaimBalance.gt(0),
+          link:`https://pools.balancer.exchange/#/pool/${this.state.selectedCoverage.tokens['Claim'].balancerPool.address}/`,
+        });
+        // Add Liquidity to Balancer Step
+        steps.push({
+          icon:'Looks4',
+          description:`Add your No-Claim tokens to the Balancer Pool`,
+          completed:balancerPoolNoClaimBalance && balancerPoolNoClaimBalance.gt(0),
+          link:`https://pools.balancer.exchange/#/pool/${this.state.selectedCoverage.tokens['NoClaim'].balancerPool.address}/`,
+        });
+      break;
+      case 'NoClaim':
+        contractInfo = claimTokenConfig.balancerPool;
+        if (this.state.swapInfo){
+          collateralAmount = this.functionsUtil.fixTokenDecimals(this.state.swapInfo.amount,this.state.tokenConfig.decimals);
+          tokenAmount = this.functionsUtil.fixTokenDecimals(this.state.swapInfo.tokenAmountOut,contractInfo.decimals);
+          infoBox = {
+            icon:'VerifiedUser',
+            text:`By providing <strong>${collateralAmount.toFixed(4)} ${this.state.selectedToken}</strong> your No-Claim tokens will pay out <strong>~${tokenAmount.toFixed(4)} ${this.state.selectedToken}</strong> if there is no successful attack on the protocol by the expiry date.<br /><small><a href="https://docs.coverprotocol.com/product/claims-guidelines" target="_blank" rel="nofollow noopener noreferrer">Read more</a> to understand how claims are assessed and paid out by Cover Protocol.</small>`
+          };
+        } else {
+          infoBox = {
+            icon:'VerifiedUser',
+            text:`No-Claim tokens will pay out 1 ${this.state.selectedToken} for each token you hold if there is no successful attack on the protocol by the expiry date.<br /><small><a href="https://docs.coverprotocol.com/product/claims-guidelines" target="_blank" rel="nofollow noopener noreferrer">Read more</a> to understand how claims are assessed and paid out by Cover Protocol.</small>`
+          };
+        }
+
+        // Add Approve Step
+        approveDescription = `Approve the No-Claim Balancer Pool contract`;
+        steps.push({
+          icon:'LooksOne',
+          description:approveDescription,
+          completed:this.state.contractApproved
+        });
+        // Add Mint Step
+        steps.push({
+          icon:'LooksTwo',
+          completed:noClaimTokenBalance && noClaimTokenBalance.gt(0),
+          description:`Buy No-Claim tokens with your ${this.state.selectedToken}`
+        });
+      break;
+      case 'Claim':
+        contractInfo = noClaimTokenConfig.balancerPool;
+        if (this.state.swapInfo){
+          collateralAmount = this.functionsUtil.fixTokenDecimals(this.state.swapInfo.amount,this.state.tokenConfig.decimals);
+          tokenAmount = this.functionsUtil.fixTokenDecimals(this.state.swapInfo.tokenAmountOut,contractInfo.decimals);
+          const portfolioCoveredPerc = 32;//this.state.portfolio && this.state.portfolio.totalBalance.gt(0) ? tokenAmount.div(this.state.portfolio.totalBalance).times(100) : null;
+          infoBox = {
+            icon:'BeachAccess',
+            text:`By providing <strong>${collateralAmount.toFixed(4)} ${this.state.selectedToken}</strong> your Claim tokens will pay out <strong>~${tokenAmount.toFixed(4)} ${this.state.selectedToken}</strong>${ portfolioCoveredPerc ? ` <strong>(${portfolioCoveredPerc}% of your portfolio)</strong>` : '' } in the event that there is a successful attack on the protocol before the expiry date.<br /><small><a href="https://docs.coverprotocol.com/product/claims-guidelines" target="_blank" rel="nofollow noopener noreferrer">Read more</a> to understand how claims are assessed and paid out by Cover Protocol.</small>`
+          };
+        } else {
+          infoBox = {
+            icon:'BeachAccess',
+            text:`Claim tokens will pay out 1 ${this.state.selectedToken} for each token you hold in the event that there is a successful attack on the protocol before the expiry date.<br /><small><a href="https://docs.coverprotocol.com/product/claims-guidelines" target="_blank" rel="nofollow noopener noreferrer">Read more</a> to understand how claims are assessed and paid out by Cover Protocol.</small>`
+          };
+        }
+
+        // Add Approve Step
+        approveDescription = `Approve the No-Claim Balancer Pool contract`;
+        steps.push({
+          icon:'LooksOne',
+          description:approveDescription,
+          completed:this.state.contractApproved
+        });
+        // Add Mint Step
+        steps.push({
+          icon:'LooksTwo',
+          completed:claimTokenBalance && claimTokenBalance.gt(0),
+          description:`Buy Claim tokens with your ${this.state.selectedToken}`
+        });
+      break;
+      default:
+      break;
+    }
+    if (contractInfo){
+      const transactionSucceeded = false;
+      this.setState({
+        steps,
+        infoBox,
+        contractInfo,
+        approveDescription,
+        transactionSucceeded
+      });
+    }
   }
 
   async loadData(){
@@ -357,9 +411,9 @@ class CoverProtocol extends Component {
       }
       return output;
     },[]);
-
-    const defaultCoverage = activeCoverages.length ? activeCoverages[0] : null;
+    
     const portfolio = await this.functionsUtil.getAccountPortfolio();
+    const defaultCoverage = activeCoverages.length ? activeCoverages[0] : null;
 
     this.setState({
       portfolio,

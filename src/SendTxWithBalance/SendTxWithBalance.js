@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import IconBox from '../IconBox/IconBox';
+import ExtLink from '../ExtLink/ExtLink';
 import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import TxProgressBar from '../TxProgressBar/TxProgressBar';
@@ -329,14 +330,31 @@ class SendTxWithBalance extends Component {
                               name={ step.completed ? 'CheckBox' : step.icon}
                               color={ step.completed ? this.props.theme.colors.transactions.status.completed : 'cellText'}
                             />
-                            <Text
-                              ml={2}
-                              fontSize={2}
-                              color={'cellText'}
-                              textAlign={'left'}
-                            >
-                              {step.description}
-                            </Text>
+                            {
+                              step.link ? (
+                                <ExtLink
+                                  ml={2}
+                                  fontSize={2}
+                                  color={'blue'}
+                                  fontWeight={1}
+                                  href={step.link}
+                                  textAlign={'left'}
+                                  hoverColor={'blue'}
+                                >
+                                  {step.description}
+                                </ExtLink>
+                              ) : (
+                                <Text
+                                  ml={2}
+                                  fontSize={2}
+                                  fontWeight={1}
+                                  color={'cellText'}
+                                  textAlign={'left'}
+                                >
+                                  {step.description}
+                                </Text>
+                              )
+                            }
                           </Flex>
                         ) )
                       }

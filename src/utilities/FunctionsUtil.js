@@ -3060,6 +3060,44 @@ class FunctionsUtil {
 
     return userShare;
   }
+  getActiveCoverages = async (account=null) => {
+    const activeCoverages = [];
+    account = account || this.props.account;
+
+    if (!account){
+      return activeCoverages;
+    }
+
+    const currTimestamp = parseInt(new Date().getTime()/1000);
+    const coverProtocolConfig = this.getGlobalConfig(['tools','coverProtocol']);
+    if (coverProtocolConfig.enabled){
+      await this.asyncForEach(coverProtocolConfig.props.coverages, async (coverage) => {
+        const token = 'Claim';
+        const coverageTokens = coverage.tokens;
+        const tokenConfig = coverageTokens[token];
+        await this.props.initContract(tokenConfig.name,tokenConfig.address,tokenConfig.abi);
+        const balance = await this.getTokenBalance(tokenConfig.name,account);
+        if (balance && balance.gt(0)){
+          const collateral = coverage.collateral;
+          const protocolName = coverProtocolConfig.label;
+          const protocolImage = coverProtocolConfig.image;
+          const status = coverage.expirationTimestamp*1000<=currTimestamp ? 'Expired' : 'Active';
+          const expirationDate = moment(coverage.expirationTimestamp*1000).utc().format('YYYY-MM-DD HH:mm:ss')+' UTC';
+          activeCoverages.push({
+            token,
+            status,
+            balance,
+            collateral,
+            protocolName,
+            protocolImage,
+            expirationDate
+          });
+        }
+      });
+    }
+
+    return activeCoverages;
+  }
   getBatchedDeposits = async (account=null) => {
     account = account || this.props.account;
     if (!account){
