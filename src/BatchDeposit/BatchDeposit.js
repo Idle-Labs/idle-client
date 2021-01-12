@@ -152,7 +152,7 @@ class BatchDeposit extends Component {
       }));
     };
 
-    this.props.contractMethodSendWrapper(this.state.selectedTokenConfig.migrationContract.name, 'executeBatch', [false], null, callbackExecute, callbackReceiptExecute);
+    this.props.contractMethodSendWrapper(this.state.selectedTokenConfig.migrationContract.name, 'executeBatch', [true], null, callbackExecute, callbackReceiptExecute);
 
     this.setState((prevState) => ({
       processing: {
