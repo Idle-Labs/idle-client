@@ -553,201 +553,81 @@ class StrategyPage extends Component {
                 )
               }
               {
-                (this.state.activeCoverages || (coverProtocolConfig.enabled && this.state.portfolio && this.state.portfolio.totalBalance.gt(0))) && (
+                !this.state.activeCoverages && coverProtocolConfig.enabled && this.state.portfolio && this.state.portfolio.totalBalance.gt(0) && (
                   <Flex
                     width={1}
-                    mb={[0,3]}
-                    id={'active-coverages'}
+                    mt={[3,4]}
+                    alignItems={'center'}
+                    id={'no-active-cover'}
                     flexDirection={'column'}
+                    justifyContent={'center'}
                   >
-                    <Title my={[3,4]}>Active Coverages</Title>
-                    <Flex
-                      width={1}
-                      alignItems={'center'}
-                      flexDirection={'column'}
-                      justifyContent={'center'}
+                    <DashboardCard
+                      cardProps={{
+                        py:3,
+                        px:[3,4],
+                        width:[1,'auto'],
+                      }}
                     >
-                    {
-                      this.state.activeCoverages ? (
-                        <CustomList
-                          rows={this.state.activeCoverages}
-                          cols={[
-                            {
-                              title:'PROTOCOL',
-                              props:{
-                                width:[0.37,0.2]
-                              },
-                              fields:[
-                                {
-                                  type:'image',
-                                  path:['protocolImage'],
-                                  props:{
-                                    mr:[1,2],
-                                    size:this.props.isMobile ? '1.2em' : '1.8em'
-                                  }
-                                },
-                                {
-                                  type:'text',
-                                  path:['protocolName'],
-                                }
-                              ]
-                            },
-                            {
-                              title:'BALANCE',
-                              props:{
-                                width:[0.37, 0.23],
-                              },
-                              fields:[
-                                {
-                                  type:'number',
-                                  path:['balance'],
-                                  props:{
-                                    decimals: 4,
-                                  }
-                                },
-                                {
-                                  type:'text',
-                                  path:['token'],
-                                  props:{
-                                    ml:[1,2]
-                                  }
-                                }
-                              ]
-                            },
-                            {
-                              mobile:false,
-                              title:'EXPIRATION DATE',
-                              props:{
-                                width:0.23,
-                                justifyContent:['center','flex-start']
-                              },
-                              fields:[
-                                {
-                                  type:'text',
-                                  path:['expirationDate'],
-                                  props:{
-                                    
-                                  }
-                                },
-                              ]
-                            },
-                            {
-                              mobile:false,
-                              title:'PORTFOLIO COVERAGE',
-                              props:{
-                                width:0.23,
-                                justifyContent:['center','flex-start']
-                              },
-                              fields:[
-                                {
-                                  type:'text',
-                                  path:['portfolioCoverage'],
-                                  props:{
-                                    
-                                  }
-                                },
-                              ]
-                            },
-                            {
-                              title:'STATUS',
-                              props:{
-                                width:[0.26,0.15],
-                                justifyContent:['center','flex-start']
-                              },
-                              fields:[
-                                {
-                                  type:'icon',
-                                  name:'custom',
-                                  path:['statusIcon'],
-                                  props:{
-                                    mr:2,
-                                    size:this.props.isMobile ? '1.2em' : '1.8em'
-                                  }
-                                },
-                                {
-                                  name:'custom',
-                                  path:['status'],
-                                  props:{
-                                    style:{
-                                      textTransform:'capitalize'
-                                    }
-                                  }
-                                }
-                              ]
-                            }
-                          ]}
-                          {...this.props}
+                      <Flex
+                        alignItems={'center'}
+                        flexDirection={'column'}
+                        justifyContent={'center'}
+                      >
+                        <Image
+                          mb={2}
+                          height={['1.8em','2.2em']}
+                          src={coverProtocolConfig.image}
                         />
-                      ) : (
-                        <DashboardCard
-                          cardProps={{
-                            py:3,
-                            px:[3,4],
-                            width:[1,'auto'],
+                        <Text
+                          mb={1}
+                          fontSize={[2,4]}
+                          fontWeight={500}
+                          textAlign={'center'}
+                        >
+                          You don't have an active coverage
+                        </Text>
+                        <Text
+                          mb={2}
+                          color={'blue'}
+                          fontSize={[1,2]}
+                          fontWeight={500}
+                          hoverColor={'blue'}
+                          textAlign={'center'}
+                        >
+                          Cover Protocol provides coverage against Smart-Contract attacks
+                        </Text>
+                        <RoundButton
+                          buttonProps={{
+                            mt:1,
+                            width:'auto',
+                            minHeight:'40px',
+                            mainColor:'redeem',
+                            size:this.props.isMobile ? 'small' : 'medium'
                           }}
+                          handleClick={ e => this.props.goToSection(`tools/${coverProtocolConfig.route}/Claim`) }
                         >
                           <Flex
                             alignItems={'center'}
-                            flexDirection={'column'}
+                            flexDirection={'row'}
                             justifyContent={'center'}
                           >
-                            <Image
-                              mb={2}
-                              height={['1.8em','2.2em']}
-                              src={coverProtocolConfig.image}
-                            />
                             <Text
-                              mb={1}
-                              fontSize={[2,4]}
-                              fontWeight={500}
-                              textAlign={'center'}
-                            >
-                              You don't have an active coverage
-                            </Text>
-                            <Text
-                              mb={2}
-                              color={'blue'}
+                              color={'white'}
                               fontSize={[1,2]}
                               fontWeight={500}
-                              hoverColor={'blue'}
-                              textAlign={'center'}
                             >
-                              Cover Protocol provides coverage against Smart-Contract attacks
+                              Get Covered
                             </Text>
-                            <RoundButton
-                              buttonProps={{
-                                mt:1,
-                                width:'auto',
-                                minHeight:'40px',
-                                mainColor:'redeem',
-                                size:this.props.isMobile ? 'small' : 'medium'
-                              }}
-                              handleClick={ e => this.props.goToSection(`tools/${coverProtocolConfig.route}/Claim`) }
-                            >
-                              <Flex
-                                alignItems={'center'}
-                                flexDirection={'row'}
-                                justifyContent={'center'}
-                              >
-                                <Text
-                                  color={'white'}
-                                  fontSize={[1,2]}
-                                  fontWeight={500}
-                                >
-                                  Get Covered
-                                </Text>
-                                <Icon
-                                  ml={1}
-                                  size={'1.3em'}
-                                  name={'KeyboardArrowRight'}
-                                />
-                              </Flex>
-                            </RoundButton>
+                            <Icon
+                              ml={1}
+                              size={'1.3em'}
+                              name={'KeyboardArrowRight'}
+                            />
                           </Flex>
-                        </DashboardCard>
-                      )
-                    }
-                    </Flex>
+                        </RoundButton>
+                      </Flex>
+                    </DashboardCard>
                   </Flex>
                 )
               }
@@ -1556,6 +1436,169 @@ class StrategyPage extends Component {
                       availableTokens={govTokens}
                     />
                   </Flex>
+              }
+              {
+                this.state.activeCoverages && (
+                  <Flex
+                    width={1}
+                    mb={[0,3]}
+                    id={'active-coverages'}
+                    flexDirection={'column'}
+                  >
+                    <Title my={[3,4]}>Coverages</Title>
+                    <Flex
+                      width={1}
+                      alignItems={'center'}
+                      flexDirection={'column'}
+                      justifyContent={'center'}
+                    >
+                      <CustomList
+                        rows={this.state.activeCoverages}
+                        handleClick={(props) => props.row.status!=='Expired' && props.row.fileClaimUrl && this.functionsUtil.openWindow(props.row.fileClaimUrl)}
+                        cols={[
+                          {
+                            title:'PROTOCOL',
+                            props:{
+                              width:[0.42,0.17]
+                            },
+                            fields:[
+                              {
+                                type:'image',
+                                path:['protocolImage'],
+                                props:{
+                                  mr:[1,2],
+                                  size:this.props.isMobile ? '1.2em' : '1.8em'
+                                }
+                              },
+                              {
+                                type:'text',
+                                path:['protocolName'],
+                              }
+                            ]
+                          },
+                          {
+                            title:'BALANCE',
+                            props:{
+                              width:[0.34, 0.15],
+                            },
+                            fields:[
+                              {
+                                type:'number',
+                                path:['balance'],
+                                props:{
+                                  decimals: 4,
+                                }
+                              },
+                              {
+                                type:'text',
+                                path:['token'],
+                                props:{
+                                  ml:[1,2],
+                                  style:{
+                                    textTransform:'uppercase'
+                                  }
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            mobile:false,
+                            title:'EXPIRATION DATE',
+                            props:{
+                              width:0.23,
+                              justifyContent:['center','flex-start']
+                            },
+                            fields:[
+                              {
+                                type:'text',
+                                path:['expirationDate'],
+                                props:{
+                                  
+                                }
+                              },
+                            ]
+                          },
+                          {
+                            mobile:false,
+                            title:'COVERAGE',
+                            props:{
+                              width:0.15,
+                              justifyContent:['center','flex-start']
+                            },
+                            fields:[
+                              {
+                                type:'text',
+                                path:['portfolioCoverage'],
+                                props:{
+                                  
+                                }
+                              },
+                            ]
+                          },
+                          {
+                            title:'STATUS',
+                            props:{
+                              width:[0.24,0.15],
+                              justifyContent:['center','flex-start']
+                            },
+                            fields:[
+                              {
+                                type:'icon',
+                                name:'custom',
+                                path:['statusIcon'],
+                                props:{
+                                  mr:[1,2],
+                                  size:this.props.isMobile ? '1.2em' : '1.8em'
+                                }
+                              },
+                              {
+                                name:'custom',
+                                path:['status'],
+                                props:{
+                                  style:{
+                                    textTransform:'capitalize'
+                                  }
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            title:'',
+                            mobile:false,
+                            props:{
+                              width:0.17,
+                            },
+                            parentProps:{
+                              width:1
+                            },
+                            fields:[
+                              {
+                                type:'button',
+                                name:'custom',
+                                label:'File Claim',
+                                funcProps:{
+                                  disabled:(props) => (props.row.status==='Expired')
+                                },
+                                props:{
+                                  width:1,
+                                  fontSize:3,
+                                  fontWeight:3,
+                                  height:'45px',
+                                  borderRadius:4,
+                                  boxShadow:null,
+                                  mainColor:'redeem',
+                                  size: this.props.isMobile ? 'small' : 'medium',
+                                  handleClick:(props) => props.row.status!=='Expired' && props.row.fileClaimUrl && this.functionsUtil.openWindow(props.row.fileClaimUrl)
+                                }
+                              }
+                            ]
+                          }
+                        ]}
+                        {...this.props}
+                      />
+                    </Flex>
+                  </Flex>
+                )
               }
               {
                 this.state.depositedTokens.length>0 &&

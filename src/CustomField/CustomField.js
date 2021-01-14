@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Text, Icon, Image } from "rimble-ui";
 import SmartNumber from '../SmartNumber/SmartNumber';
+import { Text, Icon, Image, Button } from "rimble-ui";
 import FunctionsUtil from '../utilities/FunctionsUtil';
 
 class CustomField extends Component {
@@ -67,28 +67,40 @@ class CustomField extends Component {
     let componentHasChildren = false;
     const fieldType = fieldInfo.type;
     const fieldPath = fieldInfo.path;
-    let customValue = this.functionsUtil.getArrayPath(fieldPath,this.props.row);
-    if (customValue){
-      switch (fieldType){
-        case 'image':
-          CustomComponent = Image;
-          fieldProps.src = customValue;
-        break;
-        case 'number':
-          customValue = this.functionsUtil.BNify(customValue).toString();
-          CustomComponent = SmartNumber;
-          fieldProps.number = customValue;
-        break;
-        case 'icon':
-          CustomComponent = Icon;
-          fieldProps.name = customValue;
-        break;
-        default:
-          CustomComponent = Text;
-          componentHasChildren = true;
-        break;
-      }
-      // Add custom field extra props
+    let customValue = fieldPath ? this.functionsUtil.getArrayPath(fieldPath,this.props.row) : null;
+
+    switch (fieldType){
+      case 'image':
+        CustomComponent = Image;
+        fieldProps.src = customValue;
+      break;
+      case 'number':
+        customValue = this.functionsUtil.BNify(customValue).toString();
+        CustomComponent = SmartNumber;
+        fieldProps.number = customValue;
+      break;
+      case 'icon':
+        CustomComponent = Icon;
+        fieldProps.name = customValue;
+      break;
+      case 'button':
+        CustomComponent = Button;
+        componentHasChildren = true;
+        customValue = fieldInfo.label;
+        fieldProps.onClick=() => fieldProps.handleClick(this.props)
+      break;
+      default:
+        CustomComponent = Text;
+        componentHasChildren = true;
+      break;
+    }
+
+    if (!customValue){
+      return null;
+    }
+
+    // Add custom field extra props
+    if (fieldPath){
       const customFieldName = Object.values(fieldPath).pop();
       if (this.props.row[`${customFieldName}Props`]){
         const customFieldProps = this.props.row[`${customFieldName}Props`];

@@ -306,6 +306,16 @@ class SendTxWithBalance extends Component {
               width={1}
             >
               {
+                this.props.infoBox && (
+                  <IconBox
+                    cardProps={{
+                      mb:3
+                    }}
+                    {...this.props.infoBox}
+                  />
+                )
+              }
+              {
                 this.props.steps && this.props.steps.length>0 && (
                   <DashboardCard
                     cardProps={{
@@ -360,16 +370,6 @@ class SendTxWithBalance extends Component {
                       }
                     </Flex>
                   </DashboardCard>
-                )
-              }
-              {
-                this.props.infoBox && (
-                  <IconBox
-                    cardProps={{
-                      mt:3
-                    }}
-                    {...this.props.infoBox}
-                  />
                 )
               }
               {

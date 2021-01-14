@@ -1466,6 +1466,7 @@ class RimbleTransaction extends React.Component {
     let transaction = {
       ...txData
     };
+    transaction.txReceipt = {};
     transaction.created = Date.now();
     transaction.lastUpdated = Date.now();
     transaction.status = "initialized";

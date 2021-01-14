@@ -849,6 +849,7 @@ const globalConfigs = {
       label:'Cover Protocol',
       subComponent:CoverProtocol,
       image:'images/protocols/cover-logo.png',
+      fileClaimUrl:'https://app.coverprotocol.com/app/claims/new?protocol=IDLE',
       desc:'Buy Coverage for your Idle portfolio or provide liquidity to Cover Protocol',
       props:{
         contract:{

@@ -1262,7 +1262,7 @@ class FunctionsUtil {
       /*
       txsToProcess['xxxxx'] = {
         status:'success',
-        created:new Date().getTime(),
+        created:Date.now(),
         method:'executeMetaTransaction',
         token:selectedToken.toUpperCase(),
         transactionHash:'0x000000000000000000000000000'
@@ -1570,7 +1570,7 @@ class FunctionsUtil {
   saveCachedRequest = (endpoint,alias=false,data) => {
     const key = alias ? alias : endpoint;
     let cachedRequests = this.getCachedDataWithLocalStorage('cachedRequests',{});
-    const timestamp = parseInt(new Date().getTime()/1000);
+    const timestamp = parseInt(Date.now()/1000);
     cachedRequests[key] = {
       data,
       timestamp
@@ -1598,7 +1598,7 @@ class FunctionsUtil {
   }
   makeCachedRequest = async (endpoint,TTL=0,return_data=false,alias=false) => {
     const key = alias ? alias : endpoint;
-    const timestamp = parseInt(new Date().getTime()/1000);
+    const timestamp = parseInt(Date.now()/1000);
     
     // Check if already exists
     let cachedRequests = this.getCachedDataWithLocalStorage('cachedRequests',{});
@@ -2652,7 +2652,7 @@ class FunctionsUtil {
       case 'daysFirstDeposit':
         const depositTimestamp = await this.loadAssetField('depositTimestamp',token,tokenConfig,account);
         if (depositTimestamp){
-          const currTimestamp = parseInt(new Date().getTime()/1000);
+          const currTimestamp = parseInt(Date.now()/1000);
           output = (currTimestamp-depositTimestamp)/86400;
         }
       break;
@@ -3039,7 +3039,7 @@ class FunctionsUtil {
       }
     }
 
-    if (cachedData && cachedData.data && (!cachedData.expirationDate || cachedData.expirationDate>=parseInt(new Date().getTime()/1000))){
+    if (cachedData && cachedData.data && (!cachedData.expirationDate || cachedData.expirationDate>=parseInt(Date.now()/1000))){
       return cachedData.data;
     }
     return defaultValue;
@@ -3060,6 +3060,9 @@ class FunctionsUtil {
 
     return userShare;
   }
+  openWindow = (url) => {
+    return window.open(url,'_blank','noopener');
+  }
   getActiveCoverages = async (account=null) => {
     const activeCoverages = [];
     account = account || this.props.account;
@@ -3068,20 +3071,23 @@ class FunctionsUtil {
       return activeCoverages;
     }
 
-    const currTimestamp = parseInt(new Date().getTime()/1000);
+    const currTimestamp = parseInt(Date.now()/1000);
     const coverProtocolConfig = this.getGlobalConfig(['tools','coverProtocol']);
     if (coverProtocolConfig.enabled){
       await this.asyncForEach(coverProtocolConfig.props.coverages, async (coverage) => {
         const token = 'Claim';
         const coverageTokens = coverage.tokens;
         const tokenConfig = coverageTokens[token];
+        // Initialize coverage contract
         await this.props.initContract(tokenConfig.name,tokenConfig.address,tokenConfig.abi);
+        // Take balance
         const balance = await this.getTokenBalance(tokenConfig.name,account);
         if (balance && balance.gt(0)){
           const collateral = coverage.collateral;
           const protocolName = coverProtocolConfig.label;
           const protocolImage = coverProtocolConfig.image;
-          const status = coverage.expirationTimestamp*1000<=currTimestamp ? 'Expired' : 'Active';
+          const fileClaimUrl = coverProtocolConfig.fileClaimUrl;
+          const status = coverage.expirationTimestamp<=currTimestamp ? 'Expired' : 'Active';
           const expirationDate = moment(coverage.expirationTimestamp*1000).utc().format('YYYY-MM-DD HH:mm:ss')+' UTC';
           activeCoverages.push({
             token,
@@ -3089,6 +3095,7 @@ class FunctionsUtil {
             balance,
             collateral,
             protocolName,
+            fileClaimUrl,
             protocolImage,
             expirationDate
           });
@@ -4934,7 +4941,7 @@ class FunctionsUtil {
         return this.setCachedData(cachedDataKey,tokenScore);
       // Take latest historical valid score
       } else {
-        const timestamp = parseInt(new Date().getTime()/1000);
+        const timestamp = parseInt(Date.now()/1000);
         const startTimestamp = parseInt(timestamp)-(60*60*24);
         tokenData = await this.getTokenApiData(tokenConfig.address,isRisk,startTimestamp,null,true,null,'DESC');
 
