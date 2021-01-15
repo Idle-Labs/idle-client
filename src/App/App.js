@@ -106,10 +106,15 @@ class App extends Component {
 
   setCachedData = (key,data,TTL=null,useLocalStorage=false) => {
 
-    const cachedKeyFound = this.state.cachedData[key.toLowerCase()];
-    const currentTime = parseInt(new Date().getTime()/1000);
+    key = key.toLowerCase();
+    const cachedKeyFound = this.state.cachedData[key];
+    const currentTime = parseInt(Date.now()/1000);
 
-    if (!cachedKeyFound || ( (!cachedKeyFound.expirationDate || cachedKeyFound.expirationDate>=currentTime) || JSON.stringify(cachedKeyFound.data) !== JSON.stringify(data)) ){
+    const update_key = !cachedKeyFound || ( (!cachedKeyFound.expirationDate || cachedKeyFound.expirationDate>=currentTime) || JSON.stringify(cachedKeyFound.data) !== JSON.stringify(data));
+
+    let output = false;
+
+    if (update_key){
       const expirationDate = TTL ? currentTime+(TTL) : null;
 
       // Save cached data in local storage
@@ -120,7 +125,7 @@ class App extends Component {
         }
         storedCachedData = {
           ...storedCachedData,
-          [key.toLowerCase()]:{
+          [key]:{
             data,
             expirationDate
           }
@@ -133,16 +138,17 @@ class App extends Component {
       this.setState((prevState) => ({
         cachedData: {
           ...prevState.cachedData,
-          [key.toLowerCase()]:{
+          [key]:{
             data,
             expirationDate
           }
         }
       }));
 
-      return true;
+      output = true;
     }
-    return false;
+
+    return output;
   }
 
   setCallbackAfterLogin = (callbackAfterLogin) => {
@@ -723,6 +729,7 @@ class App extends Component {
                                           logout={this.logout.bind(this)}
                                           innerHeight={this.state.height}
                                           accountBalance={accountBalance}
+                                          cachedData={this.state.cachedData}
                                           connecting={this.state.connecting}
                                           selectedTab={this.state.selectedTab}
                                           tokenConfig={this.state.tokenConfig}
@@ -736,8 +743,10 @@ class App extends Component {
                                           openBuyModal={this.openBuyModal.bind(this)}
                                           processCustomParam={this.processCustomParam}
                                           availableTokens={this.state.availableTokens}
+                                          setCachedData={this.setCachedData.bind(this)}
                                           updateSelectedTab={this.selectTab.bind(this)}
                                           toastMessageProps={this.state.toastMessageProps}
+                                          clearCachedData={this.clearCachedData.bind(this)}
                                           availableStrategies={this.state.availableStrategies}
                                           connectAndValidateAccount={connectAndValidateAccount}
                                           setToken={ e => { this.setToken(e) } }

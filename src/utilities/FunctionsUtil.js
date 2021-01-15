@@ -1828,16 +1828,18 @@ class FunctionsUtil {
       return [];
     }
 
-    let data = output.data;
+    const data = output.data;
+
+    let filteredData = null;
     if (isRisk !== null){
-      data = data.filter( d => ( d.isRisk === isRisk ) );
+      filteredData = data.filter( d => ( d.isRisk === isRisk ) );
     }
 
     cachedData.push({
-      data,
       isRisk,
       endTimestamp,
       startTimestamp,
+      data:filteredData,
     });
 
     this.setCachedData(cachedDataKey,cachedData);
@@ -3010,7 +3012,6 @@ class FunctionsUtil {
   */
   setCachedData = (key,data,TTL=180) => {
     if (this.props.setCachedData && typeof this.props.setCachedData === 'function'){
-      // this.customLog('setCachedData',key);
       this.props.setCachedData(key,data,TTL);
     }
     return data;
@@ -3026,14 +3027,15 @@ class FunctionsUtil {
   }
   getCachedData = (key,defaultValue=null,useLocalStorage=false) => {
     let cachedData = null;
+    key = key.toLowerCase();
     // Get cache from current session
-    if (this.props.cachedData && this.props.cachedData[key.toLowerCase()]){
-      cachedData = this.props.cachedData[key.toLowerCase()];
+    if (this.props.cachedData && this.props.cachedData[key]){
+      cachedData = this.props.cachedData[key];
     // Get cache from local storage
     } else if (useLocalStorage) {
       cachedData = this.getStoredItem('cachedData');
-      if (cachedData && cachedData[key.toLowerCase()]){
-        cachedData = cachedData[key.toLowerCase()];
+      if (cachedData && cachedData[key]){
+        cachedData = cachedData[key];
       } else {
         cachedData = null;
       }
@@ -4682,12 +4684,12 @@ class FunctionsUtil {
         const tokenAllocation = await this.getTokenAllocation(tokenConfig,false,addGovTokens);
         const tokenAprs = await this.getTokenAprs(tokenConfig,tokenAllocation,addGovTokens);
         if (tokenAllocation && tokenAllocation.totalAllocationWithUnlent && !tokenAllocation.totalAllocationWithUnlent.isNaN()){
-          const totalAllocation = await this.convertTokenBalance(tokenAllocation.totalAllocationWithUnlent,token,tokenConfig,isRisk);
-          totalAUM = totalAUM.plus(totalAllocation);
+          const tokenAUM = await this.convertTokenBalance(tokenAllocation.totalAllocationWithUnlent,token,tokenConfig,isRisk);
+          totalAUM = totalAUM.plus(tokenAUM);
           // console.log(tokenConfig.idle.token+'V4',totalAllocation.toFixed(5));
           if (tokenAprs && tokenAprs.avgApr && !tokenAprs.avgApr.isNaN()){
-            avgAPR = avgAPR.plus(totalAllocation.times(tokenAprs.avgApr));
-            avgAPY = avgAPY.plus(totalAllocation.times(tokenAprs.avgApy));
+            avgAPR = avgAPR.plus(tokenAUM.times(tokenAprs.avgApr));
+            avgAPY = avgAPY.plus(tokenAUM.times(tokenAprs.avgApy));
           }
         }
 
@@ -4844,7 +4846,7 @@ class FunctionsUtil {
   /*
   Get idleToken conversion rate
   */
-  getTokenConversionRate = async (tokenConfig,isRisk,conversionRateField=null) => {
+  getTokenConversionRate = async (tokenConfig,isRisk,conversionRateField=null,count=0) => {
 
     if (!conversionRateField){
       conversionRateField = this.getGlobalConfig(['stats','tokens',tokenConfig.token,'conversionRateField']);
@@ -4857,19 +4859,27 @@ class FunctionsUtil {
     const cachedDataKey = `tokenConversionRate_${tokenConfig.address}_${isRisk}_${conversionRateField}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData && !this.BNify(cachedData).isNaN()){
+      // console.log('CACHED -',count,cachedDataKey,this.BNify(cachedData).toFixed());
       return this.BNify(cachedData);
     }
 
     let tokenData = await this.getTokenApiData(tokenConfig.address,isRisk,null,null,false,null,'desc',1);
 
+    // console.log('TOKEN DATA - ',tokenConfig.address,isRisk,tokenData);
+
     if (tokenData && tokenData.length){
       tokenData = tokenData.pop();
-      if (tokenData && tokenData[conversionRateField]){
+      if (tokenData && !this.BNify(tokenData[conversionRateField]).isNaN()){
         const conversionRate = this.fixTokenDecimals(tokenData[conversionRateField],18);
         if (!this.BNify(conversionRate).isNaN()){
+          // console.log('NOT CACHED -',count,cachedDataKey,this.BNify(conversionRate).toFixed());
           return this.setCachedDataWithLocalStorage(cachedDataKey,conversionRate);
         }
       }
+    }
+
+    if (count<3){
+      return await this.getTokenConversionRate(tokenConfig,isRisk,conversionRateField,count+1); 
     }
 
     return null;
