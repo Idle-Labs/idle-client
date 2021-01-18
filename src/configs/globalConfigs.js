@@ -47,8 +47,9 @@ const env = process.env;
 const globalConfigs = {
   appName: 'Idle',
   version: 'v5.4',
-  baseURL: 'https://idle.finance',
   baseToken: 'ETH',
+  baseURL: 'https://idle.finance',
+  forumURL:'https://gov.idle.finance',
   countries:{
     'USA':'United States of America',
     'GBR':'United Kingdom',
@@ -143,6 +144,7 @@ const globalConfigs = {
     govTokenApr:'Governance Token APR is calculated using the spot price from Uniswap and the current distribution speed for the specific pool.',
     userDistributionSpeed:'The distribution indicates the amount of tokens distributed for your account based on your current pool share.',
     govTokenRedeemableBalance:'The redeemable balance is re-calculated on every interaction with the smart-contract so, the shown balance may be lower than the real one.',
+    batchDepositExecutionSchedule:'Batches are executed twice a week, usually on sunday and wednesday. The time of each execution will vary depending on the gas price of the Ethereum network.',
     apyLong:'APY is based on (I) the current yield advertised by the underlying protocol, (II) the current distribution rate of governance tokens provided by underlying lending protocols (III) the current estimated price of governance tokens from Uniswap spot prices. (IV) IDLE token distribution is referred to the entire pool.',
     yieldFarming:'Strategies in Idle now will be able to support and distribute a vast range of yield opportunities across multiple protocols. Users will be able to receive their equivalent share of governance token that the protocol is receiving while allocating liquidity to yield farming opportunities. <a target="_blank" rel="nofollow noopener noreferrer" href="https://idlefinance.medium.com/idle-yield-farming-upgrade-18e4bc483c8f">Read more here</a>.',
     riskScore:`It's a single, consistently, comparable value for measuring protocol risk, based on factors including smart contract risk, collateralization and liquidity.<br /><br />The model outputs a 0-10 score, where <strong>0 is the most risky and 10 is the most safe.</strong> Visit <a target="_blank" rel="nofollow noopener noreferrer" href="https://defiscore.io/overview">https://defiscore.io/overview</a> for further information.`,
@@ -311,7 +313,7 @@ const globalConfigs = {
       showAPR:false, // Include IDLE Apr
       protocol:'idle',
       showPrice:false, // Show price in Yield Farming section
-      showBalance:false, // Include IDLE balance in earnings
+      showBalance:false, // Include IDLE balance in Portfolio Donut
       aprTooltipMode:false,
       distributionFrequency:'day', // Multiply distribution per block
       color:'hsl(162, 100%, 41%)',
@@ -327,7 +329,7 @@ const globalConfigs = {
       showAUM:true, // Include IDLE balance in AUM
       showAPR:true, // Include COMP Apr
       showPrice:true,
-      showBalance:true, // Include COMP balance in earnings
+      showBalance:true, // Include COMP balance in Portfolio Donut
       protocol:'compound',
       aprTooltipMode:false,
       distributionFrequency:'day',
@@ -844,7 +846,7 @@ const globalConfigs = {
   },
   tools:{
     coverProtocol:{
-      enabled:true,
+      enabled:false,
       route:'cover-protocol',
       label:'Cover Protocol',
       subComponent:CoverProtocol,

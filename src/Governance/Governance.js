@@ -112,7 +112,7 @@ class Dashboard extends Component {
       }
     );
 
-    // Add tools
+    // Add Forum
     menu.push(
       {
         submenu:[],
@@ -124,7 +124,7 @@ class Dashboard extends Component {
         color:'dark-gray',
         bgColor:'#ff0000',
         isExternalLink:true,
-        route:`https://gov.idle.finance`,
+        route:this.functionsUtil.getGlobalConfig(['forumURL'])
       }
     );
 

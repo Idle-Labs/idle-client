@@ -1454,7 +1454,7 @@ class StrategyPage extends Component {
                     >
                       <CustomList
                         rows={this.state.activeCoverages}
-                        handleClick={(props) => props.row.status!=='Expired' && props.row.fileClaimUrl && this.functionsUtil.openWindow(props.row.fileClaimUrl)}
+                        handleClick={ this.props.isMobile ? (props) => props.row.status!=='Expired' && props.row.fileClaimUrl && this.functionsUtil.openWindow(props.row.fileClaimUrl) : null }
                         cols={[
                           {
                             title:'PROTOCOL',

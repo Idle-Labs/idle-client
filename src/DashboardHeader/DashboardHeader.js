@@ -189,7 +189,7 @@ class DashboardHeader extends Component {
           </Flex>
         </Flex>
         {
-          this.state.unclaimed && this.state.unclaimed.gt(0) &&
+          this.state.unclaimed && this.state.unclaimed.gt(0) ? (
             <Flex
               p={2}
               mt={3}
@@ -228,6 +228,57 @@ class DashboardHeader extends Component {
                 CLAIM NOW
               </Button>
             </Flex>
+          ) : isDashboard && (
+            <Flex
+              p={2}
+              mt={3}
+              width={1}
+              borderRadius={1}
+              alignItems={'center'}
+              flexDirection={'row'}
+              justifyContent={'center'}
+              backgroundColor={'#f3f6ff'}
+              boxShadow={'0px 0px 0px 1px rgba(0,54,255,0.3)'}
+            >
+              <Icon
+                mr={1}
+                size={'1.2em'}
+                color={'#3f4e9a'}
+                name={'LightbulbOutline'}
+              />
+              <Text
+                fontWeight={500}
+                color={'#3f4e9a'}
+                fontSize={'15px'}
+                textAlign={'center'}
+              >
+                Do you have any idea to improve the Idle Protocol? Let's discuss it in our
+              </Text>
+              <ExtLink
+                ml={1}
+                fontWeight={500}
+                color={'primary'}
+                fontSize={'15px'}
+                hoverColor={'primary'}
+                href={this.functionsUtil.getGlobalConfig(['forumURL'])}
+              >
+                <Flex
+                  alignItems={'center'}
+                  flexDirection={'row'}
+                  justifyContent={'center'}
+                >
+                  Governance Forum
+                  <Icon
+                    ml={1}
+                    size={'0.9em'}
+                    color={'primary'}
+                    name={'OpenInNew'}
+                  />
+                  .
+                </Flex>
+              </ExtLink>
+            </Flex>
+          )
         }
         {
           this.props.isGovernance && 

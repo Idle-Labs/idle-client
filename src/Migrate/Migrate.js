@@ -998,14 +998,42 @@ class Migrate extends Component {
                             width={1}
                             flexDirection={'column'}
                           >
-                            {
-                              this.state.oldIdleTokens && (
-                                <Box
-                                  mb={1}
-                                  width={1}
-                                >
+                            <Flex
+                              mb={1}
+                              alignItems={'center'}
+                              flexDirection={'row'}
+                              justifyContent={this.props.balanceSelectorInfo ? 'space-between' : 'flex-end'}
+                            >
+                              {
+                                this.props.balanceSelectorInfo && (
                                   <Flex
                                     width={1}
+                                    maxWidth={'50%'}
+                                    alignItems={'center'}
+                                    flexDirection={'row'}
+                                  >
+                                    <Text
+                                      fontSize={1}
+                                      fontWeight={3}
+                                      textAlign={'left'}
+                                      style={{
+                                        maxWidth:'100%',
+                                        overflow:'hidden',
+                                        whiteSpace:'nowrap',
+                                        textOverflow:'ellipsis'
+                                      }}
+                                      color={this.props.balanceSelectorInfo.color ? this.props.balanceSelectorInfo.color : 'copyColor'}
+                                    >
+                                      {this.props.balanceSelectorInfo.text}
+                                    </Text>
+                                  </Flex>
+                                )
+                              }
+                              {
+                                this.state.oldIdleTokens && (
+                                  <Flex
+                                    width={1}
+                                    maxWidth={'50%'}
                                     alignItems={'center'}
                                     flexDirection={'row'}
                                     justifyContent={'flex-end'}
@@ -1021,9 +1049,9 @@ class Migrate extends Component {
                                       Balance: {this.state.oldIdleTokens.toFixed(6)} {this.props.selectedToken}
                                     </Link>
                                   </Flex>
-                                </Box>
-                              )
-                            }
+                                )
+                              }
+                            </Flex>
                             <Input
                               min={0}
                               type={"number"}

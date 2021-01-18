@@ -105,6 +105,22 @@ class Dashboard extends Component {
       }
     );
 
+    // Add Forum
+    menu.push(
+      {
+        submenu:[],
+        icon:'Forum',
+        mobile:false,
+        label:'Forum',
+        selected:false,
+        component:null,
+        color:'dark-gray',
+        bgColor:'#ff0000',
+        isExternalLink:true,
+        route:this.functionsUtil.getGlobalConfig(['forumURL'])
+      }
+    );
+
     await this.setState({
       menu
     });

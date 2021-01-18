@@ -791,6 +791,17 @@ class BatchDeposit extends Component {
                       >
                         Wait for the batch to be executed
                       </Text>
+                      <Link
+                        ml={1}
+                        fontWeight={2}
+                        color={'primary'}
+                        hoverColor={'primary'}
+                        onClick={ e => this.props.openTooltipModal('Batch Execution Schedule',this.functionsUtil.getGlobalConfig(['messages','batchDepositExecutionSchedule'])) }
+                      >
+                        (Read More)
+                      </Link>
+                      {
+                        /*
                         <Tooltip
                           placement={'top'}
                           message={`Batches are executed twice a week`}
@@ -802,6 +813,8 @@ class BatchDeposit extends Component {
                             name={'InfoOutline'}
                           />
                         </Tooltip>
+                        */
+                      }
                     </Flex>
                     <Flex
                       mt={2}
@@ -1026,7 +1039,7 @@ class BatchDeposit extends Component {
                         <DashboardCard
                           cardProps={{
                             p:3,
-                            mt:3
+                            my:3
                           }}
                         >
                           <Flex
