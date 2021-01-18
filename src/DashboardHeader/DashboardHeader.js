@@ -109,7 +109,7 @@ class DashboardHeader extends Component {
                   buttonProps={{
                     mainColor:'redeem',
                     style:{
-                      height:this.props.isMobile ? '38px' : 'auto'
+                      height:this.props.isMobile ? '38px' : '45px'
                     },
                     size:this.props.isMobile ? 'small' : 'medium'
                   }}
@@ -138,6 +138,9 @@ class DashboardHeader extends Component {
                 <RoundButton
                   buttonProps={{
                     mainColor:'redeem',
+                    style:{
+                      height:this.props.isMobile ? '38px' : '45px'
+                    },
                     size:this.props.isMobile ? 'small' : 'medium'
                   }}
                   handleClick={ (e) => { this.props.goToSection(dashboardRoute,false) } }
