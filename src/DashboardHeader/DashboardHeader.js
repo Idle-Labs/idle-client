@@ -108,6 +108,9 @@ class DashboardHeader extends Component {
                 <RoundButton
                   buttonProps={{
                     mainColor:'redeem',
+                    style:{
+                      height:this.props.isMobile ? '38px' : 'auto'
+                    },
                     size:this.props.isMobile ? 'small' : 'medium'
                   }}
                   handleClick={ (e) => { this.props.goToSection(governanceRoute,false) } }
@@ -235,9 +238,9 @@ class DashboardHeader extends Component {
               width={1}
               borderRadius={1}
               alignItems={'center'}
-              flexDirection={'row'}
               justifyContent={'center'}
               backgroundColor={'#f3f6ff'}
+              flexDirection={['column','row']}
               boxShadow={'0px 0px 0px 1px rgba(0,54,255,0.3)'}
             >
               <Icon

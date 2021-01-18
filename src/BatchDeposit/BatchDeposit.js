@@ -683,12 +683,12 @@ class BatchDeposit extends Component {
                   flexDirection={'column'}
                 >
                   <Icon
-                    size={'2.3em'}
+                    size={this.props.isMobile ? '1.8em' : '2.3em'}
                     name={'Input'}
                     color={'cellText'}
                   />
                   <Text
-                    mt={2}
+                    mt={[1,2]}
                     fontSize={2}
                     color={'cellText'}
                     textAlign={'center'}
@@ -790,16 +790,17 @@ class BatchDeposit extends Component {
                         textAlign={'left'}
                       >
                         Wait for the batch to be executed
+                        <Link
+                          ml={1}
+                          fontWeight={2}
+                          color={'primary'}
+                          display={'inline'}
+                          hoverColor={'primary'}
+                          onClick={ e => this.props.openTooltipModal('Batch Execution Schedule',this.functionsUtil.getGlobalConfig(['messages','batchDepositExecutionSchedule'])) }
+                        >
+                          (Read More)
+                        </Link>
                       </Text>
-                      <Link
-                        ml={1}
-                        fontWeight={2}
-                        color={'primary'}
-                        hoverColor={'primary'}
-                        onClick={ e => this.props.openTooltipModal('Batch Execution Schedule',this.functionsUtil.getGlobalConfig(['messages','batchDepositExecutionSchedule'])) }
-                      >
-                        (Read More)
-                      </Link>
                       {
                         /*
                         <Tooltip
@@ -1047,12 +1048,12 @@ class BatchDeposit extends Component {
                             flexDirection={'column'}
                           >
                             <Icon
-                              size={'2.3em'}
+                              size={this.props.isMobile ? '1.8em' : '2.3em'}
                               name={'MoneyOff'}
                               color={'cellText'}
                             />
                             <Text
-                              mt={2}
+                              mt={[1,2]}
                               fontSize={2}
                               color={'cellText'}
                               textAlign={'center'}
@@ -1103,12 +1104,12 @@ class BatchDeposit extends Component {
                             flexDirection={'column'}
                           >
                             <Icon
-                              size={'2.3em'}
                               name={'DoneAll'}
+                              size={this.props.isMobile ? '1.8em' : '2.3em'}
                               color={this.props.theme.colors.transactions.status.completed}
                             />
                             <Text
-                              mt={2}
+                              mt={[1,2]}
                               fontSize={2}
                               color={'cellText'}
                               textAlign={'center'}
@@ -1130,11 +1131,12 @@ class BatchDeposit extends Component {
                             flexDirection={'column'}
                           >
                             <Icon
-                              size={'2.3em'}
+                              size={this.props.isMobile ? '1.8em' : '2.3em'}
                               color={'cellText'}
                               name={'FileUpload'}
                             />
                             <Text
+                              mt={[1,2]}
                               fontSize={2}
                               color={'cellText'}
                               textAlign={'center'}
@@ -1170,7 +1172,7 @@ class BatchDeposit extends Component {
                               name={'HourglassEmpty'}
                             />
                             <Text
-                              mt={2}
+                              mt={[1,2]}
                               fontSize={2}
                               color={'cellText'}
                               textAlign={'center'}
@@ -1226,12 +1228,12 @@ class BatchDeposit extends Component {
                             justifyContent={'center'}
                           >
                             <Icon
-                              size={'2.3em'}
+                              size={this.props.isMobile ? '1.8em' : '2.3em'}
                               name={'DoneAll'}
                               color={this.props.theme.colors.transactions.status.completed}
                             />
                             <Text
-                              mt={2}
+                              mt={[1,2]}
                               fontSize={2}
                               color={'cellText'}
                               textAlign={'center'}
