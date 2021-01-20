@@ -46,6 +46,7 @@ class BatchDeposit extends Component {
     },
     usePermit:false,
     batchRedeems:{},
+    lastExecution:null,
     permitEnabled:true,
     hasDeposited:false,
     permitSigned:false,
@@ -175,9 +176,11 @@ class BatchDeposit extends Component {
     ]);
 
     let [
+      batchExecutions,
       currBatchIndex,
       migrationContractApproved
     ] = await Promise.all([
+      this.functionsUtil.getBatchedDepositExecutions(migrationContractInfo.address),
       this.functionsUtil.genericContractCall(this.state.selectedTokenConfig.migrationContract.name,'currBatch'),
       this.functionsUtil.checkTokenApproved(this.state.tokenConfig.name,migrationContractInfo.address,this.props.account)
     ]);
@@ -234,6 +237,7 @@ class BatchDeposit extends Component {
 
     const hasDeposited = (batchDeposits && Object.keys(batchDeposits).length>0);
 
+    const lastExecution = batchExecutions && batchExecutions.length ? batchExecutions[0] : null;
     const batchDepositInfo = this.functionsUtil.getGlobalConfig(['tools','batchDeposit']);
     const batchDepositEnabled = batchDepositInfo.depositEnabled;
 
@@ -244,6 +248,7 @@ class BatchDeposit extends Component {
     newState.batchTotals = batchTotals;
     newState.hasDeposited = hasDeposited;
     newState.batchRedeems = batchRedeems;
+    newState.lastExecution = lastExecution;
     newState.currBatchIndex = currBatchIndex;
     newState.batchCompleted = batchCompleted;
     newState.migrationSucceeded = migrationSucceeded;
@@ -789,7 +794,7 @@ class BatchDeposit extends Component {
                         color={'cellText'}
                         textAlign={'left'}
                       >
-                        Wait for the batch to be executed
+                        Wait for batch execution
                         <Link
                           ml={1}
                           fontWeight={2}
@@ -1040,7 +1045,7 @@ class BatchDeposit extends Component {
                         <DashboardCard
                           cardProps={{
                             p:3,
-                            my:3
+                            mt:3
                           }}
                         >
                           <Flex
@@ -1088,7 +1093,7 @@ class BatchDeposit extends Component {
                     <DashboardCard
                       cardProps={{
                         p:3,
-                        my:3
+                        mt:3
                       }}
                     >
                       {
@@ -1203,7 +1208,7 @@ class BatchDeposit extends Component {
                   )
                 }
                 {
-                  canExecuteBatch && 
+                  this.state.batchTotals[this.state.currBatchIndex] && 
                     <DashboardCard
                       cardProps={{
                         p:2,
@@ -1250,19 +1255,32 @@ class BatchDeposit extends Component {
                           >
                             <Text
                               fontWeight={500}
-                              display={'block'}
                               color={'copyColor'}
                               textAlign={'center'}
                             >
                               Batch Pool: {this.state.batchTotals[this.state.currBatchIndex].toFixed(4)} {this.state.selectedToken}
                             </Text>
-                            <Link
-                              textAlign={'center'}
-                              hoverColor={'primary'}
-                              onClick={this.execute.bind(this)}
-                            >
-                              Execute Batch
-                            </Link>
+                            {
+                              canExecuteBatch && 
+                                <Link
+                                  textAlign={'center'}
+                                  hoverColor={'primary'}
+                                  onClick={this.execute.bind(this)}
+                                >
+                                  Execute Batch
+                                </Link>
+                            }
+                            {
+                              this.state.lastExecution && (
+                                <Text
+                                  fontSize={0}
+                                  color={'cellText'}
+                                  textAlign={'center'}
+                                >
+                                  Last Batch Execution: {this.functionsUtil.strToMoment(this.state.lastExecution.timeStamp*1000).utc().format('YYYY-MM-DD HH:mm UTC')}
+                                </Text>
+                              )
+                            }
                           </Flex>
                         )
                       }

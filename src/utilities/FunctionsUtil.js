@@ -584,8 +584,8 @@ class FunctionsUtil {
     const firstIdleBlockNumber = this.getGlobalConfig(['network','firstBlockNumber']);
     firstBlockNumber = Math.max(firstIdleBlockNumber,firstBlockNumber);
 
-    const requiredNetwork = globalConfigs.network.requiredNetwork;
-    const etherscanInfo = globalConfigs.network.providers.etherscan;
+    const requiredNetwork = this.getGlobalConfig(['network','requiredNetwork']);
+    const etherscanInfo = this.getGlobalConfig(['network','providers','etherscan']);
 
     let results = [];
     let etherscanBaseTxs = null;
@@ -1596,7 +1596,7 @@ class FunctionsUtil {
                   });
     return data;
   }
-  makeCachedRequest = async (endpoint,TTL=0,return_data=false,alias=false) => {
+  makeCachedRequest = async (endpoint,TTL=60,return_data=false,alias=false) => {
     const key = alias ? alias : endpoint;
     const timestamp = parseInt(Date.now()/1000);
     
@@ -3106,6 +3106,17 @@ class FunctionsUtil {
     }
 
     return activeCoverages;
+  }
+  getBatchedDepositExecutions = async (contractAddress) => {
+    const requiredNetwork = this.getGlobalConfig(['network','requiredNetwork']);
+    const etherscanInfo = this.getGlobalConfig(['network','providers','etherscan']);
+    if (etherscanInfo.enabled && etherscanInfo.endpoints[requiredNetwork]){
+      const etherscanApiUrl = etherscanInfo.endpoints[requiredNetwork];
+      const etherscanEndpoint = `${etherscanApiUrl}?&apikey=${env.REACT_APP_ETHERSCAN_KEY}&module=account&action=tokentx&address=${contractAddress}&sort=desc`;
+      const transactions = await this.makeCachedRequest(etherscanEndpoint,1800,true);
+      return transactions.result.filter( tx => tx.from === '0x0000000000000000000000000000000000000000' && tx.to.toLowerCase() === contractAddress.toLowerCase() )
+    }
+    return null;
   }
   getBatchedDeposits = async (account=null) => {
     account = account || this.props.account;
