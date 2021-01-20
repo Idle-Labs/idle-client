@@ -150,7 +150,7 @@ class GovModal extends React.Component {
         <ModalCard
           bgLayer={true}
           mainColor={'white'}
-          minWidth={['auto','420px']}
+          maxWidth={['auto','420px']}
           closeFunc={this.props.closeModal}
           background={'radial-gradient(76.02% 75.41% at 1.84% 0%, rgb(162, 196, 246) 0%, rgb(10, 79, 176) 100%)'}
         >
@@ -191,9 +191,10 @@ class GovModal extends React.Component {
                 fontSize={3}
                 color={'white'}
                 fontWeight={400}
+                textAlign={'center'}
               >
                 {
-                  this.state.unclaimed && this.state.unclaimed.gt(0) ? 'You can now claim your IDLE tokens!' : 'You don\'t have any IDLE to claim'
+                  this.state.unclaimed && this.state.unclaimed.gt(0) ? 'You can now claim your IDLE tokens from the Early LPs Program!' : 'You don\'t have any IDLE to claim from the Early LPs Program'
                 }
               </Text>
               <Flex
@@ -267,16 +268,16 @@ class GovModal extends React.Component {
                 </Link>
               </Flex>
               {
-                this.state.unclaimed && this.state.unclaimed.gt(0) && 
-                  <Flex
-                    mb={3}
-                    width={1}
-                    zIndex={10}
-                    position={'relative'}
-                    alignItems={'center'}
-                    justifyContent={'center'}
-                  >
-                    {
+                <Flex
+                  mb={3}
+                  width={1}
+                  zIndex={10}
+                  position={'relative'}
+                  alignItems={'center'}
+                  justifyContent={'center'}
+                >
+                  {
+                    this.state.unclaimed && this.state.unclaimed.gt(0) ? 
                       // Sending transaction
                       this.state.processing && this.state.processing.loading ? (
                         <TxProgressBar
@@ -303,8 +304,21 @@ class GovModal extends React.Component {
                           Claim
                         </RoundButton>
                       )
-                    }
-                  </Flex>
+                    : (
+                      <RoundButton
+                        buttonProps={{
+                          color:'blue',
+                          width:[1,'45%'],
+                          mainColor:'white',
+                          contrastColor:'blue',
+                        }}
+                        handleClick={this.closeModal.bind(this)}
+                      >
+                        Close
+                      </RoundButton>
+                    )
+                  }
+                </Flex>
               }
             </Flex>
           </ModalCard.Body>

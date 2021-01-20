@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import styles from './MenuAccount.module.scss';
+import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import ShortHash from "../utilities/components/ShortHash";
 import { Flex, Icon, Image, Link, Text } from "rimble-ui";
+import DashboardCard from '../DashboardCard/DashboardCard';
 import CardIconButton from '../CardIconButton/CardIconButton';
 import AccountModal from "../utilities/components/AccountModal";
 
@@ -72,6 +74,10 @@ class MenuAccount extends Component {
     const connectorInfo = walletProvider ? this.functionsUtil.getGlobalConfig(['connectors',walletProvider.toLowerCase()]) : null;
     const walletIcon = connectorInfo && connectorInfo.icon ? connectorInfo.icon : walletProvider ? `${walletProvider.toLowerCase()}.svg` : null;
 
+    const governanceRoute = this.functionsUtil.getGlobalConfig(['governance','baseRoute']);
+    const governanceEnabled = this.functionsUtil.getGlobalConfig(['governance','enabled']);
+    const dashboardRoute = this.functionsUtil.getGlobalConfig(['dashboard','baseRoute'])+'/'+Object.keys(this.props.availableStrategies)[0];
+
     return (
       this.props.account ? (
         <Flex
@@ -80,55 +86,82 @@ class MenuAccount extends Component {
           alignItems={['flex-start','center']}
         >
           <Flex
-            p={0}
+            flexDirection={'row'}
+            alignItems={'center'}
+            width={[1,'fit-content']}
+            justifyContent={'space-between'}
+          >
+            <DashboardCard
+              {...this.props}
+              cardProps={{
+                py:1,
+                mb:[2,0],
+                px:[1,2],
+                display:'flex',
+                width:[1,'auto']
+              }}
+              isActive={true}
+              isInteractive={true}
+              handleClick={e => this.toggleModal('account')}
+            >
+              <Flex
+                p={0}
+                width={1}
+                alignItems={'center'}
+                flexDirection={'row'}
+                justifyContent={['center','flex-start']}
+              >
+                {
+                  connectorInfo ? (
+                    <Image
+                      mr={[1,2]}
+                      width={'2em'}
+                      height={'2em'}
+                      display={'inline-flex'}
+                      src={`images/${walletIcon}`}
+                      alt={walletProvider.toLowerCase()}
+                    />
+                  ) : (
+                    <Icon
+                      mr={[1,2]}
+                      size={'2em'}
+                      color={'copyColor'}
+                      name={'AccountCircle'}
+                    />
+                  )
+                }
+                <ShortHash
+                  fontSize={2}
+                  fontWeight={3}
+                  color={'copyColor'}
+                  hash={this.props.account}
+                />
+              </Flex>
+            </DashboardCard>
+          </Flex>
+          <Flex
+            ml={[0,3]}
+            style={{
+              flex:'1 1 auto'
+            }}
+            width={[1,'auto']}
             alignItems={'center'}
             flexDirection={'row'}
-            style={{cursor:'pointer'}}
-            justifyContent={'flex-start'}
-            onClick={e => this.toggleModal('account')}
+            justifyContent={this.state.idleTokenBalance ? 'space-between' : 'flex-end'}
           >
             {
-              connectorInfo ? (
-                <Image
-                  width={'2em'}
-                  height={'2em'}
-                  mr={[2,'0.5rem']}
-                  display={'inline-flex'}
-                  src={`images/${walletIcon}`}
-                  alt={walletProvider.toLowerCase()}
-                />
-              ) : (
-                <Icon
-                  size={'2em'}
-                  mr={[0,'0.5rem']}
-                  color={'copyColor'}
-                  name={'AccountCircle'}
-                />
-              )
-            }
-            <ShortHash
-              fontSize={2}
-              fontWeight={3}
-              color={'copyColor'}
-              hash={this.props.account}
-            />
-          </Flex>
-          
-          {
-            this.state.idleTokenBalance && 
-              <Flex
-                ml={[0,3]}
-                width={'auto'}
-              >
+              this.state.idleTokenBalance && 
                 <Link
                   style={{
                     textDecoration:'none'
                   }}
+                  px={2}
                   className={styles.balanceButton}
                   onClick={ e => this.props.setGovModal(true) }
                 >
                   <Flex
                     alignItems={'center'}
+                    height={['38px','42px']}
                     justifyContent={'center'}
                   >
                     <Image
@@ -139,16 +172,81 @@ class MenuAccount extends Component {
                       src={`images/tokens/IDLE.png`}
                     />
                     <Text
-                      fontSize={2}
                       color={'white'}
+                      fontSize={[1,2]}
                       fontWeight={500}
                     >
                       {this.state.idleTokenBalance.toFixed(2)} IDLE
                     </Text>
                   </Flex>
                 </Link>
-              </Flex>
-          }
+            }
+            {
+              governanceEnabled && this.props.isDashboard ? (
+                <RoundButton
+                  buttonProps={{
+                    mainColor:'redeem',
+                    style:{
+                      width:'auto',
+                      height:this.props.isMobile ? '38px' : '45px'
+                    },
+                    size:this.props.isMobile ? 'small' : 'medium'
+                  }}
+                  handleClick={ (e) => { this.props.goToSection(governanceRoute,false) } }
+                >
+                  <Flex
+                    alignItems={'center'}
+                    flexDirection={'row'}
+                  >
+                    <Icon
+                      mr={[1,2]}
+                      size={'1.6em'}
+                      color={'white'}
+                      name={'ExitToApp'}
+                    />
+                    <Text
+                      fontWeight={3}
+                      color={'white'}
+                      fontSize={[2,3]}
+                    >
+                      Governance
+                    </Text>
+                  </Flex>
+                </RoundButton>
+              ) : this.props.isGovernance && (
+                <RoundButton
+                  buttonProps={{
+                    mainColor:'redeem',
+                    style:{
+                      width:'auto',
+                      height:this.props.isMobile ? '38px' : '45px'
+                    },
+                    size:this.props.isMobile ? 'small' : 'medium'
+                  }}
+                  handleClick={ (e) => { this.props.goToSection(dashboardRoute,false) } }
+                >
+                  <Flex
+                    alignItems={'center'}
+                    flexDirection={'row'}
+                  >
+                    <Icon
+                      mr={[1,2]}
+                      size={'1.6em'}
+                      color={'white'}
+                      name={'ExitToApp'}
+                    />
+                    <Text
+                      fontWeight={3}
+                      color={'white'}
+                      fontSize={[2,3]}
+                    >
+                      Dashboard
+                    </Text>
+                  </Flex>
+                </RoundButton>
+              )
+            }
+          </Flex>
           <AccountModal
             {...this.props}
             isOpen={this.state.isModalOpen==='account'}

@@ -1,18 +1,11 @@
 import React from "react";
-import {
-  Heading,
-  // Text,
-  Modal,
-  Box,
-  Flex,
-  // Image,
-  EthAddress
-} from "rimble-ui";
 import ModalCard from './ModalCard';
 import AssetField from '../../AssetField/AssetField.js';
 import FunctionsUtil from '../../utilities/FunctionsUtil';
+import { Heading, Modal, Flex, EthAddress } from "rimble-ui";
 import ButtonLoader from '../../ButtonLoader/ButtonLoader.js';
 import styles from '../../CryptoInput/CryptoInput.module.scss';
+import CardIconButton from '../../CardIconButton/CardIconButton';
 
 class AccountModal extends React.Component {
 
@@ -30,7 +23,6 @@ class AccountModal extends React.Component {
     const balances = [];
     const allTokens = Object.keys(this.props.availableStrategies.best);
 
-    // await this.functionsUtil.asyncForEach(allTokens, async (baseToken) => {
     allTokens.forEach( baseToken => {
       const tokens = [];
       tokens.push(baseToken);
@@ -42,20 +34,6 @@ class AccountModal extends React.Component {
       });
 
       balances.push(tokens);
-      /*
-      const tokenBalances = {};
-
-      tokenBalances[baseToken] = await this.functionsUtil.getTokenBalance(baseToken,this.props.account);
-
-      await this.functionsUtil.asyncForEach(Object.keys(this.props.availableStrategies), async (strategy) => {
-        const strategyToken = this.props.availableStrategies[strategy][baseToken];
-        if (strategyToken){
-          tokenBalances[strategyToken.idle.token] = await this.functionsUtil.getTokenBalance(strategyToken.idle.token,this.props.account);
-        }
-      });
-
-      balances.push(tokenBalances);
-      */
     });
 
     this.setState({
@@ -117,9 +95,13 @@ class AccountModal extends React.Component {
     // this.props.closeModal();
   }
 
+  goToSection(section){
+    this.props.goToSection(section);
+    this.props.closeModal();
+  }
+
   render(){
     if (this.props.account){
-      // let renderBalances = null;
 
       const rows = (Object.keys(this.props.availableStrategies).length+1);
       const renderBalances = this.state.balances && this.state.balances.map( (tokens,i) => {
@@ -177,38 +159,86 @@ class AccountModal extends React.Component {
         );
       });
 
+      const showTools = ['addFunds','tokenSwap'];
+
       return (
         <Modal isOpen={this.props.isOpen}>
           <ModalCard closeFunc={this.props.closeModal}>
             <ModalCard.Header title={'Account overview'}></ModalCard.Header>
             <ModalCard.Body>
               <Flex
+                alignItems={'center'}
                 width={["auto", "40em"]}
                 flexDirection={'column'}
-                alignItems={'center'}
-                justifyContent={'center'}>
+                justifyContent={'center'}
+              >
                 <Flex
-                  flexDirection={'column'}
+                  width={1}
+                  mb={[2,3]}
                   alignItems={'center'}
-                  justifyContent={'center'}
-                  my={[2,3]}>
-                  <Box style={{'wordBreak': 'break-word'}}>
-                    <EthAddress address={this.props.account} />
-                  </Box>
+                  flexDirection={'column'}
+                  maxWidth={['100%','30em']}
+                  justifyContent={'stretch'}
+                >
+                  <EthAddress
+                    width={1}
+                    address={this.props.account}
+                  />
                 </Flex>
                 <Flex
-                  mb={3}
-                  width={'100%'}
+                  width={1}
+                  mb={[2,3]}
                   alignItems={'center'}
-                  maxWidth={['100%','30em']}
                   flexDirection={'column'}
+                  maxWidth={['100%','30em']}
                 >
                   <Heading.h4
                     textAlign={'center'}
                   >
-                    Balances
+                    Balances:
                   </Heading.h4>
                   { renderBalances }
+                </Flex>
+                <Flex
+                  width={1}
+                  mb={[2,3]}
+                  alignItems={'center'}
+                  flexDirection={'column'}
+                  justifyContent={'center'}
+                >
+                  <Heading.h4
+                    mb={2}
+                    textAlign={'center'}
+                  >
+                    Tools:
+                  </Heading.h4>
+                  <Flex
+                    width={1}
+                    alignItems={'center'}
+                    justifyContent={'center'}
+                    flexDirection={['column','row']}
+                  >
+                    {
+                      showTools.map( toolName => {
+                        const toolConfig = this.functionsUtil.getGlobalConfig(['tools',toolName]);
+                        return (
+                          <CardIconButton
+                            {...this.props}
+                            key={`tool_${toolName}`}
+                            cardProps={{
+                              mx:[0,2],
+                              my:[2,0],
+                              width:'auto',
+                              minWidth:['50%','auto']
+                            }}
+                            icon={toolConfig.icon}
+                            text={toolConfig.label}
+                            handleClick={ e => this.goToSection(`tools/${toolConfig.route}`) }
+                          />
+                        )
+                      })
+                    }
+                  </Flex>
                 </Flex>
               </Flex>
             </ModalCard.Body>
@@ -216,10 +246,10 @@ class AccountModal extends React.Component {
             <ModalCard.Footer>
               {(this.props.context.active || (this.props.context.error && this.props.context.connectorName)) && (
                 <ButtonLoader
-                  buttonProps={{className:styles.gradientButton,borderRadius:'2rem',mt:[4,8],minWidth:['95px','145px'],size:['auto','medium']}}
-                  handleClick={ async () => { await this.logout() } }
                   buttonText={'Logout wallet'}
                   isLoading={this.state.logout}
+                  handleClick={ async () => { await this.logout() } }
+                  buttonProps={{className:styles.gradientButton,borderRadius:'2rem',mt:[4,8],minWidth:['95px','145px'],size:['auto','medium']}}
                 >
                 </ButtonLoader>
               )}

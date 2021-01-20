@@ -2,10 +2,10 @@ import theme from '../theme';
 import ExtLink from '../ExtLink/ExtLink';
 import React, { Component } from 'react';
 import MenuAccount from '../MenuAccount/MenuAccount';
-import RoundButton from '../RoundButton/RoundButton';
 import GovModal from "../utilities/components/GovModal";
 import GovernanceUtil from '../utilities/GovernanceUtil';
 import { Box, Flex, Text, Icon, Button } from "rimble-ui";
+import DashboardCard from '../DashboardCard/DashboardCard';
 import DelegateVesting from '../DelegateVesting/DelegateVesting';
 
 class DashboardHeader extends Component {
@@ -77,11 +77,6 @@ class DashboardHeader extends Component {
   }
 
   render() {
-    const isDashboard = this.props.isDashboard;
-    const isGovernance = this.props.isGovernance;
-    const governanceRoute = this.functionsUtil.getGlobalConfig(['governance','baseRoute']);
-    const governanceEnabled = this.functionsUtil.getGlobalConfig(['governance','enabled']);
-    const dashboardRoute = this.functionsUtil.getGlobalConfig(['dashboard','baseRoute'])+'/'+Object.keys(this.props.availableStrategies)[0];
     return (
       <Box
         mb={3}
@@ -98,192 +93,105 @@ class DashboardHeader extends Component {
             {...this.props}
             setGovModal={this.setGovModal.bind(this)}
           />
-          <Flex
-            mr={2}
-            flexDirection={['column','row']}
-            alignItems={['flex-end','center']}
-          >
-            {
-              governanceEnabled && isDashboard ? (
-                <RoundButton
-                  buttonProps={{
-                    mainColor:'redeem',
-                    style:{
-                      height:this.props.isMobile ? '38px' : '45px'
-                    },
-                    size:this.props.isMobile ? 'small' : 'medium'
-                  }}
-                  handleClick={ (e) => { this.props.goToSection(governanceRoute,false) } }
-                >
-                  <Flex
-                    alignItems={'center'}
-                    flexDirection={'row'}
-                  >
-                    <Icon
-                      mr={[1,2]}
-                      size={'1.6em'}
-                      color={'white'}
-                      name={'ExitToApp'}
-                    />
-                    <Text
-                      fontWeight={3}
-                      color={'white'}
-                      fontSize={[2,3]}
-                    >
-                      Governance
-                    </Text>
-                  </Flex>
-                </RoundButton>
-              ) : isGovernance && (
-                <RoundButton
-                  buttonProps={{
-                    mainColor:'redeem',
-                    style:{
-                      height:this.props.isMobile ? '38px' : '45px'
-                    },
-                    size:this.props.isMobile ? 'small' : 'medium'
-                  }}
-                  handleClick={ (e) => { this.props.goToSection(dashboardRoute,false) } }
-                >
-                  <Flex
-                    alignItems={'center'}
-                    flexDirection={'row'}
-                  >
-                    <Icon
-                      mr={[1,2]}
-                      size={'1.6em'}
-                      color={'white'}
-                      name={'ExitToApp'}
-                    />
-                    <Text
-                      fontWeight={3}
-                      color={'white'}
-                      fontSize={[2,3]}
-                    >
-                      Dashboard
-                    </Text>
-                  </Flex>
-                </RoundButton>
-              )
-            }
-            {
-              /*
-              <Link
-                display={'flex'}
-                onClick={ (e) => { this.exit() } }
-                style={{
-                  alignItems:'center',
-                  justifyContent:['flex-end','space-between']
-                }}
-              >
-                <Icon
-                  mr={2}
-                  size={'1.6em'}
-                  name={'ExitToApp'}
-                  color={'copyColor'}
-                />
-                <Text
-                  fontSize={2}
-                  fontWeight={3}
-                  color={'copyColor'}
-                >
-                  Exit
-                </Text>
-              </Link>
-              */
-            }
-          </Flex>
         </Flex>
         {
           this.state.unclaimed && this.state.unclaimed.gt(0) ? (
-            <Flex
-              p={2}
-              mt={3}
-              width={1}
-              borderRadius={1}
-              alignItems={'center'}
-              justifyContent={'center'}
-              backgroundColor={'#f3f6ff'}
-              flexDirection={['column','row']}
-              boxShadow={'0px 0px 0px 1px rgba(0,54,255,0.3)'}
+            <DashboardCard
+              cardProps={{
+                p:2,
+                mt:3,
+                width:1,
+              }}
+              isActive={true}
+              isInteractive={false}
             >
-              <Text
-                fontWeight={500}
-                color={'#3f4e9a'}
-                fontSize={'15px'}
-                textAlign={'center'}
+              <Flex
+                alignItems={'center'}
+                justifyContent={'center'}
+                flexDirection={['column','row']}
               >
-                IDLE Governance Token is now available, 
+                <Text
+                  fontWeight={500}
+                  color={'#3f4e9a'}
+                  fontSize={'15px'}
+                  textAlign={'center'}
+                >
+                  IDLE Governance Token is now available, 
+                  <ExtLink
+                    ml={1}
+                    fontWeight={500}
+                    color={'primary'}
+                    fontSize={'15px'}
+                    hoverColor={'primary'}
+                    href={'https://idlefinance.medium.com/idle-governance-is-live-9b55e8f407d7'}
+                  >
+                    discover more
+                  </ExtLink>! You have {this.state.unclaimed.toFixed(4)} IDLE tokens to claim.
+                </Text>
+                <Button
+                  ml={[0,2]}
+                  mt={[2,0]}
+                  size={'small'}
+                  onClick={ e => this.setGovModal(true) }
+                >
+                  CLAIM NOW
+                </Button>
+              </Flex>
+            </DashboardCard>
+          ) : this.props.isDashboard && (
+            <DashboardCard
+              cardProps={{
+                p:2,
+                mt:3,
+                width:1,
+              }}
+              isActive={true}
+              isInteractive={false}
+            >
+              <Flex
+                alignItems={'center'}
+                justifyContent={'center'}
+                flexDirection={['column','row']}
+              >
+                <Icon
+                  mr={1}
+                  size={'1.2em'}
+                  color={'#3f4e9a'}
+                  name={'LightbulbOutline'}
+                />
+                <Text
+                  fontWeight={500}
+                  color={'#3f4e9a'}
+                  fontSize={'15px'}
+                  textAlign={'center'}
+                >
+                  Do you have any idea to improve the Idle Protocol? Let's discuss it in our
+                </Text>
                 <ExtLink
                   ml={1}
                   fontWeight={500}
                   color={'primary'}
                   fontSize={'15px'}
                   hoverColor={'primary'}
-                  href={'https://idlefinance.medium.com/idle-governance-is-live-9b55e8f407d7'}
+                  href={this.functionsUtil.getGlobalConfig(['forumURL'])}
                 >
-                  discover more
-                </ExtLink>! You have {this.state.unclaimed.toFixed(4)} IDLE tokens to claim.
-              </Text>
-              <Button
-                ml={[0,2]}
-                mt={[2,0]}
-                size={'small'}
-                onClick={ e => this.setGovModal(true) }
-              >
-                CLAIM NOW
-              </Button>
-            </Flex>
-          ) : isDashboard && (
-            <Flex
-              p={2}
-              mt={3}
-              width={1}
-              borderRadius={1}
-              alignItems={'center'}
-              justifyContent={'center'}
-              backgroundColor={'#f3f6ff'}
-              flexDirection={['column','row']}
-              boxShadow={'0px 0px 0px 1px rgba(0,54,255,0.3)'}
-            >
-              <Icon
-                mr={1}
-                size={'1.2em'}
-                color={'#3f4e9a'}
-                name={'LightbulbOutline'}
-              />
-              <Text
-                fontWeight={500}
-                color={'#3f4e9a'}
-                fontSize={'15px'}
-                textAlign={'center'}
-              >
-                Do you have any idea to improve the Idle Protocol? Let's discuss it in our
-              </Text>
-              <ExtLink
-                ml={1}
-                fontWeight={500}
-                color={'primary'}
-                fontSize={'15px'}
-                hoverColor={'primary'}
-                href={this.functionsUtil.getGlobalConfig(['forumURL'])}
-              >
-                <Flex
-                  alignItems={'center'}
-                  flexDirection={'row'}
-                  justifyContent={'center'}
-                >
-                  Governance Forum
-                  <Icon
-                    ml={1}
-                    size={'0.9em'}
-                    color={'primary'}
-                    name={'OpenInNew'}
-                  />
-                  .
-                </Flex>
-              </ExtLink>
-            </Flex>
+                  <Flex
+                    alignItems={'center'}
+                    flexDirection={'row'}
+                    justifyContent={'center'}
+                  >
+                    Governance Forum
+                    <Icon
+                      ml={1}
+                      size={'0.9em'}
+                      color={'primary'}
+                      name={'OpenInNew'}
+                    />
+                    .
+                  </Flex>
+                </ExtLink>
+              </Flex>
+            </DashboardCard>
           )
         }
         {
