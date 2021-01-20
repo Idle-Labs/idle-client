@@ -1,9 +1,11 @@
 import theme from '../theme';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
+import AssetField from '../AssetField/AssetField';
 import { Card, Flex, Image, Text } from "rimble-ui";
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import GenericSelector from '../GenericSelector/GenericSelector';
+import TotalEarningsCounter from '../TotalEarningsCounter/TotalEarningsCounter';
 
 class EarningsEstimation extends Component {
   state = {
@@ -239,6 +241,7 @@ class EarningsEstimation extends Component {
         </Flex>
         {
           Object.keys(this.state.tokensEarnings).map((token,tokenIndex) => {
+            const tokenConfig = this.props.availableTokens[token];
             const tokenEarnings = this.state.tokensEarnings[token];
             const estimationStepPerc = this.functionsUtil.BNify(Object.values(estimationSteps).pop().perc);
             const finalEarnings = tokenEarnings.earningsYear.times(estimationStepPerc);
@@ -291,16 +294,19 @@ class EarningsEstimation extends Component {
                               key={`asset-estimate-${token}-${estimateIndex}`}
                               borderRight={`1px solid ${theme.colors.divider}`}
                             >
-                              <Text
-                                fontWeight={[3,4]}
-                                fontSize={[0,'1.2em']}
-                                style={{
-                                  wordBreak:'break-all'
-                                }}
-                                color={tokenEarnings.earnings.gte(estimationStepEarnings) ? 'copyColor' : 'legend'}
-                              >
-                                {estimationStepEarningsFormatted}
-                              </Text>
+                              {
+                                (token === 'USD' || (estimateIndex === Object.keys(estimationSteps).length-1)) && 
+                                  <Text
+                                    fontWeight={3}
+                                    fontSize={[0,'1em']}
+                                    style={{
+                                      wordBreak:'break-all'
+                                    }}
+                                    color={tokenEarnings.earnings.gte(estimationStepEarnings) ? 'copyColor' : 'legend'}
+                                  >
+                                    {estimationStepEarningsFormatted}
+                                  </Text>
+                              }
                             </Flex>
                           );
                         })
@@ -313,7 +319,7 @@ class EarningsEstimation extends Component {
                     alignItems={'center'}
                     flexDirection={'row'}
                     justifyContent={'center'}
-                    pt={ token === 'USD' ? '2.8em' : '2.2em' }
+                    pt={ token === 'USD' ? ['2em','2.8em'] : '1.4em' }
                     pb={ tokenIndex<Object.keys(this.state.tokensEarnings).length-1 ? '1em' : 0 }
                   >
                     <Flex
@@ -330,9 +336,10 @@ class EarningsEstimation extends Component {
                     </Flex>
                     <Flex
                       width={[0.85,0.9]}
+                      alignItems={'center'}
                       flexDirection={'row'}
                       height={['20px','35px']}
-                      alignItems={'flex-start'}
+                      justifyContent={'flex-start'}
                     >
                       <Flex
                         height={'100%'}
@@ -347,7 +354,7 @@ class EarningsEstimation extends Component {
                         ></Flex>
                       </Flex>
                       <Flex
-                        pl={[2,3]}
+                        pl={2}
                         width={'auto'}
                         height={'100%'}
                         alignItems={'center'}
@@ -355,6 +362,46 @@ class EarningsEstimation extends Component {
                       >
                         <Image src={`images/tokens/${token}.svg`} height={['1.4em','2.2em']} />
                       </Flex>
+                      {
+                        <Flex
+                          pl={2}
+                          alignItems={'center'}
+                        >
+                          {
+                            token !== 'USD' ? (
+                              <AssetField
+                                {...this.props}
+                                token={token}
+                                tokenConfig={tokenConfig}
+                                fieldInfo={{
+                                  name:'earningsCounter',
+                                  props:{
+                                    decimals:this.props.isMobile ? 6 : 7,
+                                    maxPrecision:this.props.isMobile ? 9 : 10,
+                                    style:{
+                                      color:this.props.theme.colors.copyColor,
+                                      fontWeight:this.props.isMobile ? 500 : 700,
+                                      fontSize:this.props.isMobile ? '14px' : '22px',
+                                    }
+                                  }
+                                }}
+                              />
+                            ) : (
+                              <TotalEarningsCounter
+                                {...this.props}
+                                decimals={this.props.isMobile ? 6 : 7}
+                                maxPrecision={this.props.isMobile ? 9 : 10}
+                                counterStyle={{
+                                  color:this.props.theme.colors.copyColor,
+                                  fontWeight:this.props.isMobile ? 500 : 700,
+                                  fontFamily:this.props.theme.fonts.sansSerif,
+                                  fontSize:this.props.isMobile ? '14px' : '22px',
+                                }}
+                              />
+                            )
+                          }
+                        </Flex>
+                      }
                     </Flex>
                   </Flex>
                 </Flex>
