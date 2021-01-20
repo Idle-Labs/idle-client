@@ -87,7 +87,6 @@ class CoverProtocol extends Component {
       if (this.state.tokenPrice && this.state.swapFee && this.state.covTokens){
 
         const swapFee = this.state.swapFee;
-        const covTokens = this.state.covTokens;
         const tokenPrice = this.state.tokenPrice;
         let tokenAmountOut = amount.div(tokenPrice);
         tokenAmountOut = tokenAmountOut.minus(tokenAmountOut.times(swapFee));
@@ -104,7 +103,6 @@ class CoverProtocol extends Component {
 
   async changeInputCallback(inputValue=null){
     let swapInfo = null;
-    let updateData = false;
     let balanceSelectorInfo = null;
     inputValue = inputValue || this.state.inputValue;
 

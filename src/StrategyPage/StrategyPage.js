@@ -1,5 +1,4 @@
 import Title from '../Title/Title';
-import CountUp from 'react-countup';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import AssetsList from '../AssetsList/AssetsList';
@@ -13,6 +12,7 @@ import PortfolioEquity from '../PortfolioEquity/PortfolioEquity';
 import TransactionsList from '../TransactionsList/TransactionsList';
 import EarningsEstimation from '../EarningsEstimation/EarningsEstimation';
 import { Flex, Box, Heading, Text, Tooltip, Icon, Image } from "rimble-ui";
+import TotalEarningsCounter from '../TotalEarningsCounter/TotalEarningsCounter';
 
 // const env = process.env;
 
@@ -161,7 +161,6 @@ class StrategyPage extends Component {
 
         let avgAPY = this.functionsUtil.BNify(0);
         let avgScore = this.functionsUtil.BNify(0);
-        let totalEarnings = this.functionsUtil.BNify(0);
         let totalAmountLent = this.functionsUtil.BNify(0);
 
         await this.functionsUtil.asyncForEach(depositedTokens,async (token) => {
@@ -171,24 +170,16 @@ class StrategyPage extends Component {
             tokenAprs,
             tokenScore,
             amountLent,
-            tokenEarnings
           ] = await Promise.all([
             this.functionsUtil.getTokenAprs(tokenConfig),
             this.functionsUtil.getTokenScore(tokenConfig,isRisk),
-            this.functionsUtil.getAmountLent([token],this.props.account),
-            this.functionsUtil.loadAssetField('earnings',token,tokenConfig,this.props.account,false),
+            this.functionsUtil.getAmountLent([token],this.props.account)
           ]);
 
           const amountLentToken = await this.functionsUtil.convertTokenBalance(amountLent[token],token,tokenConfig,isRisk);
 
           const tokenAPY = this.functionsUtil.BNify(tokenAprs.avgApy);
           const tokenWeight = portfolio.tokensBalance[token].tokenBalance.div(portfolio.totalBalance);
-
-          // console.log(token,tokenEarningsPerc.toFixed(5),amountLentToken.toFixed(5),tokenEarnings.toFixed(5));
-
-          if (tokenEarnings){
-            totalEarnings = totalEarnings.plus(tokenEarnings);
-          }
 
           if (tokenAPY){
             avgAPY = avgAPY.plus(tokenAPY.times(tokenWeight));
@@ -214,9 +205,6 @@ class StrategyPage extends Component {
             return null;
           }
         }).filter(v => (v !== null)) : null;
-
-        const earningsStart = totalEarnings;
-        const earningsEnd = totalAmountLent.times(avgAPY.div(100));
 
         newState.aggregatedValues = [
           {
@@ -245,30 +233,38 @@ class StrategyPage extends Component {
                   flexDirection={'column'}
                   justifyContent={'center'}
                 >
-                  <CountUp
-                    delay={0}
-                    decimals={8}
-                    decimal={'.'}
-                    separator={''}
-                    useEasing={false}
-                    duration={31536000}
-                    end={parseFloat(earningsEnd)}
-                    start={parseFloat(earningsStart)}
-                    formattingFn={ n => '$ '+this.functionsUtil.abbreviateNumber(n,8,10,8) }
-                  >
-                    {({ countUpRef, start }) => (
-                      <span
-                        ref={countUpRef}
-                        style={{
-                          lineHeight:1,
-                          color:this.props.theme.colors.copyColor,
-                          fontFamily:this.props.theme.fonts.counter,
-                          fontWeight: this.props.isMobile ? 600 : 700,
-                          fontSize:this.props.isMobile ? '21px' : '1.7em',
-                        }}
-                      />
-                    )}
-                  </CountUp>
+                  <TotalEarningsCounter
+                    {...this.props} 
+                    portfolio={portfolio}
+                  />
+                  {
+                    /*
+                    <CountUp
+                      delay={0}
+                      decimals={8}
+                      decimal={'.'}
+                      separator={''}
+                      useEasing={false}
+                      duration={31536000}
+                      end={parseFloat(earningsEnd)}
+                      start={parseFloat(earningsStart)}
+                      formattingFn={ n => '$ '+this.functionsUtil.abbreviateNumber(n,8,10,8) }
+                    >
+                      {({ countUpRef, start }) => (
+                        <span
+                          ref={countUpRef}
+                          style={{
+                            lineHeight:1,
+                            color:this.props.theme.colors.copyColor,
+                            fontFamily:this.props.theme.fonts.counter,
+                            fontWeight: this.props.isMobile ? 600 : 700,
+                            fontSize:this.props.isMobile ? '21px' : '1.7em',
+                          }}
+                        />
+                      )}
+                    </CountUp>
+                    */
+                  }
                   {
                     /*
                     govTokensTotalBalance && govTokensTotalBalance.gt(0) &&
@@ -329,8 +325,14 @@ class StrategyPage extends Component {
     const coverProtocolConfig = this.functionsUtil.getGlobalConfig(['tools','coverProtocol']);
 
     return (
-      <Box width={1}>
-        <Title mb={[3,4]}>{this.functionsUtil.getGlobalConfig(['strategies',this.props.selectedStrategy,'title'])} strategy</Title>
+      <Box
+        width={1}
+      >
+        <Title
+          mb={3}
+        >
+          {this.functionsUtil.getGlobalConfig(['strategies',this.props.selectedStrategy,'title'])} strategy
+        </Title>
         {
           !this.state.portfolioLoaded ? (
             <FlexLoader
