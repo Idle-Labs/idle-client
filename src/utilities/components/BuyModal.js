@@ -385,7 +385,7 @@ class BuyModal extends React.Component {
   getAvailableCountries = () => {
     const availableCountries = {};
     this.state.availableProviders.forEach((provider,i) => {
-      const providerInfo = globalConfigs.payments.providers[provider];
+      const providerInfo = this.getProviderInfo(provider);
       const providerSupportMethod = providerInfo.supportedMethods.indexOf(this.state.selectedMethod) !== -1;
       const providerSupportToken = this.state.selectedToken ? providerInfo.supportedTokens.indexOf(this.state.selectedToken) !== -1 : (providerInfo.supportedTokens.indexOf(this.props.selectedToken) !== -1 || providerInfo.supportedTokens.indexOf(globalConfigs.baseToken) !== -1);
 
