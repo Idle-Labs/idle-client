@@ -28,7 +28,7 @@ class GovernanceUtil {
   getTotalSupply = async () => {
 
     // Check for cached data
-    const cachedDataKey = `getTotalSupply`;
+    const cachedDataKey = 'getTotalSupply';
     const cachedData = this.functionsUtil.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData && !this.functionsUtil.BNify(cachedData).isNaN()){
       return cachedData;
@@ -368,15 +368,19 @@ class GovernanceUtil {
     return this.functionsUtil.setCachedData(cachedDataKey,votes);
   }
 
-  getProposals = async (voted_by=null) => {
+  getProposals = async (voted_by=null,filter_by_state=null) => {
 
     // Check for cached data
     const cachedDataKey = 'getProposals';
     let cachedData = this.functionsUtil.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData){
+      if (filter_by_state !== null){
+        cachedData = cachedData.filter( p => (p.state.toLowerCase() === filter_by_state.toLowerCase() ) );
+      }
       if (voted_by !== null){
         cachedData = cachedData.filter( p => (p.votes.find( v => (v.voter.toLowerCase() === voted_by.toLowerCase()) )) );
       }
+      // console.log('getProposals (CACHED)',filter_by_state,cachedData);
       return cachedData;
     }
 
@@ -399,7 +403,7 @@ class GovernanceUtil {
       proposalStateGets.push(this.functionsUtil.genericContractCall(governanceContractName,'state',[i]));
     }
 
-    const [
+    let [
       votes,
       proposals,
       proposalStates,
@@ -416,18 +420,6 @@ class GovernanceUtil {
       this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalCanceled', {fromBlock: 0, toBlock: 'latest'}),
       this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalExecuted', {fromBlock: 0, toBlock: 'latest'}),
     ]);
-
-    /*
-    console.log(
-      votes,
-      proposals,
-      proposalStates,
-      proposalQueuedEvents,
-      proposalCreatedEvents,
-      proposalCanceledEvents,
-      proposalExecutedEvents
-    );
-    */
 
     proposals.reverse();
     proposalStates.reverse();
@@ -558,6 +550,8 @@ class GovernanceUtil {
       // p.title = description.split(/# |\n/g)[1] || 'Untitled';
       // p.description = description.split(/# |\n/g)[2] || 'No description.';
 
+      // console.log('getProposals',filter_by_state,cachedData);
+
       // Save proposal
       proposals[i] = {
         eta:p.eta,
@@ -584,13 +578,19 @@ class GovernanceUtil {
       };
     });
 
-    this.functionsUtil.setCachedDataWithLocalStorage(cachedDataKey,proposals)
-    
-    if (voted_by === null) {
-      return proposals;
-    } else {
-      return proposals.filter( p => (p.votes.find( v => (v.voter.toLowerCase() === voted_by.toLowerCase()) )) );
+    this.functionsUtil.setCachedDataWithLocalStorage(cachedDataKey,proposals);
+
+    // console.log('getProposals',filter_by_state,cachedData);
+
+    if (filter_by_state !== null){
+      proposals = proposals.filter( p => (p.state.toLowerCase() === filter_by_state.toLowerCase() ) );
     }
+
+    if (voted_by !== null){
+      proposals = proposals.filter( p => (p.votes.find( v => (v.voter.toLowerCase() === voted_by.toLowerCase()) )) );
+    }
+    
+    return proposals;
   }
 }
 

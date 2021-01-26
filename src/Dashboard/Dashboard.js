@@ -21,6 +21,7 @@ class Dashboard extends Component {
   state = {
     menu:[],
     baseRoute:null,
+    clickEvent:null,
     activeModal:null,
     currentRoute:null,
     pageComponent:null,
@@ -490,6 +491,12 @@ class Dashboard extends Component {
     }
   }
 
+  propagateClickEvent(clickEvent){
+    this.setState({
+      clickEvent:clickEvent.target
+    });
+  }
+
   render() {
     const PageComponent = this.state.pageComponent ? this.state.pageComponent : null;
     return (
@@ -497,8 +504,9 @@ class Dashboard extends Component {
         width={'100%'}
         position={'fixed'}
         flexDirection={'row'}
-        height={[(window.innerHeight-61)+'px','100vh']}
         backgroundColor={['dashboardBg','white']}
+        /*onClick={ e => this.propagateClickEvent(e) }*/
+        height={[(window.innerHeight-61)+'px','100vh']}
       >
         <Flex
           bottom={0}
@@ -601,6 +609,7 @@ class Dashboard extends Component {
                 flexDirection={'column'}
               >
                 <DashboardHeader
+                  clickEvent={this.state.clickEvent}
                   goToSection={this.goToSection.bind(this)}
                   {...this.props}
                 />

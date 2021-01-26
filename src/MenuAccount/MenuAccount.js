@@ -5,6 +5,7 @@ import FunctionsUtil from '../utilities/FunctionsUtil';
 import ShortHash from "../utilities/components/ShortHash";
 import { Flex, Icon, Image, Link, Text } from "rimble-ui";
 import DashboardCard from '../DashboardCard/DashboardCard';
+import Notifications from '../Notifications/Notifications';
 import CardIconButton from '../CardIconButton/CardIconButton';
 import AccountModal from "../utilities/components/AccountModal";
 
@@ -86,6 +87,7 @@ class MenuAccount extends Component {
           alignItems={['flex-start','center']}
         >
           <Flex
+            mb={[2,0]}
             flexDirection={'row'}
             alignItems={'center'}
             width={[1,'fit-content']}
@@ -95,8 +97,8 @@ class MenuAccount extends Component {
               {...this.props}
               cardProps={{
                 py:1,
-                mb:[2,0],
                 px:[1,2],
+                mr:[2,0],
                 display:'flex',
                 width:[1,'auto']
               }}
@@ -138,6 +140,12 @@ class MenuAccount extends Component {
                 />
               </Flex>
             </DashboardCard>
+            {
+              this.props.isMobile &&
+                <Notifications
+                  {...this.props}
+                />
+            }
           </Flex>
           <Flex
             ml={[0,3]}
@@ -181,71 +189,87 @@ class MenuAccount extends Component {
                   </Flex>
                 </Link>
             }
-            {
-              governanceEnabled && this.props.isDashboard ? (
-                <RoundButton
-                  buttonProps={{
-                    mainColor:'redeem',
-                    style:{
-                      width:'auto',
-                      height:this.props.isMobile ? '38px' : '45px'
-                    },
-                    size:this.props.isMobile ? 'small' : 'medium'
-                  }}
-                  handleClick={ (e) => { this.props.goToSection(governanceRoute,false) } }
-                >
-                  <Flex
-                    alignItems={'center'}
-                    flexDirection={'row'}
+            <Flex
+              width={'auto'}
+              alignItems={'center'}
+              flexDirection={'row'}
+              justifyContent={'flex-end'}
+            >
+              {
+                governanceEnabled && this.props.isDashboard ? (
+                  <RoundButton
+                    buttonProps={{
+                      mainColor:'redeem',
+                      style:{
+                        width:'auto',
+                        height:this.props.isMobile ? '38px' : '45px'
+                      },
+                      size:this.props.isMobile ? 'small' : 'medium'
+                    }}
+                    handleClick={ (e) => { this.props.goToSection(governanceRoute,false) } }
                   >
-                    <Icon
-                      mr={[1,2]}
-                      size={'1.6em'}
-                      color={'white'}
-                      name={'ExitToApp'}
-                    />
-                    <Text
-                      fontWeight={3}
-                      color={'white'}
-                      fontSize={[2,3]}
+                    <Flex
+                      alignItems={'center'}
+                      flexDirection={'row'}
                     >
-                      Governance
-                    </Text>
-                  </Flex>
-                </RoundButton>
-              ) : this.props.isGovernance && (
-                <RoundButton
-                  buttonProps={{
-                    mainColor:'redeem',
-                    style:{
-                      width:'auto',
-                      height:this.props.isMobile ? '38px' : '45px'
-                    },
-                    size:this.props.isMobile ? 'small' : 'medium'
-                  }}
-                  handleClick={ (e) => { this.props.goToSection(dashboardRoute,false) } }
-                >
-                  <Flex
-                    alignItems={'center'}
-                    flexDirection={'row'}
+                      <Icon
+                        mr={[1,2]}
+                        size={'1.6em'}
+                        color={'white'}
+                        name={'ExitToApp'}
+                      />
+                      <Text
+                        fontWeight={3}
+                        color={'white'}
+                        fontSize={[2,3]}
+                      >
+                        Governance
+                      </Text>
+                    </Flex>
+                  </RoundButton>
+                ) : this.props.isGovernance && (
+                  <RoundButton
+                    buttonProps={{
+                      mainColor:'redeem',
+                      style:{
+                        width:'auto',
+                        height:this.props.isMobile ? '38px' : '45px'
+                      },
+                      size:this.props.isMobile ? 'small' : 'medium'
+                    }}
+                    handleClick={ (e) => { this.props.goToSection(dashboardRoute,false) } }
                   >
-                    <Icon
-                      mr={[1,2]}
-                      size={'1.6em'}
-                      color={'white'}
-                      name={'ExitToApp'}
-                    />
-                    <Text
-                      fontWeight={3}
-                      color={'white'}
-                      fontSize={[2,3]}
+                    <Flex
+                      alignItems={'center'}
+                      flexDirection={'row'}
                     >
-                      Dashboard
-                    </Text>
-                  </Flex>
-                </RoundButton>
-              )
-            }
+                      <Icon
+                        mr={[1,2]}
+                        size={'1.6em'}
+                        color={'white'}
+                        name={'ExitToApp'}
+                      />
+                      <Text
+                        fontWeight={3}
+                        color={'white'}
+                        fontSize={[2,3]}
+                      >
+                        Dashboard
+                      </Text>
+                    </Flex>
+                  </RoundButton>
+                )
+              }
+              {
+                !this.props.isMobile &&
+                  <Notifications
+                    {...this.props}
+                    flexProps={{
+                      ml:2
+                    }}
+                  />
+              }
+            </Flex>
           </Flex>
           <AccountModal
             {...this.props}

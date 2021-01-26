@@ -45,7 +45,7 @@ class DelegateVesting extends Component {
       ] = await Promise.all([
         this.governanceUtil.getDelegatesChanges(),
         this.governanceUtil.getCurrentDelegate(this.props.account),
-        this.governanceUtil.getVestingContract(this.props.account),
+        this.governanceUtil.getVestingContract(this.props.account)
       ]);
 
       // Init flags

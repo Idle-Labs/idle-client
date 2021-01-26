@@ -1758,6 +1758,54 @@ class FunctionsUtil {
       return null;
     }
   }
+  getSnapshotProposals = async (activeOnly=false) => {
+
+    const cachedDataKey = `snapshotProposals_${activeOnly}`;
+    const cachedData = this.getCachedData(cachedDataKey);
+    if (cachedData){
+      return cachedData;
+    }
+
+    const endpoint = this.getGlobalConfig(['network','providers','snapshot','endpoints','proposals']);
+    let proposals = await this.makeCachedRequest(endpoint,1440,true);
+
+    if (proposals){
+      proposals = Object.values(proposals);
+
+      const currTime = parseInt(Date.now()/1000);
+      if (activeOnly){
+        proposals =  proposals.filter( p => p.msg.payload.end>currTime );
+      }
+
+      const validProposals = [];
+      await this.asyncForEach(proposals, async (p) => {
+
+        // Add proposal if ended
+        if (p.msg.payload.end<=currTime){
+          validProposals.push(p);
+        } else {
+          const checkIDLEBalance = p.msg.payload.metadata.strategies.find( m => m.name=== 'erc20-balance-of' && m.params.address.toLowerCase() === this.getGlobalConfig(['governance','IDLE','address']).toLowerCase() ) || null;
+          const checkLockedIDLEBalance = p.msg.payload.metadata.strategies.find( m => m.name=== 'erc20-balance-of' && m.params.address.toLowerCase() === this.getGlobalConfig(['contracts','LockedIDLE','address']).toLowerCase() ) || null;
+
+          const [
+            IDLEBalance,
+            lockedIDLEBalance
+          ] = await Promise.all(
+            checkIDLEBalance ? this.getTokenBalance('IDLE',p.address) : null,
+            checkLockedIDLEBalance ? this.getTokenBalance('LockedIDLE',p.address) : null
+          );
+
+          // Add proposal is passed token balance check
+          if ((!checkIDLEBalance || this.BNify(IDLEBalance).gt(0)) && (!checkLockedIDLEBalance || this.BNify(lockedIDLEBalance).gt(0))){
+            validProposals.push(p);
+          }
+        }
+      });
+
+      return this.setCachedData(cachedDataKey,validProposals);
+    }
+
+  }
   getTokenApiData = async (address,isRisk=null,startTimestamp=null,endTimestamp=null,forceStartTimestamp=false,frequency=null,order=null,limit=null) => {
     if (globalConfigs.network.requiredNetwork!==1 || !globalConfigs.stats.enabled){
       return [];
@@ -3114,19 +3162,29 @@ class FunctionsUtil {
       const etherscanApiUrl = etherscanInfo.endpoints[requiredNetwork];
       const etherscanEndpoint = `${etherscanApiUrl}?&apikey=${env.REACT_APP_ETHERSCAN_KEY}&module=account&action=tokentx&address=${contractAddress}&sort=desc`;
       const transactions = await this.makeCachedRequest(etherscanEndpoint,1800,true);
-      return transactions.result.filter( tx => tx.from === '0x0000000000000000000000000000000000000000' && tx.to.toLowerCase() === contractAddress.toLowerCase() )
+      if (transactions && typeof transactions.result === 'object'){
+        return transactions.result.filter( tx => tx.from === '0x0000000000000000000000000000000000000000' && tx.to.toLowerCase() === contractAddress.toLowerCase() );
+      }
     }
     return null;
   }
-  getBatchedDeposits = async (account=null) => {
+  getBatchedDeposits = async (account=null,filter_by_status=null) => {
     account = account || this.props.account;
     if (!account){
       return null;
     }
+
     const batchDepositConfig = this.getGlobalConfig(['tools','batchDeposit']);
     if (!batchDepositConfig.enabled){
       return null;
     }
+
+    const cachedDataKey = `batchedDeposits_${account}_${filter_by_status}`;
+    const cachedData = this.getCachedData(cachedDataKey);
+    if (cachedData) {
+      return cachedData;
+    }
+
     const batchedDeposits = {};
     const availableTokens = batchDepositConfig.props.availableTokens;
     await this.asyncForEach(Object.keys(availableTokens),async (token) => {
@@ -3136,10 +3194,12 @@ class FunctionsUtil {
       const currBatchIndex = await this.genericContractCall(migrationContract.name,'currBatch');
       for (let batchIndex = 0; batchIndex <= parseInt(currBatchIndex) ; batchIndex++){
         let [
+          batchExecutions,
           batchTotal,
           batchRedeem,
           batchDeposit
         ] = await Promise.all([
+          this.getBatchedDepositExecutions(migrationContract.address),
           this.genericContractCall(migrationContract.name,'batchTotals',[batchIndex]),
           this.genericContractCall(migrationContract.name,'batchRedeemedTotals',[batchIndex]),
           this.genericContractCall(migrationContract.name,'batchDeposits',[this.props.account,batchIndex])
@@ -3164,17 +3224,25 @@ class FunctionsUtil {
 
             const status = batchIndex < currBatchIndex && batchRedeems.gt(0) ? 'executed' : 'pending';
 
+            if (filter_by_status !== null && filter_by_status.toLowerCase() !== status){
+              return;
+            }
+
+            const lastExecution = batchExecutions && batchExecutions.length ? batchExecutions[0] : null;
+
             batchedDeposits[token] = {
               status,
               batchTotals,
               batchRedeems,
-              batchDeposits
+              batchDeposits,
+              lastExecution
             };
           }
         }
       }
     });
-    return batchedDeposits;
+
+    return this.setCachedData(cachedDataKey,batchedDeposits);
   }
   getTokenBalance = async (contractName,walletAddr,fixDecimals=true) => {
     if (!walletAddr){

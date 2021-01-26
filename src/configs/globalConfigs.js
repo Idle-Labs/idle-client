@@ -13,6 +13,7 @@ import CovToken from '../abis/cover/CovToken.json';
 import CurvePool from '../abis/curve/CurvePool.json';
 import NexusMutual from '../NexusMutual/NexusMutual';
 import CoverMint from '../abis/cover/CoverMint.json';
+import LockedIDLE from '../contracts/LockedIDLE.json';
 import { Web3Versions } from '@terminal-packages/sdk';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import PriceOracle from '../contracts/PriceOracle.json';
@@ -339,6 +340,10 @@ const globalConfigs = {
     }
   },
   contracts:{
+    LockedIDLE:{
+      abi:LockedIDLE,
+      address:'0x826c61c3183B261E4d4a9a28aDbc358061ECd207'
+    },
     PriceOracle:{
       abi:PriceOracle,
       address:'0x972A64d108e250dF98dbeac8170678501f5EF181' // MAIN
@@ -794,6 +799,14 @@ const globalConfigs = {
           42: 'https://api-kovan.etherscan.io/api'
         }
       },
+      snapshot:{
+        endpoints:{
+          proposals:'https://hub.snapshot.page/api/idlefinance.eth/proposals'
+        },
+        urls:{
+          proposals:'https://signal.idle.finance/#/idlefinance.eth/proposal/'
+        }
+      },
       biconomy:{
         enabled:false,
         enableLogin:false,
@@ -844,9 +857,21 @@ const globalConfigs = {
       }
     }
   },
+  notifications:[
+    {
+      enabled:false,
+      end:1612282726374,
+      start:1611677841027,
+      date:'Jan 26, 2021 16:18 UTC',
+      title:'Cover Protocol Available',
+      hash:'/dashboard/tools/cover-protocol',
+      image:'/images/protocols/cover-logo.png',
+      text:'Protect your portfolio with Cover Protocol',
+    }
+  ],
   tools:{
     coverProtocol:{
-      enabled:false,
+      enabled:true,
       route:'cover-protocol',
       label:'Cover Protocol',
       subComponent:CoverProtocol,
@@ -1827,14 +1852,30 @@ const globalConfigs = {
         caption: 'Buy with',
         captionPos: 'top',
         subcaption:`~ 2.5% fee ~\nEUR / GBP`,
-        supportedMethods:['bank'],
+        supportedMethods:['bank','card'],
         badge: {
           text:'NO ID REQUIRED',
           color:'#fff',
           bgColor:'#0cade4'
         },
-        supportedCountries:['GBR','EUR'],
         supportedTokens:['ETH','DAI','USDC'],
+        supportedCountries:['USA','GBR','AUS','BRA','CAN','EUR','HKG','IND','MEX','RUS','ZAF','KOR'],
+        getInfo: (props) => {
+          const info = {};
+            switch (props.selectedMethod){
+              case 'bank':
+                info.supportedCountries = ['GBR','EUR'];
+                info.subcaption = `~ 1.49-1.99% fee ~`;
+              break;
+              case 'card':
+                info.supportedCountries = ['USA','GBR','AUS','BRA','CAN','EUR','HKG','IND','MEX','RUS','ZAF','KOR'];
+                info.subcaption = `~ 2.90% fee ~`;
+              break;
+              default:
+              break;
+            }
+          return info;
+        },
         getInitParams: (props,globalConfigs,buyParams) => {
         	return {
 	          hostAppName: 'Idle',
