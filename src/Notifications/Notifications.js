@@ -84,7 +84,7 @@ class Notifications extends Component {
       governanceProposals,
       batchedDeposits
     ] = await Promise.all([
-      this.functionsUtil.getSnapshotProposals(true),
+      this.functionsUtil.getSnapshotProposals(false),
       this.governanceUtil.getProposals(null,'Active'),
       this.functionsUtil.getBatchedDeposits(this.props.account,'executed')
     ]);

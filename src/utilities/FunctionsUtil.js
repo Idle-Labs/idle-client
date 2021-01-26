@@ -1774,26 +1774,26 @@ class FunctionsUtil {
 
       const currTime = parseInt(Date.now()/1000);
       if (activeOnly){
-        proposals =  proposals.filter( p => p.msg.payload.end>currTime );
+        proposals =  proposals.filter( p => (p.msg.payload.start<=currTime && p.msg.payload.end>currTime) );
       }
 
       const validProposals = [];
       await this.asyncForEach(proposals, async (p) => {
-
         // Add proposal if ended
         if (p.msg.payload.end<=currTime){
           validProposals.push(p);
         } else {
-          const checkIDLEBalance = p.msg.payload.metadata.strategies.find( m => m.name=== 'erc20-balance-of' && m.params.address.toLowerCase() === this.getGlobalConfig(['governance','IDLE','address']).toLowerCase() ) || null;
-          const checkLockedIDLEBalance = p.msg.payload.metadata.strategies.find( m => m.name=== 'erc20-balance-of' && m.params.address.toLowerCase() === this.getGlobalConfig(['contracts','LockedIDLE','address']).toLowerCase() ) || null;
+          const blockNumber = p.msg.payload.snapshot;
+          const checkIDLEBalance = p.msg.payload.metadata.strategies ? p.msg.payload.metadata.strategies.find( s => s.name==='erc20-balance-of' && s.params && s.params.address && s.params.address.toLowerCase() === this.getGlobalConfig(['govTokens','IDLE','address']).toLowerCase() ) : null;
+          const checkLockedIDLEBalance = p.msg.payload.metadata.strategies ? p.msg.payload.metadata.strategies.find( s => s.name==='erc20-balance-of' && s.params && s.params.address && s.params.address.toLowerCase() === this.getGlobalConfig(['contracts','LockedIDLE','address']).toLowerCase() ) : null;
 
           const [
             IDLEBalance,
             lockedIDLEBalance
-          ] = await Promise.all(
-            checkIDLEBalance ? this.getTokenBalance('IDLE',p.address) : null,
-            checkLockedIDLEBalance ? this.getTokenBalance('LockedIDLE',p.address) : null
-          );
+          ] = await Promise.all([
+            checkIDLEBalance ? this.getTokenBalance('IDLE',p.address,true,blockNumber) : null,
+            checkLockedIDLEBalance ? this.getTokenBalance('LockedIDLE',p.address,true,blockNumber) : null
+          ]);
 
           // Add proposal is passed token balance check
           if ((!checkIDLEBalance || this.BNify(IDLEBalance).gt(0)) && (!checkLockedIDLEBalance || this.BNify(lockedIDLEBalance).gt(0))){
@@ -3244,7 +3244,7 @@ class FunctionsUtil {
 
     return this.setCachedData(cachedDataKey,batchedDeposits);
   }
-  getTokenBalance = async (contractName,walletAddr,fixDecimals=true) => {
+  getTokenBalance = async (contractName,walletAddr,fixDecimals=true,blockNumber='latest') => {
     if (!walletAddr){
       return false;
     }
@@ -3263,7 +3263,7 @@ class FunctionsUtil {
       tokenBalance
     ] = await Promise.all([
       this.getTokenDecimals(contractName),
-      this.getContractBalance(contractName,walletAddr)
+      this.getContractBalance(contractName,walletAddr,blockNumber)
     ]);
 
     if (tokenBalance){
@@ -3329,8 +3329,9 @@ class FunctionsUtil {
   checkAddress = (address) => {
     return address !== null ? address.match(/^0x[a-fA-F0-9]{40}$/) !== null : false;
   }
-  getContractBalance = async (contractName,address) => {
-    return await this.getProtocolBalance(contractName,address);
+  getContractBalance = async (contractName,address,blockNumber='latest') => {
+    address = address ? address : this.props.tokenConfig.idle.address;
+    return await this.genericContractCall(contractName, 'balanceOf', [address], {}, blockNumber);
   }
   getProtocolBalance = async (contractName,address) => {
     address = address ? address : this.props.tokenConfig.idle.address;
