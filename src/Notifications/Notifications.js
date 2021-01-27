@@ -45,7 +45,7 @@ class Notifications extends Component {
     }
 
     const tabOpenedChanged = prevState.tabOpened !== this.state.tabOpened;
-    if (tabOpenedChanged && this.state.tabOpened){
+    if (tabOpenedChanged && this.state.tabOpened && this.state.notifications.length>0){
       this.updateLastOpenTimestamp();
     }
 
@@ -96,8 +96,10 @@ class Notifications extends Component {
     let notifications = this.functionsUtil.getGlobalConfig(['notifications']).filter( n => (n.enabled && n.start<=currTime && n.end>currTime) );
 
     activeSnapshotProposals.forEach( p => {
+        const text = p.msg.payload.body.replace(/^[#]*/,'');
+        // const text = p.msg.payload.name.replace(/^[#]*/,'');
         notifications.push({
-          text:p.msg.payload.body.replace(/^[#]*/,''),
+          text,
           image:'/images/snapshot.png',
           title:'Snapshot Proposal',
           timestamp:p.msg.payload.start*1000,
@@ -117,8 +119,8 @@ class Notifications extends Component {
           },
           icon:'LightbulbOutline',
           timestamp:p.timestamp*1000,
-          link:governanceProposalUrl+p.id,
           title:'Governance Proposal',
+          link:governanceProposalUrl+p.id,
           date:this.functionsUtil.strToMoment(p.timestamp*1000).utc().format('MMM DD, YYYY HH:mm UTC'),
         }
       );
