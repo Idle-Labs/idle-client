@@ -46,6 +46,14 @@ class Notifications extends Component {
 
     const tabOpenedChanged = prevState.tabOpened !== this.state.tabOpened;
     if (tabOpenedChanged && this.state.tabOpened && this.state.notifications.length>0){
+
+      // Send Google Analytics event
+      this.functionsUtil.sendGoogleAnalyticsEvent({
+        eventCategory: 'Notifications',
+        eventAction: 'open_tab',
+        eventLabel: ''
+      });
+
       this.updateLastOpenTimestamp();
     }
 
@@ -109,7 +117,7 @@ class Notifications extends Component {
     });
 
     // Add governance proposals
-    const governanceProposalUrl = this.functionsUtil.getGlobalConfig(['baseURL'])+'/#'+this.functionsUtil.getGlobalConfig(['governance','baseRoute'])+'/proposals/';
+    const governanceProposalUrl = this.functionsUtil.getGlobalConfig(['governance','baseRoute'])+'/proposals/';
     governanceProposals.forEach( p => {
       notifications.push(
         {
@@ -120,7 +128,7 @@ class Notifications extends Component {
           icon:'LightbulbOutline',
           timestamp:p.timestamp*1000,
           title:'Governance Proposal',
-          link:governanceProposalUrl+p.id,
+          hash:governanceProposalUrl+p.id,
           date:this.functionsUtil.strToMoment(p.timestamp*1000).utc().format('MMM DD, YYYY HH:mm UTC'),
         }
       );
@@ -128,7 +136,7 @@ class Notifications extends Component {
 
     // Add Executed Batch Deposits
     const batchDepositConfig = this.functionsUtil.getGlobalConfig(['tools','batchDeposit']);
-    const batchDepositBaseUrl = this.functionsUtil.getGlobalConfig(['baseURL'])+'/#'+this.functionsUtil.getGlobalConfig(['dashboard','baseRoute'])+`/tools/${batchDepositConfig.route}/`;
+    const batchDepositBaseUrl = this.functionsUtil.getGlobalConfig(['dashboard','baseRoute'])+`/tools/${batchDepositConfig.route}/`;
     Object.keys(batchedDeposits).forEach( batchToken => {
       const batchInfo = batchedDeposits[batchToken];
       const timestamp = batchInfo.lastExecution.timeStamp*1000;
@@ -138,7 +146,7 @@ class Notifications extends Component {
         timestamp,
         icon:'DoneAll',
         title:'Batch Deposit Executed',
-        link:batchDepositBaseUrl+batchToken,
+        hash:batchDepositBaseUrl+batchToken,
         iconProps:{
           color:this.props.theme.colors.transactions.status.completed
         },
@@ -170,6 +178,23 @@ class Notifications extends Component {
     this.setState((prevState) => ({
       tabOpened:!prevState.tabOpened
     }));
+  }
+
+  openNotification(notification){
+    // Send Google Analytics event
+    this.functionsUtil.sendGoogleAnalyticsEvent({
+      eventCategory: 'Notifications',
+      eventAction: 'open_notification',
+      eventLabel: notification.link || notification.hash
+    });
+
+    if (notification.link){
+      return this.functionsUtil.openWindow(notification.link);
+    } else if (notification.hash) {
+      return window.location.hash = notification.hash;
+    }
+
+    return false;
   }
 
   render() {
@@ -227,12 +252,11 @@ class Notifications extends Component {
                 this.state.notifications.length>0 ?
                   this.state.notifications.map( (n,index) => (
                     <ExtLink
-                      href={n.link}
                       style={{
                         textDecoration:'none'
                       }}
                       key={`notification_${index}`}
-                      onClick={ n.hash ? e => window.location.hash = n.hash : null }
+                      onClick={ e => this.openNotification(n) }
                     >
                       <Flex
                         py={2}
