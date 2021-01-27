@@ -871,7 +871,7 @@ const globalConfigs = {
   ],
   tools:{
     coverProtocol:{
-      enabled:true,
+      enabled:false,
       route:'cover-protocol',
       label:'Cover Protocol',
       subComponent:CoverProtocol,
