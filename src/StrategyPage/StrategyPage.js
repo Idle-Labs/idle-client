@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import AssetsList from '../AssetsList/AssetsList';
 import CustomList from '../CustomList/CustomList';
-import RoundButton from '../RoundButton/RoundButton';
+// import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import DashboardCard from '../DashboardCard/DashboardCard';
 import PortfolioDonut from '../PortfolioDonut/PortfolioDonut';
@@ -11,7 +11,8 @@ import GenericSelector from '../GenericSelector/GenericSelector';
 import PortfolioEquity from '../PortfolioEquity/PortfolioEquity';
 import TransactionsList from '../TransactionsList/TransactionsList';
 import EarningsEstimation from '../EarningsEstimation/EarningsEstimation';
-import { Flex, Box, Heading, Text, Tooltip, Icon, Image } from "rimble-ui";
+import DashboardIconButton from '../DashboardIconButton/DashboardIconButton';
+import { Flex, Box, Heading, Text, Tooltip, Icon/*, Image*/ } from "rimble-ui";
 import TotalEarningsCounter from '../TotalEarningsCounter/TotalEarningsCounter';
 
 // const env = process.env;
@@ -322,7 +323,7 @@ class StrategyPage extends Component {
     const riskScore = this.functionsUtil.getGlobalConfig(['messages','riskScore']);
     const yieldFarming = this.functionsUtil.getGlobalConfig(['messages','yieldFarming']);
     const batchDepositConfig = this.functionsUtil.getGlobalConfig(['tools','batchDeposit']);
-    const coverProtocolConfig = this.functionsUtil.getGlobalConfig(['tools','coverProtocol']);
+    // const coverProtocolConfig = this.functionsUtil.getGlobalConfig(['tools','coverProtocol']);
 
     return (
       <Box
@@ -555,6 +556,7 @@ class StrategyPage extends Component {
                 )
               }
               {
+                /*
                 !this.state.activeCoverages && coverProtocolConfig.enabled && this.state.portfolio && this.state.portfolio.totalBalance.gt(0) && (
                   <Flex
                     width={1}
@@ -607,7 +609,7 @@ class StrategyPage extends Component {
                             mainColor:'redeem',
                             size:this.props.isMobile ? 'small' : 'medium'
                           }}
-                          handleClick={ e => this.props.goToSection(`tools/${coverProtocolConfig.route}/Claim`) }
+                          handleClick={ e => this.props.goToSection(`tools/${coverProtocolConfig.route}`) }
                         >
                           <Flex
                             alignItems={'center'}
@@ -632,6 +634,7 @@ class StrategyPage extends Component {
                     </DashboardCard>
                   </Flex>
                 )
+                */
               }
               {
                 this.state.batchedDeposits && (
@@ -1316,6 +1319,56 @@ class StrategyPage extends Component {
                   }
                 </Flex>
               </Flex>
+              {
+                this.props.account && (
+                  <Flex
+                    mt={3}
+                    width={1}
+                    id={"tools"}
+                    flexDirection={'column'}
+                  >
+                    <Flex
+                      pb={2}
+                      width={1}
+                      mb={[2,3]}
+                      borderColor={'divider'}
+                      borderBottom={'1px solid transparent'}
+                    >
+                      <Heading.h4
+                        fontSize={[2,4]}
+                        fontWeight={[3,4]}
+                      >
+                        Tools
+                      </Heading.h4>
+                    </Flex>
+                    <Flex
+                      flexDirection={['column','row']}
+                    >
+                      {
+                        ['addFunds','coverProtocol','tokenSwap'].map( (toolName,toolIndex) => {
+                          const toolConfig = this.functionsUtil.getGlobalConfig(['tools',toolName]);
+                          return (
+                            <Flex
+                              width={[1,1/3]}
+                              mb={toolIndex<2 ? [2,0] : 0}
+                              pr={toolIndex<2 ? [0,3] : 0}
+                            >
+                              <DashboardIconButton
+                                {...this.props}  
+                                icon={toolConfig.icon}
+                                text={toolConfig.desc}
+                                image={toolConfig.image}
+                                title={toolConfig.label}
+                                handleClick={ e => this.props.goToSection(`tools/${toolConfig.route}`) }
+                              />
+                            </Flex>
+                          );
+                        })
+                      }
+                    </Flex>
+                  </Flex>
+                )
+              }
               {
                 this.state.depositedTokens.length>0 &&
                   <Flex

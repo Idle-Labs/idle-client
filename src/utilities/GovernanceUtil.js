@@ -293,7 +293,7 @@ class GovernanceUtil {
       d.rank = index+1;
       d.votes = d.votes.toFixed(6);
       d.vote_weight = (100 * (d.votes / parseFloat(totalSupply))).toFixed(4) + '%';
-      d.proposals = all_votes.filter( v => (v.voter.toLowerCase() === d.delegate.toLowerCase()) ).length;
+      d.proposals = all_votes.filter( v => (v.voter && d.delegate && v.voter.toLowerCase() === d.delegate.toLowerCase()) ).length;
     });
 
     this.functionsUtil.setCachedDataWithLocalStorage(cachedDataKey,delegates);

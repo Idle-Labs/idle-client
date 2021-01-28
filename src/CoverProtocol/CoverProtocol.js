@@ -56,7 +56,7 @@ class CoverProtocol extends Component {
       const selectedToken = this.state.selectedCoverage.collateral;
       const tokenConfig = Object.values(this.props.availableStrategies)[0][selectedToken];
       const tokenBalance = await this.functionsUtil.getTokenBalance(selectedToken,this.props.account);
-      const selectedAction = !this.state.selectedAction ? (this.props.urlParams.param2 || null) : this.state.selectedAction;
+      const selectedAction = !this.state.selectedAction ? (this.props.urlParams.param2 || 'Claim') : this.state.selectedAction;
       this.setState({
         tokenConfig,
         tokenBalance,

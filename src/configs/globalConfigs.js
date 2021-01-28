@@ -865,19 +865,19 @@ const globalConfigs = {
       date:'Jan 26, 2021 16:18 UTC',
       title:'Cover Protocol Available',
       hash:'/dashboard/tools/cover-protocol',
-      image:'/images/protocols/cover-logo.png',
+      image:'/images/protocols/cover-logo.svg',
       text:'Protect your portfolio with Cover Protocol',
     }
   ],
   tools:{
     coverProtocol:{
-      enabled:false,
-      route:'cover-protocol',
+      enabled:true,
       label:'Cover Protocol',
+      route:'cover-protocol',
       subComponent:CoverProtocol,
-      image:'images/protocols/cover-logo.png',
+      image:'images/protocols/cover-logo.svg',
+      desc:'Get your Idle Portfolio covered against Smart Contract risk',
       fileClaimUrl:'https://app.coverprotocol.com/app/claims/new?protocol=IDLE',
-      desc:'Buy Coverage for your Idle portfolio or provide liquidity to Cover Protocol',
       props:{
         contract:{
           decimals:18,
@@ -1578,7 +1578,7 @@ const globalConfigs = {
       icon:'AddCircleOutline',
       route:'add-funds',
       label:'Add Funds',
-      desc:'Buy tokens with Bank account or Credit card',
+      desc:'Buy tokens with your Bank account, Credit card or Ethereum Wallet',
       subComponent:BuyModal,
       directProps:{
         showInline:true,
@@ -1608,7 +1608,7 @@ const globalConfigs = {
       icon:'Sync',
       route:'token-swap',
       label:'Token Swap',
-      desc:'Easily swap your tokens with Kyber Widget',
+      desc:'Easily swap your tokens using Kyber Swap widget',
       subComponent:TokenSwap,
       props:{
         availableTokens:{
