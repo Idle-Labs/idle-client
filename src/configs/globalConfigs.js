@@ -817,10 +817,12 @@ const globalConfigs = {
       deposit:{
         skipMint:true,
         minAmountForMint:100000,
+        erc20ForwarderEnabled:true,
         skipMintCheckboxEnabled:true,
         metaTransactionsEnabled:false,
+        // Proxy contract for Meta Tx or ERC20 Forwarder
         proxyContract:{
-          enabled:false,
+          enabled:true,
           abi:IdleProxyMinter,
           name:'IdleProxyMinter',
           function:'mintIdleTokensProxy',
@@ -882,7 +884,7 @@ const globalConfigs = {
         }
       },
       biconomy:{
-        enabled:false,
+        enabled:true,
         enableLogin:false,
         supportedNetworks:[1,42],
         disabledWallets:['authereum'],

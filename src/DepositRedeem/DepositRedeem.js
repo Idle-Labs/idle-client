@@ -323,6 +323,7 @@ class DepositRedeem extends Component {
       const curveDepositContract = this.functionsUtil.getGlobalConfig(['curve','depositContract']);
       this.functionsUtil.enableERC20(this.props.selectedToken,curveDepositContract.address,callbackApprove,callbackReceiptApprove);
     } else {
+      // Check Proxy Contract Approved for Deposit with Biconomy
       const proxyContract = this.state.actionProxyContract[this.state.action];
       if (proxyContract && this.state.metaTransactionsEnabled && this.props.biconomy){
         this.functionsUtil.enableERC20(this.props.selectedToken,proxyContract.address,callbackApprove,callbackReceiptApprove);
@@ -333,13 +334,12 @@ class DepositRedeem extends Component {
   }
 
   checkTokenApproved = async () => {
-
     let tokenApproved = false;
-
     if (this.state.depositCurveEnabled){
       const curveDepositContract = this.functionsUtil.getGlobalConfig(['curve','depositContract']);
       tokenApproved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken,curveDepositContract.address,this.props.account);
     } else {
+      // Check Proxy Contract Approved for Deposit with Biconomy
       const proxyContract = this.state.actionProxyContract[this.state.action];
       if (proxyContract && this.state.metaTransactionsEnabled && this.props.biconomy){
         tokenApproved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken,proxyContract.address,this.props.account);
@@ -644,7 +644,7 @@ class DepositRedeem extends Component {
         const curveConfig = this.functionsUtil.getGlobalConfig(['curve']);
         const curveTokenEnabled = curveConfig.enabled && this.functionsUtil.getGlobalConfig(['curve','availableTokens',this.props.tokenConfig.idle.token,'enabled']);
 
-        // Handle Curve Deposit
+        // Curve Deposit
         if (curveTokenEnabled && this.state.depositCurveEnabled){
 
           const curvePoolContractInfo = this.functionsUtil.getGlobalConfig(['curve','poolContract']);
@@ -661,6 +661,7 @@ class DepositRedeem extends Component {
           const depositParams = [amounts,minMintAmount];
 
           contractSendResult = await this.functionsUtil.contractMethodSendWrapper(this.state.curveDepositContract.name, 'add_liquidity', depositParams, callbackDeposit, callbackReceiptDeposit);
+        // Normal Deposit
         } else {
           const tokensToDeposit = this.functionsUtil.normalizeTokenAmount(inputValue,this.props.tokenConfig.decimals);
 
@@ -1057,7 +1058,10 @@ class DepositRedeem extends Component {
     const batchDepositEnabled = batchDepositInfo.enabled && typeof batchDepositInfo.props.availableTokens[this.props.tokenConfig.idle.token] !== 'undefined';
     const batchDepositDepositEnabled = batchDepositInfo.depositEnabled;
 
-    const showBatchDeposit = batchDepositEnabled && batchDepositDepositEnabled && !this.props.isMigrationTool && this.state.action === 'deposit';
+    const biconomyPermitClient = this.props.biconomy.permitClient;
+    const biconomyERC20ForwarderClient = this.props.biconomy.erc20ForwarderClient;
+
+    const showBatchDeposit = !useMetaTx && batchDepositEnabled && batchDepositDepositEnabled && !this.props.isMigrationTool && this.state.action === 'deposit';
 
     const ethWrapperInfo = this.functionsUtil.getGlobalConfig(['tools','ethWrapper']);
     const ETHWrapperComponent = ethWrapperInfo.subComponent;

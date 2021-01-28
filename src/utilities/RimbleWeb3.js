@@ -475,6 +475,11 @@ class RimbleTransaction extends React.Component {
               return false;
             }
 
+            const ercForwarderClient = biconomy.erc20ForwarderClient;
+            const permitClient = biconomy.permitClient;
+
+            // console.log('biconomy',biconomy,'ercForwarderClient',ercForwarderClient,'permitClient',permitClient);
+
             const newState = {
               web3,
               biconomy,
