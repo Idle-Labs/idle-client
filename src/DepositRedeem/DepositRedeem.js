@@ -1171,6 +1171,9 @@ class DepositRedeem extends Component {
     const batchDepositEnabled = batchDepositInfo.enabled && typeof batchDepositInfo.props.availableTokens[this.props.tokenConfig.idle.token] !== 'undefined';
     const batchDepositDepositEnabled = batchDepositInfo.depositEnabled;
 
+    const biconomyPermitClient = this.props.biconomy.permitClient;
+    const biconomyERC20ForwarderClient = this.props.biconomy.erc20ForwarderClient;
+
     const showBatchDeposit = !useMetaTx && batchDepositEnabled && batchDepositDepositEnabled && !this.props.isMigrationTool && this.state.action === 'deposit';
 
     const ethWrapperInfo = this.functionsUtil.getGlobalConfig(['tools','ethWrapper']);

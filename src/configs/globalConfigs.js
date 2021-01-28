@@ -846,7 +846,7 @@ const globalConfigs = {
           }
         },
         proxyContract:{
-          enabled:false,
+          enabled:true,
           abi:IdleProxyMinter,
           name:'IdleProxyMinter',
           function:'mintIdleTokensProxy',
