@@ -2,6 +2,7 @@ import Web3 from "web3";
 import jQuery from 'jquery';
 import theme from "../theme";
 import Tos from "../Tos/Tos";
+import themeDark from "../theme-dark";
 import connectors from './connectors';
 import Web3Provider from 'web3-react';
 import { Web3Consumer } from 'web3-react';
@@ -30,6 +31,7 @@ class App extends Component {
   state = {
     cachedData:{},
     buyToken: null,
+    theme:themeDark,
     selectedTab: '1',
     route: "default", // or 'onboarding'
     connecting: false,
@@ -479,11 +481,13 @@ class App extends Component {
     return (
       <Router>
         <ScrollToTop />
-        <ThemeProvider theme={theme}>
+        <ThemeProvider
+          theme={this.state.theme}
+        >
           <Web3Provider
+            web3Api={Web3}
             connectors={connectors}
             libraryName={'web3.js'}
-            web3Api={Web3}
           >
             <Web3Consumer>
               {context => {
@@ -612,6 +616,7 @@ class App extends Component {
                                       setCallbackAfterLogin={this.setCallbackAfterLogin.bind(this)}
                                     />
                                   </Suspense>
+
                               }
                             >
                             </Route>
@@ -760,12 +765,12 @@ class App extends Component {
                                         <Landing
                                           {...props}
                                           web3={web3}
-                                          theme={theme}
                                           network={network}
                                           account={account}
                                           isMobile={isMobile}
                                           simpleID={simpleID}
                                           contracts={contracts}
+                                          theme={this.state.theme}
                                           innerWidth={this.state.width}
                                           logout={this.logout.bind(this)}
                                           innerHeight={this.state.height}

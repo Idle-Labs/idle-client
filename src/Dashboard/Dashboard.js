@@ -517,8 +517,10 @@ class Dashboard extends Component {
         >
           <Card
             p={[0,3]}
+            border={0}
             width={['100vw','auto']}
             height={['auto','100vh']}
+            backgroundColor={'menuBg'}
             >
             <DashboardMenu
               {...this.props}

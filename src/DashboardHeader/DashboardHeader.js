@@ -156,13 +156,13 @@ class DashboardHeader extends Component {
                 <Icon
                   mr={1}
                   size={'1.2em'}
-                  color={'#3f4e9a'}
+                  color={'flashColor'}
                   name={'LightbulbOutline'}
                 />
                 <Text
                   fontWeight={500}
-                  color={'#3f4e9a'}
                   fontSize={'15px'}
+                  color={'flashColor'}
                   textAlign={'center'}
                 >
                   Do you have any idea to improve the Idle Protocol? Let's discuss it in our

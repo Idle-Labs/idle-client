@@ -3,6 +3,17 @@ import styles from './DashboardCard.module.scss';
 import { Flex, Icon, Heading, Card, Tooltip } from "rimble-ui";
 
 class DashboardCard extends Component {
+
+  state = {
+    mouseOver:false
+  }
+
+  setMouseOver(mouseOver){
+    this.setState({
+      mouseOver
+    });
+  }
+
   render() {
     const isDisabled = this.props.isDisabled;
     const isActive = this.props.isActive && !isDisabled;
@@ -16,8 +27,14 @@ class DashboardCard extends Component {
       borderRadius:2,
       position:'relative',
       minHeight:'initial',
-      background:'cardBg'
+      borderColor:'cardBorder',
+      backgroundColor:'cardBg'
     };
+
+    if (isActive || (isInteractive && this.state.mouseOver)){
+      cardProps.backgroundColor = 'cardBgHover';
+      cardProps.boxShadow = 'cardHoverShadow';
+    }
 
     // Replace props
     if (this.props.cardProps && Object.keys(this.props.cardProps).length){
@@ -44,6 +61,8 @@ class DashboardCard extends Component {
         {...cardProps}
         className={className}
         onClick={this.props.handleClick}
+        onMouseOut={(e) => this.setMouseOver(false)}
+        onMouseOver={(e) => this.setMouseOver(true)}
       >
         {
           this.props.title && this.props.title.length>0 &&

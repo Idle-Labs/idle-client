@@ -215,6 +215,8 @@ class EarningsEstimation extends Component {
         py={[2,3]}
         boxShadow={1}
         borderRadius={2}
+        borderColor={'cardBorder'}
+        backgroundColor={'cardBg'}
       >
         <Flex
           mt={2}
@@ -344,7 +346,7 @@ class EarningsEstimation extends Component {
                       <Flex
                         height={'100%'}
                         width={cursorPerc}
-                        backgroundColor={'#ffffff'}
+                        backgroundColor={'cardBg'}
                       >
                         <Flex
                           height={'100%'}

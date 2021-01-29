@@ -91,7 +91,7 @@ class DashboardMenu extends Component {
                     borderRadius={[0,2]}
                     flexDirection={'row'}
                     alignItems={'center'}
-                    backgroundColor={ menuLink.selected ? '#f3f6ff' : 'transparent' }
+                    backgroundColor={ menuLink.selected ? 'menuHover' : 'transparent' }
                     boxShadow={menuLink.selected ? '0px 0px 0px 1px rgba(0,54,255,0.3)' : null}
                   >
                     <Flex
@@ -106,8 +106,8 @@ class DashboardMenu extends Component {
                           ml={[0,2]}
                           mb={[1,0]}
                           align={'center'}
-                          src={ menuLink.selected ? menuLink.image : (menuLink.imageInactive ? menuLink.imageInactive : menuLink.image)}
                           height={['1.2em','1.6em']}
+                          src={ menuLink.selected ? menuLink.image : (menuLink.imageInactive ? menuLink.imageInactive : menuLink.image)}
                         />
                       }
                       {menuLink.icon &&

@@ -106,8 +106,8 @@ class TotalEarningsCounter extends Component {
     }
 
     const decimals = this.props.decimals || 8;
-    const maxPrecision =  this.props.maxPrecision || 10;
-    const minPrecision =  this.props.minPrecision || 8;
+    const maxPrecision = this.props.maxPrecision || 10;
+    const minPrecision = this.props.minPrecision || 8;
 
     return this.state.earningsStart && this.state.earningsEnd ? (
       <Box
