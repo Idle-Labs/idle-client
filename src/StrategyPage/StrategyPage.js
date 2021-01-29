@@ -1350,6 +1350,7 @@ class StrategyPage extends Component {
                           return (
                             <Flex
                               width={[1,1/3]}
+                              key={`tool_${toolIndex}`}
                               mb={toolIndex<2 ? [2,0] : 0}
                               pr={toolIndex<2 ? [0,3] : 0}
                             >

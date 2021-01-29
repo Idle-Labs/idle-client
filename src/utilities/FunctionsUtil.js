@@ -2974,6 +2974,21 @@ class FunctionsUtil {
 
     return output;
   }
+  getIdleTokenSupply = async (idleToken,blockNumber='latest') => {
+    const cachedDataKey = `idleTokenSupply_${idleToken}_${blockNumber}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData && !this.BNify(cachedData).isNaN()){
+      return this.BNify(cachedData);
+    }
+
+    let idleTokenSupply = await this.genericContractCall(idleToken,'totalSupply',[],{},blockNumber);
+    if (idleTokenSupply){
+      idleTokenSupply = this.BNify(idleTokenSupply);
+      return this.setCachedDataWithLocalStorage(cachedDataKey,idleTokenSupply);
+    }
+
+    return null;
+  }
   getIdleTokenPrice = async (tokenConfig,blockNumber='latest',timestamp=false) => {
 
     const cachedDataKey = `idleTokenPrice_${tokenConfig.idle.token}_${blockNumber}`;
@@ -4742,6 +4757,115 @@ class FunctionsUtil {
   getGovTokenUserBalance = async (govTokenConfig,account=null,availableTokens=null,convertToken=null) => {
     const govTokensUserBalances = await this.getGovTokensUserBalances(account,availableTokens,convertToken,govTokenConfig);
     return govTokensUserBalances && govTokensUserBalances[govTokenConfig.token] ? govTokensUserBalances[govTokenConfig.token] : this.BNify(0);
+  }
+  getTotalTVL = async () => {
+    const tokensTVL = await this.getTokensTVL();
+    return Object.values(tokensTVL).reduce( (totalTVL,tokenInfo) => {
+      const tokenTVL = this.BNify(tokenInfo.totalTVL);
+      if (tokenTVL && !tokenTVL.isNaN()){
+        totalTVL = totalTVL.plus(tokenTVL);
+      }
+      return totalTVL;
+    },this.BNify(0));
+  }
+  getTokensTVL = async () => {
+    const output = {};
+    const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
+    await this.asyncForEach(Object.keys(this.props.availableStrategies),async (strategy) => {
+      const isRisk = strategy === 'risk';
+      const availableTokens = this.props.availableStrategies[strategy];
+      await this.asyncForEach(Object.keys(availableTokens),async (token) => {
+
+        let tokenTVL = this.BNify(0);
+        let totalTVL = this.BNify(0);
+        let oldTokenTVL = this.BNify(0);
+        const tokenConfig = availableTokens[token];
+        const idleTokenName = tokenConfig.idle.token;
+
+        output[idleTokenName] = {
+          tokenTVL,
+          totalTVL,
+          oldTokenTVL,
+          govTokens:{},
+        };
+
+        const [
+          tokenPrice,
+          totalSupply
+        ] = await Promise.all([
+          this.getIdleTokenPrice(tokenConfig),
+          this.getIdleTokenSupply(tokenConfig)
+        ]);
+
+        tokenTVL = this.fixTokenDecimals(totalSupply,18).times(tokenPrice);
+        tokenTVL = await this.convertTokenBalance(tokenTVL,token,tokenConfig,isRisk);
+
+        output[idleTokenName].tokenTVL = tokenTVL;
+        totalTVL = totalTVL.plus(tokenTVL);
+
+        // Add Gov Tokens
+        const govTokens = this.getTokenGovTokens(tokenConfig);
+        if (govTokens){
+          await this.asyncForEach(Object.keys(govTokens).filter( govToken => (govTokens[govToken].showAUM) ), async (govToken) => {
+            const govTokenConfig = govTokens[govToken];
+            const [
+              govTokenBalance,
+              govTokenConversionRate
+            ] = await Promise.all([
+              this.getProtocolBalance(govToken,tokenConfig.idle.address),
+              this.getUniswapConversionRate(DAITokenConfig,govTokenConfig)
+            ]);
+            
+            if (govTokenBalance && govTokenConversionRate){
+              const govTokenBalanceConverted = this.fixTokenDecimals(govTokenBalance,govTokenConfig.decimals).times(this.BNify(govTokenConversionRate));
+              if (govTokenBalanceConverted && !govTokenBalanceConverted.isNaN()){
+                totalTVL = totalTVL.plus(govTokenBalanceConverted);
+                output[idleTokenName].govTokens[govToken] = govTokenBalanceConverted;
+              }
+            }
+          });
+        }
+
+        // Get old token allocation
+        if (tokenConfig.migration && tokenConfig.migration.oldContract){
+          const oldTokenConfig = Object.assign({},tokenConfig);
+          oldTokenConfig.protocols = Object.values(tokenConfig.protocols);
+          oldTokenConfig.idle = Object.assign({},tokenConfig.migration.oldContract);
+
+          // Replace protocols with old protocols
+          if (oldTokenConfig.migration.oldProtocols){
+            oldTokenConfig.migration.oldProtocols.forEach( oldProtocol => {
+              const foundProtocol = oldTokenConfig.protocols.find( p => (p.name === oldProtocol.name) );
+              if (foundProtocol){
+                const protocolPos = oldTokenConfig.protocols.indexOf(foundProtocol);
+                oldTokenConfig.protocols[protocolPos] = oldProtocol;
+              }
+            });
+          }
+
+          const [
+            oldTokenPrice,
+            oldTotalSupply
+          ] = await Promise.all([
+            this.getIdleTokenPrice(oldTokenConfig),
+            this.getIdleTokenSupply(oldTokenConfig.idle.name)
+          ]);
+
+          if (oldTokenPrice && oldTotalSupply){
+            oldTokenTVL = this.fixTokenDecimals(oldTotalSupply,18).times(oldTokenPrice);
+            oldTokenTVL = await this.convertTokenBalance(oldTokenTVL,token,oldTokenConfig,isRisk);
+            if (oldTokenTVL && !oldTokenTVL.isNaN()){
+              output[idleTokenName].oldTokenTVL = oldTokenTVL;
+              totalTVL = totalTVL.plus(oldTokenTVL);
+            }
+          }
+        }
+
+        output[idleTokenName].totalTVL = totalTVL;
+      });
+    });
+
+    return output;
   }
   getAggregatedStats = async (addGovTokens=true) => {
 
