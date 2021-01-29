@@ -323,7 +323,7 @@ class StrategyPage extends Component {
     const riskScore = this.functionsUtil.getGlobalConfig(['messages','riskScore']);
     const yieldFarming = this.functionsUtil.getGlobalConfig(['messages','yieldFarming']);
     const batchDepositConfig = this.functionsUtil.getGlobalConfig(['tools','batchDeposit']);
-    // const coverProtocolConfig = this.functionsUtil.getGlobalConfig(['tools','coverProtocol']);
+    const coverProtocolConfig = this.functionsUtil.getGlobalConfig(['tools','coverProtocol']);
 
     return (
       <Box
@@ -1320,7 +1320,7 @@ class StrategyPage extends Component {
                 </Flex>
               </Flex>
               {
-                this.props.account && (
+                this.props.account && coverProtocolConfig.enabled && (
                   <Flex
                     mt={3}
                     width={1}

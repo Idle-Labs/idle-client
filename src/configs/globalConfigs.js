@@ -47,7 +47,7 @@ const env = process.env;
 
 const globalConfigs = {
   appName: 'Idle',
-  version: 'v5.4',
+  version: 'v5.5',
   baseToken: 'ETH',
   baseURL: 'https://idle.finance',
   forumURL:'https://gov.idle.finance',
@@ -871,7 +871,7 @@ const globalConfigs = {
   ],
   tools:{
     coverProtocol:{
-      enabled:true,
+      enabled:false,
       label:'Cover Protocol',
       route:'cover-protocol',
       subComponent:CoverProtocol,
