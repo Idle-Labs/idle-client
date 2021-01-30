@@ -1,4 +1,3 @@
-import theme from "../theme";
 import Select from 'react-select';
 import React, { Component } from 'react';
 import { Flex, Text, Input } from "rimble-ui";
@@ -131,11 +130,12 @@ class GenericSelector extends Component {
       return (
         <Input
           {...props}
-          fontSize={theme.fontSizes[2]}
-          color={theme.colors.copyColor}
-          fontWeight={theme.fontWeights[3]}
-          fontFamily={theme.fonts.sansSerif}
-          className={[styles.searchInput,!props.selectProps.menuIsOpen ? styles.searchInputHidden : null]}
+          fontSize={this.props.theme.fontSizes[2]}
+          color={this.props.theme.colors.copyColor}
+          fontWeight={this.props.theme.fontWeights[3]}
+          fontFamily={this.props.theme.fonts.sansSerif}
+          backgroundColor={this.props.theme.colors.cardBg}
+          className={[styles.searchInput,this.props.themeMode==='dark' ? styles.dark : null,!props.selectProps.menuIsOpen ? styles.searchInputHidden : null]}
         />
       );
     };
@@ -166,7 +166,7 @@ class GenericSelector extends Component {
           style={{cursor:'pointer'}}
           justifyContent={'flex-start'}
           className={styles.genericSelector}
-          backgroundColor={ props.isFocused ? '#fbfbfb' : '#ffffff' }
+          backgroundColor={ props.isFocused ? 'selectBgFocused' : 'selectBg' }
         >
           <CustomOptionValue
             {...props}

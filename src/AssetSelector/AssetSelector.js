@@ -237,6 +237,7 @@ class AssetSelector extends Component {
 
     return (
       <GenericSelector
+        {...this.props}
         name={'assets'}
         options={this.state.options}
         innerProps={this.props.innerProps}

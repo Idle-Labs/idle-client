@@ -1,6 +1,6 @@
-import theme from '../theme';
 import Migrate from '../Migrate/Migrate';
 import React, { Component } from 'react';
+import styles from './DepositRedeem.module.scss';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import ConnectBox from '../ConnectBox/ConnectBox';
 import CurveRedeem from '../CurveRedeem/CurveRedeem';
@@ -1422,7 +1422,7 @@ class DepositRedeem extends Component {
                           alignItems={'center'}
                           flexDirection={'row'}
                           justifyContent={'center'}
-                          backgroundColor={'white'}
+                          backgroundColor={'DashboardCard'}
                           border={`1px solid ${this.props.theme.colors.primary}`}
                         >
                           <Link
@@ -1902,10 +1902,13 @@ class DepositRedeem extends Component {
                                     height={'3.4em'}
                                     borderRadius={2}
                                     fontWeight={500}
+                                    className={styles.input}
+                                    borderColor={'cardBorder'}
+                                    backgroundColor={'cardBg'}
                                     boxShadow={'none !important'}
                                     placeholder={`Insert amount`}
                                     onChange={this.changeInputValue.bind(this)}
-                                    border={`1px solid ${theme.colors.divider}`}
+                                    border={`1px solid ${this.props.theme.colors.divider}`}
                                     value={this.state.inputValue[this.state.action] !== null ? this.functionsUtil.BNify(this.state.inputValue[this.state.action]).toFixed() : ''}
                                   />
                                   <Flex

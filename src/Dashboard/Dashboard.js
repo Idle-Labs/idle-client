@@ -58,9 +58,10 @@ class Dashboard extends Component {
         route:baseRoute+'/'+strategy,
         label:strategies[strategy].title,
         image:strategies[strategy].icon,
-        imageInactive:strategies[strategy].iconInactive,
         bgColor:strategies[strategy].color,
-        component:strategies[strategy].component
+        component:strategies[strategy].component,
+        imageInactive:strategies[strategy].iconInactive,
+        imageInactiveDark:strategies[strategy].iconInactiveDark
       })
     );
 
@@ -277,6 +278,8 @@ class Dashboard extends Component {
   }
 
   async componentWillMount() {
+
+    this.props.setCurrentSection('dashboard');
 
     this.loadUtils();
     await this.loadMenu();

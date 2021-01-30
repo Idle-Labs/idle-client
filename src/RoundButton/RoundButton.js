@@ -10,7 +10,7 @@ class RoundButton extends Component {
       height:'45px',
       boxShadow:null,
       borderRadius:4,
-      mainColor:'primary'
+      mainColor:'blue'
     },this.props.buttonProps);
 
     return (

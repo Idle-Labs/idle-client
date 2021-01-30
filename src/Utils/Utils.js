@@ -42,6 +42,7 @@ class Utils extends Component {
                 width={1}
               >
                 <Breadcrumb
+                  {...this.props}
                   showPathMobile={true}
                   isMobile={this.props.isMobile}
                   path={[this.props.selectedSubsection.label]}

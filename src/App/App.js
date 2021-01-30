@@ -31,20 +31,22 @@ class App extends Component {
   state = {
     cachedData:{},
     buyToken: null,
-    theme:themeDark,
     selectedTab: '1',
     route: "default", // or 'onboarding'
+    themeMode:'light',
     connecting: false,
     tokenConfig: null,
     genericError: null,
     customAddress: null,
     connectorName: null,
     selectedToken: null,
+    selectedTheme:theme,
     walletProvider: null,
     availableTokens: null,
     buyModalOpened: false,
     selectedStrategy: null,
     toastMessageProps: null,
+    currentSection:'landing',
     callbackAfterLogin: null,
     width: window.innerWidth,
     availableStrategies: null,
@@ -329,6 +331,17 @@ class App extends Component {
   componentDidUpdate(prevProps,prevState){
     this.loadUtils();
 
+    const currentSectionChanged = prevState.currentSection !== this.state.currentSection;
+    if (currentSectionChanged){
+      console.log('currentSectionChanged',this.state.currentSection);
+      if (this.state.currentSection === 'landing'){
+        this.setThemeMode('light');
+      } else {
+        // this.setThemeMode('light');
+        this.setThemeMode('dark');
+      }
+    }
+
     const tokenChanged = prevState.selectedToken !== this.state.selectedToken;
     const strategyChanged = prevState.selectedStrategy !== this.state.selectedStrategy;
 
@@ -338,6 +351,7 @@ class App extends Component {
   }
 
   componentDidMount() {
+
     // Close iFrame
     if (window.self !== window.top && window.top.location.href.indexOf(globalConfigs.baseURL) !== -1 && typeof window.parent.closeIframe === 'function' ){
       window.parent.closeIframe(window.self);
@@ -446,6 +460,29 @@ class App extends Component {
     });
   }
 
+  setThemeMode(themeMode){
+    let selectedTheme = null;
+    switch (themeMode){
+      default:
+      case 'light':
+        selectedTheme = theme;
+      break;
+      case 'dark':
+        selectedTheme = themeDark;
+      break;
+    }
+    this.setState({
+      themeMode,
+      selectedTheme
+    });
+  }
+
+  setCurrentSection(currentSection){
+    this.setState({
+      currentSection
+    });
+  }
+
   render() {
     const isMobile = this.state.width <= 768;
     const governanceEnabled = this.functionsUtil.getGlobalConfig(['governance','enabled']);
@@ -467,7 +504,8 @@ class App extends Component {
           }}
           loaderProps={{
             mb:3,
-            size:'80px'
+            size:'80px',
+            color:'blue'
           }}
           flexProps={{
             my:3,
@@ -482,7 +520,7 @@ class App extends Component {
       <Router>
         <ScrollToTop />
         <ThemeProvider
-          theme={this.state.theme}
+          theme={this.state.selectedTheme}
         >
           <Web3Provider
             web3Api={Web3}
@@ -560,7 +598,6 @@ class App extends Component {
                                     <Dashboard
                                       {...props}
                                       web3={web3}
-                                      theme={theme}
                                       modals={modals}
                                       network={network}
                                       context={context}
@@ -578,6 +615,8 @@ class App extends Component {
                                       buyToken={this.state.buyToken}
                                       logout={this.logout.bind(this)}
                                       accountBalance={accountBalance}
+                                      themeMode={this.state.themeMode}
+                                      theme={this.state.selectedTheme}
                                       validateAccount={validateAccount}
                                       connecting={this.state.connecting}
                                       cachedData={this.state.cachedData}
@@ -611,6 +650,7 @@ class App extends Component {
                                       setStrategyToken={this.setStrategyToken.bind(this)}
                                       accountValidationPending={accountValidationPending}
                                       availableStrategies={this.state.availableStrategies}
+                                      setCurrentSection={this.setCurrentSection.bind(this)}
                                       connectAndValidateAccount={connectAndValidateAccount}
                                       contractMethodSendWrapper={contractMethodSendWrapper}
                                       setCallbackAfterLogin={this.setCallbackAfterLogin.bind(this)}
@@ -632,7 +672,6 @@ class App extends Component {
                                         <Governance
                                           {...props}
                                           web3={web3}
-                                          theme={theme}
                                           modals={modals}
                                           network={network}
                                           context={context}
@@ -650,6 +689,8 @@ class App extends Component {
                                           buyToken={this.state.buyToken}
                                           logout={this.logout.bind(this)}
                                           accountBalance={accountBalance}
+                                          themeMode={this.state.themeMode}
+                                          theme={this.state.selectedTheme}
                                           validateAccount={validateAccount}
                                           connecting={this.state.connecting}
                                           cachedData={this.state.cachedData}
@@ -683,6 +724,7 @@ class App extends Component {
                                           setStrategyToken={this.setStrategyToken.bind(this)}
                                           accountValidationPending={accountValidationPending}
                                           availableStrategies={this.state.availableStrategies}
+                                          setCurrentSection={this.setCurrentSection.bind(this)}
                                           connectAndValidateAccount={connectAndValidateAccount}
                                           contractMethodSendWrapper={contractMethodSendWrapper}
                                           setCallbackAfterLogin={this.setCallbackAfterLogin.bind(this)}
@@ -770,11 +812,12 @@ class App extends Component {
                                           isMobile={isMobile}
                                           simpleID={simpleID}
                                           contracts={contracts}
-                                          theme={this.state.theme}
                                           innerWidth={this.state.width}
                                           logout={this.logout.bind(this)}
                                           innerHeight={this.state.height}
                                           accountBalance={accountBalance}
+                                          themeMode={this.state.themeMode}
+                                          theme={this.state.selectedTheme}
                                           cachedData={this.state.cachedData}
                                           connecting={this.state.connecting}
                                           selectedTab={this.state.selectedTab}
@@ -794,6 +837,7 @@ class App extends Component {
                                           toastMessageProps={this.state.toastMessageProps}
                                           clearCachedData={this.clearCachedData.bind(this)}
                                           availableStrategies={this.state.availableStrategies}
+                                          setCurrentSection={this.setCurrentSection.bind(this)}
                                           connectAndValidateAccount={connectAndValidateAccount}
                                           setToken={ e => { this.setToken(e) } }
                                         />
@@ -828,7 +872,10 @@ class App extends Component {
                               ) : null}
                             </Route>
                           </Switch>
-                          <TransactionToastUtil transactions={transactions} />
+                          <TransactionToastUtil
+                            transactions={transactions}
+                            themeMode={this.state.themeMode}
+                          />
                         </Box>
                       )}}
                     </RimbleWeb3.Consumer>

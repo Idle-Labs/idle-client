@@ -1,4 +1,3 @@
-import theme from '../theme';
 import React, { Component } from 'react';
 import { Flex, Link, Text } from "rimble-ui";
 import RoundIconButton from '../RoundIconButton/RoundIconButton';
@@ -18,6 +17,7 @@ class Breadcrumb extends Component {
           this.props.handleClick && 
            <RoundIconButton
              buttonProps={{
+               border:2,
                width:'35px',
                height:'35px'
              }}
@@ -56,7 +56,7 @@ class Breadcrumb extends Component {
                     overflow: 'hidden',
                     whiteSpace: 'nowrap',
                     textOverflow: 'ellipsis',
-                    borderLeft: `1px solid ${theme.colors.divider}`
+                    borderLeft: `1px solid ${this.props.theme.colors.divider}`
                   } : null }
                   key={`breadcrumb_path_${index}`}
                   color={link ? 'cellText' : 'statValue'}

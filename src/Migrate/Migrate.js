@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import styles from './Migrate.module.scss';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
@@ -1059,6 +1060,9 @@ class Migrate extends Component {
                               height={'3.4em'}
                               borderRadius={2}
                               fontWeight={500}
+                              className={styles.input}
+                              borderColor={'cardBorder'}
+                              backgroundColor={'cardBg'}
                               boxShadow={'none !important'}
                               placeholder={'Insert amount'}
                               onChange={this.changeInputValue.bind(this)}

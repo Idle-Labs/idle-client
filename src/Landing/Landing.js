@@ -56,6 +56,7 @@ class Landing extends Component {
 
   componentWillMount(){
     this.loadUtils();
+    this.props.setCurrentSection('landing');
   }
 
   setActiveCarousel = (activeCarousel) => {

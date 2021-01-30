@@ -1,4 +1,3 @@
-import theme from '../theme';
 import Title from '../Title/Title';
 import React, { Component } from 'react';
 import { Flex, Heading, Text } from "rimble-ui";
@@ -308,7 +307,7 @@ class FundsOverview extends Component {
                     maxPrecision:8,
                     fontWeight:300,
                     fontSize:['1.8em','1.9em'],
-                    color:theme.colors.counter,
+                    color:this.props.theme.colors.counter,
                     flexProps:{
                       justifyContent:'center'
                     }
@@ -340,7 +339,7 @@ class FundsOverview extends Component {
                     maxPrecision:8,
                     style:{
                       fontWeight:300,
-                      color:theme.colors.counter,
+                      color:this.props.theme.colors.counter,
                       fontSize: this.props.isMobile ? '1.8em' : '1.9em',
                     },
                     flexProps:{
@@ -395,7 +394,7 @@ class FundsOverview extends Component {
                     style:{
                       fontWeight:300,
                       fontSize:this.props.isMobile ? '1.8em' : '1.9em',
-                      color:theme.colors.counter
+                      color:this.props.theme.colors.counter
                     },
                     flexProps:{
                       justifyContent:'center'
@@ -484,7 +483,7 @@ class FundsOverview extends Component {
                     style:{
                       fontWeight:300,
                       fontSize:this.props.isMobile ? '1.8em' : '1.9em',
-                      color:theme.colors.counter
+                      color:this.props.theme.colors.counter
                     },
                     flexProps:{
                       justifyContent:'center'
@@ -516,7 +515,7 @@ class FundsOverview extends Component {
                     decimals:2,
                     fontWeight:300,
                     fontSize:['1.8em','1.9em'],
-                    color:theme.colors.counter,
+                    color:this.props.theme.colors.counter,
                     flexProps:{
                       justifyContent:'center'
                     }
@@ -622,7 +621,7 @@ class FundsOverview extends Component {
                     decimals:1,
                     fontWeight:300,
                     fontSize:['1.8em','1.9em'],
-                    color:theme.colors.counter,
+                    color:this.props.theme.colors.counter,
                     flexProps:{
                       justifyContent:'center'
                     }

@@ -126,6 +126,7 @@ class AssetPage extends Component {
             width={0.5}
           >
             <Breadcrumb
+              {...this.props}
               isMobile={this.props.isMobile}
               path={[this.props.selectedToken]}
               handleClick={ e => this.props.goToSection(this.props.selectedStrategy) }

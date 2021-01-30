@@ -26,7 +26,7 @@ export default {
   heights: [0, 16, 32, 64, 128, 256],
   minHeights: [0, 16, 32, 64, 128, 256],
   maxHeights: [0, 16, 32, 64, 128, 256],
-  borders: [0, '1px solid #e0e0e0'],
+  borders: [0, '1px solid #eee','1px solid #b6c2ff'],
   borderWidths: ['0', '1px', '2px', '4px'],
   shadows: [
     '0',
@@ -66,6 +66,9 @@ export default {
     /*
     NEW COLORS
     */
+    selectBgFocused:'#fbfbfb',
+    selectBg:'#ffffff',
+    backButtonBg:'#ffffff',
     lineChartStroke:'#dbdbdb',
     dashboardBg: '#f9fafd',
     statValue: '#959595',

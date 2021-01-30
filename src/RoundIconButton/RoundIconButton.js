@@ -6,11 +6,11 @@ class RoundIconButton extends Component {
   render() {
     const buttonProps = Object.assign({
       p:0,
-      boxShadow:1,
+      border:1,
       width:'40px',
       height:'40px',
-      mainColor:'white',
       borderRadius:'50%',
+      mainColor:'backButtonBg',
       disabled:this.props.disabled
     },this.props.buttonProps);
 

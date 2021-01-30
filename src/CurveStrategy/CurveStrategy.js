@@ -727,6 +727,7 @@ class AssetPage extends Component {
           >
             {
               <Breadcrumb
+                {...this.props}
                 isMobile={this.props.isMobile}
                 path={['Boost',this.state.selectedToken]}
                 handleClick={ e => this.props.goToSection('best') }

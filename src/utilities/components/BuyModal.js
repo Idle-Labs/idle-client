@@ -509,7 +509,16 @@ class BuyModal extends React.Component {
                   imageProps = Object.assign(imageProps,imagePropsExtended);
 
                   return (
-                    <ImageButton isMobile={ this.props.isMobile } key={`method_${method}`} {...methodInfo.props} imageProps={ imageProps } handleClick={ e => this.selectMethod(e,method) } />
+                    <ImageButton
+                      {...methodInfo.props}
+                      buttonProps={{
+                        border:2
+                      }}
+                      key={`method_${method}`}
+                      imageProps={ imageProps }
+                      isMobile={ this.props.isMobile }
+                      handleClick={ e => this.selectMethod(e,method) }
+                    />
                   );
                 })
               }
@@ -571,12 +580,15 @@ class BuyModal extends React.Component {
                     Select your country:
                   </Text>
                   <Select
-                    maxWidth={ this.props.showInline && !this.props.isMobile ? '25em' : 'auto' }
-                    placeholder={'Select your country'}
-                    noOptionsMessage={ (inputValue) => 'For European countries select Europe' }
+                    bg={'#162e4d'}
+                    backgroundColor={'#162e4d'}
                     value={this.state.selectedCountry}
+                    placeholder={'Select your country'}
                     onChange={this.handleCountryChange}
                     options={this.getAvailableCountries()}
+                    maxWidth={ this.props.showInline && !this.props.isMobile ? '25em' : 'auto' }
+                    noOptionsMessage={ (inputValue) => 'For European countries select Europe' }
+                    className={this.props.themeMode === 'light' ? styles.select : styles.selectDark}
                   />
                 </Box>
               }
@@ -675,23 +687,24 @@ class BuyModal extends React.Component {
           <ModalCard.Footer>
             <Flex px={[2,0]} flexDirection={['column', 'row']} width={1} justifyContent={'center'}>
               <Button
-                borderRadius={4}
                 my={2}
                 mx={[0, 2]}
-                size={this.props.isMobile ? 'small' : 'medium'}
+                borderRadius={4}
+                mainColor={'blue'}
                 onClick={ e => this.closeModal(e) }
+                size={this.props.isMobile ? 'small' : 'medium'}
               >
               CLOSE
               </Button>
               {
                 this.state.selectedToken !== null && (this.props.buyToken === null || this.state.selectedMethod !== null) && (
                   <Button
-                    className={styles.gradientButton}
-                    borderRadius={4}
                     my={2}
                     mx={[0, 2]}
-                    size={this.props.isMobile ? 'small' : 'medium'}
+                    borderRadius={4}
                     onClick={ e => this.goBack(e) }
+                    className={styles.gradientButton}
+                    size={this.props.isMobile ? 'small' : 'medium'}
                   >
                     GO BACK
                   </Button>

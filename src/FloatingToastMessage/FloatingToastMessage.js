@@ -23,12 +23,20 @@ class FloatingToastMessage extends Component {
 
     if (ToastComponent){
       return (
-        <Flex width={ !this.props.isMobile ? '420px': '100vw' } position={'fixed'} zIndex={'9999'} p={ !this.props.isMobile ? '1em' : 0 } right={'0'} bottom={'0'}>
+        <Flex
+          right={'0'}
+          bottom={'0'}
+          zIndex={'9999'}
+          position={'fixed'}
+          p={ !this.props.isMobile ? '1em' : 0 }
+          width={ !this.props.isMobile ? '420px': '100vw' }
+        >
           <ToastComponent
+            closeElem={false}
             style={{width:'100%'}}
+            backgroundColor={'cardBg'}
             message={this.props.message}
             secondaryMessage={this.props.secondaryMessage}
-            closeElem={false}
           />
           <Link onClick={this.props.handleClose} style={ this.props.isMobile ? {position:'absolute',top:'10px',right:'10px',width:'20px',height:'20px'} : {position:'absolute',top:'22px',right:'22px',width:'16px',height:'16px'}}>
             <Icon

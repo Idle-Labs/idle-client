@@ -260,14 +260,16 @@ class EstimatedEarnings extends Component {
             >
               <Input
                 min={0}
-                max={this.state.maxInputValue}
                 type={"number"}
                 required={true}
-                height={['3em','3.4em']}
                 borderRadius={2}
                 fontWeight={500}
                 textAlign={'center'}
+                height={['3em','3.4em']}
+                borderColor={'cardBorder'}
                 boxShadow={'none !important'}
+                max={this.state.maxInputValue}
+                backgroundColor={'cardBgHover'}
                 onChange={this.changeInputValue.bind(this)}
                 border={`1px solid ${theme.colors.divider}`}
                 placeholder={`Insert ${this.props.selectedToken.toUpperCase()} amount`}

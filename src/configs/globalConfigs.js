@@ -429,6 +429,7 @@ const globalConfigs = {
       chartColor:'hsl(40,95%,59%)',
       icon:'images/strategies/best-on.svg',
       iconInactive:'images/strategies/best-off.svg',
+      iconInactiveDark:'images/strategies/best-white.svg',
       desc:'Maximize your returns across DeFi protocols',
       descLong:'The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols. Idle’s monitoring system automatically triggers a rebalance if it spots a better-performing allocation: this includes taking account of the total liquidity within the pool, incorporating underlying protocol rate functions and levels of supply and demand. As a user, you will end up with an higher return without constantly checking rates and burning gas on every transfer. Unlock your funds from a single protocol performance with this strategy.',
       descShort:'The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols.'
@@ -446,6 +447,7 @@ const globalConfigs = {
       chartColor:'hsl(211,67%,47%)',
       icon:'images/strategies/risk-on.svg',
       iconInactive:'images/strategies/risk-off.svg',
+      iconInactiveDark:'images/strategies/risk-white.svg',
       desc:'Optimize your risk exposure across DeFi protocols',
       descLong:'The Risk-Adjusted allocation strategy provides a way to earn the best rate at the lowest risk-level. The risk-management algorithm takes account of the total assets within a pool, incorporates underlying protocol rate functions and levels of supply and demand, skimming protocols with a bad score/rate mix, and finally determining an allocation that achieves the highest risk-return score possible after the rebalance happens.',
       descShort:'The Risk-Adjusted allocation strategy provides a way to earn the best rate at the lowest risk-level.'

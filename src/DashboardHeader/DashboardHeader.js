@@ -1,4 +1,3 @@
-import theme from '../theme';
 import ExtLink from '../ExtLink/ExtLink';
 import React, { Component } from 'react';
 import MenuAccount from '../MenuAccount/MenuAccount';
@@ -87,7 +86,7 @@ class DashboardHeader extends Component {
           flexDirection={'row'}
           justifyContent={'space-between'}
           alignItems={['flex-end','center']}
-          borderBottom={`1px solid ${theme.colors.divider}`}
+          borderBottom={`1px solid ${this.props.theme.colors.divider}`}
         >
           <MenuAccount
             {...this.props}

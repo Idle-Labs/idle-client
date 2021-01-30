@@ -1,4 +1,3 @@
-import theme from '../theme';
 import { Pie } from '@nivo/pie';
 import React, { Component } from 'react';
 import { Flex, Text, Image } from "rimble-ui";
@@ -96,29 +95,31 @@ class AllocationChart extends Component {
           selectedSlice:null
         });
       },
-      sliceLabel: d => d.value+'%',
       tooltipFormat: v => v+'%',
+      sliceLabel: d => d.value+'%',
       radialLabel: d => {
         return null;
       },
       theme:{
         tooltip: {
-          container: this.props.inline ? {} : {
-            display: 'none'
+          container: this.props.inline ? {
+            background: this.props.theme.colors.cardBg
+          } : {
+            display: 'none',
           }
         },
         labels:{
           text:{
-            fontSize:this.props.isMobile ? 13 : 15,
             fontWeight:600,
-            fontFamily: theme.fonts.sansSerif
+            fontSize:this.props.isMobile ? 13 : 15,
+            fontFamily: this.props.theme.fonts.sansSerif
           }
         },
         legends:{
           text:{
             fontSize:13,
             fontWeight:500,
-            fontFamily: theme.fonts.sansSerif
+            fontFamily: this.props.theme.fonts.sansSerif
           }
         }
       },

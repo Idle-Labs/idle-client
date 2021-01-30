@@ -48,6 +48,8 @@ class DashboardMenu extends Component {
       return null;
     }
 
+    const isDarkTheme = this.props.themeMode === 'dark';
+
     return (
       <Flex
         p={0}
@@ -66,7 +68,7 @@ class DashboardMenu extends Component {
                 <Image
                   position={'relative'}
                   height={['35px','38px']}
-                  src="images/logo-gradient.svg"
+                  src={ !isDarkTheme ? 'images/logo-gradient.svg' : 'images/logo-white.svg'}
                 />
               </RouterLink>
             </Flex>
@@ -75,6 +77,7 @@ class DashboardMenu extends Component {
           visibleLinks.map((menuLink,menuIndex) => {
             const isExternalLink = menuLink.isExternalLink;
             const LinkComponent = isExternalLink ? ExtLink : RouterLink;
+            const inactiveImage = isDarkTheme && menuLink.imageInactiveDark ? menuLink.imageInactiveDark : menuLink.imageInactive;
             return (
               <Box
                 my={[0,3]}
@@ -91,8 +94,8 @@ class DashboardMenu extends Component {
                     borderRadius={[0,2]}
                     flexDirection={'row'}
                     alignItems={'center'}
+                    border={menuLink.selected ? 2 : null}
                     backgroundColor={ menuLink.selected ? 'menuHover' : 'transparent' }
-                    boxShadow={menuLink.selected ? '0px 0px 0px 1px rgba(0,54,255,0.3)' : null}
                   >
                     <Flex
                       width={1}
@@ -107,7 +110,7 @@ class DashboardMenu extends Component {
                           mb={[1,0]}
                           align={'center'}
                           height={['1.2em','1.6em']}
-                          src={ menuLink.selected ? menuLink.image : (menuLink.imageInactive ? menuLink.imageInactive : menuLink.image)}
+                          src={ menuLink.selected ? menuLink.image : inactiveImage}
                         />
                       }
                       {menuLink.icon &&

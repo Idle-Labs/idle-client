@@ -12,6 +12,17 @@
 .newPill{
   background:linear-gradient(180deg,#01b5eb,#017ed4);
 }
+.ethInput{
+  background:#fff;
+}
+.ethInputDark{
+  color:#fff !important;
+  background:#162e4d !important;
+  *{
+    color:#fff !important;
+    background:#162e4d !important;
+  }
+}
 .mainInput {
   padding-left: 0 !important;
   padding-right: 1em !important;

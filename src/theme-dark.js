@@ -26,7 +26,7 @@ export default {
   heights: [0, 16, 32, 64, 128, 256],
   minHeights: [0, 16, 32, 64, 128, 256],
   maxHeights: [0, 16, 32, 64, 128, 256],
-  borders: [0, '1px solid #e0e0e0'],
+  borders: [0, '1px solid #0d2034','1px solid #475d7c'],
   borderWidths: ['0', '1px', '2px', '4px'],
   shadows: [
     '0',
@@ -39,7 +39,7 @@ export default {
     disabled: 0.4,
   },
   colors: {
-    primary: blue.base,
+    primary: '#fcfcfc',
     'gradient-bg': 'linear-gradient(120deg, #f6d365 0%, #ea0d73 100%)',
     'primary-light': blue.light[1],
     'primary-dark': blue.dark[1],
@@ -51,7 +51,7 @@ export default {
     copyColor: '#fcfcfc',
     subColor: '#a7a7a7',
     black: baseColors.black,
-    'near-black': '#111',
+    'near-black': '#1e3657',
     'dark-gray': '#fcfcfc',
     'mid-gray': '#999',
     gray: ' #e0e0e0',
@@ -60,20 +60,23 @@ export default {
     'light-silver': '#aaa',
     'moon-gray': '#ccc',
     'light-gray': '#eee',
-    'near-white': '#f4f4f4',
+    'near-white': '#a4aec6',
     white: '#fff',
     transparent: 'transparent',
     /*
     NEW COLORS
     */
-    lineChartStroke:'#dbdbdb',
+    selectBgFocused:'#1e3657',
+    selectBg:'#162e4d',
+    backButtonBg:'#162e4d',
+    lineChartStroke:'#a4aec6',
     dashboardBg: '#13273f',
-    statValue: '#959595',
+    statValue: '#a4aec6',
     boxBorder: '#eeeeee',
     cellTitle: '#a4aec6',
     cellText: '#a4aec6',
-    divider: '#d8d8d8',
-    counter: '#5d5d5d',
+    divider: '#a4aec6',
+    counter: '#a4aec6',
     redeem: '#00a9fe',
     deposit: '#0239ff',
     migrate: '#00a9fe',
@@ -156,9 +159,9 @@ export default {
   zIndices: [0, 9, 99, 999, 9999],
   messageStyle: {
     base: {
-      color: shade(0.4, '#AAA'),
-      backgroundColor: tint(0.9, '#AAA'),
-      borderColor: '#AAA',
+      color: '#fcfcfc',
+      borderColor: '#0d2034',
+      backgroundColor: '#162e4d',
     },
     success: {
       color: shade(0.4, green.base),
@@ -176,9 +179,9 @@ export default {
       borderColor: red.base,
     },
     info: {
-      color: shade(0.4, blue.base),
-      backgroundColor: '#f3f6ff',
-      borderColor: '#b6c2ff',
+      color: '#fcfcfc',
+      borderColor: '#0d2034',
+      backgroundColor: '#162e4d',
     },
   },
   buttons: {

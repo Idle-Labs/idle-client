@@ -36,9 +36,13 @@ const ModalCard = ({children, closeFunc, ...props}) => (
       className={[ props.bgLayer ? styles.bg : null]}
       style={{
         overflow: 'auto',
-        background: props.background ? props.background : 'url(images/bg-bottom-right.png) no-repeat bottom right',
-        backgroundSize: !props.background ? '65%' : null
+        backgroundRepeat:'no-repeat',
+        backgroundPosition:'bottom right',
+        backgroundSize: !props.background ? '65%' : null,
+        backgroundImage:'url(/images/bg-bottom-right.png)',
+        background: props.background ? props.background : null,
       }}
+      backgroundColor={'cardBg'}
     >
       {children}
     </Flex>

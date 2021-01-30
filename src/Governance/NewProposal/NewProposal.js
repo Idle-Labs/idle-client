@@ -600,7 +600,7 @@ class NewProposal extends Component {
           </DashboardCard>
         ) : 
         // Has balance
-        this.props.votes && this.props.votes.gte(this.props.proposalThreshold) ? (
+        this.props.votes && this.functionsUtil.BNify(this.props.votes).gte(this.props.proposalThreshold) ? (
           <Form
             width={1}
             validated={this.state.validated}
@@ -1169,7 +1169,7 @@ class NewProposal extends Component {
               }
             </Flex>
           </Form>
-        ) : this.props.balance && this.props.balance.gte(this.props.proposalThreshold) ? (
+        ) : this.props.balance && this.functionsUtil.BNify(this.props.balance).gte(this.props.proposalThreshold) ? (
           <Flex
             width={1}
             alignItems={'center'}

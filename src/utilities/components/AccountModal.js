@@ -183,6 +183,7 @@ class AccountModal extends React.Component {
                   <EthAddress
                     width={1}
                     address={this.props.account}
+                    className={ this.props.themeMode === 'light' ? styles.ethInput : styles.ethInputDark }
                   />
                 </Flex>
                 <Flex
@@ -193,6 +194,7 @@ class AccountModal extends React.Component {
                   maxWidth={['100%','30em']}
                 >
                   <Heading.h4
+                    color={'copyColor'}
                     textAlign={'center'}
                   >
                     Balances:
@@ -208,6 +210,7 @@ class AccountModal extends React.Component {
                 >
                   <Heading.h4
                     mb={2}
+                    color={'copyColor'}
                     textAlign={'center'}
                   >
                     Tools:

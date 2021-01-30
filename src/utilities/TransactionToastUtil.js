@@ -1,6 +1,6 @@
 import React from "react";
-import TransactionToastMessages from "./TransactionToastMessages";
 import { ToastMessage } from "rimble-ui";
+import TransactionToastMessages from "./TransactionToastMessages";
 
 class TransactionToastUtil extends React.Component {
   // Determines if collections are same size
@@ -96,7 +96,7 @@ class TransactionToastUtil extends React.Component {
     // console.log("showTransactionToast: ", { ...transaction });
     // Get text info for toast
     let toastMeta = this.getTransactionToastMeta(transaction);
-    toastMeta.colorTheme = 'light';
+    toastMeta.colorTheme = this.props.themeMode;
     toastMeta.closeElem = true;
     // console.log('toastMeta',toastMeta);
 
@@ -172,6 +172,7 @@ class TransactionToastUtil extends React.Component {
     newMessage = newMessage.charAt(0).toUpperCase() + newMessage.slice(1);
     transactionToastMeta.message = newMessage;
     transactionToastMeta.closeElem = true;
+    transactionToastMeta.colorTheme = this.props.themeMode;
 
     return transactionToastMeta;
   };

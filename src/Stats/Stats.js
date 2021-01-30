@@ -911,6 +911,7 @@ class Stats extends Component {
                 width={[1,0.4]}
               >
                 <Breadcrumb
+                  {...this.props}
                   showPathMobile={true}
                   text={'ASSETS OVERVIEW'}
                   isMobile={this.props.isMobile}

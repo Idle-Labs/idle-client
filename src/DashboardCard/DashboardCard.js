@@ -23,17 +23,19 @@ class DashboardCard extends Component {
 
     const cardProps = {
       p:0,
+      border:1,
       boxShadow:1,
       borderRadius:2,
+      borderColor:null,
       position:'relative',
       minHeight:'initial',
-      borderColor:'cardBorder',
       backgroundColor:'cardBg'
     };
 
     if (isActive || (isInteractive && this.state.mouseOver)){
+      cardProps.border = 2;
+      cardProps.boxShadow = null;
       cardProps.backgroundColor = 'cardBgHover';
-      cardProps.boxShadow = 'cardHoverShadow';
     }
 
     // Replace props

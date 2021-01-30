@@ -1,4 +1,3 @@
-import theme from '../theme';
 import { Line } from '@nivo/line';
 import React, { Component } from 'react';
 // import { linearGradientDef } from '@nivo/core'
@@ -397,7 +396,6 @@ class PortfolioEquity extends Component {
       },
       animate:true,
       pointLabel:'y',
-      areaOpacity:0.1,
       enableArea:true,
       enableSlices:'x',
       enableGridY:true,
@@ -408,14 +406,15 @@ class PortfolioEquity extends Component {
       pointLabelYOffset:-12,
       areaBaselineValue:minChartValue,
       pointColor:{ from: 'color', modifiers: []},
+      areaOpacity:this.props.themeMode === 'light' ? 0.1 : 0.5,
       theme:{
         axis: {
           ticks: {
             text: {
               fontSize:12,
               fontWeight:600,
-              fill:theme.colors.legend,
-              fontFamily: theme.fonts.sansSerif
+              fill:this.props.theme.colors.legend,
+              fontFamily:this.props.theme.fonts.sansSerif
             }
           }
         },

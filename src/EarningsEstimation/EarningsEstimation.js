@@ -1,4 +1,3 @@
-import theme from '../theme';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import AssetField from '../AssetField/AssetField';
@@ -255,7 +254,7 @@ class EarningsEstimation extends Component {
                 id={`asset-${token}`}
                 flexDirection={'row'}
                 key={`asset-${token}`}
-                borderTop={ token === 'USD' ? `1px solid ${theme.colors.divider}` : null }
+                borderTop={ token === 'USD' ? `1px solid ${this.props.theme.colors.divider}` : null }
               >
                 <Flex
                   width={[1,0.93]}
@@ -294,7 +293,7 @@ class EarningsEstimation extends Component {
                               width={estimationStep.width}
                               pt={ token === 'USD' ? 2 : null }
                               key={`asset-estimate-${token}-${estimateIndex}`}
-                              borderRight={`1px solid ${theme.colors.divider}`}
+                              borderRight={`1px solid ${this.props.theme.colors.divider}`}
                             >
                               {
                                 (token === 'USD' || (estimateIndex === Object.keys(estimationSteps).length-1)) && 
@@ -444,7 +443,7 @@ class EarningsEstimation extends Component {
                         justifyContent={'flex-end'}
                         width={estimationStep.width}
                         key={`estimate-label-${estimateIndex}`}
-                        borderRight={`1px solid ${theme.colors.divider}`}
+                        borderRight={`1px solid ${this.props.theme.colors.divider}`}
                       >
                         <Text
                           fontWeight={3}
