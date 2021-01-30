@@ -262,7 +262,7 @@ class Notifications extends Component {
                         py={2}
                         px={1}
                         flexDirection={'row'}
-                        className={styles.notification}
+                        className={[styles.notification,this.props.themeMode === 'dark' ? styles.dark : null]}
                         borderBottom={index<this.state.notifications.length-1 ? `1px solid ${this.props.theme.colors.divider}` : null}
                       >
                         <Flex
@@ -294,8 +294,8 @@ class Notifications extends Component {
                         >
                           <Text
                             fontSize={1}
-                            color={'blue'}
                             lineHeight={1.3}
+                            color={'primary'}
                           >
                             {n.title}
                           </Text>
