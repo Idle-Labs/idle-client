@@ -41,12 +41,12 @@ class App extends Component {
     connectorName: null,
     selectedToken: null,
     selectedTheme:theme,
+    currentSection:null,
     walletProvider: null,
     availableTokens: null,
     buyModalOpened: false,
     selectedStrategy: null,
     toastMessageProps: null,
-    currentSection:'landing',
     callbackAfterLogin: null,
     width: window.innerWidth,
     availableStrategies: null,
@@ -309,6 +309,11 @@ class App extends Component {
       }
     }
 
+    const themeMode = this.functionsUtil.getStoredItem('themeMode',false);
+    if (themeMode){
+      this.setThemeMode(themeMode);
+    }
+
     window.closeIframe = (w) => {
       const iFrames = document.getElementsByTagName('iframe');
       for (let i=0;i<iFrames.length;i++){
@@ -333,12 +338,12 @@ class App extends Component {
 
     const currentSectionChanged = prevState.currentSection !== this.state.currentSection;
     if (currentSectionChanged){
-      console.log('currentSectionChanged',this.state.currentSection);
       if (this.state.currentSection === 'landing'){
-        this.setThemeMode('light');
+        this.setThemeMode('light',false);
       } else {
-        // this.setThemeMode('light');
-        this.setThemeMode('dark');
+        // Get stored Mode
+        const themeMode = this.functionsUtil.getStoredItem('themeMode',false) || this.functionsUtil.getGlobalConfig(['dashboard','themeMode']);
+        this.setThemeMode(themeMode);
       }
     }
 
@@ -460,7 +465,7 @@ class App extends Component {
     });
   }
 
-  setThemeMode(themeMode){
+  setThemeMode(themeMode,store=true){
     let selectedTheme = null;
     switch (themeMode){
       default:
@@ -471,6 +476,11 @@ class App extends Component {
         selectedTheme = themeDark;
       break;
     }
+
+    if (store){
+      this.functionsUtil.setLocalStorage('themeMode',themeMode);
+    }
+
     this.setState({
       themeMode,
       selectedTheme
@@ -641,6 +651,7 @@ class App extends Component {
                                       rejectAccountConnect={rejectAccountConnect}
                                       handleMenuClick={this.selectTab.bind(this)}
                                       setConnector={this.setConnector.bind(this)}
+                                      setThemeMode={this.setThemeMode.bind(this)}
                                       availableTokens={this.state.availableTokens}
                                       closeBuyModal={this.closeBuyModal.bind(this)}
                                       setCachedData={this.setCachedData.bind(this)}
@@ -715,6 +726,7 @@ class App extends Component {
                                           rejectAccountConnect={rejectAccountConnect}
                                           handleMenuClick={this.selectTab.bind(this)}
                                           setConnector={this.setConnector.bind(this)}
+                                          setThemeMode={this.setThemeMode.bind(this)}
                                           availableTokens={this.state.availableTokens}
                                           closeBuyModal={this.closeBuyModal.bind(this)}
                                           setCachedData={this.setCachedData.bind(this)}
@@ -830,6 +842,7 @@ class App extends Component {
                                           closeToastMessage={this.closeToastMessage}
                                           contractsInitialized={contractsInitialized}
                                           openBuyModal={this.openBuyModal.bind(this)}
+                                          setThemeMode={this.setThemeMode.bind(this)}
                                           processCustomParam={this.processCustomParam}
                                           availableTokens={this.state.availableTokens}
                                           setCachedData={this.setCachedData.bind(this)}

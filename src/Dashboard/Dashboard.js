@@ -513,7 +513,7 @@ class Dashboard extends Component {
       >
         <Flex
           bottom={0}
-          zIndex={1}
+          zIndex={99999}
           width={[1,1/6]}
           flexDirection={'column'}
           position={['fixed','relative']}
@@ -533,13 +533,14 @@ class Dashboard extends Component {
         </Flex>
         <Flex
           py={3}
-          px={[3,5]}
           mb={0}
+          px={[3,5]}
           width={[1,5/6]}
           style={{
             overflowY:'scroll',
             overflowX:'hidden'
           }}
+          height={['90vh','auto']}
           flexDirection={'columns'}
           backgroundColor={'dashboardBg'}
         >

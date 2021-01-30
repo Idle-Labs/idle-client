@@ -111,8 +111,8 @@ class DashboardHeader extends Component {
               >
                 <Text
                   fontWeight={500}
-                  color={'#3f4e9a'}
                   fontSize={'15px'}
+                  color={'flashColor'}
                   textAlign={'center'}
                 >
                   IDLE Governance Token is now available, 
@@ -131,6 +131,7 @@ class DashboardHeader extends Component {
                   ml={[0,2]}
                   mt={[2,0]}
                   size={'small'}
+                  mainColor={'blue'}
                   onClick={ e => this.setGovModal(true) }
                 >
                   CLAIM NOW

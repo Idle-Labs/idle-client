@@ -253,6 +253,8 @@ class DelegateVote extends Component {
                       borderRadius={2}
                       fontWeight={500}
                       textAlign={'center'}
+                      borderColor={'cardBorder'}
+                      backgroundColor={'cardBg'}
                       boxShadow={'none !important'}
                       value={this.state.newDelegate}
                       placeholder={`Insert delegate address`}

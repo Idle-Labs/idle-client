@@ -2,7 +2,7 @@ import ExtLink from '../ExtLink/ExtLink';
 import React, { Component } from 'react';
 import { Link as RouterLink } from "react-router-dom";
 import FunctionsUtil from '../utilities/FunctionsUtil';
-import { Flex, Box, Icon, Text, Image } from 'rimble-ui';
+import { Flex, Box, Icon, Text, Image, Link } from 'rimble-ui';
 
 class DashboardMenu extends Component {
   state = {
@@ -138,28 +138,58 @@ class DashboardMenu extends Component {
                     </Flex>
                   </Flex>
                 </LinkComponent>
-                {
-                  /*
-                  menuLink.submenu.length>0 && (
-                    <Flex className={[styles.submenu]} style={{maxHeight:menuLink.selected ? menuLink.submenu.length*36+'px' : '0' }} flexDirection={'column'} borderLeft={ menuLink.selected ? '2px solid rgba(0,0,0,0.3)' : null }>
-                      {
-                        menuLink.submenu.map((submenuLink,submenuIndex) => {
-                          return (
-                            <RouterLink key={`submenu-${menuIndex}-${submenuIndex}`} to={`${menuLink.route}/${submenuLink.route}`} style={{textDecoration:'none'}}>
-                              <Flex py={2} pl={'40px'} flexDirection={'row'} alignItems={'center'}>
-                                <Text fontSize={'0.85rem'}>{submenuLink.label}</Text>
-                              </Flex>
-                            </RouterLink>
-                          )
-                        })
-                      }
-                    </Flex>
-                  )
-                  */
-                }
               </Box>
             );
           })
+        }
+        {
+          !this.props.isMobile && (
+            <Box
+              my={[0,3]}
+              width={[1/visibleLinks.length,'auto']}
+            >
+              <Link
+                style={{textDecoration:'none'}}
+                onClick={ e => this.props.setThemeMode(this.props.themeMode === 'light' ? 'dark' : 'light') }
+              >
+                <Flex
+                  p={[2,3]}
+                  borderRadius={[0,2]}
+                  flexDirection={'row'}
+                  alignItems={'center'}
+                  backgroundColor={'transparent'}
+                >
+                  <Flex
+                    width={1}
+                    alignItems={'center'}
+                    flexDirection={['column','row']}
+                    justifyContent={['center','flex-start']}
+                  >
+                    <Icon
+                      mr={[0,3]}
+                      ml={[0,2]}
+                      mb={[1,0]}
+                      align={'center'}
+                      size={'1.6em'}
+                      color={'copyColor'}
+                      name={this.props.themeMode === 'light' ? 'Brightness3' : 'WbSunny'}
+                    />
+                    <Text
+                      fontWeight={3}
+                      color={'copyColor'}
+                      textAlign={'center'}
+                      fontSize={['11px',2]}
+                      style={{
+                        whiteSpace:'nowrap'
+                      }}
+                    >
+                      {this.props.themeMode === 'light' ? 'Switch to Dark' : 'Switch to Light'}
+                    </Text>
+                  </Flex>
+                </Flex>
+              </Link>
+            </Box>
+          )
         }
         {
         /*

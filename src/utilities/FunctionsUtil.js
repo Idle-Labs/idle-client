@@ -1779,6 +1779,9 @@ class FunctionsUtil {
 
       // console.log(proposals);
 
+      const IDLETokenAddress = this.getGlobalConfig(['govTokens','IDLE','address']).toLowerCase();
+      const LockedIDLETokenAddress = this.getGlobalConfig(['contracts','LockedIDLE','address']).toLowerCase();
+
       const validProposals = [];
       await this.asyncForEach(proposals, async (p) => {
         // Add proposal if ended
@@ -1786,8 +1789,8 @@ class FunctionsUtil {
           validProposals.push(p);
         } else {
           const blockNumber = p.msg.payload.snapshot;
-          const checkIDLEBalance = p.msg.payload.metadata.strategies ? p.msg.payload.metadata.strategies.find( s => s.name==='erc20-balance-of' && s.params && s.params.address && s.params.address.toLowerCase() === this.getGlobalConfig(['govTokens','IDLE','address']).toLowerCase() ) || null : null;
-          const checkLockedIDLEBalance = p.msg.payload.metadata.strategies ? p.msg.payload.metadata.strategies.find( s => s.name==='erc20-balance-of' && s.params && s.params.address && s.params.address.toLowerCase() === this.getGlobalConfig(['contracts','LockedIDLE','address']).toLowerCase() ) || null : null;
+          const checkIDLEBalance = p.msg.payload.metadata.strategies ? p.msg.payload.metadata.strategies.find( s => s.name==='erc20-balance-of' && s.params && s.params.address && s.params.address.toLowerCase() === IDLETokenAddress ) || null : null;
+          const checkLockedIDLEBalance = p.msg.payload.metadata.strategies ? p.msg.payload.metadata.strategies.find( s => s.name==='erc20-balance-of' && s.params && s.params.address && s.params.address.toLowerCase() === LockedIDLETokenAddress ) || null : null;
 
           const [
             IDLEBalance,

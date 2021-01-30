@@ -172,6 +172,7 @@ const globalConfigs = {
     }
   },
   dashboard:{
+    themeMode:'light',
     baseRoute:'/dashboard',
   },
   governance:{
