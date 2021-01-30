@@ -208,9 +208,9 @@ class TransactionsList extends Component {
     const txsIndexes = Object.values(this.state.prevTxs)
                         .filter(tx => (!!parseFloat(tx.value))) // Filter txs with value
                         .filter(tx => (
-                          (this.state.activeFilters.status === null || tx.status.toLowerCase() === this.state.activeFilters.status.toLowerCase()) && 
-                          (this.state.activeFilters.assets === null || tx.token.toLowerCase() === this.state.activeFilters.assets.toLowerCase()) &&
-                          ( availableActions.includes(tx.action.toLowerCase()) && (this.state.activeFilters.actions === null || (tx.action.toLowerCase() === this.state.activeFilters.actions.toLowerCase()) ))
+                          (this.state.activeFilters.status === null || (tx.status && tx.status.toLowerCase() === this.state.activeFilters.status.toLowerCase())) && 
+                          (this.state.activeFilters.assets === null || (tx.token && tx.token.toLowerCase() === this.state.activeFilters.assets.toLowerCase())) &&
+                          ( tx.action && availableActions.includes(tx.action.toLowerCase()) && (this.state.activeFilters.actions === null || (tx.action.toLowerCase() === this.state.activeFilters.actions.toLowerCase()) ))
                         )) // Filter by activeFilters
                         .sort((a,b) => (a.timeStamp > b.timeStamp) ? -1 : 1 );
 
