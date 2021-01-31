@@ -87,6 +87,7 @@ export default {
     menuHover:'#f3f6ff',
     cardBg:'#fff',
     flashColor:'#3f4e9a',
+    menuRightBorder:'#eee',
     cardHoverShadow:'0px 0px 0px 1px rgba(0, 54, 255, 0.3)',
     cardBgHover:'#f7f8ff',
     cardBorder:'#eee',

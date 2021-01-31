@@ -80,7 +80,7 @@ class DashboardMenu extends Component {
             const inactiveImage = isDarkTheme && menuLink.imageInactiveDark ? menuLink.imageInactiveDark : menuLink.imageInactive;
             return (
               <Box
-                my={[0,3]}
+                my={[0,2]}
                 key={`menu-${menuIndex}`}
                 width={[1/visibleLinks.length,'auto']}
               >
@@ -90,7 +90,8 @@ class DashboardMenu extends Component {
                   style={{textDecoration:'none'}}
                 >
                   <Flex
-                    p={[2,3]}
+                    py={[2,3]}
+                    px={[2,3]}
                     borderRadius={[0,2]}
                     flexDirection={'row'}
                     alignItems={'center'}
@@ -145,7 +146,7 @@ class DashboardMenu extends Component {
         {
           !this.props.isMobile && (
             <Box
-              my={[0,3]}
+              my={[0,2]}
               width={[1/visibleLinks.length,'auto']}
             >
               <Link
@@ -153,7 +154,8 @@ class DashboardMenu extends Component {
                 onClick={ e => this.props.setThemeMode(this.props.themeMode === 'light' ? 'dark' : 'light') }
               >
                 <Flex
-                  p={[2,3]}
+                  py={[2,3]}
+                  px={[2,3]}
                   borderRadius={[0,2]}
                   flexDirection={'row'}
                   alignItems={'center'}
@@ -165,15 +167,30 @@ class DashboardMenu extends Component {
                     flexDirection={['column','row']}
                     justifyContent={['center','flex-start']}
                   >
-                    <Icon
-                      mr={[0,3]}
-                      ml={[0,2]}
-                      mb={[1,0]}
-                      align={'center'}
-                      size={'1.6em'}
-                      color={'copyColor'}
-                      name={this.props.themeMode === 'light' ? 'Brightness3' : 'WbSunny'}
-                    />
+                    {
+                      this.props.themeMode === 'light' ? (
+                        <Image
+                          mr={[0,3]}
+                          ml={[0,2]}
+                          mb={[1,0]}
+                          width={'1.6em'}
+                          height={'1.6em'}
+                          name={'WbSunny'}
+                          align={'center'}
+                          src={'/images/idle-mark-dark.png'}
+                        />
+                      ) : (
+                        <Icon
+                          mr={[0,3]}
+                          ml={[0,2]}
+                          mb={[1,0]}
+                          size={'1.6em'}
+                          name={'WbSunny'}
+                          align={'center'}
+                          color={'copyColor'}
+                        />
+                      )
+                    }
                     <Text
                       fontWeight={3}
                       color={'copyColor'}
@@ -183,7 +200,7 @@ class DashboardMenu extends Component {
                         whiteSpace:'nowrap'
                       }}
                     >
-                      {this.props.themeMode === 'light' ? 'Switch to Dark' : 'Switch to Light'}
+                      {this.props.themeMode === 'light' ? 'Join the Dark Side' : 'Back to Light'}
                     </Text>
                   </Flex>
                 </Flex>

@@ -1,7 +1,7 @@
 import Title from '../Title/Title';
 import CountUp from 'react-countup';
 import React, { Component } from 'react';
-import { Box, Text, Loader } from "rimble-ui";
+import { Box, Flex, Text, Loader } from "rimble-ui";
 import FunctionsUtil from '../utilities/FunctionsUtil';
 
 class AssetsUnderManagement extends Component {
@@ -104,7 +104,14 @@ class AssetsUnderManagement extends Component {
           )
         }
       </Box>
-    ) : (<Loader size="30px" />);
+    ) : (
+      <Flex
+        alignItems={'center'}
+        justifyContent={'center'}
+      >
+        <Loader size="30px" />
+      </Flex>
+    );
   }
 }
 

@@ -45,7 +45,8 @@ class PortfolioEquity extends Component {
     }
 
     const mobileChanged = prevProps.isMobile !== this.props.isMobile;
-    if (mobileChanged){
+    const themeModeChanged = prevProps.themeMode !== this.props.themeMode;
+    if (mobileChanged || themeModeChanged){
       this.loadChartData();
     }
   }
@@ -420,7 +421,7 @@ class PortfolioEquity extends Component {
         },
         grid: {
           line: {
-            stroke: '#dbdbdb', strokeDasharray: '8 4'
+            stroke: this.props.theme.colors.lineChartStroke, strokeDasharray: '8 4'
           }
         },
       },

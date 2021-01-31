@@ -60,6 +60,11 @@ class StrategyPage extends Component {
 
   async componentDidUpdate(prevProps, prevState) {
     this.loadUtils();
+
+    const themeModeChanged = prevProps.themeMode !== this.props.themeMode;
+    if (themeModeChanged){
+      this.loadPortfolio();
+    }
   }
 
   async setStateSafe(newState,callback=null) {
@@ -238,47 +243,6 @@ class StrategyPage extends Component {
                     {...this.props} 
                     portfolio={portfolio}
                   />
-                  {
-                    /*
-                    <CountUp
-                      delay={0}
-                      decimals={8}
-                      decimal={'.'}
-                      separator={''}
-                      useEasing={false}
-                      duration={31536000}
-                      end={parseFloat(earningsEnd)}
-                      start={parseFloat(earningsStart)}
-                      formattingFn={ n => '$ '+this.functionsUtil.abbreviateNumber(n,8,10,8) }
-                    >
-                      {({ countUpRef, start }) => (
-                        <span
-                          ref={countUpRef}
-                          style={{
-                            lineHeight:1,
-                            color:this.props.theme.colors.copyColor,
-                            fontFamily:this.props.theme.fonts.counter,
-                            fontWeight: this.props.isMobile ? 600 : 700,
-                            fontSize:this.props.isMobile ? '21px' : '1.7em',
-                          }}
-                        />
-                      )}
-                    </CountUp>
-                    */
-                  }
-                  {
-                    /*
-                    govTokensTotalBalance && govTokensTotalBalance.gt(0) &&
-                      <Text
-                        fontSize={1}
-                        fontWeight={2}
-                        color={'cellText'}
-                        textAlign={'center'}
-                      >
-                        {govTokensTotalBalanceTooltip.join(' / ')}
-                      </Text>
-                    */
-                  }
                 </Flex>
               ),
               label:'',

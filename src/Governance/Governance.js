@@ -380,6 +380,8 @@ class Dashboard extends Component {
             width={['100vw','auto']}
             height={['auto','100vh']}
             backgroundColor={'menuBg'}
+            borderColor={this.props.theme.colors.menuRightBorder}
+            borderRight={`1px solid ${this.props.theme.colors.menuRightBorder}`}
             >
             <DashboardMenu
               {...this.props}

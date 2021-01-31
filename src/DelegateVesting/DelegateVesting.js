@@ -239,12 +239,12 @@ class DelegateVesting extends Component {
         p={2}
         mt={3}
         width={1}
+        border={2}
         borderRadius={1}
         alignItems={'center'}
         flexDirection={'column'}
         justifyContent={'center'}
-        backgroundColor={'#f3f6ff'}
-        boxShadow={'0px 0px 0px 1px rgba(0,54,255,0.3)'}
+        backgroundColor={'cardBgHover'}
       >
         <Flex
           width={1}
@@ -256,7 +256,7 @@ class DelegateVesting extends Component {
             mb={1}
             fontSize={3}
             fontWeight={500}
-            color={'#3f4e9a'}
+            color={'flashColor'}
             textAlign={'center'}
           >
             You have {this.state.vestingAmount.div(1e18).toFixed(5)} {this.functionsUtil.getGlobalConfig(['governance','props','tokenName'])} in the Vesting Contract
@@ -266,7 +266,7 @@ class DelegateVesting extends Component {
               <Text
                 mb={1}
                 fontWeight={500}
-                color={'#3f4e9a'}
+                color={'flashColor'}
                 fontSize={'15px'}
                 textAlign={'center'}
               >
@@ -282,8 +282,8 @@ class DelegateVesting extends Component {
                 <Text
                   mb={1}
                   fontWeight={500}
-                  color={'#3f4e9a'}
                   fontSize={'15px'}
+                  color={'flashColor'}
                   textAlign={'center'}
                 >
                   {
@@ -311,8 +311,8 @@ class DelegateVesting extends Component {
                           ml={1}
                           fontWeight={500}
                           fontSize={'15px'}
-                          color={'#3f4e9a'}
                           textAlign={'left'}
+                          color={'flashColor'}
                         >
                           Insert delegate address
                         </Text>
@@ -332,7 +332,7 @@ class DelegateVesting extends Component {
                           ml={1}
                           fontWeight={500}
                           fontSize={'15px'}
-                          color={'#3f4e9a'}
+                          color={'flashColor'}
                           textAlign={'left'}
                         >
                           Delegate Vesting
@@ -356,6 +356,8 @@ class DelegateVesting extends Component {
               fontWeight={500}
               textAlign={'center'}
               width={['100%','30em']}
+              borderColor={'cardBorder'}
+              backgroundColor={'cardBg'}
               boxShadow={'none !important'}
               value={this.state.newDelegate}
               placeholder={`Insert delegate address`}
@@ -399,6 +401,7 @@ class DelegateVesting extends Component {
           : (!this.state.vestingContractDelegated || this.state.delegateDifferentWallet) && (
             <Button
               size={'small'}
+              mainColor={'blue'}
               onClick={ e => this.delegateVesting(false) }
               disabled={ this.state.delegateDifferentWallet && !this.state.delegateAddressValid }
             >

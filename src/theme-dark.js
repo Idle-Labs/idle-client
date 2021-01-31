@@ -88,8 +88,9 @@ export default {
     menuHover:'#1e3657',
     flashColor:'#bac5ff',
     cardBgHover:'#1e3657',
-    cardHoverShadow:'0px 0px 0px 1px rgb(45 74 114)',
     cardBorder:'#0d2034',
+    menuRightBorder:'#0d2034',
+    cardHoverShadow:'0px 0px 0px 1px rgb(45 74 114)',
     transactions:{
       action:{
         send:'#10a0dd',

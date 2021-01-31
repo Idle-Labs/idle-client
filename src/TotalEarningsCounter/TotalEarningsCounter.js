@@ -33,6 +33,18 @@ class TotalEarningsCounter extends Component {
     if (availableStrategiesChanged || contractsInitialized){
       this.loadTotalEarnings();
     }
+
+    const mobileChanged = prevProps.isMobile !== this.props.isMobile;
+    const themeModeChanged = prevProps.themeMode !== this.props.themeMode;
+    const styleChanged = JSON.stringify(prevProps.counterStyle) !== JSON.stringify(this.props.counterStyle);
+    if (styleChanged || themeModeChanged || mobileChanged){
+      this.setState({
+        earningsEnd:null,
+        earningsStart:null
+      },() => {
+        this.loadTotalEarnings();
+      });
+    }
   }
 
   async loadTotalEarnings(){

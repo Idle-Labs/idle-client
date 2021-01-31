@@ -51,12 +51,15 @@ class AssetField extends Component {
 
     const tokenChanged = prevProps.token !== this.props.token;
     const accountChanged = prevProps.account !== this.props.account;
+    const themeModeChanged = prevProps.themeMode !== this.props.themeMode;
     const fieldChanged = prevProps.fieldInfo.name !== this.props.fieldInfo.name;
     const contractInitialized = prevProps.contractsInitialized !== this.props.contractsInitialized && this.props.contractsInitialized;
     const transactionsChanged = prevProps.transactions && this.props.transactions && Object.values(prevProps.transactions).filter(tx => (tx.status==='success')).length !== Object.values(this.props.transactions).filter(tx => (tx.status==='success')).length;
 
-    if (fieldChanged || tokenChanged || accountChanged || transactionsChanged || (contractInitialized && !this.state.ready)){
-      this.setStateSafe({},() => {
+    if (themeModeChanged || fieldChanged || tokenChanged || accountChanged || transactionsChanged || (contractInitialized && !this.state.ready)){
+      this.setStateSafe({
+        ready:false
+      },() => {
         this.loadField();
       });
     }
@@ -159,6 +162,7 @@ class AssetField extends Component {
           if (redeemableBalanceCurveStart && redeemableBalanceCurveEnd){
             if (setState){
               this.setStateSafe({
+                ready:true,
                 redeemableBalanceCurveEnd,
                 redeemableBalanceCurveStart
               });
@@ -179,6 +183,7 @@ class AssetField extends Component {
           if (redeemableBalanceStart && redeemableBalanceEnd){
             if (setState){
               this.setStateSafe({
+                ready:true,
                 redeemableBalanceEnd,
                 redeemableBalanceStart
               });
@@ -211,6 +216,7 @@ class AssetField extends Component {
 
             if (setState){
               this.setStateSafe({
+                ready:true,
                 feesEnd,
                 feesStart
               });
@@ -234,6 +240,7 @@ class AssetField extends Component {
 
             if (setState){
               this.setStateSafe({
+                ready:true,
                 earningsCurveEnd,
                 earningsCurveStart
               });
@@ -257,6 +264,7 @@ class AssetField extends Component {
 
             if (setState){
               this.setStateSafe({
+                ready:true,
                 earningsEnd,
                 earningsStart
               });
@@ -730,6 +738,7 @@ class AssetField extends Component {
           output = await this.functionsUtil.loadAssetField(fieldName,this.props.token,this.props.tokenConfig,this.props.account,addGovTokens);
           if (output && setState){
             this.setStateSafe({
+              ready:true,
               [fieldName]:output
             });
           }
@@ -839,7 +848,7 @@ class AssetField extends Component {
         ) : loader
       break;
       case 'redeemableBalanceCounterCurve':
-        output = this.state.redeemableBalanceCurveStart && this.state.redeemableBalanceCurveEnd ? (
+        output = this.state.ready && this.state.redeemableBalanceCurveStart && this.state.redeemableBalanceCurveEnd ? (
           <CountUp
             delay={0}
             decimal={'.'}
@@ -858,7 +867,7 @@ class AssetField extends Component {
         ) : loader
       break;
       case 'redeemableBalanceCounter':
-        output = this.state.redeemableBalanceStart && this.state.redeemableBalanceEnd ? (
+        output = this.state.ready && this.state.redeemableBalanceStart && this.state.redeemableBalanceEnd ? (
           <CountUp
             delay={0}
             decimal={'.'}
@@ -877,7 +886,7 @@ class AssetField extends Component {
         ) : loader
       break;
       case 'feesCounter':
-        output = this.state.feesStart && this.state.feesEnd ? (
+        output = this.state.ready && this.state.feesStart && this.state.feesEnd ? (
           <CountUp
             delay={0}
             decimal={'.'}
@@ -896,7 +905,7 @@ class AssetField extends Component {
         ) : loader
       break;
       case 'earningsCounterCurve':
-        output = this.state.earningsCurveStart && this.state.earningsCurveEnd ? (
+        output = this.state.ready && this.state.earningsCurveStart && this.state.earningsCurveEnd ? (
           <CountUp
             delay={0}
             decimal={'.'}
@@ -915,7 +924,7 @@ class AssetField extends Component {
         ) : loader
       break;
       case 'earningsCounter':
-        output = this.state.earningsStart && this.state.earningsEnd ? (
+        output = this.state.ready && this.state.earningsStart && this.state.earningsEnd ? (
           <CountUp
             delay={0}
             decimal={'.'}

@@ -110,6 +110,7 @@ class ExecuteTransaction extends Component {
           : this.state.processing && this.state.processing.loading ? (
             <TxProgressBar
               web3={this.props.web3}
+              {...this.props.progressBarProps}
               hash={this.state.processing.txHash}
               waitText={`${this.props.action} estimated in`}
               cancelTransaction={this.cancelTransaction.bind(this)}

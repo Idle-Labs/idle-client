@@ -102,7 +102,6 @@ class MenuAccount extends Component {
                 display:'flex',
                 width:[1,'auto']
               }}
-              isActive={true}
               isInteractive={true}
               handleClick={e => this.toggleModal('account')}
             >
