@@ -54,6 +54,7 @@ class DepositRedeem extends Component {
     showAdvancedOptions:false,
     depositCurveSlippage:null,
     showETHWrapperEnabled:false,
+    erc20ForwarderEnabled:true,
     metaTransactionsEnabled:true,
     minAmountForMintReached:false
   };
@@ -129,6 +130,12 @@ class DepositRedeem extends Component {
   toggleRedeemGovTokens = (redeemGovTokens) => {
     this.setState({
       redeemGovTokens
+    });
+  }
+
+  ToggleErc20ForwarderEnabled = (erc20ForwarderEnabled) => {
+    this.setState({
+      erc20ForwarderEnabled
     });
   }
 
@@ -318,14 +325,22 @@ class DepositRedeem extends Component {
     this.setState(newState);
   }
 
+  checkUseProxyContract = () => {
+    const proxyContract = this.state.actionProxyContract[this.state.action];
+    const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','erc20ForwarderEnabled']) && this.state.erc20ForwarderEnabled;
+    const depositMetaTransactionsEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','metaTransactionsEnabled']) && this.state.metaTransactionsEnabled;
+    return ((depositErc20ForwarderEnabled || depositMetaTransactionsEnabled) && proxyContract && this.props.biconomy);
+  }
+
   approveContract = async (callbackApprove,callbackReceiptApprove) => {
     if (this.state.depositCurveEnabled){
       const curveDepositContract = this.functionsUtil.getGlobalConfig(['curve','depositContract']);
       this.functionsUtil.enableERC20(this.props.selectedToken,curveDepositContract.address,callbackApprove,callbackReceiptApprove);
     } else {
       // Check Proxy Contract Approved for Deposit with Biconomy
-      const proxyContract = this.state.actionProxyContract[this.state.action];
-      if (proxyContract && this.state.metaTransactionsEnabled && this.props.biconomy){
+      const useProxyContract = this.checkUseProxyContract();
+      if (useProxyContract){
+        const proxyContract = this.state.actionProxyContract[this.state.action];
         this.functionsUtil.enableERC20(this.props.selectedToken,proxyContract.address,callbackApprove,callbackReceiptApprove);
       } else {
         this.functionsUtil.enableERC20(this.props.selectedToken,this.props.tokenConfig.idle.address,callbackApprove,callbackReceiptApprove);
@@ -340,8 +355,18 @@ class DepositRedeem extends Component {
       tokenApproved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken,curveDepositContract.address,this.props.account);
     } else {
       // Check Proxy Contract Approved for Deposit with Biconomy
-      const proxyContract = this.state.actionProxyContract[this.state.action];
-      if (proxyContract && this.state.metaTransactionsEnabled && this.props.biconomy){
+      const useProxyContract = this.checkUseProxyContract();
+      if (useProxyContract){
+        // Check for Permit Deposit
+        const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','erc20ForwarderEnabled']) && this.state.erc20ForwarderEnabled;
+        if (depositErc20ForwarderEnabled){
+          const permitEnabled = this.functionsUtil.getGlobalConfig(['permit',this.props.selectedToken]);
+          if (permitEnabled){
+            return true;
+          }
+        }
+        // Check proxy contract approved
+        const proxyContract = this.state.actionProxyContract[this.state.action];
         tokenApproved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken,proxyContract.address,this.props.account);
       } else {
         tokenApproved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken,this.props.tokenConfig.idle.address,this.props.account);
@@ -530,6 +555,7 @@ class DepositRedeem extends Component {
 
   cancelTransaction = async () => {
     this.setState((prevState) => ({
+      erc20ForwarderTx:null,
       processing: {
         ...prevState.processing,
         approve:{
@@ -550,6 +576,9 @@ class DepositRedeem extends Component {
     const redeemGovTokens = this.state.redeemGovTokens;
     const inputValue = this.state.inputValue[this.state.action];
     const selectedPercentage = this.getFastBalanceSelector();
+
+    const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','erc20ForwarderEnabled']) && this.state.erc20ForwarderEnabled;
+    const depositMetaTransactionsEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','metaTransactionsEnabled']) && this.state.metaTransactionsEnabled;
 
     let loading = true;
 
@@ -665,21 +694,48 @@ class DepositRedeem extends Component {
         } else {
           const tokensToDeposit = this.functionsUtil.normalizeTokenAmount(inputValue,this.props.tokenConfig.decimals);
 
-          const depositMetaTransactionsEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','metaTransactionsEnabled']);
           // const gasLimitDeposit = this.functionsUtil.BNify(1000000);
           let depositParams = [];
 
           // Use Proxy Contract if enabled
-          const mintProxyContractInfo = this.state.actionProxyContract[this.state.action];
-          if (depositMetaTransactionsEnabled && mintProxyContractInfo && this.props.biconomy && this.state.metaTransactionsEnabled){
-            const mintProxyContract = this.state.actionProxyContract[this.state.action].contract;
-            depositParams = [tokensToDeposit, this.props.tokenConfig.idle.address];
-            // console.log('mintProxyContract',mintProxyContractInfo.function,depositParams);
-            if (this.state.metaTransactionsEnabled){
-              const functionSignature = mintProxyContract.methods[mintProxyContractInfo.function](...depositParams).encodeABI();
+          const useProxyContract = this.checkUseProxyContract();
+          if (useProxyContract){
+            const mintProxyContractInfo = this.state.actionProxyContract[this.state.action];
+            const mintProxyContract = mintProxyContractInfo.contract;
+
+            // Use Meta-Transactions
+            if (depositMetaTransactionsEnabled){
+              depositParams = [tokensToDeposit, this.props.tokenConfig.idle.address];
+              const functionCall = mintProxyContract.methods[mintProxyContractInfo.function](...depositParams);
+              const functionSignature = functionCall.encodeABI();
+              // console.log('mintProxyContract',mintProxyContractInfo.function,depositParams);
+              // if (this.state.metaTransactionsEnabled){
               contractSendResult = await this.functionsUtil.sendBiconomyTxWithPersonalSign(mintProxyContractInfo.name, functionSignature, callbackDeposit, callbackReceiptDeposit);
-            } else {
-              contractSendResult = await this.functionsUtil.contractMethodSendWrapper(mintProxyContractInfo.name, mintProxyContractInfo.function, depositParams, callbackDeposit, callbackReceiptDeposit);
+              // } else {
+              //   contractSendResult = await this.functionsUtil.contractMethodSendWrapper(mintProxyContractInfo.name, mintProxyContractInfo.function, depositParams, callbackDeposit, callbackReceiptDeposit);
+              // }
+            // Use Erc20 Forwarder
+            } else if (depositErc20ForwarderEnabled){
+              // Build ERC20 Forwarder Tx
+              if (!this.state.erc20ForwarderTx){
+                const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken,this.props.account, mintProxyContractInfo.name);
+                // const { expiry, nonce, r, s, v } = signedParameters;
+                depositParams = [tokensToDeposit, this.props.tokenConfig.idle.address/*, expiry, nonce, r, s, v*/];
+                const functionCall = mintProxyContract.methods[mintProxyContractInfo.function](...depositParams);
+                const functionSignature = functionCall.encodeABI();
+                const gasLimit = await functionCall.estimateGas({from: this.props.account});
+                const erc20ForwarderTx = await this.functionsUtil.buildBiconomyErc20ForwarderTx(mintProxyContractInfo.name, this.props.tokenConfig.address, functionSignature, gasLimit);
+                console.log('erc20ForwarderTx',erc20ForwarderTx);
+                this.setState({
+                  erc20ForwarderTx
+                });
+              // Send ERC20 Forwarder Tx
+              } else {
+                this.setState({
+                  erc20ForwarderTx:null
+                });
+                contractSendResult = await this.functionsUtil.sendBiconomyTxWithErc20Forwarder(this.state.erc20ForwarderTx.request, callbackDeposit, callbackReceiptDeposit);
+              }
             }
           // Use main contract if no proxy contract exists
           } else {
@@ -1032,8 +1088,16 @@ class DepositRedeem extends Component {
     const redeemGovTokenEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','redeemGovTokens','enabled']) && !govTokensDisabled && govTokensEnabled;
     const redeemGovTokens = redeemGovTokenEnabled && this.state.redeemGovTokens && this.state.action === 'redeem';
 
-    const metaTransactionsAvailable = this.props.biconomy && this.state.actionProxyContract[this.state.action];
+    const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','erc20ForwarderEnabled']);
+    const depositMetaTransactionsEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','metaTransactionsEnabled']);
+
+    // Biconomy Start
+    const metaTransactionsAvailable = depositMetaTransactionsEnabled && this.props.biconomy && this.state.actionProxyContract[this.state.action];
     const useMetaTx = metaTransactionsAvailable && this.state.metaTransactionsEnabled;
+
+    const erc20ForwarderEnabled = depositErc20ForwarderEnabled && this.props.biconomy && this.props.erc20ForwarderClient && this.state.actionProxyContract[this.state.action];
+    // Biconomy End
+
     const totalBalance = this.state.action === 'deposit' ? this.props.tokenBalance : this.props.redeemableBalance;
     const migrateText = this.state.migrationEnabled && this.props.tokenConfig.migration.message !== undefined ? this.props.tokenConfig.migration.message : null;
 
@@ -1057,9 +1121,6 @@ class DepositRedeem extends Component {
     const batchDepositInfo = this.functionsUtil.getGlobalConfig(['tools','batchDeposit']);
     const batchDepositEnabled = batchDepositInfo.enabled && typeof batchDepositInfo.props.availableTokens[this.props.tokenConfig.idle.token] !== 'undefined';
     const batchDepositDepositEnabled = batchDepositInfo.depositEnabled;
-
-    const biconomyPermitClient = this.props.biconomy.permitClient;
-    const biconomyERC20ForwarderClient = this.props.biconomy.erc20ForwarderClient;
 
     const showBatchDeposit = !useMetaTx && batchDepositEnabled && batchDepositDepositEnabled && !this.props.isMigrationTool && this.state.action === 'deposit';
 

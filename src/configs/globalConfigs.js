@@ -828,6 +828,15 @@ const globalConfigs = {
           function:'mintIdleTokensProxy',
           address:'0x7C4414aA6B0c6CB1Bc7e5BFb7433138426AC637a',
         }
+        /*
+        proxyContract:{
+          enabled:true,
+          abi:IdleProxyMinter,
+          name:'IdleProxyMinter',
+          function:'mintIdleTokensProxy',
+          address:'0x7C4414aA6B0c6CB1Bc7e5BFb7433138426AC637a',
+        }
+        */
       },
       migrate:{
         skipRebalance:true,
@@ -893,9 +902,10 @@ const globalConfigs = {
         },
         params:{
           debug: false,
-          apiKey: env.REACT_APP_BICONOMY_KEY,
+          // apiKey: env.REACT_APP_BICONOMY_KEY, // Mainnet
           dappId: env.REACT_APP_BICONOMY_APPID,
-          apiId: '36572ec9-ae5c-4c4a-9530-f3ae7c7ac829'
+          apiId: '36572ec9-ae5c-4c4a-9530-f3ae7c7ac829',
+          apiKey: env.REACT_APP_BICONOMY_KEY_KOVAN, // Kovan
         }
       },
       terminal:{

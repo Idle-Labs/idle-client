@@ -1,9 +1,9 @@
 import Web3 from "web3";
 import React from 'react';
 import BigNumber from 'bignumber.js';
-import Biconomy from "@biconomy/mexa";
 import SimpleID from 'simpleid-js-sdk';
 import NetworkUtil from "./NetworkUtil";
+import { Biconomy } from "@biconomy/mexa";
 import * as Sentry from '@sentry/browser';
 import FunctionsUtil from './FunctionsUtil';
 import globalConfigs from '../configs/globalConfigs';
@@ -25,6 +25,7 @@ const RimbleTransactionContext = React.createContext({
   web3Infura: {},
   tokenConfig: {},
   transactions: {},
+  permitClient: {},
   accountBalance: {},
   initWeb3: () => {},
   accountValidated: {},
@@ -32,6 +33,7 @@ const RimbleTransactionContext = React.createContext({
   accountBalanceLow: {},
   initSimpleID: () => {},
   initContract: () => {},
+  erc20ForwarderClient: {},
   accountBalanceToken: {},
   checkPreflight: () => {},
   validateAccount: () => {},
@@ -475,21 +477,23 @@ class RimbleTransaction extends React.Component {
               return false;
             }
 
-            const ercForwarderClient = biconomy.erc20ForwarderClient;
+            const erc20ForwarderClient = biconomy.erc20ForwarderClient;
             const permitClient = biconomy.permitClient;
 
-            // console.log('biconomy',biconomy,'ercForwarderClient',ercForwarderClient,'permitClient',permitClient);
+            // console.log('biconomy',biconomy,'erc20ForwarderClient',erc20ForwarderClient,'permitClient',permitClient);
 
             const newState = {
               web3,
               biconomy,
-              web3Infura
+              web3Infura,
+              permitClient,
+              erc20ForwarderClient
             };
             if (web3 !== this.state.web3){
               this.setState(newState, web3Callback);
             }
           }).onEvent(biconomy.ERROR, (error, message) => {
-            // this.functionsUtil.customLog('Biconomy error',error,message,this.state.biconomy);
+            // console.error('Biconomy error',error,message,this.state.biconomy);
             web3 = originalWeb3;
             // Handle error while initializing mexa
             if (this.state.biconomy !== false){
@@ -1729,11 +1733,13 @@ class RimbleTransaction extends React.Component {
     web3Infura:null,
     transactions: {},
     CrispClient: null,
+    permitClient:null,
     tokenDecimals:null,
     accountBalance: null,
     web3Subscription: null,
     accountValidated: null,
     accountBalanceDAI: null,
+    erc20ForwarderClient:null,
     initWeb3: this.initWeb3,
     accountBalanceLow: null,
     accountInizialized:false,

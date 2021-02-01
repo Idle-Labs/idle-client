@@ -46,6 +46,13 @@ class EstimatedEarnings extends Component {
   }
 
   async loadChart(){
+
+    const tokenApy = await this.getTokenApy();
+
+    if (!tokenApy){
+      return false;
+    }
+
     const amount = this.functionsUtil.BNify(this.state.inputValue);
     const earningsYear = amount.times(this.props.tokenApy.div(100));
 

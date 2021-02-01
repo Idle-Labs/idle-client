@@ -2355,6 +2355,45 @@ class FunctionsUtil {
     }
   }
 
+  buildBiconomyErc20ForwarderTx = async (contractName,tokenAddress,functionSignature,gasLimit,callback,callback_receipt) => {
+    const contract = this.getContractByName(contractName);
+
+    console.log('Build Tx ',contract._address,tokenAddress,Number(gasLimit),functionSignature);
+
+    //Create the call data that the recipient contract will receive
+    const tx = await this.props.erc20ForwarderClient.buildTx({
+      to:contract._address,
+      token:tokenAddress,
+      txGas:Number(gasLimit),
+      data:functionSignature
+    });
+
+    return tx;
+  }
+
+  sendBiconomyTxWithErc20Forwarder = async (req,callback,callback_receipt) => {
+
+    // returns a json object with txHash (if transaction is successful), log, message, code and flag
+    const txResponse = await this.props.erc20ForwarderClient.sendTxPersonalSign({req});
+    const txHash = txResponse.txHash;
+    console.log(txHash);
+
+    //for EIP712 signature type
+    // return await this.props.erc20ForwarderClient.sendTxEIP712(tx);
+
+    // fetch mined transaction receipt 
+    /*
+     var timer = setInterval(()=> {
+      this.props.web3.eth.getTransactionReceipt(txHash, (err, receipt)=> {
+        if(!err && receipt){
+          clearInterval(timer);
+          resolve(receipt);
+        }
+      });
+    }, 2000);
+    */
+  }
+
   sendBiconomyTxWithPersonalSign = async (contractName,functionSignature,callback,callback_receipt) => {
     const contract = this.getContractByName(contractName);
 
@@ -2364,7 +2403,6 @@ class FunctionsUtil {
     }
 
     try{
-
       const userAddress = this.props.account;
       const nonce = await contract.methods.getNonce(userAddress).call();
       const chainId = this.getGlobalConfig(['network','requiredNetwork']);
@@ -2450,14 +2488,12 @@ class FunctionsUtil {
     });
   }
 
-  signPermit = async (baseContractName, holder, spenderContractName, methodName, methodParams, nonce, expiry, callback, callback_receipt, callback_permit=null) => {
-
+  signPermit = async (baseContractName, holder, spenderContractName) => {
     const baseContract = this.getContractByName(baseContractName);
     const spenderContract = this.getContractByName(spenderContractName);
 
     if (!baseContract || !spenderContract){
-      callback(null,'Contract not found');
-      return false
+      return false;
     }
 
     const result = await this.props.web3.eth.net.getId();
@@ -2471,6 +2507,9 @@ class FunctionsUtil {
     ];
 
     const permitConfig = this.getGlobalConfig(['permit',baseContractName]);
+
+    const expiry = Math.round(new Date().getTime() / 1000 + 3600);
+    const nonce = permitConfig.nonceMethod ? await baseContract.methods[permitConfig.nonceMethod](holder).call() : null;
 
     const Permit = permitConfig.type;
     const EIPVersion = permitConfig.EIPVersion;
@@ -2524,32 +2563,48 @@ class FunctionsUtil {
       primaryType: 'Permit',
     });
 
-    this.props.web3.currentProvider.send({
-      from: holder,
-      jsonrpc: '2.0',
-      params: [holder, data],
-      method: 'eth_signTypedData_v4',
-      id: Date.now().toString().substring(9),
-    }, (error, response) => {
-      if (error || (response && response.error)) {
-        return callback(null,error);
-      } else if (response && response.result) {
-        if (typeof callback_permit === 'function'){
-          callback_permit();
+    return new Promise((resolve, reject) => {
+      this.props.web3.currentProvider.send({
+        from: holder,
+        jsonrpc: '2.0',
+        params: [holder, data],
+        method: 'eth_signTypedData_v4',
+        id: Date.now().toString().substring(9),
+      }, (error, response) => {
+        if (error || (response && response.error)) {
+          return reject(error);
+        } else if (response && response.result) {
+          const signedParameters = this.getSignatureParameters_v4(response.result);
+          signedParameters.nonce = nonce;
+          signedParameters.expiry = expiry;
+          resolve(signedParameters);
         }
-        const signedParameters = this.getSignatureParameters_v4(response.result);
-        const { r, s, v } = signedParameters;
-        const permitParams = [expiry, v, r, s];
-
-        const methodAbi = spenderContract._jsonInterface.find( f => f.name === methodName );
-        const useNonce = methodAbi ? methodAbi.inputs.find( i => i.name === 'nonce' ) : true;
-        if (!isNaN(parseInt(nonce)) && useNonce){
-          permitParams.unshift(nonce);
-        }
-        const params = methodParams.concat(permitParams);
-        this.contractMethodSendWrapper(spenderContractName, methodName, params, callback, callback_receipt);
-      }
+      });
     });
+  }
+
+  sendTxWithPermit = async (baseContractName, holder, spenderContractName, methodName, methodParams, callback, callback_receipt, callback_permit=null) => {
+
+    const baseContract = this.getContractByName(baseContractName);
+    const spenderContract = this.getContractByName(spenderContractName);
+
+    if (!baseContract || !spenderContract){
+      callback(null,'Contract not found');
+      return false;
+    }
+
+    const signedParameters = await this.signPermit(baseContractName, holder, spenderContractName);
+
+    const { expiry, nonce, r, s, v } = signedParameters;
+    const permitParams = [expiry, v, r, s];
+
+    const methodAbi = spenderContract._jsonInterface.find( f => f.name === methodName );
+    const useNonce = methodAbi ? methodAbi.inputs.find( i => i.name === 'nonce' ) : true;
+    if (!isNaN(parseInt(nonce)) && useNonce){
+      permitParams.unshift(nonce);
+    }
+    const params = methodParams.concat(permitParams);
+    this.contractMethodSendWrapper(spenderContractName, methodName, params, callback_receipt, callback_receipt);
   }
 
   sendSignedTx = async (contractName,contractAddress,functionSignature,callback,callback_receipt) => {

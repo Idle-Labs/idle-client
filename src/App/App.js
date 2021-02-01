@@ -608,6 +608,7 @@ class App extends Component {
                         initContract,
                         transactions,
                         initSimpleID,
+                        permitClient,
                         tokenDecimals,
                         accountBalance,
                         needsPreflight,
@@ -621,6 +622,7 @@ class App extends Component {
                         accountBalanceToken,
                         userRejectedConnect,
                         initializeContracts,
+                        erc20ForwarderClient,
                         rejectAccountConnect,
                         contractsInitialized,
                         userRejectedValidation,
@@ -652,6 +654,7 @@ class App extends Component {
                                       simpleID={simpleID}
                                       contracts={contracts}
                                       initAccount={initAccount}
+                                      permitClient={permitClient}
                                       initSimpleID={initSimpleID}
                                       initContract={initContract}
                                       transactions={transactions}
@@ -679,6 +682,7 @@ class App extends Component {
                                       initializeContracts={initializeContracts}
                                       walletProvider={this.state.walletProvider}
                                       buyModalOpened={this.state.buyModalOpened}
+                                      erc20ForwarderClient={erc20ForwarderClient}
                                       contractsInitialized={contractsInitialized}
                                       openBuyModal={this.openBuyModal.bind(this)}
                                       rejectAccountConnect={rejectAccountConnect}
