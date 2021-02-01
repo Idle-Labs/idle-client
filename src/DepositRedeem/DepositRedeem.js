@@ -757,6 +757,7 @@ class DepositRedeem extends Component {
                 this.setState({
                   loadingErc20ForwarderTx:true
                 }, async () => {
+                  // const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken,this.props.account, mintProxyContractInfo.name);
                   // const { expiry, nonce, r, s, v } = signedParameters;
                   // depositParams = [tokensToDeposit, nonce, expiry, v, r, s];
                   depositParams = [this.props.account]; // EmitEvent

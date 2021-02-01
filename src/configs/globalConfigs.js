@@ -847,10 +847,10 @@ const globalConfigs = {
         },
         proxyContract:{
           enabled:true,
-          abi:IdleProxyMinter,
-          name:'IdleProxyMinter',
-          function:'mintIdleTokensProxy',
-          address:'0x7C4414aA6B0c6CB1Bc7e5BFb7433138426AC637a',
+          abi:IdleBatchedMint,
+          name:'IdleBatchedMintDAI',
+          function:'permitAndDeposit',
+          address:'0x1B7bA0361A15CCF62521cF7d2Cbb2Ba90b1521a7', // Kovan
         }
         /*
         proxyContract:{
