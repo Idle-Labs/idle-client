@@ -852,6 +852,15 @@ const globalConfigs = {
           function:'mintIdleTokensProxy',
           address:'0x7C4414aA6B0c6CB1Bc7e5BFb7433138426AC637a',
         }
+        /*
+        proxyContract:{
+          enabled:true,
+          abi:IdleProxyMinter,
+          name:'IdleProxyMinter',
+          function:'mintIdleTokensProxy',
+          address:'0x7C4414aA6B0c6CB1Bc7e5BFb7433138426AC637a',
+        }
+        */
       },
       migrate:{
         skipRebalance:true,
