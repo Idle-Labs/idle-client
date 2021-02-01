@@ -420,6 +420,10 @@ class GovernanceUtil {
       this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalExecuted', {fromBlock: 0, toBlock: 'latest'}),
     ]);
 
+    if (!proposals){
+      return false;
+    }
+
     proposals.reverse();
     proposalStates.reverse();
     proposalQueuedEvents.reverse();
