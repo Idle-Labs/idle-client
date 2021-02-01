@@ -11,8 +11,8 @@ import GenericSelector from '../GenericSelector/GenericSelector';
 import PortfolioEquity from '../PortfolioEquity/PortfolioEquity';
 import TransactionsList from '../TransactionsList/TransactionsList';
 import EarningsEstimation from '../EarningsEstimation/EarningsEstimation';
+import { Flex, Box, Heading, Text, Tooltip, Icon, Loader } from "rimble-ui";
 import DashboardIconButton from '../DashboardIconButton/DashboardIconButton';
-import { Flex, Box, Heading, Text, Tooltip, Icon/*, Image*/ } from "rimble-ui";
 import TotalEarningsCounter from '../TotalEarningsCounter/TotalEarningsCounter';
 
 // const env = process.env;
@@ -61,10 +61,12 @@ class StrategyPage extends Component {
   async componentDidUpdate(prevProps, prevState) {
     this.loadUtils();
 
+    /*
     const themeModeChanged = prevProps.themeMode !== this.props.themeMode;
     if (themeModeChanged){
       this.loadPortfolio();
     }
+    */
   }
 
   async setStateSafe(newState,callback=null) {
@@ -212,54 +214,10 @@ class StrategyPage extends Component {
           }
         }).filter(v => (v !== null)) : null;
 
-        newState.aggregatedValues = [
-          {
-            flexProps:{
-              pr:[0,2],
-              width:[1,1/3],
-            },
-            props:{
-              label:'',
-              title:'Avg APY',
-              value:avgAPY.toFixed(2)+'<small>%</small>',
-              description:this.functionsUtil.getGlobalConfig(['messages','apyLong'])
-            }
-          },
-          {
-            flexProps:{
-              px:[0,2],
-              width:[1,1/3],
-            },
-            props:{
-              title:'Total Earnings',
-              description:'Total earnings does not include accrued governance tokens: '+(govTokensTotalBalance && govTokensTotalBalance.gt(0) ? ` (${govTokensTotalBalanceTooltip.join(' / ')})` : ''),
-              children:(
-                <Flex
-                  alignItems={'center'}
-                  flexDirection={'column'}
-                  justifyContent={'center'}
-                >
-                  <TotalEarningsCounter
-                    {...this.props} 
-                    portfolio={portfolio}
-                  />
-                </Flex>
-              ),
-              label:'',
-            }
-          },
-          {
-            flexProps:{
-              pl:[0,2],
-              width:[1,1/3],
-            },
-            props:{
-              title:'Avg Risk Score',
-              value:avgScore.toFixed(1),
-              label:''
-            }
-          },
-        ];
+        newState.avgAPY = avgAPY;
+        newState.avgScore = avgScore;
+        newState.govTokensTotalBalance = govTokensTotalBalance;
+        newState.govTokensTotalBalanceTooltip = govTokensTotalBalanceTooltip;
       }
 
       newState.tokensToMigrate = tokensToMigrate;
@@ -333,73 +291,194 @@ class StrategyPage extends Component {
                       justifyContent={'center'}
                       flexDirection={['column','row']}
                     >
-                      {
-                        this.state.aggregatedValues.map((v,i) => (
+                      <Flex
+                        pr={[0,2]}
+                        width={[1,1/3]}
+                        flexDirection={'column'}
+                      >
+                        <DashboardCard
+                          cardProps={{
+                            py:[3,4],
+                            mb:[2,0]
+                          }}
+                        >
                           <Flex
-                            {...v.flexProps}
+                            width={1}
+                            alignItems={'center'}
                             flexDirection={'column'}
-                            key={`aggregatedValue_${i}`}
+                            justifyContent={'center'}
                           >
-                            <DashboardCard
-                              cardProps={{
-                                py:[3,4],
-                                mb:[2,0]
-                              }}
+                            {
+                              this.state.avgAPY ? (
+                                <Text
+                                  lineHeight={1}
+                                  fontWeight={[3,4]}
+                                  color={'copyColor'}
+                                  fontFamily={'counter'}
+                                  fontSize={[4,'1.7em']}
+                                  dangerouslySetInnerHTML={{ __html: this.state.avgAPY.toFixed(2)+'<small>%</small>' }}
+                                >
+                                </Text>
+                              ) : (
+                                <Loader size="20px" />
+                              )
+                            }
+                            <Flex
+                              mt={2}
+                              width={1}
+                              alignItems={'center'}
+                              flexDirection={'row'}
+                              justifyContent={'center'}
                             >
-                              <Flex
-                                width={1}
-                                alignItems={'center'}
-                                flexDirection={'column'}
-                                justifyContent={'center'}
+                              <Text
+                                fontWeight={2}
+                                fontSize={[1,2]}
+                                color={'cellText'}
                               >
-                                {
-                                  v.props.children ? v.props.children : (
-                                    <Text
-                                      lineHeight={1}
-                                      fontWeight={[3,4]}
-                                      color={'copyColor'}
-                                      fontFamily={'counter'}
-                                      fontSize={[4,'1.7em']}
-                                      dangerouslySetInnerHTML={{ __html: v.props.value }}
-                                    >
-                                    </Text>
-                                  )
-                                }
-                                  <Flex
-                                    mt={2}
-                                    width={1}
-                                    alignItems={'center'}
-                                    flexDirection={'row'}
-                                    justifyContent={'center'}
-                                  >
-                                    <Text
-                                      fontWeight={2}
-                                      fontSize={[1,2]}
-                                      color={'cellText'}
-                                    >
-                                      {v.props.title}
-                                    </Text>
-                                  {
-                                    v.props.description && (
-                                      <Tooltip
-                                        placement={'bottom'}
-                                        message={v.props.description}
-                                      >
-                                        <Icon
-                                          ml={2}
-                                          name={"Info"}
-                                          size={'1em'}
-                                          color={'cellTitle'}
-                                        />
-                                      </Tooltip>
-                                    )
-                                  }
-                                </Flex>
-                              </Flex>
-                            </DashboardCard>
+                                Avg APY
+                              </Text>
+                              <Tooltip
+                                placement={'bottom'}
+                                message={this.functionsUtil.getGlobalConfig(['messages','apyLong'])}
+                              >
+                                <Icon
+                                  ml={2}
+                                  name={"Info"}
+                                  size={'1em'}
+                                  color={'cellTitle'}
+                                />
+                              </Tooltip>
+                            </Flex>
                           </Flex>
-                        ))
-                      }
+                        </DashboardCard>
+                      </Flex>
+                      <Flex
+                        pr={[0,2]}
+                        width={[1,1/3]}
+                        flexDirection={'column'}
+                      >
+                        <DashboardCard
+                          cardProps={{
+                            py:[3,4],
+                            mb:[2,0]
+                          }}
+                        >
+                          <Flex
+                            width={1}
+                            alignItems={'center'}
+                            flexDirection={'column'}
+                            justifyContent={'center'}
+                          >
+                            {
+                              this.state.portfolio ? (
+                                <Flex
+                                  alignItems={'center'}
+                                  flexDirection={'column'}
+                                  justifyContent={'center'}
+                                >
+                                  <TotalEarningsCounter
+                                    {...this.props} 
+                                    portfolio={this.state.portfolio}
+                                  />
+                                </Flex>
+                              ) : (
+                                <Loader size="20px" />
+                              )
+                            }
+                            <Flex
+                              mt={2}
+                              width={1}
+                              alignItems={'center'}
+                              flexDirection={'row'}
+                              justifyContent={'center'}
+                            >
+                              <Text
+                                fontWeight={2}
+                                fontSize={[1,2]}
+                                color={'cellText'}
+                              >
+                                Total Earnings
+                              </Text>
+                              {
+                                this.state.govTokensTotalBalance && (
+                                  <Tooltip
+                                    placement={'bottom'}
+                                    message={'Total earnings does not include accrued governance tokens: '+(this.state.govTokensTotalBalance && this.state.govTokensTotalBalance.gt(0) ? ` (${this.state.govTokensTotalBalanceTooltip.join(' / ')})` : '')}
+                                  >
+                                    <Icon
+                                      ml={2}
+                                      name={"Info"}
+                                      size={'1em'}
+                                      color={'cellTitle'}
+                                    />
+                                  </Tooltip>
+                                )
+                              }
+                            </Flex>
+                          </Flex>
+                        </DashboardCard>
+                      </Flex>
+                      <Flex
+                        pr={[0,2]}
+                        width={[1,1/3]}
+                        flexDirection={'column'}
+                      >
+                        <DashboardCard
+                          cardProps={{
+                            py:[3,4],
+                            mb:[2,0]
+                          }}
+                        >
+                          <Flex
+                            width={1}
+                            alignItems={'center'}
+                            flexDirection={'column'}
+                            justifyContent={'center'}
+                          >
+                            {
+                              this.state.avgScore ? (
+                                <Text
+                                  lineHeight={1}
+                                  fontWeight={[3,4]}
+                                  color={'copyColor'}
+                                  fontFamily={'counter'}
+                                  fontSize={[4,'1.7em']}
+                                  dangerouslySetInnerHTML={{ __html: this.state.avgScore.toFixed(2)+'<small>%</small>' }}
+                                >
+                                </Text>
+                              ) : (
+                                <Loader size="20px" />
+                              )
+                            }
+                            <Flex
+                              mt={2}
+                              width={1}
+                              alignItems={'center'}
+                              flexDirection={'row'}
+                              justifyContent={'center'}
+                            >
+                              <Text
+                                fontWeight={2}
+                                fontSize={[1,2]}
+                                color={'cellText'}
+                              >
+                                Avg Risk Score
+                              </Text>
+                              <Tooltip
+                                placement={'bottom'}
+                                message={this.functionsUtil.getGlobalConfig(['messages','riskScoreShort'])}
+                              >
+                                <Icon
+                                  ml={2}
+                                  name={"Info"}
+                                  size={'1em'}
+                                  color={'cellTitle'}
+                                />
+                              </Tooltip>
+                            </Flex>
+                          </Flex>
+                        </DashboardCard>
+                      </Flex>
                     </Flex>
                     <Flex
                       width={1}

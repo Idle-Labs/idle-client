@@ -51,16 +51,24 @@ class AssetField extends Component {
 
     const tokenChanged = prevProps.token !== this.props.token;
     const accountChanged = prevProps.account !== this.props.account;
+    const mobileChanged = prevProps.isMobile !== this.props.isMobile;
     const themeModeChanged = prevProps.themeMode !== this.props.themeMode;
     const fieldChanged = prevProps.fieldInfo.name !== this.props.fieldInfo.name;
     const contractInitialized = prevProps.contractsInitialized !== this.props.contractsInitialized && this.props.contractsInitialized;
     const transactionsChanged = prevProps.transactions && this.props.transactions && Object.values(prevProps.transactions).filter(tx => (tx.status==='success')).length !== Object.values(this.props.transactions).filter(tx => (tx.status==='success')).length;
 
-    if (themeModeChanged || fieldChanged || tokenChanged || accountChanged || transactionsChanged || (contractInitialized && !this.state.ready)){
+    if (fieldChanged || tokenChanged || accountChanged || transactionsChanged || (contractInitialized && !this.state.ready)){
       this.setStateSafe({
         ready:false
       },() => {
         this.loadField();
+      });
+    } else if (mobileChanged || themeModeChanged){
+      const oldState = Object.assign({},this.state);
+      this.setStateSafe({
+        ready:false
+      },() => {
+        this.setState(oldState);
       });
     }
   }

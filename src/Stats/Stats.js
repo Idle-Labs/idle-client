@@ -547,6 +547,7 @@ class Stats extends Component {
         >
           <AssetsUnderManagement
             {...this.props}
+            loaderAlign={'flex-end'}
           />
           {
             Object.keys(strategies).map(strategy => {

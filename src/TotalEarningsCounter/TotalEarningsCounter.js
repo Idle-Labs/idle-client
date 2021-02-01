@@ -38,11 +38,12 @@ class TotalEarningsCounter extends Component {
     const themeModeChanged = prevProps.themeMode !== this.props.themeMode;
     const styleChanged = JSON.stringify(prevProps.counterStyle) !== JSON.stringify(this.props.counterStyle);
     if (styleChanged || themeModeChanged || mobileChanged){
+      const oldState = Object.assign({},this.state);
       this.setState({
         earningsEnd:null,
         earningsStart:null
       },() => {
-        this.loadTotalEarnings();
+        this.setState(oldState);
       });
     }
   }

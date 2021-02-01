@@ -107,9 +107,11 @@ class AssetsUnderManagement extends Component {
     ) : (
       <Flex
         alignItems={'center'}
-        justifyContent={'center'}
+        justifyContent={this.props.loaderAlign || 'center'}
       >
-        <Loader size="30px" />
+        <Loader
+          size={"30px"}
+        />
       </Flex>
     );
   }
