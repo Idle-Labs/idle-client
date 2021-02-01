@@ -719,10 +719,11 @@ class DepositRedeem extends Component {
               // Build ERC20 Forwarder Tx
               if (!this.state.erc20ForwarderTx){
                 const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken,this.props.account, mintProxyContractInfo.name);
-                // const { expiry, nonce, r, s, v } = signedParameters;
-                depositParams = [tokensToDeposit, this.props.tokenConfig.idle.address/*, expiry, nonce, r, s, v*/];
+                const { expiry, nonce, r, s, v } = signedParameters;
+                depositParams = [tokensToDeposit, nonce, expiry, v, r, s];
                 const functionCall = mintProxyContract.methods[mintProxyContractInfo.function](...depositParams);
                 const functionSignature = functionCall.encodeABI();
+                console.log(mintProxyContractInfo.name, mintProxyContractInfo.function, depositParams, functionSignature);
                 const gasLimit = await functionCall.estimateGas({from: this.props.account});
                 const erc20ForwarderTx = await this.functionsUtil.buildBiconomyErc20ForwarderTx(mintProxyContractInfo.name, this.props.tokenConfig.address, functionSignature, gasLimit);
                 console.log('erc20ForwarderTx',erc20ForwarderTx);

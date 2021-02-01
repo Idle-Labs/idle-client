@@ -823,10 +823,10 @@ const globalConfigs = {
         // Proxy contract for Meta Tx or ERC20 Forwarder
         proxyContract:{
           enabled:true,
-          abi:IdleProxyMinter,
-          name:'IdleProxyMinter',
-          function:'mintIdleTokensProxy',
-          address:'0x7C4414aA6B0c6CB1Bc7e5BFb7433138426AC637a',
+          abi:IdleBatchedMint,
+          name:'IdleBatchedMintDAI',
+          function:'permitAndDeposit',
+          address:'0x1B7bA0361A15CCF62521cF7d2Cbb2Ba90b1521a7', // Kovan
         }
         /*
         proxyContract:{
@@ -861,7 +861,7 @@ const globalConfigs = {
       1337:'Hardhat'
     },
     isForked:false, // If TRUE the tx confirmation callback is fired on the receipt
-    requiredNetwork:1, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
+    requiredNetwork:42, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
     blocksPerYear:2371428,
     firstBlockNumber:8119247,
     requiredConfirmations: 1,
