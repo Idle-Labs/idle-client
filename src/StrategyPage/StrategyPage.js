@@ -443,7 +443,7 @@ class StrategyPage extends Component {
                                   color={'copyColor'}
                                   fontFamily={'counter'}
                                   fontSize={[4,'1.7em']}
-                                  dangerouslySetInnerHTML={{ __html: this.state.avgScore.toFixed(2)+'<small>%</small>' }}
+                                  dangerouslySetInnerHTML={{ __html: this.state.avgScore.toFixed(2) }}
                                 >
                                 </Text>
                               ) : (
