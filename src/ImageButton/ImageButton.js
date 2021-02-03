@@ -19,8 +19,8 @@ class ImageButton extends Component {
           mx={ isMobile ? 0 : [0,2] }
           onClick={ this.props.handleClick }
           height={ isMobile ? '58px' : ['150px','170px']}
-          mainColor={this.props.isActive ? '#f7f8ff' : 'cardBg'}
-          contrastColor={this.props.isActive ? '#f7f8ff' : 'cardBg'}
+          mainColor={this.props.isActive ? 'cardBgHover' : 'cardBg'}
+          contrastColor={this.props.isActive ? 'cardBgHover' : 'cardBg'}
           width={this.props.width ? this.props.width : (isMobile ? '100%' : ['150px','170px'])}
           style={this.props.buttonStyle ? this.props.buttonStyle : (isMobile ? {justifyContent:'flex-start'} : null)}
           {...this.props.buttonProps}

@@ -531,6 +531,7 @@ class SendTxWithBalance extends Component {
                         backgroundColor={'cardBg'}
                         boxShadow={'none !important'}
                         placeholder={`Insert amount`}
+                        backgroundColor={'cardBg'}
                         onChange={this.changeInputValue.bind(this)}
                         border={`1px solid ${this.props.theme.colors.divider}`}
                         value={this.state.inputValue !== null ? this.functionsUtil.BNify(this.state.inputValue).toFixed() : ''}

@@ -339,7 +339,7 @@ class CoverProtocol extends Component {
           approveDescription = `Approve the Cover Protocol contract`;
           infoBox = {
             icon:'MonetizationOn',
-            text:`Stake ${this.state.selectedToken} to mint both CLAIM and NOCLAIM tokens in a 1:1 ratio then add them to the respective Balancer Pool to earn trading fees.<br /><small>Prior to expiry or an accepted claim, users can redeem back their collateral with both their CLAIM and NOCLAIM tokens. <a href="https://docs.coverprotocol.com/user-guide/redemption" target="_blank" rel="nofollow noopener noreferrer" style="color:${this.props.theme.colors.blue}">Read more</a></small>`
+            text:`Stake ${this.state.selectedToken} to mint both CLAIM and NOCLAIM tokens in a 1:1 ratio then add them to the respective Balancer Pool to earn trading fees.<br /><small>Prior to expiry or an accepted claim, users can redeem back their collateral with both their CLAIM and NOCLAIM tokens. <a href="https://docs.coverprotocol.com/user-guide/redemption" target="_blank" rel="nofollow noopener noreferrer" style="color:${this.props.theme.colors.primary}">Read more</a></small>`
           };
           // Add Approve Step
           steps.push({
@@ -384,7 +384,7 @@ class CoverProtocol extends Component {
           }
 
           // Add Yearly cost and read more
-          infoBox.text+=`${apy ? `<br /><span style="color:${this.props.theme.colors.blue}">The yearly return of buying and holding NOCLAIM until expiration is <strong>${apy.toFixed(2)}%</strong>` : null}</span><br /><small><a href="https://docs.coverprotocol.com/product/claims-guidelines" target="_blank" rel="nofollow noopener noreferrer" style="color:${this.props.theme.colors.blue}">Read more</a> to understand how claims are assessed and paid out by Cover Protocol.</small>`;
+          infoBox.text+=`${apy ? `<br /><span style="color:${this.props.theme.colors.primary}">The yearly return of buying and holding NOCLAIM until expiration is <strong>${apy.toFixed(2)}%</strong>` : null}</span><br /><small><a href="https://docs.coverprotocol.com/product/claims-guidelines" target="_blank" rel="nofollow noopener noreferrer" style="color:${this.props.theme.colors.primary}">Read more</a> to understand how claims are assessed and paid out by Cover Protocol.</small>`;
 
           // Add Approve Step
           approveDescription = `Approve the NOCLAIM Balancer Pool contract`;
@@ -416,7 +416,7 @@ class CoverProtocol extends Component {
             };
           }
 
-          infoBox.text+=`${apy ? `<br /><span style="color:${this.props.theme.colors.blue}">The yearly cost of buying and holding CLAIM until expiration is <strong>${apy.toFixed(2)}%` : null}</strong></span><br /><small><a href="https://docs.coverprotocol.com/product/claims-guidelines" target="_blank" rel="nofollow noopener noreferrer" style="color:${this.props.theme.colors.blue}">Read more</a> to understand how claims are assessed and paid out by Cover Protocol.</small>`;
+          infoBox.text+=`${apy ? `<br /><span style="color:${this.props.theme.colors.primary}">The yearly cost of buying and holding CLAIM until expiration is <strong>${apy.toFixed(2)}%` : null}</strong></span><br /><small><a href="https://docs.coverprotocol.com/product/claims-guidelines" target="_blank" rel="nofollow noopener noreferrer" style="color:${this.props.theme.colors.primary}">Read more</a> to understand how claims are assessed and paid out by Cover Protocol.</small>`;
 
           // Add Approve Step
           approveDescription = `Approve the CLAIM Balancer Pool contract`;
@@ -686,7 +686,8 @@ class CoverProtocol extends Component {
                           >
                             <ImageButton
                               buttonProps={{
-                                mx:0
+                                mx:0,
+                                border:isMint ? 2 : 0
                               }}
                               width={[1,'32%']}
                               caption={'Add Liquidity'}
@@ -699,13 +700,11 @@ class CoverProtocol extends Component {
                               }}
                               isActive={isMint}
                               handleClick={ e => this.setAction('Mint') }
-                              buttonStyle={{
-                                boxShadow:isMint ? '0px 0px 0px 1px rgba(0,54,255,0.3)' : null
-                              }}
                             />
                             <ImageButton
                               buttonProps={{
-                                mx:0
+                                mx:0,
+                                border:isBuyClaim ? 2 : 0
                               }}
                               width={[1,'32%']}
                               caption={'Buy CLAIM'}
@@ -718,13 +717,11 @@ class CoverProtocol extends Component {
                               }}
                               isActive={isBuyClaim}
                               handleClick={ e => this.setAction('Claim') }
-                              buttonStyle={{
-                                boxShadow:isBuyClaim ? '0px 0px 0px 1px rgba(0,54,255,0.3)' : null
-                              }}
                             />
                             <ImageButton
                               buttonProps={{
-                                mx:0
+                                mx:0,
+                                border:isBuyNoClaim ? 2 : 0
                               }}
                               width={[1,'32%']}
                               caption={'Buy NOCLAIM'}
@@ -737,9 +734,6 @@ class CoverProtocol extends Component {
                               }}
                               isActive={isBuyNoClaim}
                               handleClick={ e => this.setAction('NoClaim') }
-                              buttonStyle={{
-                                boxShadow:isBuyNoClaim ? '0px 0px 0px 1px rgba(0,54,255,0.3)' : null
-                              }}
                             />
                           </Flex>
                           {
