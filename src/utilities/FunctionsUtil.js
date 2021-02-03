@@ -1779,9 +1779,6 @@ class FunctionsUtil {
 
       // console.log(proposals);
 
-      const IDLETokenAddress = this.getGlobalConfig(['govTokens','IDLE','address']).toLowerCase();
-      const LockedIDLETokenAddress = this.getGlobalConfig(['contracts','LockedIDLE','address']).toLowerCase();
-
       const validProposals = [];
       await this.asyncForEach(proposals, async (p) => {
         // Add proposal if ended
@@ -1789,21 +1786,29 @@ class FunctionsUtil {
           validProposals.push(p);
         } else {
           const blockNumber = p.msg.payload.snapshot;
-          const checkIDLEBalance = p.msg.payload.metadata.strategies ? p.msg.payload.metadata.strategies.find( s => s.name==='erc20-balance-of' && s.params && s.params.address && s.params.address.toLowerCase() === IDLETokenAddress ) || null : null;
-          const checkLockedIDLEBalance = p.msg.payload.metadata.strategies ? p.msg.payload.metadata.strategies.find( s => s.name==='erc20-balance-of' && s.params && s.params.address && s.params.address.toLowerCase() === LockedIDLETokenAddress ) || null : null;
 
-          const [
-            IDLEBalance,
-            lockedIDLEBalance
-          ] = await Promise.all([
-            checkIDLEBalance ? this.getTokenBalance('IDLE',p.address,true,blockNumber) : null,
-            checkLockedIDLEBalance ? this.getTokenBalance('LockedIDLE',p.address,true,blockNumber) : null
-          ]);
+          let checkedStrategies = false;
+          await this.asyncForEach( p.msg.payload.metadata.strategies, async (s) => {
+            if (checkedStrategies){
+              return;
+            }
+            if (s.name==='erc20-balance-of'){
+              const tokenName = s.params.symbol;
+              const tokenContract = this.getContractByName(tokenName);
+              if (tokenContract){
+                const tokenBalance = await this.getTokenBalance(tokenName,p.address,true,blockNumber);
+                // console.log(tokenName,blockNumber,p.address,this.BNify(tokenBalance).toFixed());
+                if (tokenBalance && this.BNify(tokenBalance).gt(0)){
+                  checkedStrategies = true;
+                }
+              }
+            } else {
+              checkedStrategies = true;
+            }
+          });
 
-          // console.log(checkIDLEBalance,this.BNify(IDLEBalance).gt(0),checkLockedIDLEBalance,this.BNify(lockedIDLEBalance).gt(0));
-
-          // Add proposal is passed token balance check
-          if ((!checkIDLEBalance || this.BNify(IDLEBalance).gt(0)) || (!checkLockedIDLEBalance || this.BNify(lockedIDLEBalance).gt(0))){
+          // Add proposal is passed token balances check
+          if (checkedStrategies){
             validProposals.push(p);
           }
         }
@@ -3272,13 +3277,13 @@ class FunctionsUtil {
     }
 
     // Check for cached data
-    const cachedDataKey = `tokenBalance_${contractName}_${walletAddr}_${fixDecimals}`;
-    /*
-    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
-    if (cachedData && !this.BNify(cachedData).isNaN()){
-      return this.BNify(cachedData);
+    const cachedDataKey = `tokenBalance_${contractName}_${walletAddr}_${fixDecimals}_${blockNumber}`;
+    if (blockNumber !== 'latest'){
+      const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+      if (cachedData && !this.BNify(cachedData).isNaN()){
+        return this.BNify(cachedData);
+      }
     }
-    */
 
     let [
       tokenDecimals,
@@ -3293,9 +3298,15 @@ class FunctionsUtil {
         tokenBalance = this.fixTokenDecimals(tokenBalance,tokenDecimals);
       }
 
+      tokenBalance = this.BNify(tokenBalance);
+
       // Set cached data
-      if (!this.BNify(tokenBalance).isNaN()){
-        return this.setCachedDataWithLocalStorage(cachedDataKey,tokenBalance);
+      if (!tokenBalance.isNaN()){
+        if (blockNumber !== 'latest'){
+          return this.setCachedDataWithLocalStorage(cachedDataKey,tokenBalance);
+        } else {
+          return tokenBalance;
+        }
       }
     } else {
       this.customLogError('Error on getting balance for ',contractName);

@@ -51,6 +51,9 @@ const globalConfigs = {
   baseToken: 'ETH',
   baseURL: 'https://idle.finance',
   forumURL:'https://gov.idle.finance',
+  theme:{
+    darkModeEnabled:false
+  },
   countries:{
     'USA':'United States of America',
     'GBR':'United Kingdom',
@@ -344,7 +347,7 @@ const globalConfigs = {
   contracts:{
     LockedIDLE:{
       abi:LockedIDLE,
-      address:'0x826c61c3183B261E4d4a9a28aDbc358061ECd207'
+      address:'0xF241a0151841AE2E6ea750D50C5794b5EDC31D99'
     },
     PriceOracle:{
       abi:PriceOracle,

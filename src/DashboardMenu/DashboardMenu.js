@@ -49,6 +49,7 @@ class DashboardMenu extends Component {
     }
 
     const isDarkTheme = this.props.themeMode === 'dark';
+    const darkModeEnabled = this.functionsUtil.getGlobalConfig(['theme','darkModeEnabled']);
 
     return (
       <Flex
@@ -144,7 +145,7 @@ class DashboardMenu extends Component {
           })
         }
         {
-          !this.props.isMobile && (
+          darkModeEnabled && !this.props.isMobile && (
             <Box
               my={[0,2]}
               width={[1/visibleLinks.length,'auto']}

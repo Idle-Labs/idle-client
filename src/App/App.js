@@ -467,6 +467,13 @@ class App extends Component {
 
   setThemeMode(themeMode,store=true){
     let selectedTheme = null;
+
+    // Check Dark Mode Enabled
+    const darkModeEnabled = this.functionsUtil.getGlobalConfig(['theme','darkModeEnabled']);
+    if (themeMode === 'dark' && !darkModeEnabled){
+      themeMode = 'light';
+    }
+
     switch (themeMode){
       default:
       case 'light':
