@@ -141,12 +141,9 @@ class DepositRedeem extends Component {
       erc20ForwarderEnabled
     };
 
-    if (!erc20ForwarderEnabled){
-      newState.erc20ForwarderTx=false;
-      newState.loadingErc20ForwarderTx=false;
-    }
-
-    this.setState(newState);
+    this.setState(newState, () => {
+      this.cancelTransaction();
+    });
   }
 
   toggleMetaTransactionsEnabled = (metaTransactionsEnabled) => {
@@ -161,6 +158,7 @@ class DepositRedeem extends Component {
       actionProxyContract:{},
       erc20ForwarderContract:{}
     };
+
 
     await this.functionsUtil.asyncForEach(actions,async (action) => {
       let mintProxyContractInfo = null;
@@ -235,12 +233,6 @@ class DepositRedeem extends Component {
     const tokenChanged = prevProps.selectedToken !== this.props.selectedToken;
     const erc20ForwarderEnabledChanged = prevState.erc20ForwarderEnabled !==  this.state.erc20ForwarderEnabled;
     const tokenBalanceChanged = prevProps.tokenBalance !== this.props.tokenBalance && this.props.tokenBalance !== null;
-
-    // if (erc20ForwarderEnabledChanged){
-    //   await this.loadProxyContracts();
-    //   await this.checkTokenApproved();
-    // }
-
     if (tokenChanged || tokenBalanceChanged || erc20ForwarderEnabledChanged){
       await this.loadProxyContracts();
       this.loadTokenInfo();
@@ -760,27 +752,23 @@ class DepositRedeem extends Component {
                 this.setState({
                   loadingErc20ForwarderTx:true
                 }, async () => {
-                  // const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken,this.props.account, mintProxyContractInfo.name);
-                  // const { expiry, nonce, r, s, v } = signedParameters;
-                  // depositParams = [tokensToDeposit, nonce, expiry, v, r, s];
-                  depositParams = [this.props.account]; // EmitEvent
-
-                  const erc20ForwarderContract = this.state.erc20ForwarderContract[this.state.action];
-
-                  // contractSendResult = await this.functionsUtil.contractMethodSendWrapper(mintProxyContractInfo.name, mintProxyContractInfo.function, depositParams, callbackDeposit, callbackReceiptDeposit);
-
-                  const functionCall = erc20ForwarderContract.contract.methods[erc20ForwarderContract.function](...depositParams);
-                  const functionSignature = functionCall.encodeABI();
-                  const gasLimit = await functionCall.estimateGas({from: this.props.account}); // 1000000
-
-                  // console.log('CANEEEE!',mintProxyContractInfo.name, depositParams, functionSignature, gasLimit);
-
-                  const erc20ForwarderTx = await this.functionsUtil.buildBiconomyErc20ForwarderTx(erc20ForwarderContract.name, this.props.tokenConfig.address, functionSignature, gasLimit);
-                  console.log('erc20ForwarderTx',erc20ForwarderTx);
-                  return this.setState({
-                    erc20ForwarderTx,
-                    loadingErc20ForwarderTx:false
-                  });
+                  const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken, this.props.account, mintProxyContractInfo.name);
+                  if (signedParameters){
+                    const { expiry, nonce, r, s, v } = signedParameters;
+                    depositParams = [tokensToDeposit, nonce, expiry, v, r, s];
+                    const functionCall = mintProxyContract.methods[mintProxyContractInfo.function](...depositParams);
+                    const functionSignature = functionCall.encodeABI();
+                    console.log(mintProxyContractInfo.name, mintProxyContractInfo.function, depositParams, functionSignature);
+                    const gasLimit = 1000000;//await functionCall.estimateGas({from: this.props.account});
+                    const erc20ForwarderTx = await this.functionsUtil.buildBiconomyErc20ForwarderTx(mintProxyContractInfo.name, this.props.tokenConfig.address, functionSignature, gasLimit);
+                    console.log('erc20ForwarderTx',erc20ForwarderTx);
+                    return this.setState({
+                      erc20ForwarderTx,
+                      loadingErc20ForwarderTx:false
+                    });
+                  } else {
+                    return this.cancelTransaction();
+                  }
                 });
               // Send ERC20 Forwarder Tx
               } else {
@@ -2368,9 +2356,92 @@ class DepositRedeem extends Component {
                                   </DashboardCard>
                                 </Flex>
                               </DashboardCard>
+                            ) : this.state.loadingErc20ForwarderTx ? (
+                              <Flex
+                                mt={3}
+                                flexDirection={'column'}
+                              >
+                                <FlexLoader
+                                  flexProps={{
+                                    flexDirection:'row'
+                                  }}
+                                  loaderProps={{
+                                    size:'25px',
+                                  }}
+                                  textProps={{
+                                    ml:2
+                                  }}
+                                  text={'Calculating transaction fees...'}
+                                />
+                              </Flex>
+                            ) : this.state.erc20ForwarderTx ? (
+                              <DashboardCard
+                                cardProps={{
+                                  p:3,
+                                  mt:3,
+                                  display:'flex',
+                                  alignItems:'center',
+                                  flexDirection:'column',
+                                  justifyContent:'center',
+                                }}
+                              >
+                                <Text
+                                  mb={2}
+                                  fontSize={2}
+                                  color={'cellText'}
+                                  textAlign={'center'}
+                                >
+                                  The required fee to perform the {this.state.action} is <strong>{this.state.erc20ForwarderTx.cost} {this.props.selectedToken}</strong> ({this.functionsUtil.BNify(this.state.erc20ForwarderTx.cost).div(this.state.inputValue[this.state.action]).times(100).toFixed(1)}%)
+                                </Text>
+                                <Flex
+                                  width={[1,0.8]}
+                                  alignItems={'center'}
+                                  flexDirection={'row'}
+                                  justifyContent={'space-between'}
+                                >
+                                  <CardIconButton
+                                    {...this.props}
+                                    cardProps={{
+                                      py:2,
+                                      px:[2,3],
+                                      width:0.48
+                                    }}
+                                    text={'Confirm'}
+                                    useIconOnly={true}
+                                    icon={'CheckCircle'}
+                                    iconColor={'#00b84a'}
+                                    textProps={{
+                                      ml:[1,2],
+                                    }}
+                                    handleClick={this.executeAction.bind(this)}
+                                    iconProps={{
+                                      size:this.props.isMobile ? '1.4em' : '1.8em'
+                                    }}
+                                  />
+                                  <CardIconButton
+                                    {...this.props}
+                                    cardProps={{
+                                      py:2,
+                                      px:[2,3],
+                                      width:0.48,
+                                    }}
+                                    handleClick={this.cancelTransaction.bind(this)}
+                                    text={'Decline'}
+                                    icon={'Cancel'}
+                                    useIconOnly={true}
+                                    iconColor={'#e13636'}
+                                    textProps={{
+                                      ml:[1,2],
+                                    }}
+                                    iconProps={{
+                                      size:this.props.isMobile ? '1.4em' : '1.8em'
+                                    }}
+                                  />
+                                </Flex>
+                              </DashboardCard>
                             ) : (
                               <Flex
-                                mt={4}
+                                mt={3}
                                 alignItems={'center'}
                                 flexDirection={'column'}
                                 justifyContent={'center'}
