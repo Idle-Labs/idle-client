@@ -4,6 +4,7 @@ import StatsChart from './StatsChart';
 import React, { Component } from 'react';
 import Rebalance from '../Rebalance/Rebalance';
 import StatsCard from '../StatsCard/StatsCard';
+import FlexCards from '../FlexCards/FlexCards';
 import AssetsList from '../AssetsList/AssetsList';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import Breadcrumb from '../Breadcrumb/Breadcrumb';
@@ -761,6 +762,50 @@ class Stats extends Component {
               );
             })
           }
+          <Box
+            mb={2}
+            width={1}
+            flexDirection={'column'}
+            justifyContent={'center'}
+          >
+            <Flex
+              pb={2}
+              width={1}
+              mb={[2,3]}
+              borderColor={'divider'}
+              borderBottom={'1px solid transparent'}
+            >
+              <Heading.h4
+                fontSize={[2,4]}
+                fontWeight={[3,4]}
+              >
+                External Dashboards
+              </Heading.h4>
+            </Flex>
+            <FlexCards
+              itemsPerRow={4}
+              justifyContent={'space-between'}
+              cards={[
+                {
+                  link:'https://consensys.net',
+                  image:this.props.themeMode === 'dark' ? 'images/partners/into-the-block_dark.png' : 'images/partners/into-the-block.png'
+                },
+                {
+                  link:'https://explore.duneanalytics.com/dashboard/idle_v4',
+                  image:this.props.themeMode === 'dark' ? 'images/partners/dune-analytics_dark.png' : 'images/partners/dune-analytics.png'
+                },
+                {
+                  link:'https://defipulse.com/idle-finance',
+                  image:this.props.themeMode === 'dark' ? 'images/partners/defi-pulse_dark.svg' : 'images/partners/defi-pulse.svg'
+                },
+                {
+                  link:'https://defillama.com/protocol/idle-finance',
+                  image:this.props.themeMode === 'dark' ? 'images/partners/defi-lama_dark.png' : 'images/partners/defi-lama.png'
+                },
+              ]}
+              {...this.props}
+            />
+          </Box>
           {
             idleTokenEnabled && !this.state.showRefreshIdleSpeed ? (
               <Flex
