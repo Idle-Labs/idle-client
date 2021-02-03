@@ -141,9 +141,12 @@ class DepositRedeem extends Component {
       erc20ForwarderEnabled
     };
 
-    this.setState(newState, () => {
-      this.cancelTransaction();
-    });
+    if (!erc20ForwarderEnabled){
+      newState.erc20ForwarderTx=false;
+      newState.loadingErc20ForwarderTx=false;
+    }
+
+    this.setState(newState);
   }
 
   toggleMetaTransactionsEnabled = (metaTransactionsEnabled) => {
@@ -1610,8 +1613,7 @@ class DepositRedeem extends Component {
                           ) : (erc20ForwarderEnabled && !showBuyFlow && !this.state.contractPaused) && (
                             <DashboardCard
                               cardProps={{
-                                py:3,
-                                px:2,
+                                p:3,
                                 my:3,
                                 display:'flex',
                                 alignItems:'center',
@@ -1619,67 +1621,67 @@ class DepositRedeem extends Component {
                                 justifyContent:'center',
                               }}
                             >
-                              {
-                                this.state.erc20ForwarderEnabled && this.state.txError[this.state.action] && this.state.actionProxyContract[this.state.action].approved ? (
-                                  <Flex
-                                    width={1}
-                                    alignItems={'center'}
-                                    flexDirection={'column'}
-                                    justifyContent={'center'}
-                                  >
-                                    <Icon
-                                      size={'1.8em'}
-                                      name={'Warning'}
-                                      color={'cellText'}
-                                    />
-                                    <Text
-                                      mt={1}
-                                      fontSize={1}
-                                      color={'cellText'}
-                                      textAlign={'center'}
-                                    >
-                                      Seems like you are having some trouble with ERC20 Forwarder... Disable it by unchecking the box below and try again!
-                                    </Text>
-                                  </Flex>
-                                ) : this.functionsUtil.getWalletProvider() === 'WalletConnect' && this.state.erc20ForwarderEnabled ? (
-                                  <Flex
-                                    width={1}
-                                    alignItems={'center'}
-                                    flexDirection={'column'}
-                                    justifyContent={'center'}
-                                  >
-                                    <Icon
-                                      size={'1.8em'}
-                                      name={'Warning'}
-                                      color={'cellText'}
-                                    />
-                                    <Text
-                                      mt={1}
-                                      fontSize={1}
-                                      color={'cellText'}
-                                      textAlign={'center'}
-                                    >
-                                      Please disable ERC20 Forwarder if you are using Argent Wallet to avoid failed transactions!
-                                    </Text>
-                                  </Flex>
-                                ) : (
-                                  <Text
-                                    mt={1}
-                                    fontSize={1}
-                                    color={'cellText'}
-                                    textAlign={'center'}
-                                  >
-                                    ERC20 Forwarder is {this.state.erc20ForwarderEnabled ? 'enabled' : 'disabled'} for {this.state.action}s!<br />This will let you pay gas fee with your {this.props.selectedToken} instead of {this.functionsUtil.getGlobalConfig(['baseToken'])}.
-                                  </Text>
-                                )
-                              }
-                              <Checkbox
+                              <Text
+                                mb={2}
+                                fontSize={2}
+                                color={'cellText'}
+                                textAlign={'center'}
+                              >
+                                How do you prefer to pay gas fees for this {this.state.action}?
+                              </Text>
+                              <Flex
+                                width={[1,0.7]}
+                                alignItems={'center'}
+                                flexDirection={'row'}
+                                justifyContent={'space-between'}
+                              >
+                                <CardIconButton
+                                  {...this.props}
+                                  cardProps={{
+                                    py:2,
+                                    px:[2,3],
+                                    width:0.48
+                                  }}
+                                  textProps={{
+                                    ml:[1,2],
+                                  }}
+                                  text={this.props.selectedToken}
+                                  isActive={this.state.erc20ForwarderEnabled}
+                                  imageProps={{
+                                    height:this.props.isMobile ? '1.4em' : '1.8em',
+                                    width:this.props.isMobile ? '1.4em' : '1.8em'
+                                  }}
+                                  image={`/images/tokens/${this.props.selectedToken}.svg`}
+                                  handleClick={e => this.toggleErc20ForwarderEnabled(true)}
+                                />
+                                <CardIconButton
+                                  {...this.props}
+                                  cardProps={{
+                                    py:2,
+                                    px:[2,3],
+                                    width:0.48
+                                  }}
+                                  textProps={{
+                                    ml:[1,2],
+                                  }}
+                                  text={'ETH'}
+                                  isActive={!this.state.erc20ForwarderEnabled}
+                                  imageProps={{
+                                    height:this.props.isMobile ? '1.4em' : '1.8em',
+                                    width:this.props.isMobile ? '1.4em' : '1.8em'
+                                  }}
+                                  image={`/images/tokens/ETH.svg`}
+                                  handleClick={e => this.toggleErc20ForwarderEnabled(false)}
+                                />
+                              </Flex>
+                              <Text
                                 mt={2}
-                                required={false}
-                                checked={this.state.erc20ForwarderEnabled}
-                                onChange={ e => this.ToggleErc20ForwarderEnabled(e.target.checked) }
-                                label={`Pay gas fee with your ${this.props.selectedToken}`}
-                              />
+                                fontSize={'11px'}
+                                color={'cellText'}
+                                textAlign={'center'}
+                              >
+                                Powered by <ExtLink fontSize={'11px'} href={'https://biconomy.io'}>Biconomy</ExtLink>
+                              </Text>
                             </DashboardCard>
                           )
                         }
