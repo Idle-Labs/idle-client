@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Flex, Text, Icon } from "rimble-ui";
+import { Flex, Text, Icon, Image } from "rimble-ui";
 import DashboardCard from '../DashboardCard/DashboardCard';
 
 class CardIconButton extends Component {
@@ -24,12 +24,21 @@ class CardIconButton extends Component {
            justifyContent={'center'}
          >
           {
-            this.props.useIconOnly ? (
+            this.props.image ? (
+              <Image
+                align={'center'}
+                src={this.props.image}
+                height={ this.props.isMobile ? '1.2em' : '1.4em' }
+                width={ this.props.isMobile ? '1.2em' : '1.4em' }
+                {...this.props.imageProps}
+              />
+            ) : this.props.useIconOnly ? (
               <Icon
                 align={'center'}
                 name={this.props.icon}
                 size={ this.props.isMobile ? '1.2em' : '1.4em' }
                 color={ this.props.iconColor ? this.props.iconColor : 'redeem' }
+                {...this.props.iconProps}
               />
             ) : (
              <Flex
@@ -45,6 +54,7 @@ class CardIconButton extends Component {
                  name={this.props.icon}
                  size={ this.props.isMobile ? '1.2em' : '1.4em' }
                  color={ this.props.iconColor ? this.props.iconColor : 'redeem' }
+                 {...this.props.iconProps}
                />
              </Flex>
             )

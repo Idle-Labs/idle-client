@@ -1944,7 +1944,7 @@ class FunctionsUtil {
 
             // console.log(p.relayerIpfsHash,s.name,checkedStrategies);
           });
-
+          
           // Add proposal is passed token balances check
           if (checkedStrategies){
             validProposals.push(p);
@@ -2572,12 +2572,12 @@ class FunctionsUtil {
         id: Date.now().toString().substring(9),
       }, (error, response) => {
         if (error || (response && response.error)) {
-          return reject(error);
+          return resolve(null);
         } else if (response && response.result) {
           const signedParameters = this.getSignatureParameters_v4(response.result);
           signedParameters.nonce = nonce;
           signedParameters.expiry = expiry;
-          resolve(signedParameters);
+          return resolve(signedParameters);
         }
       });
     });

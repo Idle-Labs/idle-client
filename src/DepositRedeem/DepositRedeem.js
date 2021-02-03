@@ -11,6 +11,7 @@ import DashboardCard from '../DashboardCard/DashboardCard';
 import AssetSelector from '../AssetSelector/AssetSelector';
 import TxProgressBar from '../TxProgressBar/TxProgressBar';
 import ShareModal from '../utilities/components/ShareModal';
+import CardIconButton from '../CardIconButton/CardIconButton';
 import TransactionField from '../TransactionField/TransactionField';
 import FastBalanceSelector from '../FastBalanceSelector/FastBalanceSelector';
 import { Flex, Text, Input, Box, Icon, Link, Checkbox, Tooltip, Image } from "rimble-ui";
@@ -56,7 +57,8 @@ class DepositRedeem extends Component {
     showETHWrapperEnabled:false,
     erc20ForwarderEnabled:true,
     metaTransactionsEnabled:true,
-    minAmountForMintReached:false
+    minAmountForMintReached:false,
+    loadingErc20ForwarderTx:false
   };
 
   // Utils
@@ -133,10 +135,17 @@ class DepositRedeem extends Component {
     });
   }
 
-  ToggleErc20ForwarderEnabled = (erc20ForwarderEnabled) => {
-    this.setState({
+  toggleErc20ForwarderEnabled = (erc20ForwarderEnabled) => {
+    const newState = {
       erc20ForwarderEnabled
-    });
+    };
+
+    if (!erc20ForwarderEnabled){
+      newState.erc20ForwarderTx=false;
+      newState.loadingErc20ForwarderTx=false;
+    }
+
+    this.setState(newState);
   }
 
   toggleMetaTransactionsEnabled = (metaTransactionsEnabled) => {
@@ -312,7 +321,7 @@ class DepositRedeem extends Component {
       case 'deposit':
         newState.depositCurveBalance = amount;
         newState.depositCurveSlippage = await this.functionsUtil.getCurveSlippage(this.props.tokenConfig.idle.token,normalizedAmount,true);
-      break;
+      break;  
       case 'redeem':
         // newState.redeemBalance = amount;
         // newState.withdrawSlippage = await this.functionsUtil.getCurveSlippage(this.props.tokenConfig.idle.token,normalizedAmount,true);
@@ -556,6 +565,7 @@ class DepositRedeem extends Component {
   cancelTransaction = async () => {
     this.setState((prevState) => ({
       erc20ForwarderTx:null,
+      loadingErc20ForwarderTx:false,
       processing: {
         ...prevState.processing,
         approve:{
@@ -718,17 +728,26 @@ class DepositRedeem extends Component {
             } else if (depositErc20ForwarderEnabled){
               // Build ERC20 Forwarder Tx
               if (!this.state.erc20ForwarderTx){
-                const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken,this.props.account, mintProxyContractInfo.name);
-                const { expiry, nonce, r, s, v } = signedParameters;
-                depositParams = [tokensToDeposit, nonce, expiry, v, r, s];
-                const functionCall = mintProxyContract.methods[mintProxyContractInfo.function](...depositParams);
-                const functionSignature = functionCall.encodeABI();
-                console.log(mintProxyContractInfo.name, mintProxyContractInfo.function, depositParams, functionSignature);
-                const gasLimit = await functionCall.estimateGas({from: this.props.account});
-                const erc20ForwarderTx = await this.functionsUtil.buildBiconomyErc20ForwarderTx(mintProxyContractInfo.name, this.props.tokenConfig.address, functionSignature, gasLimit);
-                console.log('erc20ForwarderTx',erc20ForwarderTx);
                 this.setState({
-                  erc20ForwarderTx
+                  loadingErc20ForwarderTx:true
+                }, async () => {
+                  const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken,this.props.account, mintProxyContractInfo.name);
+                  if (signedParameters){
+                    const { expiry, nonce, r, s, v } = signedParameters;
+                    depositParams = [tokensToDeposit, nonce, expiry, v, r, s];
+                    const functionCall = mintProxyContract.methods[mintProxyContractInfo.function](...depositParams);
+                    const functionSignature = functionCall.encodeABI();
+                    console.log(mintProxyContractInfo.name, mintProxyContractInfo.function, depositParams, functionSignature);
+                    const gasLimit = 1000000;//await functionCall.estimateGas({from: this.props.account});
+                    const erc20ForwarderTx = await this.functionsUtil.buildBiconomyErc20ForwarderTx(mintProxyContractInfo.name, this.props.tokenConfig.address, functionSignature, gasLimit);
+                    console.log('erc20ForwarderTx',erc20ForwarderTx);
+                    return this.setState({
+                      erc20ForwarderTx,
+                      loadingErc20ForwarderTx:false
+                    });
+                  } else {
+                    return this.cancelTransaction();
+                  }
                 });
               // Send ERC20 Forwarder Tx
               } else {
@@ -906,7 +925,7 @@ class DepositRedeem extends Component {
       break;
     }
 
-    if (contractSendResult !== false){
+    if (contractSendResult !== false || loading !== this.state.processing[this.state.action].loading){
       this.setState((prevState) => ({
         processing: {
           ...prevState.processing,
