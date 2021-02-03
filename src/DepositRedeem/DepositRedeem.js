@@ -140,12 +140,9 @@ class DepositRedeem extends Component {
       erc20ForwarderEnabled
     };
 
-    if (!erc20ForwarderEnabled){
-      newState.erc20ForwarderTx=false;
-      newState.loadingErc20ForwarderTx=false;
-    }
-
-    this.setState(newState);
+    this.setState(newState, () => {
+      this.cancelTransaction();
+    });
   }
 
   toggleMetaTransactionsEnabled = (metaTransactionsEnabled) => {
@@ -160,8 +157,18 @@ class DepositRedeem extends Component {
       actionProxyContract:{}
     };
 
+
     await this.functionsUtil.asyncForEach(actions,async (action) => {
-      const mintProxyContractInfo = this.functionsUtil.getGlobalConfig(['contract','methods',action,'proxyContract']);
+      let mintProxyContractInfo = null;
+      const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract','methods',action,'erc20ForwarderEnabled']) && this.state.erc20ForwarderEnabled;
+
+      if (depositErc20ForwarderEnabled){
+        mintProxyContractInfo = this.functionsUtil.getGlobalConfig(['contract','methods',action,'erc20ForwarderProxyContract',this.props.selectedToken]);
+      }
+      if (!mintProxyContractInfo){
+        mintProxyContractInfo = this.functionsUtil.getGlobalConfig(['contract','methods',action,'proxyContract']);
+      }
+
       const hasProxyContract = mintProxyContractInfo && mintProxyContractInfo.enabled;
       newState.actionProxyContract[action] = hasProxyContract ? mintProxyContractInfo : null;
       if (hasProxyContract){
@@ -214,9 +221,10 @@ class DepositRedeem extends Component {
     }
 
     const tokenChanged = prevProps.selectedToken !== this.props.selectedToken;
+    const erc20ForwarderEnabledChanged = prevState.erc20ForwarderEnabled !==  this.state.erc20ForwarderEnabled;
     const tokenBalanceChanged = prevProps.tokenBalance !== this.props.tokenBalance && this.props.tokenBalance !== null;
 
-    if (tokenChanged || tokenBalanceChanged){
+    if (tokenChanged || tokenBalanceChanged || erc20ForwarderEnabledChanged){
       await this.loadProxyContracts();
       this.loadTokenInfo();
       return false;
@@ -731,7 +739,7 @@ class DepositRedeem extends Component {
                 this.setState({
                   loadingErc20ForwarderTx:true
                 }, async () => {
-                  const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken,this.props.account, mintProxyContractInfo.name);
+                  const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken, this.props.account, mintProxyContractInfo.name);
                   if (signedParameters){
                     const { expiry, nonce, r, s, v } = signedParameters;
                     depositParams = [tokensToDeposit, nonce, expiry, v, r, s];

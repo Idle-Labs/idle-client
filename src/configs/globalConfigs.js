@@ -821,22 +821,29 @@ const globalConfigs = {
         skipMintCheckboxEnabled:true,
         metaTransactionsEnabled:false,
         // Proxy contract for Meta Tx or ERC20 Forwarder
+        erc20ForwarderProxyContract:{
+          DAI:{
+            enabled:true,
+            abi:IdleBatchedMint,
+            name:'IdleBatchedMintDAI',
+            function:'permitAndDeposit',
+            address:'0x1B7bA0361A15CCF62521cF7d2Cbb2Ba90b1521a7', // Kovan
+          },
+          USDC:{
+            enabled:true,
+            abi:IdleBatchedMint,
+            name:'IdleBatchedMintUSDC',
+            function:'permitEIP2612AndDepositUnlimited',
+            address:'0x3F35eB839f91b614195a47A593dB46b14cd7EaF8', // Kovan
+          },
+        },
         proxyContract:{
-          enabled:true,
-          abi:IdleBatchedMint,
-          name:'IdleBatchedMintDAI',
-          function:'permitAndDeposit',
-          address:'0x1B7bA0361A15CCF62521cF7d2Cbb2Ba90b1521a7', // Kovan
-        }
-        /*
-        proxyContract:{
-          enabled:true,
+          enabled:false,
           abi:IdleProxyMinter,
           name:'IdleProxyMinter',
           function:'mintIdleTokensProxy',
           address:'0x7C4414aA6B0c6CB1Bc7e5BFb7433138426AC637a',
         }
-        */
       },
       migrate:{
         skipRebalance:true,
