@@ -224,7 +224,11 @@ class DepositRedeem extends Component {
     const erc20ForwarderEnabledChanged = prevState.erc20ForwarderEnabled !==  this.state.erc20ForwarderEnabled;
     const tokenBalanceChanged = prevProps.tokenBalance !== this.props.tokenBalance && this.props.tokenBalance !== null;
 
-    if (tokenChanged || tokenBalanceChanged || erc20ForwarderEnabledChanged){
+    if (erc20ForwarderEnabledChanged){
+      await this.loadProxyContracts();
+    }
+
+    if (tokenChanged || tokenBalanceChanged){
       await this.loadProxyContracts();
       this.loadTokenInfo();
       return false;
