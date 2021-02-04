@@ -160,7 +160,7 @@ class DepositRedeem extends Component {
 
     await this.functionsUtil.asyncForEach(actions,async (action) => {
       let mintProxyContractInfo = null;
-      const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract','methods',action,'erc20ForwarderEnabled']) && this.state.erc20ForwarderEnabled;
+      const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract','methods',action,'erc20ForwarderEnabled']);
 
       if (depositErc20ForwarderEnabled){
         mintProxyContractInfo = this.functionsUtil.getGlobalConfig(['contract','methods',action,'erc20ForwarderProxyContract',this.props.selectedToken]);
