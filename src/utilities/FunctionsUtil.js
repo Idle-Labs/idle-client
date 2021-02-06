@@ -3424,6 +3424,10 @@ class FunctionsUtil {
       return null;
     }
   }
+  blocksToSeconds = (blocks) => {
+    const blocksPerSeconds = this.BNify(this.getGlobalConfig(['network','blocksPerYear'])).div(365.2422).div(86400);
+    return this.BNify(blocks).div(blocksPerSeconds);
+  }
   getBlockNumber = async () => {
     return await this.props.web3.eth.getBlockNumber();
   }

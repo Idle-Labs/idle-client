@@ -1,14 +1,15 @@
 import Title from '../../Title/Title';
 import React, { Component } from 'react';
+import ExtLink from '../../ExtLink/ExtLink';
 import CastVote from '../CastVote/CastVote';
 import StatsCard from '../../StatsCard/StatsCard';
 import RoundButton from '../../RoundButton/RoundButton';
-import { Box, Flex, Blockie, Text, Link } from "rimble-ui";
 import ProposalField from '../ProposalField/ProposalField';
 import GovernanceUtil from '../../utilities/GovernanceUtil';
 import ShortHash from "../../utilities/components/ShortHash";
 import TxProgressBar from '../../TxProgressBar/TxProgressBar';
 import DashboardCard from '../../DashboardCard/DashboardCard';
+import { Box, Flex, Blockie, Text, Link, Icon } from "rimble-ui";
 
 class ProposalDetails extends Component {
 
@@ -164,6 +165,7 @@ class ProposalDetails extends Component {
 
   render() {
     let proposal = this.props.proposal;
+    const creationTime = proposal.states[0].start_time*1000;
     const lastState = Object.values(proposal.states).pop();
     const hasVotes = proposal.votes && proposal.votes.length>0;
     const forVotes = this.functionsUtil.BNify(proposal.forVotes).div(1e18);
@@ -171,6 +173,7 @@ class ProposalDetails extends Component {
     const totalVotes = forVotes.plus(againstVotes);
     const forVotesPerc = forVotes.div(totalVotes).times(100).toFixed(2);
     const againstVotesPerc = againstVotes.div(totalVotes).times(100).toFixed(2);
+    const endTime = (proposal.states[0].start_time+parseInt(this.functionsUtil.blocksToSeconds(this.props.votingPeriod)))*1000;
     const forVotesAddrs = proposal.votes.filter( v => (v.support) ).sort( (a,b) => (this.functionsUtil.BNify(a.votes).lt(this.functionsUtil.BNify(b.votes)) ? 1 : -1) );
     const againstVotesAddrs = proposal.votes.filter( v => (!v.support) ).sort( (a,b) => (this.functionsUtil.BNify(a.votes).lt(this.functionsUtil.BNify(b.votes)) ? 1 : -1) );
 
@@ -205,7 +208,7 @@ class ProposalDetails extends Component {
               value={`#${proposal.id}`}
               minHeight={['110px','143px']}
               titleMinHeight={['auto','50px']}
-              label={`Created on ${this.functionsUtil.strToMoment(proposal.states[0].start_time*1000).format('DD MMM, YYYY')}`}
+              label={`Created on ${this.functionsUtil.strToMoment(creationTime).utc().format('DD MMM, YYYY @ HH:mm')} UTC`}
             />
           </Flex>
           <Flex
@@ -236,14 +239,30 @@ class ProposalDetails extends Component {
                     seed: proposal.address,
                   }}
                 />
-                <ShortHash
-                  ml={2}
-                  lineHeight={1}
-                  fontSize={[3,4]}
-                  fontWeight={[3,4]}
-                  color={'statValue'}
-                  hash={proposal.proposer}
-                />
+                <ExtLink
+                  href={this.functionsUtil.getEtherscanAddressUrl(proposal.proposer)}
+                >
+                  <Flex
+                    flexDirection={'row'}
+                    alignItems={'flex-end'}
+                    justifyContent={'flex-start'}
+                  >
+                    <ShortHash
+                      ml={2}
+                      lineHeight={1}
+                      fontSize={[3,4]}
+                      fontWeight={[3,4]}
+                      color={'statValue'}
+                      hash={proposal.proposer}
+                    />
+                    <Icon
+                      ml={1}
+                      size={'1.2em'}
+                      name={'OpenInNew'}
+                      color={'statValue'}
+                    />
+                  </Flex>
+                </ExtLink>
               </Flex>
             </StatsCard>
           </Flex>
@@ -259,7 +278,7 @@ class ProposalDetails extends Component {
               labelTooltip={ null }
               minHeight={['110px','143px']}
               titleMinHeight={['auto','50px']}
-              label={`Updated on ${this.functionsUtil.strToMoment(lastState.start_time*1000).format('DD MMM, YYYY')}`}
+              label={proposal.state==='Active' ? `Ending on ${this.functionsUtil.strToMoment(endTime).utc().format('DD MMM, YYYY @ HH:mm')} UTC` : `Updated on ${this.functionsUtil.strToMoment(lastState.start_time*1000).utc().format('DD MMM, YYYY @ HH:mm')} UTC`}
             >
               <Flex
                 alignItems={'center'}
@@ -520,7 +539,7 @@ class ProposalDetails extends Component {
                         color={'dark-gray'}
                         lineHeight={'initial'}
                       >
-                        {this.functionsUtil.strToMoment(stateInfo.start_time*1000).format('DD MMM, YYYY')}
+                        {this.functionsUtil.strToMoment(stateInfo.start_time*1000).utc().format('DD MMM, YYYY @ HH:mm')} UTC
                       </Text>
                     </Flex>
                   );

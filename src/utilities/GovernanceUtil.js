@@ -141,6 +141,24 @@ class GovernanceUtil {
     return null;
   }
 
+  getVotingPeriod = async () => {
+    // Check for cached data
+    const cachedDataKey = `votingPeriod`;
+    const cachedData = this.functionsUtil.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData && !this.functionsUtil.BNify(cachedData).isNaN()){
+      return cachedData;
+    }
+
+    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
+    let votingPeriod = await this.functionsUtil.genericContractCall(contractName,'votingPeriod');
+    if (votingPeriod){
+      votingPeriod = this.functionsUtil.BNify(votingPeriod);
+      return this.functionsUtil.setCachedDataWithLocalStorage(cachedDataKey,votingPeriod,null);
+    }
+
+    return null;
+  }
+
   getTimelockDelay = async () => {
     // Check for cached data
     const cachedDataKey = `getTimelockDelay`;
@@ -433,7 +451,6 @@ class GovernanceUtil {
 
     await this.functionsUtil.asyncForEach(proposals, async (p,i) => {
       const proposalId = parseInt(p.id);
-
       const createdEvent = proposalCreatedEvents[i];
       const canceledEvent = proposalCanceledEvents.find( e => (parseInt(e.returnValues.id) === proposalId ) );
       const executedEvent = proposalExecutedEvents.find( e => (parseInt(e.returnValues.id) === proposalId ) );
