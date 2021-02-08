@@ -828,7 +828,8 @@ const globalConfigs = {
             enabled:true,
             abi:erc20Forwarder,
             name:'erc20Forwarder',
-            address:'0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa', // Kovan
+            function:'emitMessage',
+            address:'0xE452FDa9d69D54d55b0670F6c52805a628116501', // Kovan
           },
           tokens:{
             DAI:{
