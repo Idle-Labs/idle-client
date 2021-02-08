@@ -46,6 +46,7 @@ class CoverProtocol extends Component {
   async componentWillMount(){
     this.loadUtils();
     this.loadData();
+    // window.transactionSucceeded = this.transactionSucceeded.bind(this);
   }
 
   async componentDidUpdate(prevProps,prevState){

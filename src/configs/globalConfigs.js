@@ -32,6 +32,7 @@ import VesterFactory from '../contracts/VesterFactory.json';
 import GovernorAlpha from '../contracts/GovernorAlpha.json';
 import EcosystemFund from '../contracts/EcosystemFund.json';
 import Comptroller from '../abis/compound/Comptroller.json';
+import erc20Forwarder from '../contracts/erc20Forwarder.json';
 import BalancerPool from '../abis/balancer/BalancerPool.json';
 import IdleController from '../contracts/IdleController.json';
 import TokenMigration from '../TokenMigration/TokenMigration';
@@ -824,10 +825,10 @@ const globalConfigs = {
         erc20ForwarderProxyContract:{
           DAI:{
             enabled:true,
-            abi:IdleBatchedMint,
-            name:'IdleBatchedMintDAI',
-            function:'permitAndDeposit',
-            address:'0x1B7bA0361A15CCF62521cF7d2Cbb2Ba90b1521a7', // Kovan
+            abi:erc20Forwarder,
+            name:'erc20Forwarder',
+            function:'emitMessage',
+            address:'0xE452FDa9d69D54d55b0670F6c52805a628116501', // Kovan
           },
           USDC:{
             enabled:true,
@@ -981,7 +982,7 @@ const globalConfigs = {
       }
     },
     coverProtocol:{
-      enabled:false,
+      enabled:true,
       label:'Cover Protocol',
       route:'cover-protocol',
       subComponent:CoverProtocol,
