@@ -917,7 +917,7 @@ const globalConfigs = {
           limits:'https://api.biconomy.io/api/v1/dapp/checkLimits'
         },
         params:{
-          debug: true,
+          debug: false,
           // apiKey: env.REACT_APP_BICONOMY_KEY, // Mainnet
           dappId: env.REACT_APP_BICONOMY_APPID,
           apiId: '36572ec9-ae5c-4c4a-9530-f3ae7c7ac829',
