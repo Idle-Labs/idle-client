@@ -118,7 +118,12 @@ class BuyModal extends React.Component {
     const availableMethodsKeys = this.props.availableMethods && this.props.availableMethods.length ? this.props.availableMethods : Object.keys(globalConfigs.payments.methods);
 
     availableMethodsKeys.forEach(method => {
-      availableMethods[method] = globalConfigs.payments.methods[method];
+      const availableProviders = this.getAvailablePaymentProviders(method,this.state.selectedToken);
+      if (availableProviders && availableProviders.length>0){
+        const methodInfo = globalConfigs.payments.methods[method];
+        methodInfo.availableProviders = availableProviders;
+        availableMethods[method] = methodInfo;
+      }
     });
 
     this.setState({
@@ -252,7 +257,7 @@ class BuyModal extends React.Component {
 
   getDefaultPaymentProvider = (selectedMethod) => {
     const paymentMethod = this.state.availableMethods[selectedMethod];
-    if (paymentMethod.defaultProvider){
+    if (paymentMethod && paymentMethod.defaultProvider){
       return paymentMethod.defaultProvider;
     }
     return null;
@@ -499,11 +504,6 @@ class BuyModal extends React.Component {
               {
                 Object.keys(this.state.availableMethods).map((method,i) => {
                   const methodInfo = this.state.availableMethods[method];
-                  const availableProviders = this.getAvailablePaymentProviders(method,this.state.selectedToken);
-                  if (!availableProviders || !availableProviders.length){
-                    return false;
-                  }
-
                   let imageProps = methodInfo.props && methodInfo.props.imageProps ? methodInfo.props.imageProps : {};
                   const imagePropsExtended = this.props.isMobile ? {height:'42px'} : {height:'70px'};
                   imageProps = Object.assign(imageProps,imagePropsExtended);

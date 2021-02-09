@@ -1,4 +1,5 @@
 import IDLE from '../contracts/IDLE.json';
+import WETH from '../abis/tokens/WETH.json';
 import COMP from '../abis/compound/COMP.json';
 import TokenSwap from '../TokenSwap/TokenSwap';
 import yDAIv3 from '../abis/iearn/yDAIv3.json';
@@ -6,6 +7,7 @@ import yUSDCv3 from '../abis/iearn/yUSDCv3.json';
 import yUSDTv3 from '../abis/iearn/yUSDTv3.json';
 import ySUSDv3 from '../abis/iearn/ySUSDv3.json';
 import yTUSDv3 from '../abis/iearn/yTUSDv3.json';
+import ETHWrapper from '../ETHWrapper/ETHWrapper';
 import Timelock from '../contracts/Timelock.json';
 import CurveZap from '../abis/curve/CurveZap.json';
 import CovToken from '../abis/cover/CovToken.json';
@@ -324,6 +326,7 @@ const globalConfigs = {
       distributionFrequency:'day', // Multiply distribution per block
       color:'hsl(162, 100%, 41%)',
       icon:'images/tokens/IDLE.png',
+      disabledTokens:['idleWETHYield'], // Disable IDLE distribution for idleToken
       address:'0x875773784Af8135eA0ef43b5a374AaD105c5D39e' // MAIN
       // address:'0xAB6Bdb5CCF38ECDa7A92d04E86f7c53Eb72833dF', // KOVAN
     },
@@ -336,6 +339,7 @@ const globalConfigs = {
       showAPR:true, // Include COMP Apr
       showPrice:true,
       showBalance:true, // Include COMP balance in Portfolio Donut
+      disabledTokens:[],
       protocol:'compound',
       aprTooltipMode:false,
       distributionFrequency:'day',
@@ -632,6 +636,22 @@ const globalConfigs = {
         address:'0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
         performanceTooltip:'APR is calculated proportionally to historical allocations of each lending protocol in the selected time period. This pool has 1% unlent reserve to help reduce gas costs.',
       },
+      WETH:{
+        decimals:18,
+        enabled:false,
+        color:{
+          hex:'#ee1f79',
+          rgb:[238, 31, 121],
+          hsl:['334', '86%', '53%']
+        },
+        startTimestamp:'2021-02-09',
+        conversionRateField:'wethDAIPrice',
+        chart:{
+          labelTextColorModifiers:['darker', 4],
+        },
+        address:'0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        performanceTooltip:'APR is calculated proportionally to historical allocations of each lending protocol in the selected time period. This pool has 1% unlent reserve to help reduce gas costs.',
+      },
       COMP:{
         decimals:18,
         enabled:true,
@@ -796,13 +816,15 @@ const globalConfigs = {
     accountBalanceMinimum: 0, // in ETH for gas fees
     providers:{
       infura:{
+        42: 'https://kovan.infura.io/v3/',
         1: 'https://mainnet.infura.io/v3/',
-        42: 'https://kovan.infura.io/v3/'
+        1337: 'https://mainnet.infura.io/v3/'
       },
       etherscan:{
         enabled:true, // False for empty txs list (try new wallet)
         endpoints:{
           1: 'https://api.etherscan.io/api',
+          1337: 'https://api.etherscan.io/api',
           42: 'https://api-kovan.etherscan.io/api'
         }
       },
@@ -877,6 +899,23 @@ const globalConfigs = {
     }
   ],
   tools:{
+    ethWrapper:{
+      enabled:true,
+      label:'ETH Wrapper',
+      route:'eth-wrapper',
+      subComponent:ETHWrapper,
+      image:'images/tokens/WETH.svg',
+      desc:'Wrap your ETH and get WETH. Unwrap your WETH and get back ETH.',
+      props:{
+        contract:{
+          abi:WETH,
+          name:'WETH',
+          decimals:18,
+          token:'WETH',
+          address:'0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+        },
+      }
+    },
     coverProtocol:{
       enabled:false,
       label:'Cover Protocol',
@@ -2341,7 +2380,7 @@ const globalConfigs = {
         captionPos: 'top',
         subcaption: '~ 0.25% fee ~',
         supportedMethods:['wallet'],
-        supportedTokens:['USDC','DAI','USDT','TUSD','SUSD','WBTC'],
+        supportedTokens:['WETH','USDC','DAI','USDT','TUSD','SUSD','WBTC'],
         web3Subscription:{ // Data for web3 subscription
           enabled: true,
           contractAddress: '0x818e6fecd516ecc3849daf6845e3ec868087b755',

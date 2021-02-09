@@ -1,6 +1,7 @@
 import DAI from '../abis/tokens/DAI.json';
 import CHAI from '../abis/chai/CHAI.json';
 import cToken from '../abis/compound/cDAI';
+import WETH from '../abis/tokens/WETH.json';
 import USDC from '../abis/tokens/USDC.json';
 import ERC20 from '../abis/tokens/ERC20.js';
 import aToken from '../abis/aave/AToken.json';
@@ -101,6 +102,59 @@ const availableTokens = {
   },
   1337:{
     best:{
+      WETH:{
+        abi:WETH,
+        token:'WETH',
+        decimals:18,
+        enabled:true,
+        govTokensDisabled:false,
+        color:'hsl(40, 95%, 59%)',
+        address:'0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        deposit:{
+          minAmountForMint:0.5,
+        },
+        wyre:{
+          destCurrency:'WETH'
+        },
+        ramp:{
+          swapAsset:'WETH'
+        },
+        defiPrime:{
+          token:'weth'
+        },
+        idle:{
+          abi:IdleTokenV4,
+          token:'idleWETHYield',
+          address:'0xC8E6CA6E96a326dC448307A5fDE90a0b21fd7f80',
+        },
+        protocols:[
+          {
+            enabled:true,
+            abi:cToken.abi,
+            name:'compound',
+            address:'0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5',
+            token:'cETH',
+            decimals:28,
+            functions:{
+              exchangeRate:{
+                name:'exchangeRateStored',
+                params:[]
+              }
+            },
+          },
+          {
+            abi:aToken,
+            name:'aave',
+            enabled:true,
+            address:'0x030bA81f1c18d280636F32af80b9AAd02Cf0854e',
+            token:'aWETH',
+            decimals:18,
+            functions:{
+
+            }
+          },
+        ]
+      },
       DAI:{
         abi:DAI,
         token:'DAI',
@@ -353,6 +407,59 @@ const availableTokens = {
   },
   1:{ // Mainnet
     best:{
+      WETH:{
+        abi:WETH,
+        token:'WETH',
+        decimals:18,
+        enabled:true,
+        govTokensDisabled:false,
+        color:'hsl(40, 95%, 59%)',
+        address:'0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        deposit:{
+          minAmountForMint:0.5,
+        },
+        wyre:{
+          destCurrency:'WETH'
+        },
+        ramp:{
+          swapAsset:'WETH'
+        },
+        defiPrime:{
+          token:'weth'
+        },
+        idle:{
+          abi:IdleTokenV4,
+          token:'idleWETHYield',
+          address:'0xC8E6CA6E96a326dC448307A5fDE90a0b21fd7f80',
+        },
+        protocols:[
+          {
+            enabled:true,
+            abi:cToken.abi,
+            name:'compound',
+            address:'0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5',
+            token:'cETH',
+            decimals:18,
+            functions:{
+              exchangeRate:{
+                name:'exchangeRateStored',
+                params:[]
+              }
+            },
+          },
+          {
+            abi:aToken,
+            name:'aave',
+            enabled:true,
+            address:'0x030bA81f1c18d280636F32af80b9AAd02Cf0854e',
+            token:'aWETH',
+            decimals:18,
+            functions:{
+
+            }
+          },
+        ]
+      },
       DAI:{
         abi:DAI,
         token:'DAI',

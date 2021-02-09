@@ -250,8 +250,11 @@ class SendTxWithBalance extends Component {
         methodName,
         methodParams
       } = params;
+
+      const value = params.value || null;
+
       const contractName = this.props.contractInfo.name;
-      this.props.contractMethodSendWrapper(contractName, methodName, methodParams, null, callback, callbackReceipt);
+      this.props.contractMethodSendWrapper(contractName, methodName, methodParams, value, callback, callbackReceipt);
 
       this.setState((prevState) => ({
         processing: {
@@ -272,6 +275,11 @@ class SendTxWithBalance extends Component {
   }
 
   async checkContractApproved(){
+
+    if (this.props.approveEnabled !== undefined && !this.props.approveEnabled){
+      return true;
+    }
+
     const contractInfo = await this.props.initContract(this.props.contractInfo.name,this.props.contractInfo.address,this.props.contractInfo.abi);
     if (contractInfo){
       const contractApproved = await this.functionsUtil.checkTokenApproved(this.props.tokenConfig.token,this.props.contractInfo.address,this.props.account);
@@ -301,7 +309,7 @@ class SendTxWithBalance extends Component {
         justifyContent={'center'}
       >
         {
-          this.props.tokenBalance && this.functionsUtil.BNify(this.props.tokenBalance).gt(0) ? (
+          this.props.tokenConfig && this.props.tokenBalance && this.functionsUtil.BNify(this.props.tokenBalance).gt(0) ? (
             <Box
               width={1}
             >
@@ -545,6 +553,9 @@ class SendTxWithBalance extends Component {
                           buttonProps={{
                             mt:2,
                             width:[1,1/2],
+                            style:{
+                              textTransform:'capitalize'
+                            },
                             disabled:this.state.buttonDisabled
                           }}
                           handleClick={this.executeTx.bind(this)}
