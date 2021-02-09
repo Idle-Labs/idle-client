@@ -175,6 +175,11 @@ class IdleGovToken{
     let totalSpeed = this.functionsUtil.BNify(0);
     await this.functionsUtil.asyncForEach(Object.keys(availableTokens),async (token) => {
       const tokenConfig = availableTokens[token];
+
+      if (this.tokenConfig && this.tokenConfig.disabledTokens.includes(tokenConfig.idle.token)){
+        return;
+      }
+
       const [
         idleSpeed,
         userPoolShare
