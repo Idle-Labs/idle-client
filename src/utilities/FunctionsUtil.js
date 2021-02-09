@@ -847,7 +847,7 @@ class FunctionsUtil {
     return curveTxs;
   }
   filterEtherscanTxs = async (results,enabledTokens=[],processTxs=true,processStoredTxs=true) => {
-    if (!results || !results.length || typeof results.forEach !== 'function' || !this.props.account){
+    if (!this.props.account || !results || !results.length || typeof results.forEach !== 'function'){
       return [];
     }
 
@@ -2939,7 +2939,7 @@ class FunctionsUtil {
       case 'apy':
         const tokenApys = await this.getTokenAprs(tokenConfig,false,addGovTokens);
 
-        // this.customLog('apr',token,tokenApys.avgApr ? tokenApys.avgApr.toString() : null,tokenApys.avgApy ? tokenApys.avgApy.toString() : null);
+        // console.log('apr',token,tokenApys.avgApr ? tokenApys.avgApr.toString() : null,tokenApys.avgApy ? tokenApys.avgApy.toString() : null);
 
         if (tokenApys && tokenApys.avgApy !== null){
           output = tokenApys.avgApy;
@@ -3412,6 +3412,40 @@ class FunctionsUtil {
 
     return this.setCachedData(cachedDataKey,batchedDeposits);
   }
+  getETHBalance = async (walletAddr,fixDecimals=true,blockNumber='latest') => {
+    if (!walletAddr){
+      return false;
+    }
+
+    // Check for cached data
+    const cachedDataKey = `ethBalance_${walletAddr}_${fixDecimals}_${blockNumber}`;
+    if (blockNumber !== 'latest'){
+      const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+      if (cachedData && !this.BNify(cachedData).isNaN()){
+        return this.BNify(cachedData);
+      }
+    }
+
+    let tokenBalance = await this.props.web3.eth.getBalance(walletAddr);
+
+    if (tokenBalance){
+      if (fixDecimals){
+        tokenBalance = this.fixTokenDecimals(tokenBalance,18);
+      }
+
+      tokenBalance = this.BNify(tokenBalance);
+
+      // Set cached data
+      if (!tokenBalance.isNaN()){
+        if (blockNumber !== 'latest'){
+          return this.setCachedDataWithLocalStorage(cachedDataKey,tokenBalance);
+        } else {
+          return tokenBalance;
+        }
+      }
+    }
+    return null;
+  }
   getTokenBalance = async (contractName,walletAddr,fixDecimals=true,blockNumber='latest') => {
     if (!walletAddr){
       return false;
@@ -3792,7 +3826,19 @@ class FunctionsUtil {
     try {
       const WETHAddr = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
       const one = this.normalizeTokenDecimals(18);
-      const unires = await this.genericContractCall('UniswapRouter','getAmountsIn',[one.toFixed(),[tokenConfigFrom.address, WETHAddr, tokenConfigDest.address]]);
+
+      const path = [];
+      path.push(tokenConfigFrom.address);
+      // Don't pass through weth if i'm converting weth
+      if (WETHAddr.toLowerCase() !== tokenConfigFrom.address.toLowerCase() && WETHAddr.toLowerCase() !== tokenConfigDest.address.toLowerCase()){
+        path.push(WETHAddr);
+      }
+      path.push(tokenConfigDest.address);
+
+      const unires = await this.genericContractCall('UniswapRouter','getAmountsIn',[one.toFixed(),path]);
+
+      // console.log('getUniswapConversionRate',tokenConfigFrom,tokenConfigDest,path,unires);
+
       if (unires){
         const price = this.BNify(unires[0]).div(one);
         return this.setCachedDataWithLocalStorage(cachedDataKey,price);
@@ -4543,7 +4589,9 @@ class FunctionsUtil {
         return;
       }
       if (govTokenConfig.protocol === 'idle'){
-        output[govToken] = govTokenConfig;
+        if (!govTokenConfig.disabledTokens.includes(tokenConfig.idle.token)){
+          output[govToken] = govTokenConfig;
+        }
       } else {
         const foundProtocol = tokenConfig.protocols.find( p => (p.enabled && p.name.toLowerCase() === govTokenConfig.protocol.toLowerCase()) )
         if (foundProtocol){
@@ -5292,6 +5340,13 @@ class FunctionsUtil {
           // console.log('NOT CACHED -',count,cachedDataKey,this.BNify(conversionRate).toFixed());
           return this.setCachedDataWithLocalStorage(cachedDataKey,conversionRate);
         }
+      }
+    } else {
+      const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
+      const conversionRate = await this.getUniswapConversionRate(DAITokenConfig,tokenConfig);
+      if (!this.BNify(conversionRate).isNaN()){
+        // console.log('NOT CACHED -',count,cachedDataKey,this.BNify(conversionRate).toFixed());
+        return this.setCachedDataWithLocalStorage(cachedDataKey,conversionRate);
       }
     }
 

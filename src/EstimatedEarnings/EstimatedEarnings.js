@@ -11,7 +11,6 @@ import { Flex, Text, Input, Icon, Tooltip } from "rimble-ui";
 class EstimatedEarnings extends Component {
 
   state = {
-    tokenApy:null,
     chartData:null,
     chartProps:null,
     inputValue:1000,
@@ -46,22 +45,9 @@ class EstimatedEarnings extends Component {
     }
   }
 
-  async getTokenApy(){
-    const tokenApy = this.state.tokenApy || await this.functionsUtil.getTokenApy(this.props.tokenConfig);
-    if (this.state.tokenApy !== tokenApy){
-      this.setState({
-        tokenApy
-      });
-    }
-    return tokenApy;
-  }
-
   async loadChart(){
-
-    const tokenApy = await this.getTokenApy();
-
     const amount = this.functionsUtil.BNify(this.state.inputValue);
-    const earningsYear = amount.times(tokenApy.div(100));
+    const earningsYear = amount.times(this.props.tokenApy.div(100));
 
     const amountMonth = parseFloat(earningsYear.div(12));
     const amount3Months = parseFloat(earningsYear.div(4));
@@ -230,7 +216,7 @@ class EstimatedEarnings extends Component {
                 color={'cellText'}
                 textAlign={'center'}
               >
-                Set the amount and see your estimated earnings on time based on the current APY: { this.state.tokenApy ? `${this.state.tokenApy.toFixed(2)}%` : null}
+                Set the amount and see your estimated earnings on time based on the current APY: { this.props.tokenApy ? `${this.props.tokenApy.toFixed(2)}%` : null}
                 {
                   showAPYDisclaimer && 
                     <Flex

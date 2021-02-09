@@ -14,10 +14,12 @@ import EstimatedEarnings from '../EstimatedEarnings/EstimatedEarnings';
 class AssetPage extends Component {
 
   state = {
+    tokenApy:{},
     tokenFees:{},
     tokenBalance:{},
     tokenApproved:{},
     activeModal:null,
+    idleTokenPrice:{},
     govTokensBalance:{},
     idleTokenBalance:{},
     redeemableBalance:{},
@@ -60,6 +62,7 @@ class AssetPage extends Component {
 
         const [
           tokenFeesPercentage,
+          tokenApy,
           tokenBalance,
           tokenFees,
           idleTokenPrice,
@@ -68,6 +71,7 @@ class AssetPage extends Component {
           govTokensBalance
         ] = await Promise.all([
           this.functionsUtil.getTokenFees(tokenConfig),
+          this.functionsUtil.getTokenApy(this.props.tokenConfig),
           this.functionsUtil.getTokenBalance(token,this.props.account),
           this.functionsUtil.getUserTokenFees(tokenConfig,this.props.account),
           this.functionsUtil.genericContractCall(tokenConfig.idle.token, 'tokenPrice'),
@@ -79,16 +83,19 @@ class AssetPage extends Component {
         newState.tokenFees[token] = tokenFees;
         newState.tokenBalance[token] = tokenBalance;
         newState.tokenApproved[token] = tokenApproved;
+        newState.idleTokenPrice[token] = idleTokenPrice;
         newState.idleTokenBalance[token] = idleTokenBalance;
         newState.govTokensBalance[token] = govTokensBalance;
         newState.tokenFeesPercentage[token] = tokenFeesPercentage;
         newState.govTokensDisabled[token] = tokenConfig.govTokensDisabled;
+        newState.tokenApy[token] = tokenApy && !tokenApy.isNaN() ? tokenApy : null;
         newState.redeemableBalance[token] = idleTokenBalance ? this.functionsUtil.fixTokenDecimals(idleTokenBalance.times(idleTokenPrice),tokenConfig.decimals) : this.functionsUtil.BNify(0);
       });
 
       newState.availableGovTokens = this.functionsUtil.getTokenGovTokens(this.props.tokenConfig);
 
       newState.componentMounted = true;
+
       this.setState(newState);
     }
   }
@@ -302,7 +309,7 @@ class AssetPage extends Component {
             </Flex>
         }
         {
-        this.props.account && 
+        this.props.account && this.state.tokenApy[this.props.selectedToken] && 
           <Flex
             mb={[3,4]}
             width={1}
@@ -312,6 +319,7 @@ class AssetPage extends Component {
             <Title my={[3,4]}>Estimated earnings</Title>
             <EstimatedEarnings
               {...this.props}
+              tokenApy={this.state.tokenApy[this.props.selectedToken]}
             />
           </Flex>
         }
