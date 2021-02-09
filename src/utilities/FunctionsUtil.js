@@ -2355,17 +2355,24 @@ class FunctionsUtil {
     }
   }
 
-  buildBiconomyErc20ForwarderTx = async (contractName,tokenAddress,functionSignature,gasLimit,callback,callback_receipt) => {
+  buildBiconomyErc20ForwarderTx = async (contractName,tokenAddress,callData,gasLimit) => {
     const contract = this.getContractByName(contractName);
 
-    console.log('Build Tx ',contract._address,tokenAddress,Number(gasLimit),functionSignature);
+    const daiPermitOptions = {
+      expiry: Math.floor(Date.now() / 1000 + 3600),
+      allowed: true
+    };
+
+    // await this.props.permitClient.daiPermit(daiPermitOptions);
+
+    console.log('Build Tx ',contract._address,tokenAddress,Number(gasLimit),callData);
 
     //Create the call data that the recipient contract will receive
     const tx = await this.props.erc20ForwarderClient.buildTx({
-      to:contract._address,
+      data:callData,
       token:tokenAddress,
-      txGas:Number(gasLimit),
-      data:functionSignature
+      to:contract._address,
+      txGas:Number(gasLimit)
     });
 
     return tx;
@@ -2373,25 +2380,43 @@ class FunctionsUtil {
 
   sendBiconomyTxWithErc20Forwarder = async (req,callback,callback_receipt) => {
 
-    // returns a json object with txHash (if transaction is successful), log, message, code and flag
-    const txResponse = await this.props.erc20ForwarderClient.sendTxPersonalSign({req});
-    const txHash = txResponse.txHash;
-    console.log(txHash);
+    let transactionHash = null;
 
-    //for EIP712 signature type
-    // return await this.props.erc20ForwarderClient.sendTxEIP712(tx);
+    try {
+      const txResponse = await this.props.erc20ForwarderClient.sendTxPersonalSign({req});
+      transactionHash = txResponse.txHash;
+    } catch (error) {
+      return callback(null,true);
+    }
+
+    if (!transactionHash){
+      return callback(null,true);
+    }
+    
+    const tx = {
+      method:'mintIdleToken',
+      transactionHash
+    };
+    console.log('sendBiconomyTxWithErc20Forwarder',transactionHash);
+    callback_receipt(tx);
 
     // fetch mined transaction receipt 
-    /*
-     var timer = setInterval(()=> {
-      this.props.web3.eth.getTransactionReceipt(txHash, (err, receipt)=> {
+    const fetchReceiptIntervalId = window.setInterval(()=> {
+      this.props.web3.eth.getTransactionReceipt(transactionHash, (err, receipt)=> {
+        console.log('sendBiconomyTxWithErc20Forwarder',transactionHash,err,receipt);
         if(!err && receipt){
-          clearInterval(timer);
-          resolve(receipt);
+          window.clearInterval(fetchReceiptIntervalId);
+          tx.txReceipt = receipt;
+          tx.status = !err && receipt.status ? 'success' : 'error';
+
+          callback(tx,err);
+
+          if (typeof window.updateTransaction === 'function'){
+            window.updateTransaction(tx,transactionHash,tx.status,null);
+          }
         }
       });
-    }, 2000);
-    */
+    }, 3000);
   }
 
   sendBiconomyTxWithPersonalSign = async (contractName,functionSignature,callback,callback_receipt) => {

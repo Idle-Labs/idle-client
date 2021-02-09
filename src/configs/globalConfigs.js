@@ -45,6 +45,7 @@ import LiquidityGaugeV2 from '../abis/curve/LiquidityGaugeV2.json';
 import IdleBatchConverter from '../contracts/IdleBatchConverter.json';
 import UniswapV2Router02 from '../abis/uniswap/UniswapV2Router02.json';
 import BalancerExchangeProxy from '../abis/balancer/BalancerExchangeProxy.json';
+import idleErc20ForwarderWrapper from '../contracts/idleErc20ForwarderWrapper.json';
 import IdleConverterPersonalSignV4 from '../contracts/IdleConverterPersonalSignV4.json';
 
 const env = process.env;
@@ -823,20 +824,26 @@ const globalConfigs = {
         metaTransactionsEnabled:false,
         // Proxy contract for Meta Tx or ERC20 Forwarder
         erc20ForwarderProxyContract:{
-          DAI:{
+          forwarder:{
             enabled:true,
             abi:erc20Forwarder,
             name:'erc20Forwarder',
-            function:'emitMessage',
-            address:'0xE452FDa9d69D54d55b0670F6c52805a628116501', // Kovan
+            address:'0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa', // Kovan
           },
-          USDC:{
-            enabled:true,
-            abi:IdleBatchedMint,
-            name:'IdleBatchedMintUSDC',
-            function:'permitEIP2612AndDepositUnlimited',
-            address:'0x3F35eB839f91b614195a47A593dB46b14cd7EaF8', // Kovan
-          },
+          tokens:{
+            DAI:{
+              function:'emitMessage',
+              abi:idleErc20ForwarderWrapper,
+              name:'idleErc20ForwarderWrapper',
+              address:'0xE452FDa9d69D54d55b0670F6c52805a628116501', // Kovan
+            },
+            USDC:{
+              abi:IdleBatchedMint,
+              name:'IdleBatchedMintUSDC',
+              function:'permitEIP2612AndDepositUnlimited',
+              address:'0x3F35eB839f91b614195a47A593dB46b14cd7EaF8', // Kovan
+            },
+          }
         },
         proxyContract:{
           enabled:false,
@@ -909,7 +916,7 @@ const globalConfigs = {
           limits:'https://api.biconomy.io/api/v1/dapp/checkLimits'
         },
         params:{
-          debug: true,
+          debug: false,
           // apiKey: env.REACT_APP_BICONOMY_KEY, // Mainnet
           dappId: env.REACT_APP_BICONOMY_APPID,
           apiId: '36572ec9-ae5c-4c4a-9530-f3ae7c7ac829',

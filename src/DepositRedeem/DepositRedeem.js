@@ -53,6 +53,7 @@ class DepositRedeem extends Component {
     depositCurveBalance:null,
     depositCurveEnabled:true,
     showAdvancedOptions:false,
+    erc20ForwarderContract:{},
     depositCurveSlippage:null,
     showETHWrapperEnabled:false,
     erc20ForwarderEnabled:true,
@@ -154,16 +155,24 @@ class DepositRedeem extends Component {
   async loadProxyContracts(){
     const actions = ['deposit','redeem'];
     const newState = {
-      actionProxyContract:{}
+      actionProxyContract:{},
+      erc20ForwarderContract:{}
     };
-
 
     await this.functionsUtil.asyncForEach(actions,async (action) => {
       let mintProxyContractInfo = null;
       const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract','methods',action,'erc20ForwarderEnabled']);
 
       if (depositErc20ForwarderEnabled){
-        mintProxyContractInfo = this.functionsUtil.getGlobalConfig(['contract','methods',action,'erc20ForwarderProxyContract',this.props.selectedToken]);
+        mintProxyContractInfo = this.functionsUtil.getGlobalConfig(['contract','methods',action,'erc20ForwarderProxyContract','forwarder']);
+
+        // Init contract for erc20 forwarder
+        const erc20ForwarderContractInfo = this.functionsUtil.getGlobalConfig(['contract','methods',action,'erc20ForwarderProxyContract','tokens',this.props.selectedToken]);
+        if (erc20ForwarderContractInfo){
+          const erc20ForwarderContract = await this.props.initContract(erc20ForwarderContractInfo.name,erc20ForwarderContractInfo.address,erc20ForwarderContractInfo.abi);
+          newState.erc20ForwarderContract[action] = erc20ForwarderContractInfo;
+          newState.erc20ForwarderContract[action].contract = erc20ForwarderContract.contract;
+        }
       }
       if (!mintProxyContractInfo){
         mintProxyContractInfo = this.functionsUtil.getGlobalConfig(['contract','methods',action,'proxyContract']);
@@ -224,11 +233,12 @@ class DepositRedeem extends Component {
     const erc20ForwarderEnabledChanged = prevState.erc20ForwarderEnabled !==  this.state.erc20ForwarderEnabled;
     const tokenBalanceChanged = prevProps.tokenBalance !== this.props.tokenBalance && this.props.tokenBalance !== null;
 
-    if (erc20ForwarderEnabledChanged){
-      await this.loadProxyContracts();
-    }
+    // if (erc20ForwarderEnabledChanged){
+    //   await this.loadProxyContracts();
+    //   await this.checkTokenApproved();
+    // }
 
-    if (tokenChanged || tokenBalanceChanged){
+    if (tokenChanged || tokenBalanceChanged || erc20ForwarderEnabledChanged){
       await this.loadProxyContracts();
       this.loadTokenInfo();
       return false;
@@ -379,6 +389,7 @@ class DepositRedeem extends Component {
       const useProxyContract = this.checkUseProxyContract();
       if (useProxyContract){
         // Check for Permit Deposit
+        /*
         const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','erc20ForwarderEnabled']) && this.state.erc20ForwarderEnabled;
         if (depositErc20ForwarderEnabled){
           const permitEnabled = this.functionsUtil.getGlobalConfig(['permit',this.props.selectedToken]);
@@ -386,11 +397,14 @@ class DepositRedeem extends Component {
             return true;
           }
         }
+        */
         // Check proxy contract approved
         const proxyContract = this.state.actionProxyContract[this.state.action];
         tokenApproved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken,proxyContract.address,this.props.account);
+        console.log('tokenApproved 1',tokenApproved);
       } else {
         tokenApproved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken,this.props.tokenConfig.idle.address,this.props.account);
+        console.log('tokenApproved 2',tokenApproved);
       }
     }
 
@@ -743,23 +757,26 @@ class DepositRedeem extends Component {
                 this.setState({
                   loadingErc20ForwarderTx:true
                 }, async () => {
-                  const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken, this.props.account, mintProxyContractInfo.name);
-                  if (signedParameters){
-                    const { expiry, nonce, r, s, v } = signedParameters;
-                    depositParams = [tokensToDeposit, nonce, expiry, v, r, s];
-                    const functionCall = mintProxyContract.methods[mintProxyContractInfo.function](...depositParams);
-                    const functionSignature = functionCall.encodeABI();
-                    console.log(mintProxyContractInfo.name, mintProxyContractInfo.function, depositParams, functionSignature);
-                    const gasLimit = 1000000;//await functionCall.estimateGas({from: this.props.account});
-                    const erc20ForwarderTx = await this.functionsUtil.buildBiconomyErc20ForwarderTx(mintProxyContractInfo.name, this.props.tokenConfig.address, functionSignature, gasLimit);
-                    console.log('erc20ForwarderTx',erc20ForwarderTx);
-                    return this.setState({
-                      erc20ForwarderTx,
-                      loadingErc20ForwarderTx:false
-                    });
-                  } else {
-                    return this.cancelTransaction();
-                  }
+                  // const { expiry, nonce, r, s, v } = signedParameters;
+                  // depositParams = [tokensToDeposit, nonce, expiry, v, r, s];
+                  depositParams = [this.props.account]; // EmitEvent
+
+                  const erc20ForwarderContract = this.state.erc20ForwarderContract[this.state.action];
+
+                  // contractSendResult = await this.functionsUtil.contractMethodSendWrapper(mintProxyContractInfo.name, mintProxyContractInfo.function, depositParams, callbackDeposit, callbackReceiptDeposit);
+
+                  const functionCall = erc20ForwarderContract.contract.methods[erc20ForwarderContract.function](...depositParams);
+                  const functionSignature = functionCall.encodeABI();
+                  const gasLimit = await functionCall.estimateGas({from: this.props.account}); // 1000000
+
+                  // console.log('CANEEEE!',mintProxyContractInfo.name, depositParams, functionSignature, gasLimit);
+
+                  const erc20ForwarderTx = await this.functionsUtil.buildBiconomyErc20ForwarderTx(erc20ForwarderContract.name, this.props.tokenConfig.address, functionSignature, gasLimit);
+                  console.log('erc20ForwarderTx',erc20ForwarderTx);
+                  return this.setState({
+                    erc20ForwarderTx,
+                    loadingErc20ForwarderTx:false
+                  });
                 });
               // Send ERC20 Forwarder Tx
               } else {
