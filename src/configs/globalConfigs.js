@@ -183,8 +183,11 @@ const globalConfigs = {
     }
   },
   dashboard:{
-    themeMode:'light',
     baseRoute:'/dashboard',
+    theme:{
+      mode:'light',
+      darkModeEnabled:false
+    },
   },
   governance:{
     test:false,
