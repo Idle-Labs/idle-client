@@ -53,9 +53,6 @@ const globalConfigs = {
   baseToken: 'ETH',
   baseURL: 'https://idle.finance',
   forumURL:'https://gov.idle.finance',
-  theme:{
-    darkModeEnabled:false
-  },
   countries:{
     'USA':'United States of America',
     'GBR':'United Kingdom',
@@ -178,8 +175,11 @@ const globalConfigs = {
     }
   },
   dashboard:{
-    themeMode:'light',
     baseRoute:'/dashboard',
+    theme:{
+      mode:'light',
+      darkModeEnabled:false
+    },
   },
   governance:{
     test:false,

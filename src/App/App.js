@@ -342,7 +342,7 @@ class App extends Component {
         this.setThemeMode('light',false);
       } else {
         // Get stored Mode
-        const themeMode = this.functionsUtil.getStoredItem('themeMode',false) || this.functionsUtil.getGlobalConfig(['dashboard','themeMode']);
+        const themeMode = this.functionsUtil.getStoredItem('themeMode',false) || this.functionsUtil.getGlobalConfig(['dashboard','theme','mode']);
         this.setThemeMode(themeMode);
       }
     }
@@ -469,7 +469,7 @@ class App extends Component {
     let selectedTheme = null;
 
     // Check Dark Mode Enabled
-    const darkModeEnabled = this.functionsUtil.getGlobalConfig(['theme','darkModeEnabled']);
+    const darkModeEnabled = this.functionsUtil.getGlobalConfig(['dashboard','theme','darkModeEnabled']);
     if (themeMode === 'dark' && !darkModeEnabled){
       themeMode = 'light';
     }
