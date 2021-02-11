@@ -998,6 +998,9 @@ class DepositRedeem extends Component {
 
     const showBatchDeposit = batchDepositEnabled && batchDepositDepositEnabled && !this.props.isMigrationTool && this.state.action === 'deposit';
 
+    const ethWrapperInfo = this.functionsUtil.getGlobalConfig(['tools','ethWrapper']);
+    const showETHWrapper = ethWrapperInfo.enabled && !this.props.isMigrationTool && this.state.action === 'deposit';
+
     return (
       <Flex
         width={1}
@@ -1413,7 +1416,7 @@ class DepositRedeem extends Component {
                       </DashboardCard>
                     }
                     {
-                      showBatchDeposit &&
+                      showBatchDeposit ? (
                         <Flex
                           p={2}
                           mt={3}
@@ -1439,6 +1442,33 @@ class DepositRedeem extends Component {
                             name={'LocalGasStation'}
                           />
                         </Flex>
+                      ) : showETHWrapper && (
+                          <Flex
+                            p={2}
+                            mt={3}
+                            width={1}
+                            borderRadius={2}
+                            alignItems={'center'}
+                            flexDirection={'row'}
+                            justifyContent={'center'}
+                            backgroundColor={'DashboardCard'}
+                            border={`1px solid ${this.props.theme.colors.primary}`}
+                          >
+                            <Link
+                              textAlign={'center'}
+                              hoverColor={'primary'}
+                              href={`/#/dashboard/tools/${ethWrapperInfo.route}`}
+                            >
+                              Convert your ETH to WETH with a 1:1 ratio
+                            </Link>
+                            <Icon
+                              ml={1}
+                              size={'1em'}
+                              color={'primary'}
+                              name={'SwapHoriz'}
+                            />
+                          </Flex>
+                      )
                     }
                     {
                       showRedeemCurve && this.state.canRedeem && (

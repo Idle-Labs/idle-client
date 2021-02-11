@@ -95,7 +95,7 @@ class ETHWrapper extends Component {
           // iconProps:{
           //   color:this.props.theme.colors.transactions.action.deposit
           // },
-          text:`Deposit your ETH and get WETH`
+          text:`Deposit your ETH and get WETH with a 1:1 ratio`
         };
       break;
       case 'withdraw':
@@ -109,7 +109,7 @@ class ETHWrapper extends Component {
           // iconProps:{
           //   color:this.props.theme.colors.transactions.action.redeem
           // },
-          text:`Unwrap your WETH and get back ETH`
+          text:`Unwrap your WETH and get back ETH with a 1:1 ratio`
         };
       break;
     }
