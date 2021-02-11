@@ -33,7 +33,7 @@ export default {
     '0px 2px 4px rgba(0, 0, 0, 0.1)',
     '0 7px 14px rgba(50,50,93,.1)',
     '1px 1px 0px rgba(0,0,0,0.2)',
-    '0px 0px 16px 2px rgba(0,54,255,0.3)'
+    '0px 0px 16px 2px rgb(71,93,123,0.6)'
   ],
   opacity: {
     disabled: 0.4,
