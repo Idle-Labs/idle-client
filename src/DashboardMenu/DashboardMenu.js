@@ -49,7 +49,7 @@ class DashboardMenu extends Component {
     }
 
     const isDarkTheme = this.props.themeMode === 'dark';
-    const darkModeEnabled = this.functionsUtil.getGlobalConfig(['theme','darkModeEnabled']);
+    const darkModeEnabled = this.functionsUtil.getGlobalConfig(['dashboard','theme','darkModeEnabled']);
 
     return (
       <Flex
