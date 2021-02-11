@@ -408,6 +408,7 @@ class Stats extends Component {
     } else {
       const earning = lastIdlePrice.div(firstIdlePrice).minus(1).times(100);
       apr = earning.times(365).div(days).toFixed(2);
+
       if (firstCompoundData && lastCompoundData){
         const firstCompoundPrice = this.functionsUtil.fixTokenDecimals(firstCompoundData.price,this.props.tokenConfig.decimals);
         const lastCompoundPrice = this.functionsUtil.fixTokenDecimals(lastCompoundData.price,this.props.tokenConfig.decimals);

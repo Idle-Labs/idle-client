@@ -439,7 +439,7 @@ class FunctionsUtil {
 
     return output;
   }
-  getDepositTimestamp = async (enabledTokens=[],account) => {
+  getFirstDepositTx = async (enabledTokens=[],account) => {
     account = account ? account : this.props.account;
 
     if (!account || !enabledTokens || !enabledTokens.length || !this.props.availableTokens){
@@ -452,8 +452,8 @@ class FunctionsUtil {
 
     enabledTokens.forEach((selectedToken) => {
       let amountLent = this.BNify(0);
-      let depositTimestamp = null;
-      deposits[selectedToken] = depositTimestamp;
+      let firstDepositTx = null;
+      deposits[selectedToken] = firstDepositTx;
 
       const filteredTxs = Object.values(etherscanTxs).filter(tx => (tx.token === selectedToken));
       if (filteredTxs && filteredTxs.length){
@@ -470,8 +470,8 @@ class FunctionsUtil {
             case 'Receive':
             case 'Migrate':
               amountLent = amountLent.plus(tx.tokenAmount);
-              if (!depositTimestamp){
-                depositTimestamp = tx.timeStamp;
+              if (!firstDepositTx){
+                firstDepositTx = tx;
               }
             break;
             case 'Send':
@@ -487,16 +487,29 @@ class FunctionsUtil {
           // Reset amountLent if below zero
           if (amountLent.lt(0)){
             amountLent = this.BNify(0);
-            depositTimestamp = null;
+            firstDepositTx = null;
           }
         });
       }
 
       // Add token Data
-      deposits[selectedToken] = depositTimestamp;
+      deposits[selectedToken] = firstDepositTx;
     });
 
     return deposits;
+  }
+  getDepositTimestamp = async (enabledTokens=[],account) => {
+
+    const firstDepositTxs = await this.getFirstDepositTx(enabledTokens,account);
+
+    if (firstDepositTxs){
+      return Object.keys(firstDepositTxs).reduce( (acc,token) => {
+        acc[token] = firstDepositTxs[token].timeStamp;
+        return acc;
+      },{});
+    }
+
+    return null;
   }
   getAmountDeposited = async (tokenConfig,account) => {
     let [tokenBalance,userAvgPrice] = await Promise.all([
@@ -2827,7 +2840,26 @@ class FunctionsUtil {
         }
       break;
       case 'avgAPY':
-        const [daysFirstDeposit,earningsPerc] = await Promise.all([
+        const [
+          tokenPrice,
+          firstDepositTx,
+          days
+        ] = await Promise.all([
+          this.getIdleTokenPrice(tokenConfig),
+          this.getFirstDepositTx([token],account),
+          this.loadAssetField('daysFirstDeposit',token,tokenConfig,account)
+        ]);
+
+        if (tokenPrice && firstDepositTx && firstDepositTx[token]){
+          const tokenPriceFirstDeposit = await this.getIdleTokenPrice(tokenConfig,firstDepositTx[token].blockNumber);
+          output = this.BNify(tokenPrice).div(tokenPriceFirstDeposit).minus(1).times(365).div(days).times(100);
+        }
+      break;
+      case 'avgAPY_old':
+        const [
+          daysFirstDeposit,
+          earningsPerc
+        ] = await Promise.all([
           this.loadAssetField('daysFirstDeposit',token,tokenConfig,account),
           this.loadAssetField('earningsPerc',token,tokenConfig,account), // Take earnings perc instead of earnings
         ]);
@@ -5069,6 +5101,24 @@ class FunctionsUtil {
     }
     return tokenBalance;
   }
+
+  getAvgAPYStats = async (address,isRisk,startTimestamp=null,endTimestamp=null) => {
+
+    const apiResults = await this.getTokenApiData(address,isRisk,startTimestamp,endTimestamp,true,7200);
+
+    if (apiResults && apiResults.length){
+      const apr = apiResults.reduce( (sum,r) => {
+        const idleRate = this.fixTokenDecimals(r.idleRate,18);
+        return sum.plus(idleRate);
+      },this.BNify(0));
+
+      // Calculate average
+      return apr.div(apiResults.length);
+    }
+
+    return null;
+  }
+
   /*
   Get idleToken conversion rate
   */

@@ -44,19 +44,23 @@ class FundsOverview extends Component {
     const govTokenAvailableTokens = {};
     govTokenAvailableTokens[this.props.selectedToken] = this.props.tokenConfig;
 
+    const isRisk = this.props.selectedStrategy === 'risk';
+
     const [
       govTokensAprs,
       idleTokenUserDistribution,
       govTokensUserBalance,
-      avgAPY,
-      days
+      depositTimestamp,
+      days,
     ] = await Promise.all([
       this.functionsUtil.getGovTokensAprs(this.props.selectedToken,this.props.tokenConfig),
       this.idleGovToken.getUserDistribution(this.props.account,govTokenAvailableTokens,true),
       this.functionsUtil.getGovTokensUserBalances(this.props.account,govTokenAvailableTokens,null),
-      this.functionsUtil.loadAssetField('avgAPY',this.props.selectedToken,this.props.tokenConfig,this.props.account),
+      this.functionsUtil.loadAssetField('depositTimestamp',this.props.selectedToken,this.props.tokenConfig,this.props.account),
       this.functionsUtil.loadAssetField('daysFirstDeposit',this.props.selectedToken,this.props.tokenConfig,this.props.account),
     ]);
+
+    const avgAPY = await this.functionsUtil.getAvgAPYStats(this.props.tokenConfig.address,isRisk,depositTimestamp);
 
     const govTokensTotalBalance = govTokensUserBalance ? Object.values(govTokensUserBalance).reduce( (totBalance,govTokenBalance) => {
       return totBalance.plus(this.functionsUtil.BNify(govTokenBalance));
