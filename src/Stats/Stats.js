@@ -351,6 +351,7 @@ class Stats extends Component {
 
     // Calculate AUM
     let aum = idleTokens.times(lastIdlePrice);
+
     // Convert Token balance
     aum = await this.functionsUtil.convertTokenBalance(aum,this.props.selectedToken,this.props.tokenConfig,isRisk);
 
@@ -456,7 +457,9 @@ class Stats extends Component {
     });
 
     // Add gov tokens balance to AUM
-    const govTokensPool = await this.functionsUtil.getGovTokenPool(null,null,'DAI');
+    const availableTokens = {};
+    availableTokens[this.props.selectedToken] = this.props.tokenConfig;
+    const govTokensPool = await this.functionsUtil.getGovTokenPool(null,availableTokens,'DAI');
     if (govTokensPool){
       aum = aum.plus(govTokensPool);
     }

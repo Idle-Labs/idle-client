@@ -112,6 +112,8 @@ class ETHWrapper extends Component {
           text:`Unwrap your WETH and get back ETH with a 1:1 ratio`
         };
       break;
+      default:
+      break;
     }
 
     this.setState({
@@ -158,6 +160,8 @@ class ETHWrapper extends Component {
           text:`You have successfully withdrawn <strong>${withdrawnAmount.toFixed(4)} ETH</strong>`
         }
       break;
+      default:
+      break;
     }
 
     // Update balances
@@ -180,6 +184,8 @@ class ETHWrapper extends Component {
         params.value = null;
         params.methodParams = [amount];
         params.methodName = 'withdraw';
+      break;
+      default:
       break;
     }
     return params;

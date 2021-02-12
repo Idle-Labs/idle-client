@@ -638,7 +638,7 @@ const globalConfigs = {
       },
       WETH:{
         decimals:18,
-        enabled:false,
+        enabled:true,
         color:{
           hex:'#ee1f79',
           rgb:[238, 31, 121],
