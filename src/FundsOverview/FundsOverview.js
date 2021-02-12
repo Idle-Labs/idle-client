@@ -1,9 +1,9 @@
 import Title from '../Title/Title';
 import React, { Component } from 'react';
-import { Flex, Heading, Text } from "rimble-ui";
 import AssetField from '../AssetField/AssetField';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import DashboardCard from '../DashboardCard/DashboardCard';
+import { Flex, Heading, Text, Tooltip, Icon } from "rimble-ui";
 import PortfolioEquity from '../PortfolioEquity/PortfolioEquity';
 
 class FundsOverview extends Component {
@@ -107,6 +107,7 @@ class FundsOverview extends Component {
         },
         props:{
           title:'Avg APY',
+          desc:this.functionsUtil.getGlobalConfig(['messages','apyLong']),
           children:(
             <Flex
               width={1}
@@ -248,14 +249,34 @@ class FundsOverview extends Component {
                             </Text>
                           )
                         }
-                        <Text
+                        <Flex
                           mt={2}
-                          fontWeight={2}
-                          fontSize={[1,2]}
-                          color={'cellText'}
+                          width={1}
+                          alignItems={'center'}
+                          justifyContent={'center'}
                         >
-                          {v.props.title}
-                        </Text>
+                          <Text
+                            fontWeight={2}
+                            fontSize={[1,2]}
+                            color={'cellText'}
+                          >
+                            {v.props.title}
+                          </Text>
+                          {
+                            v.props.desc && 
+                              <Tooltip
+                                placement={'bottom'}
+                                message={v.props.desc}
+                              >
+                                <Icon
+                                  ml={2}
+                                  name={"Info"}
+                                  size={'1em'}
+                                  color={'cellTitle'}
+                                />
+                              </Tooltip>
+                          }
+                        </Flex>
                       </Flex>
                     </DashboardCard>
                   </Flex>
