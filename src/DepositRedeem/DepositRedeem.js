@@ -50,6 +50,7 @@ class DepositRedeem extends Component {
     depositCurveEnabled:true,
     showAdvancedOptions:false,
     depositCurveSlippage:null,
+    showETHWrapperEnabled:false,
     metaTransactionsEnabled:true
   };
 
@@ -106,6 +107,12 @@ class DepositRedeem extends Component {
   toggleDepositCurve = depositCurveEnabled => {
     this.setState({
       depositCurveEnabled
+    });
+  }
+
+  toggleShowETHWrapper = showETHWrapperEnabled => {
+    this.setState({
+      showETHWrapperEnabled
     });
   }
 
@@ -393,6 +400,8 @@ class DepositRedeem extends Component {
     const canDepositCurve = curveTokenEnabled && canDeposit;
     const depositCurveEnabled = canDepositCurve;
 
+    const showETHWrapperEnabled = this.state.showETHWrapperEnabled || !canDeposit;
+
     const canRedeemCurve = curveTokenEnabled && curveTokenBalance && curveTokenBalance.gt(0);
     const redeemCurveEnabled = canRedeemCurve;
 
@@ -416,6 +425,7 @@ class DepositRedeem extends Component {
     newState.redeemCurveEnabled = redeemCurveEnabled;
     newState.depositCurveEnabled = depositCurveEnabled;
     newState.curveDepositContract = curveDepositContract;
+    newState.showETHWrapperEnabled = showETHWrapperEnabled;
 
     newState.txError = {
       redeem:false,
@@ -617,23 +627,34 @@ class DepositRedeem extends Component {
 
             // Mint if someone mint over X amount
             if (_skipMint){
-              let [
-                maxUnlentPerc,
-                totalAUM
-              ] = await Promise.all([
-                this.functionsUtil.genericContractCall('idleDAIYield', 'maxUnlentPerc'),
-                this.functionsUtil.loadAssetField('pool',this.props.selectedToken,this.props.tokenConfig,this.props.account)
-              ]);
-
-              if (maxUnlentPerc && totalAUM){
-                const depositPerc = inputValue.div(totalAUM).times(100);
-                maxUnlentPerc = this.functionsUtil.BNify(maxUnlentPerc).div(1e3);
-                if (depositPerc.gte(maxUnlentPerc.times(2))){
+              // Check minAmountForMint
+              if (this.props.tokenConfig.deposit && this.props.tokenConfig.deposit.minAmountForMint){
+                const isRisk = this.props.selectedStrategy === 'risk';
+                const convertedAmount = await this.functionsUtil.convertTokenBalance(inputValue,this.props.selectedToken,this.props.tokenConfig,isRisk);
+                if (convertedAmount.gte(this.props.tokenConfig.deposit.minAmountForMint)){
                   _skipMint = false;
                 }
-                // console.log(maxUnlentPerc.toFixed(5),inputValue.toFixed(5),totalAUM.toFixed(5),depositPerc.toFixed(5),depositPerc.gte(maxUnlentPerc.times(2)),_skipMint);
+              } else {
+                let [
+                  maxUnlentPerc,
+                  totalAUM
+                ] = await Promise.all([
+                  this.functionsUtil.genericContractCall('idleDAIYield', 'maxUnlentPerc'),
+                  this.functionsUtil.loadAssetField('pool',this.props.selectedToken,this.props.tokenConfig,this.props.account)
+                ]);
+
+                if (maxUnlentPerc && totalAUM){
+                  const depositPerc = inputValue.div(totalAUM).times(100);
+                  maxUnlentPerc = this.functionsUtil.BNify(maxUnlentPerc).div(1e3);
+                  if (depositPerc.gte(maxUnlentPerc.times(2))){
+                    _skipMint = false;
+                  }
+                  // console.log(maxUnlentPerc.toFixed(5),inputValue.toFixed(5),totalAUM.toFixed(5),depositPerc.toFixed(5),depositPerc.gte(maxUnlentPerc.times(2)),_skipMint);
+                }
               }
             }
+
+            // console.log('skipMint',_skipMint);
 
             depositParams = [tokensToDeposit, _skipMint, '0x0000000000000000000000000000000000000000'];
             contractSendResult = await this.functionsUtil.contractMethodSendWrapper(this.props.tokenConfig.idle.token, 'mintIdleToken', depositParams, callbackDeposit, callbackReceiptDeposit);
@@ -777,7 +798,6 @@ class DepositRedeem extends Component {
           };
 
           let redeemParams = [idleTokenToRedeem];
-          // console.log(redeemParams,idleTokenToRedeem);
 
           contractSendResult = await this.functionsUtil.contractMethodSendWrapper(this.props.tokenConfig.idle.token, 'redeemIdleToken', redeemParams, callbackRedeem, callbackReceiptRedeem, txData);
         }
@@ -979,12 +999,9 @@ class DepositRedeem extends Component {
 
     const showDepositOptions = this.state.action === 'deposit' && !this.state.contractPaused && (curveTokenEnabled || this.state.tokenApproved);
 
-    const canPerformAction = /*!depositCurve && !this.state.redeemCurveEnabled && */((this.state.action === 'deposit' && this.state.canDeposit) || (this.state.action === 'redeem' && this.state.canRedeem) || redeemGovTokens);
     const showDepositCurve = showDepositOptions && curveTokenEnabled && this.state.componentMounted && (!this.state.migrationEnabled || this.state.skipMigration) && this.state.canDepositCurve && this.state.action === 'deposit';
     const showRedeemCurve = curveTokenEnabled && this.state.componentMounted && (!this.state.migrationEnabled || this.state.skipMigration) && this.state.canRedeemCurve && this.state.action === 'redeem';
 
-    const showActionFlow = !redeemGovTokens && canPerformAction;
-    const showBuyFlow = this.state.componentMounted && (!showDepositCurve || this.state.showBuyFlow) && !this.state.depositCurveEnabled && this.state.tokenApproved && !this.state.contractPaused && (!this.state.migrationEnabled || this.state.skipMigration) && this.state.action === 'deposit' && !this.state.canDeposit;
     const showRedeemFlow = this.state.canRedeem && (!this.state.redeemCurveEnabled || this.state.showRedeemFlow);
 
     const showCurveSlippage = depositCurve && this.state.depositCurveSlippage && this.state.depositCurveBalance && !this.state.buttonDisabled;
@@ -999,7 +1016,13 @@ class DepositRedeem extends Component {
     const showBatchDeposit = batchDepositEnabled && batchDepositDepositEnabled && !this.props.isMigrationTool && this.state.action === 'deposit';
 
     const ethWrapperInfo = this.functionsUtil.getGlobalConfig(['tools','ethWrapper']);
-    const showETHWrapper = ethWrapperInfo.enabled && !this.props.isMigrationTool && this.state.action === 'deposit';
+    const ETHWrapperComponent = ethWrapperInfo.subComponent;
+    const showETHWrapper = this.props.selectedToken === 'WETH' && ethWrapperInfo.enabled && !this.props.isMigrationTool && this.state.action === 'deposit';
+
+    const canPerformAction = /*!depositCurve && !this.state.redeemCurveEnabled && */((this.state.action === 'deposit' && this.state.canDeposit) || (this.state.action === 'redeem' && this.state.canRedeem) || redeemGovTokens) && (!this.state.showETHWrapperEnabled || this.state.action === 'redeem');
+    const showActionFlow = !redeemGovTokens && canPerformAction;
+
+    const showBuyFlow = this.state.componentMounted && (!showDepositCurve || this.state.showBuyFlow) && !this.state.depositCurveEnabled && this.state.tokenApproved && !this.state.contractPaused && (!this.state.migrationEnabled || this.state.skipMigration) && this.state.action === 'deposit' && !this.state.canDeposit && !this.state.showETHWrapperEnabled;
 
     return (
       <Flex
@@ -1443,6 +1466,49 @@ class DepositRedeem extends Component {
                           />
                         </Flex>
                       ) : showETHWrapper && (
+                        <Flex
+                          width={1}
+                          alignItems={'center'}
+                          flexDirection={'column'}
+                          justifyContent={'center'}
+                        >
+                          <DashboardCard
+                            cardProps={{
+                              py:3,
+                              px:2,
+                              mt:3,
+                              display:'flex',
+                              alignItems:'center',
+                              flexDirection:'column',
+                              justifyContent:'center',
+                              pb:this.state.showAdvancedOptions ? 3 : 2,
+                            }}
+                          >
+                            <Flex
+                              alignItems={'center'}
+                              justifyContent={'row'}
+                            >
+                              <Checkbox
+                                required={false}
+                                checked={this.state.showETHWrapperEnabled}
+                                label={`Convert your ETH to WETH`}
+                                onChange={ e => this.toggleShowETHWrapper(e.target.checked) }
+                              />
+                            </Flex>
+                          </DashboardCard>
+                          {
+                            this.state.showETHWrapperEnabled && 
+                              <ETHWrapperComponent
+                                {...this.props}
+                                fullWidth={true}
+                                depositOnly={true}
+                                toolProps={ethWrapperInfo.props}
+                              />
+                          }
+                        </Flex>
+                      )
+
+                        /*(
                           <Flex
                             p={2}
                             mt={3}
@@ -1468,7 +1534,7 @@ class DepositRedeem extends Component {
                               name={'SwapHoriz'}
                             />
                           </Flex>
-                      )
+                      )*/
                     }
                     {
                       showRedeemCurve && this.state.canRedeem && (
@@ -1672,7 +1738,7 @@ class DepositRedeem extends Component {
                             </Text>
                           </Flex>
                         </DashboardCard>
-                      ) : (!this.state.tokenApproved && this.state.action === 'deposit') ? (
+                      ) : (!this.state.tokenApproved && this.state.action === 'deposit' && !this.state.showETHWrapperEnabled) ? (
                         <DashboardCard
                           cardProps={{
                             p:3,
@@ -1985,7 +2051,7 @@ class DepositRedeem extends Component {
                           </Flex>
                         ) : (
                           <Flex
-                            mt={4}
+                            mt={3}
                             flexDirection={'column'}
                           >
                             <TxProgressBar

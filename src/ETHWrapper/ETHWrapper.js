@@ -61,8 +61,8 @@ class ETHWrapper extends Component {
       this.functionsUtil.getTokenBalance('WETH',this.props.account)
     ]);
 
-    const action = this.state.action || 'deposit';
-    const tokenBalance = action === 'deposit' ? balanceETH : balanceWETH;
+    const action = this.state.action || 'wrap';
+    const tokenBalance = action === 'wrap' ? balanceETH : balanceWETH;
 
     this.setState({
       action,
@@ -81,7 +81,7 @@ class ETHWrapper extends Component {
     let approveDescription = null;
 
     switch (this.state.action){
-      case 'deposit':
+      case 'wrap':
         selectedToken = 'ETH';
         approveEnabled = true;
         tokenConfig = {
@@ -95,10 +95,10 @@ class ETHWrapper extends Component {
           // iconProps:{
           //   color:this.props.theme.colors.transactions.action.deposit
           // },
-          text:`Deposit your ETH and get WETH with a 1:1 ratio`
+          text:`Wrap your ETH and get WETH with a 1:1 ratio`
         };
       break;
-      case 'withdraw':
+      case 'unwrap':
         selectedToken = 'WETH';
         approveEnabled = false;
         tokenBalance = this.state.balanceWETH;
@@ -136,7 +136,7 @@ class ETHWrapper extends Component {
     let infoBox = null;
 
     switch (this.state.action){
-      case 'deposit':
+      case 'wrap':
         const mintLog = tx.txReceipt && tx.txReceipt.logs ? tx.txReceipt.logs.find( log => log.address.toLowerCase() === this.props.toolProps.contract.address.toLowerCase() ) : null;
         let mintedAmount = mintLog ? parseInt(mintLog.data,16) : amount;
         mintedAmount = this.functionsUtil.fixTokenDecimals(mintedAmount,this.state.tokenConfig.decimals);
@@ -145,10 +145,10 @@ class ETHWrapper extends Component {
           iconProps:{
             color:this.props.theme.colors.transactions.status.completed
           },
-          text:`You have successfully minted <strong>${mintedAmount.toFixed(4)} WETH</strong>`
+          text:`You have received <strong>${mintedAmount.toFixed(4)} WETH</strong>`
         }
       break;
-      case 'withdraw':
+      case 'unwrap':
         const withdrawLog = tx.txReceipt && tx.txReceipt.logs ? tx.txReceipt.logs.find( log => log.address.toLowerCase() === this.props.toolProps.contract.address.toLowerCase() ) : null;
         let withdrawnAmount = withdrawLog ? parseInt(withdrawLog.data,16) : amount;
         withdrawnAmount = this.functionsUtil.fixTokenDecimals(withdrawnAmount,this.state.tokenConfig.decimals);
@@ -157,7 +157,7 @@ class ETHWrapper extends Component {
           iconProps:{
             color:this.props.theme.colors.transactions.status.completed
           },
-          text:`You have successfully withdrawn <strong>${withdrawnAmount.toFixed(4)} ETH</strong>`
+          text:`You have received <strong>${withdrawnAmount.toFixed(4)} ETH</strong>`
         }
       break;
       default:
@@ -175,12 +175,12 @@ class ETHWrapper extends Component {
   getTransactionParams(amount){
     const params = {};
     switch (this.state.action){
-      case 'deposit':
+      case 'wrap':
         params.value = amount;
         params.methodParams = [];
         params.methodName = 'deposit';
       break;
-      case 'withdraw':
+      case 'unwrap':
         params.value = null;
         params.methodParams = [amount];
         params.methodName = 'withdraw';
@@ -192,19 +192,23 @@ class ETHWrapper extends Component {
   }
 
   render() {
+
+    const fullWidth = !!this.props.fullWidth;
+    const depositOnly = !!this.props.depositOnly;
+
     return (
       <Flex
         width={1}
-        mt={[2,3]}
         alignItems={'center'}
         flexDirection={'column'}
         justifyContent={'center'}
+        mt={[2,fullWidth ? 2 : 3]}
       >
         <Flex
-          width={[1,0.36]}
           alignItems={'stretch'}
           flexDirection={'column'}
           justifyContent={'center'}
+          width={[1,fullWidth ? 1 : 0.36]}
         >
           {
             !this.props.account ? (
@@ -246,53 +250,58 @@ class ETHWrapper extends Component {
               <Box
                 width={1}
               >
-                <Flex
-                  width={1}
-                  flexDirection={'column'}
-                >
-                  <Text
-                    mb={2}
-                  >
-                    Choose the action:
-                  </Text>
-                  <Flex
-                    alignItems={'center'}
-                    flexDirection={'row'}
-                    justifyContent={'space-between'}
-                  >
-                    <CardIconButton
-                      {...this.props}
-                      cardProps={{
-                        px:3,
-                        py:3,
-                        width:0.48
-                      }}
-                      text={'Deposit'}
-                      iconColor={'deposit'}
-                      icon={'ArrowDownward'}
-                      iconBgColor={'#ced6ff'}
-                      isActive={ this.state.action === 'deposit' }
-                      handleClick={ e => this.setAction('deposit') }
-                    />
-                    <CardIconButton
-                      {...this.props}
-                      cardProps={{
-                        px:3,
-                        py:3,
-                        width:0.48
-                      }}
-                      text={'Withdraw'}
-                      iconColor={'redeem'}
-                      icon={'ArrowUpward'}
-                      iconBgColor={'#ceeff6'}
-                      isActive={ this.state.action === 'withdraw' }
-                      handleClick={ e => this.setAction('withdraw') }
-                    />
-                  </Flex>
-                </Flex>
+                {
+                  !this.props.depositOnly && (
+                    <Flex
+                      width={1}
+                      flexDirection={'column'}
+                    >
+                      <Text
+                        mb={2}
+                      >
+                        Choose the action:
+                      </Text>
+                      <Flex
+                        alignItems={'center'}
+                        flexDirection={'row'}
+                        justifyContent={'space-between'}
+                      >
+                        <CardIconButton
+                          {...this.props}
+                          cardProps={{
+                            px:3,
+                            py:3,
+                            width:0.48
+                          }}
+                          text={'Wrap'}
+                          iconColor={'wrap'}
+                          icon={'ArrowDownward'}
+                          iconBgColor={'#ced6ff'}
+                          isActive={ this.state.action === 'wrap' }
+                          handleClick={ e => this.setAction('wrap') }
+                        />
+                        <CardIconButton
+                          {...this.props}
+                          cardProps={{
+                            px:3,
+                            py:3,
+                            width:0.48
+                          }}
+                          text={'Unwrap'}
+                          iconColor={'redeem'}
+                          icon={'ArrowUpward'}
+                          iconBgColor={'#ceeff6'}
+                          isActive={ this.state.action === 'unwrap' }
+                          handleClick={ e => this.setAction('unwrap') }
+                        />
+                      </Flex>
+                    </Flex>
+
+                  )
+                }
                 <Box
-                  my={3}
                   width={1}
+                  my={fullWidth ? 2 : 3}
                 >
                   {
                     this.state.tokenBalance!==null ? (
