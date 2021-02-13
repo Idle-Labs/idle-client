@@ -11,6 +11,7 @@ import ModalCard from './ModalCard';
 import 'react-date-range/dist/styles.css';
 import { DateRange } from 'react-date-range';
 import 'react-date-range/dist/theme/default.css';
+import './DateRangeModal.css';
 
 class DateRangeModal extends React.Component {
 
@@ -109,10 +110,11 @@ class DateRangeModal extends React.Component {
               <Field label="Quick Date Selection" style={{display:'flex',width:'100%',alignItems:'stretch',justifyContent:'center'}}>
                 <Select
                   style={{
-                    color:'#7d888d',
                     fontSize:'14px',
                     height:'2.5em',
-                    boxShadow:'none'
+                    boxShadow:'none',
+                    color:this.props.theme.colors.counter,
+                    backgroundColor:this.props.theme.colors.cardBg
                   }}
                   width={'100%'}
                   required={true}
@@ -131,6 +133,7 @@ class DateRangeModal extends React.Component {
                 ranges={[this.state.ranges]}
                 minDate={this.props.minDate}
                 maxDate={this.props.maxDate}
+                className={this.props.themeMode}
                 onChange={this.handleSelect.bind(this)}
               />
             </Flex>
@@ -138,11 +141,12 @@ class DateRangeModal extends React.Component {
           <ModalCard.Footer>
             <Flex px={[2,0]} flexDirection={['column', 'row']} width={1} justifyContent={'center'}>
               <Button
-                borderRadius={4}
                 my={2}
                 mx={[0, 2]}
-                size={this.props.isMobile ? 'small' : 'medium'}
+                borderRadius={4}
+                mainColor={'blue'}
                 onClick={ e => this.closeModal(e) }
+                size={this.props.isMobile ? 'small' : 'medium'}
               >
               APPLY
               </Button>

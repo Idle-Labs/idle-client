@@ -1462,8 +1462,8 @@ class Stats extends Component {
               </Box>
             )
           }
-
           <DateRangeModal
+            {...this.props}
             minDate={this.state.minDate}
             maxDate={this.state.maxDate}
             handleSelect={this.setDateRange}
