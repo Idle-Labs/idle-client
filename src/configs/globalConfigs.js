@@ -539,7 +539,7 @@ const globalConfigs = {
             startTimestamp:1599183170,
           }
         },
-        enabledTokens:['DAI','USDC','USDT','TUSD','SUSD','WBTC'],
+        enabledTokens:['DAI','USDC','USDT','TUSD','SUSD','WBTC','WETH'],
         additionalProtocols:[
           {
             decimals:16,
