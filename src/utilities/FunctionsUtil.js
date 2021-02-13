@@ -567,12 +567,12 @@ class FunctionsUtil {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
   getDepositTimestamp = async (enabledTokens=[],account) => {
-
     const firstDepositTxs = await this.getFirstDepositTx(enabledTokens,account);
-
     if (firstDepositTxs){
       return Object.keys(firstDepositTxs).reduce( (acc,token) => {
-        acc[token] = firstDepositTxs[token].timeStamp;
+        if (firstDepositTxs[token]){
+          acc[token] = firstDepositTxs[token].timeStamp;
+        }
         return acc;
       },{});
     }

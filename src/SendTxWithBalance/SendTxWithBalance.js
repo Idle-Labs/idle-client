@@ -45,11 +45,12 @@ class SendTxWithBalance extends Component {
   async componentDidUpdate(prevProps,prevState){
     this.loadUtils();
 
+    const actionChanged = prevProps.action !== this.props.action;
     const accountChanged = prevProps.account !== this.props.account;
     const tokenBalanceChanged = prevProps.tokenBalance !== this.props.tokenBalance;
     const contractChanged = JSON.stringify(prevProps.contractInfo) !== JSON.stringify(this.props.contractInfo);
     const tokenConfigChanged = JSON.stringify(prevProps.tokenConfig) !== JSON.stringify(this.props.tokenConfig);
-    if (accountChanged || tokenBalanceChanged || contractChanged || tokenConfigChanged){
+    if (actionChanged || accountChanged || tokenBalanceChanged || contractChanged || tokenConfigChanged){
       await this.loadData();
     }
 
@@ -59,9 +60,9 @@ class SendTxWithBalance extends Component {
         this.props.contractApproved(this.state.contractApproved);
       }
     }
-    
+
     const fastBalanceSelectorChanged = this.state.fastBalanceSelector !== prevState.fastBalanceSelector;
-    if (fastBalanceSelectorChanged){
+    if (fastBalanceSelectorChanged || actionChanged){
       this.setInputValue();
     }
 
@@ -290,8 +291,10 @@ class SendTxWithBalance extends Component {
   }
 
   async loadData(){
+    const inputValue = null;
     const contractApproved = await this.checkContractApproved();
     this.setState({
+      inputValue,
       contractApproved
     });
   }
