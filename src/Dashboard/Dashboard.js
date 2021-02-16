@@ -361,7 +361,7 @@ class Dashboard extends Component {
     if (!isOriginUrl && !isBetaApproved){
       const activeModal = 'beta';
       if (activeModal !== this.state.activeModal){
-        this.setState({
+        await this.setState({
           activeModal,
         });
 
@@ -373,7 +373,7 @@ class Dashboard extends Component {
   async checkTokensToMigrate(){
 
     const showUpgradeModal = this.functionsUtil.getStoredItem('dontShowUpgradeModal',false,null) !== null ? false : true;
-    if (this.props.selectedToken || !showUpgradeModal || !this.props.availableTokens){
+    if (this.props.selectedToken || !showUpgradeModal || !this.props.availableTokens || this.state.activeModal !== null){
       return null;
     }
 
@@ -385,7 +385,7 @@ class Dashboard extends Component {
     if ((tokensToMigrate && Object.keys(tokensToMigrate).length>0) || (oldIdleTokensToMigrate && Object.keys(oldIdleTokensToMigrate).length>0)){
       const activeModal = 'upgrade';
       if (activeModal !== this.state.activeModal){
-        this.setState({
+        await this.setState({
           activeModal,
           tokensToMigrate,
           oldIdleTokensToMigrate
@@ -438,7 +438,7 @@ class Dashboard extends Component {
 
       const activeModal = welcomeIsOpen ? 'welcome' : this.state.activeModal;
       if (this.state.activeModal !== activeModal){
-        this.setState({
+        await this.setState({
           activeModal
         });
 
@@ -466,7 +466,7 @@ class Dashboard extends Component {
         activeModal,
         protocolsTokensBalances
       };
-      this.setState(newState);
+      await this.setState(newState);
       return activeModal;
     }
 
