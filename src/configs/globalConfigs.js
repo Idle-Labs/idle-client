@@ -56,6 +56,7 @@ const globalConfigs = {
   theme:{
     darkModeEnabled:true
   },
+  betaURL: 'https://beta.idle.finance',
   countries:{
     'USA':'United States of America',
     'GBR':'United Kingdom',
@@ -660,7 +661,7 @@ const globalConfigs = {
           rgb:[238, 31, 121],
           hsl:['334', '86%', '53%']
         },
-        startTimestamp:'2021-02-09',
+        startTimestamp:'2021-02-16',
         conversionRateField:'wethDAIPrice',
         chart:{
           labelTextColorModifiers:['darker', 4],

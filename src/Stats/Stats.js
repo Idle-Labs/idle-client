@@ -7,6 +7,7 @@ import StatsCard from '../StatsCard/StatsCard';
 import AssetsList from '../AssetsList/AssetsList';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import Breadcrumb from '../Breadcrumb/Breadcrumb';
+import SmartNumber from '../SmartNumber/SmartNumber';
 import globalConfigs from '../configs/globalConfigs';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import DashboardCard from '../DashboardCard/DashboardCard';
@@ -465,7 +466,14 @@ class Stats extends Component {
     }
 
     // Format AUM
+    /*
     aum = this.functionsUtil.formatMoney(parseFloat(aum));
+
+    const conversionRateField = this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken,'conversionRateField']);
+    if (conversionRateField){
+      aum += ' $';
+    }
+    */
 
     let unlentBalance = await this.functionsUtil.getUnlentBalance(this.props.tokenConfig);
     if (unlentBalance){
@@ -508,6 +516,21 @@ class Stats extends Component {
   }
 
   render() {
+
+    const valueProps = {
+      lineHeight:1,
+      fontSize:[4,5],
+      fontWeight:[3,4],
+      color:'statValue'
+    };
+
+    const unitProps = {
+      ml:2,
+      lineHeight:1,
+      fontWeight:[2,3],
+      color:'statValue',
+      fontSize:[3,'23px'],
+    };
 
     const idleTokenEnabled = this.functionsUtil.getGlobalConfig(['govTokens','IDLE','enabled']);
     const apyLong = this.functionsUtil.getGlobalConfig(['messages','apyLong']);
@@ -1053,11 +1076,23 @@ class Stats extends Component {
                       flexDirection={'column'}
                     >
                       <StatsCard
-                        value={this.state.aum}
                         title={'Asset Under Management'}
                         label={ this.state.unlentBalance ? `Unlent funds: ${this.state.unlentBalance} ${this.props.selectedToken}` : this.props.selectedToken }
                         labelTooltip={ this.state.unlentBalance ? this.functionsUtil.getGlobalConfig(['messages','cheapRedeem']) : null}
-                      />
+                      >
+                        <SmartNumber
+                          precision={2}
+                          type={'money'}
+                          {...valueProps}
+                          unitProps={unitProps}
+                          number={this.state.aum}
+                          flexProps={{
+                            alignItems:'baseline',
+                            justifyContent:'flex-start'
+                          }}
+                          unit={this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken,'conversionRateField']) ? '$' : null}
+                        />
+                      </StatsCard>
                     </Flex>
                     <Flex
                       mb={[2,0]}

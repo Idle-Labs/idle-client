@@ -457,16 +457,14 @@ class UpgradeModal extends React.Component {
                 >
                   MIGRATE LATER
                 </RoundButton>
-                {
-                  <Checkbox
-                    mt={2}
-                    required={false}
-                    color={'mid-gray'}
-                    checked={this.state.dontShowAgain}
-                    label={`Don't show this popup again`}
-                    onChange={ e => this.toggleDontShowAgain(e.target.checked) }
-                  />
-                }
+                <Checkbox
+                  mt={2}
+                  required={false}
+                  color={'mid-gray'}
+                  checked={this.state.dontShowAgain}
+                  label={`Don't show this popup again`}
+                  onChange={ e => this.toggleDontShowAgain(e.target.checked) }
+                />
               </Flex>
             </Flex>
           </ModalCard.Body>

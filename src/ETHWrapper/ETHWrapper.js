@@ -251,7 +251,7 @@ class ETHWrapper extends Component {
                 width={1}
               >
                 {
-                  !this.props.depositOnly && (
+                  !depositOnly && (
                     <Flex
                       width={1}
                       flexDirection={'column'}

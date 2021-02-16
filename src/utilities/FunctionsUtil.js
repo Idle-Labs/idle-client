@@ -1358,6 +1358,8 @@ class FunctionsUtil {
 
     etherscanTxs = Object.assign({},etherscanTxs);
 
+    const networkId = this.getGlobalConfig(['network','requiredNetwork']);
+
     // this.customLog('Processing stored txs',enabledTokens);
 
     await this.asyncForEach(enabledTokens,async (selectedToken) => {
@@ -1393,7 +1395,7 @@ class FunctionsUtil {
         const tx = txsToProcess[txKey];
 
         // Skip wrong token
-        if (!tx || !tx.token || tx.token.toUpperCase() !== selectedToken.toUpperCase()){
+        if (!tx || !tx.token || tx.token.toUpperCase() !== selectedToken.toUpperCase() || (tx.networkId && parseInt(tx.networkId) !== parseInt(networkId))){
           return false;
         }
 
@@ -1789,6 +1791,9 @@ class FunctionsUtil {
   }
   checkUrlOrigin = () => {
     return window.location.origin.toLowerCase().includes(globalConfigs.baseURL.toLowerCase());
+  }
+  checkUrlBeta = () => {
+    return window.location.origin.toLowerCase().includes(globalConfigs.betaURL.toLowerCase());
   }
   sendGoogleAnalyticsEvent = async (eventData,callback=null) => {
 

@@ -9,6 +9,7 @@ import Stats from '../Stats/Stats';
 import Utils from '../Utils/Utils';
 import AssetPage from '../AssetPage/AssetPage';
 import RoundButton from '../RoundButton/RoundButton';
+import BetaModal from "../utilities/components/BetaModal";
 import DashboardCard from '../DashboardCard/DashboardCard';
 import CurveStrategy from '../CurveStrategy/CurveStrategy';
 import WelcomeModal from "../utilities/components/WelcomeModal";
@@ -346,9 +347,27 @@ class Dashboard extends Component {
       return null;
     }
 
+    await this.checkBetaApproval();
     await this.checkTokensToMigrate();
     await this.checkWelcomeModal();
     await this.checkProtocolsTokensBalances();
+  }
+
+  async checkBetaApproval(){
+    const isOriginUrl = this.functionsUtil.checkUrlOrigin();
+    const isBetaApproved = this.functionsUtil.getStoredItem('betaApproved',false,false);
+
+    // Show Beta Warning modal
+    if (!isOriginUrl && !isBetaApproved){
+      const activeModal = 'beta';
+      if (activeModal !== this.state.activeModal){
+        this.setState({
+          activeModal,
+        });
+
+        return activeModal;
+      }
+    }
   }
 
   async checkTokensToMigrate(){
@@ -643,6 +662,10 @@ class Dashboard extends Component {
             )
           }
         </Flex>
+        <BetaModal
+          closeModal={this.resetModal}
+          isOpen={this.state.activeModal === 'beta'}
+        />
         <UpgradeModal
           {...this.props}
           closeModal={this.resetModal}
@@ -663,8 +686,7 @@ class Dashboard extends Component {
           title={this.state.modalTitle}
           content={this.state.modalContent}
           isOpen={this.state.activeModal === 'tooltip'}
-        >
-        </TooltipModal>
+        />
         <WelcomeModal
           closeModal={this.resetModal}
           account={this.props.account}

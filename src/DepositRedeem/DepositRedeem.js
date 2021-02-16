@@ -461,7 +461,7 @@ class DepositRedeem extends Component {
     const canDepositCurve = curveTokenEnabled && canDeposit;
     const depositCurveEnabled = canDepositCurve;
 
-    const showETHWrapperEnabled = this.state.showETHWrapperEnabled || !canDeposit;
+    const showETHWrapperEnabled = this.props.selectedToken === 'WETH' && (this.state.showETHWrapperEnabled || !canDeposit);
 
     const canRedeemCurve = curveTokenEnabled && curveTokenBalance && curveTokenBalance.gt(0);
     const redeemCurveEnabled = canRedeemCurve;

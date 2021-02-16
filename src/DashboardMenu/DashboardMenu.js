@@ -49,6 +49,7 @@ class DashboardMenu extends Component {
     }
 
     const isDarkTheme = this.props.themeMode === 'dark';
+    const isOriginUrl = this.functionsUtil.checkUrlOrigin();
     const darkModeEnabled = this.functionsUtil.getGlobalConfig(['dashboard','theme','darkModeEnabled']);
 
     return (
@@ -69,8 +70,8 @@ class DashboardMenu extends Component {
               <RouterLink to="/">
                 <Image
                   position={'relative'}
-                  height={['35px','38px']}
-                  src={ !isDarkTheme ? 'images/logo-gradient.svg' : 'images/logo-white.svg'}
+                  height={['35px','42px']}
+                  src={ isOriginUrl ? (!isDarkTheme ? 'images/logo-gradient.svg' : 'images/logo-white.svg') : (!isDarkTheme ? 'images/logo-gradient-beta.png' : 'images/logo-white-beta.png')}
                 />
               </RouterLink>
             </Flex>
