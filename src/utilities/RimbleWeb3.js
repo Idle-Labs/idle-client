@@ -1471,11 +1471,12 @@ class RimbleTransaction extends React.Component {
     };
     transaction.txReceipt = {};
     transaction.created = Date.now();
-    transaction.lastUpdated = Date.now();
-    transaction.status = "initialized";
     transaction.confirmationCount = 0;
+    transaction.status = "initialized";
+    transaction.lastUpdated = Date.now();
     transaction.token = this.props.selectedToken;
     transaction.strategy = this.props.selectedStrategy;
+    transaction.networkId = this.functionsUtil.getGlobalConfig(['network','requiredNetwork']);
     return transaction;
   }
 
