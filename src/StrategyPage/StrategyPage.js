@@ -286,7 +286,7 @@ class StrategyPage extends Component {
               width={1}
             >
               {
-                this.state.depositedTokens.length>0 ? (
+                this.props.account && this.state.depositedTokens.length>0 ? (
                   <Flex
                     width={1}
                     flexDirection={'column'}

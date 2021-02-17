@@ -571,7 +571,7 @@ class RimbleTransaction extends React.Component {
   }
 
   initAccount = async (account=false) => {
-
+    
     const customAddress = this.props.customAddress;
     const walletProvider = this.functionsUtil.getWalletProvider('Infura');
 
@@ -605,6 +605,14 @@ class RimbleTransaction extends React.Component {
 
       // Request account access if needed
       if (account && walletProvider !== 'Infura'){
+
+        if (walletProvider === 'Infura'){
+          this.setState({
+            accountInizialized: true,
+            account:this.props.customAddress
+          });
+          return false;
+        }
 
         // Send address info to SimpleID
         const simpleID = this.initSimpleID();
