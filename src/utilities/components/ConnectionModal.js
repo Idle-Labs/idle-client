@@ -5,7 +5,9 @@ import {
   Link,
   Icon,
   Flex,
+  Field,
   Modal,
+  Input,
   Loader,
   Button,
   Heading
@@ -24,11 +26,15 @@ import {
 class ConnectionModal extends React.Component {
   // TODO save pref in localstorage and do not show 'Before connecting' info every time
   state = {
+    validated:false,
+    showTxFees:false,
+    customAddress:'',
     currentSection:null,
-    showTxFees: false,
+    showInstructions:false,
+    askCustomAddress:false,
     closeRemainingTime:null,
-    newToEthereumChoice: null,
-    showInstructions: false
+    customAddressError:false,
+    newToEthereumChoice:null
   };
 
   // Utils
@@ -74,9 +80,10 @@ class ConnectionModal extends React.Component {
   resetModal = e => {
     this.setState({
       showTxFees: false,
-      newToEthereumChoice:null,
+      currentSection:null,
+      askCustomAddress:false,
       showInstructions: false,
-      currentSection:null
+      newToEthereumChoice:null,
     });
   }
 
@@ -85,9 +92,9 @@ class ConnectionModal extends React.Component {
 
     // Send Google Analytics event
     this.functionsUtil.sendGoogleAnalyticsEvent({
-      eventCategory: 'Connect',
-      eventAction: 'select_wallet',
-      eventLabel: walletProvider
+      eventCategory:'Connect',
+      eventLabel:walletProvider,
+      eventAction:'select_wallet'
     });
 
     if (this.props.setConnector && typeof this.props.setConnector === 'function'){
@@ -152,6 +159,38 @@ class ConnectionModal extends React.Component {
     }
   }
 
+  connectCustomAddress = () => {
+    const addressValid = this.functionsUtil.checkAddress(this.state.customAddress);
+    if (addressValid){
+      this.setCustomAddress(false);
+      this.functionsUtil.setCustomAddress(this.state.customAddress);
+      this.setConnector('custom','custom');
+      setTimeout(() => { this.closeModal() },1000);
+      return true;
+    } else {
+      return this.setState({
+        customAddressError:true
+      });
+    }
+  }
+
+  updateCustomAddress = (e) => {
+    const customAddressError = false;
+    const customAddress = e.target.value;
+    const validated = this.functionsUtil.checkAddress(customAddress);
+    this.setState({
+      validated,
+      customAddress,
+      customAddressError
+    });
+  }
+
+  setCustomAddress = (askCustomAddress) => {
+    this.setState({
+      askCustomAddress
+    });
+  }
+
   renderModalContent = () => {
 
     const TOSacceptance = (
@@ -160,8 +199,8 @@ class ConnectionModal extends React.Component {
       </Box>
     );
 
-    const showConnectionButtons = this.state.currentSection === 'wallet';
     const newToEthereum = this.state.currentSection === 'new';
+    const showConnectionButtons = this.state.currentSection === 'wallet';
     const showInstructions = this.state.currentSection === 'instructions';
 
     if (showInstructions){
@@ -235,13 +274,97 @@ class ConnectionModal extends React.Component {
       );
     }
 
+    if (this.state.askCustomAddress){
+      return (
+        <Box>
+          <ModalCard.Header
+            title={'Connect ETH wallet'}
+            icon={'images/idle-mark.png'}
+            subtitle={'And get started with Idle.'}
+          >
+          </ModalCard.Header>
+          <ModalCard.Body>
+            <Flex
+              width={1}
+              minWidth={[1,'30em']}
+              flexDirection={'column'}
+              justifyContent={'center'}
+            >
+              <Field
+                width={1}
+                label={'Ethereum address'}
+              >
+                <Input
+                  required
+                  width={1}
+                  type={'text'}
+                  className={styles.input}
+                  pattern={'^0x[a-fA-F0-9]{40}$'}
+                  value={this.state.customAddress}
+                  onChange={ e => this.updateCustomAddress(e) }
+                  placeholder={'Insert a valid Ethereum address'}
+                />
+              </Field>
+              {
+                this.state.customAddressError && (
+                  <Text
+                    mb={2}
+                    fontSize={2}
+                    color={'red'}
+                    fontWeight={3}
+                    textAlign={'center'}
+                  >
+                    Insert a valid Ethereum Address
+                  </Text>
+                )
+              }
+              <Button
+                px={[3,4]}
+                mx={'auto'}
+                fontWeight={3}
+                size={'medium'}
+                fontSize={[2,2]}
+                borderRadius={4}
+                contrastColor={'white'}
+                className={[styles.gradientButton]}
+                onClick={ e => this.connectCustomAddress() }
+              >
+                CONNECT
+              </Button>
+            </Flex>
+            <Flex
+              pt={3}
+              alignItems={'center'}
+              justifyContent={'center'}
+            >
+              <Link
+                hoverColor={'blue'}
+                textAlign={'center'}
+                onClick={ e => this.setCustomAddress(false) }
+              >
+                Select another Wallet
+              </Link>
+            </Flex>
+            { TOSacceptance }
+          </ModalCard.Body>
+        </Box>
+      );
+    }
+
     if (showConnectionButtons) {
       return (
         <Box>
           <ModalCard.Header title={'Select your Wallet'} subtitle={'And get started with Idle.'} icon={'images/idle-mark.png'}></ModalCard.Header>
           <ModalCard.Body>
             <Flex width={1} px={[0,5]} flexDirection={'column'} justifyContent={'center'}>
-              <Web3ConnectionButtons isMobile={this.props.isMobile} connectionCallback={ this.closeModal } setConnector={ this.setConnector } width={1/2} size={ this.props.isMobile ? 'medium' : 'large' } />
+              <Web3ConnectionButtons
+                width={1/2}
+                isMobile={this.props.isMobile}
+                setConnector={this.setConnector}
+                connectionCallback={this.closeModal}
+                size={this.props.isMobile ? 'medium' : 'large'}
+                setCustomAddress={this.setCustomAddress.bind(this)}
+              />
             </Flex>
             <Flex pt={3} alignItems={'center'} justifyContent={'center'}>
               <Link textAlign={'center'} hoverColor={'blue'} onClick={ e => this.setCurrentSection(e,'new') }>I don't have a wallet</Link>
@@ -319,13 +442,13 @@ class ConnectionModal extends React.Component {
 
   renderFooter = () => {
 
-    if (this.state.newToEthereumChoice){
+    if (this.state.newToEthereumChoice || (this.state.currentSection && this.state.askCustomAddress)){
       return null;
     }
 
     return (
       <ModalCard.Footer>
-        { (!this.state.currentSection) ? (
+        { !this.state.currentSection ? (
             <Button
               className={[styles.gradientButton,styles.empty]}
               onClick={ e => this.setCurrentSection(e,'instructions') }
@@ -339,7 +462,7 @@ class ConnectionModal extends React.Component {
             >
               READ INSTRUCTIONS
             </Button>
-          ) : (
+          ) : !this.state.askCustomAddress && (
             <Button
               className={[styles.gradientButton,styles.empty]}
               onClick={this.resetModal}

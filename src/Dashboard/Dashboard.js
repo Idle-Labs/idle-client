@@ -307,7 +307,11 @@ class Dashboard extends Component {
     this.loadUtils();
     await this.loadMenu();
     this.loadParams();
-    this.checkModals();
+
+    const viewOnly = this.props.connectorName === 'custom';
+    if (!viewOnly){
+      this.checkModals();
+    }
   }
 
   async componentDidUpdate(prevProps,prevState) {
@@ -325,12 +329,13 @@ class Dashboard extends Component {
       });
     }
 
+    const viewOnly = this.props.connectorName === 'custom';
     const accountChanged = prevProps.account !== this.props.account;
     const strategyChanged = this.props.selectedStrategy && prevProps.selectedStrategy !== this.props.selectedStrategy;
     const accountInizialized = this.props.accountInizialized && prevProps.accountInizialized !== this.props.accountInizialized;
     const contractsInitialized = this.props.contractsInitialized && prevProps.contractsInitialized !== this.props.contractsInitialized;
 
-    if (accountChanged || accountInizialized || contractsInitialized || strategyChanged){
+    if (!viewOnly && (accountChanged || accountInizialized || contractsInitialized || strategyChanged)){
       this.checkModals();
     }
   }

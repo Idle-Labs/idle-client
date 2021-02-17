@@ -38,6 +38,11 @@ class DashboardHeader extends Component {
 
   async componentDidUpdate(prevProps,prevState){
     this.loadUtils();
+
+    const accountChanged = prevProps.account !== this.props.account;
+    if (accountChanged){
+      await this.loadData();
+    }
   }
 
   async loadData(){

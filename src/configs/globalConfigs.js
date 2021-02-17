@@ -131,6 +131,11 @@ const globalConfigs = {
     ledger:{
       enabled:true,
       subcaption:'Hardware wallet'
+    },
+    custom:{
+      enabled:true,
+      icon:'tokens/ETH.svg',
+      subcaption:'Custom address'
     }
   },
   newsletterSubscription:{

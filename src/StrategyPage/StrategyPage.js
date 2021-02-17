@@ -61,12 +61,10 @@ class StrategyPage extends Component {
   async componentDidUpdate(prevProps, prevState) {
     this.loadUtils();
 
-    /*
-    const themeModeChanged = prevProps.themeMode !== this.props.themeMode;
-    if (themeModeChanged){
-      this.loadPortfolio();
+    const accountChanged = prevProps.account !== this.props.account;
+    if (accountChanged){
+      await this.loadPortfolio();
     }
-    */
   }
 
   async setStateSafe(newState,callback=null) {
@@ -240,6 +238,7 @@ class StrategyPage extends Component {
   }
 
   render(){
+    const viewOnly = this.props.connectorName === 'custom';
     const govTokens = this.functionsUtil.getGlobalConfig(['govTokens']);
     const apyLong = this.functionsUtil.getGlobalConfig(['messages','apyLong']);
     const riskScore = this.functionsUtil.getGlobalConfig(['messages','riskScore']);
@@ -1363,7 +1362,7 @@ class StrategyPage extends Component {
                 </Flex>
               </Flex>
               {
-                this.props.account && coverProtocolConfig.enabled && (
+                !viewOnly && this.props.account && coverProtocolConfig.enabled && (
                   <Flex
                     mt={3}
                     width={1}

@@ -85,6 +85,7 @@ class App extends Component {
     const prevParams = prevProps ? prevProps.match.params : null;
 
     // Reset params
+    /*
     if ( prevParams && params && prevParams.customParam !== params.customParam && (!params || !params.customParam || params.customParam === undefined)){
       this.setState({
         customAddress:null,
@@ -101,6 +102,7 @@ class App extends Component {
         });
       }
     }
+    */
   }
 
   clearCachedData = () => {
@@ -326,7 +328,22 @@ class App extends Component {
 
     window.addEventListener('resize', this.handleWindowSizeChange);
 
+    this.loadCustomAddress();
     this.loadAvailableTokens();
+  }
+
+  loadCustomAddress(){
+    if (!this.state.customAddress){
+      const walletProvider = this.functionsUtil.getWalletProvider('Infura');
+      if (walletProvider === 'custom'){
+        const customAddress = this.functionsUtil.getCustomAddress();
+        if (customAddress && customAddress !== this.state.customAddress){
+          this.setState({
+            customAddress
+          });
+        }
+      }
+    }
   }
 
   componentWillUnmount() {
@@ -422,7 +439,12 @@ class App extends Component {
   }
 
   async logout(){
-    this.functionsUtil.clearStoredData();
+    // Reset Custom Address
+    this.setState({
+      customAddress:null
+    });
+    // Reset Localstorage
+    this.functionsUtil.clearStoredData(['themeMode','lastLogin']);
   }
 
   setConnector(connectorName,walletProvider){
@@ -462,6 +484,8 @@ class App extends Component {
     return this.setState({
       connectorName,
       walletProvider
+    },() => {
+      this.loadCustomAddress();
     });
   }
 

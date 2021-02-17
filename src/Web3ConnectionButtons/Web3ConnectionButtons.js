@@ -21,6 +21,7 @@ export default function Web3ConnectionButtons(props) {
   } else {
     customLog('context success', context);
   }
+
   const setConnector = async (connectorName,name) => {
     let walletProvider = connectorName === 'Injected' ? name : connectorName;
     if (localStorage) {
@@ -101,9 +102,9 @@ export default function Web3ConnectionButtons(props) {
               <Flex
                 width={1}
                 key={`wallet_${name}`}
+                justifyContent={'space-between'}
                 style={{
                   flex:'0 100%',
-                  justifyContent:'flex-start'
                 }}
               >
                 <ImageButton
@@ -114,6 +115,15 @@ export default function Web3ConnectionButtons(props) {
                   imageProps={{width:'auto',height:'42px'}}
                   handleClick={ async () => await setConnector(connectorName,name)}
                   subcaption={ connectorInfo && connectorInfo.subcaption ? connectorInfo.subcaption : `Connect using ${name}` }
+                />
+                <ImageButton
+                  isMobile={true}
+                  width={[1,0.48]}
+                  caption={'Custom Address'}
+                  imageSrc={`images/tokens/ETH.svg`}
+                  imageProps={{width:'auto',height:'42px'}}
+                  subcaption={'Connect with any ETH address'}
+                  handleClick={ e => props.setCustomAddress(true) }
                 />
               </Flex>
             )
@@ -190,7 +200,11 @@ export default function Web3ConnectionButtons(props) {
           </Button.Outline>
         )}
       </Flex>
-      <Flex flexDirection={'row'} flexWrap={'wrap'} justifyContent={'space-between'}>
+      <Flex
+        flexWrap={'wrap'}
+        flexDirection={'row'}
+        justifyContent={'space-between'}
+      >
         {buttons}
       </Flex>
     </Box>

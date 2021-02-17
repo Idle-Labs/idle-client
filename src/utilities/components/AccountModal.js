@@ -101,6 +101,8 @@ class AccountModal extends React.Component {
   }
 
   render(){
+    const viewOnly = this.props.connectorName === 'custom';
+
     if (this.props.account){
 
       const rows = (Object.keys(this.props.availableStrategies).length+1);
@@ -201,61 +203,63 @@ class AccountModal extends React.Component {
                   </Heading.h4>
                   { renderBalances }
                 </Flex>
-                <Flex
-                  width={1}
-                  mb={[2,3]}
-                  alignItems={'center'}
-                  flexDirection={'column'}
-                  justifyContent={'center'}
-                >
-                  <Heading.h4
-                    mb={2}
-                    color={'copyColor'}
-                    textAlign={'center'}
-                  >
-                    Tools:
-                  </Heading.h4>
-                  <Flex
-                    width={1}
-                    alignItems={'center'}
-                    justifyContent={'center'}
-                    flexDirection={['column','row']}
-                  >
-                    {
-                      showTools.map( toolName => {
-                        const toolConfig = this.functionsUtil.getGlobalConfig(['tools',toolName]);
-                        return (
-                          <CardIconButton
-                            {...this.props}
-                            key={`tool_${toolName}`}
-                            cardProps={{
-                              mx:[0,2],
-                              my:[2,0],
-                              width:'auto',
-                              minWidth:['50%','auto']
-                            }}
-                            icon={toolConfig.icon}
-                            text={toolConfig.label}
-                            handleClick={ e => this.goToSection(`tools/${toolConfig.route}`) }
-                          />
-                        )
-                      })
-                    }
-                  </Flex>
-                </Flex>
+                {
+                  !viewOnly && (
+                    <Flex
+                      width={1}
+                      mb={[2,3]}
+                      alignItems={'center'}
+                      flexDirection={'column'}
+                      justifyContent={'center'}
+                    >
+                      <Heading.h4
+                        mb={2}
+                        color={'copyColor'}
+                        textAlign={'center'}
+                      >
+                        Tools:
+                      </Heading.h4>
+                      <Flex
+                        width={1}
+                        alignItems={'center'}
+                        justifyContent={'center'}
+                        flexDirection={['column','row']}
+                      >
+                        {
+                          showTools.map( toolName => {
+                            const toolConfig = this.functionsUtil.getGlobalConfig(['tools',toolName]);
+                            return (
+                              <CardIconButton
+                                {...this.props}
+                                key={`tool_${toolName}`}
+                                cardProps={{
+                                  mx:[0,2],
+                                  my:[2,0],
+                                  width:'auto',
+                                  minWidth:['50%','auto']
+                                }}
+                                icon={toolConfig.icon}
+                                text={toolConfig.label}
+                                handleClick={ e => this.goToSection(`tools/${toolConfig.route}`) }
+                              />
+                            )
+                          })
+                        }
+                      </Flex>
+                    </Flex>
+                  )
+                }
               </Flex>
             </ModalCard.Body>
 
             <ModalCard.Footer>
-              {(this.props.context.active || (this.props.context.error && this.props.context.connectorName)) && (
-                <ButtonLoader
-                  buttonText={'Logout wallet'}
-                  isLoading={this.state.logout}
-                  handleClick={ async () => { await this.logout() } }
-                  buttonProps={{className:styles.gradientButton,borderRadius:'2rem',mt:[4,8],minWidth:['95px','145px'],size:['auto','medium']}}
-                >
-                </ButtonLoader>
-              )}
+              <ButtonLoader
+                buttonText={'Logout wallet'}
+                isLoading={this.state.logout}
+                handleClick={ async () => { await this.logout() } }
+                buttonProps={{className:styles.gradientButton,borderRadius:'2rem',mt:[4,8],minWidth:['95px','145px'],size:['auto','medium']}}
+              >
+              </ButtonLoader>
             </ModalCard.Footer>
           </ModalCard>
         </Modal>

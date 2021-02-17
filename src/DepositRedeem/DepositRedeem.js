@@ -1,4 +1,5 @@
 import Migrate from '../Migrate/Migrate';
+import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
 import styles from './DepositRedeem.module.scss';
 import FlexLoader from '../FlexLoader/FlexLoader';
@@ -998,6 +999,8 @@ class DepositRedeem extends Component {
 
     const showBatchDeposit = batchDepositEnabled && batchDepositDepositEnabled && !this.props.isMigrationTool && this.state.action === 'deposit';
 
+    const viewOnly = this.props.connectorName === 'custom';
+
     return (
       <Flex
         width={1}
@@ -1021,274 +1024,444 @@ class DepositRedeem extends Component {
               {...this.props}
             />
           </Box>
-          <Migrate
-            {...this.props}
-            migrateTextBefore={migrateText}
-            migrateText={migrateText !== null ? '' : null}
-            toggleSkipMigration={this.toggleSkipMigration.bind(this)}
-          >
-            {
-              !this.props.account ? (
-                <ConnectBox
-                  {...this.props}
-                />
-              ) :
-              this.state.componentMounted ? (
-                this.state.action ? (
-                  <Box width={1}>
-                    <Flex
-                      mt={2}
-                      flexDirection={'column'}
-                    >
-                      <Text mb={2}>
-                        Choose the action:
-                      </Text>
-                      <Flex
-                        alignItems={'center'}
-                        flexDirection={'row'}
-                        justifyContent={'space-between'}
-                      >
-                        <DashboardCard
-                          cardProps={{
-                            p:3,
-                            width:0.48,
-                            onMouseDown:() => {
-                              this.setAction('deposit');
-                            }
-                          }}
-                          isInteractive={true}
-                          isActive={ this.state.action === 'deposit' }
-                        >
-                          <Flex
-                            my={1}
-                            alignItems={'center'}
-                            flexDirection={'row'}
-                            justifyContent={'center'}
-                          >
-                            <TransactionField
-                              transaction={{
-                                action:'deposit'
-                              }}
-                              fieldInfo={{
-                                name:'icon',
-                                props:{
-                                  mr:3
-                                }
-                              }}
-                            />
-                            <Text
-                              fontSize={3}
-                              fontWeight={3}
-                            >
-                              Deposit
-                            </Text>
-                          </Flex>
-                        </DashboardCard>
-                        <DashboardCard
-                          cardProps={{
-                            p:3,
-                            width:0.48,
-                            onMouseDown:() => {
-                              this.setAction('redeem');
-                            }
-                          }}
-                          isInteractive={true}
-                          isActive={ this.state.action === 'redeem' }
-                          isDisabled={ !this.state.canRedeem && !this.state.canRedeemCurve }
-                        >
-                          <Flex
-                            my={1}
-                            alignItems={'center'}
-                            flexDirection={'row'}
-                            justifyContent={'center'}
-                          >
-                            <TransactionField
-                              transaction={{
-                                action:'redeem'
-                              }}
-                              fieldInfo={{
-                                name:'icon',
-                                props:{
-                                  mr:3
-                                }
-                              }}
-                            />
-                            <Text
-                              fontSize={3}
-                              fontWeight={3}
-                            >
-                              Redeem
-                            </Text>
-                          </Flex>
-                        </DashboardCard>
-                      </Flex>
-                    </Flex>
-                    {
-                      showAdvancedDepositOptions ? (
-                        <DashboardCard
-                          cardProps={{
-                            pt:2,
-                            px:2,
-                            mt:3,
-                            display:'flex',
-                            alignItems:'center',
-                            flexDirection:'column',
-                            justifyContent:'center',
-                            pb:this.state.showAdvancedOptions ? 3 : 2,
-                          }}
-                        >
-                          <Flex
-                            width={1}
-                            alignItems={'center'}
-                            flexDirection={'row'}
-                            justifyContent={'center'}
-                          >
-                            <Link
-                              ml={1}
-                              mainColor={'primary'}
-                              hoverColor={'primary'}
-                              onClick={this.toggleShowAdvancedOptions}
-                            >
-                              { this.state.showAdvancedOptions ? 'Hide' : 'Show' } advanced options
-                            </Link>
-                            <Icon
-                              size={'1.8em'}
-                              color={'cellText'}
-                              name={this.state.showAdvancedOptions ? 'ArrowDropUp' : 'ArrowDropDown'}
-                            />
-                          </Flex>
-                          {
-                            this.state.showAdvancedOptions &&
-                              <Flex
-                                mt={1}
-                                flexDirection={'column'}
-                              >
-                                {
-                                  showDepositCurve && 
-                                    <Flex
-                                      alignItems={'center'}
-                                      justifyContent={'row'}
-                                    >
-                                      <Checkbox
-                                        required={false}
-                                        disabled={this.state.directMint}
-                                        label={`Deposit in the Curve Pool`}
-                                        checked={this.state.depositCurveEnabled}
-                                        onChange={ e => this.toggleDepositCurve(e.target.checked) }
-                                      />
-                                      <Link
-                                        mainColor={'primary'}
-                                        hoverColor={'primary'}
-                                        onClick={ e => this.props.openTooltipModal('How Curve works',this.functionsUtil.getGlobalConfig(['messages','curveInstructions'])) }
-                                      >
-                                        (read more)
-                                      </Link>
-                                    </Flex>
-                                }
-                                {
-                                  showRebalanceOption && 
-                                    <Flex
-                                      alignItems={'center'}
-                                      justifyContent={'row'}
-                                    >
-                                      <Checkbox
-                                        required={false}
-                                        label={`Rebalance the pool`}
-                                        checked={this.state.directMint}
-                                        disabled={this.state.depositCurveEnabled}
-                                        onChange={ e => this.toggleSkipMint(e.target.checked) }
-                                      />
-                                      <Tooltip
-                                        placement={'bottom'}
-                                        message={this.functionsUtil.getGlobalConfig(['messages','directMint'])}
-                                      >
-                                        <Icon
-                                          size={'1em'}
-                                          color={'cellTitle'}
-                                          name={"InfoOutline"}
-                                        />
-                                      </Tooltip>
-                                    </Flex>
-                                }
-                              </Flex>
-                          }
-                        </DashboardCard>
-                      ) : (
+          {
+            viewOnly ? (
+              <IconBox
+                cardProps={{
+                  mt:3
+                }}
+                icon={'Visibility'}
+                text={'You are using Idle in "Read-Only" mode.<br />Logout and connect with your wallet to interact.'}
+              />
+            ) : (
+              <Migrate
+                {...this.props}
+                migrateTextBefore={migrateText}
+                migrateText={migrateText !== null ? '' : null}
+                toggleSkipMigration={this.toggleSkipMigration.bind(this)}
+              >
+                {
+                  !this.props.account ? (
+                    <ConnectBox
+                      {...this.props}
+                    />
+                  ) :
+                  this.state.componentMounted ? (
+                    this.state.action ? (
+                      <Box width={1}>
                         <Flex
-                          width={1}
+                          mt={2}
                           flexDirection={'column'}
                         >
-                          {
-                            showDepositCurve && (
+                          <Text mb={2}>
+                            Choose the action:
+                          </Text>
+                          <Flex
+                            alignItems={'center'}
+                            flexDirection={'row'}
+                            justifyContent={'space-between'}
+                          >
+                            <DashboardCard
+                              cardProps={{
+                                p:3,
+                                width:0.48,
+                                onMouseDown:() => {
+                                  this.setAction('deposit');
+                                }
+                              }}
+                              isInteractive={true}
+                              isActive={ this.state.action === 'deposit' }
+                            >
                               <Flex
-                                width={1}
-                                flexDirection={'column'}
+                                my={1}
+                                alignItems={'center'}
+                                flexDirection={'row'}
                                 justifyContent={'center'}
                               >
-                                <DashboardCard
-                                  isRainbow={true}
-                                  cardProps={{
-                                    py:3,
-                                    px:2,
-                                    mt:3,
-                                    display:'flex',
-                                    alignItems:'center',
-                                    flexDirection:'column',
-                                    justifyContent:'center',
+                                <TransactionField
+                                  transaction={{
+                                    action:'deposit'
                                   }}
+                                  fieldInfo={{
+                                    name:'icon',
+                                    props:{
+                                      mr:3
+                                    }
+                                  }}
+                                />
+                                <Text
+                                  fontSize={3}
+                                  fontWeight={3}
                                 >
+                                  Deposit
+                                </Text>
+                              </Flex>
+                            </DashboardCard>
+                            <DashboardCard
+                              cardProps={{
+                                p:3,
+                                width:0.48,
+                                onMouseDown:() => {
+                                  this.setAction('redeem');
+                                }
+                              }}
+                              isInteractive={true}
+                              isActive={ this.state.action === 'redeem' }
+                              isDisabled={ !this.state.canRedeem && !this.state.canRedeemCurve }
+                            >
+                              <Flex
+                                my={1}
+                                alignItems={'center'}
+                                flexDirection={'row'}
+                                justifyContent={'center'}
+                              >
+                                <TransactionField
+                                  transaction={{
+                                    action:'redeem'
+                                  }}
+                                  fieldInfo={{
+                                    name:'icon',
+                                    props:{
+                                      mr:3
+                                    }
+                                  }}
+                                />
+                                <Text
+                                  fontSize={3}
+                                  fontWeight={3}
+                                >
+                                  Redeem
+                                </Text>
+                              </Flex>
+                            </DashboardCard>
+                          </Flex>
+                        </Flex>
+                        {
+                          showAdvancedDepositOptions ? (
+                            <DashboardCard
+                              cardProps={{
+                                pt:2,
+                                px:2,
+                                mt:3,
+                                display:'flex',
+                                alignItems:'center',
+                                flexDirection:'column',
+                                justifyContent:'center',
+                                pb:this.state.showAdvancedOptions ? 3 : 2,
+                              }}
+                            >
+                              <Flex
+                                width={1}
+                                alignItems={'center'}
+                                flexDirection={'row'}
+                                justifyContent={'center'}
+                              >
+                                <Link
+                                  ml={1}
+                                  mainColor={'primary'}
+                                  hoverColor={'primary'}
+                                  onClick={this.toggleShowAdvancedOptions}
+                                >
+                                  { this.state.showAdvancedOptions ? 'Hide' : 'Show' } advanced options
+                                </Link>
+                                <Icon
+                                  size={'1.8em'}
+                                  color={'cellText'}
+                                  name={this.state.showAdvancedOptions ? 'ArrowDropUp' : 'ArrowDropDown'}
+                                />
+                              </Flex>
+                              {
+                                this.state.showAdvancedOptions &&
+                                  <Flex
+                                    mt={1}
+                                    flexDirection={'column'}
+                                  >
+                                    {
+                                      showDepositCurve && 
+                                        <Flex
+                                          alignItems={'center'}
+                                          justifyContent={'row'}
+                                        >
+                                          <Checkbox
+                                            required={false}
+                                            disabled={this.state.directMint}
+                                            label={`Deposit in the Curve Pool`}
+                                            checked={this.state.depositCurveEnabled}
+                                            onChange={ e => this.toggleDepositCurve(e.target.checked) }
+                                          />
+                                          <Link
+                                            mainColor={'primary'}
+                                            hoverColor={'primary'}
+                                            onClick={ e => this.props.openTooltipModal('How Curve works',this.functionsUtil.getGlobalConfig(['messages','curveInstructions'])) }
+                                          >
+                                            (read more)
+                                          </Link>
+                                        </Flex>
+                                    }
+                                    {
+                                      showRebalanceOption && 
+                                        <Flex
+                                          alignItems={'center'}
+                                          justifyContent={'row'}
+                                        >
+                                          <Checkbox
+                                            required={false}
+                                            label={`Rebalance the pool`}
+                                            checked={this.state.directMint}
+                                            disabled={this.state.depositCurveEnabled}
+                                            onChange={ e => this.toggleSkipMint(e.target.checked) }
+                                          />
+                                          <Tooltip
+                                            placement={'bottom'}
+                                            message={this.functionsUtil.getGlobalConfig(['messages','directMint'])}
+                                          >
+                                            <Icon
+                                              size={'1em'}
+                                              color={'cellTitle'}
+                                              name={"InfoOutline"}
+                                            />
+                                          </Tooltip>
+                                        </Flex>
+                                    }
+                                  </Flex>
+                              }
+                            </DashboardCard>
+                          ) : (
+                            <Flex
+                              width={1}
+                              flexDirection={'column'}
+                            >
+                              {
+                                showDepositCurve && (
                                   <Flex
                                     width={1}
-                                    alignItems={'center'}
                                     flexDirection={'column'}
                                     justifyContent={'center'}
                                   >
-                                    <Image
-                                      height={'1.8em'}
-                                      src={curveConfig.params.image}
-                                    />
-                                    <Text
-                                      mt={2}
-                                      px={2}
-                                      fontSize={1}
-                                      color={'dark-gray'}
-                                      textAlign={'center'}
+                                    <DashboardCard
+                                      isRainbow={true}
+                                      cardProps={{
+                                        py:3,
+                                        px:2,
+                                        mt:3,
+                                        display:'flex',
+                                        alignItems:'center',
+                                        flexDirection:'column',
+                                        justifyContent:'center',
+                                      }}
                                     >
-                                      Deposit your tokens in the Curve Pool and boost your APY up to {this.state.curveAPY ? this.state.curveAPY.toFixed(2) : '-'}%.
-                                      <Link
-                                        ml={1}
-                                        mainColor={'primary'}
-                                        hoverColor={'primary'}
-                                        onClick={ e => this.props.openTooltipModal('How Curve works',this.functionsUtil.getGlobalConfig(['messages','curveInstructions'])) }
+                                      <Flex
+                                        width={1}
+                                        alignItems={'center'}
+                                        flexDirection={'column'}
+                                        justifyContent={'center'}
                                       >
-                                        Read More
-                                      </Link>
-                                    </Text>
+                                        <Image
+                                          height={'1.8em'}
+                                          src={curveConfig.params.image}
+                                        />
+                                        <Text
+                                          mt={2}
+                                          px={2}
+                                          fontSize={1}
+                                          color={'dark-gray'}
+                                          textAlign={'center'}
+                                        >
+                                          Deposit your tokens in the Curve Pool and boost your APY up to {this.state.curveAPY ? this.state.curveAPY.toFixed(2) : '-'}%.
+                                          <Link
+                                            ml={1}
+                                            mainColor={'primary'}
+                                            hoverColor={'primary'}
+                                            onClick={ e => this.props.openTooltipModal('How Curve works',this.functionsUtil.getGlobalConfig(['messages','curveInstructions'])) }
+                                          >
+                                            Read More
+                                          </Link>
+                                        </Text>
+                                        <Checkbox
+                                          mt={2}
+                                          required={false}
+                                          label={`Deposit in Curve`}
+                                          checked={this.state.depositCurveEnabled}
+                                          onChange={ e => this.toggleDepositCurve(e.target.checked) }
+                                        />
+                                      </Flex>
+                                    </DashboardCard>
+                                    {
+                                      (!this.state.showBuyFlow && !this.state.depositCurveEnabled && !this.state.canDeposit) &&
+                                        <Link
+                                          textAlign={'center'}
+                                          hoverColor={'primary'}
+                                          onClick={ e => this.setShowBuyFlow(true) }
+                                        >
+                                          I just want to deposit more {this.props.selectedToken}
+                                        </Link>
+                                    }
+                                  </Flex>
+                                )
+                              }
+                              {
+                                showRebalanceOption && (
+                                  <DashboardCard
+                                    cardProps={{
+                                      py:3,
+                                      px:2,
+                                      mt:3,
+                                      display:'flex',
+                                      alignItems:'center',
+                                      flexDirection:'column',
+                                      justifyContent:'center',
+                                    }}
+                                  >
+                                    <Flex
+                                      width={1}
+                                      alignItems={'center'}
+                                      flexDirection={'column'}
+                                      justifyContent={'center'}
+                                    >
+                                      <Icon
+                                        size={'1.8em'}
+                                        color={'cellText'}
+                                        name={'InfoOutline'}
+                                      />
+                                      <Text
+                                        mt={1}
+                                        px={2}
+                                        fontSize={1}
+                                        color={'cellText'}
+                                        textAlign={'center'}
+                                      >
+                                        By checking this flag you can rebalance the pool and help all users gain an additional APR
+                                      </Text>
+                                    </Flex>
                                     <Checkbox
                                       mt={2}
                                       required={false}
-                                      label={`Deposit in Curve`}
-                                      checked={this.state.depositCurveEnabled}
-                                      onChange={ e => this.toggleDepositCurve(e.target.checked) }
+                                      label={`Rebalance the pool`}
+                                      checked={this.state.directMint}
+                                      onChange={ e => this.toggleSkipMint(e.target.checked) }
                                     />
-                                  </Flex>
-                                </DashboardCard>
-                                {
-                                  (!this.state.showBuyFlow && !this.state.depositCurveEnabled && !this.state.canDeposit) &&
-                                    <Link
-                                      textAlign={'center'}
-                                      hoverColor={'primary'}
-                                      onClick={ e => this.setShowBuyFlow(true) }
-                                    >
-                                      I just want to deposit more {this.props.selectedToken}
-                                    </Link>
-                                }
-                              </Flex>
-                            )
-                          }
-                          {
-                            showRebalanceOption && (
+                                  </DashboardCard>
+                                )
+                              }
+                            </Flex>
+                          )
+                        }
+                        {
+                          (metaTransactionsAvailable && !showBuyFlow && !this.state.contractPaused) && 
+                          <DashboardCard
+                            cardProps={{
+                              py:3,
+                              px:2,
+                              my:3,
+                              display:'flex',
+                              alignItems:'center',
+                              flexDirection:'column',
+                              justifyContent:'center',
+                            }}
+                          >
+                            {
+                              this.state.metaTransactionsEnabled && this.state.txError[this.state.action] && this.state.actionProxyContract[this.state.action].approved ? (
+                                <Flex
+                                  width={1}
+                                  alignItems={'center'}
+                                  flexDirection={'column'}
+                                  justifyContent={'center'}
+                                >
+                                  <Icon
+                                    size={'1.8em'}
+                                    name={'Warning'}
+                                    color={'cellText'}
+                                  />
+                                  <Text
+                                    mt={1}
+                                    fontSize={1}
+                                    color={'cellText'}
+                                    textAlign={'center'}
+                                  >
+                                    Seems like you are having some trouble with Meta-Transactions... Disable them by unchecking the box below and try again!
+                                  </Text>
+                                </Flex>
+                              ) : this.functionsUtil.getWalletProvider() === 'WalletConnect' && this.state.metaTransactionsEnabled ? (
+                                <Flex
+                                  width={1}
+                                  alignItems={'center'}
+                                  flexDirection={'column'}
+                                  justifyContent={'center'}
+                                >
+                                  <Icon
+                                    size={'1.8em'}
+                                    name={'Warning'}
+                                    color={'cellText'}
+                                  />
+                                  <Text
+                                    mt={1}
+                                    fontSize={1}
+                                    color={'cellText'}
+                                    textAlign={'center'}
+                                  >
+                                    Please disable Meta-Transactions if you are using Argent Wallet to avoid failed transactions!
+                                  </Text>
+                                </Flex>
+                              ) : (
+                                <Text
+                                  mt={1}
+                                  fontSize={1}
+                                  color={'cellText'}
+                                  textAlign={'center'}
+                                >
+                                  Meta-Transactions are {this.state.metaTransactionsEnabled ? 'available' : 'disabled'} for {this.state.action}s!<br />
+                                  {
+                                    this.state.metaTransactionsEnabled && !this.state.actionProxyContract[this.state.action].approved && `Please either enable the Smart-Contract to enjoy gas-less ${this.state.action} or just disable meta-tx.`
+                                  }
+                                </Text>
+                              )
+                            }
+                            <Checkbox
+                              mt={2}
+                              required={false}
+                              checked={this.state.metaTransactionsEnabled}
+                              onChange={ e => this.toggleMetaTransactionsEnabled(e.target.checked) }
+                              label={`${this.functionsUtil.capitalize(this.state.action)} with Meta-Transaction`}
+                            />
+                          </DashboardCard>
+                        }
+                        {
+                          showBatchDeposit &&
+                            <Flex
+                              p={2}
+                              mt={3}
+                              width={1}
+                              borderRadius={2}
+                              alignItems={'center'}
+                              flexDirection={'row'}
+                              justifyContent={'center'}
+                              backgroundColor={'DashboardCard'}
+                              border={`1px solid ${this.props.theme.colors.primary}`}
+                            >
+                              <Link
+                                textAlign={'center'}
+                                hoverColor={'primary'}
+                                href={`/#/dashboard/tools/${batchDepositInfo.route}/${this.props.tokenConfig.idle.token}`}
+                              >
+                                Gas fees too high? Save gas with our Batch Deposit!
+                              </Link>
+                              <Icon
+                                ml={1}
+                                size={'1em'}
+                                color={'primary'}
+                                name={'LocalGasStation'}
+                              />
+                            </Flex>
+                        }
+                        {
+                          showRedeemCurve && this.state.canRedeem && (
+                            <Flex
+                              width={1}
+                              flexDirection={'column'}
+                              justifyContent={'center'}
+                            >
                               <DashboardCard
+                                isRainbow={true}
                                 cardProps={{
                                   py:3,
                                   px:2,
@@ -1305,693 +1478,535 @@ class DepositRedeem extends Component {
                                   flexDirection={'column'}
                                   justifyContent={'center'}
                                 >
-                                  <Icon
-                                    size={'1.8em'}
-                                    color={'cellText'}
-                                    name={'InfoOutline'}
+                                  <Image
+                                    height={'1.8em'}
+                                    src={curveConfig.params.image}
                                   />
                                   <Text
-                                    mt={1}
+                                    mt={2}
                                     px={2}
                                     fontSize={1}
-                                    color={'cellText'}
+                                    color={'dark-gray'}
                                     textAlign={'center'}
                                   >
-                                    By checking this flag you can rebalance the pool and help all users gain an additional APR
+                                    Redeem your tokens from the Curve Pool.
+                                    <Link
+                                      ml={1}
+                                      mainColor={'primary'}
+                                      hoverColor={'primary'}
+                                      onClick={ e => this.props.openTooltipModal('How Curve works',this.functionsUtil.getGlobalConfig(['messages','curveInstructions'])) }
+                                    >
+                                      Read More
+                                    </Link>
                                   </Text>
+                                  {
+                                    this.state.canRedeem &&
+                                      <Checkbox
+                                        mt={2}
+                                        required={false}
+                                        label={`Redeem from Curve`}
+                                        checked={this.state.redeemCurveEnabled}
+                                        onChange={ e => this.toggleRedeemCurve(e.target.checked) }
+                                      />
+                                  }
                                 </Flex>
-                                <Checkbox
-                                  mt={2}
-                                  required={false}
-                                  label={`Rebalance the pool`}
-                                  checked={this.state.directMint}
-                                  onChange={ e => this.toggleSkipMint(e.target.checked) }
-                                />
                               </DashboardCard>
-                            )
-                          }
-                        </Flex>
-                      )
-                    }
-                    {
-                      (metaTransactionsAvailable && !showBuyFlow && !this.state.contractPaused) && 
-                      <DashboardCard
-                        cardProps={{
-                          py:3,
-                          px:2,
-                          my:3,
-                          display:'flex',
-                          alignItems:'center',
-                          flexDirection:'column',
-                          justifyContent:'center',
-                        }}
-                      >
-                        {
-                          this.state.metaTransactionsEnabled && this.state.txError[this.state.action] && this.state.actionProxyContract[this.state.action].approved ? (
-                            <Flex
-                              width={1}
-                              alignItems={'center'}
-                              flexDirection={'column'}
-                              justifyContent={'center'}
-                            >
-                              <Icon
-                                size={'1.8em'}
-                                name={'Warning'}
-                                color={'cellText'}
-                              />
-                              <Text
-                                mt={1}
-                                fontSize={1}
-                                color={'cellText'}
-                                textAlign={'center'}
-                              >
-                                Seems like you are having some trouble with Meta-Transactions... Disable them by unchecking the box below and try again!
-                              </Text>
-                            </Flex>
-                          ) : this.functionsUtil.getWalletProvider() === 'WalletConnect' && this.state.metaTransactionsEnabled ? (
-                            <Flex
-                              width={1}
-                              alignItems={'center'}
-                              flexDirection={'column'}
-                              justifyContent={'center'}
-                            >
-                              <Icon
-                                size={'1.8em'}
-                                name={'Warning'}
-                                color={'cellText'}
-                              />
-                              <Text
-                                mt={1}
-                                fontSize={1}
-                                color={'cellText'}
-                                textAlign={'center'}
-                              >
-                                Please disable Meta-Transactions if you are using Argent Wallet to avoid failed transactions!
-                              </Text>
-                            </Flex>
-                          ) : (
-                            <Text
-                              mt={1}
-                              fontSize={1}
-                              color={'cellText'}
-                              textAlign={'center'}
-                            >
-                              Meta-Transactions are {this.state.metaTransactionsEnabled ? 'available' : 'disabled'} for {this.state.action}s!<br />
                               {
-                                this.state.metaTransactionsEnabled && !this.state.actionProxyContract[this.state.action].approved && `Please either enable the Smart-Contract to enjoy gas-less ${this.state.action} or just disable meta-tx.`
+                                this.canRedeem &&
+                                  <Link
+                                    textAlign={'center'}
+                                    hoverColor={'primary'}
+                                    onClick={ e => this.setShowRedeemFlow(true) }
+                                  >
+                                    I just want to redeem my {this.props.selectedToken}
+                                  </Link>
                               }
-                            </Text>
+                            </Flex>
                           )
                         }
-                        <Checkbox
-                          mt={2}
-                          required={false}
-                          checked={this.state.metaTransactionsEnabled}
-                          onChange={ e => this.toggleMetaTransactionsEnabled(e.target.checked) }
-                          label={`${this.functionsUtil.capitalize(this.state.action)} with Meta-Transaction`}
-                        />
-                      </DashboardCard>
-                    }
-                    {
-                      showBatchDeposit &&
-                        <Flex
-                          p={2}
-                          mt={3}
-                          width={1}
-                          borderRadius={2}
-                          alignItems={'center'}
-                          flexDirection={'row'}
-                          justifyContent={'center'}
-                          backgroundColor={'DashboardCard'}
-                          border={`1px solid ${this.props.theme.colors.primary}`}
-                        >
-                          <Link
-                            textAlign={'center'}
-                            hoverColor={'primary'}
-                            href={`/#/dashboard/tools/${batchDepositInfo.route}/${this.props.tokenConfig.idle.token}`}
-                          >
-                            Gas fees too high? Save gas with our Batch Deposit!
-                          </Link>
-                          <Icon
-                            ml={1}
-                            size={'1em'}
-                            color={'primary'}
-                            name={'LocalGasStation'}
-                          />
-                        </Flex>
-                    }
-                    {
-                      showRedeemCurve && this.state.canRedeem && (
-                        <Flex
-                          width={1}
-                          flexDirection={'column'}
-                          justifyContent={'center'}
-                        >
-                          <DashboardCard
-                            isRainbow={true}
-                            cardProps={{
-                              py:3,
-                              px:2,
-                              mt:3,
-                              display:'flex',
-                              alignItems:'center',
-                              flexDirection:'column',
-                              justifyContent:'center',
-                            }}
-                          >
-                            <Flex
-                              width={1}
-                              alignItems={'center'}
-                              flexDirection={'column'}
-                              justifyContent={'center'}
+                        {
+                          (this.state.action === 'redeem' && this.state.unlentBalance && showRedeemFlow) &&
+                            <DashboardCard
+                              cardProps={{
+                                py:2,
+                                px:2,
+                                mt:3,
+                                display:'flex',
+                                alignItems:'center',
+                                flexDirection:'column',
+                                justifyContent:'center',
+                              }}
                             >
-                              <Image
-                                height={'1.8em'}
-                                src={curveConfig.params.image}
-                              />
-                              <Text
-                                mt={2}
-                                px={2}
-                                fontSize={1}
-                                color={'dark-gray'}
-                                textAlign={'center'}
-                              >
-                                Redeem your tokens from the Curve Pool.
-                                <Link
-                                  ml={1}
-                                  mainColor={'primary'}
-                                  hoverColor={'primary'}
-                                  onClick={ e => this.props.openTooltipModal('How Curve works',this.functionsUtil.getGlobalConfig(['messages','curveInstructions'])) }
-                                >
-                                  Read More
-                                </Link>
-                              </Text>
-                              {
-                                this.state.canRedeem &&
-                                  <Checkbox
-                                    mt={2}
-                                    required={false}
-                                    label={`Redeem from Curve`}
-                                    checked={this.state.redeemCurveEnabled}
-                                    onChange={ e => this.toggleRedeemCurve(e.target.checked) }
-                                  />
-                              }
-                            </Flex>
-                          </DashboardCard>
-                          {
-                            this.canRedeem &&
-                              <Link
-                                textAlign={'center'}
-                                hoverColor={'primary'}
-                                onClick={ e => this.setShowRedeemFlow(true) }
-                              >
-                                I just want to redeem my {this.props.selectedToken}
-                              </Link>
-                          }
-                        </Flex>
-                      )
-                    }
-                    {
-                      (this.state.action === 'redeem' && this.state.unlentBalance && showRedeemFlow) &&
-                        <DashboardCard
-                          cardProps={{
-                            py:2,
-                            px:2,
-                            mt:3,
-                            display:'flex',
-                            alignItems:'center',
-                            flexDirection:'column',
-                            justifyContent:'center',
-                          }}
-                        >
-                          <Flex
-                            width={1}
-                            alignItems={'center'}
-                            flexDirection={'column'}
-                            justifyContent={'center'}
-                          >
-                            <Icon
-                              size={'1.8em'}
-                              color={'cellText'}
-                              name={'LocalGasStation'}
-                            />
-                            <Text
-                              px={2}
-                              fontSize={1}
-                              color={'cellText'}
-                              textAlign={'center'}
-                            >
-                              Available balance for Cheap Redeem
-                            </Text>
-                            <Flex
-                              alignItems={'center'}
-                              flexDirection={'row'}
-                            >
-                              <Text
-                                fontSize={1}
-                                fontWeight={3}
-                                color={'dark-gray'}
-                                textAlign={'center'}
-                                hoverColor={'copyColor'}
-                              >
-                                {this.state.unlentBalance.toFixed(4)} {this.props.selectedToken}
-                              </Text>
-                              <Tooltip
-                                placement={'top'}
-                                message={this.functionsUtil.getGlobalConfig(['messages','cheapRedeem'])}
+                              <Flex
+                                width={1}
+                                alignItems={'center'}
+                                flexDirection={'column'}
+                                justifyContent={'center'}
                               >
                                 <Icon
-                                  ml={1}
-                                  size={'1em'}
-                                  color={'cellTitle'}
-                                  name={"InfoOutline"}
+                                  size={'1.8em'}
+                                  color={'cellText'}
+                                  name={'LocalGasStation'}
                                 />
-                              </Tooltip>
-                            </Flex>
-                          </Flex>
-                        </DashboardCard>
-                    }
-                    {
-                      (this.state.action === 'redeem' && redeemGovTokenEnabled && showRedeemFlow) && (
-                        <DashboardCard
-                          cardProps={{
-                            py:3,
-                            px:2,
-                            mt:3,
-                            display:'flex',
-                            alignItems:'center',
-                            flexDirection:'column',
-                            justifyContent:'center',
-                          }}
-                        >
-                          <Flex
-                            width={1}
-                            alignItems={'center'}
-                            flexDirection={'column'}
-                            justifyContent={'center'}
-                          >
-                            <Icon
-                              size={'1.8em'}
-                              color={'cellText'}
-                              name={'InfoOutline'}
-                            />
-                            <Text
-                              mt={1}
-                              px={2}
-                              fontSize={1}
-                              color={'cellText'}
-                              textAlign={'center'}
-                            >
-                              By redeeming your {this.props.selectedToken} you will automatically get also the proportional amount of governance tokens accrued{ this.props.govTokensBalance && this.props.govTokensBalance.gt(0) ? ` (~ $${this.props.govTokensBalance.toFixed(2)})` : null }.
-                            </Text>
-                          </Flex>
-                          <Checkbox
-                            mt={2}
-                            required={false}
-                            checked={this.state.redeemGovTokens}
-                            label={`Redeem governance tokens only`}
-                            onChange={ e => this.toggleRedeemGovTokens(e.target.checked) }
-                          />
-                        </DashboardCard>
-                      )
-                    }
-                    {
-                      (this.state.contractPaused && this.state.action === 'deposit') ? (
-                        <DashboardCard
-                          cardProps={{
-                            p:3,
-                            mt:3
-                          }}
-                        >
-                          <Flex
-                            alignItems={'center'}
-                            flexDirection={'column'}
-                          >
-                            <Icon
-                              size={'1.8em'}
-                              name={'Warning'}
-                              color={'cellText'}
-                            />
-                            <Text
-                              mt={1}
-                              fontSize={2}
-                              color={'cellText'}
-                              textAlign={'center'}
-                            >
-                              Deposits for {this.props.selectedToken} are temporarily unavailable due to Smart-Contract maintenance. Redeems are always available.
-                            </Text>
-                          </Flex>
-                        </DashboardCard>
-                      ) : (!this.state.tokenApproved && this.state.action === 'deposit') ? (
-                        <DashboardCard
-                          cardProps={{
-                            p:3,
-                            mt:3
-                          }}
-                        >
-                          {
-                            this.state.processing['approve'] && this.state.processing['approve'].loading ? (
-                              <Flex
-                                flexDirection={'column'}
-                              >
-                                <TxProgressBar
-                                  web3={this.props.web3}
-                                  waitText={`Approve estimated in`}
-                                  endMessage={`Finalizing approve request...`}
-                                  hash={this.state.processing['approve'].txHash}
-                                  cancelTransaction={this.cancelTransaction.bind(this)}
-                                />
+                                <Text
+                                  px={2}
+                                  fontSize={1}
+                                  color={'cellText'}
+                                  textAlign={'center'}
+                                >
+                                  Available balance for Cheap Redeem
+                                </Text>
+                                <Flex
+                                  alignItems={'center'}
+                                  flexDirection={'row'}
+                                >
+                                  <Text
+                                    fontSize={1}
+                                    fontWeight={3}
+                                    color={'dark-gray'}
+                                    textAlign={'center'}
+                                    hoverColor={'copyColor'}
+                                  >
+                                    {this.state.unlentBalance.toFixed(4)} {this.props.selectedToken}
+                                  </Text>
+                                  <Tooltip
+                                    placement={'top'}
+                                    message={this.functionsUtil.getGlobalConfig(['messages','cheapRedeem'])}
+                                  >
+                                    <Icon
+                                      ml={1}
+                                      size={'1em'}
+                                      color={'cellTitle'}
+                                      name={"InfoOutline"}
+                                    />
+                                  </Tooltip>
+                                </Flex>
                               </Flex>
-                            ) : (
+                            </DashboardCard>
+                        }
+                        {
+                          (this.state.action === 'redeem' && redeemGovTokenEnabled && showRedeemFlow) && (
+                            <DashboardCard
+                              cardProps={{
+                                py:3,
+                                px:2,
+                                mt:3,
+                                display:'flex',
+                                alignItems:'center',
+                                flexDirection:'column',
+                                justifyContent:'center',
+                              }}
+                            >
+                              <Flex
+                                width={1}
+                                alignItems={'center'}
+                                flexDirection={'column'}
+                                justifyContent={'center'}
+                              >
+                                <Icon
+                                  size={'1.8em'}
+                                  color={'cellText'}
+                                  name={'InfoOutline'}
+                                />
+                                <Text
+                                  mt={1}
+                                  px={2}
+                                  fontSize={1}
+                                  color={'cellText'}
+                                  textAlign={'center'}
+                                >
+                                  By redeeming your {this.props.selectedToken} you will automatically get also the proportional amount of governance tokens accrued{ this.props.govTokensBalance && this.props.govTokensBalance.gt(0) ? ` (~ $${this.props.govTokensBalance.toFixed(2)})` : null }.
+                                </Text>
+                              </Flex>
+                              <Checkbox
+                                mt={2}
+                                required={false}
+                                checked={this.state.redeemGovTokens}
+                                label={`Redeem governance tokens only`}
+                                onChange={ e => this.toggleRedeemGovTokens(e.target.checked) }
+                              />
+                            </DashboardCard>
+                          )
+                        }
+                        {
+                          (this.state.contractPaused && this.state.action === 'deposit') ? (
+                            <DashboardCard
+                              cardProps={{
+                                p:3,
+                                mt:3
+                              }}
+                            >
                               <Flex
                                 alignItems={'center'}
                                 flexDirection={'column'}
                               >
                                 <Icon
                                   size={'1.8em'}
-                                  name={'LockOpen'}
+                                  name={'Warning'}
                                   color={'cellText'}
                                 />
                                 <Text
-                                  mt={3}
+                                  mt={1}
                                   fontSize={2}
                                   color={'cellText'}
                                   textAlign={'center'}
                                 >
-                                  {
-                                    this.state.depositCurveEnabled ? 
-                                      `To ${this.functionsUtil.capitalize(this.state.action)} your ${this.props.selectedToken} in the Curve Pool you need to approve the Smart-Contract first.`
-                                    : useMetaTx ?
-                                      `To ${this.functionsUtil.capitalize(this.state.action)} your ${this.props.selectedToken} into Idle using Meta-Transaction you need to approve our Smart-Contract first.`
-                                    :
-                                      `To ${this.functionsUtil.capitalize(this.state.action)} your ${this.props.selectedToken} into Idle you need to approve our Smart-Contract first.`
-                                  }
+                                  Deposits for {this.props.selectedToken} are temporarily unavailable due to Smart-Contract maintenance. Redeems are always available.
                                 </Text>
-                                <RoundButton
-                                  buttonProps={{
-                                    mt:3,
-                                    width:[1,1/2]
-                                  }}
-                                  handleClick={this.approveToken.bind(this)}
-                                >
-                                  Approve
-                                </RoundButton>
+                              </Flex>
+                            </DashboardCard>
+                          ) : (!this.state.tokenApproved && this.state.action === 'deposit') ? (
+                            <DashboardCard
+                              cardProps={{
+                                p:3,
+                                mt:3
+                              }}
+                            >
+                              {
+                                this.state.processing['approve'] && this.state.processing['approve'].loading ? (
+                                  <Flex
+                                    flexDirection={'column'}
+                                  >
+                                    <TxProgressBar
+                                      web3={this.props.web3}
+                                      waitText={`Approve estimated in`}
+                                      endMessage={`Finalizing approve request...`}
+                                      hash={this.state.processing['approve'].txHash}
+                                      cancelTransaction={this.cancelTransaction.bind(this)}
+                                    />
+                                  </Flex>
+                                ) : (
+                                  <Flex
+                                    alignItems={'center'}
+                                    flexDirection={'column'}
+                                  >
+                                    <Icon
+                                      size={'1.8em'}
+                                      name={'LockOpen'}
+                                      color={'cellText'}
+                                    />
+                                    <Text
+                                      mt={3}
+                                      fontSize={2}
+                                      color={'cellText'}
+                                      textAlign={'center'}
+                                    >
+                                      {
+                                        this.state.depositCurveEnabled ? 
+                                          `To ${this.functionsUtil.capitalize(this.state.action)} your ${this.props.selectedToken} in the Curve Pool you need to approve the Smart-Contract first.`
+                                        : useMetaTx ?
+                                          `To ${this.functionsUtil.capitalize(this.state.action)} your ${this.props.selectedToken} into Idle using Meta-Transaction you need to approve our Smart-Contract first.`
+                                        :
+                                          `To ${this.functionsUtil.capitalize(this.state.action)} your ${this.props.selectedToken} into Idle you need to approve our Smart-Contract first.`
+                                      }
+                                    </Text>
+                                    <RoundButton
+                                      buttonProps={{
+                                        mt:3,
+                                        width:[1,1/2]
+                                      }}
+                                      handleClick={this.approveToken.bind(this)}
+                                    >
+                                      Approve
+                                    </RoundButton>
+                                  </Flex>
+                                )
+                              }
+                            </DashboardCard>
+                          ) : (!showBuyFlow && canPerformAction) && (
+                            !this.state.processing[this.state.action].loading ? (
+                              <Flex
+                                mt={2}
+                                flexDirection={'column'}
+                              >
+                                {
+                                  showActionFlow && (
+                                    <Flex
+                                      mb={3}
+                                      width={1}
+                                      flexDirection={'column'}
+                                    >
+                                      {
+                                        /*
+                                        showCurveSlippage &&
+                                          <DashboardCard
+                                            cardProps={{
+                                              p:3,
+                                              mb:2
+                                            }}
+                                          >
+                                            <Flex
+                                              alignItems={'center'}
+                                              flexDirection={'column'}
+                                            >
+                                              <Icon
+                                                size={'1.8em'}
+                                                color={'cellText'}
+                                                name={'FileUpload'}
+                                              />
+                                              <Text
+                                                mt={2}
+                                                fontSize={2}
+                                                color={'cellText'}
+                                                textAlign={'center'}
+                                              >
+                                                You can deposit {this.state.depositCurveBalance.toFixed(4)} {this.props.selectedToken} in the Curve Pool{ this.state.depositCurveSlippage ? (this.state.depositCurveSlippage.gt(0) ? ` with ${this.state.depositCurveSlippage.times(100).toFixed(2)}% of slippage` : ` with ${Math.abs(parseFloat(this.state.depositCurveSlippage.times(100).toFixed(2)))}% of bonus`) : '' }.
+                                              </Text>
+                                            </Flex>
+                                          </DashboardCard>
+                                        */
+                                      }
+                                      {
+                                        (totalBalance || this.props.tokenFeesPercentage) && (
+                                          <Box
+                                            mb={1}
+                                            width={1}
+                                          >
+                                            {
+                                              this.state.showMaxSlippage && showCurveSlippage && (
+                                                <Box
+                                                  mb={2}
+                                                  width={1}
+                                                >
+                                                  <Flex
+                                                    alignItems={'center'}
+                                                    flexDirection={'row'}
+                                                  >
+                                                    <Text>
+                                                      Choose max slippage:
+                                                    </Text>
+                                                    <Tooltip
+                                                      placement={'top'}
+                                                      message={`Max additional slippage on top of the one shown below`}
+                                                    >
+                                                      <Icon
+                                                        ml={1}
+                                                        size={'1em'}
+                                                        color={'cellTitle'}
+                                                        name={"InfoOutline"}
+                                                      />
+                                                    </Tooltip>
+                                                  </Flex>
+                                                  <Flex
+                                                    mt={2}
+                                                    alignItems={'center'}
+                                                    flexDirection={'row'}
+                                                    justifyContent={'space-between'}
+                                                  >
+                                                    {
+                                                      [0.2,0.5,1,5].map( slippage => (
+                                                        <FastBalanceSelector
+                                                          cardProps={{
+                                                            p:1
+                                                          }}
+                                                          textProps={{
+                                                            fontSize:1
+                                                          }}
+                                                          percentage={slippage}
+                                                          key={`selector_${slippage}`}
+                                                          onMouseDown={()=>this.setMaxSlippage(slippage)}
+                                                          isActive={this.state.maxSlippage === parseFloat(slippage)}
+                                                        />
+                                                      ))
+                                                    }
+                                                  </Flex>
+                                                </Box>
+                                              )
+                                            }
+                                            <Flex
+                                              width={1}
+                                              alignItems={'center'}
+                                              flexDirection={'row'}
+                                              justifyContent={'space-between'}
+                                            >
+                                            {
+                                              showCurveSlippage ? (
+                                                <Flex
+                                                  width={1}
+                                                  maxWidth={'50%'}
+                                                  alignItems={'center'}
+                                                  flexDirection={'row'}
+                                                >
+                                                  <Text
+                                                    fontSize={1}
+                                                    fontWeight={3}
+                                                    textAlign={'right'}
+                                                    style={{
+                                                      whiteSpace:'nowrap'
+                                                    }}
+                                                    color={ this.state.depositCurveSlippage.gt(0) ? this.props.theme.colors.transactions.status.failed : this.props.theme.colors.transactions.status.completed }
+                                                  >
+                                                    {
+                                                      parseFloat(this.state.depositCurveSlippage.times(100).toFixed(2)) === 0 ?
+                                                        'No Slippage'
+                                                      : `${ this.state.depositCurveSlippage.gt(0) ? 'Slippage: ' : 'Bonus: ' } ${this.state.depositCurveSlippage.times(100).abs().toFixed(2)}%`
+                                                    }
+                                                  </Text>
+                                                  <Tooltip
+                                                    placement={'top'}
+                                                    message={this.functionsUtil.getGlobalConfig(['messages','curveBonusSlippage'])}
+                                                  >
+                                                    <Icon
+                                                      ml={1}
+                                                      size={'1em'}
+                                                      color={'cellTitle'}
+                                                      name={"InfoOutline"}
+                                                    />
+                                                  </Tooltip>
+                                                  <Link
+                                                    ml={1}
+                                                    color={'copyColor'}
+                                                    hoverColor={'primary'}
+                                                    onClick={this.showMaxSlippage}
+                                                  >
+                                                    change
+                                                  </Link>
+                                                </Flex>
+                                              ) : this.props.tokenFeesPercentage && (
+                                                <Flex
+                                                  alignItems={'center'}
+                                                  flexDirection={'row'}
+                                                >
+                                                  <Text
+                                                    fontSize={1}
+                                                    fontWeight={3}
+                                                    color={'dark-gray'}
+                                                    textAlign={'right'}
+                                                    hoverColor={'copyColor'}
+                                                  >
+                                                    Performance fee: {this.props.tokenFeesPercentage.times(100).toFixed(2)}%
+                                                  </Text>
+                                                  <Tooltip
+                                                    placement={'top'}
+                                                    message={this.functionsUtil.getGlobalConfig(['messages','performanceFee'])}
+                                                  >
+                                                    <Icon
+                                                      ml={1}
+                                                      size={'1em'}
+                                                      color={'cellTitle'}
+                                                      name={"InfoOutline"}
+                                                    />
+                                                  </Tooltip>
+                                                </Flex>
+                                              )
+                                            }
+                                            {
+                                              totalBalance && (
+                                                <Link
+                                                  fontSize={1}
+                                                  fontWeight={3}
+                                                  color={'dark-gray'}
+                                                  textAlign={'right'}
+                                                  hoverColor={'copyColor'}
+                                                  onClick={ (e) => this.setFastBalanceSelector(100) }
+                                                >
+                                                  {totalBalance.toFixed(6)} {this.props.selectedToken}
+                                                </Link>
+                                              )
+                                            }
+                                            </Flex>
+                                          </Box>
+                                        )
+                                      }
+                                      <Input
+                                        min={0}
+                                        type={"number"}
+                                        required={true}
+                                        height={'3.4em'}
+                                        borderRadius={2}
+                                        fontWeight={500}
+                                        className={styles.input}
+                                        borderColor={'cardBorder'}
+                                        backgroundColor={'cardBg'}
+                                        boxShadow={'none !important'}
+                                        placeholder={`Insert amount`}
+                                        onChange={this.changeInputValue.bind(this)}
+                                        border={`1px solid ${this.props.theme.colors.divider}`}
+                                        value={this.state.inputValue[this.state.action] !== null ? this.functionsUtil.BNify(this.state.inputValue[this.state.action]).toFixed() : ''}
+                                      />
+                                      <Flex
+                                        mt={2}
+                                        alignItems={'center'}
+                                        flexDirection={'row'}
+                                        justifyContent={'space-between'}
+                                      >
+                                        {
+                                          [25,50,75,100].map( percentage => (
+                                            <FastBalanceSelector
+                                              percentage={percentage}
+                                              key={`selector_${percentage}`}
+                                              onMouseDown={()=>this.setFastBalanceSelector(percentage)}
+                                              isActive={this.state.fastBalanceSelector[this.state.action] === parseInt(percentage)}
+                                            />
+                                          ))
+                                        }
+                                      </Flex>
+                                    </Flex>
+                                  )
+                                }
+                                {
+                                  canPerformAction && 
+                                    <Flex
+                                      justifyContent={'center'}
+                                      mt={ redeemGovTokens ? 2 : 0 }
+                                    >
+                                      <RoundButton
+                                        buttonProps={{
+                                          width:'auto',
+                                          minWidth:[1,1/2],
+                                          style:{
+                                            textTransform:'capitalize'
+                                          },
+                                          disabled:this.state.buttonDisabled
+                                        }}
+                                        handleClick={this.state.buttonDisabled ? null : this.executeAction.bind(this) }
+                                      >
+                                        {this.state.action}{ redeemGovTokens ? ' Gov Tokens' : '' /*(depositCurve ? ' in Curve' : '')*/ }
+                                      </RoundButton>
+                                    </Flex>
+                                }
+                              </Flex>
+                            ) : (
+                              <Flex
+                                mt={4}
+                                flexDirection={'column'}
+                              >
+                                <TxProgressBar
+                                  web3={this.props.web3}
+                                  cancelTransaction={this.cancelTransaction.bind(this)}
+                                  hash={this.state.processing[this.state.action].txHash}
+                                  endMessage={`Finalizing ${this.state.action} request...`}
+                                  waitText={`${this.functionsUtil.capitalize(this.state.action)} estimated in`}
+                                />
                               </Flex>
                             )
-                          }
-                        </DashboardCard>
-                      ) : (!showBuyFlow && canPerformAction) && (
-                        !this.state.processing[this.state.action].loading ? (
-                          <Flex
-                            mt={2}
-                            flexDirection={'column'}
-                          >
-                            {
-                              showActionFlow && (
-                                <Flex
-                                  mb={3}
-                                  width={1}
-                                  flexDirection={'column'}
-                                >
-                                  {
-                                    /*
-                                    showCurveSlippage &&
-                                      <DashboardCard
-                                        cardProps={{
-                                          p:3,
-                                          mb:2
-                                        }}
-                                      >
-                                        <Flex
-                                          alignItems={'center'}
-                                          flexDirection={'column'}
-                                        >
-                                          <Icon
-                                            size={'1.8em'}
-                                            color={'cellText'}
-                                            name={'FileUpload'}
-                                          />
-                                          <Text
-                                            mt={2}
-                                            fontSize={2}
-                                            color={'cellText'}
-                                            textAlign={'center'}
-                                          >
-                                            You can deposit {this.state.depositCurveBalance.toFixed(4)} {this.props.selectedToken} in the Curve Pool{ this.state.depositCurveSlippage ? (this.state.depositCurveSlippage.gt(0) ? ` with ${this.state.depositCurveSlippage.times(100).toFixed(2)}% of slippage` : ` with ${Math.abs(parseFloat(this.state.depositCurveSlippage.times(100).toFixed(2)))}% of bonus`) : '' }.
-                                          </Text>
-                                        </Flex>
-                                      </DashboardCard>
-                                    */
-                                  }
-                                  {
-                                    (totalBalance || this.props.tokenFeesPercentage) && (
-                                      <Box
-                                        mb={1}
-                                        width={1}
-                                      >
-                                        {
-                                          this.state.showMaxSlippage && showCurveSlippage && (
-                                            <Box
-                                              mb={2}
-                                              width={1}
-                                            >
-                                              <Flex
-                                                alignItems={'center'}
-                                                flexDirection={'row'}
-                                              >
-                                                <Text>
-                                                  Choose max slippage:
-                                                </Text>
-                                                <Tooltip
-                                                  placement={'top'}
-                                                  message={`Max additional slippage on top of the one shown below`}
-                                                >
-                                                  <Icon
-                                                    ml={1}
-                                                    size={'1em'}
-                                                    color={'cellTitle'}
-                                                    name={"InfoOutline"}
-                                                  />
-                                                </Tooltip>
-                                              </Flex>
-                                              <Flex
-                                                mt={2}
-                                                alignItems={'center'}
-                                                flexDirection={'row'}
-                                                justifyContent={'space-between'}
-                                              >
-                                                {
-                                                  [0.2,0.5,1,5].map( slippage => (
-                                                    <FastBalanceSelector
-                                                      cardProps={{
-                                                        p:1
-                                                      }}
-                                                      textProps={{
-                                                        fontSize:1
-                                                      }}
-                                                      percentage={slippage}
-                                                      key={`selector_${slippage}`}
-                                                      onMouseDown={()=>this.setMaxSlippage(slippage)}
-                                                      isActive={this.state.maxSlippage === parseFloat(slippage)}
-                                                    />
-                                                  ))
-                                                }
-                                              </Flex>
-                                            </Box>
-                                          )
-                                        }
-                                        <Flex
-                                          width={1}
-                                          alignItems={'center'}
-                                          flexDirection={'row'}
-                                          justifyContent={'space-between'}
-                                        >
-                                        {
-                                          showCurveSlippage ? (
-                                            <Flex
-                                              width={1}
-                                              maxWidth={'50%'}
-                                              alignItems={'center'}
-                                              flexDirection={'row'}
-                                            >
-                                              <Text
-                                                fontSize={1}
-                                                fontWeight={3}
-                                                textAlign={'right'}
-                                                style={{
-                                                  whiteSpace:'nowrap'
-                                                }}
-                                                color={ this.state.depositCurveSlippage.gt(0) ? this.props.theme.colors.transactions.status.failed : this.props.theme.colors.transactions.status.completed }
-                                              >
-                                                {
-                                                  parseFloat(this.state.depositCurveSlippage.times(100).toFixed(2)) === 0 ?
-                                                    'No Slippage'
-                                                  : `${ this.state.depositCurveSlippage.gt(0) ? 'Slippage: ' : 'Bonus: ' } ${this.state.depositCurveSlippage.times(100).abs().toFixed(2)}%`
-                                                }
-                                              </Text>
-                                              <Tooltip
-                                                placement={'top'}
-                                                message={this.functionsUtil.getGlobalConfig(['messages','curveBonusSlippage'])}
-                                              >
-                                                <Icon
-                                                  ml={1}
-                                                  size={'1em'}
-                                                  color={'cellTitle'}
-                                                  name={"InfoOutline"}
-                                                />
-                                              </Tooltip>
-                                              <Link
-                                                ml={1}
-                                                color={'copyColor'}
-                                                hoverColor={'primary'}
-                                                onClick={this.showMaxSlippage}
-                                              >
-                                                change
-                                              </Link>
-                                            </Flex>
-                                          ) : this.props.tokenFeesPercentage && (
-                                            <Flex
-                                              alignItems={'center'}
-                                              flexDirection={'row'}
-                                            >
-                                              <Text
-                                                fontSize={1}
-                                                fontWeight={3}
-                                                color={'dark-gray'}
-                                                textAlign={'right'}
-                                                hoverColor={'copyColor'}
-                                              >
-                                                Performance fee: {this.props.tokenFeesPercentage.times(100).toFixed(2)}%
-                                              </Text>
-                                              <Tooltip
-                                                placement={'top'}
-                                                message={this.functionsUtil.getGlobalConfig(['messages','performanceFee'])}
-                                              >
-                                                <Icon
-                                                  ml={1}
-                                                  size={'1em'}
-                                                  color={'cellTitle'}
-                                                  name={"InfoOutline"}
-                                                />
-                                              </Tooltip>
-                                            </Flex>
-                                          )
-                                        }
-                                        {
-                                          totalBalance && (
-                                            <Link
-                                              fontSize={1}
-                                              fontWeight={3}
-                                              color={'dark-gray'}
-                                              textAlign={'right'}
-                                              hoverColor={'copyColor'}
-                                              onClick={ (e) => this.setFastBalanceSelector(100) }
-                                            >
-                                              {totalBalance.toFixed(6)} {this.props.selectedToken}
-                                            </Link>
-                                          )
-                                        }
-                                        </Flex>
-                                      </Box>
-                                    )
-                                  }
-                                  <Input
-                                    min={0}
-                                    type={"number"}
-                                    required={true}
-                                    height={'3.4em'}
-                                    borderRadius={2}
-                                    fontWeight={500}
-                                    className={styles.input}
-                                    borderColor={'cardBorder'}
-                                    backgroundColor={'cardBg'}
-                                    boxShadow={'none !important'}
-                                    placeholder={`Insert amount`}
-                                    onChange={this.changeInputValue.bind(this)}
-                                    border={`1px solid ${this.props.theme.colors.divider}`}
-                                    value={this.state.inputValue[this.state.action] !== null ? this.functionsUtil.BNify(this.state.inputValue[this.state.action]).toFixed() : ''}
-                                  />
-                                  <Flex
-                                    mt={2}
-                                    alignItems={'center'}
-                                    flexDirection={'row'}
-                                    justifyContent={'space-between'}
-                                  >
-                                    {
-                                      [25,50,75,100].map( percentage => (
-                                        <FastBalanceSelector
-                                          percentage={percentage}
-                                          key={`selector_${percentage}`}
-                                          onMouseDown={()=>this.setFastBalanceSelector(percentage)}
-                                          isActive={this.state.fastBalanceSelector[this.state.action] === parseInt(percentage)}
-                                        />
-                                      ))
-                                    }
-                                  </Flex>
-                                </Flex>
-                              )
-                            }
-                            {
-                              canPerformAction && 
-                                <Flex
-                                  justifyContent={'center'}
-                                  mt={ redeemGovTokens ? 2 : 0 }
-                                >
-                                  <RoundButton
-                                    buttonProps={{
-                                      width:'auto',
-                                      minWidth:[1,1/2],
-                                      style:{
-                                        textTransform:'capitalize'
-                                      },
-                                      disabled:this.state.buttonDisabled
-                                    }}
-                                    handleClick={this.state.buttonDisabled ? null : this.executeAction.bind(this) }
-                                  >
-                                    {this.state.action}{ redeemGovTokens ? ' Gov Tokens' : '' /*(depositCurve ? ' in Curve' : '')*/ }
-                                  </RoundButton>
-                                </Flex>
-                            }
-                          </Flex>
-                        ) : (
-                          <Flex
-                            mt={4}
-                            flexDirection={'column'}
-                          >
-                            <TxProgressBar
-                              web3={this.props.web3}
-                              cancelTransaction={this.cancelTransaction.bind(this)}
-                              hash={this.state.processing[this.state.action].txHash}
-                              endMessage={`Finalizing ${this.state.action} request...`}
-                              waitText={`${this.functionsUtil.capitalize(this.state.action)} estimated in`}
-                            />
-                          </Flex>
-                        )
-                      )
-                    }
-                  </Box>
-                ) : null
-              ) : (
-                <Flex
-                  mt={4}
-                  flexDirection={'column'}
-                >
-                  <FlexLoader
-                    flexProps={{
-                      flexDirection:'row'
-                    }}
-                    loaderProps={{
-                      size:'30px'
-                    }}
-                    textProps={{
-                      ml:2
-                    }}
-                    text={'Loading asset info...'}
-                  />
-                </Flex>
-              )
-            }
-          </Migrate>
+                          )
+                        }
+                      </Box>
+                    ) : null
+                  ) : (
+                    <Flex
+                      mt={4}
+                      flexDirection={'column'}
+                    >
+                      <FlexLoader
+                        flexProps={{
+                          flexDirection:'row'
+                        }}
+                        loaderProps={{
+                          size:'30px'
+                        }}
+                        textProps={{
+                          ml:2
+                        }}
+                        text={'Loading asset info...'}
+                      />
+                    </Flex>
+                  )
+                }
+              </Migrate>
+            )
+          }
         </Flex>
         {
           /*

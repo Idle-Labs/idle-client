@@ -740,7 +740,7 @@ class FunctionsUtil {
     return curveTxs;
   }
   filterEtherscanTxs = async (results,enabledTokens=[],processTxs=true,processStoredTxs=true) => {
-    if (!results || !results.length || typeof results.forEach !== 'function'){
+    if (!results || !results.length || typeof results.forEach !== 'function' || !this.props.account){
       return [];
     }
 
@@ -1590,6 +1590,12 @@ class FunctionsUtil {
     };
     return this.setCachedDataWithLocalStorage('cachedRequests',cachedRequests);
   }
+  getCustomAddress = () => {
+    return this.getStoredItem('customAddress',false);
+  }
+  setCustomAddress = (customAddress) => {
+    return this.setLocalStorage('customAddress',customAddress);
+  }
   getCachedRequest = (endpoint,alias=false) => {
     const key = alias ? alias : endpoint;
     let cachedRequests = this.getCachedDataWithLocalStorage('cachedRequests',{});
@@ -1728,8 +1734,8 @@ class FunctionsUtil {
     }
     return null;
   }
-  getWalletProvider = () => {
-    return this.getStoredItem('walletProvider',false,null);
+  getWalletProvider = (defaultProvider=null) => {
+    return this.getStoredItem('walletProvider',false,defaultProvider);
   }
   simpleIDPassUserInfo = (userInfo,simpleID) => {
     if (!userInfo.address && this.props.account){
@@ -3392,7 +3398,7 @@ class FunctionsUtil {
     return true;
   }
   checkAddress = (address) => {
-    return address !== null ? address.match(/^0x[a-fA-F0-9]{40}$/) !== null : false;
+    return address ? address.match(/^0x[a-fA-F0-9]{40}$/) !== null : false;
   }
   getContractBalance = async (contractName,address,blockNumber='latest') => {
     address = address ? address : this.props.tokenConfig.idle.address;

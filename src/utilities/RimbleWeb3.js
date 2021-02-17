@@ -186,6 +186,11 @@ class RimbleTransaction extends React.Component {
       this.initWeb3();
     }
 
+    const customAddressChanged = prevProps.customAddress !== this.props.customAddress;
+    if (customAddressChanged){
+      this.initAccount();
+    }
+
     const tokenChanged = prevProps.selectedToken !== this.props.selectedToken;
     // const availableTokensChanged = prevProps.availableTokens && this.props.availableTokens && JSON.stringify(Object.keys(prevProps.availableTokens)) !== JSON.stringify(Object.keys(this.props.availableTokens));
     const availableStrategiesChanged = prevProps.availableStrategies && this.props.availableStrategies && JSON.stringify(Object.keys(prevProps.availableStrategies)) !== JSON.stringify(Object.keys(this.props.availableStrategies));
@@ -567,14 +572,14 @@ class RimbleTransaction extends React.Component {
 
   initAccount = async (account=false) => {
 
-    this.functionsUtil.customLog('initAccount',account);
+    const customAddress = this.props.customAddress;
+    const walletProvider = this.functionsUtil.getWalletProvider('Infura');
 
-    if (this.props.customAddress){
-
+    if (customAddress){
       // Set custom account
       this.setState({
-        accountInizialized: true,
-        account: this.props.customAddress
+        account:customAddress,
+        accountInizialized:true,
       });
 
       // After account is complete, get the balance
@@ -599,9 +604,7 @@ class RimbleTransaction extends React.Component {
       }
 
       // Request account access if needed
-      if (account){
-
-        const walletProvider = localStorage && localStorage.getItem('walletProvider') ? localStorage.getItem('walletProvider') : 'Infura';
+      if (account && walletProvider !== 'Infura'){
 
         // Send address info to SimpleID
         const simpleID = this.initSimpleID();

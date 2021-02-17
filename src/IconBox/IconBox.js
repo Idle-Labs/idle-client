@@ -25,7 +25,7 @@ class IconBox extends Component {
           {
             this.props.text && 
               <Text
-                mt={2}
+                mt={1}
                 fontSize={2}
                 color={'cellText'}
                 textAlign={'center'}

@@ -1,4 +1,5 @@
 import Title from '../Title/Title';
+import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
 import Breadcrumb from '../Breadcrumb/Breadcrumb';
 import FunctionsUtil from '../utilities/FunctionsUtil';
@@ -28,6 +29,7 @@ class Utils extends Component {
 
   render() {
     const SubComponent = this.props.selectedSubsection && this.props.selectedSubsection.subComponent ? this.props.selectedSubsection.subComponent : null;
+    const viewOnly = this.props.connectorName === 'custom';
     return (
       <Flex
         width={1}
@@ -88,9 +90,18 @@ class Utils extends Component {
                 style={{
                   flexWrap:'wrap'
                 }}
+                justifyContent={viewOnly ? 'center' : 'flex-start'}
               >
               {
-                this.props.selectedSection.submenu.map( (tool,toolIndex) => (
+                viewOnly ? (
+                  <IconBox
+                    cardProps={{
+                      maxWidth:[1,'35em']
+                    }}
+                    icon={'Visibility'}
+                    text={'You are using Idle in "Read-Only" mode.<br />Logout and connect with your wallet to interact.'}
+                  />
+                ) : this.props.selectedSection.submenu.map( (tool,toolIndex) => (
                   <DashboardCard
                     isInteractive={true}
                     key={`tool_${toolIndex}`}
