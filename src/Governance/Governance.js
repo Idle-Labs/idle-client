@@ -323,6 +323,10 @@ class Dashboard extends Component {
 
   async loadData(){
 
+    if (!this.props.web3){
+      return false;
+    }
+
     const newState = {};
     const [
       blockNumber,
