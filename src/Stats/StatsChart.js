@@ -821,6 +821,16 @@ class StatsChart extends Component {
             }
           ],
           theme:{
+            tooltip: {
+              container:{
+                padding:'0',
+                boxShadow:'none',
+                background:'transparent',
+              },
+              tableCell:{
+                padding:'0'
+              }
+            },
             axis: {
               ticks: {
                 text: {
@@ -849,17 +859,27 @@ class StatsChart extends Component {
           tooltip:({ id, value, color }) => {
             const allocation = this.functionsUtil.formatMoney(value,0);
             return (
-              <table style={{width:'100%',borderCollapse:'collapse'}}>
-                <tbody>
-                  <tr>
-                    <td style={{padding:'3px 5px'}}>
-                      <span style={{display:'block', width: '12px', height: '12px', background: color}}></span>
-                    </td>
-                    <td style={{padding:'3px 5px',textTransform:'capitalize'}}>{id}</td>
-                    <td style={{padding:'3px 5px'}}><strong>{allocation} {this.props.selectedToken}</strong></td>
-                  </tr>
-                </tbody>
-              </table>
+              <DashboardCard
+                cardProps={{
+                  py:1,
+                  px:2,
+                  width:1,
+                }}
+              >
+                <table
+                  style={{width:'100%',borderCollapse:'collapse'}}
+                >
+                  <tbody>
+                    <tr>
+                      <td style={{padding:'3px 5px'}}>
+                        <span style={{display:'block', width: '12px', height: '12px', background: color}}></span>
+                      </td>
+                      <td style={{padding:'3px 5px',textTransform:'capitalize'}}>{id}</td>
+                      <td style={{padding:'3px 5px'}}><strong>{allocation} {this.props.selectedToken}</strong></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </DashboardCard>
             )
           }
         }
