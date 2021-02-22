@@ -537,6 +537,7 @@ class App extends Component {
         alignItems={'center'}
         flexDirection={'column'}
         justifyContent={'center'}
+        backgroundColor={'selectBg'}
       >
         <FlexLoader
           textProps={{
@@ -546,7 +547,7 @@ class App extends Component {
           loaderProps={{
             mb:3,
             size:'80px',
-            color:'blue'
+            color:'primary'
           }}
           flexProps={{
             my:3,
