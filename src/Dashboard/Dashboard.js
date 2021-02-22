@@ -79,20 +79,6 @@ class Dashboard extends Component {
       menu.push(curveParams);
     }
 
-    // Add Stats
-    menu.push(
-      {
-        icon:'Equalizer',
-        label:'Stats',
-        bgColor:'#21f36b',
-        color:'dark-gray',
-        component:Stats,
-        selected:false,
-        route:'/dashboard/stats',
-        submenu:[]
-      }
-    );
-
     // Add tools
     menu.push(
       {
@@ -104,6 +90,20 @@ class Dashboard extends Component {
         route:'/dashboard/tools',
         bgColor:this.props.theme.colors.primary,
         submenu:Object.values(this.functionsUtil.getGlobalConfig(['tools'])).filter( u => (u.enabled) )
+      }
+    );
+
+    // Add Stats
+    menu.push(
+      {
+        icon:'Equalizer',
+        label:'Stats',
+        bgColor:'#21f36b',
+        color:'dark-gray',
+        component:Stats,
+        selected:false,
+        route:'/dashboard/stats',
+        submenu:[]
       }
     );
 

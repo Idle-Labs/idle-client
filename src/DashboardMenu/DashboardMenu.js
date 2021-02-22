@@ -170,6 +170,7 @@ class DashboardMenu extends Component {
                   >
                     {
                       this.props.themeMode === 'light' ? (
+                        /*
                         <Image
                           mr={[0,3]}
                           ml={[0,2]}
@@ -179,6 +180,16 @@ class DashboardMenu extends Component {
                           name={'WbSunny'}
                           align={'center'}
                           src={'/images/idle-mark-dark.png'}
+                        />
+                        */
+                        <Icon
+                          mr={[0,3]}
+                          ml={[0,2]}
+                          mb={[1,0]}
+                          size={'1.6em'}
+                          align={'center'}
+                          color={'copyColor'}
+                          name={'Brightness2'}
                         />
                       ) : (
                         <Icon
@@ -201,7 +212,7 @@ class DashboardMenu extends Component {
                         whiteSpace:'nowrap'
                       }}
                     >
-                      {this.props.themeMode === 'light' ? 'Join the Dark Side' : 'Back to Light'}
+                      {this.props.themeMode === 'light' ? 'Dark Mode' : 'Back to Light'}
                     </Text>
                   </Flex>
                 </Flex>

@@ -81,8 +81,8 @@ class App extends Component {
   }
 
   processCustomParam = (props,prevProps) => {
-    const params = props ? props.match.params : null;
-    const prevParams = prevProps ? prevProps.match.params : null;
+    // const params = props ? props.match.params : null;
+    // const prevParams = prevProps ? prevProps.match.params : null;
 
     // Reset params
     /*

@@ -51,7 +51,8 @@ class DepositRedeem extends Component {
     depositCurveEnabled:true,
     showAdvancedOptions:false,
     depositCurveSlippage:null,
-    metaTransactionsEnabled:true
+    metaTransactionsEnabled:true,
+    minAmountForMintReached:false
   };
 
   // Utils
@@ -572,6 +573,8 @@ class DepositRedeem extends Component {
           }));
         };
 
+        const isRisk = this.props.selectedStrategy === 'risk';
+
         const curveConfig = this.functionsUtil.getGlobalConfig(['curve']);
         const curveTokenEnabled = curveConfig.enabled && this.functionsUtil.getGlobalConfig(['curve','availableTokens',this.props.tokenConfig.idle.token,'enabled']);
 
@@ -616,23 +619,30 @@ class DepositRedeem extends Component {
             let _skipMint = !this.state.directMint && this.functionsUtil.getGlobalConfig(['contract','methods','deposit','skipMint']);
             _skipMint = typeof this.props.tokenConfig.skipMintForDeposit !== 'undefined' ? this.props.tokenConfig.skipMintForDeposit : _skipMint;
 
-            // Mint if someone mint over X amount
-            if (_skipMint){
-              let [
-                maxUnlentPerc,
-                totalAUM
-              ] = await Promise.all([
-                this.functionsUtil.genericContractCall('idleDAIYield', 'maxUnlentPerc'),
-                this.functionsUtil.loadAssetField('pool',this.props.selectedToken,this.props.tokenConfig,this.props.account)
-              ]);
-
-              if (maxUnlentPerc && totalAUM){
-                const depositPerc = inputValue.div(totalAUM).times(100);
-                maxUnlentPerc = this.functionsUtil.BNify(maxUnlentPerc).div(1e3);
-                if (depositPerc.gte(maxUnlentPerc.times(2))){
+            // Check if deposited amount is greated that general lower limit for direct mint
+            if (_skipMint && this.state.minAmountForMintReached){
+              // Check token minAmountForMint
+              if (this.props.tokenConfig.deposit && this.props.tokenConfig.deposit.minAmountForMint){
+                const convertedAmount = await this.functionsUtil.convertTokenBalance(inputValue,this.props.selectedToken,this.props.tokenConfig,isRisk);
+                if (convertedAmount.gte(this.props.tokenConfig.deposit.minAmountForMint)){
                   _skipMint = false;
                 }
-                // console.log(maxUnlentPerc.toFixed(5),inputValue.toFixed(5),totalAUM.toFixed(5),depositPerc.toFixed(5),depositPerc.gte(maxUnlentPerc.times(2)),_skipMint);
+              } else {
+                let [
+                  maxUnlentPerc,
+                  totalAUM
+                ] = await Promise.all([
+                  this.functionsUtil.genericContractCall('idleDAIYield', 'maxUnlentPerc'),
+                  this.functionsUtil.loadAssetField('pool',this.props.selectedToken,this.props.tokenConfig,this.props.account)
+                ]);
+
+                if (maxUnlentPerc && totalAUM){
+                  const depositPerc = inputValue.div(totalAUM).times(100);
+                  maxUnlentPerc = this.functionsUtil.BNify(maxUnlentPerc).div(1e3);
+                  if (depositPerc.gte(maxUnlentPerc.times(2))){
+                    _skipMint = false;
+                  }
+                }
               }
             }
 
@@ -914,13 +924,21 @@ class DepositRedeem extends Component {
     }));
   }
 
-  changeInputValue = (e) => {
+  changeInputValue = async (e) => {
     if (!this.state.action){
       return false;
     }
     const amount = e.target.value.length && !isNaN(e.target.value) ? this.functionsUtil.BNify(e.target.value) : this.functionsUtil.BNify(0);
     this.checkButtonDisabled(amount);
+
+    const isRisk = this.props.selectedStrategy === 'risk';
+    const convertedAmount = await this.functionsUtil.convertTokenBalance(amount,this.props.selectedToken,this.props.tokenConfig,isRisk);
+    const minAmountForMint = this.functionsUtil.BNify(this.functionsUtil.getGlobalConfig(['contract','methods','deposit','minAmountForMint']));
+
+    const minAmountForMintReached = convertedAmount.gte(minAmountForMint);
+
     this.setState((prevState) => ({
+      minAmountForMintReached,
       fastBalanceSelector:{
         ...prevState.fastBalanceSelector,
         [this.state.action]: null
@@ -1424,6 +1442,35 @@ class DepositRedeem extends Component {
                               label={`${this.functionsUtil.capitalize(this.state.action)} with Meta-Transaction`}
                             />
                           </DashboardCard>
+                        }
+                        {
+                          (this.state.minAmountForMintReached && this.state.action === 'deposit') && (
+                            <DashboardCard
+                              cardProps={{
+                                p:3,
+                                mt:3
+                              }}
+                            >
+                              <Flex
+                                alignItems={'center'}
+                                flexDirection={'column'}
+                              >
+                                <Icon
+                                  size={'1.8em'}
+                                  color={'cellText'}
+                                  name={'InfoOutline'}
+                                />
+                                <Text
+                                  mt={1}
+                                  fontSize={2}
+                                  color={'cellText'}
+                                  textAlign={'center'}
+                                >
+                                  By depositing more than {this.functionsUtil.getGlobalConfig(['contract','methods','deposit','minAmountForMint'])}$ the pool will be automatically rebalanced, gas cost may be higher.
+                                </Text>
+                              </Flex>
+                            </DashboardCard>
+                          )
                         }
                         {
                           showBatchDeposit &&
