@@ -52,7 +52,7 @@ const globalConfigs = {
   baseURL: 'https://idle.finance',
   forumURL:'https://gov.idle.finance',
   theme:{
-    darkModeEnabled:true
+    darkModeEnabled:false
   },
   countries:{
     'USA':'United States of America',

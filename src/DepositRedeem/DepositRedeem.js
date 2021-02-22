@@ -204,6 +204,11 @@ class DepositRedeem extends Component {
       this.setInputValue();
     }
 
+    const inputValueChanged = prevState.inputValue[this.state.action] !== this.state.inputValue[this.state.action];
+    if (inputValueChanged){
+      this.checkMinAmountForMint();
+    }
+
     const redeemGovTokensChanged = prevState.redeemGovTokens !== this.state.redeemGovTokens;
     if (redeemGovTokensChanged || actionChanged){
       this.checkButtonDisabled();
@@ -222,6 +227,16 @@ class DepositRedeem extends Component {
     if (inputChanged){
       this.calculateCurveSlippage();
     }
+  }
+
+  async checkMinAmountForMint(){
+    const isRisk = this.props.selectedStrategy === 'risk';
+    const convertedAmount = await this.functionsUtil.convertTokenBalance(this.state.inputValue[this.state.action],this.props.selectedToken,this.props.tokenConfig,isRisk);
+    const minAmountForMint = this.functionsUtil.BNify(this.functionsUtil.getGlobalConfig(['contract','methods','deposit','minAmountForMint']));
+    const minAmountForMintReached = convertedAmount.gte(minAmountForMint);
+    this.setState({
+      minAmountForMintReached
+    });
   }
 
   async calculateCurveSlippage(){
@@ -931,14 +946,7 @@ class DepositRedeem extends Component {
     const amount = e.target.value.length && !isNaN(e.target.value) ? this.functionsUtil.BNify(e.target.value) : this.functionsUtil.BNify(0);
     this.checkButtonDisabled(amount);
 
-    const isRisk = this.props.selectedStrategy === 'risk';
-    const convertedAmount = await this.functionsUtil.convertTokenBalance(amount,this.props.selectedToken,this.props.tokenConfig,isRisk);
-    const minAmountForMint = this.functionsUtil.BNify(this.functionsUtil.getGlobalConfig(['contract','methods','deposit','minAmountForMint']));
-
-    const minAmountForMintReached = convertedAmount.gte(minAmountForMint);
-
     this.setState((prevState) => ({
-      minAmountForMintReached,
       fastBalanceSelector:{
         ...prevState.fastBalanceSelector,
         [this.state.action]: null
