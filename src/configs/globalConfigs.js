@@ -483,6 +483,10 @@ const globalConfigs = {
       TTL:300, // 5 minutes
       endpoint:'https://api.idle.finance/rates/'
     },
+    tvls:{
+      TTL:120,
+      endpoint:'https://api.idle.finance/tvls/'
+    },
     scores:{
       TTL:300, // 5 minutes
       endpoint:'https://api.idle.finance/scores/'

@@ -4924,6 +4924,21 @@ class FunctionsUtil {
     return output;
   }
   getAggregatedStats = async (addGovTokens=true) => {
+    const endpointInfo = this.getGlobalConfig(['stats','tvls']);
+    const tvls = await this.makeCachedRequest(endpointInfo.endpoint,endpointInfo.TTL,true);
+
+    if (tvls){
+      const avgAPY = this.BNify(tvls.avgAPY);
+      const totalAUM = this.BNify(tvls.totalTVL);
+      return {
+        avgAPY,
+        totalAUM
+      };
+    } else {
+      return await this.getAggregatedStats_chain();
+    }
+  }
+  getAggregatedStats_chain = async (addGovTokens=true) => {
 
     // Check for cached data
     const cachedDataKey = `getAggregatedStats_${addGovTokens}`;
@@ -4950,7 +4965,7 @@ class FunctionsUtil {
         if (tokenAllocation && tokenAllocation.totalAllocationWithUnlent && !tokenAllocation.totalAllocationWithUnlent.isNaN()){
           const tokenAUM = await this.convertTokenBalance(tokenAllocation.totalAllocationWithUnlent,token,tokenConfig,isRisk);
           totalAUM = totalAUM.plus(tokenAUM);
-          // console.log(tokenConfig.idle.token+'V4',totalAllocation.toFixed(5));
+          // console.log(tokenConfig.idle.token+'V4',tokenAUM.toFixed());
           if (tokenAprs && tokenAprs.avgApr && !tokenAprs.avgApr.isNaN()){
             avgAPR = avgAPR.plus(tokenAUM.times(tokenAprs.avgApr));
             avgAPY = avgAPY.plus(tokenAUM.times(tokenAprs.avgApy));
@@ -4973,7 +4988,7 @@ class FunctionsUtil {
             if (tokenBalance && tokenConversionRate){
               const tokenBalanceConverted = this.fixTokenDecimals(tokenBalance,govTokenConfig.decimals).times(this.BNify(tokenConversionRate));
               if (tokenBalanceConverted && !tokenBalanceConverted.isNaN()){
-                // console.log(tokenConfig.idle.token+'V4',govToken,tokenBalanceConverted.toFixed(5));
+                // console.log(tokenConfig.idle.token+'V4 - COMP',tokenBalanceConverted.toFixed());
                 totalAUM = totalAUM.plus(tokenBalanceConverted);
               }
             }
