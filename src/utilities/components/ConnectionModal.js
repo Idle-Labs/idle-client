@@ -422,15 +422,42 @@ class ConnectionModal extends React.Component {
         <ModalCard.Header title={'Connect to Idle'} icon={'images/idle-mark.png'}></ModalCard.Header>
         <ModalCard.Body>
           {
-            <Flex width={1} px={[0,4]} flexDirection={'column'} justifyContent={'center'}>
+            <Flex
+              width={1}
+              px={[0,4]}
+              flexDirection={'column'}
+              justifyContent={'center'}
+            >
               <Box mb={3}>
-                <Text fontSize={[2,3]} textAlign={'center'} fontWeight={2} lineHeight={1.5}>
+                <Text
+                  fontWeight={2}
+                  fontSize={[2,3]}
+                  lineHeight={1.5}
+                  textAlign={'center'}
+                >
                   How do you want to connect to Idle?
                 </Text>
               </Box>
-              <Flex mb={[2,3]} flexDirection={['column','row']} alignItems={'center'} justifyContent={'center'}>
+              <Flex
+                mb={[2,3]}
+                alignItems={'center'}
+                justifyContent={'center'}
+                flexDirection={['column','row']}
+              >
                 <ImageButton isMobile={ this.props.isMobile } imageSrc={'images/ethereum-wallet.svg'} imageProps={ this.props.isMobile ? {width:'auto',height:'42px'} : {width:'auto',height:'55px',marginBottom:'5px'} } caption={`Ethereum wallet`} subcaption={'Choose your favourite'} handleClick={ e => this.setCurrentSection(e,'wallet') } />
                 <ImageButton isMobile={ this.props.isMobile } imageSrc={'images/new-wallet.png'} imageProps={ this.props.isMobile ? {width:'auto',height:'42px'} : {width:'auto',height:'55px',marginBottom:'5px'} } caption={`New wallet`} subcaption={'Use email / phone'} handleClick={ e => this.setCurrentSection(e,'new') } />
+              </Flex>
+              <Flex
+                alignItems={'center'}
+                justifyContent={'center'}
+              >
+                <Link
+                  color={'primary'}
+                  hoverColor={'primary'}
+                  onClick={ e => this.setCustomAddress(true) }
+                >
+                  Watch Ethereum Address
+                </Link>
               </Flex>
             </Flex>
           }
@@ -462,7 +489,7 @@ class ConnectionModal extends React.Component {
             >
               READ INSTRUCTIONS
             </Button>
-          ) : !this.state.askCustomAddress && (
+          ) : (!this.state.askCustomAddress || this.state.currentSection==='instructions') && (
             <Button
               className={[styles.gradientButton,styles.empty]}
               onClick={this.resetModal}

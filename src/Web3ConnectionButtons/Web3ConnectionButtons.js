@@ -119,10 +119,10 @@ export default function Web3ConnectionButtons(props) {
                 <ImageButton
                   isMobile={true}
                   width={[1,0.48]}
-                  caption={'Custom Address'}
+                  caption={'Watch Address'}
                   imageSrc={`images/tokens/ETH.svg`}
+                  subcaption={'Watch an Ethereum address'}
                   imageProps={{width:'auto',height:'42px'}}
-                  subcaption={'Connect with any ETH address'}
                   handleClick={ e => props.setCustomAddress(true) }
                 />
               </Flex>
