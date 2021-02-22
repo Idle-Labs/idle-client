@@ -986,6 +986,8 @@ class DepositRedeem extends Component {
       return null;
     }
 
+    const viewOnly = this.props.connectorName === 'custom';
+
     const govTokensDisabled = this.props.tokenConfig.govTokensDisabled;
     const govTokensEnabled = this.functionsUtil.getGlobalConfig(['strategies',this.props.selectedStrategy,'govTokensEnabled']);
     const skipMintForDepositEnabled = typeof this.props.tokenConfig.skipMintForDeposit !== 'undefined' ? this.props.tokenConfig.skipMintForDeposit : true;
@@ -1011,7 +1013,7 @@ class DepositRedeem extends Component {
     const showRedeemCurve = curveTokenEnabled && this.state.componentMounted && (!this.state.migrationEnabled || this.state.skipMigration) && this.state.canRedeemCurve && this.state.action === 'redeem';
 
     const showActionFlow = !redeemGovTokens && canPerformAction;
-    const showBuyFlow = this.state.componentMounted && (!showDepositCurve || this.state.showBuyFlow) && !this.state.depositCurveEnabled && this.state.tokenApproved && !this.state.contractPaused && (!this.state.migrationEnabled || this.state.skipMigration) && this.state.action === 'deposit' && !this.state.canDeposit;
+    const showBuyFlow = !viewOnly && this.state.componentMounted && (!showDepositCurve || this.state.showBuyFlow) && !this.state.depositCurveEnabled && this.state.tokenApproved && !this.state.contractPaused && (!this.state.migrationEnabled || this.state.skipMigration) && this.state.action === 'deposit' && !this.state.canDeposit;
     const showRedeemFlow = this.state.canRedeem && (!this.state.redeemCurveEnabled || this.state.showRedeemFlow);
 
     const showCurveSlippage = depositCurve && this.state.depositCurveSlippage && this.state.depositCurveBalance && !this.state.buttonDisabled;
@@ -1024,8 +1026,6 @@ class DepositRedeem extends Component {
     const batchDepositDepositEnabled = batchDepositInfo.depositEnabled;
 
     const showBatchDeposit = batchDepositEnabled && batchDepositDepositEnabled && !this.props.isMigrationTool && this.state.action === 'deposit';
-
-    const viewOnly = this.props.connectorName === 'custom';
 
     return (
       <Flex
