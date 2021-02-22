@@ -322,38 +322,45 @@ class Dashboard extends Component {
   }
 
   async loadData(){
+
+    const newState = {};
+    const [
+      blockNumber,
+      votingPeriod,
+      timelockDelay,
+      {
+        proposalThreshold, proposalMaxOperations
+      }
+    ] = await Promise.all([
+      this.functionsUtil.getBlockNumber(),
+      this.governanceUtil.getVotingPeriod(),
+      this.governanceUtil.getTimelockDelay(),
+      this.governanceUtil.getProposalParams(),
+    ]);
+
+    newState.blockNumber = blockNumber;
+    newState.votingPeriod = votingPeriod;
+    newState.timelockDelay = timelockDelay;
+    newState.proposalThreshold = proposalThreshold;
+    newState.proposalMaxOperations = proposalMaxOperations;
+
     if (this.props.account){
       const [
-        blockNumber,
-        votingPeriod,
-        timelockDelay,
-        {
-          proposalThreshold, proposalMaxOperations
-        },
         votes,
         balance,
         currentDelegate
       ] = await Promise.all([
-        this.functionsUtil.getBlockNumber(),
-        this.governanceUtil.getVotingPeriod(),
-        this.governanceUtil.getTimelockDelay(),
-        this.governanceUtil.getProposalParams(),
         this.governanceUtil.getCurrentVotes(this.props.account),
         this.governanceUtil.getTokensBalance(this.props.account),
         this.governanceUtil.getCurrentDelegate(this.props.account)
       ]);
 
-      this.setState({
-        votes,
-        balance,
-        blockNumber,
-        votingPeriod,
-        timelockDelay,
-        currentDelegate,
-        proposalThreshold,
-        proposalMaxOperations
-      });
+      newState.votes = votes;
+      newState.balance = balance;
+      newState.currentDelegate = currentDelegate;
     }
+
+    this.setState(newState);
   }
 
   logout = async () => {
