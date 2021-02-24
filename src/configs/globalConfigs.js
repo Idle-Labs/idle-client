@@ -601,9 +601,9 @@ const globalConfigs = {
         decimals:18,
         enabled:true,
         color:{
-          hex:'#002868',
-          rgb:[0, 40, 104],
-          hsl:['217', '100%', '20%']
+          hex:'0340a1',
+          rgb:[3, 64, 161],
+          hsl:['217', '96%', '32%']
         },
         chart:{
           labelTextColorModifiers:['brighter', 5]
