@@ -764,7 +764,7 @@ const globalConfigs = {
       },
       deposit:{
         skipMint:true,
-        minAmountForMint:50000,
+        minAmountForMint:100000,
         skipMintCheckboxEnabled:true,
         metaTransactionsEnabled:false,
         proxyContract:{
