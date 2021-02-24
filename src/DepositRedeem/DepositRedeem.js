@@ -328,8 +328,6 @@ class DepositRedeem extends Component {
 
   checkTokenApproved = async () => {
 
-    return true;
-
     let tokenApproved = false;
 
     if (this.state.depositCurveEnabled){
