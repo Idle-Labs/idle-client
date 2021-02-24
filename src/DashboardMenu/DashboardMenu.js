@@ -54,6 +54,7 @@ class DashboardMenu extends Component {
     return (
       <Flex
         p={0}
+        height={'100%'}
         flexDirection={['row','column']}
       >
         {
@@ -146,8 +147,11 @@ class DashboardMenu extends Component {
         }
         {
           darkModeEnabled && !this.props.isMobile && (
-            <Box
+            <Flex
               my={[0,2]}
+              height={'100%'}
+              flexDirection={'column'}
+              justifyContent={'flex-end'}
               width={[1/visibleLinks.length,'auto']}
             >
               <Link
@@ -155,69 +159,105 @@ class DashboardMenu extends Component {
                 onClick={ e => this.props.setThemeMode(this.props.themeMode === 'light' ? 'dark' : 'light') }
               >
                 <Flex
-                  py={[2,3]}
-                  px={[2,3]}
-                  borderRadius={[0,2]}
-                  flexDirection={'row'}
+                  p={2}
                   alignItems={'center'}
-                  backgroundColor={'transparent'}
+                  flexDirection={'row'}
+                  justifyContent={'flex-end'}
                 >
+                  <Icon
+                    mr={[0,2]}
+                    ml={[0,2]}
+                    size={'1.4em'}
+                    align={'center'}
+                    color={'copyColor'}
+                    name={'Brightness2'}
+                  />
                   <Flex
-                    width={1}
+                    px={'0.2em'}
+                    width={'3.4em'}
+                    height={'1.6em'}
                     alignItems={'center'}
-                    flexDirection={['column','row']}
-                    justifyContent={['center','flex-start']}
+                    borderRadius={'1.6em'}
+                    backgroundColor={'cellText'}
+                    justifyContent={this.props.themeMode === 'light' ? 'flex-end' : 'flex-start'}
                   >
-                    {
-                      this.props.themeMode === 'light' ? (
-                        /*
-                        <Image
-                          mr={[0,3]}
-                          ml={[0,2]}
-                          mb={[1,0]}
-                          width={'1.6em'}
-                          height={'1.6em'}
-                          name={'WbSunny'}
-                          align={'center'}
-                          src={'/images/idle-mark-dark.png'}
-                        />
-                        */
-                        <Icon
-                          mr={[0,3]}
-                          ml={[0,2]}
-                          mb={[1,0]}
-                          size={'1.6em'}
-                          align={'center'}
-                          color={'copyColor'}
-                          name={'Brightness2'}
-                        />
-                      ) : (
-                        <Icon
-                          mr={[0,3]}
-                          ml={[0,2]}
-                          mb={[1,0]}
-                          size={'1.6em'}
-                          name={'WbSunny'}
-                          align={'center'}
-                          color={'copyColor'}
-                        />
-                      )
-                    }
-                    <Text
-                      fontWeight={3}
-                      color={'copyColor'}
-                      textAlign={'center'}
-                      fontSize={['11px',2]}
-                      style={{
-                        whiteSpace:'nowrap'
-                      }}
+                    <Box
+                      width={'1.3em'}
+                      height={'1.3em'}
+                      borderRadius={'1.3em'}
+                      backgroundColor={'copyColor'}
                     >
-                      {this.props.themeMode === 'light' ? 'Dark Mode' : 'Back to Light'}
-                    </Text>
+                    </Box>
                   </Flex>
+                  <Icon
+                    ml={[0,2]}
+                    size={'1.4em'}
+                    align={'center'}
+                    name={'WbSunny'}
+                    color={'copyColor'}
+                  />
                 </Flex>
               </Link>
-            </Box>
+              {
+                /*
+                  <Link
+                    style={{textDecoration:'none'}}
+                    onClick={ e => this.props.setThemeMode(this.props.themeMode === 'light' ? 'dark' : 'light') }
+                  >
+                    <Flex
+                      py={[2,3]}
+                      px={[2,3]}
+                      borderRadius={[0,2]}
+                      flexDirection={'row'}
+                      alignItems={'center'}
+                      backgroundColor={'transparent'}
+                    >
+                      <Flex
+                        width={1}
+                        alignItems={'center'}
+                        flexDirection={['column','row']}
+                        justifyContent={['center','flex-start']}
+                      >
+                        {
+                          this.props.themeMode === 'light' ? (
+                            <Icon
+                              mr={[0,3]}
+                              ml={[0,2]}
+                              mb={[1,0]}
+                              size={'1.6em'}
+                              align={'center'}
+                              color={'copyColor'}
+                              name={'Brightness2'}
+                            />
+                          ) : (
+                            <Icon
+                              mr={[0,3]}
+                              ml={[0,2]}
+                              mb={[1,0]}
+                              size={'1.6em'}
+                              name={'WbSunny'}
+                              align={'center'}
+                              color={'copyColor'}
+                            />
+                          )
+                        }
+                        <Text
+                          fontWeight={3}
+                          color={'copyColor'}
+                          textAlign={'center'}
+                          fontSize={['11px',2]}
+                          style={{
+                            whiteSpace:'nowrap'
+                          }}
+                        >
+                          {this.props.themeMode === 'light' ? 'Dark Mode' : 'Back to Light'}
+                        </Text>
+                      </Flex>
+                    </Flex>
+                  </Link>
+                */
+              }
+            </Flex>
           )
         }
         {
