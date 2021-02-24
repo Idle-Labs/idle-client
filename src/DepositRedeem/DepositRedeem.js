@@ -632,8 +632,6 @@ class DepositRedeem extends Component {
           }));
         };
 
-        const isRisk = this.props.selectedStrategy === 'risk';
-
         const curveConfig = this.functionsUtil.getGlobalConfig(['curve']);
         const curveTokenEnabled = curveConfig.enabled && this.functionsUtil.getGlobalConfig(['curve','availableTokens',this.props.tokenConfig.idle.token,'enabled']);
 
