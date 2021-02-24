@@ -233,10 +233,16 @@ class DepositRedeem extends Component {
   }
 
   async checkMinAmountForMint(){
+    let showPoolPerc = false;
     let totalAUM = this.state.totalAUM;
     let maxUnlentPerc = this.state.maxUnlentPerc;
     const isRisk = this.props.selectedStrategy === 'risk';
     const inputValue = this.functionsUtil.BNify(this.state.inputValue[this.state.action]);
+
+    if (inputValue.gt(this.props.tokenBalance)){
+      return false;
+    }
+
     const convertedAmount = await this.functionsUtil.convertTokenBalance(inputValue,this.props.selectedToken,this.props.tokenConfig,isRisk);
     let minAmountForMint = this.functionsUtil.BNify(this.functionsUtil.getGlobalConfig(['contract','methods','deposit','minAmountForMint']));
     let minAmountForMintReached = convertedAmount.gte(minAmountForMint);
@@ -261,6 +267,7 @@ class DepositRedeem extends Component {
           if (depositPerc.lt(maxUnlentPercFormatted)){
             minAmountForMintReached = false;
           } else if (totalAUM.times(maxUnlentPercFormatted.div(100)).gt(minAmountForMint)) {
+            showPoolPerc = true;
             minAmountForMint = totalAUM.times(maxUnlentPercFormatted.div(100));
           }
         }
@@ -269,6 +276,7 @@ class DepositRedeem extends Component {
 
     this.setState({
       totalAUM,
+      showPoolPerc,
       maxUnlentPerc,
       minAmountForMint,
       minAmountForMintReached
@@ -319,6 +327,8 @@ class DepositRedeem extends Component {
   }
 
   checkTokenApproved = async () => {
+
+    return true;
 
     let tokenApproved = false;
 
@@ -1488,7 +1498,7 @@ class DepositRedeem extends Component {
                                   color={'cellText'}
                                   textAlign={'center'}
                                 >
-                                  By depositing more than {this.functionsUtil.formatMoney(this.state.minAmountForMint)}$ ({this.state.minAmountForMint.div(this.state.totalAUM).times(100).toFixed(0)}% of the pool) the pool will be automatically rebalanced, gas cost may be higher.
+                                  By depositing more than {this.functionsUtil.formatMoney(this.state.minAmountForMint)}$ { this.state.showPoolPerc ? `(${this.state.minAmountForMint.div(this.state.totalAUM).times(100).toFixed(0)}% of the pool)` : null } the pool will be automatically rebalanced, gas cost may be higher.
                                 </Text>
                               </Flex>
                             </DashboardCard>
