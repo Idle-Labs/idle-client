@@ -53,7 +53,6 @@ class TotalBalanceCounter extends Component {
     if (!this.props.availableStrategies || !this.props.contractsInitialized){
       return true;
     }
-    const isRisk = this.props.selectedStrategy === 'risk';
 
     const availableTokens = this.props.availableTokens || {};
     const portfolio = this.props.portfolio || await this.functionsUtil.getAccountPortfolio(availableTokens,this.props.account);
@@ -85,8 +84,6 @@ class TotalBalanceCounter extends Component {
     }
 
     const decimals = this.props.decimals || 8;
-    const maxPrecision = this.props.maxPrecision || 10;
-    const minPrecision = this.props.minPrecision || 8;
 
     return this.state.counterStart && this.state.counterEnd ? (
       <Box

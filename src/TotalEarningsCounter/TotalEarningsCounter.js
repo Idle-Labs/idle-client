@@ -53,11 +53,9 @@ class TotalEarningsCounter extends Component {
     if (!this.props.availableStrategies || !this.props.contractsInitialized){
       return true;
     }
-    const isRisk = this.props.selectedStrategy === 'risk';
 
     const availableTokens = this.props.availableTokens || {};
     const portfolio = this.props.portfolio || await this.functionsUtil.getAccountPortfolio(availableTokens,this.props.account);
-    const depositedTokens = Object.keys(portfolio.tokensBalance).filter(token => ( this.functionsUtil.BNify(portfolio.tokensBalance[token].idleTokenBalance).gt(0) ));
 
     const earningsStart = portfolio.totalEarnings;
     const earningsEnd = portfolio.totalAmountLent.times(portfolio.avgAPY.div(100));
@@ -87,8 +85,6 @@ class TotalEarningsCounter extends Component {
 
     const unit = this.props.unit || '$ ';
     const decimals = this.props.decimals || 8;
-    const maxPrecision = this.props.maxPrecision || 10;
-    const minPrecision = this.props.minPrecision || 8;
 
     return this.state.earningsStart && this.state.earningsEnd ? (
       <Flex
