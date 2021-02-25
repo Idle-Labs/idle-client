@@ -450,6 +450,12 @@ class GovernanceUtil {
     proposalExecutedEvents.reverse();
 
     await this.functionsUtil.asyncForEach(proposals, async (p,i) => {
+
+      if (!p.id){
+        debugger;
+        return;
+      }
+
       const proposalId = parseInt(p.id);
       const createdEvent = proposalCreatedEvents[i];
       const canceledEvent = proposalCanceledEvents.find( e => (parseInt(e.returnValues.id) === proposalId ) );

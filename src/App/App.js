@@ -444,7 +444,7 @@ class App extends Component {
       customAddress:null
     });
     // Reset Localstorage
-    this.functionsUtil.clearStoredData(['themeMode','lastLogin']);
+    this.functionsUtil.clearStoredData(['version','themeMode','lastLogin']);
   }
 
   setConnector(connectorName,walletProvider){

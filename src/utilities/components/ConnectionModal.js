@@ -195,7 +195,7 @@ class ConnectionModal extends React.Component {
 
     const TOSacceptance = (
       <Box>
-        <Text textAlign={'center'} fontSize={1} py={[2,3]}>By connecting, I accept Idle's <RouterLink to="/terms-of-service" color={'blue'} style={{textDecoration:'underline'}} target={'_blank'} rel="nofollow noopener noreferrer">Terms of Service</RouterLink></Text>
+        <Text textAlign={'center'} fontSize={1} py={[2,3]}>By connecting, I accept Idle's <RouterLink to="/terms-of-service" color={'primary'} style={{textDecoration:'underline'}} target={'_blank'} rel="nofollow noopener noreferrer">Terms of Service</RouterLink></Text>
       </Box>
     );
 
@@ -299,6 +299,8 @@ class ConnectionModal extends React.Component {
                   width={1}
                   type={'text'}
                   className={styles.input}
+                  borderColor={'cardBorder'}
+                  backgroundColor={'cardBg'}
                   pattern={'^0x[a-fA-F0-9]{40}$'}
                   value={this.state.customAddress}
                   onChange={ e => this.updateCustomAddress(e) }
@@ -389,8 +391,28 @@ class ConnectionModal extends React.Component {
                     </Text>
                   </Box>
                   <Flex mb={3} flexDirection={['column','row']} alignItems={'center'} justifyContent={'center'}>
-                    <ImageButton isMobile={this.props.isMobile} imageSrc={'images/email.svg'} imageProps={ this.props.isMobile ? {width:'auto',height:'42px'} : {mb:'3px',width:'auto',height:'55px'}} caption={'Use e-mail'} subcaption={'Powered by Portis'} handleClick={ e => this.setConnector('Portis','Portis') } />
-                    <ImageButton isMobile={this.props.isMobile} imageSrc={'images/mobile.svg'} imageProps={ this.props.isMobile ? {width:'auto',height:'42px'} : {mb:'3px',width:'auto',height:'55px'}} caption={'Use phone number'} subcaption={'Powered by Fortmatic'} handleClick={ e => this.setConnector('Fortmatic','Fortmatic') }/>
+                    <ImageButton
+                      buttonProps={{
+                        border:2
+                      }}
+                      caption={'Use e-mail'}
+                      imageSrc={'images/email.svg'}
+                      isMobile={this.props.isMobile}
+                      subcaption={'Powered by Portis'}
+                      handleClick={ e => this.setConnector('Portis','Portis') }
+                      imageProps={ this.props.isMobile ? {width:'auto',height:'42px'} : {mb:'3px',width:'auto',height:'55px'}}
+                    />
+                    <ImageButton
+                      buttonProps={{
+                        border:2
+                      }}
+                      caption={'Use phone number'}
+                      isMobile={this.props.isMobile}
+                      imageSrc={'images/mobile.svg'}
+                      subcaption={'Powered by Fortmatic'}
+                      handleClick={ e => this.setConnector('Fortmatic','Fortmatic') }
+                      imageProps={ this.props.isMobile ? {width:'auto',height:'42px'} : {mb:'3px',width:'auto',height:'55px'}}
+                    />
                   </Flex>
                   <Flex alignItems={'center'} justifyContent={'center'}>
                     <Link textAlign={'center'} hoverColor={'blue'} onClick={ e => this.setCurrentSection(e,'wallet') }>I already have a wallet</Link>
@@ -444,8 +466,28 @@ class ConnectionModal extends React.Component {
                 justifyContent={'center'}
                 flexDirection={['column','row']}
               >
-                <ImageButton isMobile={ this.props.isMobile } imageSrc={'images/ethereum-wallet.svg'} imageProps={ this.props.isMobile ? {width:'auto',height:'42px'} : {width:'auto',height:'55px',marginBottom:'5px'} } caption={`Ethereum wallet`} subcaption={'Choose your favourite'} handleClick={ e => this.setCurrentSection(e,'wallet') } />
-                <ImageButton isMobile={ this.props.isMobile } imageSrc={'images/new-wallet.png'} imageProps={ this.props.isMobile ? {width:'auto',height:'42px'} : {width:'auto',height:'55px',marginBottom:'5px'} } caption={`New wallet`} subcaption={'Use email / phone'} handleClick={ e => this.setCurrentSection(e,'new') } />
+                <ImageButton
+                  buttonProps={{
+                    border:2
+                  }}
+                  caption={`Ethereum wallet`}
+                  isMobile={this.props.isMobile}
+                  subcaption={'Choose your favourite'}
+                  imageSrc={'images/ethereum-wallet.svg'}
+                  handleClick={ e => this.setCurrentSection(e,'wallet') }
+                  imageProps={this.props.isMobile ? {width:'auto',height:'42px'} : {width:'auto',height:'55px',marginBottom:'5px'}}
+                />
+                <ImageButton
+                  buttonProps={{
+                    border:2
+                  }}
+                  caption={`New wallet`}
+                  isMobile={this.props.isMobile}
+                  subcaption={'Use email / phone'}
+                  imageSrc={'images/new-wallet.png'}
+                  handleClick={ e => this.setCurrentSection(e,'new') }
+                  imageProps={this.props.isMobile ? {width:'auto',height:'42px'} : {width:'auto',height:'55px',marginBottom:'5px'}}
+                />
               </Flex>
               <Flex
                 alignItems={'center'}

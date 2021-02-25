@@ -150,7 +150,11 @@ class FunctionsUtil {
   getAccountPortfolio = async (availableTokens=null,account=null) => {
     const portfolio = {
       tokensBalance:{},
-      totalBalance:this.BNify(0)
+      avgAPY:this.BNify(0),
+      totalBalance:this.BNify(0),
+      totalEarnings:this.BNify(0),
+      totalAmountLent:this.BNify(0),
+      totalEarningsPerc:this.BNify(0),
     };
 
     availableTokens = availableTokens ? availableTokens : this.props.availableTokens;
@@ -189,6 +193,52 @@ class FunctionsUtil {
     });
 
     portfolio.tokensBalance = orderedTokensBalance;
+
+    const depositedTokens = Object.keys(portfolio.tokensBalance).filter(token => ( this.BNify(portfolio.tokensBalance[token].idleTokenBalance).gt(0) ));
+
+    let avgAPY = this.BNify(0);
+    let totalEarnings = this.BNify(0);
+    let totalAmountLent = this.BNify(0);
+    let totalEarningsPerc = this.BNify(0);
+    const isRisk = this.props.selectedStrategy === 'risk';
+
+    await this.asyncForEach(depositedTokens,async (token) => {
+      const tokenConfig = availableTokens[token];
+      const [
+        tokenAprs,
+        amountLent,
+        tokenEarnings
+      ] = await Promise.all([
+        this.getTokenAprs(tokenConfig),
+        this.getAmountLent([token],this.props.account),
+        this.loadAssetField('earnings',token,tokenConfig,this.props.account,false),
+      ]);
+
+      const tokenAPY = this.BNify(tokenAprs.avgApy);
+      const tokenWeight = portfolio.tokensBalance[token].tokenBalance.div(portfolio.totalBalance);
+      const amountLentToken = await this.convertTokenBalance(amountLent[token],token,tokenConfig,isRisk);
+
+      if (tokenEarnings){
+        totalEarnings = totalEarnings.plus(tokenEarnings);
+      }
+
+      if (tokenAPY){
+        avgAPY = avgAPY.plus(tokenAPY.times(tokenWeight));
+      }
+
+      if (amountLentToken){
+        totalAmountLent = totalAmountLent.plus(amountLentToken);
+      }
+    });
+
+    if (totalAmountLent.gt(0)){
+      totalEarningsPerc = totalEarnings.div(totalAmountLent).times(100);
+    }
+
+    portfolio.avgAPY = avgAPY;
+    portfolio.totalEarnings = totalEarnings;
+    portfolio.totalAmountLent = totalAmountLent;
+    portfolio.totalEarningsPerc = totalEarningsPerc;
 
     return portfolio;
   }
@@ -2964,15 +3014,11 @@ class FunctionsUtil {
 
           if (idleTokenBalance2 && idleTokenPrice1){
             const tokenBalance = idleTokenBalance2.times(idleTokenPrice1);
-
             let redeemableBalance = tokenBalance;
-
             if (govTokensBalance && !this.BNify(govTokensBalance).isNaN()){
               redeemableBalance = redeemableBalance.plus(this.BNify(govTokensBalance));
             }
-
             output = redeemableBalance;
-
             // console.log('redeemableBalance',token,idleTokenBalance2.toFixed(4),idleTokenPrice1.toFixed(4),tokenBalance.toFixed(4),govTokensBalance ? govTokensBalance.toFixed(4) : null,output.toFixed(4));
           }
         }

@@ -322,8 +322,8 @@ class AssetField extends Component {
           output = await this.functionsUtil.loadAssetField(fieldName,this.props.token,this.props.tokenConfig,this.props.account,addGovTokens);
           if (output && setState){
             this.setStateSafe({
-              earningsPercDirection:parseFloat(output)>0 ? 'up' : 'down',
-              earningsPerc:parseFloat(output).toFixed(decimals)
+              earningsPerc:parseFloat(output).toFixed(decimals),
+              earningsPercDirection:parseFloat(output)>0 ? 'up' : 'down'
             });
           }
         break;

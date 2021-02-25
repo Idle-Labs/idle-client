@@ -204,18 +204,21 @@ class WelcomeModal extends React.Component {
                     </Flex>
                     <Form.Field width={1} label={''}>
                       <Form.Input
-                        type="email"
-                        name="EMAIL"
-                        width={1}
-                        outline={'none'}
-                        border={0}
                         px={3}
                         py={4}
+                        required
+                        width={1}
+                        border={0}
                         fontSize={3}
+                        type={"email"}
+                        name={"EMAIL"}
+                        outline={'none'}
+                        borderColor={'cardBorder'}
+                        backgroundColor={'cardBg'}
                         textAlign={['center','left']}
+                        className={header_styles.input}
                         placeholder={'Enter your e-mail'}
                         onChange={this.handleValidation}
-                        required
                       />
                     </Form.Field>
                     <Flex mb={3} flexDirection={'column'} alignItems={'center'} justifyContent={'center'}>

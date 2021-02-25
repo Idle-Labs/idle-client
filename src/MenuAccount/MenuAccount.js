@@ -12,8 +12,8 @@ import AccountModal from "../utilities/components/AccountModal";
 class MenuAccount extends Component {
 
   state = {
-    isModalOpen: null,
-    idleTokenBalance: null
+    isModalOpen:null,
+    idleTokenBalance:null
   };
 
   // Utils
@@ -39,7 +39,11 @@ class MenuAccount extends Component {
     this.loadUtils();
     const accountChanged = prevProps.account !== this.props.account;
     if (accountChanged){
-      this.loadIdleTokenBalance();
+      this.setState({
+        isModalOpen:null
+      },() => {
+        this.loadIdleTokenBalance();
+      });
     }
   }
 

@@ -13,6 +13,7 @@ import TransactionsList from '../TransactionsList/TransactionsList';
 import EarningsEstimation from '../EarningsEstimation/EarningsEstimation';
 import { Flex, Box, Heading, Text, Tooltip, Icon, Loader } from "rimble-ui";
 import DashboardIconButton from '../DashboardIconButton/DashboardIconButton';
+import TotalBalanceCounter from '../TotalBalanceCounter/TotalBalanceCounter';
 import TotalEarningsCounter from '../TotalEarningsCounter/TotalEarningsCounter';
 
 // const env = process.env;
@@ -63,7 +64,11 @@ class StrategyPage extends Component {
 
     const accountChanged = prevProps.account !== this.props.account;
     if (accountChanged){
-      await this.loadPortfolio();
+      this.setState({
+        portfolioLoaded:false
+      },() => {
+        this.loadPortfolio();
+      });
     }
   }
 
@@ -297,8 +302,12 @@ class StrategyPage extends Component {
                       >
                         <DashboardCard
                           cardProps={{
-                            py:[3,4],
-                            mb:[2,0]
+                            py:[3,0],
+                            mb:[2,0],
+                            display:'flex',
+                            alignItems:'center',
+                            height:['auto','125px'],
+                            justifyContent:'center'
                           }}
                         >
                           <Flex
@@ -358,8 +367,12 @@ class StrategyPage extends Component {
                       >
                         <DashboardCard
                           cardProps={{
-                            py:[3,4],
-                            mb:[2,0]
+                            py:[3,0],
+                            mb:[2,0],
+                            display:'flex',
+                            alignItems:'center',
+                            height:['auto','125px'],
+                            justifyContent:'center'
                           }}
                         >
                           <Flex
@@ -375,17 +388,62 @@ class StrategyPage extends Component {
                                   flexDirection={'column'}
                                   justifyContent={'center'}
                                 >
-                                  <TotalEarningsCounter
-                                    {...this.props} 
+                                  <TotalBalanceCounter
+                                    decimals={5}
+                                    {...this.props}
                                     portfolio={this.state.portfolio}
                                   />
+                                  <Flex
+                                    width={1}
+                                    alignItems={'center'}
+                                    flexDirection={'row'}
+                                    justifyContent={'center'}
+                                  >
+                                    <Flex
+                                      width={0.45}
+                                      alignItems={'center'}
+                                      justifyContent={'flex-end'}
+                                    >
+                                      <Text
+                                        fontSize={1}
+                                        fontWeight={3}
+                                        fontFamily={this.props.theme.fonts.counter}
+                                        color={this.props.theme.colors.transactions.status.completed}
+                                      >
+                                        +{this.state.portfolio.totalEarningsPerc.toFixed(2)}%
+                                      </Text>
+                                    </Flex>
+                                    <Text
+                                      mx={1}
+                                      fontSize={1}
+                                      fontWeight={3}
+                                      fontFamily={this.props.theme.fonts.counter}
+                                      color={this.props.theme.colors.transactions.status.completed}
+                                    >|</Text>
+                                    <Flex
+                                      width={0.45}
+                                      alignItems={'center'}
+                                      justifyContent={'flex-start'}
+                                    >
+                                      <TotalEarningsCounter
+                                        {...this.props}
+                                        unit={'+$'}
+                                        decimals={4}
+                                        counterStyle={{
+                                          fontSize:14,
+                                          fontWeight:600,
+                                          color:this.props.theme.colors.transactions.status.completed
+                                        }}
+                                        portfolio={this.state.portfolio}
+                                      />
+                                    </Flex>
+                                  </Flex>
                                 </Flex>
                               ) : (
                                 <Loader size="20px" />
                               )
                             }
                             <Flex
-                              mt={2}
                               width={1}
                               alignItems={'center'}
                               flexDirection={'row'}
@@ -396,13 +454,13 @@ class StrategyPage extends Component {
                                 fontSize={[1,2]}
                                 color={'cellText'}
                               >
-                                Total Earnings
+                                Total Balance
                               </Text>
                               {
                                 this.state.govTokensTotalBalance && (
                                   <Tooltip
                                     placement={'bottom'}
-                                    message={'Total earnings does not include accrued governance tokens: '+(this.state.govTokensTotalBalance && this.state.govTokensTotalBalance.gt(0) ? ` (${this.state.govTokensTotalBalanceTooltip.join(' / ')})` : '')}
+                                    message={'Total Balance does not include accrued governance tokens: '+(this.state.govTokensTotalBalance && this.state.govTokensTotalBalance.gt(0) ? ` (${this.state.govTokensTotalBalanceTooltip.join(' / ')})` : '')}
                                   >
                                     <Icon
                                       ml={2}
@@ -424,8 +482,12 @@ class StrategyPage extends Component {
                       >
                         <DashboardCard
                           cardProps={{
-                            py:[3,4],
-                            mb:[2,0]
+                            py:[3,0],
+                            mb:[2,0],
+                            display:'flex',
+                            alignItems:'center',
+                            height:['auto','125px'],
+                            justifyContent:'center'
                           }}
                         >
                           <Flex
@@ -487,7 +549,7 @@ class StrategyPage extends Component {
                     >
                       <Flex
                         mb={[3,0]}
-                        width={[1,0.33]}
+                        width={[1,0.328]}
                         flexDirection={'column'}
                         id={"portfolio-composition"}
                       >
@@ -506,7 +568,7 @@ class StrategyPage extends Component {
                         </DashboardCard>
                       </Flex>
                       <Flex
-                        width={[1,0.66]}
+                        width={[1,0.666]}
                         flexDirection={'column'}
                       >
                         <DashboardCard>

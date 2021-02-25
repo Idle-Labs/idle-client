@@ -1,13 +1,13 @@
 import CountUp from 'react-countup';
-import { Flex, Loader } from "rimble-ui";
+import { Box, Loader } from "rimble-ui";
 import React, { Component } from 'react';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 
-class TotalEarningsCounter extends Component {
+class TotalBalanceCounter extends Component {
 
   state = {
-    earningsEnd:null,
-    earningsStart:null
+    counterEnd:null,
+    counterStart:null
   }
 
   // Utils
@@ -40,8 +40,8 @@ class TotalEarningsCounter extends Component {
     if (styleChanged || themeModeChanged || mobileChanged){
       const oldState = Object.assign({},this.state);
       this.setState({
-        earningsEnd:null,
-        earningsStart:null
+        counterEnd:null,
+        counterStart:null
       },() => {
         this.setState(oldState);
       });
@@ -57,14 +57,13 @@ class TotalEarningsCounter extends Component {
 
     const availableTokens = this.props.availableTokens || {};
     const portfolio = this.props.portfolio || await this.functionsUtil.getAccountPortfolio(availableTokens,this.props.account);
-    const depositedTokens = Object.keys(portfolio.tokensBalance).filter(token => ( this.functionsUtil.BNify(portfolio.tokensBalance[token].idleTokenBalance).gt(0) ));
 
-    const earningsStart = portfolio.totalEarnings;
-    const earningsEnd = portfolio.totalAmountLent.times(portfolio.avgAPY.div(100));
+    const counterStart = portfolio.totalAmountLent.plus(portfolio.totalEarnings);
+    const counterEnd = counterStart.plus(counterStart.times(portfolio.avgAPY.div(100)));
 
     this.setState({
-      earningsEnd,
-      earningsStart
+      counterEnd,
+      counterStart
     });
   }
 
@@ -85,13 +84,13 @@ class TotalEarningsCounter extends Component {
       });
     }
 
-    const unit = this.props.unit || '$ ';
     const decimals = this.props.decimals || 8;
     const maxPrecision = this.props.maxPrecision || 10;
     const minPrecision = this.props.minPrecision || 8;
 
-    return this.state.earningsStart && this.state.earningsEnd ? (
-      <Flex
+    return this.state.counterStart && this.state.counterEnd ? (
+      <Box
+        width={1}
       >
         <CountUp
           delay={0}
@@ -100,9 +99,9 @@ class TotalEarningsCounter extends Component {
           useEasing={false}
           decimals={decimals}
           duration={31536000}
-          end={parseFloat(this.state.earningsEnd)}
-          start={parseFloat(this.state.earningsStart)}
-          formattingFn={ n => unit+this.functionsUtil.formatMoney(n,decimals) }
+          end={parseFloat(this.state.counterEnd)}
+          start={parseFloat(this.state.counterStart)}
+          formattingFn={ n => '$ '+this.functionsUtil.formatMoney(n,decimals) }
         >
           {({ countUpRef, start }) => (
             <span
@@ -111,11 +110,11 @@ class TotalEarningsCounter extends Component {
             />
           )}
         </CountUp>
-      </Flex>
+      </Box>
     ) : (
       <Loader size={"20px"} />
     );
   }
 }
 
-export default TotalEarningsCounter;
+export default TotalBalanceCounter;

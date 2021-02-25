@@ -108,6 +108,9 @@ export default function Web3ConnectionButtons(props) {
                 }}
               >
                 <ImageButton
+                  buttonProps={{
+                    border:2
+                  }}
                   caption={name}
                   isMobile={true}
                   width={[1,0.48]}
@@ -117,6 +120,9 @@ export default function Web3ConnectionButtons(props) {
                   subcaption={ connectorInfo && connectorInfo.subcaption ? connectorInfo.subcaption : `Connect using ${name}` }
                 />
                 <ImageButton
+                  buttonProps={{
+                    border:2
+                  }}
                   isMobile={true}
                   width={[1,0.48]}
                   caption={'Watch Address'}
@@ -133,6 +139,9 @@ export default function Web3ConnectionButtons(props) {
           const connectorInfo = globalConfigs.connectors[connectorName.toLowerCase()];
           return (
             <ImageButton
+              buttonProps={{
+                border:2
+              }}
               isMobile={true}
               caption={'Browser Wallet'}
               key={`wallet_${connectorName}`}
@@ -152,6 +161,9 @@ export default function Web3ConnectionButtons(props) {
           let caption = connectorInfo.name ? connectorInfo.name : connectorName;
           return (
             <ImageButton
+              buttonProps={{
+                border:2
+              }}
               isMobile={true}
               caption={caption}
               key={`wallet_${connectorName}`}

@@ -249,7 +249,7 @@ class PortfolioEquity extends Component {
           let tokenUsdConversionRate = null;
           const conversionRateField = this.functionsUtil.getGlobalConfig(['stats','tokens',token,'conversionRateField']);
           if (!this.props.chartToken && conversionRateField){
-            const conversionRate = lastTokenData && lastTokenData[conversionRateField] ? lastTokenData[conversionRateField] : lastTokenDataUnfiltered && lastTokenDataUnfiltered[conversionRateField] ? lastTokenDataUnfiltered[conversionRateField] : null;
+            const conversionRate = lastTokenData && lastTokenData[conversionRateField] ? lastTokenData[conversionRateField] : (lastTokenDataUnfiltered && lastTokenDataUnfiltered[conversionRateField] ? lastTokenDataUnfiltered[conversionRateField] : null);
             if (conversionRate){
               tokenUsdConversionRate = this.functionsUtil.fixTokenDecimals(conversionRate,18);
               if (tokenUsdConversionRate.gt(0)){
@@ -259,6 +259,7 @@ class PortfolioEquity extends Component {
           }
           
           tokensBalances[token] = lastTxBalance;
+
           aggregatedBalance = aggregatedBalance.plus(lastTxBalance);
         }
 
@@ -267,11 +268,11 @@ class PortfolioEquity extends Component {
 
       let momentDate = this.functionsUtil.strToMoment(timeStamp*1000);
 
-      if (startDate === null || momentDate.isSameOrAfter(startDate)){
+      if (startDate === null || (momentDate.isSameOrAfter(startDate) && momentDate.isSameOrBefore(new Date(),'day'))){
         
-        if (momentDate.isAfter(new Date(),'day')){
-          momentDate = this.functionsUtil.strToMoment(new Date());
-        }
+        // if (momentDate.isAfter(new Date(),'day')){
+        //   momentDate = this.functionsUtil.strToMoment(new Date());
+        // }
 
         // Force date to midnight
         const formattedDate = momentDate.format('YYYY/MM/DD 00:00');
@@ -281,8 +282,8 @@ class PortfolioEquity extends Component {
 
         aggregatedBalance = parseFloat(parseFloat(aggregatedBalance.toFixed(6)));
 
-        aggregatedBalancesKeys[formattedDate] = aggregatedBalance;
         tokensBalancesPerDate[formattedDate] = tokensBalances;
+        aggregatedBalancesKeys[formattedDate] = aggregatedBalance;
 
         // console.log(formattedDate,tokensBalances);
 
