@@ -155,6 +155,7 @@ class FunctionsUtil {
       totalEarnings:this.BNify(0),
       totalAmountLent:this.BNify(0),
       totalEarningsPerc:this.BNify(0),
+      totalBalanceConverted:this.BNify(0)
     };
 
     availableTokens = availableTokens ? availableTokens : this.props.availableTokens;
@@ -164,6 +165,8 @@ class FunctionsUtil {
       return portfolio;
     }
 
+    const isRisk = this.props.selectedStrategy === 'risk';
+
     await this.asyncForEach(Object.keys(availableTokens),async (token) => {
       const tokenConfig = availableTokens[token];
       const idleTokenBalance = await this.getTokenBalance(tokenConfig.idle.token,account);
@@ -171,16 +174,19 @@ class FunctionsUtil {
       if (idleTokenBalance){
         const tokenPrice = await this.getIdleTokenPrice(tokenConfig);
         const tokenBalance = idleTokenBalance.times(tokenPrice);
+        const tokenBalanceConverted = await this.convertTokenBalance(tokenBalance,token,tokenConfig,isRisk);
 
         if (!tokenPrice.isNaN() && !tokenBalance.isNaN()){
           portfolio.tokensBalance[token] = {
             tokenPrice,
             tokenBalance,
-            idleTokenBalance
+            idleTokenBalance,
+            tokenBalanceConverted
           };
 
           // Increment total balance
           portfolio.totalBalance = portfolio.totalBalance.plus(tokenBalance);
+          portfolio.totalBalanceConverted = portfolio.totalBalanceConverted.plus(tokenBalanceConverted);
         }
       }
     });
@@ -200,23 +206,23 @@ class FunctionsUtil {
     let totalEarnings = this.BNify(0);
     let totalAmountLent = this.BNify(0);
     let totalEarningsPerc = this.BNify(0);
-    const isRisk = this.props.selectedStrategy === 'risk';
+    const amountLent = await this.getAmountLent(depositedTokens,this.props.account);
 
     await this.asyncForEach(depositedTokens,async (token) => {
       const tokenConfig = availableTokens[token];
+      const tokenBalanceConverted = portfolio.tokensBalance[token].tokenBalanceConverted;
       const [
-        tokenAprs,
-        amountLent,
-        tokenEarnings
+        tokenAprs
+        // tokenEarnings
       ] = await Promise.all([
-        this.getTokenAprs(tokenConfig),
-        this.getAmountLent([token],this.props.account),
-        this.loadAssetField('earnings',token,tokenConfig,this.props.account,false),
+        this.getTokenAprs(tokenConfig)
+        // this.loadAssetField('earnings',token,tokenConfig,this.props.account,false),
       ]);
 
       const tokenAPY = this.BNify(tokenAprs.avgApy);
-      const tokenWeight = portfolio.tokensBalance[token].tokenBalance.div(portfolio.totalBalance);
+      const tokenWeight = tokenBalanceConverted.div(portfolio.totalBalanceConverted);
       const amountLentToken = await this.convertTokenBalance(amountLent[token],token,tokenConfig,isRisk);
+      const tokenEarnings = tokenBalanceConverted.minus(amountLentToken);
 
       if (tokenEarnings){
         totalEarnings = totalEarnings.plus(tokenEarnings);
@@ -229,6 +235,8 @@ class FunctionsUtil {
       if (amountLentToken){
         totalAmountLent = totalAmountLent.plus(amountLentToken);
       }
+
+      // console.log(token,amountLentToken.toFixed(),tokenEarnings.toFixed(),tokenBalanceConverted.toFixed());
     });
 
     if (totalAmountLent.gt(0)){
@@ -239,6 +247,8 @@ class FunctionsUtil {
     portfolio.totalEarnings = totalEarnings;
     portfolio.totalAmountLent = totalAmountLent;
     portfolio.totalEarningsPerc = totalEarningsPerc;
+
+    // debugger;
 
     return portfolio;
   }
@@ -548,6 +558,9 @@ class FunctionsUtil {
 
     return deposits;
   }
+  asyncTimeout = (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
   getDepositTimestamp = async (enabledTokens=[],account) => {
 
     const firstDepositTxs = await this.getFirstDepositTx(enabledTokens,account);
@@ -577,13 +590,13 @@ class FunctionsUtil {
   }
   getAmountLent = async (enabledTokens=[],account) => {
 
-    account = account ? account : this.props.account;
+    account = account || this.props.account;
 
     if (!account || !enabledTokens || !enabledTokens.length || !this.props.availableTokens){
       return [];
     }
 
-    const etherscanTxs = await this.getEtherscanTxs(account,0,'latest',enabledTokens);
+    const etherscanTxs = await this.getEtherscanTxs(account,0,'latest',enabledTokens,false);
 
     const amountLents = {};
 
@@ -630,9 +643,11 @@ class FunctionsUtil {
       amountLents[selectedToken] = amountLent;
     });
 
+    // debugger;
+
     return amountLents;
   }
-  getEtherscanBaseTxs = async (account=false,firstBlockNumber=0,endBlockNumber='latest',enabledTokens=[]) => {
+  getEtherscanBaseTxs = async (account=false,firstBlockNumber=0,endBlockNumber='latest',enabledTokens=[],debug=false) => {
     account = account ? account : this.props.account;
 
     if (!account || !enabledTokens || !enabledTokens.length){
@@ -661,6 +676,10 @@ class FunctionsUtil {
       // Get base endpoint cached transactions
       etherscanBaseEndpoint = `${etherscanApiUrl}?strategy=${selectedStrategy}&apikey=${env.REACT_APP_ETHERSCAN_KEY}&module=account&action=tokentx&address=${account}&startblock=${firstIdleBlockNumber}&endblock=${endBlockNumber}&sort=asc`;
       etherscanBaseTxs = this.getCachedRequest(etherscanBaseEndpoint);
+
+      if (debug){
+        console.log('DEBUG - CACHED - etherscanBaseTxs',etherscanBaseTxs);
+      }
 
       // Check if the latest blockNumber is actually the latest one
       if (etherscanBaseTxs && etherscanBaseTxs.data.result && Object.values(etherscanBaseTxs.data.result).length){
@@ -701,9 +720,38 @@ class FunctionsUtil {
 
       let txs = etherscanBaseTxs;
 
+      if (debug){
+        console.log('DEBUG - txs',txs);
+      }
+
       if (!txs){
         // Make request
         txs = await this.makeRequest(etherscanBaseEndpoint);
+
+        // console.log('makeRequest 1',account,etherscanBaseEndpoint,txs,txs.data.message,txs.data.status,parseInt(txs.data.status));
+
+        if (!txs || !txs.data || parseInt(txs.data.status)===0){
+          let requestCount = 0;
+          let requestStatus = false;
+          do {
+            await this.asyncTimeout(500);
+            txs = await this.makeRequest(etherscanBaseEndpoint);
+            requestCount++;
+            requestStatus = txs && txs.data ? parseInt(txs.data.status) : false;
+            // console.log('makeRequest '+(requestCount+1),account,etherscanBaseEndpoint,txs,txs.data.message,txs.data.status,parseInt(txs.data.status));
+          } while (requestCount<5 && !requestStatus);
+        }
+
+        // Cache request
+        if (txs && txs.data && parseInt(txs.data.status)>0){
+          const timestamp = parseInt(Date.now()/1000);
+          const cachedRequests = this.getCachedDataWithLocalStorage('cachedRequests',{});
+          cachedRequests[etherscanBaseEndpoint] = {
+            data:txs,
+            timestamp
+          };
+          this.setCachedDataWithLocalStorage('cachedRequests',cachedRequests);
+        }
       }
 
       if (txs && txs.data && txs.data.result){
@@ -741,12 +789,12 @@ class FunctionsUtil {
     };
     this.saveCachedRequest(endpoint,false,cachedRequest);
   }
-  getEtherscanTxs = async (account=false,firstBlockNumber=0,endBlockNumber='latest',enabledTokens=[]) => {
+  getEtherscanTxs = async (account=false,firstBlockNumber=0,endBlockNumber='latest',enabledTokens=[],debug=false) => {
     const {
       results,
       etherscanBaseTxs,
       etherscanBaseEndpoint
-    } = await this.getEtherscanBaseTxs(account,firstBlockNumber,endBlockNumber,enabledTokens);
+    } = await this.getEtherscanBaseTxs(account,firstBlockNumber,endBlockNumber,enabledTokens,debug);
 
     // Initialize prevTxs
     let etherscanTxs = {};
@@ -762,6 +810,10 @@ class FunctionsUtil {
       if (etherscanTxs && Object.keys(etherscanTxs).length){
         this.saveEtherscanTxs(etherscanBaseEndpoint,etherscanTxs);
       }
+    }
+
+    if (debug){
+      console.log('DEBUG - getEtherscanTxs -',etherscanTxs);
     }
 
     return Object
@@ -1670,7 +1722,7 @@ class FunctionsUtil {
     const timestamp = parseInt(Date.now()/1000);
     
     // Check if already exists
-    let cachedRequests = this.getCachedDataWithLocalStorage('cachedRequests',{});
+    const cachedRequests = this.getCachedDataWithLocalStorage('cachedRequests',{});
     // Check if it's not expired
     if (cachedRequests && cachedRequests[key] && cachedRequests[key].timestamp && timestamp-cachedRequests[key].timestamp<TTL){
       return (cachedRequests[key].data && return_data ? cachedRequests[key].data.data : cachedRequests[key].data);
