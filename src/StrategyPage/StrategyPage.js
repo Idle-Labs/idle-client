@@ -88,6 +88,10 @@ class StrategyPage extends Component {
   async loadPortfolio(){
     const availableTokens = this.props.availableTokens || {};
 
+    if (this.state.portfolioLoaded){
+      return false;
+    }
+
     // Load portfolio if account is set
     if (this.props.account){
       const newState = {};
