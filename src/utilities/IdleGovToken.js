@@ -52,10 +52,12 @@ class IdleGovToken{
   }
 
   getUnclaimedTokens = async () => {
+    /*
     let rewards =  await this.functionsUtil.genericContractCall('EarlyRewards','rewards',[this.props.account]);
     if (rewards){
       return this.functionsUtil.fixTokenDecimals(rewards,this.tokenConfig.decimals);
     }
+    */
     return this.functionsUtil.BNify(0);
   }
 

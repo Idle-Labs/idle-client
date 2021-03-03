@@ -55,19 +55,68 @@ class Footer extends Component {
                 Resources
               </Heading.h3>
               <Flex width={1} flexDirection={'column'}>
-                <ExtLink pb={[3,2]} href={'https://developers.idle.finance'} textAlign={['center','left']} fontFamily={'sansSerif'} fontSize={[3,2]} color={'blue'} hoverColor={'blue'}>Developers</ExtLink>
+                <ExtLink
+                  pb={[3,2]}
+                  fontSize={[3,2]}
+                  color={'blue'}
+                  hoverColor={'blue'}
+                  fontFamily={'sansSerif'}
+                  textAlign={['center','left']}
+                  href={'https://developers.idle.finance'}
+                >
+                  📚 Documentation
+                </ExtLink>
                 <Flex pb={[3,2]} width={1} justifyContent={['center','flex-start']}>
                   <RouterLink
                     color={'blue'}
                     to="/terms-of-service"
                     className={styles.link}
                   >
-                    <Text textAlign={['center','left']} fontFamily={'sansSerif'} fontSize={[3,2]} fontWeight={3} color={'blue'} hoverColor={'blue'}>Terms of Service</Text>
+                    <Text
+                      fontWeight={3}
+                      color={'blue'}
+                      fontSize={[3,2]}
+                      hoverColor={'blue'}
+                      fontFamily={'sansSerif'}
+                      textAlign={['center','left']}
+                    >
+                      📑 Terms of Service
+                    </Text>
                   </RouterLink>
                 </Flex>
-                <ExtLink pb={[3,2]} href={'https://www.iubenda.com/privacy-policy/61211749'} textAlign={['center','left']} fontFamily={'sansSerif'} fontSize={[3,2]} color={'blue'} hoverColor={'blue'}>Privacy Policy</ExtLink>
-                <ExtLink pb={[3,2]} href={'https://www.iubenda.com/privacy-policy/61211749/cookie-policy'} textAlign={['center','left']} fontFamily={'sansSerif'} fontSize={[3,2]} color={'blue'} hoverColor={'blue'}>Cookie Policy</ExtLink>
-                <ExtLink pb={[3,2]} href={'https://www.notion.so/idlelabs/Idle-Finance-Brand-Assets-fd63e4161cb64c999531646c7549bc4b'} textAlign={['center','left']} fontFamily={'sansSerif'} fontSize={[3,2]} color={'blue'} hoverColor={'blue'}>Brand Assets</ExtLink>
+                <ExtLink
+                  pb={[3,2]}
+                  color={'blue'}
+                  fontSize={[3,2]}
+                  hoverColor={'blue'}
+                  fontFamily={'sansSerif'}
+                  textAlign={['center','left']}
+                  href={'https://www.iubenda.com/privacy-policy/61211749'}
+                >
+                  🕵️‍♂️ Privacy Policy
+                </ExtLink>
+                <ExtLink
+                  pb={[3,2]}
+                  color={'blue'}
+                  fontSize={[3,2]}
+                  hoverColor={'blue'}
+                  fontFamily={'sansSerif'}
+                  textAlign={['center','left']}
+                  href={'https://www.iubenda.com/privacy-policy/61211749/cookie-policy'}
+                >
+                  🍪 Cookie Policy
+                </ExtLink>
+                <ExtLink
+                  pb={[3,2]}
+                  color={'blue'}
+                  fontSize={[3,2]}
+                  hoverColor={'blue'}
+                  fontFamily={'sansSerif'}
+                  textAlign={['center','left']}
+                  href={'https://www.notion.so/idlelabs/Idle-Finance-Brand-Assets-fd63e4161cb64c999531646c7549bc4b'}
+                >
+                  🎨 Brand Assets
+                </ExtLink>
               </Flex>
             </Flex>
             {
@@ -83,7 +132,9 @@ class Footer extends Component {
                         to={"/governance"}
                         className={styles.link}
                       >
-                        <Text textAlign={['center','left']} fontFamily={'sansSerif'} fontSize={[3,2]} fontWeight={3} color={'blue'} hoverColor={'blue'}>Overview</Text>
+                        <Text textAlign={['center','left']} fontFamily={'sansSerif'} fontSize={[3,2]} fontWeight={3} color={'blue'} hoverColor={'blue'}>
+                          🏛 Overview
+                        </Text>
                       </RouterLink>
                     </Flex>
                     <Flex pb={[3,2]} width={1} justifyContent={['center','flex-start']}>
@@ -92,7 +143,9 @@ class Footer extends Component {
                         className={styles.link}
                         to={"/governance/proposals"}
                       >
-                        <Text textAlign={['center','left']} fontFamily={'sansSerif'} fontSize={[3,2]} fontWeight={3} color={'blue'} hoverColor={'blue'}>Proposals</Text>
+                        <Text textAlign={['center','left']} fontFamily={'sansSerif'} fontSize={[3,2]} fontWeight={3} color={'blue'} hoverColor={'blue'}>
+                          💡 Proposals
+                        </Text>
                       </RouterLink>
                     </Flex>
                     <Flex pb={[3,2]} width={1} justifyContent={['center','flex-start']}>
@@ -101,12 +154,16 @@ class Footer extends Component {
                         className={styles.link}
                         to={"/governance/leaderboard"}
                       >
-                        <Text textAlign={['center','left']} fontFamily={'sansSerif'} fontSize={[3,2]} fontWeight={3} color={'blue'} hoverColor={'blue'}>Leaderboard</Text>
+                        <Text textAlign={['center','left']} fontFamily={'sansSerif'} fontSize={[3,2]} fontWeight={3} color={'blue'} hoverColor={'blue'}>
+                          📋 Leaderboard
+                        </Text>
                       </RouterLink>
                     </Flex>
                     <Flex pb={[3,2]} width={1} justifyContent={['center','flex-start']}>
                       <ExtLink href="https://gov.idle.finance/">
-                        <Text textAlign={['center','left']} fontFamily={'sansSerif'} fontSize={[3,2]} fontWeight={3} color={'blue'} hoverColor={'blue'}>Forum</Text>
+                        <Text textAlign={['center','left']} fontFamily={'sansSerif'} fontSize={[3,2]} fontWeight={3} color={'blue'} hoverColor={'blue'}>
+                          🤝 Forum
+                        </Text>
                       </ExtLink>
                     </Flex>
                   </Flex>
@@ -116,7 +173,9 @@ class Footer extends Component {
               <Heading.h3 textAlign={['center','left']} fontFamily={'sansSerif'} fontSize={[3,3]} my={3} color={'dark-gray'}>
                 Start a Conversation
               </Heading.h3>
-              <Link textAlign={['center','left']} fontFamily={'sansSerif'} fontSize={[3,2]} color={'blue'} hoverColor={'blue'}>info@idle.finance</Link>
+              <Link textAlign={['center','left']} fontFamily={'sansSerif'} fontSize={[3,2]} color={'blue'} hoverColor={'blue'}>
+                ✉️ info@idle.finance
+              </Link>
             </Flex>
             <Flex width={[1,columnWidth]} flexDirection={'column'}>
               <Heading.h3 textAlign={['center','left']} fontFamily={'sansSerif'} fontSize={[3,3]} my={3} color={'dark-gray'}>
