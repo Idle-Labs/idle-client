@@ -384,7 +384,6 @@ class DepositRedeem extends Component {
       const useProxyContract = this.checkUseProxyContract();
       if (useProxyContract){
         // Check for Permit Deposit
-        /*
         const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','erc20ForwarderEnabled']) && this.state.erc20ForwarderEnabled;
         if (depositErc20ForwarderEnabled){
           const permitEnabled = this.functionsUtil.getGlobalConfig(['permit',this.props.selectedToken]);
@@ -392,7 +391,6 @@ class DepositRedeem extends Component {
             return true;
           }
         }
-        */
         // Check proxy contract approved
         const proxyContract = this.state.actionProxyContract[this.state.action];
         tokenApproved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken,proxyContract.address,this.props.account);
@@ -752,26 +750,28 @@ class DepositRedeem extends Component {
                 this.setState({
                   loadingErc20ForwarderTx:true
                 }, async () => {
-                  // const { expiry, nonce, r, s, v } = signedParameters;
-                  // depositParams = [tokensToDeposit, nonce, expiry, v, r, s];
-                  depositParams = [this.props.account]; // EmitEvent
-
                   const erc20ForwarderContract = this.state.erc20ForwarderContract[this.state.action];
+                  const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken, this.props.account, erc20ForwarderContract.name);
+                  if (signedParameters){
+                    const { expiry, nonce, r, s, v } = signedParameters;
+                    depositParams = [tokensToDeposit, nonce, expiry, v, r, s];
 
-                  // contractSendResult = await this.functionsUtil.contractMethodSendWrapper(mintProxyContractInfo.name, mintProxyContractInfo.function, depositParams, callbackDeposit, callbackReceiptDeposit);
+                    // contractSendResult = await this.functionsUtil.contractMethodSendWrapper(mintProxyContractInfo.name, mintProxyContractInfo.function, depositParams, callbackDeposit, callbackReceiptDeposit);
 
-                  const functionCall = erc20ForwarderContract.contract.methods[erc20ForwarderContract.function](...depositParams);
-                  const functionSignature = functionCall.encodeABI();
-                  const gasLimit = await functionCall.estimateGas({from: this.props.account}); // 1000000
+                    const permitType = erc20ForwarderContract.permitType;
+                    const functionCall = erc20ForwarderContract.contract.methods[erc20ForwarderContract.function](...depositParams);
+                    const functionSignature = functionCall.encodeABI();
+                    const gasLimit = await functionCall.estimateGas({from: this.props.account}); // 1000000
 
-                  // console.log('CANEEEE!',mintProxyContractInfo.name, depositParams, functionSignature, gasLimit);
+                    // console.log('CANEEEE!',mintProxyContractInfo.name, depositParams, functionSignature, gasLimit);
 
-                  const erc20ForwarderTx = await this.functionsUtil.buildBiconomyErc20ForwarderTx(erc20ForwarderContract.name, this.props.tokenConfig.address, functionSignature, gasLimit);
-                  console.log('erc20ForwarderTx',erc20ForwarderTx);
-                  return this.setState({
-                    erc20ForwarderTx,
-                    loadingErc20ForwarderTx:false
-                  });
+                    const erc20ForwarderTx = await this.functionsUtil.buildBiconomyErc20ForwarderTx(erc20ForwarderContract.name, this.props.tokenConfig.address, permitType, functionSignature, gasLimit);
+                    console.log('erc20ForwarderTx',erc20ForwarderTx);
+                    return this.setState({
+                      erc20ForwarderTx,
+                      loadingErc20ForwarderTx:false
+                    });
+                  }
                 });
               // Send ERC20 Forwarder Tx
               } else {

@@ -2355,7 +2355,7 @@ class FunctionsUtil {
     }
   }
 
-  buildBiconomyErc20ForwarderTx = async (contractName,tokenAddress,callData,gasLimit) => {
+  buildBiconomyErc20ForwarderTx = async (contractName,tokenAddress,permitType,callData,gasLimit) => {
     const contract = this.getContractByName(contractName);
 
     const daiPermitOptions = {
@@ -2369,6 +2369,7 @@ class FunctionsUtil {
 
     //Create the call data that the recipient contract will receive
     const tx = await this.props.erc20ForwarderClient.buildTx({
+      permitType,
       data:callData,
       token:tokenAddress,
       to:contract._address,

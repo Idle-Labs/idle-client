@@ -44,8 +44,8 @@ import IdleRebalancerV3 from '../contracts/IdleRebalancerV3.json';
 import LiquidityGaugeV2 from '../abis/curve/LiquidityGaugeV2.json';
 import IdleBatchConverter from '../contracts/IdleBatchConverter.json';
 import UniswapV2Router02 from '../abis/uniswap/UniswapV2Router02.json';
+import IdleDepositForwarder from '../contracts/IdleDepositForwarder.json';
 import BalancerExchangeProxy from '../abis/balancer/BalancerExchangeProxy.json';
-import idleErc20ForwarderWrapper from '../contracts/idleErc20ForwarderWrapper.json';
 import IdleConverterPersonalSignV4 from '../contracts/IdleConverterPersonalSignV4.json';
 
 const env = process.env;
@@ -833,16 +833,18 @@ const globalConfigs = {
           },
           tokens:{
             DAI:{
-              function:'emitMessage',
-              abi:idleErc20ForwarderWrapper,
-              name:'idleErc20ForwarderWrapper',
-              address:'0xE452FDa9d69D54d55b0670F6c52805a628116501', // Kovan
+              permitType:'DAI_Permit',
+              abi:IdleDepositForwarder,
+              function:'permitAndDeposit',
+              name:'IdleDepositForwarderDAI',
+              address:'0x4FE826aB737852AD7bD57cFd2246c5CD98E8617c', // Kovan
             },
             USDC:{
-              abi:IdleBatchedMint,
-              name:'IdleBatchedMintUSDC',
-              function:'permitEIP2612AndDepositUnlimited',
-              address:'0x3F35eB839f91b614195a47A593dB46b14cd7EaF8', // Kovan
+              permitType:'USDC_Permit',
+              abi:IdleDepositForwarder,
+              function:'permitAndDeposit',
+              name:'IdleDepositForwarderUSDC',
+              address:'0x1b3c017B980804e19aC5da751d8A6037bA088814', // Kovan
             },
           }
         },
