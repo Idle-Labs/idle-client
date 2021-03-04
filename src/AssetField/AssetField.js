@@ -5,8 +5,10 @@ import { linearGradientDef } from '@nivo/core'
 import SmartNumber from '../SmartNumber/SmartNumber';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import GenericChart from '../GenericChart/GenericChart';
+import CustomTooltip from '../CustomTooltip/CustomTooltip';
 import VariationNumber from '../VariationNumber/VariationNumber';
 import AllocationChart from '../AllocationChart/AllocationChart';
+import CustomTooltipRow from '../CustomTooltip/CustomTooltipRow';
 import { Image, Text, Loader, Button, Tooltip, Icon, Flex } from "rimble-ui";
 
 class AssetField extends Component {
@@ -578,15 +580,14 @@ class AssetField extends Component {
             useMesh:false,
             axisLeft:null,
             animate:false,
-            curve:'monotoneX',
             axisBottom:null,
             enableArea:true,
             areaOpacity:0.1,
+            curve:'monotoneX',
             enableGridX:false,
             enableGridY:false,
             pointBorderWidth:2,
-            enableSlices:false,
-            isInteractive:false,
+            isInteractive:true,
             colors:d => d.color,
             defs:[
               linearGradientDef('gradientArea', [
@@ -594,10 +595,38 @@ class AssetField extends Component {
                   { offset: 50, color: '#e4b400' },
               ])
             ],
+            enableSlices:this.props.isMobile ? false : 'x',
+            yFormat:value => parseFloat(value).toFixed(2)+'%',
             fill:[
               { match: { id: this.props.token } , id: 'gradientArea' },
             ],
-            margin: { top: 10, right: 0, bottom: 0, left: 0 }
+            margin: { top: 10, right: 0, bottom: 0, left: 0 },
+            sliceTooltip:(slideData) => {
+              const { slice } = slideData;
+              const point = slice.points[0];
+              return (
+                <CustomTooltip
+                  point={point}
+                >
+                  {
+                  typeof slice.points === 'object' && slice.points.length &&
+                    slice.points.map(point => {
+                      const protocolName = point.serieId;
+                      const protocolEarning = point.data.yFormatted;
+                      // const protocolApy = point.data.apy;
+                      return (
+                        <CustomTooltipRow
+                          key={point.id}
+                          color={point.color}
+                          label={protocolName}
+                          value={protocolEarning}
+                        />
+                      );
+                    })
+                  }
+                </CustomTooltip>
+              );
+            }
           };
 
           if (this.props.chartProps){

@@ -68,9 +68,10 @@ class ConnectionErrorModal extends React.Component {
             </Flex>
             <Flex mb={3} flexDirection={'column'} alignItems={'center'} justifyContent={'center'}>
               <Button
-                borderRadius={4}
                 my={2}
                 mx={[0, 2]}
+                borderRadius={4}
+                mainColor={'blue'}
                 size={this.props.isMobile ? 'small' : 'medium'}
                 onClick={ async (e) => { await this.closeModal(e); } }
               >

@@ -1384,6 +1384,9 @@ class StrategyPage extends Component {
                             fields:[
                               {
                                 name:'aprChart',
+                                style:{
+                                  overflow:'visible',
+                                },
                               }
                             ]
                           },

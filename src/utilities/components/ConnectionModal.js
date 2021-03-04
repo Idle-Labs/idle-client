@@ -327,7 +327,7 @@ class ConnectionModal extends React.Component {
                 size={'medium'}
                 fontSize={[2,2]}
                 borderRadius={4}
-                contrastColor={'white'}
+                contrastColor={'primary'}
                 className={[styles.gradientButton]}
                 onClick={ e => this.connectCustomAddress() }
               >

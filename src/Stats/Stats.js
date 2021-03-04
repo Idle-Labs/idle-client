@@ -715,6 +715,9 @@ class Stats extends Component {
                         fields:[
                           {
                             name:'aprChart',
+                            style:{
+                              overflow:'visible',
+                            },
                           }
                         ]
                       },

@@ -3,11 +3,12 @@ import theme from '../theme';
 import { Bar } from '@nivo/bar';
 import { Line } from '@nivo/line';
 import React, { Component } from 'react';
-import { Flex, Text, Box } from 'rimble-ui';
 import globalConfigs from '../configs/globalConfigs';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import GenericChart from '../GenericChart/GenericChart';
 import DashboardCard from '../DashboardCard/DashboardCard';
+import CustomTooltip from '../CustomTooltip/CustomTooltip';
+import CustomTooltipRow from '../CustomTooltip/CustomTooltipRow';
 
 class StatsChart extends Component {
   state = {
@@ -55,103 +56,6 @@ class StatsChart extends Component {
     if (!this.props.tokenConfig || !this.props.selectedToken || !this.props.chartMode || !this.props.apiResults){
       return false;
     }
-
-    const CustomTooltipRow = props => (
-      <Flex
-        mb={2}
-        width={1}
-        alignItems={'center'}
-        flexDirection={'row'}
-      >
-        <Flex
-          pr={2}
-          style={{
-            flexBasis:'0',
-            flex:'1 1 0px'
-          }}
-          alignItems={'center'}
-          justifyContent={'flex-start'}
-        > 
-          {
-            props.color && 
-            <Box
-              mr={2}
-              width={'10px'}
-              height={'10px'}
-              borderRadius={'50%'}
-              backgroundColor={props.color}
-            >
-            </Box>
-          }
-          <Text
-            fontSize={1}
-            fontWeight={2}
-            textAlign={'left'}
-            color={'dark-gray'}
-            style={{
-              textTransform:'capitalize'
-            }}
-          >
-            {props.label}
-          </Text>
-        </Flex>
-        <Flex
-          style={{
-            flexBasis:'0',
-            flex:'1 1 0px'
-          }}
-          alignItems={'center'}
-          justifyContent={'flex-end'}
-        >
-          <Text
-            fontSize={1}
-            fontWeight={3}
-            color={'cellText'}
-            textAlign={'right'}
-            style={{
-              whiteSpace:'nowrap'
-            }}
-            dangerouslySetInnerHTML={{
-              __html: props.value
-            }}
-          >
-          </Text>
-        </Flex>
-      </Flex>
-    );
-
-    const CustomTooltip = props => {
-      return (
-        <DashboardCard
-          key={props.point.id}
-          cardProps={{
-            py:2,
-            px:3,
-            width:1,
-            left: props.point.data.itemPos>50 ? '-110%' : '0'
-          }}
-        >
-          <Flex
-            width={1}
-            flexDirection={'column'}
-          >
-            {
-              props.point.data.xFormatted && 
-                <Text
-                  mb={2}
-                  fontSize={1}
-                  fontWeight={3}
-                  color={'cellText'}
-                  textAlign={'left'}
-                >
-                  {props.point.data.xFormatted}
-                </Text>
-            }
-            {props.children}
-          </Flex>
-        </DashboardCard>
-      );
-    };
 
     const maxGridLines = 4;
     const apiResults = this.props.apiResults;
