@@ -577,6 +577,7 @@ class App extends Component {
                     isMobile={isMobile}
                     config={this.config}
                     connectors={connectors}
+                    theme={this.state.selectedTheme}
                     cachedData={this.state.cachedData}
                     tokenConfig={this.state.tokenConfig}
                     customAddress={this.state.customAddress}

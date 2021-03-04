@@ -33,6 +33,7 @@ class ConnectionModalUtil extends React.Component {
         />
 
         <ConnectionModal
+          {...this.props}
           isMobile={this.props.isMobile}
           setConnector={this.props.setConnector}
           currentNetwork={this.props.network.current}

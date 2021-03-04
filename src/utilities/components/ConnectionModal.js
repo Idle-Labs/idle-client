@@ -195,7 +195,7 @@ class ConnectionModal extends React.Component {
 
     const TOSacceptance = (
       <Box>
-        <Text textAlign={'center'} fontSize={1} py={[2,3]}>By connecting, I accept Idle's <RouterLink to="/terms-of-service" color={'primary'} style={{textDecoration:'underline'}} target={'_blank'} rel="nofollow noopener noreferrer">Terms of Service</RouterLink></Text>
+        <Text textAlign={'center'} fontSize={1} py={[2,3]}>By connecting, I accept Idle's <RouterLink to="/terms-of-service" color={'primary'} style={{color:this.props.theme.colors.primary,textDecoration:'underline'}} target={'_blank'} rel="nofollow noopener noreferrer">Terms of Service</RouterLink></Text>
       </Box>
     );
 

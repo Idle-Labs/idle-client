@@ -1803,8 +1803,12 @@ class RimbleTransaction extends React.Component {
     const transactionErrorModalOpened = typeof this.state.modals.data.transactionError === 'string' && this.state.modals.data.transactionError.length>0;
     return (
       <div>
-        <RimbleTransactionContext.Provider value={this.state} {...this.props} />
+        <RimbleTransactionContext.Provider
+          {...this.props}
+          value={this.state}
+        />
         <ConnectionModalUtil
+          {...this.props}
           modals={this.state.modals}
           network={this.state.network}
           account={this.state.account}
