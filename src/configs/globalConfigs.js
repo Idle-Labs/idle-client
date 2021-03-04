@@ -487,6 +487,10 @@ const globalConfigs = {
       TTL:120,
       endpoint:'https://api.idle.finance/tvls/'
     },
+    substack:{
+      TTL:1800,
+      endpoint:'https://api.idle.finance/substack/'
+    },
     scores:{
       TTL:300, // 5 minutes
       endpoint:'https://api.idle.finance/scores/'

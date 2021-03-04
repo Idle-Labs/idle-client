@@ -88,28 +88,49 @@ class Notifications extends Component {
 
     // Get active snapshot proposals
     const [
+      latestFeed,
       activeSnapshotProposals,
       governanceProposals,
-      batchedDeposits
+      batchedDeposits,
     ] = await Promise.all([
+      this.functionsUtil.getSubstackLatestFeed(),
       this.functionsUtil.getSnapshotProposals(true),
       this.governanceUtil.getProposals(null,'Active'),
+      // this.functionsUtil.makeCachedRequest('http://localhost:3333/substack'),
       this.functionsUtil.getBatchedDeposits(this.props.account,'executed')
     ]);
+
+    let notifications = this.functionsUtil.getGlobalConfig(['notifications']).filter( n => (n.enabled && n.start<=currTime && n.end>currTime) );
+
+    // Show latest Substack for 1 week
+    if (latestFeed){
+      const latestFeedDate = this.functionsUtil.strToMoment(latestFeed.isoDate);
+      if (latestFeedDate.isAfter(this.functionsUtil.strToMoment().subtract(7,'d'))){
+        notifications.push(
+          {
+            link:latestFeed.link,
+            image:'/images/substack.png',
+            timestamp:latestFeedDate._d.getTime(),
+            title:this.functionsUtil.htmlDecode(latestFeed.title),
+            text:this.functionsUtil.htmlDecode(latestFeed.content),
+            date:latestFeedDate.utc().format('MMM DD, YYYY HH:mm UTC'),
+          }
+        );
+      }
+    }
 
     const currTime = Date.now();
 
     // Add snapshot proposals
     const snapshotProposalBaseUrl = this.functionsUtil.getGlobalConfig(['network','providers','snapshot','urls','proposals']);
-    let notifications = this.functionsUtil.getGlobalConfig(['notifications']).filter( n => (n.enabled && n.start<=currTime && n.end>currTime) );
 
     activeSnapshotProposals.forEach( p => {
         const text = p.msg.payload.body.replace(/^[#]*/,'');
         // const text = p.msg.payload.name.replace(/^[#]*/,'');
         notifications.push({
           text,
-          image:'/images/snapshot.png',
           title:'Snapshot Proposal',
+          image:'/images/snapshot.png',
           timestamp:p.msg.payload.start*1000,
           link:snapshotProposalBaseUrl+p.authorIpfsHash,
           date:this.functionsUtil.strToMoment(p.msg.payload.start*1000).utc().format('MMM DD, YYYY HH:mm UTC'),

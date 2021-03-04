@@ -47,6 +47,11 @@ class FunctionsUtil {
       "ether"
     );
   }
+  htmlDecode = input => {
+    var e = document.createElement('textarea');
+    e.innerHTML = input;
+    return e.childNodes.length === 0 ? '' : e.childNodes[0].nodeValue;
+  }
   BNify_obj = s => new BigNumber(s)
   BNify = s => new BigNumber( typeof s === 'object' ? s : String(s) )
   customLog = (...props) => { if (globalConfigs.logs.messagesEnabled) this.customLog(moment().format('HH:mm:ss'),...props); }
@@ -5020,6 +5025,23 @@ class FunctionsUtil {
     });
 
     return output;
+  }
+  getSubstackLatestFeed = async () => {
+    const cachedDataKey = `substackLatestFeed`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData){
+      return cachedData;
+    }
+
+    const endpointInfo = this.getGlobalConfig(['stats','substack']);
+    const idleSubstackFeed = await this.makeRequest(endpointInfo.endpoint);
+
+    if (idleSubstackFeed && idleSubstackFeed.data && idleSubstackFeed.data.items && idleSubstackFeed.data.items.length>0){
+      const latestFeed = idleSubstackFeed.data.items[0];
+      return this.setCachedDataWithLocalStorage(cachedDataKey,latestFeed,endpointInfo.TTL);
+    }
+
+    return null;
   }
   getAggregatedStats = async (addGovTokens=true) => {
     const endpointInfo = this.getGlobalConfig(['stats','tvls']);
