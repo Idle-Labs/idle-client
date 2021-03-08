@@ -451,8 +451,7 @@ class GovernanceUtil {
 
     await this.functionsUtil.asyncForEach(proposals, async (p,i) => {
 
-      if (!p.id){
-        debugger;
+      if (!p || !p.id){
         return;
       }
 
