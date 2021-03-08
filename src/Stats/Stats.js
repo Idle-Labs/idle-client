@@ -255,6 +255,7 @@ class Stats extends Component {
       return false;
     }
 
+    /*
     const style = document.createElement('style');
     style.id = 'crisp-custom-style';
     style.type = 'text/css';
@@ -263,6 +264,7 @@ class Stats extends Component {
       display:none !important;
     }`;
     document.body.appendChild(style);
+    */
 
     this.loadUtils();
     await this.loadParams();

@@ -1928,14 +1928,16 @@ class FunctionsUtil {
               const tokenContract = this.getContractByName(tokenName);
               if (tokenContract){
                 const tokenBalance = await this.getTokenBalance(tokenName,p.address,true,blockNumber);
-                // console.log(tokenName,blockNumber,p.address,this.BNify(tokenBalance).toFixed());
-                if (tokenBalance && this.BNify(tokenBalance).gt(0)){
+                // console.log(p.relayerIpfsHash,s.name,tokenBalance ? tokenBalance.toFixed() : null);
+                if (tokenBalance && this.BNify(tokenBalance).gt(100)){
                   checkedStrategies = true;
                 }
               }
             } else {
-              checkedStrategies = true;
+              // checkedStrategies = true;
             }
+
+            // console.log(p.relayerIpfsHash,s.name,checkedStrategies);
           });
 
           // Add proposal is passed token balances check
