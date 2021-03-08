@@ -269,9 +269,10 @@ class StatsChart extends Component {
             },
             legends:{
               text:{
-                fontSize: this.props.isMobile ? 12: 14,
                 fontWeight:500,
-                fontFamily: theme.fonts.sansSerif
+                textTransform:'capitalize',
+                fontFamily: theme.fonts.sansSerif,
+                fontSize: this.props.isMobile ? 12: 14
               }
             },
             tooltip:{
@@ -880,6 +881,10 @@ class StatsChart extends Component {
         maxChartValue = 0;
 
         this.props.tokenConfig.protocols.forEach((p,j) => {
+          const protocolInfo = globalConfigs.stats.protocols[p.name];
+          if (!protocolInfo.enabled){
+            return;
+          }
           if (chartData.filter(d => { return d.name === p.name; }).length){
             return;
           }
@@ -1014,9 +1019,10 @@ class StatsChart extends Component {
             },
             legends:{
               text:{
-                fontSize: this.props.isMobile ? 12: 14,
                 fontWeight:500,
-                fontFamily: theme.fonts.sansSerif
+                textTransform:'capitalize',
+                fontFamily: theme.fonts.sansSerif,
+                fontSize: this.props.isMobile ? 12: 14
               }
             }
           },
@@ -1056,10 +1062,13 @@ class StatsChart extends Component {
         maxChartValue = 0;
 
         this.props.tokenConfig.protocols.forEach((p,j) => {
+          const protocolInfo = globalConfigs.stats.protocols[p.name];
+          if (!protocolInfo.enabled){
+            return;
+          }
           if (chartData.filter(d => { return d.name === p.name; }).length){
             return;
           }
-
           chartData.push({
             id:p.name,
             color:'hsl('+globalConfigs.stats.protocols[p.name].color.hsl.join(',')+')',
@@ -1192,9 +1201,10 @@ class StatsChart extends Component {
             },
             legends:{
               text:{
-                fontSize: this.props.isMobile ? 12: 14,
                 fontWeight:500,
-                fontFamily: theme.fonts.sansSerif
+                textTransform:'capitalize',
+                fontFamily: theme.fonts.sansSerif,
+                fontSize: this.props.isMobile ? 12: 14
               }
             }
           },
@@ -1297,6 +1307,11 @@ class StatsChart extends Component {
         protocols.forEach( p => {
 
           const protocolInfo = globalConfigs.stats.protocols[p.name];
+
+          if (!protocolInfo.enabled){
+            return;
+          }
+
           const rateField = protocolInfo.rateField ? protocolInfo.rateField : 'rate';
 
           const chartRow = {
@@ -1594,6 +1609,11 @@ class StatsChart extends Component {
         await this.functionsUtil.asyncForEach(protocols,async (p) => {
 
           const protocolInfo = globalConfigs.stats.protocols[p.name];
+
+          if (!protocolInfo.enabled){
+            return;
+          }
+
           const rateField = protocolInfo.rateField ? protocolInfo.rateField : 'rate';
 
           const chartRow = {
@@ -1808,9 +1828,10 @@ class StatsChart extends Component {
             },
             legends:{
               text:{
-                fontSize: this.props.isMobile ? 12: 14,
                 fontWeight:500,
-                fontFamily: theme.fonts.sansSerif
+                textTransform:'capitalize',
+                fontFamily: theme.fonts.sansSerif,
+                fontSize: this.props.isMobile ? 12: 14
               }
             }
           },

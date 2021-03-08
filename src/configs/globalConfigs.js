@@ -715,6 +715,7 @@ const globalConfigs = {
     protocols:{
       compound:{
         legend:true,
+        enabled:true,
         label:'Compound',
         color:{
           rgb:[0, 209, 146],
@@ -722,6 +723,7 @@ const globalConfigs = {
         }
       },
       compoundWithCOMP:{
+        enabled:true,
         rateField:['rate','compoundAdditionalAPR'],
         label:'Compound + COMP',
         color:{
@@ -731,6 +733,7 @@ const globalConfigs = {
       },
       fulcrum:{
         legend:false,
+        enabled:false,
         label:'Fulcrum',
         color:{
           rgb:[2, 138, 192],
@@ -739,6 +742,7 @@ const globalConfigs = {
       },
       dsr:{
         label:'DSR',
+        enabled:false,
         icon:'CHAI.png',
         color:{
           rgb:[222, 52, 67],
@@ -746,19 +750,22 @@ const globalConfigs = {
         }
       },
       dydx:{
-        label:'DyDx',
         legend:true,
+        label:'DyDx',
+        enabled:true,
         color:{
           rgb:[87, 87, 90],
           hsl:['240', '2%', '35%']
         }
       },
       iearn:{
-        label:'Yearn'
+        label:'Yearn',
+        enabled:true,
       },
       aave:{
         label:'Aave',
         legend:true,
+        enabled:true,
         color:{
           rgb:[230, 131, 206],
           hsl:['315', '66%', '71%']
@@ -770,6 +777,7 @@ const globalConfigs = {
       },
       curve:{
         label:'',
+        enabled:true,
         color:{
           rgb:[0, 55, 255],
           hsl:['227', '100%', '50%']
@@ -777,6 +785,7 @@ const globalConfigs = {
       },
       idle:{
         label:'Idle',
+        enabled:true,
         color:{
           rgb:[0, 55, 255],
           hsl:['227', '100%', '50%']
