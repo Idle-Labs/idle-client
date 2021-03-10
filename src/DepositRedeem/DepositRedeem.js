@@ -40,6 +40,8 @@ class DepositRedeem extends Component {
     contractPaused:false,
     buttonDisabled:false,
     canRedeemCurve:false,
+    erc20ForwarderTx:null,
+    signedParameters:null,
     minAmountForMint:null,
     showMaxSlippage:false,
     redeemGovTokens:false,
@@ -55,8 +57,8 @@ class DepositRedeem extends Component {
     showAdvancedOptions:false,
     erc20ForwarderContract:{},
     depositCurveSlippage:null,
-    showETHWrapperEnabled:false,
     erc20ForwarderEnabled:true,
+    showETHWrapperEnabled:false,
     metaTransactionsEnabled:true,
     minAmountForMintReached:false,
     loadingErc20ForwarderTx:false
@@ -166,14 +168,18 @@ class DepositRedeem extends Component {
       if (depositErc20ForwarderEnabled){
         mintProxyContractInfo = this.functionsUtil.getGlobalConfig(['contract','methods',action,'erc20ForwarderProxyContract','forwarder']);
 
+        await this.props.initContract(mintProxyContractInfo.name,mintProxyContractInfo.address,mintProxyContractInfo.abi);
+
         // Init contract for erc20 forwarder
         const erc20ForwarderContractInfo = this.functionsUtil.getGlobalConfig(['contract','methods',action,'erc20ForwarderProxyContract','tokens',this.props.selectedToken]);
         if (erc20ForwarderContractInfo){
+          mintProxyContractInfo = erc20ForwarderContractInfo;
           const erc20ForwarderContract = await this.props.initContract(erc20ForwarderContractInfo.name,erc20ForwarderContractInfo.address,erc20ForwarderContractInfo.abi);
           newState.erc20ForwarderContract[action] = erc20ForwarderContractInfo;
           newState.erc20ForwarderContract[action].contract = erc20ForwarderContract.contract;
         }
       }
+
       if (!mintProxyContractInfo){
         mintProxyContractInfo = this.functionsUtil.getGlobalConfig(['contract','methods',action,'proxyContract']);
       }
@@ -756,29 +762,68 @@ class DepositRedeem extends Component {
                     const { expiry, nonce, r, s, v } = signedParameters;
                     depositParams = [tokensToDeposit, nonce, expiry, v, r, s];
 
+                    console.log('permitAndDeposit',mintProxyContractInfo.name, mintProxyContractInfo.function, depositParams);
+
                     // contractSendResult = await this.functionsUtil.contractMethodSendWrapper(mintProxyContractInfo.name, mintProxyContractInfo.function, depositParams, callbackDeposit, callbackReceiptDeposit);
 
                     const permitType = erc20ForwarderContract.permitType;
                     const functionCall = erc20ForwarderContract.contract.methods[erc20ForwarderContract.function](...depositParams);
                     const functionSignature = functionCall.encodeABI();
-                    const gasLimit = await functionCall.estimateGas({from: this.props.account}); // 1000000
 
-                    // console.log('CANEEEE!',mintProxyContractInfo.name, depositParams, functionSignature, gasLimit);
+                    // console.log('buildBiconomyErc20ForwarderTx 1',permitType, erc20ForwarderContract.function, depositParams, functionCall, functionSignature);
+
+                    const gasLimit = 5000000;// await functionCall.estimateGas({from: this.props.account}); // 1000000
+
+                    console.log('buildBiconomyErc20ForwarderTx',mintProxyContractInfo.name, depositParams, functionSignature, gasLimit);
+
+                    debugger;
 
                     const erc20ForwarderTx = await this.functionsUtil.buildBiconomyErc20ForwarderTx(erc20ForwarderContract.name, this.props.tokenConfig.address, permitType, functionSignature, gasLimit);
                     console.log('erc20ForwarderTx',erc20ForwarderTx);
                     return this.setState({
                       erc20ForwarderTx,
+                      signedParameters,
+                      loadingErc20ForwarderTx:false
+                    });
+                  } else {
+                    this.setState({
+                      erc20ForwarderTx:null,
                       loadingErc20ForwarderTx:false
                     });
                   }
                 });
               // Send ERC20 Forwarder Tx
               } else {
-                this.setState({
-                  erc20ForwarderTx:null
-                });
-                contractSendResult = await this.functionsUtil.sendBiconomyTxWithErc20Forwarder(this.state.erc20ForwarderTx.request, callbackDeposit, callbackReceiptDeposit);
+                const metaInfo = {};
+                const permitOptions = {};
+                const erc20ForwarderContract = this.state.erc20ForwarderContract[this.state.action];
+                const erc20ForwarderBaseContract = this.functionsUtil.getGlobalConfig(['contract','methods',this.state.action,'erc20ForwarderProxyContract','forwarder']);
+
+                const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken, this.props.account, erc20ForwarderBaseContract.name);
+                if (signedParameters){
+                  const { expiry, nonce, r, s, v } = signedParameters;
+                  permitOptions.v = v;
+                  permitOptions.r = r;
+                  permitOptions.s = s;
+                  permitOptions.value = 0; //in case of DAI passing dummy value for the sake of struct (similar to token address in EIP2771)
+                  permitOptions.allowed = true;
+                  permitOptions.expiry = parseInt(expiry);
+                  permitOptions.holder = this.props.account;
+                  permitOptions.nonce = parseInt(nonce.toString());
+                  permitOptions.spender = erc20ForwarderBaseContract.address;
+
+                  metaInfo.permitData = permitOptions;
+                  metaInfo.permitType = erc20ForwarderContract.permitType;
+
+                  console.log('sendBiconomyTxWithErc20Forwarder',permitOptions,metaInfo);
+                  debugger;
+
+                  contractSendResult = await this.functionsUtil.sendBiconomyTxWithErc20Forwarder(this.state.erc20ForwarderTx.request, metaInfo, callbackDeposit, callbackReceiptDeposit);
+
+                  this.setState({
+                    erc20ForwarderTx:null
+                  });
+                }
               }
             }
           // Use main contract if no proxy contract exists
@@ -1140,6 +1185,8 @@ class DepositRedeem extends Component {
     const useMetaTx = metaTransactionsAvailable && this.state.metaTransactionsEnabled;
 
     const erc20ForwarderEnabled = depositErc20ForwarderEnabled && this.props.biconomy && this.props.erc20ForwarderClient && this.state.actionProxyContract[this.state.action];
+
+    // console.log(erc20ForwarderEnabled,depositErc20ForwarderEnabled,this.props.biconomy,this.props.erc20ForwarderClient,this.state.actionProxyContract[this.state.action]);
     // Biconomy End
 
     const totalBalance = this.state.action === 'deposit' ? this.props.tokenBalance : this.props.redeemableBalance;
@@ -2377,71 +2424,6 @@ class DepositRedeem extends Component {
                                   text={'Calculating transaction fees...'}
                                 />
                               </Flex>
-                            ) : this.state.erc20ForwarderTx ? (
-                              <DashboardCard
-                                cardProps={{
-                                  p:3,
-                                  mt:3,
-                                  display:'flex',
-                                  alignItems:'center',
-                                  flexDirection:'column',
-                                  justifyContent:'center',
-                                }}
-                              >
-                                <Text
-                                  mb={2}
-                                  fontSize={2}
-                                  color={'cellText'}
-                                  textAlign={'center'}
-                                >
-                                  The required fee to perform the {this.state.action} is <strong>{this.state.erc20ForwarderTx.cost} {this.props.selectedToken}</strong> ({this.functionsUtil.BNify(this.state.erc20ForwarderTx.cost).div(this.state.inputValue[this.state.action]).times(100).toFixed(1)}%)
-                                </Text>
-                                <Flex
-                                  width={[1,0.8]}
-                                  alignItems={'center'}
-                                  flexDirection={'row'}
-                                  justifyContent={'space-between'}
-                                >
-                                  <CardIconButton
-                                    {...this.props}
-                                    cardProps={{
-                                      py:2,
-                                      px:[2,3],
-                                      width:0.48
-                                    }}
-                                    text={'Confirm'}
-                                    useIconOnly={true}
-                                    icon={'CheckCircle'}
-                                    iconColor={'#00b84a'}
-                                    textProps={{
-                                      ml:[1,2],
-                                    }}
-                                    handleClick={this.executeAction.bind(this)}
-                                    iconProps={{
-                                      size:this.props.isMobile ? '1.4em' : '1.8em'
-                                    }}
-                                  />
-                                  <CardIconButton
-                                    {...this.props}
-                                    cardProps={{
-                                      py:2,
-                                      px:[2,3],
-                                      width:0.48,
-                                    }}
-                                    handleClick={this.cancelTransaction.bind(this)}
-                                    text={'Decline'}
-                                    icon={'Cancel'}
-                                    useIconOnly={true}
-                                    iconColor={'#e13636'}
-                                    textProps={{
-                                      ml:[1,2],
-                                    }}
-                                    iconProps={{
-                                      size:this.props.isMobile ? '1.4em' : '1.8em'
-                                    }}
-                                  />
-                                </Flex>
-                              </DashboardCard>
                             ) : (
                               <Flex
                                 mt={3}

@@ -2358,10 +2358,12 @@ class FunctionsUtil {
   buildBiconomyErc20ForwarderTx = async (contractName,tokenAddress,permitType,callData,gasLimit) => {
     const contract = this.getContractByName(contractName);
 
+    /*
     const daiPermitOptions = {
       expiry: Math.floor(Date.now() / 1000 + 3600),
       allowed: true
     };
+    */
 
     // await this.props.permitClient.daiPermit(daiPermitOptions);
 
@@ -2379,18 +2381,21 @@ class FunctionsUtil {
     return tx;
   }
 
-  sendBiconomyTxWithErc20Forwarder = async (req,callback,callback_receipt) => {
+  sendBiconomyTxWithErc20Forwarder = async (req,metaInfo,callback,callback_receipt) => {
 
     let transactionHash = null;
 
     try {
-      const txResponse = await this.props.erc20ForwarderClient.sendTxPersonalSign({req});
+      const txResponse = await this.props.erc20ForwarderClient.permitAndSendTxEIP712({req,metaInfo});
       transactionHash = txResponse.txHash;
+      console.log('permitAndSendTxEIP712',transactionHash);
     } catch (error) {
+      console.log('permitAndSendTxEIP712 ERROR',error);
       return callback(null,true);
     }
 
     if (!transactionHash){
+      console.log('!transactionHash ERROR');
       return callback(null,true);
     }
     

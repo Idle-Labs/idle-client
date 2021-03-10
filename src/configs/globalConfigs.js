@@ -829,22 +829,24 @@ const globalConfigs = {
             abi:erc20Forwarder,
             name:'erc20Forwarder',
             function:'emitMessage',
-            address:'0xE452FDa9d69D54d55b0670F6c52805a628116501', // Kovan
+            address:'0x9A60349561E0489faB15A6cc5ad9F75061db0F52', // Kovan
           },
           tokens:{
             DAI:{
+              enabled:true,
               permitType:'DAI_Permit',
               abi:IdleDepositForwarder,
               function:'permitAndDeposit',
               name:'IdleDepositForwarderDAI',
-              address:'0x4FE826aB737852AD7bD57cFd2246c5CD98E8617c', // Kovan
+              address:'0x01A3688D7d01390677e85256406B3156aCd59C64', // Kovan
             },
             USDC:{
+              enabled:true,
               permitType:'USDC_Permit',
               abi:IdleDepositForwarder,
-              function:'permitAndDeposit',
               name:'IdleDepositForwarderUSDC',
-              address:'0x1b3c017B980804e19aC5da751d8A6037bA088814', // Kovan
+              function:'permitEIP2612AndDeposit',
+              address:'0x8f9048CFAa27b1A1b77c32a0b87D2DcF5D016cb5', // Kovan
             },
           }
         },

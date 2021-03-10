@@ -47,7 +47,7 @@ class EstimatedEarnings extends Component {
 
   async loadChart(){
 
-    const tokenApy = await this.getTokenApy();
+    const tokenApy = await this.functionsUtil.getTokenApy(this.props.tokenConfig);
 
     if (!tokenApy){
       return false;
