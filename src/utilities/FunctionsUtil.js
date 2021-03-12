@@ -2358,6 +2358,10 @@ class FunctionsUtil {
   buildBiconomyErc20ForwarderTx = async (contractName,tokenAddress,permitType,callData,gasLimit) => {
     const contract = this.getContractByName(contractName);
 
+    if (!contract){
+      return false;
+    }
+
     /*
     const daiPermitOptions = {
       expiry: Math.floor(Date.now() / 1000 + 3600),
@@ -2593,6 +2597,8 @@ class FunctionsUtil {
       },
       primaryType: 'Permit',
     });
+
+    console.log('Permit',JSON.parse(data));
 
     return new Promise((resolve, reject) => {
       this.props.web3.currentProvider.send({

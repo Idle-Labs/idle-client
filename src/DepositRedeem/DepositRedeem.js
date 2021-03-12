@@ -760,7 +760,7 @@ class DepositRedeem extends Component {
                   const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken, this.props.account, erc20ForwarderContract.name);
                   if (signedParameters){
                     const { expiry, nonce, r, s, v } = signedParameters;
-                    depositParams = [tokensToDeposit, nonce, expiry, v, r, s];
+                    depositParams = [tokensToDeposit, parseInt(nonce)+1, expiry, v, r, s];
 
                     console.log('permitAndDeposit',mintProxyContractInfo.name, mintProxyContractInfo.function, depositParams);
 
@@ -772,11 +772,11 @@ class DepositRedeem extends Component {
 
                     // console.log('buildBiconomyErc20ForwarderTx 1',permitType, erc20ForwarderContract.function, depositParams, functionCall, functionSignature);
 
-                    const gasLimit = 5000000;// await functionCall.estimateGas({from: this.props.account}); // 1000000
+                    const gasLimit = 1000000;//await functionCall.estimateGas({from: this.props.account}); // 5000000;
 
                     console.log('buildBiconomyErc20ForwarderTx',mintProxyContractInfo.name, depositParams, functionSignature, gasLimit);
 
-                    debugger;
+                    // debugger;
 
                     const erc20ForwarderTx = await this.functionsUtil.buildBiconomyErc20ForwarderTx(erc20ForwarderContract.name, this.props.tokenConfig.address, permitType, functionSignature, gasLimit);
                     console.log('erc20ForwarderTx',erc20ForwarderTx);
@@ -816,12 +816,13 @@ class DepositRedeem extends Component {
                   metaInfo.permitType = erc20ForwarderContract.permitType;
 
                   console.log('sendBiconomyTxWithErc20Forwarder',permitOptions,metaInfo);
-                  debugger;
+                  // debugger;
 
                   contractSendResult = await this.functionsUtil.sendBiconomyTxWithErc20Forwarder(this.state.erc20ForwarderTx.request, metaInfo, callbackDeposit, callbackReceiptDeposit);
 
                   this.setState({
-                    erc20ForwarderTx:null
+                    erc20ForwarderTx:null,
+                    loadingErc20ForwarderTx:false
                   });
                 }
               }

@@ -829,16 +829,17 @@ const globalConfigs = {
             abi:erc20Forwarder,
             name:'erc20Forwarder',
             function:'emitMessage',
-            address:'0x9A60349561E0489faB15A6cc5ad9F75061db0F52', // Kovan
+            address:'0x9A60349561E0489faB15A6cc5ad9F75061db0F52' // Kovan
+            // address:'0xF82986F574803dfFd9609BE8b9c7B92f63a1410E', // Kovan
           },
           tokens:{
             DAI:{
               enabled:true,
               permitType:'DAI_Permit',
               abi:IdleDepositForwarder,
-              function:'permitAndDeposit',
+              function:'permitAndDeposit', // foo
               name:'IdleDepositForwarderDAI',
-              address:'0x01A3688D7d01390677e85256406B3156aCd59C64', // Kovan
+              address:'0x1E32F1E96B9735E5D31a23e12fe8e6D9845a9072', // Kovan
             },
             USDC:{
               enabled:true,
