@@ -16,6 +16,7 @@ function withdraw(uint256 batchId) external
 import Migrate from '../Migrate/Migrate';
 import React, { Component } from 'react';
 import AssetField from '../AssetField/AssetField';
+import FlexLoader from '../FlexLoader/FlexLoader';
 import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import AssetSelector from '../AssetSelector/AssetSelector';
@@ -57,6 +58,7 @@ class BatchDeposit extends Component {
     claimSucceeded:false,
     availableTokens:null,
     selectedStrategy:null,
+    componentLoaded:false,
     executeSucceeded:false,
     migrationEnabled:false,
     migrationSucceeded:false,
@@ -88,7 +90,11 @@ class BatchDeposit extends Component {
 
     const tokenFromChanged = prevProps.urlParams.param2 !== this.props.urlParams.param2;
     if (tokenFromChanged){
-      await this.loadTokens();
+      this.setState({
+        componentLoaded:false
+      },async () => {
+        await this.loadTokens();
+      });
     }
 
     const selectedStrategyChanged = prevState.selectedStrategy !== this.state.selectedStrategy;
@@ -244,6 +250,7 @@ class BatchDeposit extends Component {
     newState.usePermit = usePermit;
     newState.showPermitBox = false;
     newState.claimSucceeded = false;
+    newState.componentLoaded = true;
     newState.executeSucceeded = false;
     newState.batchTotals = batchTotals;
     newState.hasDeposited = hasDeposited;
@@ -676,6 +683,27 @@ class BatchDeposit extends Component {
               </Box>
           }
           {
+            !this.state.componentLoaded && (
+              <Flex
+                mt={4}
+                flexDirection={'column'}
+              >
+                <FlexLoader
+                  flexProps={{
+                    flexDirection:'row'
+                  }}
+                  loaderProps={{
+                    size:'30px'
+                  }}
+                  textProps={{
+                    ml:2
+                  }}
+                  text={'Loading asset info...'}
+                />
+              </Flex>
+            )
+          }
+          {
             !this.props.account ? (
               <DashboardCard
                 cardProps={{
@@ -711,20 +739,10 @@ class BatchDeposit extends Component {
                   </RoundButton>
                 </Flex>
               </DashboardCard>
-            ) : this.state.selectedTokenConfig && (this.state.canDeposit || this.state.canClaim) && (
+            ) : this.state.componentLoaded &&  this.state.selectedTokenConfig && (this.state.canDeposit || this.state.canClaim) && (
               <Box
                 width={1}
               >
-                {
-                  /*
-                  <IconBox
-                    cardProps={{
-                      mt:3
-                    }}
-                    text={'You will start earning gov tokens after the batch is executed'}
-                  />
-                  */
-                }
                 <DashboardCard
                   cardProps={{
                     p:3,
@@ -806,21 +824,6 @@ class BatchDeposit extends Component {
                           (Read More)
                         </Link>
                       </Text>
-                      {
-                        /*
-                        <Tooltip
-                          placement={'top'}
-                          message={`Batches are executed twice a week`}
-                        >
-                          <Icon
-                            ml={1}
-                            size={'1.1em'}
-                            color={'cellTitle'}
-                            name={'InfoOutline'}
-                          />
-                        </Tooltip>
-                        */
-                      }
                     </Flex>
                     <Flex
                       mt={2}
@@ -866,7 +869,7 @@ class BatchDeposit extends Component {
             )
           }
           {
-            this.props.account && this.state.availableTokens && this.state.selectedToken && (
+            this.state.componentLoaded && this.props.account && this.state.availableTokens && this.state.selectedToken && (
               <Box width={1}>
                 {
                   (contractApproved || this.state.canClaim) && 

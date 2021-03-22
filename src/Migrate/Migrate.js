@@ -1294,6 +1294,9 @@ class Migrate extends Component {
                       height={'3.4em'}
                       borderRadius={2}
                       fontWeight={500}
+                      className={styles.input}
+                      borderColor={'cardBorder'}
+                      backgroundColor={'cardBg'}
                       boxShadow={'none !important'}
                       onChange={this.changeInputValue.bind(this)}
                       border={`1px solid ${this.props.theme.colors.divider}`}
