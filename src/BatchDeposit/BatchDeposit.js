@@ -1056,12 +1056,12 @@ class BatchDeposit extends Component {
                             flexDirection={'column'}
                           >
                             <Icon
-                              size={this.props.isMobile ? '1.8em' : '2.3em'}
                               name={'MoneyOff'}
                               color={'cellText'}
+                              size={this.props.isMobile ? '1.8em' : '2.3em'}
                             />
                             <Text
-                              mt={[1,2]}
+                              mt={1}
                               fontSize={2}
                               color={'cellText'}
                               textAlign={'center'}
@@ -1272,6 +1272,18 @@ class BatchDeposit extends Component {
                                 >
                                   Execute Batch
                                 </Link>
+                            }
+                            {
+                              this.state.batchTotals[this.state.currBatchIndex].lt(this.state.selectedTokenConfig.minPoolSize) && (
+                                <Text
+                                  mb={1}
+                                  fontSize={1}
+                                  color={'#fa0000'}
+                                  textAlign={'center'}
+                                >
+                                  (The pool size has to reach at least {this.functionsUtil.formatMoney(this.state.selectedTokenConfig.minPoolSize,0)} {this.state.selectedToken} to be executed)
+                                </Text>
+                              )
                             }
                             {
                               this.state.lastExecution && (
