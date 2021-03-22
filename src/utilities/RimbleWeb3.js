@@ -145,9 +145,10 @@ class RimbleTransaction extends React.Component {
 
     window.updateTransaction = (transaction,hash,status,params) => {
       // Add meta data to transaction
-      transaction.type = "contract";
       transaction.status = status;
       transaction.params = params;
+      transaction.type = "contract";
+      transaction.created = Date.now();
       transaction.transactionHash = hash;
       this.updateTransaction(transaction);
       return transaction;

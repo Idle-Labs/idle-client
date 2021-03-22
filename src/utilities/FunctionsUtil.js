@@ -1933,7 +1933,7 @@ class FunctionsUtil {
               const tokenContract = this.getContractByName(tokenName);
               if (tokenContract){
                 const tokenBalance = await this.getTokenBalance(tokenName,p.address,true,blockNumber);
-                // console.log(p.relayerIpfsHash,s.name,tokenBalance ? tokenBalance.toFixed() : null);
+                // console.log(p.relayerIpfsHash,p.address,s.name,tokenBalance ? tokenBalance.toFixed() : null);
                 if (tokenBalance && this.BNify(tokenBalance).gt(100)){
                   checkedStrategies = true;
                 }
@@ -1942,7 +1942,7 @@ class FunctionsUtil {
               // checkedStrategies = true;
             }
 
-            // console.log(p.relayerIpfsHash,s.name,checkedStrategies);
+            // console.log(p.relayerIpfsHash,p.address,s.name,checkedStrategies);
           });
           
           // Add proposal is passed token balances check
@@ -2362,15 +2362,6 @@ class FunctionsUtil {
       return false;
     }
 
-    /*
-    const daiPermitOptions = {
-      expiry: Math.floor(Date.now() / 1000 + 3600),
-      allowed: true
-    };
-    */
-
-    // await this.props.permitClient.daiPermit(daiPermitOptions);
-
     console.log('Build Tx ',contract._address,tokenAddress,Number(gasLimit),callData);
 
     //Create the call data that the recipient contract will receive
@@ -2395,12 +2386,14 @@ class FunctionsUtil {
       console.log('permitAndSendTxEIP712',transactionHash);
     } catch (error) {
       console.log('permitAndSendTxEIP712 ERROR',error);
-      return callback(null,true);
+      callback(null,true);
+      return false;
     }
 
     if (!transactionHash){
       console.log('!transactionHash ERROR');
-      return callback(null,true);
+      callback(null,true);
+      return false;
     }
     
     const tx = {
@@ -2427,6 +2420,8 @@ class FunctionsUtil {
         }
       });
     }, 3000);
+
+    return true;
   }
 
   sendBiconomyTxWithPersonalSign = async (contractName,functionSignature,callback,callback_receipt) => {
@@ -2523,7 +2518,7 @@ class FunctionsUtil {
     });
   }
 
-  signPermit = async (baseContractName, holder, spenderContractName) => {
+  signPermit = async (baseContractName, holder, spenderContractName, addToNonce=0) => {
     const baseContract = this.getContractByName(baseContractName);
     const spenderContract = this.getContractByName(spenderContractName);
 
@@ -2543,8 +2538,14 @@ class FunctionsUtil {
 
     const permitConfig = this.getGlobalConfig(['permit',baseContractName]);
 
+    // console.log('permitConfig',permitConfig);
+
     const expiry = Math.round(new Date().getTime() / 1000 + 3600);
-    const nonce = permitConfig.nonceMethod ? await baseContract.methods[permitConfig.nonceMethod](holder).call() : null;
+    let nonce = permitConfig.nonceMethod ? await baseContract.methods[permitConfig.nonceMethod](holder).call() : null;
+    if (addToNonce>0){
+      nonce = parseInt(nonce)+parseInt(addToNonce);
+    }
+    nonce = nonce.toString();
 
     const Permit = permitConfig.type;
     const EIPVersion = permitConfig.EIPVersion;
