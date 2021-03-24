@@ -400,10 +400,10 @@ class DepositRedeem extends Component {
         // Check proxy contract approved
         const proxyContract = this.state.actionProxyContract[this.state.action];
         tokenApproved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken,proxyContract.address,this.props.account);
-        console.log('tokenApproved 1',tokenApproved);
+        // console.log('tokenApproved 1',tokenApproved);
       } else {
         tokenApproved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken,this.props.tokenConfig.idle.address,this.props.account);
-        console.log('tokenApproved 2',tokenApproved);
+        // console.log('tokenApproved 2',tokenApproved);
       }
     }
 

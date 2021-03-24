@@ -847,7 +847,7 @@ const globalConfigs = {
               abi:IdleDepositForwarder,
               name:'IdleDepositForwarderUSDC',
               function:'permitEIP2612AndDeposit',
-              address:'0x1E32F1E96B9735E5D31a23e12fe8e6D9845a9072', // Kovan
+              address:'0x8f9048CFAa27b1A1b77c32a0b87D2DcF5D016cb5', // Kovan
             },
           }
         },
