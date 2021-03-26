@@ -855,6 +855,10 @@ const globalConfigs = {
         }
       },
       snapshot:{
+        whitelist:[
+          '0x9993ADB62085AcB05Fc493f7A1D10C11227A78fa',
+          '0xf12ce5807e3d3128B876aa1Cec0632D63547E22E'
+        ],
         endpoints:{
           proposals:'https://hub.snapshot.page/api/idlefinance.eth/proposals'
         },

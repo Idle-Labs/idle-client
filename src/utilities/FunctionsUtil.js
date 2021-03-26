@@ -1897,6 +1897,7 @@ class FunctionsUtil {
       return cachedData;
     }
 
+    const whitelist = this.getGlobalConfig(['network','providers','snapshot','whitelist']).map( addr => addr.toLowerCase() );
     const endpoint = this.getGlobalConfig(['network','providers','snapshot','endpoints','proposals']);
     let proposals = await this.makeCachedRequest(endpoint,1440,true);
 
@@ -1913,7 +1914,7 @@ class FunctionsUtil {
       const validProposals = [];
       await this.asyncForEach(proposals, async (p) => {
         // Add proposal if ended
-        if (p.msg.payload.end<=currTime){
+        if (p.msg.payload.end<=currTime || whitelist.includes(p.address.toLowerCase())){
           validProposals.push(p);
         } else {
           const blockNumber = p.msg.payload.snapshot;

@@ -526,7 +526,6 @@ class SendTxWithBalance extends Component {
                         height={'3.4em'}
                         borderRadius={2}
                         fontWeight={500}
-                        className={styles.input}
                         borderColor={'cardBorder'}
                         backgroundColor={'cardBg'}
                         boxShadow={'none !important'}

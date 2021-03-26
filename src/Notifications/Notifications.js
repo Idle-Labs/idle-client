@@ -125,14 +125,14 @@ class Notifications extends Component {
     const snapshotProposalBaseUrl = this.functionsUtil.getGlobalConfig(['network','providers','snapshot','urls','proposals']);
 
     activeSnapshotProposals.forEach( p => {
-        const text = p.msg.payload.body.replace(/^[#]*/,'');
+        const text = this.functionsUtil.htmlDecode(p.msg.payload.body.replace(/^[#]*/,''));
         // const text = p.msg.payload.name.replace(/^[#]*/,'');
         notifications.push({
           text,
-          title:'Snapshot Proposal',
           image:'/images/snapshot.png',
           timestamp:p.msg.payload.start*1000,
           link:snapshotProposalBaseUrl+p.authorIpfsHash,
+          title:this.functionsUtil.htmlDecode(p.msg.payload.name),
           date:this.functionsUtil.strToMoment(p.msg.payload.start*1000).utc().format('MMM DD, YYYY HH:mm UTC'),
         });
     });
@@ -260,7 +260,7 @@ class Notifications extends Component {
                   position:'absolute',
                   top:this.props.isMobile ? '2.8em' : '3em',
                 },
-                minWidth:['91vw','20em'],
+                minWidth:['91vw','22em'],
                 onMouseOut:(e) => this.setMouseOverNotifications(false),
                 onMouseOver:(e) => this.setMouseOverNotifications(true),
               }}
@@ -317,6 +317,11 @@ class Notifications extends Component {
                             fontSize={1}
                             lineHeight={1.3}
                             color={'primary'}
+                            style={{
+                              overflow:'hidden',
+                              whiteSpace:'nowrap',
+                              textOverflow:'ellipsis'
+                            }}
                           >
                             {n.title}
                           </Text>

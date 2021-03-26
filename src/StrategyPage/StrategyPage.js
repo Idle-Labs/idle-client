@@ -480,7 +480,6 @@ class StrategyPage extends Component {
                         </DashboardCard>
                       </Flex>
                       <Flex
-                        pr={[0,2]}
                         width={[1,1/3]}
                         flexDirection={'column'}
                       >

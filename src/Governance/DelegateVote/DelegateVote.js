@@ -5,6 +5,7 @@ import RoundButton from '../../RoundButton/RoundButton';
 import GovernanceUtil from '../../utilities/GovernanceUtil';
 import DashboardCard from '../../DashboardCard/DashboardCard';
 import TxProgressBar from '../../TxProgressBar/TxProgressBar';
+import styles from '../../CryptoInput/CryptoInput.module.scss';
 import { Flex, Text, Input, Button, Box, EthAddress } from "rimble-ui";
 
 class DelegateVote extends Component {
@@ -211,6 +212,7 @@ class DelegateVote extends Component {
                     <EthAddress
                       width={1}
                       address={this.props.currentDelegate}
+                      className={ this.props.themeMode === 'light' ? styles.ethInput : styles.ethInputDark }
                     />
                   )
                 }

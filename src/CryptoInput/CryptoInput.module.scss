@@ -68,6 +68,9 @@ input[type="number"] {
 .gradientButton:before{
   display:none !important;
 }
+.input::placeholder{
+  color:#a0acc3;
+}
 @media (max-width: 30em){
   .mainInput {
     padding-left: 0;
