@@ -1,7 +1,6 @@
 import Migrate from '../Migrate/Migrate';
 import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
-import styles from './DepositRedeem.module.scss';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import ConnectBox from '../ConnectBox/ConnectBox';
 import CurveRedeem from '../CurveRedeem/CurveRedeem';

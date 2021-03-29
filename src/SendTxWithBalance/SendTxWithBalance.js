@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import IconBox from '../IconBox/IconBox';
 import ExtLink from '../ExtLink/ExtLink';
-import styles from './SendTxWithBalance.module.scss';
 import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import TxProgressBar from '../TxProgressBar/TxProgressBar';

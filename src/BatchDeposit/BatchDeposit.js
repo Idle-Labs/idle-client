@@ -261,7 +261,7 @@ class BatchDeposit extends Component {
     newState.migrationSucceeded = migrationSucceeded;
     newState.batchDepositEnabled = batchDepositEnabled;
     newState.canClaim = batchCompleted || hasDeposited;
-    newState.action = hasDeposited ? 'redeem' : 'deposit';
+    newState.action = hasDeposited || newState.canClaim ? 'redeem' : 'deposit';
     // Prevent user to deposit if the batch has been completed
     newState.canDeposit = batchDepositEnabled && !batchCompleted;
     newState.migrationContractApproved = migrationContractApproved;
@@ -411,10 +411,10 @@ class BatchDeposit extends Component {
 
       // Send Google Analytics event
       const eventData = {
-        eventCategory: `BatchDeposit`,
         eventAction: 'Claim',
+        eventCategory: `BatchDeposit`,
+        eventValue: parseInt(claimableValue),
         eventLabel: this.props.selectedToken,
-        eventValue: parseInt(claimableValue)
       };
 
       if (error){
@@ -783,8 +783,8 @@ class BatchDeposit extends Component {
                     >
                       <Icon
                         size={'1.5em'}
-                        name={ this.state.hasDeposited ? 'CheckBox' : 'LooksTwo'}
-                        color={ this.state.hasDeposited ? this.props.theme.colors.transactions.status.completed : 'cellText'}
+                        name={ (this.state.hasDeposited || this.state.batchCompleted) ? 'CheckBox' : 'LooksTwo'}
+                        color={ (this.state.hasDeposited || this.state.batchCompleted) ? this.props.theme.colors.transactions.status.completed : 'cellText'}
                       />
                       <Text
                         ml={2}
@@ -856,9 +856,12 @@ class BatchDeposit extends Component {
                         >
                           <Icon
                             ml={1}
-                            size={'1.1em'}
-                            color={'cellTitle'}
-                            name={'InfoOutline'}
+                            size={'1.2em'}
+                            name={'Warning'}
+                            color={'#ffe000'}
+                            style={{
+                              cursor:'pointer'
+                            }}
                           />
                         </Tooltip>
                       </Flex>
@@ -1144,12 +1147,18 @@ class BatchDeposit extends Component {
                               name={'FileUpload'}
                             />
                             <Text
-                              mt={[1,2]}
                               fontSize={2}
                               color={'cellText'}
                               textAlign={'center'}
                             >
                               The Batch has been executed!<br />You can now claim your {batchRedeem.toFixed(4)} {this.state.tokenConfig.idle.token}
+                            </Text>
+                            <Text
+                              fontSize={1}
+                              color={'#fa0000'}
+                              textAlign={'center'}
+                            >
+                              (You need to claim your {this.state.tokenConfig.idle.token} to start earning Gov Tokens)
                             </Text>
                             <Flex
                               width={1}
@@ -1189,19 +1198,6 @@ class BatchDeposit extends Component {
                                 color={'cellText'}
                               >
                                 You have successfully deposited <strong>{batchDeposit.toFixed(4)} {this.state.selectedToken}</strong>, please wait until the batch is executed to claim your {this.state.tokenConfig.idle.token}.
-                                {
-                                  /*
-                                  typeof this.state.batchTotals[batchId] !== 'undefined' && 
-                                    <Text.span
-                                      fontWeight={500}
-                                      display={'block'}
-                                      color={'copyColor'}
-                                      textAlign={'center'}
-                                    >
-                                      Batch pool: {this.state.batchTotals[batchId].toFixed(4)} {this.state.selectedToken}
-                                    </Text.span>
-                                  */
-                                }
                               </Text.span>
                             </Text>
                           </Flex>
