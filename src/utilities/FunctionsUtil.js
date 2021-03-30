@@ -2694,9 +2694,15 @@ class FunctionsUtil {
   }
 
   checkTokenApproved = async (contractName,contractAddr,walletAddr) => {
-    const value = this.props.web3.utils.toWei('0','ether');
-    const allowance = await this.getAllowance(contractName,contractAddr,walletAddr);
-    return allowance && this.BNify(allowance).gt(this.BNify(value.toString()));
+    const [
+      balance,
+      allowance
+    ] = await Promise.all([
+      this.getTokenBalance(contractName,walletAddr,false),
+      this.getAllowance(contractName,contractAddr,walletAddr)
+    ]);
+    this.customLog('checkTokenApproved',contractName,this.BNify(allowance).toFixed(),this.BNify(balance).toFixed(),(allowance && this.BNify(allowance).gte(this.BNify(balance))));
+    return allowance && this.BNify(allowance).gte(this.BNify(balance));
   }
   getAllowance = async (contractName,contractAddr,walletAddr) => {
     if (!contractName || !contractAddr || !walletAddr){
