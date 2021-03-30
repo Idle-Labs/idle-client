@@ -261,10 +261,10 @@ class BatchDeposit extends Component {
     newState.migrationSucceeded = migrationSucceeded;
     newState.batchDepositEnabled = batchDepositEnabled;
     newState.canClaim = batchCompleted || hasDeposited;
-    newState.action = hasDeposited || newState.canClaim ? 'redeem' : 'deposit';
     // Prevent user to deposit if the batch has been completed
     newState.canDeposit = batchDepositEnabled && !batchCompleted;
     newState.migrationContractApproved = migrationContractApproved;
+    newState.action = hasDeposited || newState.canClaim ? 'redeem' : 'deposit';
 
     this.setState(newState);
   }
@@ -1155,7 +1155,7 @@ class BatchDeposit extends Component {
                             </Text>
                             <Text
                               fontSize={1}
-                              color={'#fa0000'}
+                              color={'#ff9900'}
                               textAlign={'center'}
                             >
                               (You need to claim your {this.state.tokenConfig.idle.token} to start earning Gov Tokens)
@@ -1274,7 +1274,7 @@ class BatchDeposit extends Component {
                                 <Text
                                   mb={1}
                                   fontSize={1}
-                                  color={'#fa0000'}
+                                  color={'#ff9900'}
                                   textAlign={'center'}
                                 >
                                   (The pool size has to reach at least {this.functionsUtil.formatMoney(this.state.selectedTokenConfig.minPoolSize,0)} {this.state.selectedToken} to be executed)
