@@ -448,7 +448,7 @@ class Stats extends Component {
           }
           const prevP = prevRow.protocolsData.find( prevP => (prevP.protocolAddr.toLowerCase() === p.protocolAddr.toLowerCase()) );
           const allocation = this.functionsUtil.fixTokenDecimals(p.allocation,this.props.tokenConfig.decimals);
-          const prevAllocation = this.functionsUtil.fixTokenDecimals(prevP.allocation,this.props.tokenConfig.decimals);
+          const prevAllocation = prevP ? this.functionsUtil.fixTokenDecimals(prevP.allocation,this.props.tokenConfig.decimals) : this.functionsUtil.BNify(0);
           const allocationPerc = parseInt(parseFloat(allocation.div(totalAllocation).times(100)));
           const prevAllocationPerc = parseInt(parseFloat(prevAllocation.div(prevTotalAllocation).times(100)));
           if (allocationPerc!==prevAllocationPerc){
