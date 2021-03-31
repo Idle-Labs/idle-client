@@ -635,7 +635,6 @@ class StatsChart extends Component {
             const protocolPaused = this.functionsUtil.BNify(protocolData.rate).eq(0);
             const foundProtocol = this.props.tokenConfig.protocols.find((p) => { return p.address.toLowerCase() === protocolData.protocolAddr.toLowerCase() });
             if (foundProtocol){
-              const protocolName = this.functionsUtil.capitalize(foundProtocol.name);
               const protocolInfo = globalConfigs.stats.protocols[foundProtocol.name];
               if (!protocolPaused){
                 let allocation = parseFloat(this.functionsUtil.fixTokenDecimals(protocolData.allocation,this.props.tokenConfig.decimals));
@@ -1251,7 +1250,7 @@ class StatsChart extends Component {
 
         // console.log('PRICE_V4',apiResults);
 
-        const idleChartData = [];
+        idleChartData = [];
 
         apiResults.forEach((d,i) => {
 
