@@ -147,6 +147,7 @@ class AllocationChart extends Component {
         const protocolAllocationPercParsed = parseFloat(protocolsAllocationsPerc[protocolAddr].times(100).toFixed(2));
         chartData.push({
           id:protocolAddr,
+          name:protocolName,
           value:protocolAllocationPercParsed,
           color:'hsl('+globalConfigs.stats.protocols[protocolName].color.hsl.join(',')+')',
           label: globalConfigs.stats.protocols[protocolName].label ? globalConfigs.stats.protocols[protocolName].label : this.functionsUtil.capitalize(protocolName)
@@ -167,7 +168,7 @@ class AllocationChart extends Component {
   render() {
     
     const selectedSlice = this.state.selectedSlice !== null && this.state.protocolsAllocations[this.state.selectedSlice.id] ? this.state.protocolsAllocations[this.state.selectedSlice.id] : false;
-    const protocolIcon = this.state.selectedSlice !== null ? (globalConfigs.stats.protocols[this.state.selectedSlice.label.toLowerCase()] && globalConfigs.stats.protocols[this.state.selectedSlice.label.toLowerCase()].icon ? globalConfigs.stats.protocols[this.state.selectedSlice.label.toLowerCase()].icon : `${this.state.selectedSlice.label.toLowerCase()}.svg`) : null;
+    const protocolIcon = this.state.selectedSlice !== null ? (globalConfigs.stats.protocols[this.state.selectedSlice.name] && globalConfigs.stats.protocols[this.state.selectedSlice.name].icon ? globalConfigs.stats.protocols[this.state.selectedSlice.name].icon : `${this.state.selectedSlice.name}.svg`) : null;
 
     return (
       <Flex

@@ -636,15 +636,16 @@ class StatsChart extends Component {
             const foundProtocol = this.props.tokenConfig.protocols.find((p) => { return p.address.toLowerCase() === protocolData.protocolAddr.toLowerCase() });
             if (foundProtocol){
               const protocolName = this.functionsUtil.capitalize(foundProtocol.name);
+              const protocolInfo = globalConfigs.stats.protocols[foundProtocol.name];
               if (!protocolPaused){
                 let allocation = parseFloat(this.functionsUtil.fixTokenDecimals(protocolData.allocation,this.props.tokenConfig.decimals));
-                keys[protocolName] = 1;
-                row[protocolName] = allocation;
-                row[`${protocolName}Color`] = 'hsl('+globalConfigs.stats.protocols[protocolName.toLowerCase()].color.hsl.join(',')+')';
-                // console.log(protocolName,this.functionsUtil.BNify(protocolData.allocation).toString(),this.props.tokenConfig.decimals,allocation);
+                keys[protocolInfo.label] = 1;
+                row[protocolInfo.label] = allocation;
+                row[`${protocolInfo.label}Color`] = 'hsl('+protocolInfo.color.hsl.join(',')+')';
+                // console.log(protocolInfo.label,this.functionsUtil.BNify(protocolData.allocation).toString(),this.props.tokenConfig.decimals,allocation);
                 maxChartValue = Math.max(maxChartValue,allocation);
               } else {
-                row[protocolName] = 0;
+                row[protocolInfo.label] = 0;
               }
             }
           });
@@ -889,7 +890,7 @@ class StatsChart extends Component {
             return;
           }
           chartData.push({
-            id:p.name,
+            id:protocolInfo.label,
             color:'hsl('+globalConfigs.stats.protocols[p.name].color.hsl.join(',')+')',
             data:apiResults.map((d,i) => {
               return d.protocolsData.filter((protocolAllocation,x) => {
@@ -957,14 +958,14 @@ class StatsChart extends Component {
             format:value => parseFloat(value).toFixed(1)+'%',
           },
           axisBottom: this.props.isMobile ? null : {
+            legend: '',
             tickSize: 0,
             format: '%b %d',
             tickPadding: 15,
-            tickValues: this.props.isMobile ? 'every 4 days' : ( this.props.showAdvanced ? 'every 3 days' : 'every 2 days'),
-            orient: 'bottom',
-            legend: '',
             legendOffset: 0,
-            legendPosition: 'middle'
+            orient: 'bottom',
+            legendPosition: 'middle',
+            tickValues: this.props.isMobile ? 'every 4 days' : ( this.props.showAdvanced ? 'every 3 days' : 'every 2 days'),
           },
           gridYValues,
           pointSize:0,
@@ -1070,7 +1071,7 @@ class StatsChart extends Component {
             return;
           }
           chartData.push({
-            id:p.name,
+            id:protocolInfo.label,
             color:'hsl('+globalConfigs.stats.protocols[p.name].color.hsl.join(',')+')',
             data:apiResults.map((d,i) => {
               return d.protocolsData.filter((protocolAllocation,x) => {
@@ -1250,7 +1251,9 @@ class StatsChart extends Component {
 
         // console.log('PRICE_V4',apiResults);
 
-        idleChartData = apiResults.map((d,i) => {
+        const idleChartData = [];
+
+        apiResults.forEach((d,i) => {
 
           let y = 0;
           let apy = 0;
@@ -1289,7 +1292,9 @@ class StatsChart extends Component {
 
           itemIndex++;
 
-          return { x, y, apy, blocknumber, itemPos };
+          if (apy>0){
+            idleChartData.push({ x, y, apy, blocknumber, itemPos });
+          }
         });
 
         // Add Additional protocols
@@ -1401,15 +1406,17 @@ class StatsChart extends Component {
 
                 itemIndex++;
 
-                rowData = {
-                  x,
-                  y,
-                  apy,
-                  itemPos
-                };
+                if (apy>0){
+                  rowData = {
+                    x,
+                    y,
+                    apy,
+                    itemPos
+                  };
 
-                itemIndex++;
-                chartRow.data.push(rowData);
+                  itemIndex++;
+                  chartRow.data.push(rowData);
+                }
               }
             }
           });
