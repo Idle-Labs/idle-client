@@ -2159,7 +2159,6 @@ class FunctionsUtil {
     }
 
     const lastAllocationsPromises = [];
-    const lastRebalancerAllocationsPromises = [];
     const allocations = await this.genericContractCall(tokenConfig.idle.token, 'getAllocations');
 
     for (let protocolIndex=0;protocolIndex<allocations.length;protocolIndex++){
