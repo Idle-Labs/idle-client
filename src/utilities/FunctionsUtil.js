@@ -2151,117 +2151,39 @@ class FunctionsUtil {
     return false;
   }
   checkRebalance = async (tokenConfig) => {
-
     if (!tokenConfig && this.props.tokenConfig){
       tokenConfig = this.props.tokenConfig;
     }
-
-    if (!globalConfigs.contract.methods.rebalance.enabled || !tokenConfig){
+    if (!tokenConfig){
       return false;
     }
 
-    const rebalancer = await this.genericContractCall(tokenConfig.idle.token, 'rebalancer');
+    const lastAllocationsPromises = [];
+    const lastRebalancerAllocationsPromises = [];
+    const allocations = await this.genericContractCall(tokenConfig.idle.token, 'getAllocations');
 
-    if (!rebalancer){
-      return false;
-    }
-
-    const idleRebalancerInstance = await this.createContract('idleRebalancerInstance',rebalancer,globalConfigs.contract.methods.rebalance.abi);
-
-
-    if (!idleRebalancerInstance || !idleRebalancerInstance.contract){
-      return false;
-    }
-
-    // Take next protocols allocations
-    const allocationsPromises = [];
-    const availableTokensPromises = [];
-
-    for (let protocolIndex=0;protocolIndex<tokenConfig.protocols.length;protocolIndex++){
-      const allocationPromise = new Promise( async (resolve, reject) => {
+    for (let protocolIndex=0;protocolIndex<allocations.length;protocolIndex++){
+      const lastAllocationsPromise = new Promise( async (resolve, reject) => {
         try{
-          const allocation = await idleRebalancerInstance.contract.methods.lastAmounts(protocolIndex).call();
-          resolve({
-            allocation,
-            protocolIndex
-          });
+          const lastAllocations = await this.genericContractCall(tokenConfig.idle.token, 'lastAllocations',[protocolIndex]);
+          resolve(lastAllocations);
         } catch (error){
+          console.log(error);
           resolve(null);
         }
       });
-      allocationsPromises.push(allocationPromise);
-
-      const availableTokenPromise = new Promise( async (resolve, reject) => {
-        try {
-          const protocolAddr = await this.genericContractCall(tokenConfig.idle.token, 'allAvailableTokens', [protocolIndex]);
-          resolve({
-            protocolAddr,
-            protocolIndex
-          });
-        } catch (error){
-          resolve(null);
-        }
-      });
-      availableTokensPromises.push(availableTokenPromise);
+      lastAllocationsPromises.push(lastAllocationsPromise);
     }
 
-    let nextAllocations = null;
-    let allAvailableTokens = null;
+    const newAllocations = await Promise.all(lastAllocationsPromises);
 
-    try{
-      nextAllocations = await Promise.all(allocationsPromises);
-      allAvailableTokens = await Promise.all(availableTokensPromises);
-    } catch (error){
-      
+    if (!allocations || !newAllocations){
+      return true;
     }
 
-    nextAllocations = nextAllocations && nextAllocations.length ? nextAllocations.filter(v => (v !== null)) : null;
-    allAvailableTokens = allAvailableTokens && allAvailableTokens.length ? allAvailableTokens.filter(v => (v !== null)) : null;
+    const diff = allocations.filter( (alloc,index) => alloc !== newAllocations[index] );
 
-    if ((!allAvailableTokens || !allAvailableTokens.length) || (!nextAllocations || !nextAllocations.length)){
-      return false;
-    }
-
-    // Merge nextAllocations and allAvailableTokens
-    let newTotalAllocation = this.BNify(0);
-    const newProtocolsAllocations = allAvailableTokens.reduce((accumulator,availableTokenInfo) => {
-      if (availableTokenInfo.protocolAddr){
-        const nextAllocation = nextAllocations.find(v => { return v.protocolIndex === availableTokenInfo.protocolIndex; });
-        if (nextAllocation){
-          const allocation = this.BNify(nextAllocation.allocation);
-          accumulator[availableTokenInfo.protocolAddr.toLowerCase()] = allocation;
-          newTotalAllocation = newTotalAllocation.plus(allocation);
-        }
-      }
-      return accumulator;
-    },{});
-
-    // Check if newAllocations differs from currentAllocations
-    let shouldRebalance = false;
-
-    const tokenAllocation = await this.getTokenAllocation(tokenConfig);
-    const protocolsAllocationsPerc = tokenAllocation ? tokenAllocation.protocolsAllocationsPerc : null;
-
-    if (typeof protocolsAllocationsPerc === 'object'){
-      Object.keys(protocolsAllocationsPerc).forEach((protocolAddr) => {
-
-        // Get current protocol allocation percentage
-        const protocolAllocation = protocolsAllocationsPerc[protocolAddr];
-        const protocolAllocationPerc = parseFloat(protocolAllocation).toFixed(3);
-        
-        // Calculate new protocol allocation percentage
-        const newProtocolAllocation = newProtocolsAllocations[protocolAddr.toLowerCase()] ? newProtocolsAllocations[protocolAddr.toLowerCase()] : this.BNify(0);
-        const newProtocolAllocationPerc = newProtocolAllocation ? parseFloat(newProtocolAllocation.div(newTotalAllocation)).toFixed(3) : this.BNify(0);
-
-        // this.customLog(protocolAddr,protocolAllocation.toString(),newProtocolAllocation.toString(),newTotalAllocation.toString(),protocolAllocationPerc,newProtocolAllocationPerc);
-
-        if (protocolAllocationPerc !== newProtocolAllocationPerc){
-          shouldRebalance = true;
-        }
-      });
-    }
-
-    return shouldRebalance;
+    return diff.length>0;
   }
   checkMigration = async (tokenConfig,account) => {
 

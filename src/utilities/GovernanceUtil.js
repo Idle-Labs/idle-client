@@ -393,10 +393,10 @@ class GovernanceUtil {
     let cachedData = this.functionsUtil.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData){
       if (filter_by_state){
-        cachedData = cachedData.filter( p => (p.state && p.state.toLowerCase() === filter_by_state.toLowerCase() ) );
+        cachedData = cachedData.filter( p => (p && p.state && p.state.toLowerCase() === filter_by_state.toLowerCase() ) );
       }
       if (voted_by){
-        cachedData = cachedData.filter( p => (p.votes.find( v => (v.voter && v.voter.toLowerCase() === voted_by.toLowerCase()) )) );
+        cachedData = cachedData.filter( p => (p && p.votes.find( v => (v.voter && v.voter.toLowerCase() === voted_by.toLowerCase()) )) );
       }
       return cachedData;
     }
@@ -608,11 +608,11 @@ class GovernanceUtil {
     // console.log('getProposals',filter_by_state,cachedData);
 
     if (filter_by_state){
-      proposals = proposals.filter( p => (p.state && p.state.toLowerCase() === filter_by_state.toLowerCase() ) );
+      proposals = proposals.filter( p => (p && p.state && p.state.toLowerCase() === filter_by_state.toLowerCase() ) );
     }
 
     if (voted_by){
-      proposals = proposals.filter( p => (p.votes.find( v => (v.voter && v.voter.toLowerCase() === voted_by.toLowerCase()) )) );
+      proposals = proposals.filter( p => (p && p.votes.find( v => (v.voter && v.voter.toLowerCase() === voted_by.toLowerCase()) )) );
     }
     
     return proposals;

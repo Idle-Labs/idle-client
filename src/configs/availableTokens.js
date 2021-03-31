@@ -183,7 +183,7 @@ const availableTokens = {
           },
           {
             abi:iToken,
-            enabled:true,
+            enabled:false,
             name:'fulcrum',
             address:'0x493c57c4763932315a328269e1adad09653b9081',
             token:'iDAI',
@@ -311,7 +311,7 @@ const availableTokens = {
           },
           {
             name:'fulcrum',
-            enabled:true,
+            enabled:false,
             abi:iToken,
             address:'0xf013406a0b1d544238083df0b93ad0d2cbe0f65f',
             token:'iUSDC',
@@ -488,7 +488,7 @@ const availableTokens = {
           },
           {
             abi:iToken,
-            enabled:true,
+            enabled:false,
             name:'fulcrum',
             address:'0x493c57c4763932315a328269e1adad09653b9081',
             token:'iDAI',
@@ -506,6 +506,17 @@ const availableTokens = {
             enabled:true,
             address:'0xfC1E690f61EFd961294b3e1Ce3313fBD8aa4f85d',
             token:'aDAI',
+            decimals:18,
+            functions:{
+
+            }
+          },
+          {
+            abi:aToken,
+            name:'aavev2',
+            enabled:true,
+            address:'0x028171bCA77440897B824Ca71D1c56caC55b68A3',
+            token:'aDAIv2',
             decimals:18,
             functions:{
 
@@ -616,7 +627,7 @@ const availableTokens = {
           },
           {
             name:'fulcrum',
-            enabled:true,
+            enabled:false,
             abi:iToken,
             address:'0xf013406a0b1d544238083df0b93ad0d2cbe0f65f',
             token:'iUSDC',
@@ -635,6 +646,17 @@ const availableTokens = {
             address:'0x9bA00D6856a4eDF4665BcA2C2309936572473B7E',
             token:'aUSDC',
             decimals:18,
+            functions:{
+              
+            }
+          },
+          {
+            abi:aToken,
+            decimals:18,
+            enabled:true,
+            name:'aavev2',
+            token:'aUSDCv2',
+            address:'0x3ed3b47dd13ec9a98b44e6204a523e766b225811',
             functions:{
               
             }
@@ -714,7 +736,7 @@ const availableTokens = {
           },
           {
             name:'fulcrum',
-            enabled:true,
+            enabled:false,
             abi:iToken,
             address:'0x8326645f3aa6de6420102fdb7da9e3a91855045b',
             token:'iUSDT',
@@ -733,6 +755,17 @@ const availableTokens = {
             address:'0x71fc860F7D3A592A4a98740e39dB31d25db65ae8',
             token:'aUSDT',
             decimals:18,
+            functions:{
+              
+            }
+          },
+          {
+            abi:aToken,
+            decimals:18,
+            name:'aavev2',
+            enabled:true,
+            token:'aUSDTv2',
+            address:'0x3ed3b47dd13ec9a98b44e6204a523e766b225811',
             functions:{
               
             }
@@ -794,6 +827,17 @@ const availableTokens = {
             functions:{
               
             }
+          },
+          {
+            name:'aavev2',
+            enabled:true,
+            abi:aToken,
+            address:'0x6c5024cd4f8a59110119c56f8933403a539555eb',
+            token:'aSUSDv2',
+            decimals:18,
+            functions:{
+              
+            }
           }
         ]
       },
@@ -847,6 +891,17 @@ const availableTokens = {
             abi:aToken,
             address:'0x4da9b813057d04baef4e5800e36083717b4a0341',
             token:'aTUSD',
+            decimals:18,
+            functions:{
+              
+            }
+          },
+          {
+            abi:aToken,
+            enabled:true,
+            name:'aavev2',
+            token:'aTUSDv2',
+            address:'0x101cc05f4A51C0319f570d5E146a8C625198e636',
             decimals:18,
             functions:{
               
@@ -971,7 +1026,7 @@ const availableTokens = {
             abi:iToken,
             decimals:18,
             token:'iWBTC',
-            enabled:true,
+            enabled:false,
             name:'fulcrum',
             address:'0xba9262578efef8b3aff7f60cd629d6cc8859c8b5',
             functions:{
@@ -987,6 +1042,17 @@ const availableTokens = {
             abi:aToken,
             address:'0xfc4b8ed459e00e5400be803a9bb3954234fd50e3',
             token:'aWBTC',
+            decimals:18,
+            functions:{
+              
+            }
+          },
+          {
+            abi:aToken,
+            enabled:true,
+            name:'aavev2',
+            token:'aWBTCv2',
+            address:'0x9ff58f4fFB29fA2266Ab25e75e2A8b3503311656',
             decimals:18,
             functions:{
               
@@ -1073,7 +1139,7 @@ const availableTokens = {
           },
           {
             name:'fulcrum',
-            enabled:true,
+            enabled:false,
             abi:iToken,
             address:'0x493c57c4763932315a328269e1adad09653b9081',
             token:'iDAI',
@@ -1200,7 +1266,7 @@ const availableTokens = {
           },
           {
             name:'fulcrum',
-            enabled:true,
+            enabled:false,
             abi:iToken,
             address:'0xf013406a0b1d544238083df0b93ad0d2cbe0f65f',
             token:'iUSDC',
@@ -1297,7 +1363,7 @@ const availableTokens = {
           },
           {
             name:'fulcrum',
-            enabled:true,
+            enabled:false,
             abi:iToken,
             address:'0x8326645f3aa6de6420102fdb7da9e3a91855045b',
             token:'iUSDT',
