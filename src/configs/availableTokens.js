@@ -656,7 +656,7 @@ const availableTokens = {
             enabled:true,
             name:'aavev2',
             token:'aUSDCv2',
-            address:'0x3ed3b47dd13ec9a98b44e6204a523e766b225811',
+            address:'0xBcca60bB61934080951369a648Fb03DF4F96263C',
             functions:{
               
             }
@@ -1009,11 +1009,11 @@ const availableTokens = {
         },
         protocols:[
           {
-            name:'compound',
             enabled:true,
-            abi:cToken.abi,
-            address:'0xc11b1268c1a384e55c48c2391d8d480264a3a7f4',
             token:'cWBTC',
+            abi:cToken.abi,
+            name:'compound',
+            address:'0xc11b1268c1a384e55c48c2391d8d480264a3a7f4',
             decimals:18,
             functions:{
               exchangeRate:{
@@ -1037,11 +1037,11 @@ const availableTokens = {
             },
           },
           {
+            abi:aToken,
             name:'aave',
             enabled:true,
-            abi:aToken,
-            address:'0xfc4b8ed459e00e5400be803a9bb3954234fd50e3',
             token:'aWBTC',
+            address:'0xfc4b8ed459e00e5400be803a9bb3954234fd50e3',
             decimals:18,
             functions:{
               

@@ -37,6 +37,7 @@ class CustomTooltipRow extends Component {
             textAlign={'left'}
             color={'dark-gray'}
             style={{
+              whiteSpace:'nowrap',
               textTransform:'capitalize'
             }}
           >

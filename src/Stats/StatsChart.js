@@ -552,14 +552,15 @@ class StatsChart extends Component {
                   {
                     point.data.allocations && typeof point.data.allocations === 'object' &&
                       Object.keys(point.data.allocations).map(protocolName => {
-                        const protocolColor = 'hsl('+globalConfigs.stats.protocols[protocolName].color.hsl.join(',')+')';
+                        const protocolInfo = globalConfigs.stats.protocols[protocolName];
+                        const protocolColor = 'hsl('+protocolInfo.color.hsl.join(',')+')';
                         const protocolAllocation = point.data.allocations[protocolName];
                         const protocolAllocationFormatted = this.functionsUtil.formatMoney(protocolAllocation,protocolAllocation<1 ? 3 : 0);
                         const protocolAllocationPerc = this.functionsUtil.BNify(point.data.allocations[protocolName]).div(this.functionsUtil.BNify(point.data.y)).times(100).toFixed(0)+'%';
                         return (
                           <CustomTooltipRow
-                            label={protocolName}
                             color={protocolColor}
+                            label={protocolInfo.label}
                             key={`${point.id}_${protocolName}`}
                             value={`${protocolAllocationFormatted} (${protocolAllocationPerc})`}
                           />
