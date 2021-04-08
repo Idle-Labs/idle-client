@@ -166,6 +166,13 @@ class Footer extends Component {
                         </Text>
                       </ExtLink>
                     </Flex>
+                    <Flex pb={[3,2]} width={1} justifyContent={['center','flex-start']}>
+                      <ExtLink href="https://www.notion.so/idlelabs/ffe8115b7b53489ab0a7f84e656e4bb0?v=916250f54ff24daabad72cf095fd6d88">
+                        <Text textAlign={['center','left']} fontFamily={'sansSerif'} fontSize={[3,2]} fontWeight={3} color={'blue'} hoverColor={'blue'}>
+                          <span role="img" aria-label="governance-forum">🌎</span> Team
+                        </Text>
+                      </ExtLink>
+                    </Flex>
                   </Flex>
                 </Flex>
             }
