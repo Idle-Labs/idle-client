@@ -150,6 +150,9 @@ class RimbleTransaction extends React.Component {
       transaction.type = "contract";
       transaction.created = Date.now();
       transaction.transactionHash = hash;
+
+      // console.log('window.updateTransaction',transaction);
+
       this.updateTransaction(transaction);
       return transaction;
     }
@@ -1513,10 +1516,8 @@ class RimbleTransaction extends React.Component {
     transactions[`tx${updatedTransaction.created}`] = transaction;
     this.setState({ transactions });
 
-    // this.functionsUtil.customLog('updateTransaction',transactions);
-
     // Save transactions in localStorage only if pending or succeeded
-    // console.log('updateTransaction',transaction.transactionHash,transaction.status.toLowerCase());
+    // console.log('updateTransaction',transaction);
     if (transaction.transactionHash){
       // Clear cached data
       this.functionsUtil.clearCachedData();

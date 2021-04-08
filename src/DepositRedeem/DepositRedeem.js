@@ -1,6 +1,7 @@
 import Migrate from '../Migrate/Migrate';
 import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
+import ExtLink from '../ExtLink/ExtLink';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import ConnectBox from '../ConnectBox/ConnectBox';
 import CurveRedeem from '../CurveRedeem/CurveRedeem';
@@ -756,10 +757,13 @@ class DepositRedeem extends Component {
               // Build ERC20 Forwarder Tx
               if (!this.state.erc20ForwarderTx){
                 this.setState({
+                  txError:{
+                    [this.state.action]:false
+                  },
                   loadingErc20ForwarderTx:true
                 }, async () => {
                   const erc20ForwarderContract = this.state.erc20ForwarderContract[this.state.action];
-                  const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken, this.props.account, erc20ForwarderContract.name, 1);
+                  const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken, this.props.account, erc20ForwarderContract.name);
                   console.log('signedParameters',signedParameters);
                   if (signedParameters){
                     const { expiry, nonce, r, s, v } = signedParameters;
@@ -805,6 +809,9 @@ class DepositRedeem extends Component {
               // Send ERC20 Forwarder Tx
               } else {
                 this.setState({
+                  txError:{
+                    [this.state.action]:false
+                  },
                   loadingErc20ForwarderTx:true
                 }, async () => {
                   const metaInfo = {};
@@ -812,7 +819,7 @@ class DepositRedeem extends Component {
                   const erc20ForwarderContract = this.state.erc20ForwarderContract[this.state.action];
                   const erc20ForwarderBaseContract = this.functionsUtil.getGlobalConfig(['contract','methods',this.state.action,'erc20ForwarderProxyContract','forwarder']);
 
-                  const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken, this.props.account, erc20ForwarderBaseContract.name);
+                  const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken, this.props.account, erc20ForwarderBaseContract.name, 1);
                   if (signedParameters){
 
                     this.setState({
@@ -1746,6 +1753,18 @@ class DepositRedeem extends Component {
                                   handleClick={e => this.toggleErc20ForwarderEnabled(false)}
                                 />
                               </Flex>
+                              {
+                                this.state.txError[this.state.action] && (
+                                  <Text
+                                    mt={2}
+                                    fontSize={1}
+                                    color={'red'}
+                                    textAlign={'center'}
+                                  >
+                                    The meta-transaction cannot be executed, select ETH and try again.
+                                  </Text>
+                                )
+                              }
                               <Text
                                 mt={2}
                                 fontSize={'11px'}

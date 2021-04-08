@@ -5484,7 +5484,7 @@ class FunctionsUtil {
     const endpoint = `${apiInfo.endpoint}${tokenConfig.address}?isRisk=${isRisk}`;
     let tokenData = await this.makeCachedRequest(endpoint,apiInfo.TTL,true,false,config);
 
-    if (tokenData){
+    if (tokenData && tokenData.length){
       let tokenScore = this.BNify(tokenData[0].idleScore);
       if (tokenScore && tokenScore.gt(0)){
         // Set cached data
