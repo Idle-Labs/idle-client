@@ -503,6 +503,9 @@ const globalConfigs = {
       TTL:300, // 5 minutes
       endpoint:'https://api.idle.finance/scores/'
     },
+    config:{
+      headers: env.REACT_APP_IDLE_KEY ? { Authorization: `Bearer ${env.REACT_APP_IDLE_KEY}` } : {}
+    },
     versions:{
       /*
       v2:{

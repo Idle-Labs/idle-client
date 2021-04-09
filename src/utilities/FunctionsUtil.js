@@ -1724,7 +1724,7 @@ class FunctionsUtil {
                   });
     return data;
   }
-  makeCachedRequest = async (endpoint,TTL=60,return_data=false,alias=false) => {
+  makeCachedRequest = async (endpoint,TTL=60,return_data=false,alias=false,config=null) => {
     const key = alias ? alias : endpoint;
     const timestamp = parseInt(Date.now()/1000);
     
@@ -1735,7 +1735,7 @@ class FunctionsUtil {
       return (cachedRequests[key].data && return_data ? cachedRequests[key].data.data : cachedRequests[key].data);
     }
 
-    const data = await this.makeRequest(endpoint);
+    const data = await this.makeRequest(endpoint,false,config);
 
     cachedRequests[key] = {
       data,
@@ -2017,7 +2017,8 @@ class FunctionsUtil {
       }
     }
 
-    let output = await this.makeRequest(endpoint);
+    const config = this.getGlobalConfig(['stats','config']);
+    let output = await this.makeRequest(endpoint,false,config);
     if (!output){
       return [];
     }
@@ -3759,7 +3760,7 @@ class FunctionsUtil {
     }
 
     try {
-      const WETHAddr = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+      const WETHAddr = this.getGlobalConfig(['stats','tokens','WETH','address']);
       const one = this.normalizeTokenDecimals(18);
 
       const path = [];
@@ -5016,8 +5017,9 @@ class FunctionsUtil {
       return cachedData;
     }
 
+    const config = this.getGlobalConfig(['stats','config']);
     const endpointInfo = this.getGlobalConfig(['stats','substack']);
-    const idleSubstackFeed = await this.makeRequest(endpointInfo.endpoint);
+    const idleSubstackFeed = await this.makeRequest(endpointInfo.endpoint,false,config);
 
     if (idleSubstackFeed && idleSubstackFeed.data && idleSubstackFeed.data.items && idleSubstackFeed.data.items.length>0){
       const latestFeed = idleSubstackFeed.data.items[0];
@@ -5027,8 +5029,9 @@ class FunctionsUtil {
     return null;
   }
   getAggregatedStats = async (addGovTokens=true) => {
+    const config = this.getGlobalConfig(['stats','config']);
     const endpointInfo = this.getGlobalConfig(['stats','tvls']);
-    const tvls = await this.makeCachedRequest(endpointInfo.endpoint,endpointInfo.TTL,true);
+    const tvls = await this.makeCachedRequest(endpointInfo.endpoint,endpointInfo.TTL,true,false,config);
 
     if (tvls){
       const avgAPY = this.BNify(tvls.avgAPY);
@@ -5301,12 +5304,13 @@ class FunctionsUtil {
     }
 
     const apiInfo = globalConfigs.stats.rates;
+    const config = this.getGlobalConfig(['stats','config']);
     const endpoint = `${apiInfo.endpoint}${tokenConfig.address}?isRisk=${isRisk}&limit=1&order=DESC`;
     const [
       tokenData,
       tokenAllocation
     ] = await Promise.all([
-      this.makeCachedRequest(endpoint,apiInfo.TTL,true),
+      this.makeCachedRequest(endpoint,apiInfo.TTL,true,false,config),
       this.getTokenAllocation(tokenConfig,false,false)
     ]);
 
@@ -5348,8 +5352,9 @@ class FunctionsUtil {
     }
 
     const apiInfo = globalConfigs.stats.scores;
+    const config = this.getGlobalConfig(['stats','config']);
     const endpoint = `${apiInfo.endpoint}${tokenConfig.address}?isRisk=${isRisk}`;
-    let tokenData = await this.makeCachedRequest(endpoint,apiInfo.TTL,true);
+    let tokenData = await this.makeCachedRequest(endpoint,apiInfo.TTL,true,false,config);
 
     if (tokenData){
       let tokenScore = this.BNify(tokenData[0].idleScore);
