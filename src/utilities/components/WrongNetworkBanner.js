@@ -9,12 +9,11 @@ class WrongNetworkBanner extends React.Component {
       left: 0,
       right: 0,
       width: "100%",
-      backgroundColor: "white",
       zIndex: 9999
     };
 
     return (
-      <Box style={bannerStyle} p={3}>
+      <Box style={bannerStyle} backgroundColor={'wrongNetworkBannerBg'} p={3}>
         <Flex alignItems={"center"}>
           <Box p={4}>
             <Icon name="Warning" color="gold" size="30" />

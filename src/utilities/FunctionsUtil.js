@@ -211,10 +211,14 @@ class FunctionsUtil {
     let totalEarnings = this.BNify(0);
     let totalAmountLent = this.BNify(0);
     let totalEarningsPerc = this.BNify(0);
-    const amountLent = await this.getAmountLent(depositedTokens,this.props.account);
+    // const amountLents = await this.getAmountLent(depositedTokens,this.props.account);
 
     await this.asyncForEach(depositedTokens,async (token) => {
       const tokenConfig = availableTokens[token];
+      const amountDeposited = await this.getAmountDeposited(tokenConfig,account);
+
+      // console.log(token,'amountDeposited',amountDeposited.toString(),'amountLent',amountLents[token].toString());
+
       const tokenBalanceConverted = portfolio.tokensBalance[token].tokenBalanceConverted;
       const [
         tokenAprs
@@ -226,7 +230,7 @@ class FunctionsUtil {
 
       const tokenAPY = this.BNify(tokenAprs.avgApy);
       const tokenWeight = tokenBalanceConverted.div(portfolio.totalBalanceConverted);
-      const amountLentToken = await this.convertTokenBalance(amountLent[token],token,tokenConfig,isRisk);
+      const amountLentToken = await this.convertTokenBalance(amountDeposited,token,tokenConfig,isRisk);
       const tokenEarnings = tokenBalanceConverted.minus(amountLentToken);
 
       if (tokenEarnings){
@@ -2080,7 +2084,7 @@ class FunctionsUtil {
     const normalizedTokenDecimals = this.normalizeTokenDecimals(tokenDecimals);
     return this.BNify(tokenBalance).times(normalizedTokenDecimals).integerValue(BigNumber.ROUND_FLOOR).toFixed();
   }
-  fixTokenDecimals = (tokenBalance,tokenDecimals,exchangeRate) => {
+  fixTokenDecimals = (tokenBalance,tokenDecimals,exchangeRate=null) => {
     const normalizedTokenDecimals = this.normalizeTokenDecimals(tokenDecimals);
     let balance = this.BNify(tokenBalance).div(normalizedTokenDecimals);
     if (exchangeRate && !exchangeRate.isNaN()){
@@ -2924,11 +2928,11 @@ class FunctionsUtil {
         }
       break;
       case 'amountLent':
-        // output = account ? await this.getAmountDeposited(tokenConfig,account) : false;
-        const amountLents = account ? await this.getAmountLent([token],account) : false;
-        if (amountLents && amountLents[token]){
-          output = amountLents[token];
-        }
+        output = account ? await this.getAmountDeposited(tokenConfig,account) : false;
+        // const amountLents = account ? await this.getAmountLent([token],account) : false;
+        // if (amountLents && amountLents[token]){
+        //   output = amountLents[token];
+        // }
       break;
       case 'tokenPrice':
         if (Object.keys(govTokens).includes(token)){
@@ -3073,6 +3077,33 @@ class FunctionsUtil {
     }
 
     return null;
+  }
+  getIdleTokenPriceWithFee = async (tokenConfig,account,blockNumber='latest') => {
+    account = account || this.props.account;
+    if (!account){
+      return null;
+    }
+
+    let [
+      fee,
+      tokenPrice,
+      userAvgPrice
+    ] = await Promise.all([
+      this.genericContractCall(tokenConfig.idle.token, 'fee', [], {}, blockNumber),
+      this.genericContractCall(tokenConfig.idle.token, 'tokenPrice', [], {}, blockNumber),
+      this.genericContractCall(tokenConfig.idle.token, 'userAvgPrices', [account], {}, blockNumber)
+    ]);
+    
+    fee = this.BNify(fee);
+    tokenPrice = this.BNify(tokenPrice);
+    userAvgPrice = this.BNify(userAvgPrice);
+
+    if (!tokenPrice.isNaN() && !userAvgPrice.isNaN() && !fee.isNaN() && !this.BNify(userAvgPrice).eq(0) && this.BNify(tokenPrice).gt(this.BNify(userAvgPrice))){
+      const priceWFee = this.integerValue(this.BNify(tokenPrice).minus(parseInt(fee.div(1e5).times(tokenPrice.minus(userAvgPrice)))));
+      return priceWFee;
+    }
+
+    return tokenPrice;
   }
   getIdleTokenPrice = async (tokenConfig,blockNumber='latest',timestamp=false) => {
 

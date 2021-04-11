@@ -449,7 +449,7 @@ class PortfolioEquity extends Component {
               value={`$ ${point.data.yFormatted}`}
             />
             {
-            typeof point.data.balances === 'object' && Object.keys(point.data.balances).length &&
+            (typeof point.data.balances === 'object' && Object.keys(point.data.balances).length>0) &&
               Object.keys(point.data.balances).map(token => {
                 if (token === point.serieId){
                   return null;

@@ -92,7 +92,6 @@ class EarningsEstimation extends Component {
     let estimationStepsPerc = 0;
 
     const isRisk = this.props.selectedStrategy === 'risk';
-    const amountLents = await this.functionsUtil.getAmountLent(this.props.enabledTokens,this.props.account);
 
     const aggregatedEarnings = {
       earnings:this.functionsUtil.BNify(0),
@@ -100,11 +99,12 @@ class EarningsEstimation extends Component {
       earningsYear:this.functionsUtil.BNify(0),
     };
 
-    await this.functionsUtil.asyncForEach(Object.keys(amountLents),async (token) => {
+    await this.functionsUtil.asyncForEach(this.props.enabledTokens,async (token) => {
       const tokenConfig = this.props.availableTokens[token];
+      const amountDeposited = await this.functionsUtil.getAmountDeposited(tokenConfig,this.props.account);
 
       const [amountLent,avgBuyPrice,idleTokenPrice] = await Promise.all([
-        this.functionsUtil.convertTokenBalance(amountLents[token],token,tokenConfig,isRisk),
+        this.functionsUtil.convertTokenBalance(amountDeposited,token,tokenConfig,isRisk),
         this.functionsUtil.getAvgBuyPrice([token],this.props.account),
         this.functionsUtil.getIdleTokenPrice(tokenConfig)
       ]);
@@ -147,7 +147,7 @@ class EarningsEstimation extends Component {
     });
 
     const orderedTokensEarnings = {};
-    Object.keys(amountLents).forEach( token => {
+    this.props.enabledTokens.forEach( token => {
       if (tokensEarnings[token]){
         orderedTokensEarnings[token] = tokensEarnings[token];
       }

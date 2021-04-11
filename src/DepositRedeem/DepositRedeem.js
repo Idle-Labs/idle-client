@@ -769,8 +769,13 @@ class DepositRedeem extends Component {
           if (selectedPercentage){
             idleTokenToRedeem = this.functionsUtil.BNify(this.props.idleTokenBalance).times(selectedPercentage);
           } else {
-            const idleTokenPrice = await this.functionsUtil.genericContractCall(this.props.tokenConfig.idle.token, 'tokenPrice');
-            idleTokenToRedeem = this.functionsUtil.BNify(this.functionsUtil.normalizeTokenAmount(inputValue,this.props.tokenConfig.decimals)).div(idleTokenPrice);
+            const idleTokenPriceWithFee = await this.functionsUtil.getIdleTokenPriceWithFee(this.props.tokenConfig,this.props.account)
+            idleTokenToRedeem = this.functionsUtil.BNify(this.functionsUtil.normalizeTokenAmount(inputValue,this.props.tokenConfig.decimals)).div(idleTokenPriceWithFee);
+          }
+
+          // Check if idleTokens to redeem > idleToken balance
+          if (idleTokenToRedeem.gt(this.functionsUtil.BNify(this.props.idleTokenBalance))){
+            idleTokenToRedeem = this.functionsUtil.BNify(this.props.idleTokenBalance);
           }
 
           // Normalize number

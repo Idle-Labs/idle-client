@@ -72,6 +72,7 @@ export default {
     selectBg:'#ffffff',
     backButtonBg:'#ffffff',
     lineChartStroke:'#dbdbdb',
+    wrongNetworkBannerBg:'#ffffff',
     dashboardBg: '#f9fafd',
     statValue: '#959595',
     boxBorder: '#eeeeee',

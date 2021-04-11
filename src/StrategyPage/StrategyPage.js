@@ -188,10 +188,10 @@ class StrategyPage extends Component {
           ] = await Promise.all([
             this.functionsUtil.getTokenAprs(tokenConfig),
             this.functionsUtil.getTokenScore(tokenConfig,isRisk),
-            this.functionsUtil.getAmountLent([token],this.props.account)
+            this.functionsUtil.getAmountDeposited(tokenConfig,this.props.account)
           ]);
 
-          const amountLentToken = await this.functionsUtil.convertTokenBalance(amountLent[token],token,tokenConfig,isRisk);
+          const amountLentToken = await this.functionsUtil.convertTokenBalance(amountLent,token,tokenConfig,isRisk);
 
           const tokenAPY = this.functionsUtil.BNify(tokenAprs.avgApy);
           const tokenWeight = portfolio.tokensBalance[token].tokenBalance.div(portfolio.totalBalance);

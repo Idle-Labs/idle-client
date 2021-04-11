@@ -1182,6 +1182,8 @@ class RimbleTransaction extends React.Component {
     let network = { ...this.state.network };
     network.isCorrectNetwork = this.state.network.current.id === this.state.network.required.id;
 
+    // console.log('checkNetwork',this.state.network.current.id,this.state.network.required.id);
+
     // To do, check window.web3.currentProvider.networkVersion to see if Metamask is in the requiredNetwork
 
     this.setState({ network });
@@ -1835,6 +1837,7 @@ class RimbleTransaction extends React.Component {
         />
         <NetworkUtil
           web3={this.state.web3}
+          theme={this.props.theme}
           network={this.state.network}
         />
       </div>
