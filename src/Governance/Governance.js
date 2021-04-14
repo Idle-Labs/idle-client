@@ -323,7 +323,7 @@ class Dashboard extends Component {
 
   async loadData(){
 
-    if (!this.props.web3){
+    if (!this.props.web3 || !this.props.contractsInitialized){
       return false;
     }
 
@@ -362,6 +362,8 @@ class Dashboard extends Component {
       newState.votes = votes;
       newState.balance = balance;
       newState.currentDelegate = currentDelegate;
+
+      console.log(this.props.account,newState);
     }
 
     this.setState(newState);

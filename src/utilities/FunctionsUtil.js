@@ -2166,6 +2166,10 @@ class FunctionsUtil {
     const lastAllocationsPromises = [];
     const allocations = await this.genericContractCall(tokenConfig.idle.token, 'getAllocations');
 
+    if (!allocations || !allocations.length){
+      return false;
+    }
+
     for (let protocolIndex=0;protocolIndex<allocations.length;protocolIndex++){
       const lastAllocationsPromise = new Promise( async (resolve, reject) => {
         try{

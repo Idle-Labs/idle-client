@@ -19,6 +19,7 @@ import LockedIDLE from '../contracts/LockedIDLE.json';
 import { Web3Versions } from '@terminal-packages/sdk';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import PriceOracle from '../contracts/PriceOracle.json';
+import FeeTreasury from '../contracts/FeeTreasury.json';
 import IdleTokenV2 from '../contracts/IdleTokenV2.json';
 import StrategyPage from '../StrategyPage/StrategyPage';
 import BuyModal from '../utilities/components/BuyModal';
@@ -199,6 +200,7 @@ const globalConfigs = {
       tokenName:'IDLE',
       availableContracts:{
         IDLE,
+        FeeTreasury,
         PriceOracle,
         GovernorAlpha,
         EcosystemFund,
@@ -361,6 +363,10 @@ const globalConfigs = {
     LockedIDLE:{
       abi:LockedIDLE,
       address:'0xF241a0151841AE2E6ea750D50C5794b5EDC31D99'
+    },
+    FeeTreasury:{
+      abi:FeeTreasury,
+      address:'0x69a62c24f16d4914a48919613e8ee330641bcb94' // MAIN
     },
     PriceOracle:{
       abi:PriceOracle,

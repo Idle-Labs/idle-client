@@ -644,6 +644,8 @@ class NewProposal extends Component {
                       type={'text'}
                       className={styles.input}
                       value={this.state.title}
+                      borderColor={'cardBorder'}
+                      backgroundColor={'cardBg'}
                       placeholder={'Title of your proposal'}
                       onChange={ e => this.handleInput('title',e) }
                     />
@@ -662,6 +664,8 @@ class NewProposal extends Component {
                       rows={8}
                       width={1}
                       className={styles.input}
+                      borderColor={'cardBorder'}
+                      backgroundColor={'cardBg'}
                       value={this.state.description}
                       placeholder={'Description of your proposal'}
                       onChange={ e => this.handleInput('description',e) }
@@ -734,7 +738,9 @@ class NewProposal extends Component {
                                 >
                                   <Select
                                     style={{
-                                      width:'100%'
+                                      width:'100%',
+                                      color:this.props.theme.colors.counter,
+                                      backgroundColor:this.props.theme.colors.cardBg
                                     }}
                                     required={true}
                                     value={this.state.selectedContract}
@@ -759,6 +765,8 @@ class NewProposal extends Component {
                                           width={1}
                                           type={'text'}
                                           className={styles.input}
+                                          borderColor={'cardBorder'}
+                                          backgroundColor={'cardBg'}
                                           placeholder={'Custom contract address'}
                                           pattern={this.getPatternByFieldType('address',true)}
                                           onChange={ e => this.handleInput('customAddress',e,'address') }
@@ -796,7 +804,9 @@ class NewProposal extends Component {
                                     >
                                       <Select
                                         style={{
-                                          width:'100%'
+                                          width:'100%',
+                                          color:this.props.theme.colors.counter,
+                                          backgroundColor:this.props.theme.colors.cardBg
                                         }}
                                         required={true}
                                         options={this.state.functionsOptions}
@@ -821,6 +831,8 @@ class NewProposal extends Component {
                                         width={1}
                                         type={'number'}
                                         className={styles.input}
+                                        borderColor={'cardBorder'}
+                                        backgroundColor={'cardBg'}
                                         placeholder={`Enter ETH value`}
                                         onChange={ e => this.valueChange(e) }
                                         value={this.state.actionValue ? this.state.actionValue : 0}
@@ -850,6 +862,8 @@ class NewProposal extends Component {
                                             type={fieldType}
                                             pattern={fieldPattern}
                                             className={styles.input}
+                                            borderColor={'cardBorder'}
+                                            backgroundColor={'cardBg'}
                                             placeholder={`${input.name} (${input.type})`}
                                             onChange={ e => this.inputChange(e,inputIndex) }
                                             value={this.state.actionInputs[inputIndex] ? this.state.actionInputs[inputIndex] : ''}
@@ -961,7 +975,9 @@ class NewProposal extends Component {
                               >
                                 <Select
                                   style={{
-                                    width:'100%'
+                                    width:'100%',
+                                    color:this.props.theme.colors.counter,
+                                    backgroundColor:this.props.theme.colors.cardBg
                                   }}
                                   required={true}
                                   options={this.state.contractOptions}
@@ -985,6 +1001,8 @@ class NewProposal extends Component {
                                         width={1}
                                         type={'text'}
                                         className={styles.input}
+                                        borderColor={'cardBorder'}
+                                        backgroundColor={'cardBg'}
                                         placeholder={'Custom contract address'}
                                         pattern={this.getPatternByFieldType('address',true)}
                                         onChange={ e => this.handleInput('customAddress',e,'address') }
@@ -1022,7 +1040,9 @@ class NewProposal extends Component {
                                   >
                                     <Select
                                       style={{
-                                        width:'100%'
+                                        width:'100%',
+                                        color:this.props.theme.colors.counter,
+                                        backgroundColor:this.props.theme.colors.cardBg
                                       }}
                                       required={true}
                                       options={this.state.functionsOptions}
@@ -1047,6 +1067,8 @@ class NewProposal extends Component {
                                       width={1}
                                       type={'number'}
                                       className={styles.input}
+                                      borderColor={'cardBorder'}
+                                      backgroundColor={'cardBg'}
                                       placeholder={`Enter ETH value`}
                                       onChange={ e => this.valueChange(e) }
                                       value={this.state.actionValue ? this.state.actionValue : 0}
@@ -1076,6 +1098,8 @@ class NewProposal extends Component {
                                           type={fieldType}
                                           pattern={fieldPattern}
                                           className={styles.input}
+                                          borderColor={'cardBorder'}
+                                          backgroundColor={'cardBg'}
                                           placeholder={`${input.name} (${input.type})`}
                                           onChange={ e => this.inputChange(e,inputIndex) }
                                           value={this.state.actionInputs[inputIndex] ? this.state.actionInputs[inputIndex] : ''}
