@@ -229,6 +229,14 @@ class DepositRedeem extends Component {
     }
   }
 
+  getReferralAddress(){
+    let _referral = this.functionsUtil.getQueryStringParameterByName('_referral');
+    if (!this.functionsUtil.checkAddress(_referral)){
+      _referral = null;
+    }
+    return _referral;
+  }
+
   async componentDidUpdate(prevProps,prevState){
     this.loadUtils();
 
@@ -877,9 +885,9 @@ class DepositRedeem extends Component {
               _skipMint = false;
             }
 
-            // console.log('skipMint',_skipMint);
-
-            depositParams = [tokensToDeposit, _skipMint, '0x0000000000000000000000000000000000000000'];
+            const _referral = this.getReferralAddress() || '0x0000000000000000000000000000000000000000';
+            depositParams = [tokensToDeposit, _skipMint, _referral];
+            console.log('depositParams',depositParams);
             contractSendResult = await this.functionsUtil.contractMethodSendWrapper(this.props.tokenConfig.idle.token, 'mintIdleToken', depositParams, callbackDeposit, callbackReceiptDeposit);
           }
         }
@@ -1265,6 +1273,9 @@ class DepositRedeem extends Component {
 
     const showBuyFlow = this.state.componentMounted && (!showDepositCurve || this.state.showBuyFlow) && !this.state.depositCurveEnabled && this.state.tokenApproved && !this.state.contractPaused && (!this.state.migrationEnabled || this.state.skipMigration) && this.state.action === 'deposit' && !this.state.canDeposit && !this.state.showETHWrapperEnabled;
 
+    const _referral = this.getReferralAddress();
+    const showReferral = _referral && this.state.action === 'deposit' && showActionFlow && !showBuyFlow;
+
     return (
       <Flex
         width={1}
@@ -1609,6 +1620,52 @@ class DepositRedeem extends Component {
                                 )
                               }
                             </Flex>
+                          )
+                        }
+                        {
+                          showReferral && (
+                            <DashboardCard
+                              cardProps={{
+                                py:3,
+                                px:2,
+                                mt:3,
+                                display:'flex',
+                                alignItems:'center',
+                                flexDirection:'column',
+                                justifyContent:'center',
+                              }}
+                            >
+                              <Flex
+                                width={1}
+                                alignItems={'center'}
+                                flexDirection={'column'}
+                                justifyContent={'center'}
+                              >
+                                <Icon
+                                  size={'1.8em'}
+                                  name={'Share'}
+                                  color={'cellText'}
+                                />
+                                <Text
+                                  mt={1}
+                                  px={2}
+                                  fontSize={1}
+                                  color={'cellText'}
+                                  textAlign={'center'}
+                                >
+                                  You are depositing with the following referral address:
+                                </Text>
+                                <Text
+                                  mt={1}
+                                  px={2}
+                                  fontSize={1}
+                                  textAlign={'center'}
+                                  color={this.props.theme.colors.transactions.status.completed}
+                                >
+                                  {_referral}
+                                </Text>
+                              </Flex>
+                            </DashboardCard>
                           )
                         }
                         {
