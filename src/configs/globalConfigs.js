@@ -829,8 +829,8 @@ const globalConfigs = {
             abi:erc20Forwarder,
             name:'erc20Forwarder',
             function:'emitMessage',
-            address:'0xCB3F801C91DEcaaE9b08b1eDb915F9677D8fdB4A' // Kovan
-            // address:'0xF82986F574803dfFd9609BE8b9c7B92f63a1410E', // Kovan
+            address:'0x84a0856b038eaAd1cC7E297cF34A7e72685A8693', // Main
+            // address:'0xCB3F801C91DEcaaE9b08b1eDb915F9677D8fdB4A' // Kovan
           },
           tokens:{
             DAI:{
@@ -839,7 +839,8 @@ const globalConfigs = {
               abi:IdleDepositForwarder,
               function:'permitAndDeposit', // foo
               name:'IdleDepositForwarderDAI',
-              address:'0x1E32F1E96B9735E5D31a23e12fe8e6D9845a9072', // Kovan
+              address:'0xDe3c769cCD1878372864375e9f89956806B86daA', // Main
+              // address:'0x1E32F1E96B9735E5D31a23e12fe8e6D9845a9072', // Kovan
             },
             USDC:{
               enabled:true,
@@ -847,7 +848,8 @@ const globalConfigs = {
               abi:IdleDepositForwarder,
               name:'IdleDepositForwarderUSDC',
               function:'permitEIP2612AndDeposit',
-              address:'0x8f9048CFAa27b1A1b77c32a0b87D2DcF5D016cb5', // Kovan
+              address:'0x43bD6a78b37b50E3f52CAcec53F1202dbDe6a761', // Main
+              // address:'0x8f9048CFAa27b1A1b77c32a0b87D2DcF5D016cb5', // Kovan
             },
           }
         },
@@ -882,7 +884,7 @@ const globalConfigs = {
       1337:'Hardhat'
     },
     isForked:false, // If TRUE the tx confirmation callback is fired on the receipt
-    requiredNetwork:42, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
+    requiredNetwork:1, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
     blocksPerYear:2371428,
     firstBlockNumber:8119247,
     requiredConfirmations: 1,
@@ -923,10 +925,10 @@ const globalConfigs = {
         },
         params:{
           debug: false,
-          // apiKey: env.REACT_APP_BICONOMY_KEY, // Mainnet
+          apiKey: env.REACT_APP_BICONOMY_KEY, // Mainnet
           dappId: env.REACT_APP_BICONOMY_APPID,
           apiId: '36572ec9-ae5c-4c4a-9530-f3ae7c7ac829',
-          apiKey: env.REACT_APP_BICONOMY_KEY_KOVAN, // Kovan
+          // apiKey: env.REACT_APP_BICONOMY_KEY_KOVAN, // Kovan
         }
       },
       terminal:{
@@ -995,7 +997,7 @@ const globalConfigs = {
       }
     },
     coverProtocol:{
-      enabled:true,
+      enabled:false,
       label:'Cover Protocol',
       route:'cover-protocol',
       subComponent:CoverProtocol,

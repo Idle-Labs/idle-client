@@ -116,6 +116,7 @@ class FunctionsUtil {
     animateScroll();
   }
   getQueryStringParameterByName = (name, url = window.location.href) => {
+    // eslint-disable-next-line
     name = name.replace(/[\[\]]/g, '\\$&');
     var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
         results = regex.exec(url);

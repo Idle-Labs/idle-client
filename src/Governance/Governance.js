@@ -362,8 +362,6 @@ class Dashboard extends Component {
       newState.votes = votes;
       newState.balance = balance;
       newState.currentDelegate = currentDelegate;
-
-      console.log(this.props.account,newState);
     }
 
     this.setState(newState);

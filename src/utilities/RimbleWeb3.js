@@ -482,8 +482,8 @@ class RimbleTransaction extends React.Component {
               return false;
             }
             
-            const erc20ForwarderClient = biconomy.erc20ForwarderClient;
             const permitClient = biconomy.permitClient;
+            const erc20ForwarderClient = biconomy.erc20ForwarderClient;
 
             const newState = {
               web3,
@@ -492,6 +492,8 @@ class RimbleTransaction extends React.Component {
               permitClient,
               erc20ForwarderClient
             };
+            // console.log('biconomy',newState);
+
             if (web3 !== this.state.web3){
               this.setState(newState, web3Callback);
             }
@@ -1385,10 +1387,10 @@ class RimbleTransaction extends React.Component {
       };
 
       // const networkId = this.functionsUtil.getGlobalConfig(['network','requiredNetwork']);
-      // const common = { customChain:{ chainId: 1, networkId } };
+      // const common = { customChain:{ chainId: 1337, networkId: 1337 } };
 
       return contract.methods[contractMethod](...params)
-        .send(value ? { from: account, value, gas } : { from: account, gas })
+        .send(value ? { from: account, value, gas/*, common*/ } : { from: account, gas/*, common*/ })
         .on("transactionHash", hash => {
           this.functionsUtil.customLog('txOnTransactionHash', hash);
 
