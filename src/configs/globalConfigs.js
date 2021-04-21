@@ -8,7 +8,6 @@ import yUSDCv3 from '../abis/iearn/yUSDCv3.json';
 import yUSDTv3 from '../abis/iearn/yUSDTv3.json';
 import ySUSDv3 from '../abis/iearn/ySUSDv3.json';
 import yTUSDv3 from '../abis/iearn/yTUSDv3.json';
-import ETHWrapper from '../ETHWrapper/ETHWrapper';
 import Timelock from '../contracts/Timelock.json';
 import CurveZap from '../abis/curve/CurveZap.json';
 import CovToken from '../abis/cover/CovToken.json';
@@ -20,6 +19,7 @@ import CoverMint from '../abis/cover/CoverMint.json';
 import LockedIDLE from '../contracts/LockedIDLE.json';
 import { Web3Versions } from '@terminal-packages/sdk';
 import FunctionsUtil from '../utilities/FunctionsUtil';
+import TokenWrapper from '../TokenWrapper/TokenWrapper';
 import PriceOracle from '../contracts/PriceOracle.json';
 import FeeTreasury from '../contracts/FeeTreasury.json';
 import IdleTokenV2 from '../contracts/IdleTokenV2.json';
@@ -987,15 +987,22 @@ const globalConfigs = {
       enabled:true,
       label:'ETH Wrapper',
       route:'eth-wrapper',
-      subComponent:ETHWrapper,
+      subComponent:TokenWrapper,
       image:'images/tokens/WETH.svg',
       desc:'Wrap your ETH and get WETH. Unwrap your WETH and get back ETH.',
       props:{
-        contract:{
+        startContract:{
+          name:'ETH',
+          token:'ETH',
+          decimals:18,
+          wrapMethod:'deposit',
+        },
+        destContract:{
           abi:WETH,
           name:'WETH',
           decimals:18,
           token:'WETH',
+          unwrapMethod:'withdraw',
           address:'0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
         },
       }
@@ -1015,9 +1022,10 @@ const globalConfigs = {
               abi:LpStaking,
               name:'LpStaking',
               rewardToken:'IDLE',
-              // address:'0x46f2f34742c1d9b9b220aabf0ff26bf59ec9f8a0' // Mainnet
+              // address:'0x4A679253410272dd5232B3Ff7cF5dbB88f295319' // Mainnet
               address:'0x4A679253410272dd5232B3Ff7cF5dbB88f295319' // Fork
             },
+            name:'SLP',
             token:'SLP',
             decimals:18,
             enabled:true,
@@ -1025,7 +1033,6 @@ const globalConfigs = {
             label:'SushiSwap LP Token',
             icon:'images/protocols/sushiswap.png',
             address:'0xa7f11e026a0af768d285360a855f2bded3047530' // Mainnet
-            // address:'0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44' // Fork
           }
         }
       }

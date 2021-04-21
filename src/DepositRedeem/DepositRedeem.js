@@ -1925,8 +1925,8 @@ class DepositRedeem extends Component {
                                 this.state.showETHWrapperEnabled && 
                                   <ETHWrapperComponent
                                     {...this.props}
+                                    action={'wrap'}
                                     fullWidth={true}
-                                    depositOnly={true}
                                     toolProps={ethWrapperInfo.props}
                                   />
                               }

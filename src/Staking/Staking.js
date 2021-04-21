@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { Flex, Box, Text, Icon } from "rimble-ui";
 import FlexLoader from '../FlexLoader/FlexLoader';
 import AssetField from '../AssetField/AssetField';
 import ImageButton from '../ImageButton/ImageButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
+import TokenWrapper from '../TokenWrapper/TokenWrapper';
 import DashboardCard from '../DashboardCard/DashboardCard';
+import { Flex, Box, Text, Icon, Checkbox } from "rimble-ui";
 import GenericSelector from '../GenericSelector/GenericSelector';
 import SendTxWithBalance from '../SendTxWithBalance/SendTxWithBalance';
 
@@ -30,6 +31,7 @@ class Staking extends Component {
     availableTokens:null,
     approveEnabled:false,
     contractApproved:false,
+    tokenWrapperProps:null,
     distributionSpeed:null,
     approveDescription:null,
     balanceSelectorInfo:null,
@@ -77,7 +79,12 @@ class Staking extends Component {
     const selectedActionChanged = prevState.selectedAction !== this.state.selectedAction;
     const contractApprovedChanged = prevState.contractApproved !== this.state.contractApproved;
     if (selectedActionChanged || contractApprovedChanged){
-      this.updateData(selectedActionChanged);
+      this.setState({
+        tokenWrapperProps:null,
+        showTokenWrapperEnabled:false
+      },() => {
+        this.updateData(selectedActionChanged);
+      });
     }
 
     const contractInfoChanged = JSON.stringify(prevState.contractInfo) !== JSON.stringify(this.state.contractInfo);
@@ -89,8 +96,6 @@ class Staking extends Component {
   async changeInputCallback(inputValue=null){
 
     let infoBox = null;
-
-    console.log('changeInputCallback',inputValue);
 
     if (inputValue && this.functionsUtil.BNify(inputValue).gt(0)){
       switch (this.state.selectedAction){
@@ -175,7 +180,7 @@ class Staking extends Component {
   }
 
   async transactionSucceeded(tx,amount,params){
-    console.log('transactionSucceeded',tx);
+    // console.log('transactionSucceeded',tx);
     let infoBox = null;
     switch (this.state.selectedAction){
       case 'Stake':
@@ -220,6 +225,7 @@ class Staking extends Component {
   async updateData(selectedActionChanged=false){
     const newState = {};
 
+    newState.balanceProp = this.functionsUtil.BNify(0)
     newState.tokenBalance = this.functionsUtil.BNify(await this.functionsUtil.getTokenBalance(this.state.selectedToken,this.props.account));
     newState.stakedBalance = this.functionsUtil.BNify(await this.functionsUtil.genericContractCall(this.state.contractInfo.name,'totalStakedFor',[this.props.account]));
 
@@ -228,20 +234,50 @@ class Staking extends Component {
         newState.approveEnabled = true;
         newState.balanceProp = newState.tokenBalance;
         newState.approveDescription = 'Approve the Staking contract to stake your LP tokens';
+        newState.tokenWrapperProps = {
+          startContract:{
+            name:'ETH',
+            token:'ETH',
+            decimals:18,
+            wrapMethod:'deposit',
+          },
+          destContract:{
+            unwrapMethod:'withdraw',
+            ...this.state.tokenConfig
+          },
+        };
       break;
       case 'Withdraw':
         newState.approveEnabled = false;
         newState.approveDescription = '';
         newState.balanceProp = this.functionsUtil.fixTokenDecimals(newState.stakedBalance,this.state.tokenConfig.decimals);
+        newState.tokenWrapperProps = {
+          startContract:{
+            name:'ETH',
+            token:'ETH',
+            decimals:18,
+            wrapMethod:'deposit',
+          },
+          destContract:{
+            unwrapMethod:'withdraw',
+            ...this.state.tokenConfig
+          },
+        };
       break;
       default:
       break;
+    }
+
+    if (newState.balanceProp.lte(0)){
+      newState.showTokenWrapperEnabled = true;
     }
 
     if (selectedActionChanged){
       newState.infoBox = null;
       newState.transactionSucceeded = false;
     }
+
+    // console.log('updateData',this.state.selectedAction,newState);
 
     this.setState(newState,() => {
       this.loadStats();
@@ -345,9 +381,14 @@ class Staking extends Component {
     });
 
     const globalStats = [];
+
+    const stakingShare = this.functionsUtil.BNify(accountingData[2]).div(this.functionsUtil.BNify(accountingData[3]));
+    const userDistributionSpeed = distributionSpeed.times(stakingShare);
+    const rewardsPerDay = userDistributionSpeed.times(86400);
+
     globalStats.push({
-      title:'APY',
-      value:'???'
+      title:'Distribution rate',
+      value:this.functionsUtil.formatMoney(rewardsPerDay)+' '+this.state.contractInfo.rewardToken+' / day'
     });
 
     globalStats.push({
@@ -370,6 +411,12 @@ class Staking extends Component {
       accountingData,
       distributionSpeed,
       totalStakingShares
+    });
+  }
+
+  toggleShowTokenWrapper = showTokenWrapperEnabled => {
+    this.setState({
+      showTokenWrapperEnabled
     });
   }
 
@@ -413,6 +460,7 @@ class Staking extends Component {
             mt={1}
             fontSize={[2,3]}
             color={'statValue'}
+            {...props.textProps}
           >
             {props.value}
           </Text>
@@ -619,6 +667,9 @@ class Staking extends Component {
                                     mb:[2,0],
                                     width:[1,'32%']
                                   }}
+                                  textProps={{
+                                    fontSize:[1,2]
+                                  }}
                                   {...statInfo}
                                 />
                               )
@@ -694,61 +745,125 @@ class Staking extends Component {
                             />
                           </Flex>
                           {
-                            this.state.tokenConfig && this.state.balanceProp && this.state.contractInfo && (isStake || isUnstake) ? (
-                              <Box
+                            this.state.tokenWrapperProps && (
+                              <Flex
                                 mt={1}
-                                mb={3}
                                 width={1}
+                                alignItems={'center'}
+                                flexDirection={'column'}
+                                justifyContent={'center'}
+                                mb={this.state.showTokenWrapperEnabled ? 0 : 3}
                               >
-                                <SendTxWithBalance
-                                  {...this.props}
-                                  action={txAction}
-                                  error={this.state.error}
-                                  steps={this.state.steps}
-                                  infoBox={this.state.infoBox}
-                                  tokenConfig={this.state.tokenConfig}
-                                  tokenBalance={this.state.balanceProp}
-                                  contractInfo={this.state.contractInfo}
-                                  approveEnabled={this.state.approveEnabled}
-                                  callback={this.transactionSucceeded.bind(this)}
-                                  approveDescription={this.state.approveDescription}
-                                  contractApproved={this.contractApproved.bind(this)}
-                                  balanceSelectorInfo={this.state.balanceSelectorInfo}
-                                  changeInputCallback={this.changeInputCallback.bind(this)}
-                                  getTransactionParams={this.getTransactionParams.bind(this)}
+                                <DashboardCard
+                                  cardProps={{
+                                    py:3,
+                                    px:2,
+                                    pb:2,
+                                    display:'flex',
+                                    alignItems:'center',
+                                    flexDirection:'column',
+                                    justifyContent:'center',
+                                  }}
                                 >
-                                  <DashboardCard
-                                    cardProps={{
-                                      p:3
-                                    }}
+                                  <Flex
+                                    alignItems={'center'}
+                                    justifyContent={'row'}
                                   >
-                                    <Flex
-                                      alignItems={'center'}
-                                      flexDirection={'column'}
+                                    <Checkbox
+                                      required={false}
+                                      checked={this.state.showTokenWrapperEnabled}
+                                      onChange={ e => this.toggleShowTokenWrapper(e.target.checked) }
+                                      label={ isStake ? `Convert your ${this.state.tokenWrapperProps.startContract.token} to ${this.state.tokenWrapperProps.destContract.token}` : `Convert your ${this.state.tokenWrapperProps.destContract.token} to ${this.state.tokenWrapperProps.startContract.token}`}
+                                    />
+                                  </Flex>
+                                </DashboardCard>
+                              </Flex>
+                            )
+                          }
+                          {
+                            (isStake || isUnstake) ?
+                              this.state.showTokenWrapperEnabled && this.state.tokenWrapperProps ? (
+                                <TokenWrapper
+                                  {...this.props}
+                                  fullWidth={true}
+                                  action={ isStake ? 'wrap' : 'unwrap' }
+                                  toolProps={this.state.tokenWrapperProps}
+                                />
+                              ) : (this.state.tokenConfig && this.state.balanceProp && this.state.contractInfo ? (
+                                <Box
+                                  mt={1}
+                                  mb={3}
+                                  width={1}
+                                >
+                                  <SendTxWithBalance
+                                    {...this.props}
+                                    action={txAction}
+                                    error={this.state.error}
+                                    steps={this.state.steps}
+                                    infoBox={this.state.infoBox}
+                                    tokenConfig={this.state.tokenConfig}
+                                    tokenBalance={this.state.balanceProp}
+                                    contractInfo={this.state.contractInfo}
+                                    approveEnabled={this.state.approveEnabled}
+                                    callback={this.transactionSucceeded.bind(this)}
+                                    approveDescription={this.state.approveDescription}
+                                    contractApproved={this.contractApproved.bind(this)}
+                                    balanceSelectorInfo={this.state.balanceSelectorInfo}
+                                    changeInputCallback={this.changeInputCallback.bind(this)}
+                                    getTransactionParams={this.getTransactionParams.bind(this)}
+                                  >
+                                    <DashboardCard
+                                      cardProps={{
+                                        p:3
+                                      }}
                                     >
-                                      <Icon
-                                        name={'MoneyOff'}
-                                        color={'cellText'}
-                                        size={this.props.isMobile ? '1.8em' : '2.3em'}
-                                      />
-                                      <Text
-                                        mt={1}
-                                        fontSize={2}
-                                        color={'cellText'}
-                                        textAlign={'center'}
+                                      <Flex
+                                        alignItems={'center'}
+                                        flexDirection={'column'}
                                       >
-                                        {
-                                          isStake ? (
-                                            `You don't have any ${this.state.selectedToken} in your wallet.`
-                                          ) : isUnstake && (
-                                            `You don't have any staked ${this.state.selectedToken} to withdraw.`
-                                          )
-                                        }
-                                      </Text>
-                                    </Flex>
-                                  </DashboardCard>
-                                </SendTxWithBalance>
-                              </Box>
+                                        <Icon
+                                          name={'MoneyOff'}
+                                          color={'cellText'}
+                                          size={this.props.isMobile ? '1.8em' : '2.3em'}
+                                        />
+                                        <Text
+                                          mt={1}
+                                          fontSize={2}
+                                          color={'cellText'}
+                                          textAlign={'center'}
+                                        >
+                                          {
+                                            isStake ? (
+                                              `You don't have any ${this.state.selectedToken} in your wallet.`
+                                            ) : isUnstake && (
+                                              `You don't have any staked ${this.state.selectedToken} to withdraw.`
+                                            )
+                                          }
+                                        </Text>
+                                      </Flex>
+                                    </DashboardCard>
+                                  </SendTxWithBalance>
+                                </Box>
+                              ) : (
+                                <Flex
+                                  mt={3}
+                                  mb={3}
+                                  width={1}
+                                >
+                                  <FlexLoader
+                                    flexProps={{
+                                      flexDirection:'row'
+                                    }}
+                                    loaderProps={{
+                                      size:'30px'
+                                    }}
+                                    textProps={{
+                                      ml:2
+                                    }}
+                                    text={'Loading balance...'}
+                                  />
+                                </Flex>
+                              )
                             ) : isStats && (
                               <Flex
                                 mt={1}

@@ -7,19 +7,20 @@ import DashboardCard from '../DashboardCard/DashboardCard';
 import CardIconButton from '../CardIconButton/CardIconButton';
 import SendTxWithBalance from '../SendTxWithBalance/SendTxWithBalance';
 
-class ETHWrapper extends Component {
+class TokenWrapper extends Component {
 
   state = {
     action:null,
     infoBox:null,
-    balanceETH:null,
-    balanceWETH:null,
+    balanceDest:null,
     tokenConfig:null,
+    balanceStart:null,
     tokenBalance:null,
     contractInfo:null,
     selectedToken:null,
     approveEnabled:true,
-    approveDescription:null
+    approveDescription:null,
+    showTokenWrapperEnabled:false
   };
 
   // Utils
@@ -35,39 +36,74 @@ class ETHWrapper extends Component {
 
   async componentWillMount(){
     this.loadUtils();
-    this.loadBalance();
+    this.loadData();
   }
 
   async componentDidUpdate(prevProps,prevState){
     this.loadUtils();
 
-    const actionChanged = prevState.action !== this.state.action;
-    if (actionChanged){
-      this.updateActionData();
+    const actionChanged = (prevState.action !== this.state.action) || (this.props.action !== prevProps.action);
+    const startContractChanged = JSON.stringify(this.props.startContract) !== JSON.stringify(prevProps.startContract);
+    const destContractChanged = JSON.stringify(this.props.destContract) !== JSON.stringify(prevProps.destContract);
+    if (actionChanged || startContractChanged || destContractChanged){
+      this.loadData();
     }
+  }
+
+  async loadData(){
+    const action = this.props.action || this.state.action || 'wrap';
+    this.setState({
+      action
+    },() => {
+      this.loadBalance();
+      this.updateActionData();
+    });
+  }
+
+  async getTokenBalance(contractInfo){
+
+    if (!contractInfo){
+      return false;
+    }
+
+    let tokenBalance = null;
+    switch (contractInfo.name){
+      case 'ETH':
+        tokenBalance = await this.functionsUtil.getETHBalance(this.props.account);
+      break;
+      default:
+        // Init Contract
+        await this.props.initContract(contractInfo.name,contractInfo.address,contractInfo.abi);
+        tokenBalance = await this.functionsUtil.getTokenBalance(contractInfo.name,this.props.account);
+      break;
+    }
+
+    tokenBalance = tokenBalance || this.functionsUtil.BNify(0);
+
+    return tokenBalance;
   }
 
   async loadBalance(){
 
-    // Init Contract
-    await this.props.initContract(this.props.toolProps.contract.name,this.props.toolProps.contract.address,this.props.toolProps.contract.abi);
+    if (!this.props.toolProps.startContract || !this.props.toolProps.destContract){
+      return false;
+    }
 
     // Load Balances
     const [
-      balanceETH,
-      balanceWETH
+      balanceDest,
+      balanceStart
     ] = await Promise.all([
-      this.functionsUtil.getETHBalance(this.props.account),
-      this.functionsUtil.getTokenBalance('WETH',this.props.account)
+      this.getTokenBalance(this.props.toolProps.destContract),
+      this.getTokenBalance(this.props.toolProps.startContract)
     ]);
 
-    const action = this.state.action || 'wrap';
-    const tokenBalance = action === 'wrap' ? balanceETH : balanceWETH;
+    const tokenBalance = this.state.action === 'wrap' ? balanceStart : balanceDest;
+    // console.log('loadBalance',this.props.toolProps.startContract,parseFloat(balanceStart),this.props.toolProps.destContract,parseFloat(balanceDest));
 
     this.setState({
-      action,
-      balanceETH,
-      balanceWETH,
+      balanceDest,
+      balanceStart,
       tokenBalance
     });
   }
@@ -82,34 +118,31 @@ class ETHWrapper extends Component {
 
     switch (this.state.action){
       case 'wrap':
-        selectedToken = 'ETH';
         approveEnabled = true;
-        tokenConfig = {
-          token:'ETH',
-          decimals:18
-        };
-        tokenBalance = this.state.balanceETH;
-        approveDescription = 'To Mint new WETH you need to approve the Smart-Contract first';
+        tokenBalance = this.state.balanceStart;
+        tokenConfig = this.props.toolProps.startContract;
+        selectedToken = this.props.toolProps.startContract.name;
+        approveDescription = `To Mint new ${this.props.toolProps.destContract.name} you need to approve the Smart-Contract first`;
         infoBox = {
           icon:'FileDownload',
           // iconProps:{
           //   color:this.props.theme.colors.transactions.action.deposit
           // },
-          text:`Wrap your ETH and get WETH with a 1:1 ratio`
+          text:`Wrap your ${this.props.toolProps.startContract.name} and get ${this.props.toolProps.destContract.name}`
         };
       break;
       case 'unwrap':
-        selectedToken = 'WETH';
+        selectedToken = this.props.toolProps.destContract.name;
         approveEnabled = false;
-        tokenBalance = this.state.balanceWETH;
-        tokenConfig = this.props.toolProps.contract;
-        approveDescription = 'To withdraw your ETH you need to approve the Smart-Contract first';
+        tokenBalance = this.state.balanceDest;
+        tokenConfig = this.props.toolProps.destContract;
+        approveDescription = `To withdraw your ${this.props.toolProps.startContract.name} you need to approve the Smart-Contract first`;
         infoBox = {
           icon:'FileUpload',
           // iconProps:{
           //   color:this.props.theme.colors.transactions.action.redeem
           // },
-          text:`Unwrap your WETH and get back ETH with a 1:1 ratio`
+          text:`Unwrap your ${this.props.toolProps.destContract.name} and get back ${this.props.toolProps.startContract.name}`
         };
       break;
       default:
@@ -123,6 +156,8 @@ class ETHWrapper extends Component {
       selectedToken,
       approveEnabled,
       approveDescription
+    },() => {
+      this.loadBalance();
     });
   }
 
@@ -137,7 +172,7 @@ class ETHWrapper extends Component {
 
     switch (this.state.action){
       case 'wrap':
-        const mintLog = tx.txReceipt && tx.txReceipt.logs ? tx.txReceipt.logs.find( log => log.address.toLowerCase() === this.props.toolProps.contract.address.toLowerCase() ) : null;
+        const mintLog = tx.txReceipt && tx.txReceipt.logs ? tx.txReceipt.logs.find( log => log.address.toLowerCase() === this.props.toolProps.destContract.address.toLowerCase() ) : null;
         let mintedAmount = mintLog ? parseInt(mintLog.data,16) : amount;
         mintedAmount = this.functionsUtil.fixTokenDecimals(mintedAmount,this.state.tokenConfig.decimals);
         infoBox = {
@@ -145,11 +180,11 @@ class ETHWrapper extends Component {
           iconProps:{
             color:this.props.theme.colors.transactions.status.completed
           },
-          text:`You have received <strong>${mintedAmount.toFixed(4)} WETH</strong>`
+          text:`You have received <strong>${mintedAmount.toFixed(4)} ${this.props.toolProps.destContract.name}</strong>`
         }
       break;
       case 'unwrap':
-        const withdrawLog = tx.txReceipt && tx.txReceipt.logs ? tx.txReceipt.logs.find( log => log.address.toLowerCase() === this.props.toolProps.contract.address.toLowerCase() ) : null;
+        const withdrawLog = tx.txReceipt && tx.txReceipt.logs ? tx.txReceipt.logs.find( log => log.address.toLowerCase() === this.props.toolProps.destContract.address.toLowerCase() ) : null;
         let withdrawnAmount = withdrawLog ? parseInt(withdrawLog.data,16) : amount;
         withdrawnAmount = this.functionsUtil.fixTokenDecimals(withdrawnAmount,this.state.tokenConfig.decimals);
         infoBox = {
@@ -157,7 +192,7 @@ class ETHWrapper extends Component {
           iconProps:{
             color:this.props.theme.colors.transactions.status.completed
           },
-          text:`You have received <strong>${withdrawnAmount.toFixed(4)} ETH</strong>`
+          text:`You have received <strong>${withdrawnAmount.toFixed(4)} ${this.props.toolProps.startContract.name}</strong>`
         }
       break;
       default:
@@ -178,12 +213,12 @@ class ETHWrapper extends Component {
       case 'wrap':
         params.value = amount;
         params.methodParams = [];
-        params.methodName = 'deposit';
+        params.methodName = this.props.toolProps.startContract.wrapMethod;
       break;
       case 'unwrap':
         params.value = null;
         params.methodParams = [amount];
-        params.methodName = 'withdraw';
+        params.methodName = this.props.toolProps.destContract.unwrapMethod;
       break;
       default:
       break;
@@ -194,7 +229,6 @@ class ETHWrapper extends Component {
   render() {
 
     const fullWidth = !!this.props.fullWidth;
-    const depositOnly = !!this.props.depositOnly;
 
     return (
       <Flex
@@ -251,7 +285,7 @@ class ETHWrapper extends Component {
                 width={1}
               >
                 {
-                  !depositOnly && (
+                  !this.props.action && (
                     <Flex
                       width={1}
                       flexDirection={'column'}
@@ -274,7 +308,7 @@ class ETHWrapper extends Component {
                             width:0.48
                           }}
                           text={'Wrap'}
-                          iconColor={'wrap'}
+                          iconColor={'deposit'}
                           icon={'ArrowDownward'}
                           iconBgColor={'#ced6ff'}
                           isActive={ this.state.action === 'wrap' }
@@ -312,7 +346,7 @@ class ETHWrapper extends Component {
                         infoBox={this.state.infoBox}
                         tokenConfig={this.state.tokenConfig}
                         tokenBalance={this.state.tokenBalance}
-                        contractInfo={this.props.toolProps.contract}
+                        contractInfo={this.props.toolProps.destContract}
                         callback={this.transactionSucceeded.bind(this)}
                         approveDescription={this.state.approveDescription}
                         // changeInputCallback={this.changeInputCallback.bind(this)}
@@ -344,10 +378,8 @@ class ETHWrapper extends Component {
                         </DashboardCard>
                       </SendTxWithBalance>
                     ) : (
-                      <DashboardCard
-                        cardProps={{
-                          p:3,
-                        }}
+                      <Flex
+                        width={1}
                       >
                         <FlexLoader
                           flexProps={{
@@ -361,7 +393,7 @@ class ETHWrapper extends Component {
                           }}
                           text={'Loading Balance...'}
                         />
-                      </DashboardCard>
+                      </Flex>
                     )
                   }
                 </Box>
@@ -374,4 +406,4 @@ class ETHWrapper extends Component {
   }
 }
 
-export default ETHWrapper;
+export default TokenWrapper;

@@ -203,7 +203,7 @@ class SendTxWithBalance extends Component {
     const _amount = this.functionsUtil.normalizeTokenAmount(inputValue,this.props.tokenConfig.decimals);
     const params = await this.props.getTransactionParams(_amount);
 
-    console.log('executeTx',params);
+    // console.log('executeTx',params);
 
     const callback = (tx,error) => {
       const txSucceeded = tx.status === 'success';
@@ -455,10 +455,10 @@ class SendTxWithBalance extends Component {
                   >
                     <TxProgressBar
                       web3={this.props.web3}
-                      waitText={`${action} estimated in`}
                       hash={this.state.processing.txHash}
                       endMessage={`Finalizing ${action} request...`}
                       cancelTransaction={this.cancelTransaction.bind(this)}
+                      waitText={`${this.functionsUtil.capitalize(action)} estimated in`}
                     />
                   </Flex>
                 ) : (
