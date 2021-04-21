@@ -47,9 +47,10 @@ class SendTxWithBalance extends Component {
     const actionChanged = prevProps.action !== this.props.action;
     const accountChanged = prevProps.account !== this.props.account;
     const tokenBalanceChanged = prevProps.tokenBalance !== this.props.tokenBalance;
+    const approveEnabledChanged = prevProps.approveEnabled !== this.props.approveEnabled;
     const contractChanged = JSON.stringify(prevProps.contractInfo) !== JSON.stringify(this.props.contractInfo);
     const tokenConfigChanged = JSON.stringify(prevProps.tokenConfig) !== JSON.stringify(this.props.tokenConfig);
-    if (actionChanged || accountChanged || tokenBalanceChanged || contractChanged || tokenConfigChanged){
+    if (actionChanged || accountChanged || tokenBalanceChanged || contractChanged || tokenConfigChanged || approveEnabledChanged){
       await this.loadData();
     }
 
@@ -67,20 +68,23 @@ class SendTxWithBalance extends Component {
 
     const inputValueChanged = prevState.inputValue !== this.state.inputValue;
     if (inputValueChanged){
-      if (typeof this.props.changeInputCallback === 'function'){
-        this.props.changeInputCallback(this.state.inputValue);
-      }
       this.checkButtonDisabled();
     }
   }
 
-  changeInputValue = (e) => {
+  changeInputValue = (e,call_callback=true) => {
     const fastBalanceSelector = null;
     const inputValue = e.target.value.length && !isNaN(e.target.value) ? this.functionsUtil.BNify(e.target.value) : this.functionsUtil.BNify(0);
-    this.setState((prevState) => ({
-      inputValue,
-      fastBalanceSelector
-    }));
+    if (this.state.inputValue !== inputValue){
+      this.setState((prevState) => ({
+        inputValue,
+        fastBalanceSelector
+      }),() => {
+        if (call_callback && typeof this.props.changeInputCallback === 'function'){
+          this.props.changeInputCallback(this.state.inputValue);
+        }
+      });
+    }
   }
 
   setInputValue = () => {
@@ -88,9 +92,12 @@ class SendTxWithBalance extends Component {
       return false;
     }
     const selectedPercentage = this.functionsUtil.BNify(this.state.fastBalanceSelector).div(100);
-    const inputValue = this.props.tokenBalance ? this.functionsUtil.BNify(this.props.tokenBalance).times(selectedPercentage) : null;
-    this.setState({
-      inputValue
+    const inputValue = this.props.tokenBalance && !this.functionsUtil.BNify(this.props.tokenBalance).isNaN() ? this.functionsUtil.BNify(this.props.tokenBalance).times(selectedPercentage) : null;
+
+    this.changeInputValue({
+      target:{
+        value:inputValue.toString()
+      }
     });
   }
 
@@ -167,6 +174,8 @@ class SendTxWithBalance extends Component {
         }));
       };
 
+      // console.log(this.props.tokenConfig.token,this.props.contractInfo.address);
+
       this.functionsUtil.enableERC20(this.props.tokenConfig.token,this.props.contractInfo.address,callbackApprove,callbackReceiptApprove);
 
       this.setState((prevState) => ({
@@ -193,6 +202,8 @@ class SendTxWithBalance extends Component {
 
     const _amount = this.functionsUtil.normalizeTokenAmount(inputValue,this.props.tokenConfig.decimals);
     const params = await this.props.getTransactionParams(_amount);
+
+    console.log('executeTx',params);
 
     const callback = (tx,error) => {
       const txSucceeded = tx.status === 'success';
@@ -228,7 +239,7 @@ class SendTxWithBalance extends Component {
           target:{
             value:0
           }
-        });
+        },false);
         // Call upper component callback
         if (typeof this.props.callback === 'function'){
           this.props.callback(tx,_amount,params);
@@ -291,10 +302,12 @@ class SendTxWithBalance extends Component {
 
   async loadData(){
     const inputValue = null;
+    const fastBalanceSelector = null;
     const contractApproved = await this.checkContractApproved();
     this.setState({
       inputValue,
-      contractApproved
+      contractApproved,
+      fastBalanceSelector
     });
   }
 
@@ -304,6 +317,8 @@ class SendTxWithBalance extends Component {
 
   render() {
 
+    const action = this.props.action ? this.props.action : 'Deposit';
+
     return (
       <Flex
         width={1}
@@ -312,7 +327,7 @@ class SendTxWithBalance extends Component {
         justifyContent={'center'}
       >
         {
-          this.props.tokenConfig && this.props.tokenBalance && this.functionsUtil.BNify(this.props.tokenBalance).gt(0) ? (
+          this.props.tokenConfig && !this.functionsUtil.BNify(this.props.tokenBalance).isNaN() && this.functionsUtil.BNify(this.props.tokenBalance).gt(0) ? (
             <Box
               width={1}
             >
@@ -401,8 +416,7 @@ class SendTxWithBalance extends Component {
                   ) : (
                     <DashboardCard
                       cardProps={{
-                        p:3,
-                        mt:3,
+                        p:3
                       }}
                     >
                       <Flex
@@ -441,9 +455,9 @@ class SendTxWithBalance extends Component {
                   >
                     <TxProgressBar
                       web3={this.props.web3}
-                      waitText={`Deposit estimated in`}
+                      waitText={`${action} estimated in`}
                       hash={this.state.processing.txHash}
-                      endMessage={`Finalizing deposit request...`}
+                      endMessage={`Finalizing ${action} request...`}
                       cancelTransaction={this.cancelTransaction.bind(this)}
                     />
                   </Flex>
@@ -490,7 +504,7 @@ class SendTxWithBalance extends Component {
                           )
                         }
                         {
-                          this.props.tokenBalance && (
+                          !this.functionsUtil.BNify(this.props.tokenBalance).isNaN() && (
                             <Flex
                               width={1}
                               maxWidth={'50%'}
@@ -512,7 +526,7 @@ class SendTxWithBalance extends Component {
                                   textOverflow:'ellipsis'
                                 }}
                               >
-                                Balance: {this.props.tokenBalance.toFixed(this.props.isMobile ? 2 : 4)} {this.props.tokenConfig.token}
+                                Balance: {this.functionsUtil.BNify(this.props.tokenBalance).toFixed(this.props.isMobile ? 2 : 4)} {this.props.tokenConfig.token}
                               </Link>
                             </Flex>
                           )

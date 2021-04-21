@@ -1,3 +1,4 @@
+import Staking from '../Staking/Staking';
 import IDLE from '../contracts/IDLE.json';
 import WETH from '../abis/tokens/WETH.json';
 import COMP from '../abis/compound/COMP.json';
@@ -11,6 +12,7 @@ import ETHWrapper from '../ETHWrapper/ETHWrapper';
 import Timelock from '../contracts/Timelock.json';
 import CurveZap from '../abis/curve/CurveZap.json';
 import CovToken from '../abis/cover/CovToken.json';
+import LpStaking from '../contracts/LpStaking.json';
 // import CurveSwap from '../abis/curve/CurveSwap.json';
 import CurvePool from '../abis/curve/CurvePool.json';
 import NexusMutual from '../NexusMutual/NexusMutual';
@@ -45,6 +47,7 @@ import LiquidityGaugeV2 from '../abis/curve/LiquidityGaugeV2.json';
 import IdleBatchConverter from '../contracts/IdleBatchConverter.json';
 import UniswapV2Router02 from '../abis/uniswap/UniswapV2Router02.json';
 import IdleDepositForwarder from '../contracts/IdleDepositForwarder.json';
+import SushiLiquidityPool from '../abis/sushiswap/SushiLiquidityPool.json';
 import BalancerExchangeProxy from '../abis/balancer/BalancerExchangeProxy.json';
 import IdleConverterPersonalSignV4 from '../contracts/IdleConverterPersonalSignV4.json';
 
@@ -342,6 +345,7 @@ const globalConfigs = {
       icon:'images/tokens/IDLE.png',
       address:'0x875773784Af8135eA0ef43b5a374AaD105c5D39e' // MAIN
       // address:'0xAB6Bdb5CCF38ECDa7A92d04E86f7c53Eb72833dF', // KOVAN
+      // address:'0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f' // Fork
     },
     COMP:{
       abi:COMP,
@@ -884,7 +888,7 @@ const globalConfigs = {
       1337:'Hardhat'
     },
     isForked:false, // If TRUE the tx confirmation callback is fired on the receipt
-    requiredNetwork:1, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
+    requiredNetwork:1337, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
     blocksPerYear:2371428,
     firstBlockNumber:8119247,
     requiredConfirmations: 1,
@@ -994,6 +998,36 @@ const globalConfigs = {
           token:'WETH',
           address:'0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
         },
+      }
+    },
+    stake:{
+      enabled:true,
+      icon:'Layers',
+      label:'LP Staking',
+      route:'lp-staking',
+      subComponent:Staking,
+      desc:'Stake your Sushi Swap LP tokens and earn $IDLE rewards',
+      props:{
+        availableTokens:{
+          SLP:{
+            contract:{
+              decimals:24,
+              abi:LpStaking,
+              name:'LpStaking',
+              rewardToken:'IDLE',
+              // address:'0x46f2f34742c1d9b9b220aabf0ff26bf59ec9f8a0' // Mainnet
+              address:'0x4A679253410272dd5232B3Ff7cF5dbB88f295319' // Fork
+            },
+            token:'SLP',
+            decimals:18,
+            enabled:true,
+            abi:SushiLiquidityPool,
+            label:'SushiSwap LP Token',
+            icon:'images/protocols/sushiswap.png',
+            address:'0xa7f11e026a0af768d285360a855f2bded3047530' // Mainnet
+            // address:'0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44' // Fork
+          }
+        }
       }
     },
     coverProtocol:{
