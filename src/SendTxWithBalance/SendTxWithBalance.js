@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import IconBox from '../IconBox/IconBox';
 import ExtLink from '../ExtLink/ExtLink';
+import ConnectBox from '../ConnectBox/ConnectBox';
 import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import TxProgressBar from '../TxProgressBar/TxProgressBar';
@@ -362,6 +363,7 @@ class SendTxWithBalance extends Component {
 
   render() {
 
+    const viewOnly = this.props.connectorName === 'custom';
     const action = this.props.action ? this.props.action : 'Deposit';
 
     return (
@@ -372,7 +374,19 @@ class SendTxWithBalance extends Component {
         justifyContent={'center'}
       >
         {
-          this.props.tokenConfig && !this.functionsUtil.BNify(this.props.tokenBalance).isNaN() && this.functionsUtil.BNify(this.props.tokenBalance).gt(0) ? (
+          viewOnly ? (
+            <IconBox
+              cardProps={{
+                mt:3
+              }}
+              icon={'Visibility'}
+              text={'You are using Idle in "Read-Only" mode.<br />Logout and connect with your wallet to interact.'}
+            />
+          ) : !this.props.account ? (
+            <ConnectBox
+              {...this.props}
+            />
+          ) : this.props.tokenConfig && !this.functionsUtil.BNify(this.props.tokenBalance).isNaN() && this.functionsUtil.BNify(this.props.tokenBalance).gt(0) ? (
             <Box
               width={1}
             >
