@@ -412,13 +412,13 @@ class Staking extends Component {
 
     const stakingShare = accountingData && accountingData[2] && this.functionsUtil.BNify(accountingData[3]).gt(0) ? this.functionsUtil.BNify(accountingData[2]).div(this.functionsUtil.BNify(accountingData[3])) : this.functionsUtil.BNify(0);
 
-    const rewardMultiplier = this.functionsUtil.BNify(1); //stakingShare.gt(0) && this.functionsUtil.BNify(totalUnlocked).gt(0) ? this.functionsUtil.BNify(Math.max(1,parseFloat(this.functionsUtil.BNify(collectedRewards).div(this.functionsUtil.BNify(totalUnlocked).times(stakingShare)).times(this.state.contractInfo.maxMultiplier)))) : this.functionsUtil.BNify(1);
+    const rewardMultiplier = accountingData && this.functionsUtil.BNify(accountingData[4]).gt(0) ? this.functionsUtil.BNify(Math.max(1,parseFloat(this.functionsUtil.BNify(collectedRewards).div(this.functionsUtil.BNify(accountingData[4])).times(this.state.contractInfo.maxMultiplier)))) : this.functionsUtil.BNify(1);
 
     const distributionSpeedMultiplier = this.functionsUtil.BNify(1).div(this.state.contractInfo.maxMultiplier).times(rewardMultiplier);
     const userDistributionSpeed = distributionSpeed.times(stakingShare).times(distributionSpeedMultiplier);
     const rewardsPerDay = userDistributionSpeed.times(86400);
 
-    // console.log(parseFloat(this.functionsUtil.BNify(collectedRewards)),parseFloat(this.functionsUtil.BNify(totalUnlocked).times(stakingShare)),parseFloat(stakingShare),this.state.contractInfo.maxMultiplier,parseFloat(rewardMultiplier));
+    // console.log(parseFloat(this.functionsUtil.BNify(collectedRewards)),parseFloat(this.functionsUtil.BNify(accountingData[4])),this.state.contractInfo.maxMultiplier,parseFloat(this.functionsUtil.BNify(collectedRewards).div(this.functionsUtil.BNify(accountingData[4])).times(this.state.contractInfo.maxMultiplier)),parseFloat(rewardMultiplier));
 
     globalStats.push({
       title:'Distribution rate',
