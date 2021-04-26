@@ -2358,7 +2358,6 @@ class FunctionsUtil {
 
       return true;
     } catch (error) {
-      console.error(error);
       callback(null,error);
       return false;
     }
@@ -2608,7 +2607,7 @@ class FunctionsUtil {
       primaryType: 'Permit',
     });
 
-    console.log('Permit',JSON.parse(data));
+    // console.log('Permit',JSON.parse(data));
 
     return new Promise((resolve, reject) => {
       this.props.web3.currentProvider.send({
@@ -2642,16 +2641,20 @@ class FunctionsUtil {
 
     const signedParameters = await this.signPermit(baseContractName, holder, spenderContractName);
 
-    const { expiry, nonce, r, s, v } = signedParameters;
-    const permitParams = [expiry, v, r, s];
+    if (signedParameters){
+      const { expiry, nonce, r, s, v } = signedParameters;
+      const permitParams = [expiry, v, r, s];
 
-    const methodAbi = spenderContract._jsonInterface.find( f => f.name === methodName );
-    const useNonce = methodAbi ? methodAbi.inputs.find( i => i.name === 'nonce' ) : true;
-    if (!isNaN(parseInt(nonce)) && useNonce){
-      permitParams.unshift(nonce);
+      const methodAbi = spenderContract._jsonInterface.find( f => f.name === methodName );
+      const useNonce = methodAbi ? methodAbi.inputs.find( i => i.name === 'nonce' ) : true;
+      if (!isNaN(parseInt(nonce)) && useNonce){
+        permitParams.unshift(nonce);
+      }
+      const params = methodParams.concat(permitParams);
+      this.contractMethodSendWrapper(spenderContractName, methodName, params, callback, callback_receipt);
+    } else {
+      callback(null,'Permit cancelled');
     }
-    const params = methodParams.concat(permitParams);
-    this.contractMethodSendWrapper(spenderContractName, methodName, params, callback_receipt, callback_receipt);
   }
 
   sendSignedTx = async (contractName,contractAddress,functionSignature,callback,callback_receipt) => {
@@ -3714,7 +3717,7 @@ class FunctionsUtil {
     blockNumber = blockNumber !== 'latest' && blockNumber && !isNaN(blockNumber) ? parseInt(blockNumber) : blockNumber;
 
     try{
-      console.log(`genericContractCall - ${contractName} - ${methodName}`);
+      this.customLog(`genericContractCall - ${contractName} - ${methodName}`);
       const value = await contract.methods[methodName](...params).call(callParams,blockNumber).catch(error => {
         this.customLog(`${contractName} contract method ${methodName} error: `, error);
       });
