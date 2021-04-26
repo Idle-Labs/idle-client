@@ -5,7 +5,7 @@ import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import TxProgressBar from '../TxProgressBar/TxProgressBar';
 import DashboardCard from '../DashboardCard/DashboardCard';
-import { Flex, Box, Text, Icon, Link, Input } from "rimble-ui";
+import { Flex, Box, Text, Icon, Link, Input, Checkbox } from "rimble-ui";
 import FastBalanceSelector from '../FastBalanceSelector/FastBalanceSelector';
 
 class SendTxWithBalance extends Component {
@@ -17,6 +17,8 @@ class SendTxWithBalance extends Component {
     },
     inputValue:null,
     txSucceeded:false,
+    permitEnabled:true,
+    showPermitBox:false,
     buttonDisabled:true,
     contractApproved:false,
     fastBalanceSelector:null,
@@ -47,10 +49,11 @@ class SendTxWithBalance extends Component {
     const actionChanged = prevProps.action !== this.props.action;
     const accountChanged = prevProps.account !== this.props.account;
     const tokenBalanceChanged = prevProps.tokenBalance !== this.props.tokenBalance;
+    const permitEnabledChanged = prevState.permitEnabled !== this.state.permitEnabled;
     const approveEnabledChanged = prevProps.approveEnabled !== this.props.approveEnabled;
     const contractChanged = JSON.stringify(prevProps.contractInfo) !== JSON.stringify(this.props.contractInfo);
     const tokenConfigChanged = JSON.stringify(prevProps.tokenConfig) !== JSON.stringify(this.props.tokenConfig);
-    if (actionChanged || accountChanged || tokenBalanceChanged || contractChanged || tokenConfigChanged || approveEnabledChanged){
+    if (actionChanged || accountChanged || tokenBalanceChanged || contractChanged || tokenConfigChanged || approveEnabledChanged || permitEnabledChanged){
       await this.loadData();
     }
 
@@ -106,6 +109,18 @@ class SendTxWithBalance extends Component {
       return false;
     }
     return this.functionsUtil.BNify(this.state.fastBalanceSelector).div(100);
+  }
+
+  showPermitBox(){
+    this.setState({
+      showPermitBox:true
+    });
+  }
+
+  togglePermitEnabled(permitEnabled){
+    this.setState({
+      permitEnabled
+    });
   }
 
   setFastBalanceSelector = (fastBalanceSelector) => {
@@ -201,7 +216,6 @@ class SendTxWithBalance extends Component {
     }
 
     const _amount = this.functionsUtil.normalizeTokenAmount(inputValue,this.props.tokenConfig.decimals);
-    const params = await this.props.getTransactionParams(_amount);
 
     // console.log('executeTx',params);
 
@@ -240,6 +254,9 @@ class SendTxWithBalance extends Component {
             value:0
           }
         },false);
+        this.setState({
+          showPermitBox:false
+        });
         // Call upper component callback
         if (typeof this.props.callback === 'function'){
           this.props.callback(tx,_amount,params);
@@ -257,21 +274,44 @@ class SendTxWithBalance extends Component {
       }));
     };
 
+    const contractName = this.props.contractInfo.name;
+
+    let params = null;
+
+    // Check contract approved without permit
+    const contractApproved = await this.checkContractApproved(false);
+
+    const permitEnabled = this.props.permitEnabled && this.state.permitEnabled && !contractApproved;
+    if (permitEnabled){
+      const signedParameters = await this.functionsUtil.signPermit(this.props.tokenConfig.token, this.props.account, contractName);
+      if (signedParameters){
+        params = this.props.getPermitTransactionParams(_amount,signedParameters);
+      }
+    } else {
+      params = this.props.getTransactionParams(_amount);
+    }
+
     if (params){
-      const {
+      let {
         methodName,
         methodParams
       } = params;
 
       const value = params.value || null;
 
-      const contractName = this.props.contractInfo.name;
       this.props.contractMethodSendWrapper(contractName, methodName, methodParams, value, callback, callbackReceipt);
 
       this.setState((prevState) => ({
         processing: {
           ...prevState.processing,
           loading:true
+        }
+      }));
+    } else {
+      this.setState((prevState) => ({
+        processing: {
+          ...prevState.processing,
+          loading:false
         }
       }));
     }
@@ -286,7 +326,11 @@ class SendTxWithBalance extends Component {
     });
   }
 
-  async checkContractApproved(){
+  async checkContractApproved(checkPermit=true){
+
+    if (checkPermit && this.props.permitEnabled && this.state.permitEnabled){
+      return true;
+    }
 
     if (this.props.approveEnabled !== undefined && !this.props.approveEnabled){
       return true;
@@ -297,7 +341,8 @@ class SendTxWithBalance extends Component {
       const contractApproved = await this.functionsUtil.checkTokenApproved(this.props.tokenConfig.token,this.props.contractInfo.address,this.props.account);
       return contractApproved;
     }
-    return null;
+    
+    return false;
   }
 
   async loadData(){
@@ -466,6 +511,67 @@ class SendTxWithBalance extends Component {
                     mt={2}
                     width={1}
                   >
+                    {
+                      this.state.showPermitBox && this.props.permitEnabled ? (
+                        <DashboardCard
+                          cardProps={{
+                            py:3,
+                            px:3,
+                            mt:3,
+                            display:'flex',
+                            alignItems:'center',
+                            flexDirection:'column',
+                            justifyContent:'center',
+                          }}
+                        >
+                          <Flex
+                            width={1}
+                            alignItems={'center'}
+                            flexDirection={'column'}
+                            justifyContent={'center'}
+                          >
+                            <Icon
+                              size={'1.8em'}
+                              color={'cellText'}
+                              name={'LightbulbOutline'}
+                            />
+                            <Text
+                              mt={1}
+                              fontSize={1}
+                              color={'cellText'}
+                              textAlign={'center'}
+                            >
+                              Approve and Deposit in a single transaction is supported for this transaction, disable this feature and try again if you can't deposit.
+                            </Text>
+                          </Flex>
+                          <Checkbox
+                            mt={1}
+                            required={false}
+                            checked={this.state.permitEnabled}
+                            label={`Approve and Deposit in a single transaction`}
+                            onChange={ e => this.togglePermitEnabled(e.target.checked) }
+                          />
+                        </DashboardCard>
+                      ) : !this.state.showPermitBox && this.props.permitEnabled && (
+                        <Flex
+                          p={0}
+                          mt={3}
+                          width={1}
+                          borderRadius={2}
+                          alignItems={'center'}
+                          flexDirection={'row'}
+                          justifyContent={'center'}
+                        >
+                          <Link
+                            textAlign={'center'}
+                            hoverColor={'primary'}
+                            onClick={this.showPermitBox.bind(this)}
+                          >
+                            Having trouble with the Permit signature?
+                          </Link>
+                        </Flex>
+                      )
+                    }
                     <Flex
                       mt={2}
                       mb={3}

@@ -3714,7 +3714,7 @@ class FunctionsUtil {
     blockNumber = blockNumber !== 'latest' && blockNumber && !isNaN(blockNumber) ? parseInt(blockNumber) : blockNumber;
 
     try{
-      this.customLog(`genericContractCall - ${contractName} - ${methodName}`);
+      console.log(`genericContractCall - ${contractName} - ${methodName}`);
       const value = await contract.methods[methodName](...params).call(callParams,blockNumber).catch(error => {
         this.customLog(`${contractName} contract method ${methodName} error: `, error);
       });

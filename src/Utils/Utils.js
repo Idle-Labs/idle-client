@@ -30,6 +30,7 @@ class Utils extends Component {
   render() {
     const SubComponent = this.props.selectedSubsection && this.props.selectedSubsection.subComponent ? this.props.selectedSubsection.subComponent : null;
     const viewOnly = this.props.connectorName === 'custom';
+    const showBreadCrumb = typeof this.props.showBreadCrumb !== 'undefined' ? this.props.showBreadCrumb : true;
     return (
       <Flex
         width={1}
@@ -40,18 +41,22 @@ class Utils extends Component {
             <Box
               width={1}
             >
-              <Flex
-                width={1}
-              >
-                <Breadcrumb
-                  {...this.props}
-                  showPathMobile={true}
-                  isMobile={this.props.isMobile}
-                  path={[this.props.selectedSubsection.label]}
-                  text={this.props.selectedSection.label.toUpperCase()}
-                  handleClick={ e => this.props.goToSection(this.props.selectedSection.route) }
-                />
-              </Flex>
+              {
+                showBreadCrumb && (
+                  <Flex
+                    width={1}
+                  >
+                    <Breadcrumb
+                      {...this.props}
+                      showPathMobile={true}
+                      isMobile={this.props.isMobile}
+                      path={[this.props.selectedSubsection.label]}
+                      text={this.props.selectedSection.label.toUpperCase()}
+                      handleClick={ e => this.props.goToSection(this.props.selectedSection.route) }
+                    />
+                  </Flex>
+                )
+              }
               <Flex
                 my={[2,3]}
                 flexDirection={'column'}

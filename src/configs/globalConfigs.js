@@ -325,6 +325,19 @@ const globalConfigs = {
         { name: "nonce", type: "uint256" },
         { name: "deadline", type: "uint256" },
       ]
+    },
+    SLP:{
+      version:1,
+      EIPVersion:2612,
+      nonceMethod:'nonces',
+      name:'SushiSwap LP Token',
+      type:[
+        { name: "owner", type: "address" },
+        { name: "spender", type: "address" },
+        { name: "value", type: "uint256" },
+        { name: "nonce", type: "uint256" },
+        { name: "deadline", type: "uint256" },
+      ]
     }
   },
   govTokens:{
@@ -334,7 +347,7 @@ const globalConfigs = {
       token:'IDLE',
       enabled:true,
       showAUM:false, // Include IDLE balance in AUM
-      showAPR:false, // Include IDLE Apr
+      showAPR:true, // Include IDLE Apr
       protocol:'idle',
       showPrice:false, // Show price in Yield Farming section
       disabledTokens:[], // Disable IDLE distribution for idleToken
@@ -888,7 +901,7 @@ const globalConfigs = {
       1337:'Hardhat'
     },
     isForked:false, // If TRUE the tx confirmation callback is fired on the receipt
-    requiredNetwork:1337, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
+    requiredNetwork:1, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
     blocksPerYear:2371428,
     firstBlockNumber:8119247,
     requiredConfirmations: 1,
@@ -1021,9 +1034,11 @@ const globalConfigs = {
               decimals:24,
               abi:LpStaking,
               name:'LpStaking',
+              maxMultiplier:3,
+              maxBonusDays:120,
               rewardToken:'IDLE',
-              // address:'0x4A679253410272dd5232B3Ff7cF5dbB88f295319' // Mainnet
-              address:'0x4A679253410272dd5232B3Ff7cF5dbB88f295319' // Fork
+              address:'0xcc0b9f7ed0e6bc7c2e69dbd247e8420f29aeb48d' // Mainnet
+              // address:'0x95274E30C33083F3E3fEA9454347b9BD59e85225' // Fork
             },
             name:'SLP',
             token:'SLP',

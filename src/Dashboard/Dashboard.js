@@ -31,6 +31,7 @@ class Dashboard extends Component {
     tokensToMigrate:null,
     showResetButton:false,
     selectedSubsection:null,
+    pageComponentProps:null,
     oldIdleTokensToMigrate:null,
     protocolsTokensBalances:null,
   };
@@ -78,6 +79,28 @@ class Dashboard extends Component {
       },curveConfig.params);
 
       menu.push(curveParams);
+    }
+
+    // Add Stake
+    const stakeConfig = this.functionsUtil.getGlobalConfig(['tools','stake']);
+    if (stakeConfig.enabled){
+      menu.push(
+        {
+          submenu:[],
+          label:'Stake',
+          selected:false,
+          color:'dark-gray',
+          icon:stakeConfig.icon,
+          route:'/dashboard/stake',
+          component:Utils,
+          componentProps:{
+            showBreadCrumb:false,
+            toolProps:stakeConfig.props,
+            selectedSubsection:stakeConfig
+          },
+          bgColor:this.props.theme.colors.primary,
+        }
+      );
     }
 
     // Add tools
@@ -167,6 +190,7 @@ class Dashboard extends Component {
     let selectedToken = null;
     let currentSection = null;
     let selectedStrategy = null;
+    let pageComponentProps = null;
 
     // Set strategy
     if (params.section){
@@ -217,6 +241,7 @@ class Dashboard extends Component {
         m.selected = true;
         if (pageComponent === null){
           pageComponent = m.component;
+          pageComponentProps = m.componentProps;
         }
       } else if (m.submenu.length) {
         m.submenu.forEach(subm => {
@@ -230,8 +255,10 @@ class Dashboard extends Component {
             if (pageComponent === null){
               if (subm.component){
                 pageComponent = subm.component;
+                pageComponentProps = m.componentProps;
               } else {
                 pageComponent = m.component;
+                pageComponentProps = m.componentProps;
               }
             }
           }
@@ -268,6 +295,7 @@ class Dashboard extends Component {
       pageComponent,
       currentSection,
       selectedSection,
+      pageComponentProps,
       selectedSubsection
     });
   }
@@ -656,6 +684,7 @@ class Dashboard extends Component {
                       selectedSection={this.state.selectedSection}
                       selectedSubsection={this.state.selectedSubsection}
                       openTooltipModal={this.openTooltipModal.bind(this)}
+                      {...this.state.pageComponentProps}
                       />
                 }
               </Flex>

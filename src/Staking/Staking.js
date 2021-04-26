@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import AssetField from '../AssetField/AssetField';
+import { Flex, Box, Text, Icon } from "rimble-ui";
 import ImageButton from '../ImageButton/ImageButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
-import TokenWrapper from '../TokenWrapper/TokenWrapper';
+// import TokenWrapper from '../TokenWrapper/TokenWrapper';
 import DashboardCard from '../DashboardCard/DashboardCard';
-import { Flex, Box, Text, Icon, Checkbox } from "rimble-ui";
 import GenericSelector from '../GenericSelector/GenericSelector';
 import SendTxWithBalance from '../SendTxWithBalance/SendTxWithBalance';
 
@@ -28,6 +28,7 @@ class Staking extends Component {
     selectedAction:null,
     selectedOption:null,
     successMessage:null,
+    permitEnabled:false,
     availableTokens:null,
     approveEnabled:false,
     contractApproved:false,
@@ -100,13 +101,15 @@ class Staking extends Component {
     if (inputValue && this.functionsUtil.BNify(inputValue).gt(0)){
       switch (this.state.selectedAction){
         case 'Stake':
-          const rewards = this.functionsUtil.formatMoney(Math.min(parseFloat(this.state.totalRewards),parseFloat(this.state.distributionSpeed.times(inputValue).div(this.functionsUtil.fixTokenDecimals(this.state.totalStakingShares,this.state.contractInfo.decimals).plus(inputValue)).times(86400))));
+          let rewardsPerDay = this.functionsUtil.BNify(this.state.userDistributionSpeed).gt(0) ? this.state.userDistributionSpeed.times(86400) : this.functionsUtil.BNify(0);
+          const totalRewardsPerDay = this.functionsUtil.formatMoney(Math.min(parseFloat(this.state.totalRewards),parseFloat(rewardsPerDay.plus(this.state.distributionSpeed.times(inputValue).div(this.functionsUtil.fixTokenDecimals(this.state.totalStakingShares,this.state.contractInfo.decimals).plus(inputValue)).times(86400)))));
+          console.log(parseFloat(rewardsPerDay),parseFloat(totalRewardsPerDay));
           infoBox = {
             icon:'FileDownload',
             iconProps:{
               color:this.props.theme.colors.transactions.status.completed
             },
-            text:`By staking <strong>${inputValue} ${this.state.tokenConfig.token}</strong> you will get <strong>${rewards} ${this.state.contractInfo.rewardToken} / day</strong>`
+            text:`By staking <strong>${inputValue} ${this.state.tokenConfig.token}</strong> you will get <strong>${totalRewardsPerDay} ${this.state.contractInfo.rewardToken} / day</strong><br /><small style="color:#ff9900">(based on you current reward multiplier)</small>`
           };
         break;
         case 'Withdraw':
@@ -151,18 +154,41 @@ class Staking extends Component {
     */
   }
 
-  async getTransactionParams(amount){
+  getTransactionParams(amount){
     let methodName = null;
     let methodParams = [];
     amount = this.functionsUtil.BNify(amount);
     switch (this.state.selectedAction){
       case 'Stake':
-        methodName = 'stake';
-        methodParams = [amount,'0x'];
+        methodName = 'wrapAndStake';
+        methodParams = [amount];
       break;
       case 'Withdraw':
-        methodName = 'unstake';
-        methodParams = [amount,'0x'];
+        methodName = 'unstakeAndUnwrap';
+        methodParams = [amount];
+      break;
+      default:
+      break;
+    }
+    return {
+      methodName,
+      methodParams
+    };
+  }
+
+  getPermitTransactionParams(amount,signedParameters){
+    let methodName = null;
+    let methodParams = [];
+    const { expiry, r, s, v } = signedParameters;
+    amount = this.functionsUtil.BNify(amount);
+    switch (this.state.selectedAction){
+      case 'Stake':
+        methodName = 'permitWrapAndStakeUnlimited';
+        methodParams = [amount, expiry, v, r, s];
+      break;
+      case 'Withdraw':
+        methodName = 'unstakeAndUnwrap';
+        methodParams = [amount];
       break;
       default:
       break;
@@ -180,11 +206,11 @@ class Staking extends Component {
   }
 
   async transactionSucceeded(tx,amount,params){
-    // console.log('transactionSucceeded',tx);
+    console.log('transactionSucceeded',tx);
     let infoBox = null;
     switch (this.state.selectedAction){
       case 'Stake':
-        const stakedTokensLog = tx.txReceipt && tx.txReceipt.logs ? tx.txReceipt.logs.find( log => log.address.toLowerCase() === this.state.tokenConfig.address.toLowerCase() ) : null;
+        const stakedTokensLog = tx.txReceipt && tx.txReceipt.logs ? tx.txReceipt.logs.find( log => log.address.toLowerCase() === this.state.tokenConfig.address.toLowerCase() && log.topics.find( t => t.toLowerCase().includes(this.state.contractInfo.address.replace('0x','').toLowerCase()) ) && log.topics.find( t => t.toLowerCase().includes(this.props.account.replace('0x','').toLowerCase()) ) && log.data.toLowerCase()!=='0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'.toLowerCase() ) : null;
         const stakedTokens = stakedTokensLog ? this.functionsUtil.fixTokenDecimals(parseInt(stakedTokensLog.data,16),this.state.tokenConfig.decimals) : this.functionsUtil.BNify(0);
         infoBox = {
           icon:'DoneAll',
@@ -231,6 +257,7 @@ class Staking extends Component {
 
     switch (this.state.selectedAction){
       case 'Stake':
+        newState.permitEnabled = true;
         newState.approveEnabled = true;
         newState.balanceProp = newState.tokenBalance;
         newState.approveDescription = 'Approve the Staking contract to stake your LP tokens';
@@ -248,6 +275,7 @@ class Staking extends Component {
         };
       break;
       case 'Withdraw':
+        newState.permitEnabled = false;
         newState.approveEnabled = false;
         newState.approveDescription = '';
         newState.balanceProp = this.functionsUtil.fixTokenDecimals(newState.stakedBalance,this.state.tokenConfig.decimals);
@@ -324,7 +352,7 @@ class Staking extends Component {
       this.functionsUtil.genericContractCall(this.state.contractInfo.name,'totalStakingShares'),
       this.functionsUtil.genericContractCall(this.state.contractInfo.name,'unlockScheduleCount'),
       this.functionsUtil.genericContractCall(this.state.contractInfo.name,'updateAccounting',[],{from:this.props.account}),
-      this.functionsUtil.genericContractCall(this.state.contractInfo.name,'unstakeQuery',[this.state.stakedBalance.toString()],{from:this.props.account})
+      this.state.stakedBalance.gt(0) ? this.functionsUtil.genericContractCall(this.state.contractInfo.name,'unstakeQuery',[this.state.stakedBalance.toString()],{from:this.props.account}) : this.functionsUtil.BNify(0)
     ]);
 
     const unlockSchedulesPromises = [];
@@ -363,7 +391,7 @@ class Staking extends Component {
       return endTime;
     },parseInt(Date.now()/1000));
 
-    const programDuration = `${this.functionsUtil.strToMoment(programEndTime*1000).utc().format('DD MMM, YYYY @ HH:mm')} UTC`;
+    const programDuration = unlockSchedules.length>0 ? `${this.functionsUtil.strToMoment(programEndTime*1000).utc().format('DD MMM, YYYY @ HH:mm')} UTC` : 'None';
     stats.push({
       title:'Program duration',
       value:programDuration
@@ -382,35 +410,46 @@ class Staking extends Component {
 
     const globalStats = [];
 
-    const stakingShare = this.functionsUtil.BNify(accountingData[2]).div(this.functionsUtil.BNify(accountingData[3]));
-    const userDistributionSpeed = distributionSpeed.times(stakingShare);
+    const stakingShare = accountingData && accountingData[2] && this.functionsUtil.BNify(accountingData[3]).gt(0) ? this.functionsUtil.BNify(accountingData[2]).div(this.functionsUtil.BNify(accountingData[3])) : this.functionsUtil.BNify(0);
+
+    const rewardMultiplier = stakingShare.gt(0) && this.functionsUtil.BNify(totalUnlocked).gt(0) ? this.functionsUtil.BNify(Math.max(1,parseFloat(this.functionsUtil.BNify(collectedRewards).div(this.functionsUtil.BNify(totalUnlocked).times(stakingShare)).times(this.state.contractInfo.maxMultiplier)))) : this.functionsUtil.BNify(1);
+
+    const distributionSpeedMultiplier = this.functionsUtil.BNify(1).div(this.state.contractInfo.maxMultiplier).times(rewardMultiplier);
+    const userDistributionSpeed = distributionSpeed.times(stakingShare).times(distributionSpeedMultiplier);
     const rewardsPerDay = userDistributionSpeed.times(86400);
+
+    // console.log(parseFloat(this.functionsUtil.BNify(collectedRewards)),parseFloat(this.functionsUtil.BNify(totalUnlocked).times(stakingShare)),parseFloat(stakingShare),this.state.contractInfo.maxMultiplier,parseFloat(rewardMultiplier));
 
     globalStats.push({
       title:'Distribution rate',
-      value:this.functionsUtil.formatMoney(rewardsPerDay)+' '+this.state.contractInfo.rewardToken+' / day'
+      description:'Your daily rewards distribution based on your current multiplier',
+      value:this.functionsUtil.formatMoney(rewardsPerDay)+' '+this.state.contractInfo.rewardToken+' / day',
     });
 
     globalStats.push({
       title:'Reward Multiplier',
-      value:'1.0x'
+      value:`${rewardMultiplier}x`,
+      description:`Deposit liquidity tokens for ${this.state.contractInfo.maxBonusDays} days to achieve a ${this.state.contractInfo.maxMultiplier}x reward multiplier`
     });
 
     const currentRewards = this.functionsUtil.formatMoney(this.functionsUtil.fixTokenDecimals(collectedRewards,this.state.tokenConfig.decimals));
     globalStats.push({
       title:'Current Rewards',
-      value:currentRewards+' '+this.state.contractInfo.rewardToken
+      value:currentRewards+' '+this.state.contractInfo.rewardToken,
+      description:'Your share of the total unlocked reward pool. Larger your deposit and for longer, higher your share'
     });
 
-    // debugger;
+    // console.log('loadStats',stats,globalStats);
 
     this.setState({
       stats,
       globalStats,
+      stakingShare,
       totalRewards,
       accountingData,
       distributionSpeed,
-      totalStakingShares
+      totalStakingShares,
+      userDistributionSpeed
     });
   }
 
@@ -455,6 +494,7 @@ class Staking extends Component {
             mt:0,
             ml:0
           }}
+          description={props.description}
         >
           <Text
             mt={1}
@@ -661,8 +701,9 @@ class Staking extends Component {
                             justifyContent={'space-between'}
                           >
                             {
-                              this.state.globalStats.map( statInfo =>
+                              this.state.globalStats.map( (statInfo,index) =>
                                 <StatsCard
+                                  key={`globalStats_${index}`}
                                   cardProps={{
                                     mb:[2,0],
                                     width:[1,'32%']
@@ -745,6 +786,7 @@ class Staking extends Component {
                             />
                           </Flex>
                           {
+                            /*
                             this.state.tokenWrapperProps && (
                               <Flex
                                 mt={1}
@@ -779,9 +821,11 @@ class Staking extends Component {
                                 </DashboardCard>
                               </Flex>
                             )
+                            */
                           }
                           {
                             (isStake || isUnstake) ?
+                              /*
                               this.state.showTokenWrapperEnabled && this.state.tokenWrapperProps ? (
                                 <TokenWrapper
                                   {...this.props}
@@ -789,7 +833,9 @@ class Staking extends Component {
                                   action={ isStake ? 'wrap' : 'unwrap' }
                                   toolProps={this.state.tokenWrapperProps}
                                 />
-                              ) : (this.state.tokenConfig && this.state.balanceProp && this.state.contractInfo ? (
+                              ) :
+                              */
+                              (this.state.tokenConfig && this.state.balanceProp && this.state.contractInfo ? (
                                 <Box
                                   mt={1}
                                   mb={3}
@@ -804,6 +850,7 @@ class Staking extends Component {
                                     tokenConfig={this.state.tokenConfig}
                                     tokenBalance={this.state.balanceProp}
                                     contractInfo={this.state.contractInfo}
+                                    permitEnabled={this.state.permitEnabled}
                                     approveEnabled={this.state.approveEnabled}
                                     callback={this.transactionSucceeded.bind(this)}
                                     approveDescription={this.state.approveDescription}
@@ -811,6 +858,7 @@ class Staking extends Component {
                                     balanceSelectorInfo={this.state.balanceSelectorInfo}
                                     changeInputCallback={this.changeInputCallback.bind(this)}
                                     getTransactionParams={this.getTransactionParams.bind(this)}
+                                    getPermitTransactionParams={this.getPermitTransactionParams.bind(this)}
                                   >
                                     <DashboardCard
                                       cardProps={{
@@ -875,8 +923,28 @@ class Staking extends Component {
                                 justifyContent={'space-between'}
                               >
                                 {
-                                  this.state.stats.map( statInfo =>
+                                  (!this.state.stats || !this.state.stats.length) ? (
+                                    <Flex
+                                      mt={3}
+                                      mb={3}
+                                      width={1}
+                                    >
+                                      <FlexLoader
+                                        flexProps={{
+                                          flexDirection:'row'
+                                        }}
+                                        loaderProps={{
+                                          size:'30px'
+                                        }}
+                                        textProps={{
+                                          ml:2
+                                        }}
+                                        text={'Loading stats...'}
+                                      />
+                                    </Flex>
+                                  ) : this.state.stats.map( (statInfo,index) =>
                                     <StatsCard
+                                      key={`stats_${index}`}
                                       cardProps={{
                                         width:[1,'49%']
                                       }}
