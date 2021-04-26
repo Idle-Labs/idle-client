@@ -393,7 +393,7 @@ class Staking extends Component {
 
     const programDuration = unlockSchedules.length>0 ? `${this.functionsUtil.strToMoment(programEndTime*1000).utc().format('DD MMM, YYYY @ HH:mm')} UTC` : 'None';
     stats.push({
-      title:'Program duration',
+      title:'Program End-Date',
       value:programDuration
     });
 
