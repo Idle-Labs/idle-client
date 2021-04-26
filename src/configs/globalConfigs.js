@@ -1000,8 +1000,8 @@ const globalConfigs = {
             },
             USDC:{
               enabled:true,
-              permitType:'USDC_Permit',
               abi:IdleDepositForwarder,
+              permitType:'EIP2612_Permit',
               name:'IdleDepositForwarderUSDC',
               function:'permitEIP2612AndDeposit',
               address:'0x43bD6a78b37b50E3f52CAcec53F1202dbDe6a761', // Main
@@ -1099,7 +1099,7 @@ const globalConfigs = {
         }
       },
       biconomy:{
-        enabled:false,
+        enabled:true,
         enableLogin:false,
         supportedNetworks:[1,42],
         disabledWallets:['authereum'],

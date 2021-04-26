@@ -2539,16 +2539,20 @@ class FunctionsUtil {
       return false;
     }
 
-    console.log('Build Tx ',contract._address,tokenAddress,Number(gasLimit),callData);
+    // console.log('Build Tx ',contract._address,tokenAddress,Number(gasLimit),callData);
 
-    //Create the call data that the recipient contract will receive
-    const tx = await this.props.erc20ForwarderClient.buildTx({
+    const buildParams = {
       permitType,
       data:callData,
       token:tokenAddress,
       to:contract._address,
-      txGas:Number(gasLimit)
-    });
+      txGas:parseInt(gasLimit)
+    };
+
+    console.log('buildBiconomyErc20ForwarderTx',buildParams);
+
+    //Create the call data that the recipient contract will receive
+    const tx = await this.props.erc20ForwarderClient.buildTx(buildParams);
 
     return tx;
   }

@@ -864,6 +864,10 @@ class DepositRedeem extends Component {
               // }
             // Use Erc20 Forwarder
             } else if (depositErc20ForwarderEnabled){
+
+              const methodAbi = mintProxyContractInfo.contract._jsonInterface.find( f => f.name === mintProxyContractInfo.function );
+              const useNonce = methodAbi ? methodAbi.inputs.find( i => i.name === 'nonce' ) : true;
+
               // Build ERC20 Forwarder Tx
               if (!this.state.erc20ForwarderTx){
                 this.setState({
@@ -874,10 +878,16 @@ class DepositRedeem extends Component {
                 }, async () => {
                   const erc20ForwarderContract = this.state.erc20ForwarderContract[this.state.action];
                   const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken, this.props.account, erc20ForwarderContract.name);
-                  console.log('signedParameters',signedParameters);
+                  // console.log('signedParameters',signedParameters);
                   if (signedParameters){
+
                     const { expiry, nonce, r, s, v } = signedParameters;
-                    depositParams = [tokensToDeposit, parseInt(nonce), expiry, v, r, s];
+
+                    if (useNonce){
+                      depositParams = [tokensToDeposit, parseInt(nonce), expiry, v, r, s];
+                    } else {
+                      depositParams = [tokensToDeposit, expiry, v, r, s];
+                    }
 
                     console.log('permitAndDeposit',mintProxyContractInfo.name, mintProxyContractInfo.function, depositParams);
 
@@ -889,9 +899,14 @@ class DepositRedeem extends Component {
 
                     // console.log('buildBiconomyErc20ForwarderTx 1',permitType, erc20ForwarderContract.function, depositParams, functionCall, functionSignature);
 
-                    const gasLimit = 1000000;//await functionCall.estimateGas({from: this.props.account}); // 5000000;
+                    let gasLimit = await functionCall.estimateGas({from: this.props.account}); // 5000000;
+                    if (gasLimit){
+                      gasLimit = this.functionsUtil.BNify(gasLimit).times(1.2);
+                    } else {
+                      gasLimit = this.functionsUtil.BNify(1000000);
+                    }
 
-                    console.log('buildBiconomyErc20ForwarderTx',mintProxyContractInfo.name, depositParams, functionSignature, gasLimit);
+                    // console.log('buildBiconomyErc20ForwarderTx',mintProxyContractInfo.name, depositParams, functionSignature, gasLimit);
 
                     // debugger;
 
@@ -929,7 +944,8 @@ class DepositRedeem extends Component {
                   const erc20ForwarderContract = this.state.erc20ForwarderContract[this.state.action];
                   const erc20ForwarderBaseContract = this.functionsUtil.getGlobalConfig(['contract','methods',this.state.action,'erc20ForwarderProxyContract','forwarder']);
 
-                  const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken, this.props.account, erc20ForwarderBaseContract.name, 1);
+                  const incrementNonce = 1; // useNonce ? 1 : 0;
+                  const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken, this.props.account, erc20ForwarderBaseContract.name, incrementNonce);
                   if (signedParameters){
 
                     this.setState({
@@ -2332,7 +2348,7 @@ class DepositRedeem extends Component {
                                     color={'red'}
                                     textAlign={'center'}
                                   >
-                                    The meta-transaction cannot be executed, select ETH and try again.
+                                    The meta-transaction cannot be executed due to insufficient funds, fund your wallet or select ETH and try again.
                                   </Text>
                                 )
                               }
