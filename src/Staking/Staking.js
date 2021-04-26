@@ -412,7 +412,7 @@ class Staking extends Component {
 
     const stakingShare = accountingData && accountingData[2] && this.functionsUtil.BNify(accountingData[3]).gt(0) ? this.functionsUtil.BNify(accountingData[2]).div(this.functionsUtil.BNify(accountingData[3])) : this.functionsUtil.BNify(0);
 
-    const rewardMultiplier = stakingShare.gt(0) && this.functionsUtil.BNify(totalUnlocked).gt(0) ? this.functionsUtil.BNify(Math.max(1,parseFloat(this.functionsUtil.BNify(collectedRewards).div(this.functionsUtil.BNify(totalUnlocked).times(stakingShare)).times(this.state.contractInfo.maxMultiplier)))) : this.functionsUtil.BNify(1);
+    const rewardMultiplier = this.functionsUtil.BNify(1); //stakingShare.gt(0) && this.functionsUtil.BNify(totalUnlocked).gt(0) ? this.functionsUtil.BNify(Math.max(1,parseFloat(this.functionsUtil.BNify(collectedRewards).div(this.functionsUtil.BNify(totalUnlocked).times(stakingShare)).times(this.state.contractInfo.maxMultiplier)))) : this.functionsUtil.BNify(1);
 
     const distributionSpeedMultiplier = this.functionsUtil.BNify(1).div(this.state.contractInfo.maxMultiplier).times(rewardMultiplier);
     const userDistributionSpeed = distributionSpeed.times(stakingShare).times(distributionSpeedMultiplier);
@@ -742,7 +742,7 @@ class Staking extends Component {
                               caption={'Stake'}
                               imageSrc={'images/mint.svg'}
                               isMobile={this.props.isMobile}
-                              subcaption={'stake LP Tokens'}
+                              // subcaption={'stake LP Tokens'}
                               imageProps={{
                                 mb:2,
                                 height:this.props.isMobile ? '42px' : '52px'
@@ -759,7 +759,7 @@ class Staking extends Component {
                               caption={'Withdraw'}
                               imageSrc={'images/upload.svg'}
                               isMobile={this.props.isMobile}
-                              subcaption={'withdraw LP tokens'}
+                              // subcaption={'withdraw LP tokens'}
                               imageProps={{
                                 mb:2,
                                 height:this.props.isMobile ? '42px' : '52px'
@@ -775,7 +775,7 @@ class Staking extends Component {
                               width={[1,'32%']}
                               caption={'Stats'}
                               imageSrc={'images/stats.svg'}
-                              subcaption={'view some stats'}
+                              // subcaption={'view some stats'}
                               isMobile={this.props.isMobile}
                               imageProps={{
                                 mb:2,

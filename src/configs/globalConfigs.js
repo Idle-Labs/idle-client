@@ -347,7 +347,7 @@ const globalConfigs = {
       token:'IDLE',
       enabled:true,
       showAUM:false, // Include IDLE balance in AUM
-      showAPR:true, // Include IDLE Apr
+      showAPR:false, // Include IDLE Apr
       protocol:'idle',
       showPrice:false, // Show price in Yield Farming section
       disabledTokens:[], // Disable IDLE distribution for idleToken
@@ -1045,7 +1045,7 @@ const globalConfigs = {
             decimals:18,
             enabled:true,
             abi:SushiLiquidityPool,
-            label:'SushiSwap LP Token',
+            label:'SushiSwap IDLE/ETH LP Token',
             icon:'images/protocols/sushiswap.png',
             address:'0xa7f11e026a0af768d285360a855f2bded3047530' // Mainnet
           }
