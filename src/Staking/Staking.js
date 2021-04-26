@@ -103,7 +103,7 @@ class Staking extends Component {
         case 'Stake':
           let rewardsPerDay = this.functionsUtil.BNify(this.state.userDistributionSpeed).gt(0) ? this.state.userDistributionSpeed.times(86400) : this.functionsUtil.BNify(0);
           const totalRewardsPerDay = this.functionsUtil.formatMoney(Math.min(parseFloat(this.state.totalRewards),parseFloat(rewardsPerDay.plus(this.state.distributionSpeed.times(inputValue).div(this.functionsUtil.fixTokenDecimals(this.state.totalStakingShares,this.state.contractInfo.decimals).plus(inputValue)).times(86400)))));
-          console.log(parseFloat(rewardsPerDay),parseFloat(totalRewardsPerDay));
+          // console.log(parseFloat(rewardsPerDay),parseFloat(totalRewardsPerDay));
           infoBox = {
             icon:'FileDownload',
             iconProps:{
@@ -157,7 +157,7 @@ class Staking extends Component {
   getTransactionParams(amount){
     let methodName = null;
     let methodParams = [];
-    amount = this.functionsUtil.BNify(amount);
+    amount = this.functionsUtil.toBN(amount);
     switch (this.state.selectedAction){
       case 'Stake':
         methodName = 'wrapAndStake';
@@ -180,7 +180,7 @@ class Staking extends Component {
     let methodName = null;
     let methodParams = [];
     const { expiry, r, s, v } = signedParameters;
-    amount = this.functionsUtil.BNify(amount);
+    amount = this.functionsUtil.toBN(amount);
     switch (this.state.selectedAction){
       case 'Stake':
         methodName = 'permitWrapAndStakeUnlimited';
@@ -206,7 +206,7 @@ class Staking extends Component {
   }
 
   async transactionSucceeded(tx,amount,params){
-    console.log('transactionSucceeded',tx);
+    // console.log('transactionSucceeded',tx);
     let infoBox = null;
     switch (this.state.selectedAction){
       case 'Stake':
