@@ -102,7 +102,7 @@ class Staking extends Component {
       switch (this.state.selectedAction){
         case 'Stake':
           let rewardsPerDay = this.functionsUtil.BNify(this.state.userDistributionSpeed).gt(0) ? this.state.userDistributionSpeed.times(86400) : this.functionsUtil.BNify(0);
-          const totalRewardsPerDay = this.functionsUtil.formatMoney(Math.min(parseFloat(this.state.totalRewards),parseFloat(rewardsPerDay.plus(this.state.distributionSpeed.times(inputValue).div(this.functionsUtil.fixTokenDecimals(this.state.totalStakingShares,this.state.contractInfo.decimals).plus(inputValue)).times(86400)))));
+          const totalRewardsPerDay = this.functionsUtil.BNify(this.state.distributionSpeed).gt(0) ? this.functionsUtil.formatMoney(Math.min(parseFloat(this.state.totalRewards),parseFloat(rewardsPerDay.plus(this.state.distributionSpeed.times(inputValue).div(this.functionsUtil.fixTokenDecimals(this.state.totalStakingShares,this.state.contractInfo.decimals).plus(inputValue)).times(86400))))) : this.functionsUtil.formatMoney(0);
           // console.log(parseFloat(rewardsPerDay),parseFloat(totalRewardsPerDay));
           infoBox = {
             icon:'FileDownload',
@@ -386,12 +386,12 @@ class Staking extends Component {
       value:this.functionsUtil.formatMoney(parseFloat(unlockedRewards))+' '+this.state.contractInfo.rewardToken
     });
 
-    const programEndTime = unlockSchedules.reduce( (endTime,s) => {
+    const programEndTime = unlockSchedules.length>0 ? unlockSchedules.reduce( (endTime,s) => {
       endTime = Math.max(s.endAtSec,endTime);
       return endTime;
-    },parseInt(Date.now()/1000));
+    },parseInt(Date.now()/1000)) : null;
 
-    const programDuration = unlockSchedules.length>0 ? `${this.functionsUtil.strToMoment(programEndTime*1000).utc().format('DD MMM, YYYY @ HH:mm')} UTC` : 'None';
+    const programDuration = programEndTime ? `${this.functionsUtil.strToMoment(programEndTime*1000).utc().format('DD MMM, YYYY @ HH:mm')} UTC` : 'None';
     stats.push({
       title:'Program End-Date',
       value:programDuration
