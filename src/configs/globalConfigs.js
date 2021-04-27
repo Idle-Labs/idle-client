@@ -985,7 +985,7 @@ const globalConfigs = {
             abi:erc20Forwarder,
             name:'erc20Forwarder',
             function:'emitMessage',
-            address:'0x84a0856b038eaAd1cC7E297cF34A7e72685A8693', // Main
+            address:'0xfaadbe5f0a19f0ebf92aeb73534cbc96b96e2bda', // Main
             // address:'0xCB3F801C91DEcaaE9b08b1eDb915F9677D8fdB4A' // Kovan
           },
           tokens:{

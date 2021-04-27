@@ -2592,13 +2592,13 @@ class FunctionsUtil {
       method:'mintIdleToken',
       transactionHash
     };
-    console.log('sendBiconomyTxWithErc20Forwarder',transactionHash);
+    console.log('sendBiconomyTxWithErc20Forwarder - TX',tx);
     callback_receipt(tx);
 
     // fetch mined transaction receipt 
     const fetchReceiptIntervalId = window.setInterval(()=> {
       this.props.web3.eth.getTransactionReceipt(transactionHash, (err, receipt)=> {
-        console.log('sendBiconomyTxWithErc20Forwarder',transactionHash,err,receipt);
+        console.log('sendBiconomyTxWithErc20Forwarder - RECEIPT',transactionHash,err,receipt);
         if(!err && receipt){
           window.clearInterval(fetchReceiptIntervalId);
           tx.txReceipt = receipt;
@@ -2710,7 +2710,7 @@ class FunctionsUtil {
     });
   }
 
-  signPermit = async (baseContractName, holder, spenderContractName, addToNonce=0) => {
+  signPermit = async (baseContractName, holder, spenderContractName, addToNonce=0, value=null) => {
     const baseContract = this.getContractByName(baseContractName);
     const spenderContract = this.getContractByName(spenderContractName);
 
@@ -2761,7 +2761,7 @@ class FunctionsUtil {
         const owner = holder;
         const deadline = expiry;
         // Unlimited allowance
-        const value = this.integerValue(this.BNify(2).pow(256).minus(1));
+        value = value || this.integerValue(this.BNify(2).pow(256).minus(1));
         message = {
           value,
           nonce,

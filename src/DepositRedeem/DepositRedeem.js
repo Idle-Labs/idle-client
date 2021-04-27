@@ -806,6 +806,7 @@ class DepositRedeem extends Component {
         };
 
         const callbackReceiptDeposit = (tx) => {
+          console.log('callbackReceiptDeposit',tx);
           const txHash = tx.transactionHash;
           this.setState((prevState) => ({
             processing: {
@@ -877,8 +878,10 @@ class DepositRedeem extends Component {
                   loadingErc20ForwarderTx:true
                 }, async () => {
                   const erc20ForwarderContract = this.state.erc20ForwarderContract[this.state.action];
-                  const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken, this.props.account, erc20ForwarderContract.name);
-                  // console.log('signedParameters',signedParameters);
+                  const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken, this.props.account, erc20ForwarderContract.name, 0, tokensToDeposit);
+                  
+                  console.log('signedParameters_1',signedParameters);
+
                   if (signedParameters){
 
                     const { expiry, nonce, r, s, v } = signedParameters;
@@ -906,7 +909,7 @@ class DepositRedeem extends Component {
                       gasLimit = this.functionsUtil.BNify(1000000);
                     }
 
-                    // console.log('buildBiconomyErc20ForwarderTx',mintProxyContractInfo.name, depositParams, functionSignature, gasLimit);
+                    console.log('gasEstimate',mintProxyContractInfo.name, depositParams, functionSignature, parseFloat(gasLimit));
 
                     // debugger;
 
@@ -946,6 +949,9 @@ class DepositRedeem extends Component {
 
                   const incrementNonce = 1; // useNonce ? 1 : 0;
                   const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken, this.props.account, erc20ForwarderBaseContract.name, incrementNonce);
+
+                  console.log('signedParameters_2',signedParameters);
+
                   if (signedParameters){
 
                     this.setState({

@@ -6,6 +6,7 @@ import { Flex, Text, Progress, Icon, Link } from 'rimble-ui'
 
 class TxProgressBar extends Component {
   state = {
+    txCount:0,
     error:null,
     ended:false,
     percentage:0,
@@ -38,6 +39,8 @@ class TxProgressBar extends Component {
     while (id--) {
         window.clearTimeout(id); // will do nothing if no timeout with id is present
     }
+
+    window.initProgressBar = this.initProgressBar;
   }
 
   componentWillMount(){
@@ -58,11 +61,13 @@ class TxProgressBar extends Component {
 
   getTransaction = async () => {
     const transaction = await (new Promise( async (resolve, reject) => {
-      this.functionsUtil.customLog('getTransaction',this.props.hash);
+      console.log('getTransaction',this.props.hash);
       this.props.web3.eth.getTransaction(this.props.hash,(err,transaction) => {
         resolve(transaction);
       });
     }));
+
+    console.log('getTransaction',transaction);
 
     const newState = {};
     if (transaction){
@@ -296,6 +301,8 @@ class TxProgressBar extends Component {
     };
     this.setState(newState);
 
+    console.log('initProgressBar',this.state.txCount,this.props.hash);
+
     const transaction = await this.getTransaction();
 
     if (transaction){
@@ -304,11 +311,21 @@ class TxProgressBar extends Component {
         this.calculateRemainingTime();
       } catch (err) {
         newState.error = 'Processing transaction';
-
         // const errStringified = JSON.stringify(err);
       }
 
       this.setState(newState);
+    } else {
+      const txCount = this.state.txCount++;
+      if (txCount<5){
+        this.setState({
+          txCount
+        },() => {
+          window.setTimeout(() => {
+            this.initProgressBar();
+          },1000);
+        });
+      }
     }
   }
 
