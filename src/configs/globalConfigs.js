@@ -44,6 +44,7 @@ import { RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
 import IdleProxyMinter from '../contracts/IdleProxyMinter.json';
 import IdleRebalancerV3 from '../contracts/IdleRebalancerV3.json';
 import LiquidityGaugeV2 from '../abis/curve/LiquidityGaugeV2.json';
+import SushiV2Router02 from '../abis/sushiswap/SushiV2Router02.json';
 import IdleBatchConverter from '../contracts/IdleBatchConverter.json';
 import UniswapV2Router02 from '../abis/uniswap/UniswapV2Router02.json';
 import IdleDepositForwarder from '../contracts/IdleDepositForwarder.json';
@@ -427,6 +428,10 @@ const globalConfigs = {
       address:'0x3d9819210a31b4961b30ef54be2aed79b9c9cd3b', // Main
       // address:'0x5eae89dc1c671724a672ff0630122ee834098657' // Kovan
     },
+    SushiswapRouter:{
+      abi:SushiV2Router02,
+      address:'0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
+    },
     UniswapRouter:{
       abi:UniswapV2Router02,
       address:'0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
@@ -726,7 +731,7 @@ const globalConfigs = {
         chart:{
           labelTextColorModifiers:['darker', 4]
         },
-        address:'0xc00e94cb662c3520282e6f5717214004a7f26888',
+        address:'0x875773784Af8135eA0ef43b5a374AaD105c5D39e',
       },
       'idleDAI+idleUSDC+idleUSDT':{
         decimals:18,
@@ -1047,7 +1052,8 @@ const globalConfigs = {
             abi:SushiLiquidityPool,
             label:'SushiSwap IDLE/ETH LP Token',
             icon:'images/protocols/sushiswap.png',
-            address:'0xa7f11e026a0af768d285360a855f2bded3047530' // Mainnet
+            address:'0xa7f11e026a0af768d285360a855f2bded3047530', // Mainnet
+            poolLink:'https://analytics.sushi.com/pairs/0xa7f11e026a0af768d285360a855f2bded3047530',
           }
         }
       }

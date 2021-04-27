@@ -285,6 +285,7 @@ class SendTxWithBalance extends Component {
     const permitEnabled = this.props.permitEnabled && this.state.permitEnabled && !contractApproved;
     if (permitEnabled){
       const signedParameters = await this.functionsUtil.signPermit(this.props.tokenConfig.token, this.props.account, contractName);
+      console.log('signedParameters',signedParameters);
       if (signedParameters){
         params = this.props.getPermitTransactionParams(_amount,signedParameters);
       }
@@ -457,6 +458,80 @@ class SendTxWithBalance extends Component {
                   </DashboardCard>
                 )
               }
+              <Box
+                mt={2}
+                width={1}
+              >
+                {
+                  this.state.showPermitBox && this.props.permitEnabled ? (
+                    <DashboardCard
+                      cardProps={{
+                        py:3,
+                        px:3,
+                        mt:3,
+                        display:'flex',
+                        alignItems:'center',
+                        flexDirection:'column',
+                        justifyContent:'center',
+                      }}
+                    >
+                      <Flex
+                        width={1}
+                        alignItems={'center'}
+                        flexDirection={'column'}
+                        justifyContent={'center'}
+                      >
+                        <Icon
+                          size={'1.8em'}
+                          name={'Warning'}
+                          color={'cellText'}
+                        />
+                        <Text
+                          mt={1}
+                          fontSize={1}
+                          color={'cellText'}
+                          textAlign={'center'}
+                        >
+                          Approve and Deposit in a single transaction is supported for this transaction, disable this feature and try again if you can't deposit.
+                        </Text>
+                      </Flex>
+                      <Checkbox
+                        mt={1}
+                        required={false}
+                        checked={this.state.permitEnabled}
+                        label={`Approve and Deposit in a single transaction`}
+                        onChange={ e => this.togglePermitEnabled(e.target.checked) }
+                      />
+                    </DashboardCard>
+                  ) : !this.state.showPermitBox && this.props.permitEnabled && (
+                    <Flex
+                      p={2}
+                      mt={3}
+                      width={1}
+                      borderRadius={2}
+                      alignItems={'center'}
+                      flexDirection={'row'}
+                      justifyContent={'center'}
+                      backgroundColor={'DashboardCard'}
+                      border={`1px solid ${this.props.theme.colors.primary}`}
+                    >
+                      <Link
+                        textAlign={'center'}
+                        hoverColor={'primary'}
+                        onClick={this.showPermitBox.bind(this)}
+                      >
+                        Having trouble with the Permit signature?
+                      </Link>
+                      <Icon
+                        ml={1}
+                        size={'1em'}
+                        name={'Warning'}
+                        color={'primary'}
+                      />
+                    </Flex>
+                  )
+                }
+              </Box>
               {
                 !this.state.contractApproved ?
                   this.state.processing.loading ? (
@@ -525,67 +600,6 @@ class SendTxWithBalance extends Component {
                     mt={2}
                     width={1}
                   >
-                    {
-                      this.state.showPermitBox && this.props.permitEnabled ? (
-                        <DashboardCard
-                          cardProps={{
-                            py:3,
-                            px:3,
-                            mt:3,
-                            display:'flex',
-                            alignItems:'center',
-                            flexDirection:'column',
-                            justifyContent:'center',
-                          }}
-                        >
-                          <Flex
-                            width={1}
-                            alignItems={'center'}
-                            flexDirection={'column'}
-                            justifyContent={'center'}
-                          >
-                            <Icon
-                              size={'1.8em'}
-                              color={'cellText'}
-                              name={'LightbulbOutline'}
-                            />
-                            <Text
-                              mt={1}
-                              fontSize={1}
-                              color={'cellText'}
-                              textAlign={'center'}
-                            >
-                              Approve and Deposit in a single transaction is supported for this transaction, disable this feature and try again if you can't deposit.
-                            </Text>
-                          </Flex>
-                          <Checkbox
-                            mt={1}
-                            required={false}
-                            checked={this.state.permitEnabled}
-                            label={`Approve and Deposit in a single transaction`}
-                            onChange={ e => this.togglePermitEnabled(e.target.checked) }
-                          />
-                        </DashboardCard>
-                      ) : !this.state.showPermitBox && this.props.permitEnabled && (
-                        <Flex
-                          p={0}
-                          mt={3}
-                          width={1}
-                          borderRadius={2}
-                          alignItems={'center'}
-                          flexDirection={'row'}
-                          justifyContent={'center'}
-                        >
-                          <Link
-                            textAlign={'center'}
-                            hoverColor={'primary'}
-                            onClick={this.showPermitBox.bind(this)}
-                          >
-                            Having trouble with the Permit signature?
-                          </Link>
-                        </Flex>
-                      )
-                    }
                     <Flex
                       mt={2}
                       mb={3}

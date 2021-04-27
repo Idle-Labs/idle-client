@@ -81,6 +81,7 @@ export default {
     divider: '#d8d8d8',
     counter: '#5d5d5d',
     redeem: '#00a9fe',
+    link:'#0036ff',
     deposit: '#0239ff',
     migrate: '#00a9fe',
     legend: '#c9c9c9',

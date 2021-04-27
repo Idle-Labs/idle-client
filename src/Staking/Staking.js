@@ -1,3 +1,4 @@
+import ExtLink from '../ExtLink/ExtLink';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import AssetField from '../AssetField/AssetField';
@@ -24,13 +25,16 @@ class Staking extends Component {
     contractInfo:null,
     stakedBalance:null,
     selectedToken:null,
+    rewardMultiplier:1,
     accountingData:null,
     selectedAction:null,
     selectedOption:null,
     successMessage:null,
     permitEnabled:false,
+    poolTokenPrice:null,
     availableTokens:null,
     approveEnabled:false,
+    rewardTokenPrice:null,
     contractApproved:false,
     tokenWrapperProps:null,
     distributionSpeed:null,
@@ -75,18 +79,19 @@ class Staking extends Component {
       },() => {
         this.updateData();
       });
+    } else {
+      const selectedActionChanged = prevState.selectedAction !== this.state.selectedAction;
+      const contractApprovedChanged = prevState.contractApproved !== this.state.contractApproved;
+      if (selectedActionChanged || contractApprovedChanged){
+        this.setState({
+          tokenWrapperProps:null,
+          showTokenWrapperEnabled:false
+        },() => {
+          this.updateData(selectedActionChanged);
+        });
+      }
     }
 
-    const selectedActionChanged = prevState.selectedAction !== this.state.selectedAction;
-    const contractApprovedChanged = prevState.contractApproved !== this.state.contractApproved;
-    if (selectedActionChanged || contractApprovedChanged){
-      this.setState({
-        tokenWrapperProps:null,
-        showTokenWrapperEnabled:false
-      },() => {
-        this.updateData(selectedActionChanged);
-      });
-    }
 
     const contractInfoChanged = JSON.stringify(prevState.contractInfo) !== JSON.stringify(this.state.contractInfo);
     if (contractInfoChanged){
@@ -99,17 +104,25 @@ class Staking extends Component {
     let infoBox = null;
 
     if (inputValue && this.functionsUtil.BNify(inputValue).gt(0)){
+      inputValue = this.functionsUtil.BNify(inputValue);
       switch (this.state.selectedAction){
         case 'Stake':
-          let rewardsPerDay = this.functionsUtil.BNify(this.state.userDistributionSpeed).gt(0) ? this.state.userDistributionSpeed.times(86400) : this.functionsUtil.BNify(0);
-          const totalRewardsPerDay = this.functionsUtil.BNify(this.state.distributionSpeed).gt(0) ? this.functionsUtil.formatMoney(Math.min(parseFloat(this.state.totalRewards),parseFloat(rewardsPerDay.plus(this.state.distributionSpeed.times(inputValue).div(this.functionsUtil.fixTokenDecimals(this.state.totalStakingShares,this.state.contractInfo.decimals).plus(inputValue)).times(86400))))) : this.functionsUtil.formatMoney(0);
-          // console.log(parseFloat(rewardsPerDay),parseFloat(totalRewardsPerDay));
+          const userStakedBalance = this.functionsUtil.fixTokenDecimals(this.state.stakedBalance,this.state.tokenConfig.decimals).plus(inputValue);
+          const totalStakedBalance = this.functionsUtil.fixTokenDecimals(this.state.totalStakingShares,this.state.contractInfo.decimals).plus(inputValue);
+          const userTotalStakingShare = userStakedBalance.div(totalStakedBalance);
+          const rewardsPerDay = this.state.distributionSpeed.times(86400).times(userTotalStakingShare);//.times(this.state.distributionSpeedMultiplier);
+
+          const stakedBalanceUSD = userStakedBalance.times(this.state.poolTokenPrice);
+          const rewardsPerYearUSD = rewardsPerDay.times(365).times(this.state.rewardTokenPrice);
+          const apy = stakedBalanceUSD.gt(0) ? rewardsPerYearUSD.div(stakedBalanceUSD).times(100) : this.functionsUtil.BNify(0);
+
+          // console.log(parseFloat(userStakedBalance),parseFloat(this.state.poolTokenPrice),parseFloat(stakedBalanceUSD),parseFloat(rewardsPerDay),parseFloat(this.state.rewardTokenPrice),parseFloat(rewardsPerYearUSD),parseFloat(apy));
           infoBox = {
             icon:'FileDownload',
             iconProps:{
               color:this.props.theme.colors.transactions.status.completed
             },
-            text:`By staking <strong>${inputValue} ${this.state.tokenConfig.token}</strong> you will get <strong>${totalRewardsPerDay} ${this.state.contractInfo.rewardToken} / day</strong><br /><small style="color:#ff9900">(based on you current reward multiplier)</small>`
+            text:`By staking <strong>${inputValue.toFixed(4)} ${this.state.tokenConfig.token}</strong> you will get <strong>${rewardsPerDay.toFixed(4)} ${this.state.contractInfo.rewardToken} / day</strong> with an average APY of <strong>${apy.toFixed(2)}%</strong><br /><small style="color:#ff9900">assuming you have achieved the maximum reward multiplier</small>`
           };
         break;
         case 'Withdraw':
@@ -121,7 +134,7 @@ class Staking extends Component {
             iconProps:{
               color:this.props.theme.colors.transactions.status.completed
             },
-            text:`By unstaking <strong>${inputValue} ${this.state.tokenConfig.token}</strong> you will get <strong>${unstakeRewards} ${this.state.contractInfo.rewardToken}</strong>`
+            text:`By unstaking <strong>${inputValue.toFixed(4)} ${this.state.tokenConfig.token}</strong> you will get <strong>${unstakeRewards.toFixed(4)} ${this.state.contractInfo.rewardToken}</strong>`
           };
         break;
         default:
@@ -251,9 +264,26 @@ class Staking extends Component {
   async updateData(selectedActionChanged=false){
     const newState = {};
 
-    newState.balanceProp = this.functionsUtil.BNify(0)
-    newState.tokenBalance = this.functionsUtil.BNify(await this.functionsUtil.getTokenBalance(this.state.selectedToken,this.props.account));
-    newState.stakedBalance = this.functionsUtil.BNify(await this.functionsUtil.genericContractCall(this.state.contractInfo.name,'totalStakedFor',[this.props.account]));
+    const DAITokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens','DAI']);
+    const rewardTokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',this.state.contractInfo.rewardToken]);
+
+    const [
+      poolTokenPrice,
+      rewardTokenPrice,
+      tokenBalance,
+      stakedBalance,
+    ] = await Promise.all([
+      this.functionsUtil.getSushiswapPoolTokenPrice(this.state.selectedToken),
+      this.functionsUtil.getSushiswapConversionRate(DAITokenConfig,rewardTokenConfig),
+      this.functionsUtil.getTokenBalance(this.state.selectedToken,this.props.account),
+      this.functionsUtil.genericContractCall(this.state.contractInfo.name,'totalStakedFor',[this.props.account]),
+    ]);
+
+    newState.balanceProp = this.functionsUtil.BNify(0);
+    newState.tokenBalance = this.functionsUtil.BNify(tokenBalance);
+    newState.stakedBalance = this.functionsUtil.BNify(stakedBalance);
+    newState.poolTokenPrice = this.functionsUtil.BNify(poolTokenPrice);
+    newState.rewardTokenPrice = this.functionsUtil.BNify(rewardTokenPrice);
 
     switch (this.state.selectedAction){
       case 'Stake':
@@ -410,7 +440,8 @@ class Staking extends Component {
 
     const globalStats = [];
 
-    const stakingShare = accountingData && accountingData[2] && this.functionsUtil.BNify(accountingData[3]).gt(0) ? this.functionsUtil.BNify(accountingData[2]).div(this.functionsUtil.BNify(accountingData[3])) : this.functionsUtil.BNify(0);
+    const stakedBalance = this.functionsUtil.fixTokenDecimals(this.state.stakedBalance,this.state.tokenConfig.decimals);
+    const stakingShare = stakedBalance.div(totalDeposits); // accountingData && accountingData[2] && this.functionsUtil.BNify(accountingData[3]).gt(0) ? this.functionsUtil.BNify(accountingData[2]).div(this.functionsUtil.BNify(accountingData[3])) : this.functionsUtil.BNify(0);
 
     const rewardMultiplier = accountingData && this.functionsUtil.BNify(accountingData[4]).gt(0) ? this.functionsUtil.BNify(Math.max(1,parseFloat(this.functionsUtil.BNify(collectedRewards).div(this.functionsUtil.BNify(accountingData[4])).times(this.state.contractInfo.maxMultiplier)))) : this.functionsUtil.BNify(1);
 
@@ -420,21 +451,39 @@ class Staking extends Component {
 
     // console.log(parseFloat(this.functionsUtil.BNify(collectedRewards)),parseFloat(this.functionsUtil.BNify(accountingData[4])),this.state.contractInfo.maxMultiplier,parseFloat(this.functionsUtil.BNify(collectedRewards).div(this.functionsUtil.BNify(accountingData[4])).times(this.state.contractInfo.maxMultiplier)),parseFloat(rewardMultiplier));
 
+    // globalStats.push({
+    //   title:'Distribution rate',
+    //   description:'Your daily rewards distribution based on your current multiplier',
+    //   value:this.functionsUtil.formatMoney(rewardsPerDay)+' '+this.state.contractInfo.rewardToken+' / day',
+    // });
+
+    const stakedBalanceUSD = stakedBalance.times(this.state.poolTokenPrice);
+    const rewardsPerYearUSD = rewardsPerDay.times(365).times(this.state.rewardTokenPrice);
+    const apy = stakedBalanceUSD.gt(0) ? rewardsPerYearUSD.div(stakedBalanceUSD).times(100) : this.functionsUtil.BNify(0);
+
+    // console.log(parseFloat(this.state.stakedBalance),parseFloat(this.state.poolTokenPrice),parseFloat(stakedBalanceUSD),parseFloat(rewardsPerDay),parseFloat(this.state.rewardTokenPrice),parseFloat(rewardsPerYearUSD),parseFloat(apy));
+
     globalStats.push({
-      title:'Distribution rate',
-      description:'Your daily rewards distribution based on your current multiplier',
-      value:this.functionsUtil.formatMoney(rewardsPerDay)+' '+this.state.contractInfo.rewardToken+' / day',
+      title:'APY',
+      value:`${apy.toFixed(2)}%`,
+      description:'Annualized rewards based on your current multiplier',
     });
 
     globalStats.push({
-      title:'Reward Multiplier',
+      title:'Share',
+      value:`${stakingShare.times(100).toFixed(2)}%`,
+      description:'Your share of the total deposits',
+    });
+
+    globalStats.push({
+      title:'Multiplier',
       value:`${rewardMultiplier}x`,
       description:`Deposit liquidity tokens for ${this.state.contractInfo.maxBonusDays} days to achieve a ${this.state.contractInfo.maxMultiplier}x reward multiplier`
     });
 
     const currentRewards = this.functionsUtil.formatMoney(this.functionsUtil.fixTokenDecimals(collectedRewards,this.state.tokenConfig.decimals));
     globalStats.push({
-      title:'Current Rewards',
+      title:'Rewards',
       value:currentRewards+' '+this.state.contractInfo.rewardToken,
       description:'Your share of the total unlocked reward pool. Larger your deposit and for longer, higher your share'
     });
@@ -447,9 +496,11 @@ class Staking extends Component {
       stakingShare,
       totalRewards,
       accountingData,
+      rewardMultiplier,
       distributionSpeed,
       totalStakingShares,
-      userDistributionSpeed
+      userDistributionSpeed,
+      distributionSpeedMultiplier
     });
   }
 
@@ -684,6 +735,38 @@ class Staking extends Component {
                       />
                     </Box>
                     {
+                      this.state.tokenConfig && this.state.tokenConfig.poolLink && (
+                        <Box
+                          mt={2}
+                          width={1}
+                        >
+                          <Text
+                            mb={1}
+                          >
+                            Pool link:
+                          </Text>
+                          <ExtLink
+                            mt={1}
+                            color={'link'}
+                            hoverColor={'link'}
+                            href={this.state.tokenConfig.poolLink}
+                          >
+                            <Text
+                              color={'link'}
+                              style={{
+                                maxWidth:'100%',
+                                overflow:'hidden',
+                                whiteSpace:'nowrap',
+                                textOverflow:'ellipsis'
+                              }}
+                            >
+                              {this.state.tokenConfig.poolLink}
+                            </Text>
+                          </ExtLink>
+                        </Box>
+                      )
+                    }
+                    {
                       this.state.globalStats.length>0 && (
                         <Box
                           mt={2}
@@ -706,7 +789,8 @@ class Staking extends Component {
                                   key={`globalStats_${index}`}
                                   cardProps={{
                                     mb:[2,0],
-                                    width:[1,'32%']
+                                    mr:[0,index<this.state.globalStats.length-1 ? 1 : 0],
+                                    width:[1,'100%']
                                   }}
                                   textProps={{
                                     fontSize:[1,2]
@@ -744,7 +828,7 @@ class Staking extends Component {
                               isMobile={this.props.isMobile}
                               // subcaption={'stake LP Tokens'}
                               imageProps={{
-                                mb:2,
+                                mb:[0,2],
                                 height:this.props.isMobile ? '42px' : '52px'
                               }}
                               isActive={isStake}
@@ -761,7 +845,7 @@ class Staking extends Component {
                               isMobile={this.props.isMobile}
                               // subcaption={'withdraw LP tokens'}
                               imageProps={{
-                                mb:2,
+                                mb:[0,2],
                                 height:this.props.isMobile ? '42px' : '52px'
                               }}
                               isActive={isUnstake}
@@ -778,7 +862,7 @@ class Staking extends Component {
                               // subcaption={'view some stats'}
                               isMobile={this.props.isMobile}
                               imageProps={{
-                                mb:2,
+                                mb:[0,2],
                                 height:this.props.isMobile ? '42px' : '52px'
                               }}
                               isActive={isStats}
@@ -838,8 +922,8 @@ class Staking extends Component {
                               (this.state.tokenConfig && this.state.balanceProp && this.state.contractInfo ? (
                                 <Box
                                   mt={1}
-                                  mb={3}
                                   width={1}
+                                  mb={[4,3]}
                                 >
                                   <SendTxWithBalance
                                     {...this.props}

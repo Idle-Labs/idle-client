@@ -124,56 +124,62 @@ class Notifications extends Component {
     // Add snapshot proposals
     const snapshotProposalBaseUrl = this.functionsUtil.getGlobalConfig(['network','providers','snapshot','urls','proposals']);
 
-    activeSnapshotProposals.forEach( p => {
-        const text = this.functionsUtil.htmlDecode(p.msg.payload.body.replace(/^[#]*/,''));
-        // const text = p.msg.payload.name.replace(/^[#]*/,'');
-        notifications.push({
-          text,
-          image:'/images/snapshot.png',
-          timestamp:p.msg.payload.start*1000,
-          link:snapshotProposalBaseUrl+p.authorIpfsHash,
-          title:this.functionsUtil.htmlDecode(p.msg.payload.name),
-          date:this.functionsUtil.strToMoment(p.msg.payload.start*1000).utc().format('MMM DD, YYYY HH:mm UTC'),
-        });
-    });
+    if (activeSnapshotProposals){
+      activeSnapshotProposals.forEach( p => {
+          const text = this.functionsUtil.htmlDecode(p.msg.payload.body.replace(/^[#]*/,''));
+          // const text = p.msg.payload.name.replace(/^[#]*/,'');
+          notifications.push({
+            text,
+            image:'/images/snapshot.png',
+            timestamp:p.msg.payload.start*1000,
+            link:snapshotProposalBaseUrl+p.authorIpfsHash,
+            title:this.functionsUtil.htmlDecode(p.msg.payload.name),
+            date:this.functionsUtil.strToMoment(p.msg.payload.start*1000).utc().format('MMM DD, YYYY HH:mm UTC'),
+          });
+      });
+    }
 
     // Add governance proposals
-    const governanceProposalUrl = this.functionsUtil.getGlobalConfig(['governance','baseRoute'])+'/proposals/';
-    governanceProposals.forEach( p => {
-      notifications.push(
-        {
-          text:p.title,
-          iconProps:{
-            color:'#00acff'
-          },
-          icon:'LightbulbOutline',
-          timestamp:p.timestamp*1000,
-          title:'Governance Proposal',
-          hash:governanceProposalUrl+p.id,
-          date:this.functionsUtil.strToMoment(p.timestamp*1000).utc().format('MMM DD, YYYY HH:mm UTC'),
-        }
-      );
-    });
+    if (governanceProposals){
+      const governanceProposalUrl = this.functionsUtil.getGlobalConfig(['governance','baseRoute'])+'/proposals/';
+      governanceProposals.forEach( p => {
+        notifications.push(
+          {
+            text:p.title,
+            iconProps:{
+              color:'#00acff'
+            },
+            icon:'LightbulbOutline',
+            timestamp:p.timestamp*1000,
+            title:'Governance Proposal',
+            hash:governanceProposalUrl+p.id,
+            date:this.functionsUtil.strToMoment(p.timestamp*1000).utc().format('MMM DD, YYYY HH:mm UTC'),
+          }
+        );
+      });
+    }
 
     // Add Executed Batch Deposits
-    const batchDepositConfig = this.functionsUtil.getGlobalConfig(['tools','batchDeposit']);
-    const batchDepositBaseUrl = this.functionsUtil.getGlobalConfig(['dashboard','baseRoute'])+`/tools/${batchDepositConfig.route}/`;
-    Object.keys(batchedDeposits).forEach( batchToken => {
-      const batchInfo = batchedDeposits[batchToken];
-      const timestamp = batchInfo.lastExecution.timeStamp*1000;
-      const text = `You can claim ${batchInfo.batchRedeems.toFixed(4)} ${batchToken}`;
-      notifications.push({
-        text,
-        timestamp,
-        icon:'DoneAll',
-        title:'Batch Deposit Executed',
-        hash:batchDepositBaseUrl+batchToken,
-        iconProps:{
-          color:this.props.theme.colors.transactions.status.completed
-        },
-        date:this.functionsUtil.strToMoment(timestamp).utc().format('MMM DD, YYYY HH:mm UTC')
+    if (batchedDeposits){
+      const batchDepositConfig = this.functionsUtil.getGlobalConfig(['tools','batchDeposit']);
+      const batchDepositBaseUrl = this.functionsUtil.getGlobalConfig(['dashboard','baseRoute'])+`/tools/${batchDepositConfig.route}/`;
+      Object.keys(batchedDeposits).forEach( batchToken => {
+        const batchInfo = batchedDeposits[batchToken];
+        const timestamp = batchInfo.lastExecution.timeStamp*1000;
+        const text = `You can claim ${batchInfo.batchRedeems.toFixed(4)} ${batchToken}`;
+        notifications.push({
+          text,
+          timestamp,
+          icon:'DoneAll',
+          title:'Batch Deposit Executed',
+          hash:batchDepositBaseUrl+batchToken,
+          iconProps:{
+            color:this.props.theme.colors.transactions.status.completed
+          },
+          date:this.functionsUtil.strToMoment(timestamp).utc().format('MMM DD, YYYY HH:mm UTC')
+        });
       });
-    });
+    }
 
     notifications = notifications.sort((a,b) => (a.timestamp < b.timestamp ? 1 : -1));
 

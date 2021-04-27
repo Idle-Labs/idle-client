@@ -3890,6 +3890,87 @@ class FunctionsUtil {
     const unires = await this.genericContractCall('UniswapRouter','getAmountsIn',[one.toFixed(),path]);
     return unires;
   }
+  getSushiswapPoolTokenPrice = async (contractName,pairAddresses) => {
+    const [
+      token0_address,
+      token1_address,
+      poolReserves,
+      totalSupply
+    ] = await Promise.all([
+      this.genericContractCall(contractName,'token0'),
+      this.genericContractCall(contractName,'token1'),
+      this.genericContractCall(contractName,'getReserves'),
+      this.genericContractCall(contractName,'totalSupply')
+    ]);
+
+    if (token0_address && token1_address && poolReserves && totalSupply){
+      const token0_config = {
+        address:token0_address
+      };
+      const token1_config = {
+        address:token1_address
+      };
+      const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
+
+      let [
+        token0_price,
+        token1_price
+      ] = await Promise.all([
+        this.getSushiswapConversionRate(DAITokenConfig,token0_config),
+        this.getSushiswapConversionRate(DAITokenConfig,token1_config)
+      ]);
+
+      if (token0_price && token1_price){
+        // token0_price = this.BNify(1).div(this.BNify(token0_price));
+        // token1_price = this.BNify(1).div(this.BNify(token1_price));
+
+        const token0_pool = token0_price.times(this.fixTokenDecimals(poolReserves[0],18));
+        const token1_pool = token1_price.times(this.fixTokenDecimals(poolReserves[1],18));
+
+        const totalPoolSize = token0_pool.plus(token1_pool);
+        const poolTokenPrice = totalPoolSize.div(this.fixTokenDecimals(totalSupply,18));
+
+        // console.log(parseFloat(token0_price),parseFloat(token1_price),parseFloat(poolTokenPrice));
+
+        return poolTokenPrice;
+      }
+    }
+
+    return null;
+  }
+  getSushiswapConversionRate = async (tokenConfigFrom,tokenConfigDest) => {
+
+    // Check for cached data
+    const cachedDataKey = `sushiswapConversionRate_${tokenConfigFrom.address}_${tokenConfigDest.address}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData && !this.BNify(cachedData).isNaN()){
+      return this.BNify(cachedData);
+    }
+
+    try {
+      const WETHAddr = this.getGlobalConfig(['stats','tokens','WETH','address']);
+      const one = this.normalizeTokenDecimals(18);
+
+      const path = [];
+      path.push(tokenConfigFrom.address);
+
+      // Don't pass through weth if i'm converting weth
+      if (WETHAddr.toLowerCase() !== tokenConfigFrom.address.toLowerCase() && WETHAddr.toLowerCase() !== tokenConfigDest.address.toLowerCase()){
+        path.push(WETHAddr);
+      }
+      path.push(tokenConfigDest.address);
+
+      const res = await this.genericContractCall('SushiswapRouter','getAmountsIn',[one.toFixed(),path]);
+
+      if (res){
+        const price = this.BNify(res[0]).div(one);
+        return this.setCachedDataWithLocalStorage(cachedDataKey,price);
+      }
+      return null;
+    } catch (error) {
+      return null;
+    }
+  }
   getUniswapConversionRate = async (tokenConfigFrom,tokenConfigDest) => {
 
     // Check for cached data
@@ -3912,8 +3993,6 @@ class FunctionsUtil {
       path.push(tokenConfigDest.address);
 
       const unires = await this.genericContractCall('UniswapRouter','getAmountsIn',[one.toFixed(),path]);
-
-      // console.log('getUniswapConversionRate',tokenConfigFrom,tokenConfigDest,path,unires);
 
       if (unires){
         const price = this.BNify(unires[0]).div(one);
