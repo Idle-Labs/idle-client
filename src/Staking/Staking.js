@@ -128,7 +128,7 @@ class Staking extends Component {
         break;
         case 'Withdraw':
           const normalizedInputValue = this.functionsUtil.normalizeTokenAmount(inputValue,this.state.tokenConfig.decimals);
-          let unstakeRewards = await this.functionsUtil.genericContractCall(this.state.contractInfo.name,'unstakeQuery',[normalizedInputValue.toString()],{from:this.props.account});
+          let unstakeRewards = await this.functionsUtil.genericContractCall(this.state.contractInfo.name,'unstakeQuery',[normalizedInputValue],{from:this.props.account});
           unstakeRewards = this.functionsUtil.formatMoney(this.functionsUtil.fixTokenDecimals(unstakeRewards,this.state.tokenConfig.decimals));
           infoBox = {
             icon:'FileUpload',
@@ -383,7 +383,7 @@ class Staking extends Component {
       this.functionsUtil.genericContractCall(this.state.contractInfo.name,'totalStakingShares'),
       this.functionsUtil.genericContractCall(this.state.contractInfo.name,'unlockScheduleCount'),
       this.functionsUtil.genericContractCall(this.state.contractInfo.name,'updateAccounting',[],{from:this.props.account}),
-      this.state.stakedBalance.gt(0) ? this.functionsUtil.genericContractCall(this.state.contractInfo.name,'unstakeQuery',[this.state.stakedBalance.toString()],{from:this.props.account}) : this.functionsUtil.BNify(0)
+      this.state.stakedBalance.gt(0) ? this.functionsUtil.genericContractCall(this.state.contractInfo.name,'unstakeQuery',[this.functionsUtil.integerValue(this.state.stakedBalance)],{from:this.props.account}) : this.functionsUtil.BNify(0)
     ]);
 
     const unlockSchedulesPromises = [];

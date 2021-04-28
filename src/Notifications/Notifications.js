@@ -96,7 +96,6 @@ class Notifications extends Component {
       this.functionsUtil.getSubstackLatestFeed(),
       this.functionsUtil.getSnapshotProposals(true),
       this.governanceUtil.getProposals(null,'Active'),
-      // this.functionsUtil.makeCachedRequest('http://localhost:3333/substack'),
       this.functionsUtil.getBatchedDeposits(this.props.account,'executed')
     ]);
 
