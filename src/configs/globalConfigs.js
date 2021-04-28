@@ -1003,7 +1003,7 @@ const globalConfigs = {
               abi:IdleDepositForwarder,
               permitType:'EIP2612_Permit',
               name:'IdleDepositForwarderUSDC',
-              function:'permitEIP2612AndDeposit',
+              function:'permitEIP2612AndDeposit', // 'foo'
               address:'0x43bD6a78b37b50E3f52CAcec53F1202dbDe6a761', // Main
               // address:'0x8f9048CFAa27b1A1b77c32a0b87D2DcF5D016cb5', // Kovan
             },

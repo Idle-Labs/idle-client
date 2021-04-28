@@ -892,6 +892,10 @@ class DepositRedeem extends Component {
                       depositParams = [tokensToDeposit, expiry, v, r, s];
                     }
 
+                    if (mintProxyContractInfo.function === 'foo'){
+                      depositParams = [];
+                    }
+
                     console.log('permitAndDeposit',mintProxyContractInfo.name, mintProxyContractInfo.function, depositParams);
 
                     // contractSendResult = await this.functionsUtil.contractMethodSendWrapper(mintProxyContractInfo.name, mintProxyContractInfo.function, depositParams, callbackDeposit, callbackReceiptDeposit);
@@ -900,12 +904,21 @@ class DepositRedeem extends Component {
                     const functionCall = erc20ForwarderContract.contract.methods[erc20ForwarderContract.function](...depositParams);
                     const functionSignature = functionCall.encodeABI();
 
-                    // console.log('buildBiconomyErc20ForwarderTx 1',permitType, erc20ForwarderContract.function, depositParams, functionCall, functionSignature);
+                    console.log('functionSignature',permitType, erc20ForwarderContract.function, depositParams, functionSignature);
 
-                    let gasLimit = await functionCall.estimateGas({from: this.props.account}); // 5000000;
-                    if (gasLimit){
-                      gasLimit = this.functionsUtil.BNify(gasLimit).times(1.2);
-                    } else {
+                    let gasLimit = null;
+                    try {
+                      gasLimit = await functionCall.estimateGas({from: this.props.account}); // 5000000;
+                      if (gasLimit){
+                        gasLimit = this.functionsUtil.BNify(gasLimit).times(1.2);
+                      } else {
+                        gasLimit = this.functionsUtil.BNify(1000000);
+                      }
+                    } catch (error) {
+                      
+                    }
+                    
+                    if (!gasLimit){
                       gasLimit = this.functionsUtil.BNify(1000000);
                     }
 

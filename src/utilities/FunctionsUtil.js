@@ -2791,7 +2791,7 @@ class FunctionsUtil {
       primaryType: 'Permit',
     });
 
-    // console.log('Permit',JSON.parse(data));
+    console.log('Permit',JSON.parse(data));
 
     return new Promise((resolve, reject) => {
       this.props.web3.currentProvider.send({
