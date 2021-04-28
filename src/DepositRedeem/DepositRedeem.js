@@ -958,15 +958,18 @@ class DepositRedeem extends Component {
                       signedParameters
                     });
 
+                    const permitConfig = this.functionsUtil.getGlobalConfig(['permit',this.props.selectedToken]);
+                    const setValue = permitConfig.type.find( t => t.name==='value' );
+
                     const { expiry, nonce, r, s, v } = signedParameters;
                     permitOptions.v = v;
                     permitOptions.r = r;
                     permitOptions.s = s;
-                    permitOptions.value = 0; //in case of DAI passing dummy value for the sake of struct (similar to token address in EIP2771)
                     permitOptions.allowed = true;
                     permitOptions.expiry = parseInt(expiry);
                     permitOptions.holder = this.props.account;
                     permitOptions.nonce = parseInt(nonce.toString());
+                    permitOptions.value = setValue ? tokensToDeposit : 0;
                     permitOptions.spender = erc20ForwarderBaseContract.address;
 
                     metaInfo.permitData = permitOptions;
