@@ -21,6 +21,7 @@ class Staking extends Component {
     description:null,
     tokenConfig:null,
     balanceProp:null,
+    statsLoaded:false,
     tokenBalance:null,
     contractInfo:null,
     stakedBalance:null,
@@ -134,7 +135,7 @@ class Staking extends Component {
             iconProps:{
               color:this.props.theme.colors.transactions.status.completed
             },
-            text:`By unstaking <strong>${inputValue.toFixed(4)} ${this.state.tokenConfig.token}</strong> you will get <strong>${unstakeRewards.toFixed(4)} ${this.state.contractInfo.rewardToken}</strong>`
+            text:`By unstaking <strong>${inputValue.toFixed(4)} ${this.state.tokenConfig.token}</strong> you will get <strong>${unstakeRewards} ${this.state.contractInfo.rewardToken}</strong>`
           };
         break;
         default:
@@ -280,10 +281,10 @@ class Staking extends Component {
     ]);
 
     newState.balanceProp = this.functionsUtil.BNify(0);
-    newState.tokenBalance = this.functionsUtil.BNify(tokenBalance);
-    newState.stakedBalance = this.functionsUtil.BNify(stakedBalance);
-    newState.poolTokenPrice = this.functionsUtil.BNify(poolTokenPrice);
-    newState.rewardTokenPrice = this.functionsUtil.BNify(rewardTokenPrice);
+    newState.tokenBalance = !this.functionsUtil.BNify(tokenBalance).isNaN() ? this.functionsUtil.BNify(tokenBalance) : this.functionsUtil.BNify(0);
+    newState.stakedBalance = !this.functionsUtil.BNify(stakedBalance).isNaN() ? this.functionsUtil.BNify(stakedBalance) : this.functionsUtil.BNify(0);
+    newState.poolTokenPrice = !this.functionsUtil.BNify(poolTokenPrice).isNaN() ? this.functionsUtil.BNify(poolTokenPrice) : this.functionsUtil.BNify(0);
+    newState.rewardTokenPrice = !this.functionsUtil.BNify(rewardTokenPrice).isNaN() ? this.functionsUtil.BNify(rewardTokenPrice) : this.functionsUtil.BNify(0);
 
     switch (this.state.selectedAction){
       case 'Stake':
@@ -428,8 +429,12 @@ class Staking extends Component {
     });
 
     const distributionSpeed = unlockSchedules.reduce( (distributionSpeed,s) => {
-      const tokensPerSecond = this.functionsUtil.fixTokenDecimals(s.initialLockedShares,this.state.contractInfo.decimals).div(s.durationSec);
-      distributionSpeed = distributionSpeed.plus(tokensPerSecond);
+      if (this.functionsUtil.BNify(s.initialLockedShares).gt(0) && this.functionsUtil.BNify(s.durationSec).gt(0)){
+        const tokensPerSecond = this.functionsUtil.fixTokenDecimals(s.initialLockedShares,this.state.contractInfo.decimals).div(s.durationSec);
+        if (!tokensPerSecond.isNaN()){
+          distributionSpeed = distributionSpeed.plus(tokensPerSecond);
+        }
+      }
       return distributionSpeed;
     },this.functionsUtil.BNify(0));
 
@@ -489,9 +494,11 @@ class Staking extends Component {
     });
 
     // console.log('loadStats',stats,globalStats);
+    const statsLoaded = true;
 
     this.setState({
       stats,
+      statsLoaded,
       globalStats,
       stakingShare,
       totalRewards,
@@ -767,7 +774,7 @@ class Staking extends Component {
                       )
                     }
                     {
-                      this.state.globalStats.length>0 && (
+                      this.state.stakedBalance && this.functionsUtil.BNify(this.state.stakedBalance).gt(0) && this.state.globalStats.length>0 && (
                         <Box
                           mt={2}
                           width={1}
@@ -919,7 +926,7 @@ class Staking extends Component {
                                 />
                               ) :
                               */
-                              (this.state.tokenConfig && this.state.balanceProp && this.state.contractInfo ? (
+                              (this.state.tokenConfig && this.state.balanceProp && this.state.statsLoaded && this.state.contractInfo ? (
                                 <Box
                                   mt={1}
                                   width={1}
@@ -992,7 +999,7 @@ class Staking extends Component {
                                     textProps={{
                                       ml:2
                                     }}
-                                    text={'Loading balance...'}
+                                    text={'Loading info...'}
                                   />
                                 </Flex>
                               )

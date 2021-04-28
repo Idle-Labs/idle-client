@@ -98,9 +98,11 @@ class SendTxWithBalance extends Component {
     const selectedPercentage = this.functionsUtil.BNify(this.state.fastBalanceSelector).div(100);
     const inputValue = this.props.tokenBalance && !this.functionsUtil.BNify(this.props.tokenBalance).isNaN() ? this.functionsUtil.BNify(this.props.tokenBalance).times(selectedPercentage) : null;
 
-    this.changeInputValue({
-      target:{
-        value:inputValue.toString()
+    this.setState((prevState) => ({
+      inputValue
+    }),() => {
+      if (typeof this.props.changeInputCallback === 'function'){
+        this.props.changeInputCallback(this.state.inputValue);
       }
     });
   }
