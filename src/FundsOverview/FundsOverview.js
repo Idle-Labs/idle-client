@@ -9,7 +9,7 @@ import PortfolioEquity from '../PortfolioEquity/PortfolioEquity';
 class FundsOverview extends Component {
 
   state = {
-    govTokensAprs:null,
+    // govTokensAprs:null,
     aggregatedValues:[],
     govTokensTotalApr:null,
     govTokensUserBalance:null,
@@ -47,13 +47,13 @@ class FundsOverview extends Component {
     const isRisk = this.props.selectedStrategy === 'risk';
 
     const [
-      govTokensAprs,
+      // govTokensAprs,
       idleTokenUserDistribution,
       govTokensUserBalance,
       depositTimestamp,
       days,
     ] = await Promise.all([
-      this.functionsUtil.getGovTokensAprs(this.props.selectedToken,this.props.tokenConfig),
+      // this.functionsUtil.getGovTokensAprs(this.props.selectedToken,this.props.tokenConfig),
       this.idleGovToken.getUserDistribution(this.props.account,govTokenAvailableTokens,true),
       this.functionsUtil.getGovTokensUserBalances(this.props.account,govTokenAvailableTokens,null),
       this.functionsUtil.loadAssetField('depositTimestamp',this.props.selectedToken,this.props.tokenConfig,this.props.account),
@@ -77,17 +77,17 @@ class FundsOverview extends Component {
 
     // console.log(govTokensTotalBalance,govTokensUserBalance,govTokensTotalBalanceTooltip);
 
-    const govTokensTotalApr = govTokensAprs ? Object.values(govTokensAprs).reduce( (totApr,govTokenApr) => {
-      return totApr.plus(this.functionsUtil.BNify(govTokenApr));
-    },this.functionsUtil.BNify(0)) : null;
+    // const govTokensTotalApr = govTokensAprs ? Object.values(govTokensAprs).reduce( (totApr,govTokenApr) => {
+    //   return totApr.plus(this.functionsUtil.BNify(govTokenApr));
+    // },this.functionsUtil.BNify(0)) : null;
 
-    const govTokensTotalAprTooltip = govTokensAprs ? Object.keys(govTokensAprs).map( govToken => {
-      const apr = govTokensAprs[govToken];
-      if (apr.gt(0)){
-        return `${govToken}: ${apr.toFixed(2)}%`;
-      }
-      return null;
-    }).filter(v => (v !== null)) : null;
+    // const govTokensTotalAprTooltip = govTokensAprs ? Object.keys(govTokensAprs).map( govToken => {
+    //   const apr = govTokensAprs[govToken];
+    //   if (apr.gt(0)){
+    //     return `${govToken}: ${apr.toFixed(2)}%`;
+    //   }
+    //   return null;
+    // }).filter(v => (v !== null)) : null;
 
     /*
     const govTokensDistributionTooltip = govTokensUserDistribution ? Object.keys(govTokensUserDistribution).map( govToken => {
@@ -185,12 +185,12 @@ class FundsOverview extends Component {
     ];
 
     this.setState({
-      govTokensAprs,
+      // govTokensAprs,
       aggregatedValues,
-      govTokensTotalApr,
+      // govTokensTotalApr,
       govTokensUserBalance,
       govTokensTotalBalance,
-      govTokensTotalAprTooltip,
+      // govTokensTotalAprTooltip,
       idleTokenUserDistribution,
       govTokensTotalBalanceTooltip
     });

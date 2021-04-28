@@ -2,6 +2,7 @@ import Staking from '../Staking/Staking';
 import IDLE from '../contracts/IDLE.json';
 import WETH from '../abis/tokens/WETH.json';
 import COMP from '../abis/compound/COMP.json';
+import aToken from '../abis/aave/AToken.json';
 import TokenSwap from '../TokenSwap/TokenSwap';
 import yDAIv3 from '../abis/iearn/yDAIv3.json';
 import yUSDCv3 from '../abis/iearn/yUSDCv3.json';
@@ -354,6 +355,7 @@ const globalConfigs = {
       disabledTokens:[], // Disable IDLE distribution for idleToken
       showBalance:false, // Include IDLE balance in Portfolio Donut
       aprTooltipMode:false,
+      distributionMode:'block',
       distributionFrequency:'day', // Multiply distribution per block
       color:'hsl(162, 100%, 41%)',
       icon:'images/tokens/IDLE.png',
@@ -373,10 +375,29 @@ const globalConfigs = {
       disabledTokens:[],
       protocol:'compound',
       aprTooltipMode:false,
+      distributionMode:'block',
       distributionFrequency:'day',
       color:'hsl(162, 100%, 41%)',
       address:'0xc00e94cb662c3520282e6f5717214004a7f26888', // MAIN
       // address:'0x61460874a7196d6a22d1ee4922473664b3e95270' // KOVAN
+    },
+    stkAAVE:{
+      abi:aToken,
+      decimals:18,
+      enabled:true,
+      showAUM:true, // Include stkAAVE balance in AUM
+      showAPR:true, // Include stkAAVE Apr
+      showPrice:true,
+      token:'stkAAVE',
+      showBalance:true, // Include stkAAVE balance in Portfolio Donut
+      protocol:'aavev2',
+      aprTooltipMode:false,
+      color:'hsl(162, 100%, 41%)',
+      distributionMode:'second',
+      distributionFrequency:'day',
+      disabledTokens:['idleTUSDYield','idleSUSDYield'],
+      address:'0x4da27a545c0c5b758a6ba100e3a049001de870f5', // MAIN
+      addressForPrice:'0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9', // MAIN
     }
   },
   contracts:{
@@ -717,6 +738,21 @@ const globalConfigs = {
         },
         address:'0xc00e94cb662c3520282e6f5717214004a7f26888',
       },
+      stkAAVE:{
+        decimals:18,
+        enabled:true,
+        color:{
+          hex:'#e683ce',
+          rgb:[230, 131, 206],
+          hsl:['315', '66%', '71%']
+        },
+        startTimestamp:'2021-04-30',
+        conversionRateField:'compDAIPrice',
+        chart:{
+          labelTextColorModifiers:['darker', 4]
+        },
+        address:'0x4da27a545c0c5b758a6ba100e3a049001de870f5',
+      },
       IDLE:{
         decimals:18,
         enabled:true,
@@ -908,6 +944,7 @@ const globalConfigs = {
     isForked:false, // If TRUE the tx confirmation callback is fired on the receipt
     requiredNetwork:1, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
     blocksPerYear:2371428,
+    secondsPerYear:31536000,
     firstBlockNumber:8119247,
     requiredConfirmations: 1,
     accountBalanceMinimum: 0, // in ETH for gas fees
