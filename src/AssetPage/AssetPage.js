@@ -26,7 +26,8 @@ class AssetPage extends Component {
     govTokensDisabled:{},
     availableGovTokens:{},
     tokenFeesPercentage:{},
-    componentMounted:false
+    componentMounted:false,
+    govTokensUserBalances:{}
   };
 
   // Utils
@@ -68,7 +69,8 @@ class AssetPage extends Component {
           idleTokenPrice,
           idleTokenBalance,
           tokenApproved,
-          govTokensBalance
+          govTokensBalance,
+          govTokensUserBalances
         ] = await Promise.all([
           this.functionsUtil.getTokenFees(tokenConfig),
           this.functionsUtil.getTokenApy(this.props.tokenConfig),
@@ -77,8 +79,12 @@ class AssetPage extends Component {
           this.functionsUtil.genericContractCall(tokenConfig.idle.token, 'tokenPrice'),
           this.functionsUtil.getTokenBalance(tokenConfig.idle.token,this.props.account),
           this.functionsUtil.checkTokenApproved(token,tokenConfig.idle.address,this.props.account),
-          this.functionsUtil.getGovTokensUserTotalBalance(this.props.account,govTokenAvailableTokens,'DAI')
+          this.functionsUtil.getGovTokensUserTotalBalance(this.props.account,govTokenAvailableTokens,'DAI'),
+          this.functionsUtil.getGovTokensUserBalances(this.props.account,govTokenAvailableTokens,null,null)
         ]);
+
+
+        console.log()
 
         newState.tokenFees[token] = tokenFees;
         newState.tokenBalance[token] = tokenBalance;
@@ -87,6 +93,7 @@ class AssetPage extends Component {
         newState.idleTokenBalance[token] = idleTokenBalance;
         newState.govTokensBalance[token] = govTokensBalance;
         newState.tokenFeesPercentage[token] = tokenFeesPercentage;
+        newState.govTokensUserBalances[token] = govTokensUserBalances;
         newState.govTokensDisabled[token] = tokenConfig.govTokensDisabled;
         newState.tokenApy[token] = tokenApy && !tokenApy.isNaN() ? tokenApy : null;
         newState.redeemableBalance[token] = idleTokenBalance ? this.functionsUtil.fixTokenDecimals(idleTokenBalance.times(idleTokenPrice),tokenConfig.decimals) : this.functionsUtil.BNify(0);
@@ -169,6 +176,7 @@ class AssetPage extends Component {
             idleTokenBalance={this.state.idleTokenBalance[this.props.selectedToken]}
             redeemableBalance={this.state.redeemableBalance[this.props.selectedToken]}
             tokenFeesPercentage={this.state.tokenFeesPercentage[this.props.selectedToken]}
+            govTokensUserBalances={this.state.govTokensUserBalances[this.props.selectedToken]}
           />
         </Flex>
         {

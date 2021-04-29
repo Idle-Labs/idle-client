@@ -2,10 +2,12 @@ import Migrate from '../Migrate/Migrate';
 import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
 import ExtLink from '../ExtLink/ExtLink';
+import AssetField from '../AssetField/AssetField';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import ConnectBox from '../ConnectBox/ConnectBox';
 import CurveRedeem from '../CurveRedeem/CurveRedeem';
 import RoundButton from '../RoundButton/RoundButton';
+import SmartNumber from '../SmartNumber/SmartNumber';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import BuyModal from '../utilities/components/BuyModal';
 import DashboardCard from '../DashboardCard/DashboardCard';
@@ -32,11 +34,13 @@ class DepositRedeem extends Component {
     action:'deposit',
     directMint:false,
     activeModal:null,
+    tokenGovTokens:{},
     showBuyFlow:false,
     maxUnlentPerc:null,
     unlentBalance:null,
     tokenApproved:false,
     skipMigration:false,
+    redeemSkipGov:false,
     showRedeemFlow:false,
     contractPaused:false,
     buttonDisabled:false,
@@ -47,11 +51,13 @@ class DepositRedeem extends Component {
     showMaxSlippage:false,
     redeemGovTokens:false,
     canDepositCurve:false,
+    redeemSkipGovTokens:[],
     fastBalanceSelector:{},
     actionProxyContract:{},
     migrationEnabled:false,
     componentMounted:false,
     curveTokenBalance:null,
+    agreeSkipGovTokens:false,
     redeemCurveEnabled:false,
     depositCurveBalance:null,
     depositCurveEnabled:true,
@@ -61,6 +67,7 @@ class DepositRedeem extends Component {
     erc20ForwarderEnabled:true,
     showETHWrapperEnabled:false,
     metaTransactionsEnabled:true,
+    skippedGovTokensBalance:null,
     minAmountForMintReached:false,
     loadingErc20ForwarderTx:false
   };
@@ -127,6 +134,12 @@ class DepositRedeem extends Component {
     });
   }
 
+  toggleAgreeSkipGovTokens = agreeSkipGovTokens => {
+    this.setState({
+      agreeSkipGovTokens
+    });
+  }
+
   toggleSkipMint = (directMint) => {
     this.setState({
       directMint
@@ -135,7 +148,46 @@ class DepositRedeem extends Component {
 
   toggleRedeemGovTokens = (redeemGovTokens) => {
     this.setState({
-      redeemGovTokens
+      redeemGovTokens,
+      redeemSkipGov:redeemGovTokens?false:this.state.redeemSkipGov
+    });
+  }
+
+  toggleRedeemSkipGov = (redeemSkipGov) => {
+    this.setState({
+      redeemSkipGov,
+      redeemGovTokens:redeemSkipGov?false:this.state.redeemGovTokens
+    });
+  }
+
+  calculateSkippedGovTokens = async () => {
+    let skippedGovTokensBalance = this.functionsUtil.BNify(0);
+    const DAITokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens','DAI']);
+    await this.functionsUtil.asyncForEach(this.state.redeemSkipGovTokens, async (govToken) => {
+      const govTokenConfig = this.functionsUtil.getGlobalConfig(['govTokens',govToken]);
+      const govTokenPrice = await this.functionsUtil.getUniswapConversionRate(DAITokenConfig,govTokenConfig);
+      const skippedAmount = this.props.govTokensUserBalances[govToken].times(govTokenPrice);
+      skippedGovTokensBalance = skippedGovTokensBalance.plus(skippedAmount);
+    });
+    this.setState({
+      skippedGovTokensBalance
+    });
+    return skippedGovTokensBalance;
+  }
+
+  setRedeemSkipGovTokens = (token,checked) => {
+    const redeemSkipGovTokens = this.state.redeemSkipGovTokens;
+    // Remove token from 
+    if (!checked && redeemSkipGovTokens.includes(token)){
+      redeemSkipGovTokens.splice(redeemSkipGovTokens.indexOf(token),1);
+    } else if (checked && !redeemSkipGovTokens.includes(token)) {
+      redeemSkipGovTokens.push(token);
+    }
+
+    this.setState({
+      redeemSkipGovTokens
+    },() => {
+      this.calculateSkippedGovTokens();
     });
   }
 
@@ -266,8 +318,10 @@ class DepositRedeem extends Component {
       this.checkMinAmountForMint();
     }
 
+    const redeemSkipGovChanged = prevState.redeemSkipGov !== this.state.redeemSkipGov;
     const redeemGovTokensChanged = prevState.redeemGovTokens !== this.state.redeemGovTokens;
-    if (redeemGovTokensChanged || actionChanged){
+    const redeemSkipGovTokensChanged = JSON.stringify(prevState.redeemSkipGovTokens) !== JSON.stringify(this.state.redeemSkipGovTokens);
+    if (redeemGovTokensChanged || actionChanged || redeemSkipGovTokensChanged || redeemSkipGovChanged){
       this.checkButtonDisabled();
     }
 
@@ -533,6 +587,8 @@ class DepositRedeem extends Component {
     const canRedeemCurve = curveTokenEnabled && curveTokenBalance && curveTokenBalance.gt(0);
     const redeemCurveEnabled = canRedeemCurve;
 
+    const tokenGovTokens = this.functionsUtil.getTokenGovTokens(this.props.tokenConfig);
+
     const newState = {...this.state};
 
     // Check curve deposit enabled
@@ -540,10 +596,12 @@ class DepositRedeem extends Component {
       newState.depositCurveEnabled = false;
     }
     
+
     newState.canRedeem = canRedeem;
     newState.canDeposit = canDeposit;
     newState.unlentBalance = unlentBalance;
     newState.tokenApproved = tokenApproved;
+    newState.tokenGovTokens = tokenGovTokens;
     newState.contractPaused = contractPaused;
     newState.canRedeemCurve = canRedeemCurve;
     newState.canDepositCurve = canDepositCurve;
@@ -1110,6 +1168,12 @@ class DepositRedeem extends Component {
       break;
       case 'redeem':
         buttonDisabled = !this.state.canRedeemCurve && !this.state.redeemGovTokens && ( buttonDisabled || (amount && amount.gt(this.props.redeemableBalance)) );
+
+        console.log('checkButtonDisabled',this.state.redeemSkipGov,this.state.redeemSkipGovTokens.length,this.state.agreeSkipGovTokens);
+
+        if (!buttonDisabled && this.state.redeemSkipGov && this.state.redeemSkipGovTokens.length>0 && !this.state.agreeSkipGovTokens){
+          buttonDisabled = false;
+        }
       break;
       default:
       break;
@@ -1219,12 +1283,21 @@ class DepositRedeem extends Component {
     const viewOnly = this.props.connectorName === 'custom';
 
     const govTokensDisabled = this.props.tokenConfig.govTokensDisabled;
-    const govTokensEnabled = this.functionsUtil.getGlobalConfig(['strategies',this.props.selectedStrategy,'govTokensEnabled']);
+    const govTokensEnabled = !govTokensDisabled && this.functionsUtil.getGlobalConfig(['strategies',this.props.selectedStrategy,'govTokensEnabled']) && Object.keys(this.state.tokenGovTokens).length>0;
     const skipMintForDepositEnabled = typeof this.props.tokenConfig.skipMintForDeposit !== 'undefined' ? this.props.tokenConfig.skipMintForDeposit : true;
     const skipMintCheckboxEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','skipMintCheckboxEnabled']) && skipMintForDepositEnabled;
 
-    const redeemGovTokenEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','redeemGovTokens','enabled']) && !govTokensDisabled && govTokensEnabled;
-    const redeemGovTokens = redeemGovTokenEnabled && this.state.redeemGovTokens && this.state.action === 'redeem';
+    const showRedeemFlow = this.state.canRedeem && (!this.state.redeemCurveEnabled || this.state.showRedeemFlow) && this.state.action==='redeem';
+
+    const redeemGovTokenEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','redeemGovTokens','enabled']) && govTokensEnabled && showRedeemFlow;
+    const redeemGovTokens = redeemGovTokenEnabled && this.state.redeemGovTokens;
+
+    const redeemSkipGovEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','redeemSkipGov','enabled']) && govTokensEnabled && showRedeemFlow;
+    const redeemSkipGov = redeemSkipGovEnabled && this.state.redeemSkipGov && Object.keys(this.props.govTokensUserBalances).length>0 && this.props.govTokensBalance.gt(0);
+
+    const showAdvancedRedeemOptions = redeemGovTokenEnabled || redeemSkipGovEnabled;
+
+    // console.log('showAdvancedRedeemOptions',showAdvancedRedeemOptions,redeemGovTokenEnabled,redeemSkipGovEnabled,govTokensEnabled,showRedeemFlow);
 
     const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','erc20ForwarderEnabled']);
     const depositMetaTransactionsEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','metaTransactionsEnabled']);
@@ -1250,8 +1323,6 @@ class DepositRedeem extends Component {
 
     const showDepositCurve = showDepositOptions && curveTokenEnabled && this.state.componentMounted && (!this.state.migrationEnabled || this.state.skipMigration) && this.state.canDepositCurve && this.state.action === 'deposit';
     const showRedeemCurve = curveTokenEnabled && this.state.componentMounted && (!this.state.migrationEnabled || this.state.skipMigration) && this.state.canRedeemCurve && this.state.action === 'redeem';
-
-    const showRedeemFlow = this.state.canRedeem && (!this.state.redeemCurveEnabled || this.state.showRedeemFlow);
 
     const showCurveSlippage = depositCurve && this.state.depositCurveSlippage && this.state.depositCurveBalance && !this.state.buttonDisabled;
 
@@ -1413,7 +1484,151 @@ class DepositRedeem extends Component {
                           </Flex>
                         </Flex>
                         {
-                          showAdvancedDepositOptions ? (
+                          (showRedeemFlow && this.state.unlentBalance) &&
+                            <DashboardCard
+                              cardProps={{
+                                py:2,
+                                px:2,
+                                mt:3,
+                                display:'flex',
+                                alignItems:'center',
+                                flexDirection:'column',
+                                justifyContent:'center',
+                              }}
+                            >
+                              <Flex
+                                width={1}
+                                alignItems={'center'}
+                                flexDirection={'column'}
+                                justifyContent={'center'}
+                              >
+                                <Icon
+                                  size={'1.8em'}
+                                  color={'cellText'}
+                                  name={'LocalGasStation'}
+                                />
+                                <Text
+                                  px={2}
+                                  fontSize={1}
+                                  color={'cellText'}
+                                  textAlign={'center'}
+                                >
+                                  Available balance for Cheap Redeem
+                                </Text>
+                                <Flex
+                                  alignItems={'center'}
+                                  flexDirection={'row'}
+                                >
+                                  <Text
+                                    fontSize={1}
+                                    fontWeight={3}
+                                    color={'dark-gray'}
+                                    textAlign={'center'}
+                                    hoverColor={'copyColor'}
+                                  >
+                                    {this.state.unlentBalance.toFixed(4)} {this.props.selectedToken}
+                                  </Text>
+                                  <Tooltip
+                                    placement={'top'}
+                                    message={this.functionsUtil.getGlobalConfig(['messages','cheapRedeem'])}
+                                  >
+                                    <Icon
+                                      ml={1}
+                                      size={'1em'}
+                                      color={'cellTitle'}
+                                      name={"InfoOutline"}
+                                    />
+                                  </Tooltip>
+                                </Flex>
+                              </Flex>
+                            </DashboardCard>
+                        }
+                        {
+                          showAdvancedRedeemOptions ? (
+                            <DashboardCard
+                              cardProps={{
+                                pt:2,
+                                px:2,
+                                mt:3,
+                                display:'flex',
+                                alignItems:'center',
+                                flexDirection:'column',
+                                justifyContent:'center',
+                                pb:this.state.showAdvancedOptions ? 3 : 2,
+                              }}
+                            >
+                              <Flex
+                                width={1}
+                                alignItems={'center'}
+                                flexDirection={'row'}
+                                justifyContent={'center'}
+                              >
+                                <Link
+                                  ml={1}
+                                  mainColor={'primary'}
+                                  hoverColor={'primary'}
+                                  onClick={this.toggleShowAdvancedOptions}
+                                >
+                                  { this.state.showAdvancedOptions ? 'Hide' : 'Show' } advanced options
+                                </Link>
+                                <Icon
+                                  size={'1.8em'}
+                                  color={'cellText'}
+                                  name={this.state.showAdvancedOptions ? 'ArrowDropUp' : 'ArrowDropDown'}
+                                />
+                              </Flex>
+                              {
+                                this.state.showAdvancedOptions &&
+                                  <Flex
+                                    mt={1}
+                                    flexDirection={'column'}
+                                  >
+                                    {
+                                      redeemGovTokenEnabled && 
+                                        <Flex
+                                          alignItems={'center'}
+                                          justifyContent={'row'}
+                                        >
+                                          <Checkbox
+                                            required={false}
+                                            checked={this.state.redeemGovTokens}
+                                            label={`Redeem governance tokens only`}
+                                            onChange={ e => this.toggleRedeemGovTokens(e.target.checked) }
+                                          />
+                                          <Link
+                                            color={'link'}
+                                            hoverColor={'link'}
+                                            onClick={ e => this.props.openTooltipModal('Redeem governance tokens',`This feature allows you to redeem just the amount of governance tokens accrued${ this.props.govTokensBalance && this.props.govTokensBalance.gt(0) ? ` (~ $${this.props.govTokensBalance.toFixed(2)})` : null } without redeeming the underlying token.`) }
+                                          >
+                                            (read more)
+                                          </Link>
+                                        </Flex>
+                                    }
+                                    {
+                                      redeemSkipGovEnabled && 
+                                        <Flex
+                                          alignItems={'center'}
+                                          justifyContent={'row'}
+                                        >
+                                          <Checkbox
+                                            required={false}
+                                            checked={this.state.redeemSkipGov}
+                                            label={`Redeem without governance tokens`}
+                                            onChange={ e => this.toggleRedeemSkipGov(e.target.checked) }
+                                          />
+                                          <Link
+                                            color={'link'}
+                                            hoverColor={'link'}
+                                            onClick={ e => this.props.openTooltipModal('Redeem without governance tokens',this.functionsUtil.getGlobalConfig(['messages','redeemSkipGov'])) }
+                                          >
+                                            (read more)
+                                          </Link>
+                                        </Flex>
+                                    }
+                                  </Flex>
+                              }
+                            </DashboardCard>
+                          ) :  showAdvancedDepositOptions ? (
                             <DashboardCard
                               cardProps={{
                                 pt:2,
@@ -1619,7 +1834,176 @@ class DepositRedeem extends Component {
                                   </DashboardCard>
                                 )
                               }
+                              {
+                                redeemGovTokenEnabled && (
+                                  <DashboardCard
+                                    cardProps={{
+                                      py:3,
+                                      px:2,
+                                      mt:3,
+                                      display:'flex',
+                                      alignItems:'center',
+                                      flexDirection:'column',
+                                      justifyContent:'center',
+                                    }}
+                                  >
+                                    <Flex
+                                      width={1}
+                                      alignItems={'center'}
+                                      flexDirection={'column'}
+                                      justifyContent={'center'}
+                                    >
+                                      <Icon
+                                        size={'1.8em'}
+                                        color={'cellText'}
+                                        name={'InfoOutline'}
+                                      />
+                                      <Text
+                                        mt={1}
+                                        px={2}
+                                        fontSize={1}
+                                        color={'cellText'}
+                                        textAlign={'center'}
+                                      >
+                                        By redeeming your {this.props.selectedToken} you will automatically get also the proportional amount of governance tokens accrued{ this.props.govTokensBalance && this.props.govTokensBalance.gt(0) ? ` (~ $${this.props.govTokensBalance.toFixed(2)})` : null }.
+                                      </Text>
+                                    </Flex>
+                                    <Checkbox
+                                      mt={2}
+                                      required={false}
+                                      checked={this.state.redeemGovTokens}
+                                      label={`Redeem governance tokens only`}
+                                      onChange={ e => this.toggleRedeemGovTokens(e.target.checked) }
+                                    />
+                                  </DashboardCard>
+                                )
+                              }
                             </Flex>
+                          )
+                        }
+                        {
+                          redeemSkipGov && (
+                            <DashboardCard
+                              cardProps={{
+                                mt:2,
+                                mb:2,
+                                py:2,
+                                px:1
+                              }}
+                            >
+                              <Flex
+                                alignItems={'center'}
+                                flexDirection={'column'}
+                              >
+                                <Text
+                                  mt={1}
+                                  fontSize={2}
+                                  color={'cellText'}
+                                  textAlign={'center'}
+                                >
+                                  Select the gov tokens you want to skip:
+                                </Text>
+                                <Flex
+                                  mt={2}
+                                  width={1}
+                                  boxShadow={0}
+                                  style={{
+                                    flexWrap:'wrap'
+                                  }}
+                                  alignItems={'center'}
+                                  justifyContent={'center'}
+                                  >
+                                    {
+                                      Object.keys(this.props.govTokensUserBalances).map( token => {
+                                        const balance = this.props.govTokensUserBalances[token];
+                                        const isActive = this.state.redeemSkipGovTokens.includes(token);
+                                        const tokenConfig = this.functionsUtil.getGlobalConfig(['govTokens',token]);
+                                        return (
+                                          <Flex
+                                            p={2}
+                                            mb={1}
+                                            mx={1}
+                                            width={'auto'}
+                                            style={{
+                                              cursor:'pointer'
+                                            }}
+                                            borderRadius={2}
+                                            flexDirection={'row'}
+                                            key={`skipGovToken_${token}`}
+                                            justifyContent={'flex-start'}
+                                            backgroundColor={isActive ? '#2a4b78' : 'cardBgHover'}
+                                            onClick={ e => this.setRedeemSkipGovTokens(token,!this.state.redeemSkipGovTokens.includes(token)) }
+                                          >
+                                            <Checkbox
+                                              m={0}
+                                              required={false}
+                                              checked={isActive}
+                                              onChange={ e => this.setRedeemSkipGovTokens(token,e.target.checked) }
+                                            />
+                                            <AssetField
+                                              token={token}
+                                              tokenConfig={tokenConfig}
+                                              fieldInfo={{
+                                                name:'icon',
+                                                props:{
+                                                  mr:1,
+                                                  width:['1.4em','1.6em'],
+                                                  height:['1.4em','1.6em']
+                                                }
+                                              }}
+                                            />
+                                            <SmartNumber
+                                              ml={1}
+                                              fontSize={[0,2]}
+                                              fontWeight={500}
+                                              maxPrecision={4}
+                                              color={'cellText'}
+                                              number={balance.toString()}
+                                            />
+                                          </Flex>
+                                        );
+                                    })
+                                  }
+                                </Flex>
+                              </Flex>
+                            </DashboardCard>
+                          )
+                        }
+                        {
+                          this.functionsUtil.BNify(this.state.skippedGovTokensBalance).gt(0) && (
+                            <DashboardCard
+                              cardProps={{
+                                p:2,
+                                my:2
+                              }}
+                            >
+                              <Flex
+                                alignItems={'center'}
+                                flexDirection={'column'}
+                                justifyContent={'center'}
+                              >
+                                <Icon
+                                  size={'1.8em'}
+                                  name={'Warning'}
+                                  color={'#ffe000'}
+                                />
+                                <Text
+                                  mt={1}
+                                  fontSize={1}
+                                  color={'red'}
+                                  textAlign={'center'}
+                                >
+                                  You are giving away {this.functionsUtil.formatMoney(this.state.skippedGovTokensBalance)}$ worth of governance tokens!<br />To proceed with the redeem please give your authorization by checking the following flag.
+                                </Text>
+                                <Checkbox
+                                  mt={1}
+                                  required={false}
+                                  checked={this.state.agreeSkipGovTokens}
+                                  label={`I agree to give away my governance tokens`}
+                                  onChange={ e => this.toggleAgreeSkipGovTokens(e.target.checked) }
+                                />
+                              </Flex>
+                            </DashboardCard>
                           )
                         }
                         {
@@ -2002,110 +2386,6 @@ class DepositRedeem extends Component {
                                   </Link>
                               }
                             </Flex>
-                          )
-                        }
-                        {
-                          (this.state.action === 'redeem' && this.state.unlentBalance && showRedeemFlow) &&
-                            <DashboardCard
-                              cardProps={{
-                                py:2,
-                                px:2,
-                                mt:3,
-                                display:'flex',
-                                alignItems:'center',
-                                flexDirection:'column',
-                                justifyContent:'center',
-                              }}
-                            >
-                              <Flex
-                                width={1}
-                                alignItems={'center'}
-                                flexDirection={'column'}
-                                justifyContent={'center'}
-                              >
-                                <Icon
-                                  size={'1.8em'}
-                                  color={'cellText'}
-                                  name={'LocalGasStation'}
-                                />
-                                <Text
-                                  px={2}
-                                  fontSize={1}
-                                  color={'cellText'}
-                                  textAlign={'center'}
-                                >
-                                  Available balance for Cheap Redeem
-                                </Text>
-                                <Flex
-                                  alignItems={'center'}
-                                  flexDirection={'row'}
-                                >
-                                  <Text
-                                    fontSize={1}
-                                    fontWeight={3}
-                                    color={'dark-gray'}
-                                    textAlign={'center'}
-                                    hoverColor={'copyColor'}
-                                  >
-                                    {this.state.unlentBalance.toFixed(4)} {this.props.selectedToken}
-                                  </Text>
-                                  <Tooltip
-                                    placement={'top'}
-                                    message={this.functionsUtil.getGlobalConfig(['messages','cheapRedeem'])}
-                                  >
-                                    <Icon
-                                      ml={1}
-                                      size={'1em'}
-                                      color={'cellTitle'}
-                                      name={"InfoOutline"}
-                                    />
-                                  </Tooltip>
-                                </Flex>
-                              </Flex>
-                            </DashboardCard>
-                        }
-                        {
-                          (this.state.action === 'redeem' && redeemGovTokenEnabled && showRedeemFlow) && (
-                            <DashboardCard
-                              cardProps={{
-                                py:3,
-                                px:2,
-                                mt:3,
-                                display:'flex',
-                                alignItems:'center',
-                                flexDirection:'column',
-                                justifyContent:'center',
-                              }}
-                            >
-                              <Flex
-                                width={1}
-                                alignItems={'center'}
-                                flexDirection={'column'}
-                                justifyContent={'center'}
-                              >
-                                <Icon
-                                  size={'1.8em'}
-                                  color={'cellText'}
-                                  name={'InfoOutline'}
-                                />
-                                <Text
-                                  mt={1}
-                                  px={2}
-                                  fontSize={1}
-                                  color={'cellText'}
-                                  textAlign={'center'}
-                                >
-                                  By redeeming your {this.props.selectedToken} you will automatically get also the proportional amount of governance tokens accrued{ this.props.govTokensBalance && this.props.govTokensBalance.gt(0) ? ` (~ $${this.props.govTokensBalance.toFixed(2)})` : null }.
-                                </Text>
-                              </Flex>
-                              <Checkbox
-                                mt={2}
-                                required={false}
-                                checked={this.state.redeemGovTokens}
-                                label={`Redeem governance tokens only`}
-                                onChange={ e => this.toggleRedeemGovTokens(e.target.checked) }
-                              />
-                            </DashboardCard>
                           )
                         }
                         {
