@@ -2905,6 +2905,9 @@ class FunctionsUtil {
           case 'COMP':
             output = await this.getCompUserDistribution(account,govTokenAvailableTokens);
           break;
+          case 'stkAAVE':
+            output = await this.getStkAaveUserDistribution(account,govTokenAvailableTokens);
+          break;
           case 'IDLE':
             const idleGovToken = this.getIdleGovToken();
             output = await idleGovToken.getUserDistribution(account,govTokenAvailableTokens);
@@ -4481,7 +4484,7 @@ class FunctionsUtil {
           aaveDistribution = aaveDistribution.div(1e18).times(secondsPerYear);
         }
 
-        console.log('getStkAaveDistribution',tokenConfig.idle.token,aTokenIdleSupply.toFixed(),aTokenTotalSupply.toFixed(),aavePoolShare.toFixed(),aaveSpeed.toFixed(),aaveDistribution.toFixed());
+        // console.log('getStkAaveDistribution',tokenConfig.idle.token,aTokenIdleSupply.toFixed(),aTokenTotalSupply.toFixed(),aavePoolShare.toFixed(),aaveSpeed.toFixed(),aaveDistribution.toFixed());
 
         if (!this.BNify(aaveDistribution).isNaN()){
           return this.setCachedDataWithLocalStorage(cachedDataKey,aaveDistribution);
@@ -4490,6 +4493,41 @@ class FunctionsUtil {
     }
 
     return aaveDistribution;
+  }
+  getStkAaveUserDistribution = async (account=null,availableTokens=null) => {
+    if (!account){
+      account = this.props.account;
+    }
+    if (!availableTokens && this.props.selectedStrategy){
+      availableTokens = this.props.availableStrategies[this.props.selectedStrategy];
+    }
+
+    if (!account || !availableTokens){
+      return false;
+    }
+
+    const stkAAVETokenConfig = this.getGlobalConfig(['govTokens','stkAAVE']);
+
+    let output = this.BNify(0);
+    await this.asyncForEach(Object.keys(availableTokens),async (token) => {
+      const tokenConfig = availableTokens[token];
+      const aTokenInfo = tokenConfig.protocols.find( p => (p.name === stkAAVETokenConfig.protocol) );
+      if (aTokenInfo){
+        const [
+          userPoolShare,
+          aaveDistribution,
+        ] = await Promise.all([
+          this.getUserPoolShare(account,tokenConfig,false),
+          this.getStkAaveDistribution(tokenConfig,null,false),
+        ]);
+
+        if (aaveDistribution && userPoolShare){
+          output = output.plus(aaveDistribution.times(userPoolShare));
+        }
+      }
+    });
+
+    return output;
   }
   getStkAaveApr = async (token,tokenConfig,aaveConversionRate=null) => {
     const stkAAVETokenConfig = this.getGlobalConfig(['govTokens','stkAAVE']);
@@ -4531,7 +4569,7 @@ class FunctionsUtil {
       if (tokenAllocation){
         stkAaveAPR = stkAaveValue.div(tokenAllocation.totalAllocationConverted).times(100);
 
-        console.log('getStkAaveApr',tokenConfig.idle.token,aaveDistribution.toFixed(),this.BNify(aaveConversionRate).toFixed(),stkAaveValue.toFixed(),tokenAllocation.totalAllocationConverted.toFixed(),stkAaveAPR.toFixed());
+        // console.log('getStkAaveApr',tokenConfig.idle.token,aaveDistribution.toFixed(),this.BNify(aaveConversionRate).toFixed(),stkAaveValue.toFixed(),tokenAllocation.totalAllocationConverted.toFixed(),stkAaveAPR.toFixed());
 
         if (!this.BNify(stkAaveAPR).isNaN()){
           this.setCachedDataWithLocalStorage(cachedDataKey,stkAaveAPR);
@@ -4949,31 +4987,18 @@ class FunctionsUtil {
   }
   getGovTokensDistributionSpeed = async (tokenConfig,enabledTokens=null) => {
     const govTokensDistribution = {};
-    const govTokens = this.getGlobalConfig(['govTokens']);
-
-    await this.asyncForEach(Object.keys(govTokens),async (govToken) => {
-      if (enabledTokens && !enabledTokens.includes(govToken)){
-        return;
-      }
-
-      const govTokenConfig = govTokens[govToken];
-
-      if (!govTokenConfig.enabled){
-        return;
-      }
-
+    const tokenGovTokens = this.getTokenGovTokens(tokenConfig);
+    
+    await this.asyncForEach(Object.keys(tokenGovTokens), async (govToken) => {
       let govSpeed = null;
-      const protocolTokenInfo = tokenConfig.protocols.find( p => (p.name === govTokenConfig.protocol) );
+      const govTokenConfig = tokenGovTokens[govToken];
+
       switch (govToken){
         case 'COMP':
-          if (protocolTokenInfo){
-            govSpeed = await this.getCompDistribution(tokenConfig,null,false);
-          }
+          govSpeed = await this.getCompDistribution(tokenConfig,null,false);
         break;
         case 'stkAAVE':
-          if (protocolTokenInfo){
-            govSpeed = await this.getStkAaveDistribution(tokenConfig,null,false);
-          }
+          govSpeed = await this.getStkAaveDistribution(tokenConfig,null,false);
         break;
         case 'IDLE':
           const idleGovToken = this.getIdleGovToken();
@@ -4985,7 +5010,7 @@ class FunctionsUtil {
 
       if (govSpeed){
         govSpeed = govSpeed.div(1e18);
-        if (govTokenConfig.distributionFrequency){
+        if (govTokenConfig.distributionFrequency && govTokenConfig.distributionMode){
           govSpeed = this.fixDistributionSpeed(govSpeed,govTokenConfig.distributionFrequency,govTokenConfig.distributionMode);
         }
         govTokensDistribution[govToken] = govSpeed;
