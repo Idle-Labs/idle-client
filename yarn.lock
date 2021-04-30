@@ -3030,6 +3030,11 @@
   resolved "https://registry.yarnpkg.com/@metamask/detect-provider/-/detect-provider-1.2.0.tgz#3667a7531f2a682e3c3a43eaf3a1958bdb42a696"
   integrity sha512-ocA76vt+8D0thgXZ7LxFPyqw3H7988qblgzddTDA6B8a/yU0uKV42QR/DhA+Jh11rJjxW0jKvwb5htA6krNZDQ==
 
+"@metamask/safe-event-emitter@2.0.0", "@metamask/safe-event-emitter@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@metamask/safe-event-emitter/-/safe-event-emitter-2.0.0.tgz#af577b477c683fad17c619a78208cede06f9605c"
+  integrity sha512-/kSXhY692qiV1MXu6EeOZvg5nECLclxNXcKCxJ3cXQgYuRymRHpdx/t7JXfsK+JLjwA1e1c1/SBrlQYpusC29Q==
+
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/@mrmlnc/readdir-enhanced/-/readdir-enhanced-2.2.1.tgz#524af240d1a360527b730475ecfa1344aa540dde"
@@ -4675,6 +4680,13 @@ async-iterator-to-stream@^1.1.0:
 async-limiter@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/async-limiter/-/async-limiter-1.0.0.tgz#78faed8c3d074ab81f22b4e985d79e8738f720f8"
+
+async-mutex@^0.2.6:
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/async-mutex/-/async-mutex-0.2.6.tgz#0d7a3deb978bc2b984d5908a2038e1ae2e54ff40"
+  integrity sha512-Hs4R+4SPgamu6rSGW8C7cV9gaWUKEHykfzCCvIRuaVv636Ju10ZdeUbvb4TBEW0INuq2DHZqXbK4Nd3yG4RaRw==
+  dependencies:
+    tslib "^2.0.0"
 
 async-retry@^1.3.1:
   version "1.3.1"
@@ -8517,6 +8529,17 @@ etag@~1.8.1:
   version "1.8.1"
   resolved "https://registry.yarnpkg.com/etag/-/etag-1.8.1.tgz#41ae2eeb65efa62268aebfea83ac7d79299b0887"
 
+eth-block-tracker@4.4.3, eth-block-tracker@^4.4.2:
+  version "4.4.3"
+  resolved "https://registry.yarnpkg.com/eth-block-tracker/-/eth-block-tracker-4.4.3.tgz#766a0a0eb4a52c867a28328e9ae21353812cf626"
+  dependencies:
+    "@babel/plugin-transform-runtime" "^7.5.5"
+    "@babel/runtime" "^7.5.5"
+    eth-query "^2.1.0"
+    json-rpc-random-id "^1.0.1"
+    pify "^3.0.0"
+    safe-event-emitter "^1.0.1"
+
 eth-block-tracker@^3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/eth-block-tracker/-/eth-block-tracker-3.0.1.tgz#95cd5e763c7293e0b1b2790a2a39ac2ac188a5e1"
@@ -8534,17 +8557,6 @@ eth-block-tracker@^4.2.0:
   resolved "https://registry.yarnpkg.com/eth-block-tracker/-/eth-block-tracker-4.4.1.tgz#805931fdff240e950c5ea68198a2fdc61b4482d2"
   dependencies:
     babel-plugin-transform-runtime "^6.23.0"
-    eth-query "^2.1.0"
-    json-rpc-random-id "^1.0.1"
-    pify "^3.0.0"
-    safe-event-emitter "^1.0.1"
-
-eth-block-tracker@^4.4.2:
-  version "4.4.3"
-  resolved "https://registry.yarnpkg.com/eth-block-tracker/-/eth-block-tracker-4.4.3.tgz#766a0a0eb4a52c867a28328e9ae21353812cf626"
-  dependencies:
-    "@babel/plugin-transform-runtime" "^7.5.5"
-    "@babel/runtime" "^7.5.5"
     eth-query "^2.1.0"
     json-rpc-random-id "^1.0.1"
     pify "^3.0.0"
@@ -8568,6 +8580,18 @@ eth-json-rpc-errors@^2.0.1, eth-json-rpc-errors@^2.0.2:
   resolved "https://registry.yarnpkg.com/eth-json-rpc-errors/-/eth-json-rpc-errors-2.0.2.tgz#c1965de0301fe941c058e928bebaba2e1285e3c4"
   dependencies:
     fast-safe-stringify "^2.0.6"
+
+eth-json-rpc-filters@4.2.2:
+  version "4.2.2"
+  resolved "https://registry.yarnpkg.com/eth-json-rpc-filters/-/eth-json-rpc-filters-4.2.2.tgz#eb35e1dfe9357ace8a8908e7daee80b2cd60a10d"
+  integrity sha512-DGtqpLU7bBg63wPMWg1sCpkKCf57dJ+hj/k3zF26anXMzkmtSBDExL8IhUu7LUd34f0Zsce3PYNO2vV2GaTzaw==
+  dependencies:
+    "@metamask/safe-event-emitter" "^2.0.0"
+    async-mutex "^0.2.6"
+    eth-json-rpc-middleware "^6.0.0"
+    eth-query "^2.1.2"
+    json-rpc-engine "^6.1.0"
+    pify "^5.0.0"
 
 eth-json-rpc-filters@^4.0.2:
   version "4.0.3"
@@ -8666,6 +8690,23 @@ eth-json-rpc-middleware@^4.1.4, eth-json-rpc-middleware@^4.1.5:
     pify "^3.0.0"
     safe-event-emitter "^1.0.1"
 
+eth-json-rpc-middleware@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/eth-json-rpc-middleware/-/eth-json-rpc-middleware-6.0.0.tgz#4fe16928b34231a2537856f08a5ebbc3d0c31175"
+  integrity sha512-qqBfLU2Uq1Ou15Wox1s+NX05S9OcAEL4JZ04VZox2NS0U+RtCMjSxzXhLFWekdShUPZ+P8ax3zCO2xcPrp6XJQ==
+  dependencies:
+    btoa "^1.2.1"
+    clone "^2.1.1"
+    eth-query "^2.1.2"
+    eth-rpc-errors "^3.0.0"
+    eth-sig-util "^1.4.2"
+    ethereumjs-util "^5.1.2"
+    json-rpc-engine "^5.3.0"
+    json-stable-stringify "^1.0.1"
+    node-fetch "^2.6.1"
+    pify "^3.0.0"
+    safe-event-emitter "^1.0.1"
+
 "eth-json-rpc-middleware@github:radotzki/eth-json-rpc-middleware#patch-1":
   version "4.1.2"
   resolved "https://codeload.github.com/radotzki/eth-json-rpc-middleware/tar.gz/8acc43df4a8c0c7f6d212af9163d379211dad4c7"
@@ -8735,6 +8776,27 @@ eth-query@^2.0.2, eth-query@^2.1.0, eth-query@^2.1.2:
   dependencies:
     json-rpc-random-id "^1.0.0"
     xtend "^4.0.1"
+
+eth-rpc-errors@4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/eth-rpc-errors/-/eth-rpc-errors-4.0.2.tgz#11bc164e25237a679061ac05b7da7537b673d3b7"
+  integrity sha512-n+Re6Gu8XGyfFy1it0AwbD1x0MUzspQs0D5UiPs1fFPCr6WAwZM+vbIhXheBFrpgosqN9bs5PqlB4Q61U/QytQ==
+  dependencies:
+    fast-safe-stringify "^2.0.6"
+
+eth-rpc-errors@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/eth-rpc-errors/-/eth-rpc-errors-3.0.0.tgz#d7b22653c70dbf9defd4ef490fd08fe70608ca10"
+  integrity sha512-iPPNHPrLwUlR9xCSYm7HHQjWBasor3+KZfRvwEWxMz3ca0yqnlBeJrnyphkGIXZ4J7AMAaOLmwy4AWhnxOiLxg==
+  dependencies:
+    fast-safe-stringify "^2.0.6"
+
+eth-rpc-errors@^4.0.2:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/eth-rpc-errors/-/eth-rpc-errors-4.0.3.tgz#6ddb6190a4bf360afda82790bb7d9d5e724f423a"
+  integrity sha512-Z3ymjopaoft7JDoxZcEb3pwdGh7yiYMhOwm2doUt6ASXlMavpNlK6Cre0+IMl2VSGyEU9rkiperQhp5iRxn5Pg==
+  dependencies:
+    fast-safe-stringify "^2.0.6"
 
 eth-sig-util@2.1.2:
   version "2.1.2"
@@ -13063,6 +13125,14 @@ json-parse-better-errors@^1.0.1, json-parse-better-errors@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/json-parse-better-errors/-/json-parse-better-errors-1.0.2.tgz#bb867cfb3450e69107c131d1c514bab3dc8bcaa9"
 
+json-rpc-engine@6.1.0, json-rpc-engine@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/json-rpc-engine/-/json-rpc-engine-6.1.0.tgz#bf5ff7d029e1c1bf20cb6c0e9f348dcd8be5a393"
+  integrity sha512-NEdLrtrq1jUZyfjkr9OCz9EzCNhnRyWtt1PAnvnhwy6e8XETS0Dtc+ZNCO2gvuAoKsIn2+vCSowXTYE4CkgnAQ==
+  dependencies:
+    "@metamask/safe-event-emitter" "^2.0.0"
+    eth-rpc-errors "^4.0.2"
+
 json-rpc-engine@^3.4.0, json-rpc-engine@^3.6.0:
   version "3.8.0"
   resolved "https://registry.yarnpkg.com/json-rpc-engine/-/json-rpc-engine-3.8.0.tgz#9d4ff447241792e1d0a232f6ef927302bb0c62a9"
@@ -13091,6 +13161,14 @@ json-rpc-engine@^5.1.3, json-rpc-engine@^5.1.8:
     async "^2.0.1"
     eth-json-rpc-errors "^2.0.1"
     promise-to-callback "^1.0.0"
+    safe-event-emitter "^1.0.1"
+
+json-rpc-engine@^5.3.0:
+  version "5.4.0"
+  resolved "https://registry.yarnpkg.com/json-rpc-engine/-/json-rpc-engine-5.4.0.tgz#75758609d849e1dba1e09021ae473f3ab63161e5"
+  integrity sha512-rAffKbPoNDjuRnXkecTjnsE3xLLrb00rEkdgalINhaYVYIxDwWtvYBr9UFbhTvPB1B2qUOLoFd/cV6f4Q7mh7g==
+  dependencies:
+    eth-rpc-errors "^3.0.0"
     safe-event-emitter "^1.0.1"
 
 json-rpc-error@2.0.0, json-rpc-error@^2.0.0:
@@ -15311,6 +15389,11 @@ node-fetch@^1.0.1, node-fetch@~1.7.1:
     encoding "^0.1.11"
     is-stream "^1.0.1"
 
+node-fetch@^2.6.1:
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
+  integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
+
 node-forge@0.7.5:
   version "0.7.5"
   resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-0.7.5.tgz#6c152c345ce11c52f465c2abd957e8639cd674df"
@@ -16509,6 +16592,11 @@ pify@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/pify/-/pify-3.0.0.tgz#e5a4acd2c101fdf3d9a4d07f0dbc4db49dd28176"
 
+pify@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/pify/-/pify-5.0.0.tgz#1f5eca3f5e87ebec28cc6d54a0e4aaf00acc127f"
+  integrity sha512-eW/gHNMlxdSP6dmG6uJip6FXN0EQBwm2clYYd8Wul42Cwu/DK8HEftzsapcNdYe2MfLiIwZqsDk2RDEsTE79hA==
+
 pinkie-promise@^2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/pinkie-promise/-/pinkie-promise-2.0.1.tgz#2135d6dfa7a358c069ac9b178776288228450ffa"
@@ -17186,10 +17274,10 @@ preact@10.4.1:
   resolved "https://registry.yarnpkg.com/preact/-/preact-10.4.1.tgz#9b3ba020547673a231c6cf16f0fbaef0e8863431"
   integrity sha512-WKrRpCSwL2t3tpOOGhf2WfTpcmbpxaWtDbdJdKdjd0aEiTkvOmS4NBkG6kzlaAHI9AkQ3iVqbFWM3Ei7mZ4o1Q==
 
-preact@^10.3.3:
-  version "10.4.6"
-  resolved "https://registry.yarnpkg.com/preact/-/preact-10.4.6.tgz#86cc43396e4bdd755726a2b4b1f0529e78067cd3"
-  integrity sha512-80WJfXH53yyINig5Wza/8MD9n4lMg9G6aN00ws0ptsAaY/Fu/M7xW4zICf7OLfocVltxS30wvNQ8oIbUyZS1tw==
+preact@^10.5.9:
+  version "10.5.13"
+  resolved "https://registry.yarnpkg.com/preact/-/preact-10.5.13.tgz#85f6c9197ecd736ce8e3bec044d08fd1330fa019"
+  integrity sha512-q/vlKIGNwzTLu+jCcvywgGrt+H/1P/oIRSD6mV4ln3hmlC+Aa34C7yfPI4+5bzW8pONyVXYS7SvXosy2dKKtWQ==
 
 prebuild-install@^5.2.4, prebuild-install@^5.3.0:
   version "5.3.0"
@@ -18769,10 +18857,10 @@ rxjs@^6.5.2:
   dependencies:
     tslib "^1.9.0"
 
-rxjs@^6.5.4:
-  version "6.6.0"
-  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-6.6.0.tgz#af2901eedf02e3a83ffa7f886240ff9018bbec84"
-  integrity sha512-3HMA8z/Oz61DUHe+SdOiQyzIf4tOx5oQHmMir7IZEu6TMqCLHT4LRcmNaUS0NwOz8VLvmmBduMsoaUvMaIiqzg==
+rxjs@^6.6.3:
+  version "6.6.7"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-6.6.7.tgz#90ac018acabf491bf65044235d5863c4dab804c9"
+  integrity sha512-hTdwr+7yYNIT5n4AMYp85KA6yw2Va0FLa3Rguvbpa4W3I5xynaBZo41cM3XM+4Q6fRMj3sBYIR1VAmZMXYJvRQ==
   dependencies:
     tslib "^1.9.0"
 
@@ -20515,6 +20603,11 @@ tslib@^1.9.0:
   version "1.9.3"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.9.3.tgz#d7e4dd79245d85428c4d7e4822a79917954ca286"
 
+tslib@^2.0.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.2.0.tgz#fb2c475977e35e241311ede2693cee1ec6698f5c"
+  integrity sha512-gS9GVHRU+RGn5KQM2rllAlR3dU6m7AcpJKdtH8gFvQiC4Otgk98XnmMU+nZenHt/+VhnBPWwgrJsyrdcw6i23w==
+
 tty-browserify@0.0.0:
   version "0.0.0"
   resolved "https://registry.yarnpkg.com/tty-browserify/-/tty-browserify-0.0.0.tgz#a157ba402da24e9bf957f9aa69d524eed42901a6"
@@ -21119,16 +21212,21 @@ walker@~1.0.5:
   dependencies:
     makeerror "1.0.x"
 
-walletlink@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/walletlink/-/walletlink-2.0.2.tgz#8640e42d3df49b4661019287ab9789e94b72db98"
-  integrity sha512-4MIctCHAjcPHSQUHpHuU9leUAvYqRF+/4kCq7x9AngZQ2Jd74dbpC8dfZ55uOwW8TXc7z9XYeSyzRrGHbv5ZXg==
+walletlink@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/walletlink/-/walletlink-2.1.0.tgz#15725b829ec09d7e933527726793f36b4c374776"
+  integrity sha512-kCl+3q9ZCnbD2ti+rA/rI/cTRBv2MfBU174uxvUW6piTIWwP5wM5ehDZp7lgW+aEOrjK49hBGOPn0CDUsD0tSQ==
   dependencies:
+    "@metamask/safe-event-emitter" "2.0.0"
     bind-decorator "^1.0.11"
     bn.js "^5.1.1"
     clsx "^1.1.0"
-    preact "^10.3.3"
-    rxjs "^6.5.4"
+    eth-block-tracker "4.4.3"
+    eth-json-rpc-filters "4.2.2"
+    eth-rpc-errors "4.0.2"
+    json-rpc-engine "6.1.0"
+    preact "^10.5.9"
+    rxjs "^6.6.3"
 
 warning@^4.0.2:
   version "4.0.3"
