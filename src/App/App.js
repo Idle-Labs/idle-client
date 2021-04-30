@@ -861,6 +861,7 @@ class App extends Component {
                                           isMobile={isMobile}
                                           simpleID={simpleID}
                                           contracts={contracts}
+                                          initContract={initContract}
                                           innerWidth={this.state.width}
                                           logout={this.logout.bind(this)}
                                           innerHeight={this.state.height}

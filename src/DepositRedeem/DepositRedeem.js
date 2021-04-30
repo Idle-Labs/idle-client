@@ -176,16 +176,16 @@ class DepositRedeem extends Component {
   }
 
   setRedeemSkipGovTokens = (token,checked) => {
-    const redeemSkipGovTokens = this.state.redeemSkipGovTokens;
-    // Remove token from 
-    if (!checked && redeemSkipGovTokens.includes(token)){
-      redeemSkipGovTokens.splice(redeemSkipGovTokens.indexOf(token),1);
-    } else if (checked && !redeemSkipGovTokens.includes(token)) {
-      redeemSkipGovTokens.push(token);
-    }
-
-    this.setState({
-      redeemSkipGovTokens
+    this.setState((prevState) => {
+      const redeemSkipGovTokens = Object.assign([],prevState.redeemSkipGovTokens);
+      if (!checked && redeemSkipGovTokens.includes(token)){
+        redeemSkipGovTokens.splice(redeemSkipGovTokens.indexOf(token),1);
+      } else if (checked && !redeemSkipGovTokens.includes(token)) {
+        redeemSkipGovTokens.push(token);
+      }
+      return {
+        redeemSkipGovTokens
+      };
     },() => {
       this.calculateSkippedGovTokens();
     });
@@ -320,8 +320,10 @@ class DepositRedeem extends Component {
 
     const redeemSkipGovChanged = prevState.redeemSkipGov !== this.state.redeemSkipGov;
     const redeemGovTokensChanged = prevState.redeemGovTokens !== this.state.redeemGovTokens;
+    const agreeSkipGovTokensChanged = prevState.agreeSkipGovTokens !== this.state.agreeSkipGovTokens;
     const redeemSkipGovTokensChanged = JSON.stringify(prevState.redeemSkipGovTokens) !== JSON.stringify(this.state.redeemSkipGovTokens);
-    if (redeemGovTokensChanged || actionChanged || redeemSkipGovTokensChanged || redeemSkipGovChanged){
+
+    if (redeemGovTokensChanged || actionChanged || redeemSkipGovTokensChanged || redeemSkipGovChanged || agreeSkipGovTokensChanged){
       this.checkButtonDisabled();
     }
 
@@ -676,8 +678,9 @@ class DepositRedeem extends Component {
 
     let contractSendResult = null;
     const redeemGovTokens = this.state.redeemGovTokens;
-    const inputValue = this.state.inputValue[this.state.action];
     const selectedPercentage = this.getFastBalanceSelector();
+    const inputValue = this.state.inputValue[this.state.action];
+    const redeemSkipGov = this.state.redeemSkipGov && this.state.redeemSkipGovTokens.length>0 && this.state.agreeSkipGovTokens;
 
     const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','erc20ForwarderEnabled']) && this.state.erc20ForwarderEnabled;
     const depositMetaTransactionsEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','metaTransactionsEnabled']) && this.state.metaTransactionsEnabled;
@@ -1091,9 +1094,20 @@ class DepositRedeem extends Component {
             }));
           };
 
+          let redeemMethod = 'redeemIdleToken';
           let redeemParams = [idleTokenToRedeem];
 
-          contractSendResult = await this.functionsUtil.contractMethodSendWrapper(this.props.tokenConfig.idle.token, 'redeemIdleToken', redeemParams, callbackRedeem, callbackReceiptRedeem, txData);
+          if (redeemSkipGov){
+            redeemMethod = 'redeemIdleTokenSkipGov';
+            const govTokensIndexes = await this.functionsUtil.getGovTokensIndexes(this.props.account,this.props.tokenConfig);
+            const _skipGovTokenRedeem = Object.keys(govTokensIndexes).map( token => {
+              return this.state.redeemSkipGovTokens.includes(token);
+            });
+            redeemParams.push(_skipGovTokenRedeem);
+            console.log(redeemParams);
+          }
+
+          contractSendResult = await this.functionsUtil.contractMethodSendWrapper(this.props.tokenConfig.idle.token, redeemMethod, redeemParams, callbackRedeem, callbackReceiptRedeem, txData);
         }
       break;
       default: // Reset loading if not handled action
@@ -1164,16 +1178,15 @@ class DepositRedeem extends Component {
 
     switch (this.state.action){
       case 'deposit':
-        buttonDisabled = buttonDisabled || (amount && amount.gt(this.props.tokenBalance));
+        buttonDisabled = buttonDisabled || (amount && (amount.lte(0) || amount.gt(this.props.tokenBalance)));
       break;
       case 'redeem':
-        buttonDisabled = !this.state.canRedeemCurve && !this.state.redeemGovTokens && ( buttonDisabled || (amount && amount.gt(this.props.redeemableBalance)) );
-
-        console.log('checkButtonDisabled',this.state.redeemSkipGov,this.state.redeemSkipGovTokens.length,this.state.agreeSkipGovTokens);
+        buttonDisabled = !this.state.canRedeemCurve && !this.state.redeemGovTokens && (buttonDisabled || ( !amount || amount.lte(0) || amount.gt(this.props.redeemableBalance) ));
 
         if (!buttonDisabled && this.state.redeemSkipGov && this.state.redeemSkipGovTokens.length>0 && !this.state.agreeSkipGovTokens){
-          buttonDisabled = false;
+          buttonDisabled = true;
         }
+        // console.log('checkButtonDisabled',this.state.redeemSkipGov,this.state.redeemSkipGovTokens.length,this.state.agreeSkipGovTokens,buttonDisabled);
       break;
       default:
       break;
@@ -1608,13 +1621,19 @@ class DepositRedeem extends Component {
                                       redeemSkipGovEnabled && 
                                         <Flex
                                           alignItems={'center'}
-                                          justifyContent={'row'}
+                                          flexDirection={'row'}
                                         >
                                           <Checkbox
                                             required={false}
                                             checked={this.state.redeemSkipGov}
                                             label={`Redeem without governance tokens`}
                                             onChange={ e => this.toggleRedeemSkipGov(e.target.checked) }
+                                          />
+                                          <Icon
+                                            mr={1}
+                                            size={'1.2em'}
+                                            name={'Warning'}
+                                            color={'#ffe000'}
                                           />
                                           <Link
                                             color={'link'}
@@ -1996,7 +2015,7 @@ class DepositRedeem extends Component {
                                   You are giving away {this.functionsUtil.formatMoney(this.state.skippedGovTokensBalance)}$ worth of governance tokens!<br />To proceed with the redeem please give your authorization by checking the following flag.
                                 </Text>
                                 <Checkbox
-                                  mt={1}
+                                  my={1}
                                   required={false}
                                   checked={this.state.agreeSkipGovTokens}
                                   label={`I agree to give away my governance tokens`}

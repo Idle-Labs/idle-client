@@ -5203,6 +5203,29 @@ class FunctionsUtil {
     }
     return this.BNify(0);
   }
+  getGovTokensIndexes = async (account,tokenConfig) => {
+    if (!account){
+      account = this.props.account;
+    }
+    const output = {};
+    const govTokensAmounts = await this.genericContractCall(tokenConfig.idle.token,'getGovTokensAmounts',[account]);
+    if (govTokensAmounts){
+      await this.asyncForEach(govTokensAmounts, async (govTokenAmount,govTokenIndex) => {
+        // Get gov Token config by index
+        const govTokenAddress = await this.genericContractCall(tokenConfig.idle.token,'govTokens',[govTokenIndex]);
+
+        if (govTokenAddress){
+          const govTokenConfig = this.getGovTokenConfigByAddress(govTokenAddress);
+
+          if (govTokenConfig){
+            output[govTokenConfig.token] = govTokenIndex;
+          }
+        }
+      });
+    }
+
+    return output;
+  }
   getGovTokensUserBalances = async (account=null,availableTokens=null,convertToken=null,govTokenConfigForced=null,checkShowBalance=false) => {
     if (!account){
       account = this.props.account;
