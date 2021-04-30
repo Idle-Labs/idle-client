@@ -951,7 +951,7 @@ const availableTokens = {
           },
           {
             abi:aToken,
-            name:'aave',
+            name:'aavev2',
             enabled:true,
             address:'0x030bA81f1c18d280636F32af80b9AAd02Cf0854e',
             token:'aWETH',

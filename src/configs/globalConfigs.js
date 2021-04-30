@@ -601,6 +601,11 @@ const globalConfigs = {
             decimals:16,
             protocol:'compound',
             name:'compoundWithCOMP',
+          },
+          {
+            decimals:18,
+            protocol:'aavev2',
+            name:'aavev2WithStkAAVE',
           }
         ]
       }
@@ -790,6 +795,15 @@ const globalConfigs = {
         color:{
           rgb:[0, 209, 146],
           hsl:['162', '100%', '41%']
+        }
+      },
+      aavev2WithStkAAVE:{
+        enabled:true,
+        rateField:['rate','aaveAdditionalAPR'],
+        label:'Aave V2 + stkAAVE',
+        color:{
+          rgb:[230, 131, 206],
+          hsl:['315', '66%', '71%']
         }
       },
       compoundWithCOMP:{
