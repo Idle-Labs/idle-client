@@ -263,7 +263,7 @@ class DepositRedeem extends Component {
 
     const inputValueChanged = prevState.inputValue[this.state.action] !== this.state.inputValue[this.state.action];
     if (inputValueChanged){
-      this.checkMinAmountForMint();
+      // this.checkMinAmountForMint();
     }
 
     const redeemGovTokensChanged = prevState.redeemGovTokens !== this.state.redeemGovTokens;
@@ -877,6 +877,7 @@ class DepositRedeem extends Component {
             }
           // Use main contract if no proxy contract exists
           } else {
+            /*
             let _skipMint = !this.state.directMint && this.functionsUtil.getGlobalConfig(['contract','methods','deposit','skipMint']);
             _skipMint = typeof this.props.tokenConfig.skipMintForDeposit !== 'undefined' ? this.props.tokenConfig.skipMintForDeposit : _skipMint;
 
@@ -884,6 +885,9 @@ class DepositRedeem extends Component {
             if (_skipMint && this.state.minAmountForMintReached){
               _skipMint = false;
             }
+            */
+            // Always skip mint
+            let _skipMint = true;
 
             const _referral = this.getReferralAddress() || '0x0000000000000000000000000000000000000000';
             depositParams = [tokensToDeposit, _skipMint, _referral];
