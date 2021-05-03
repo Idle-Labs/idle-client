@@ -62,10 +62,12 @@ class DepositRedeem extends Component {
     depositCurveBalance:null,
     depositCurveEnabled:true,
     showAdvancedOptions:false,
-    erc20ForwarderContract:{},
+    skipGovTokensGasSave:null,
     depositCurveSlippage:null,
+    erc20ForwarderContract:{},
     erc20ForwarderEnabled:true,
     showETHWrapperEnabled:false,
+    skipGovTokensGasSaveUSD:null,
     metaTransactionsEnabled:true,
     skippedGovTokensBalance:null,
     minAmountForMintReached:false,
@@ -149,6 +151,9 @@ class DepositRedeem extends Component {
   toggleRedeemGovTokens = (redeemGovTokens) => {
     this.setState({
       redeemGovTokens,
+      redeemSkipGovTokens:[],
+      agreeSkipGovTokens:false,
+      skippedGovTokensBalance:this.functionsUtil.BNify(0),
       redeemSkipGov:redeemGovTokens?false:this.state.redeemSkipGov
     });
   }
@@ -156,7 +161,17 @@ class DepositRedeem extends Component {
   toggleRedeemSkipGov = (redeemSkipGov) => {
     this.setState({
       redeemSkipGov,
+      redeemSkipGovTokens:[],
+      agreeSkipGovTokens:false,
+      skippedGovTokensBalance:this.functionsUtil.BNify(0),
       redeemGovTokens:redeemSkipGov?false:this.state.redeemGovTokens
+    });
+  }
+
+  getSkippedGovTokensFlags = async () => {
+    const govTokensIndexes = await this.functionsUtil.getGovTokensIndexes(this.props.account,this.props.tokenConfig);
+    return Object.keys(govTokensIndexes).map( token => {
+      return this.state.redeemSkipGovTokens.includes(token);
     });
   }
 
@@ -169,7 +184,27 @@ class DepositRedeem extends Component {
       const skippedAmount = this.props.govTokensUserBalances[govToken].times(govTokenPrice);
       skippedGovTokensBalance = skippedGovTokensBalance.plus(skippedAmount);
     });
+
+    const _skipGovTokenRedeem = await this.getSkippedGovTokensFlags();
+    const WETHTokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens','WETH']);
+
+    const [
+      wethPrice,
+      redeemGasUsage,
+      skipGovRedeemGasUsage
+    ] = await Promise.all([
+      this.functionsUtil.getUniswapConversionRate(DAITokenConfig,WETHTokenConfig),
+      this.functionsUtil.estimateMethodGasUsage(this.props.tokenConfig.idle.token, 'redeemIdleToken', [this.functionsUtil.integerValue(this.props.redeemableBalance)], this.props.account),
+      this.functionsUtil.estimateMethodGasUsage(this.props.tokenConfig.idle.token, 'redeemIdleToken', [0], this.props.account),
+      // this.functionsUtil.estimateMethodGasUsage(this.props.tokenConfig.idle.token, 'redeemIdleTokenSkipGov', [this.functionsUtil.integerValue(this.props.redeemableBalance),_skipGovTokenRedeem], this.props.account)
+    ]);
+
+    const skipGovTokensGasSave = redeemGasUsage && skipGovRedeemGasUsage ? redeemGasUsage.minus(skipGovRedeemGasUsage) : this.functionsUtil.BNify(0);
+    const skipGovTokensGasSaveUSD = skipGovTokensGasSave ? skipGovTokensGasSave.times(wethPrice) : this.functionsUtil.BNify(0);
+
     this.setState({
+      skipGovTokensGasSave,
+      skipGovTokensGasSaveUSD,
       skippedGovTokensBalance
     });
     return skippedGovTokensBalance;
@@ -1099,10 +1134,7 @@ class DepositRedeem extends Component {
 
           if (redeemSkipGov){
             redeemMethod = 'redeemIdleTokenSkipGov';
-            const govTokensIndexes = await this.functionsUtil.getGovTokensIndexes(this.props.account,this.props.tokenConfig);
-            const _skipGovTokenRedeem = Object.keys(govTokensIndexes).map( token => {
-              return this.state.redeemSkipGovTokens.includes(token);
-            });
+            const _skipGovTokenRedeem = await this.getSkippedGovTokensFlags();
             redeemParams.push(_skipGovTokenRedeem);
             console.log(redeemParams);
           }
@@ -1611,7 +1643,7 @@ class DepositRedeem extends Component {
                                           <Link
                                             color={'link'}
                                             hoverColor={'link'}
-                                            onClick={ e => this.props.openTooltipModal('Redeem governance tokens',`This feature allows you to redeem just the amount of governance tokens accrued${ this.props.govTokensBalance && this.props.govTokensBalance.gt(0) ? ` (~ $${this.props.govTokensBalance.toFixed(2)})` : null } without redeeming the underlying token.`) }
+                                            onClick={ e => this.props.openTooltipModal('Redeem governance tokens',`This feature allows you to redeem just the amount of governance tokens accrued${ this.props.govTokensBalance && this.props.govTokensBalance.gt(0) ? ` (~${this.props.govTokensBalance.toFixed(2)}$)` : null } without redeeming the underlying token.`) }
                                           >
                                             (read more)
                                           </Link>
@@ -1989,7 +2021,7 @@ class DepositRedeem extends Component {
                           )
                         }
                         {
-                          this.functionsUtil.BNify(this.state.skippedGovTokensBalance).gt(0) && (
+                          redeemSkipGov && this.functionsUtil.BNify(this.state.skippedGovTokensBalance).gt(0) && (
                             <DashboardCard
                               cardProps={{
                                 p:2,
@@ -2012,7 +2044,27 @@ class DepositRedeem extends Component {
                                   color={'red'}
                                   textAlign={'center'}
                                 >
-                                  You are giving away {this.functionsUtil.formatMoney(this.state.skippedGovTokensBalance)}$ worth of governance tokens!<br />To proceed with the redeem please give your authorization by checking the following flag.
+                                  You are giving away {this.functionsUtil.formatMoney(this.state.skippedGovTokensBalance)}$ worth of governance tokens!
+                                </Text>
+                                {
+                                  this.state.skipGovTokensGasSave && this.state.skipGovTokensGasSave.gte(0.0001) && (
+                                    <Text
+                                      mt={1}
+                                      fontSize={1}
+                                      color={'#00b84a'}
+                                      textAlign={'center'}
+                                    >
+                                      This will save you {this.state.skipGovTokensGasSave.toFixed(4)} ETH of gas (~{this.state.skipGovTokensGasSaveUSD.toFixed(2)}$)
+                                    </Text>
+                                  )
+                                }
+                                <Text
+                                  mt={1}
+                                  fontSize={1}
+                                  color={'cellText'}
+                                  textAlign={'center'}
+                                >
+                                  To proceed with the redeem please give your authorization by checking the following flag:
                                 </Text>
                                 <Checkbox
                                   my={1}

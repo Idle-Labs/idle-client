@@ -2255,6 +2255,29 @@ class FunctionsUtil {
     };
   }
 
+  estimateMethodGasUsage = async (contractName, methodName, methodParams = [], account = null) => {
+    account = account || this.props.account;
+    if (!account){
+      return null;
+    }
+    const contract = this.getContractByName(contractName);
+    if (contract && contract.methods[methodName]){
+      const functionCall = contract.methods[methodName](...methodParams);
+      const [
+        gasPrice,
+        gasLimit
+      ] = await Promise.all([
+        this.props.web3.eth.getGasPrice(),
+        functionCall.estimateGas({from: account})
+      ]);
+
+      if (gasPrice && gasLimit){
+        return this.fixTokenDecimals(this.fixTokenDecimals(gasPrice,9).times(gasLimit),9);
+      }
+    }
+    return null;
+  }
+
   executeMetaTransaction = async (contract, userAddress, signedParameters, callback, callback_receipt) => {
     try {
 
