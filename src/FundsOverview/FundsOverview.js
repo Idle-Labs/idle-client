@@ -122,7 +122,7 @@ class FundsOverview extends Component {
                 color={'copyColor'}
                 fontFamily={'counter'}
                 fontSize={['1.7em','1.7em']}
-                dangerouslySetInnerHTML={{ __html: (avgAPY ? avgAPY.toFixed(2)+'%' : '-') }}
+                dangerouslySetInnerHTML={{ __html: (avgAPY ? avgAPY.toFixed(2)+'%' : '0.00%') }}
               />
             </Flex>
           )

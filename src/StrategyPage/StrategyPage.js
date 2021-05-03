@@ -193,14 +193,15 @@ class StrategyPage extends Component {
 
           const amountLentToken = await this.functionsUtil.convertTokenBalance(amountLent,token,tokenConfig,isRisk);
 
-          const tokenAPY = this.functionsUtil.BNify(tokenAprs.avgApy);
           const tokenWeight = portfolio.tokensBalance[token].tokenBalance.div(portfolio.totalBalance);
+          const tokenAPY = tokenAprs.avgApy && !this.functionsUtil.BNify(tokenAprs.avgApy).isNaN() ? this.functionsUtil.BNify(tokenAprs.avgApy) : this.functionsUtil.BNify(0);
 
-          if (tokenAPY){
+          if (!tokenAPY.isNaN()){
             avgAPY = avgAPY.plus(tokenAPY.times(tokenWeight));
+            // console.log('tokenAPY',token,tokenAPY.toFixed(),tokenWeight.toFixed(),avgAPY.toFixed());
           }
 
-          if (tokenScore){
+          if (!tokenScore.isNaN()){
             avgScore = avgScore.plus(tokenScore.times(tokenWeight));
           }
 
@@ -208,6 +209,8 @@ class StrategyPage extends Component {
             totalAmountLent = totalAmountLent.plus(amountLentToken);
           }
         });
+
+        // console.log('avgAPY',avgAPY.toFixed());
 
         // Add gov tokens to earnings
         const govTokensTotalBalance = await this.functionsUtil.getGovTokensUserTotalBalance(this.props.account,availableTokens,'DAI');

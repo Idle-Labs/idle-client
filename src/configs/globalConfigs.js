@@ -595,7 +595,7 @@ const globalConfigs = {
             startTimestamp:1599183170,
           }
         },
-        enabledTokens:['DAI','USDC','USDT','TUSD','SUSD','WBTC','WETH'],
+        enabledTokens:['DAI','USDC','USDT','TUSD','SUSD','WBTC','WETH','RAI'],
         additionalProtocols:[
           {
             decimals:16,
@@ -775,6 +775,22 @@ const globalConfigs = {
         },
         address:'0x875773784Af8135eA0ef43b5a374AaD105c5D39e',
       },
+      RAI:{
+        decimals:18,
+        enabled:true,
+        color:{
+          hex:'#378879',
+          rgb:[55, 136, 121],
+          hsl:['169', '42%', '37%']
+        },
+        startTimestamp:'2021-05-10',
+        icon:'images/tokens/RAI.png',
+        conversionRateField:'raiDAIPrice',
+        chart:{
+          labelTextColorModifiers:['darker', 4]
+        },
+        address:'0x03ab458634910aad20ef5f1c8ee96f1d6ac54919',
+      },
       'idleDAI+idleUSDC+idleUSDT':{
         decimals:18,
         enabled:false,
@@ -863,6 +879,26 @@ const globalConfigs = {
         color:{
           rgb:[151, 79, 141],
           hsl:['308', '31%', '45%']
+        }
+      },
+      cream:{
+        legend:true,
+        enabled:true,
+        label:'Cream',
+        icon:'cream.svg',
+        color:{
+          rgb:[105, 226, 220],
+          hsl:['177', '68%', '65%']
+        }
+      },
+      fuse:{
+        legend:true,
+        enabled:true,
+        label:'Fuse',
+        icon:'fuse.png',
+        color:{
+          rgb:[0, 0, 0],
+          hsl:['0', '0%', '0%']
         }
       },
       curve:{
@@ -2579,7 +2615,7 @@ const globalConfigs = {
         captionPos: 'top',
         subcaption: '~ 0.25% fee ~',
         supportedMethods:['wallet'],
-        supportedTokens:['WETH','USDC','DAI','USDT','TUSD','SUSD','WBTC'],
+        supportedTokens:['WETH','USDC','DAI','USDT','TUSD','SUSD','WBTC','RAI'],
         web3Subscription:{ // Data for web3 subscription
           enabled: true,
           contractAddress: '0x818e6fecd516ecc3849daf6845e3ec868087b755',

@@ -74,8 +74,6 @@ class AllocationChart extends Component {
       protocolsAllocationsPerc
     } = await this.functionsUtil.getTokenAllocation(this.props.tokenConfig);
 
-    // console.log('AllocationChart',this.props.token,totalAllocation,protocolsAllocations,protocolsAllocationsPerc);
-
     const chartProps = {
       padAngle:0,
       animate:true,
@@ -153,7 +151,6 @@ class AllocationChart extends Component {
           label: globalConfigs.stats.protocols[protocolName].label ? globalConfigs.stats.protocols[protocolName].label : this.functionsUtil.capitalize(protocolName)
         });
       }
-
     });
 
     this.setStateSafe({

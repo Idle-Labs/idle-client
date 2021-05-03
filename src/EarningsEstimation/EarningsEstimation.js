@@ -247,6 +247,7 @@ class EarningsEstimation extends Component {
             const estimationStepPerc = this.functionsUtil.BNify(Object.values(estimationSteps).pop().perc);
             const finalEarnings = tokenEarnings.earningsYear.times(estimationStepPerc);
             const cursorPerc = Math.min(1,parseFloat(tokenEarnings.earnings.div(finalEarnings)));
+            const tokenIcon = tokenConfig && tokenConfig.icon ? tokenConfig.icon :`images/tokens/${token}.svg`;
             const tokenRGBColor = this.functionsUtil.getGlobalConfig(['stats','tokens',token,'color','rgb']).join(',');
             // console.log(tokenEarnings.earnings.toFixed(10),tokenEarnings.earningsYear.toFixed(10),finalEarnings.toFixed(10),cursorPerc.toFixed(10),estimationStepPerc.toFixed(10));
             return (
@@ -361,7 +362,7 @@ class EarningsEstimation extends Component {
                         alignItems={'center'}
                         justifyContent={'flex-start'}
                       >
-                        <Image src={`images/tokens/${token}.svg`} height={['1.4em','2.2em']} />
+                        <Image src={tokenIcon} height={['1.4em','2.2em']} />
                       </Flex>
                       {
                         <Flex

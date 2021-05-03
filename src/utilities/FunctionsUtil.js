@@ -3019,8 +3019,10 @@ class FunctionsUtil {
 
         // console.log('apr',token,tokenApys.avgApr ? tokenApys.avgApr.toString() : null,tokenApys.avgApy ? tokenApys.avgApy.toString() : null);
 
-        if (tokenApys && tokenApys.avgApy !== null){
-          output = tokenApys.avgApy;
+        output = this.BNify(0);
+
+        if (tokenApys && !this.BNify(tokenApys.avgApy).isNaN()){
+          output = this.BNify(tokenApys.avgApy);
 
           if (addCurveApy){
             const curveAPY = await this.getCurveAPY();
@@ -3028,6 +3030,8 @@ class FunctionsUtil {
               output = output.plus(curveAPY);
             }
           }
+        } else {
+
         }
       break;
       case 'avgAPY':
@@ -3118,7 +3122,7 @@ class FunctionsUtil {
           this.loadAssetField('redeemableBalance',token,tokenConfig,account,false),
         ]);
 
-        let redeemableBalanceEnd = null;
+        let redeemableBalanceEnd = redeemableBalanceStart;
 
         if (redeemableBalanceStart && tokenAPY1 && amountLent2){
           const earningPerYear = amountLent2.times(tokenAPY1.div(100));
@@ -4008,6 +4012,7 @@ class FunctionsUtil {
     // Check for cached data
     const cachedDataKey = `uniswapConversionRate_${tokenConfigFrom.address}_${tokenConfigDest.address}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    // console.log('getUniswapConversionRate - CACHED',cachedDataKey,cachedData);
     if (cachedData && !this.BNify(cachedData).isNaN()){
       return this.BNify(cachedData);
     }
@@ -4025,6 +4030,8 @@ class FunctionsUtil {
       path.push(tokenConfigDest.address);
 
       const unires = await this.genericContractCall('UniswapRouter','getAmountsIn',[one.toFixed(),path]);
+
+      // console.log('getUniswapConversionRate',cachedDataKey,this.BNify(unires[0]).div(one).toFixed());
 
       if (unires){
         const price = this.BNify(unires[0]).div(one);
@@ -5695,7 +5702,7 @@ class FunctionsUtil {
       return apr.div(apiResults.length);
     }
 
-    return null;
+    return this.BNify(0);
   }
 
   /*
@@ -5836,8 +5843,13 @@ class FunctionsUtil {
   */
   getTokenAprs = async (tokenConfig,tokenAllocation=false,addGovTokens=true) => {
 
+    const tokenAprs = {
+      avgApr: this.BNify(0),
+      avgApy: this.BNify(0)
+    };
+
     if (!tokenConfig.idle){
-      return false;
+      return tokenAprs;
     }
 
     // Check for cached data
@@ -5853,7 +5865,7 @@ class FunctionsUtil {
     const Aprs = await this.getAprs(tokenConfig.idle.token);
 
     if (!Aprs){
-      return false;
+      return tokenAprs;
     }
 
     if (!tokenAllocation){
@@ -5861,7 +5873,7 @@ class FunctionsUtil {
     }
 
     if (!tokenAllocation){
-      return false;
+      return tokenAprs;
     }
 
     const addresses = Aprs.addresses.map((addr,i) => { return addr.toString().toLowerCase() });
@@ -5904,11 +5916,6 @@ class FunctionsUtil {
       }
     });
 
-    const tokenAprs = {
-      avgApr: null,
-      avgApy: null
-    };
-
     if (tokenAllocation){
       tokenAprs.avgApr = this.getAvgApr(protocolsAprs,tokenAllocation.protocolsAllocations,tokenAllocation.totalAllocation);
       tokenAprs.avgApy = this.getAvgApr(protocolsApys,tokenAllocation.protocolsAllocations,tokenAllocation.totalAllocation);
@@ -5930,12 +5937,19 @@ class FunctionsUtil {
         }
       }
 
+      if (this.BNify(tokenAprs.avgApy).isNaN()){
+        tokenAprs.avgApy = this.BNify(0);
+      }
+      if (this.BNify(tokenAprs.avgApr).isNaN()){
+        tokenAprs.avgApr = this.BNify(0);
+      }
+
       // console.log(tokenConfig.idle.token,tokenAprs,govTokensAprs);
 
       return this.setCachedDataWithLocalStorage(cachedDataKey,tokenAprs);
     }
 
-    return null;
+    return tokenAprs;
   }
   abbreviateNumber(value,decimals=3,maxPrecision=5,minPrecision=0){
 

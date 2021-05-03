@@ -191,7 +191,13 @@ class App extends Component {
 
     // Load available strategies
     Object.keys(availableTokens[requiredNetwork]).forEach((strategy) => {
-      availableStrategies[strategy] = availableTokens[requiredNetwork][strategy];
+      availableStrategies[strategy] = Object.keys(availableTokens[requiredNetwork][strategy]).reduce( (enabledTokens,token) => {
+        const tokenConfig = availableTokens[requiredNetwork][strategy][token];
+        if (tokenConfig.enabled){
+          enabledTokens[token] = tokenConfig;
+        }
+        return enabledTokens;
+      },{});
     });
 
     newState.availableStrategies = availableStrategies;

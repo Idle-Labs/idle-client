@@ -20,8 +20,11 @@ class TransactionField extends Component {
     }
   }
 
-  async componentDidMount(){
+  async componentWillMount(){
     this.loadUtils();
+  }
+
+  async componentDidMount(){
     this.loadField();
   }
 
@@ -66,9 +69,9 @@ class TransactionField extends Component {
     let icon = null;
     let color = null;
     let output = null;
-    let bgColor = theme.colors.transactions.actionBg.default;
     const fieldInfo = this.props.fieldInfo;
     const transaction = this.props.transaction;
+    let bgColor = theme.colors.transactions.actionBg.default;
 
     const fieldProps = {
       fontWeight:3,
@@ -240,13 +243,16 @@ class TransactionField extends Component {
         );
       break;
       case 'tokenIcon':
+        const tokenSymbol = transaction.tokenSymbol.toUpperCase();
+        const tokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',tokenSymbol]);
+        const iconSrc = tokenConfig && tokenConfig.icon ? tokenConfig.icon : `images/tokens/${tokenSymbol}.svg`;
         output = (
-          <Image src={`images/tokens/${transaction.tokenSymbol.toUpperCase()}.svg`} {...fieldProps} />
+          <Image src={iconSrc} {...fieldProps} />
         );
       break;
       case 'tokenName':
         output = (
-          <Text {...fieldProps}>{transaction.tokenSymbol}</Text>
+          <Text {...fieldProps}>{transaction.tokenSymbol.toUpperCase()}</Text>
         );
       break;
       default:

@@ -562,6 +562,7 @@ class Stats extends Component {
       const enabledTokens = [];
       const statsTokens = this.functionsUtil.getGlobalConfig(['stats','tokens']);
       const statsProtocols = this.functionsUtil.getGlobalConfig(['stats','protocols']);
+
       Object.keys(statsTokens).forEach(token => {
         const tokenInfo = statsTokens[token];
         if (tokenInfo.enabled){
@@ -582,9 +583,25 @@ class Stats extends Component {
             Object.keys(strategies).map(strategy => {
               const strategyInfo = strategies[strategy];
               const availableTokens = this.props.availableStrategies[strategy];
+
               if (!availableTokens){
                 return false;
               }
+              
+              // Get available protocols name
+              const availableProtocolsKeys = [];
+              Object.keys(availableTokens).forEach( token => {
+                availableTokens[token].protocols.forEach( protocolInfo => {
+                  if (availableProtocolsKeys.indexOf(protocolInfo.name)<0){
+                    availableProtocolsKeys.push(protocolInfo.name);
+                  }
+                });
+              });
+
+              const availableProtocols = availableProtocolsKeys.map( protocolName => {
+                return statsProtocols[protocolName];
+              },{});
+
               return (
                 <Box
                   mb={2}
@@ -763,7 +780,7 @@ class Stats extends Component {
                         justifyContent={'flex-end'}
                       >
                         {
-                          Object.values(statsProtocols).filter( p => (p.legend) ).map( (p,index) => (
+                          availableProtocols.filter( p => p.legend ).map( (p,index) => (
                             <Flex
                               mr={3}
                               alignItems={'center'}

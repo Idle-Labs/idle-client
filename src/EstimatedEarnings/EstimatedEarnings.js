@@ -210,6 +210,7 @@ class EstimatedEarnings extends Component {
             >
               <AssetField
                 token={this.props.selectedToken}
+                tokenConfig={this.props.tokenConfig}
                 fieldInfo={{
                   name:'icon',
                   props:{

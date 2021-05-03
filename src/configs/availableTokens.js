@@ -4,9 +4,11 @@ import cToken from '../abis/compound/cDAI';
 import WETH from '../abis/tokens/WETH.json';
 import USDC from '../abis/tokens/USDC.json';
 import ERC20 from '../abis/tokens/ERC20.js';
+import fToken from '../abis/fuse/fToken.json';
 import aToken from '../abis/aave/AToken.json';
 import yToken from '../abis/dydx/yToken.json';
 import iToken from '../abis/fulcrum/iToken.json';
+import crToken from '../abis/cream/crToken.json';
 import IdleTokenV3 from '../contracts/IdleTokenV3.json';
 import IdleTokenV4 from '../contracts/IdleTokenV4.json';
 import IdleConverterPersonalSignV4 from '../contracts/IdleConverterPersonalSignV4.json';
@@ -1059,7 +1061,53 @@ const availableTokens = {
             }
           }
         ]
-      }
+      },
+      RAI:{
+        deposit:{},
+        token:'RAI',
+        decimals:18,
+        enabled:false,
+        abi:ERC20.abi,
+        govTokensDisabled:false,
+        color:'hsl(169,42%,37%)',
+        icon:'images/tokens/RAI.png',
+        address:'0x03ab458634910aad20ef5f1c8ee96f1d6ac54919',
+        idle:{
+          abi:IdleTokenV4,
+          token:'idleRAIYield',
+          address:'0x5C960a3DCC01BE8a0f49c02A8ceBCAcf5D07fABe',
+        },
+        protocols:[
+          {
+            abi:crToken,
+            decimals:28,
+            enabled:true,
+            name:'cream',
+            token:'crRAI',
+            functions:{
+              exchangeRate:{
+                name:'exchangeRateStored',
+                params:[]
+              }
+            },
+            address:'0xf8445c529d363ce114148662387eba5e62016e20',
+          },
+          {
+            abi:fToken,
+            decimals:28,
+            name:'fuse',
+            token:'fRAI',
+            enabled:true,
+            functions:{
+              exchangeRate:{
+                name:'exchangeRateStored',
+                params:[]
+              }
+            },
+            address:'0x752F119bD4Ee2342CE35E2351648d21962c7CAfE',
+          }
+        ]
+      },
     },
     risk:{
       DAI:{
