@@ -3381,7 +3381,7 @@ class FunctionsUtil {
     ]);
 
     let userShare = this.BNify(0);
-    if (idleTokensBalance && idleTokensTotalSupply){
+    if (this.BNify(idleTokensBalance).gt(0) && this.BNify(idleTokensTotalSupply).gt(0)){
       userShare = this.BNify(idleTokensBalance).div(this.BNify(idleTokensTotalSupply));
     }
 

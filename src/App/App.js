@@ -312,7 +312,7 @@ class App extends Component {
       // Clear all localStorage data except walletProvider and connectorName if version has changed
       const version = this.functionsUtil.getStoredItem('version',false);
       if (version !== globalConfigs.version){
-        this.functionsUtil.clearStoredData(['walletProvider','connectorName']);
+        this.functionsUtil.clearStoredData(['walletProvider','connectorName','themeMode']);
         this.functionsUtil.setLocalStorage('version',globalConfigs.version);
       }
     }
