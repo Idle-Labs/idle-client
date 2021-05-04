@@ -195,8 +195,7 @@ class DepositRedeem extends Component {
     ] = await Promise.all([
       this.functionsUtil.getUniswapConversionRate(DAITokenConfig,WETHTokenConfig),
       this.functionsUtil.estimateMethodGasUsage(this.props.tokenConfig.idle.token, 'redeemIdleToken', [this.functionsUtil.integerValue(this.props.redeemableBalance)], this.props.account),
-      this.functionsUtil.estimateMethodGasUsage(this.props.tokenConfig.idle.token, 'redeemIdleToken', [0], this.props.account),
-      // this.functionsUtil.estimateMethodGasUsage(this.props.tokenConfig.idle.token, 'redeemIdleTokenSkipGov', [this.functionsUtil.integerValue(this.props.redeemableBalance),_skipGovTokenRedeem], this.props.account)
+      this.functionsUtil.estimateMethodGasUsage(this.props.tokenConfig.idle.token, 'redeemIdleTokenSkipGov', [this.functionsUtil.integerValue(this.props.redeemableBalance),_skipGovTokenRedeem], this.props.account)
     ]);
 
     const skipGovTokensGasSave = redeemGasUsage && skipGovRedeemGasUsage ? redeemGasUsage.minus(skipGovRedeemGasUsage) : this.functionsUtil.BNify(0);
@@ -350,7 +349,7 @@ class DepositRedeem extends Component {
 
     const inputValueChanged = prevState.inputValue[this.state.action] !== this.state.inputValue[this.state.action];
     if (inputValueChanged){
-      this.checkMinAmountForMint();
+      // this.checkMinAmountForMint();
     }
 
     const redeemSkipGovChanged = prevState.redeemSkipGov !== this.state.redeemSkipGov;
@@ -1334,13 +1333,13 @@ class DepositRedeem extends Component {
 
     const showRedeemFlow = this.state.canRedeem && (!this.state.redeemCurveEnabled || this.state.showRedeemFlow) && this.state.action==='redeem';
 
-    const redeemGovTokenEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','redeemGovTokens','enabled']) && govTokensEnabled && showRedeemFlow;
+    const redeemGovTokenEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','redeemGovTokens','enabled']) && govTokensEnabled && showRedeemFlow && this.props.govTokensBalance.gt(0);
     const redeemGovTokens = redeemGovTokenEnabled && this.state.redeemGovTokens;
 
     const redeemSkipGovEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','redeemSkipGov','enabled']) && govTokensEnabled && showRedeemFlow;
     const redeemSkipGov = redeemSkipGovEnabled && this.state.redeemSkipGov && Object.keys(this.props.govTokensUserBalances).length>0 && this.props.govTokensBalance.gt(0);
 
-    const showAdvancedRedeemOptions = redeemGovTokenEnabled || redeemSkipGovEnabled;
+    const showAdvancedRedeemOptions = redeemGovTokenEnabled && redeemSkipGovEnabled;
 
     // console.log('showAdvancedRedeemOptions',showAdvancedRedeemOptions,redeemGovTokenEnabled,redeemSkipGovEnabled,govTokensEnabled,showRedeemFlow);
 
@@ -1371,7 +1370,7 @@ class DepositRedeem extends Component {
 
     const showCurveSlippage = depositCurve && this.state.depositCurveSlippage && this.state.depositCurveBalance && !this.state.buttonDisabled;
 
-    const showRebalanceOption = showDepositOptions && this.state.canDeposit && skipMintCheckboxEnabled && this.state.action === 'deposit';
+    const showRebalanceOption = false && this.state.canDeposit && skipMintCheckboxEnabled && this.state.action === 'deposit';
     const showAdvancedDepositOptions = showDepositCurve || showRebalanceOption;
 
     const batchDepositInfo = this.functionsUtil.getGlobalConfig(['tools','batchDeposit']);

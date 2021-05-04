@@ -1066,7 +1066,7 @@ const availableTokens = {
         deposit:{},
         token:'RAI',
         decimals:18,
-        enabled:false,
+        enabled:true,
         abi:ERC20.abi,
         govTokensDisabled:false,
         color:'hsl(169,42%,37%)',

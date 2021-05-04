@@ -482,7 +482,7 @@ class Staking extends Component {
 
     globalStats.push({
       title:'Multiplier',
-      value:`${rewardMultiplier}x`,
+      value:`${rewardMultiplier.toFixed(2)}x`,
       description:`Deposit liquidity tokens for ${this.state.contractInfo.maxBonusDays} days to achieve a ${this.state.contractInfo.maxMultiplier}x reward multiplier`
     });
 

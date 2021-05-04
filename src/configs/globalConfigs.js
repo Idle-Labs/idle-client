@@ -385,9 +385,9 @@ const globalConfigs = {
     stkAAVE:{
       abi:aToken,
       decimals:18,
-      enabled:true,
       showAUM:true, // Include stkAAVE balance in AUM
       showAPR:true, // Include stkAAVE Apr
+      enabled:false,
       showPrice:true,
       token:'stkAAVE',
       showBalance:true, // Include stkAAVE balance in Portfolio Donut
@@ -777,7 +777,7 @@ const globalConfigs = {
       },
       RAI:{
         decimals:18,
-        enabled:true,
+        enabled:false,
         color:{
           hex:'#378879',
           rgb:[55, 136, 121],
@@ -979,7 +979,7 @@ const globalConfigs = {
         enabled:true
       },
       redeemSkipGov:{
-        enabled:true
+        enabled:false
       },
       rebalance:{
         enabled:true,

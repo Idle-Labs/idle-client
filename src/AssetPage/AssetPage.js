@@ -63,28 +63,25 @@ class AssetPage extends Component {
 
         const [
           tokenFeesPercentage,
+          idleTokenPrice,
           tokenApy,
           tokenBalance,
           tokenFees,
-          idleTokenPrice,
           idleTokenBalance,
           tokenApproved,
           govTokensBalance,
           govTokensUserBalances
         ] = await Promise.all([
           this.functionsUtil.getTokenFees(tokenConfig),
+          this.functionsUtil.getIdleTokenPrice(tokenConfig),
           this.functionsUtil.getTokenApy(this.props.tokenConfig),
           this.functionsUtil.getTokenBalance(token,this.props.account),
           this.functionsUtil.getUserTokenFees(tokenConfig,this.props.account),
-          this.functionsUtil.genericContractCall(tokenConfig.idle.token, 'tokenPrice'),
           this.functionsUtil.getTokenBalance(tokenConfig.idle.token,this.props.account),
           this.functionsUtil.checkTokenApproved(token,tokenConfig.idle.address,this.props.account),
           this.functionsUtil.getGovTokensUserTotalBalance(this.props.account,govTokenAvailableTokens,'DAI'),
           this.functionsUtil.getGovTokensUserBalances(this.props.account,govTokenAvailableTokens,null,null)
         ]);
-
-
-        console.log()
 
         newState.tokenFees[token] = tokenFees;
         newState.tokenBalance[token] = tokenBalance;
@@ -96,7 +93,7 @@ class AssetPage extends Component {
         newState.govTokensUserBalances[token] = govTokensUserBalances;
         newState.govTokensDisabled[token] = tokenConfig.govTokensDisabled;
         newState.tokenApy[token] = tokenApy && !tokenApy.isNaN() ? tokenApy : null;
-        newState.redeemableBalance[token] = idleTokenBalance ? this.functionsUtil.fixTokenDecimals(idleTokenBalance.times(idleTokenPrice),tokenConfig.decimals) : this.functionsUtil.BNify(0);
+        newState.redeemableBalance[token] = idleTokenBalance && idleTokenPrice ? idleTokenBalance.times(idleTokenPrice) : this.functionsUtil.BNify(0);
       });
 
       newState.availableGovTokens = this.functionsUtil.getTokenGovTokens(this.props.tokenConfig);

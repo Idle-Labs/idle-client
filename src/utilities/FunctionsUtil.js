@@ -3659,7 +3659,14 @@ class FunctionsUtil {
   }
   getAprs = async (contractName) => {
     contractName = contractName ? contractName : this.props.tokenConfig.idle.token;
-    return await this.genericContractCall(contractName, 'getAPRs');
+    const aprs = await this.genericContractCall(contractName, 'getAPRs');
+    if (aprs){
+      return {
+        aprs:aprs[1],
+        addresses:aprs[0]
+      };
+    }
+    return null;
   }
   genericIdleCall = async (methodName, params = [], callParams = {}) => {
     return await this.genericContractCall(this.props.tokenConfig.idle.token, methodName, params, callParams).catch(err => {
