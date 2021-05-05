@@ -177,6 +177,7 @@ class StrategyPage extends Component {
         let avgAPY = this.functionsUtil.BNify(0);
         let avgScore = this.functionsUtil.BNify(0);
         let totalAmountLent = this.functionsUtil.BNify(0);
+        let totalBalanceWithScore = this.functionsUtil.BNify(0);
 
         await this.functionsUtil.asyncForEach(depositedTokens,async (token) => {
           const tokenConfig = availableTokens[token];
@@ -193,22 +194,25 @@ class StrategyPage extends Component {
 
           const amountLentToken = await this.functionsUtil.convertTokenBalance(amountLent,token,tokenConfig,isRisk);
 
-          const tokenWeight = portfolio.tokensBalance[token].tokenBalance.div(portfolio.totalBalance);
+          const tokenBalance = portfolio.tokensBalance[token].tokenBalance;
+          const tokenWeight = tokenBalance.div(portfolio.totalBalance);
           const tokenAPY = tokenAprs.avgApy && !this.functionsUtil.BNify(tokenAprs.avgApy).isNaN() ? this.functionsUtil.BNify(tokenAprs.avgApy) : this.functionsUtil.BNify(0);
 
           if (!tokenAPY.isNaN()){
             avgAPY = avgAPY.plus(tokenAPY.times(tokenWeight));
-            // console.log('tokenAPY',token,tokenAPY.toFixed(),tokenWeight.toFixed(),avgAPY.toFixed());
           }
 
-          if (!tokenScore.isNaN()){
-            avgScore = avgScore.plus(tokenScore.times(tokenWeight));
+          if (!tokenScore.isNaN() && tokenScore.gt(0)){
+            avgScore = avgScore.plus(tokenScore.times(tokenBalance));
+            totalBalanceWithScore = totalBalanceWithScore.plus(tokenBalance);
           }
 
           if (amountLentToken){
             totalAmountLent = totalAmountLent.plus(amountLentToken);
           }
         });
+
+        avgScore = avgScore.div(totalBalanceWithScore);
 
         // console.log('avgAPY',avgAPY.toFixed());
 
