@@ -1281,8 +1281,10 @@ class Stats extends Component {
                       height={ 350 }
                       {...this.state}
                       parentId={'chart-PRICE'}
+                      theme={this.props.theme}
                       isMobile={this.props.isMobile}
                       contracts={this.props.contracts}
+                      themeMode={this.props.themeMode}
                       apiResults={this.state.apiResults}
                       idleVersion={this.state.idleVersion}
                       apiResults_unfiltered={this.state.apiResults_unfiltered}
@@ -1345,7 +1347,9 @@ class Stats extends Component {
                           {...this.state}
                           chartMode={'ALL'}
                           parentId={'chart-ALL'}
+                          theme={this.props.theme}
                           isMobile={this.props.isMobile}
+                          themeMode={this.props.themeMode}
                           contracts={this.props.contracts}
                           apiResults={this.state.apiResults}
                           idleVersion={this.state.idleVersion}
@@ -1425,7 +1429,9 @@ class Stats extends Component {
                             {...this.state}
                             chartMode={'AUM'}
                             parentId={'chart-AUM'}
+                            theme={this.props.theme}
                             isMobile={this.props.isMobile}
+                            themeMode={this.props.themeMode}
                             contracts={this.props.contracts}
                             apiResults={this.state.apiResults}
                             idleVersion={this.state.idleVersion}
@@ -1466,7 +1472,9 @@ class Stats extends Component {
                             {...this.state}
                             chartMode={'APR'}
                             parentId={'chart-APR'}
+                            theme={this.props.theme}
                             isMobile={this.props.isMobile}
+                            themeMode={this.props.themeMode}
                             contracts={this.props.contracts}
                             apiResults={this.state.apiResults}
                             idleVersion={this.state.idleVersion}
@@ -1501,7 +1509,9 @@ class Stats extends Component {
                             {...this.state}
                             chartMode={'SCORE'}
                             parentId={'chart-SCORE'}
+                            theme={this.props.theme}
                             isMobile={this.props.isMobile}
+                            themeMode={this.props.themeMode}
                             contracts={this.props.contracts}
                             apiResults={this.state.apiResults}
                             idleVersion={this.state.idleVersion}
@@ -1542,7 +1552,9 @@ class Stats extends Component {
                             {...this.state}
                             chartMode={'VOL'}
                             parentId={'chart-VOL'}
+                            theme={this.props.theme}
                             isMobile={this.props.isMobile}
+                            themeMode={this.props.themeMode}
                             contracts={this.props.contracts}
                             apiResults={this.state.apiResults}
                             idleVersion={this.state.idleVersion}

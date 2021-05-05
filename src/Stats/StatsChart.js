@@ -1,5 +1,4 @@
 import moment from 'moment';
-import theme from '../theme';
 import { Bar } from '@nivo/bar';
 import { Line } from '@nivo/line';
 import React, { Component } from 'react';
@@ -192,7 +191,7 @@ class StatsChart extends Component {
               axis: 'y',
               value: 0,
               lineStyle: { strokeOpacity: 0 },
-              textStyle: { fill: theme.colors.transactions.action.deposit },
+              textStyle: { fill: this.props.theme.colors.transactions.action.deposit },
               legend: 'deposits',
               legendPosition: 'top-left',
               legendOrientation: 'vertical',
@@ -202,8 +201,8 @@ class StatsChart extends Component {
             {
               axis: 'y',
               value: 0,
-              lineStyle: { stroke: theme.colors['dark-gray'], strokeDasharray: '5 3' },
-              textStyle: { fill: theme.colors.transactions.action.redeem },
+              lineStyle: { stroke: this.props.theme.colors['dark-gray'], strokeDasharray: '5 3' },
+              textStyle: { fill: this.props.theme.colors.transactions.action.redeem },
               legend: 'redeems',
               legendPosition: 'bottom-left',
               legendOrientation: 'vertical',
@@ -213,7 +212,7 @@ class StatsChart extends Component {
           ],
           keys:['deposits','redeems'],
           padding:0.4,
-          colors:[theme.colors.transactions.action.deposit, theme.colors.transactions.action.redeem],
+          colors:[this.props.theme.colors.transactions.action.deposit, this.props.theme.colors.transactions.action.redeem],
           labelTextColor: 'inherit:darker(1.4)',
           labelSkipWidth: 16,
           labelSkipHeight: 16,
@@ -240,12 +239,12 @@ class StatsChart extends Component {
               direction: 'row',
               anchor: 'bottom-left',
               symbolShape: 'circle',
-              itemTextColor: theme.colors.legend,
+              itemTextColor: this.props.theme.colors.legend,
               effects: [
                 {
                   on: 'hover',
                   style: {
-                    itemTextColor: '#000'
+                    itemTextColor: this.props.themeMode === 'light' ? '#000' : '#fff'
                   }
                 }
               ]
@@ -257,21 +256,22 @@ class StatsChart extends Component {
                 text: {
                   fontSize: this.props.isMobile ? 12: 14,
                   fontWeight:600,
-                  fill:theme.colors.legend,
-                  fontFamily: theme.fonts.sansSerif
+                  fill:this.props.theme.colors.legend,
+                  fontFamily: this.props.theme.fonts.sansSerif
                 }
               }
             },
             grid: {
               line: {
-                stroke: theme.colors.lineChartStroke, strokeDasharray: '10 6'
+                stroke: this.props.theme.colors.lineChartStroke, strokeDasharray: '10 6'
               }
             },
             legends:{
               text:{
                 fontWeight:500,
+                fill:this.props.theme.colors.legend,
                 textTransform:'capitalize',
-                fontFamily: theme.fonts.sansSerif,
+                fontFamily: this.props.theme.fonts.sansSerif,
                 fontSize: this.props.isMobile ? 12: 14
               }
             },
@@ -300,12 +300,12 @@ class StatsChart extends Component {
               >
                 <CustomTooltipRow
                   label={'Deposits'}
-                  color={theme.colors.deposit}
+                  color={this.props.theme.colors.deposit}
                   value={depositFormatted}
                 />
                 <CustomTooltipRow
                   label={'Redeem'}
-                  color={theme.colors.redeem}
+                  color={this.props.theme.colors.redeem}
                   value={redeemFormatted}
                 />
               </CustomTooltip>
@@ -499,12 +499,12 @@ class StatsChart extends Component {
               direction: 'row',
               anchor: 'bottom-left',
               symbolShape: 'circle',
-              itemTextColor: theme.colors.legend,
+              itemTextColor: this.props.theme.colors.legend,
               effects: [
                 {
                   on: 'hover',
                   style: {
-                    itemTextColor: '#000'
+                    itemTextColor: this.props.themeMode === 'light' ? '#000' : '#fff'
                   }
                 }
               ]
@@ -516,21 +516,22 @@ class StatsChart extends Component {
                 text: {
                   fontSize: this.props.isMobile ? 12: 14,
                   fontWeight:600,
-                  fill:theme.colors.legend,
-                  fontFamily: theme.fonts.sansSerif
+                  fill:this.props.theme.colors.legend,
+                  fontFamily: this.props.theme.fonts.sansSerif
                 }
               }
             },
             grid: {
               line: {
-                stroke: theme.colors.lineChartStroke, strokeDasharray: '10 6'
+                stroke: this.props.theme.colors.lineChartStroke, strokeDasharray: '10 6'
               }
             },
             legends:{
               text:{
                 fontSize: this.props.isMobile ? 12: 14,
+                fill:this.props.theme.colors.legend,
                 fontWeight:500,
-                fontFamily: theme.fonts.sansSerif
+                fontFamily: this.props.theme.fonts.sansSerif
               }
             }
           },
@@ -715,12 +716,12 @@ class StatsChart extends Component {
               direction: 'row',
               anchor: 'bottom-left',
               symbolShape: 'circle',
-              itemTextColor: theme.colors.legend,
+              itemTextColor: this.props.theme.colors.legend,
               effects: [
                 {
                   on: 'hover',
                   style: {
-                    itemTextColor: '#000'
+                    itemTextColor: this.props.themeMode === 'light' ? '#000' : '#fff'
                   }
                 }
               ]
@@ -742,21 +743,22 @@ class StatsChart extends Component {
                 text: {
                   fontSize:this.props.isMobile ? 12 : 14,
                   fontWeight:600,
-                  fill:theme.colors.legend,
-                  fontFamily: theme.fonts.sansSerif
+                  fill:this.props.theme.colors.legend,
+                  fontFamily: this.props.theme.fonts.sansSerif
                 }
               }
             },
             grid: {
               line: {
-                stroke: theme.colors.lineChartStroke, strokeDasharray: '10 6'
+                stroke: this.props.theme.colors.lineChartStroke, strokeDasharray: '10 6'
               }
             },
             legends:{
               text:{
                 fontSize:this.props.isMobile ? 12 : 14,
+                fill:this.props.theme.colors.legend,
                 fontWeight:500,
-                fontFamily: theme.fonts.sansSerif
+                fontFamily: this.props.theme.fonts.sansSerif
               }
             }
           },
@@ -998,12 +1000,12 @@ class StatsChart extends Component {
               direction: 'row',
               anchor: 'bottom-left',
               symbolShape: 'circle',
-              itemTextColor: theme.colors.legend,
+              itemTextColor: this.props.theme.colors.legend,
               effects: [
                 {
                   on: 'hover',
                   style: {
-                    itemTextColor: '#000'
+                    itemTextColor: this.props.themeMode === 'light' ? '#000' : '#fff'
                   }
                 }
               ]
@@ -1015,21 +1017,22 @@ class StatsChart extends Component {
                 text: {
                   fontSize: this.props.isMobile ? 12: 14,
                   fontWeight:600,
-                  fill:theme.colors.legend,
-                  fontFamily: theme.fonts.sansSerif
+                  fill:this.props.theme.colors.legend,
+                  fontFamily: this.props.theme.fonts.sansSerif
                 }
               }
             },
             grid: {
               line: {
-                stroke: theme.colors.lineChartStroke, strokeDasharray: '10 6'
+                stroke: this.props.theme.colors.lineChartStroke, strokeDasharray: '10 6'
               }
             },
             legends:{
               text:{
                 fontWeight:500,
+                fill:this.props.theme.colors.legend,
                 textTransform:'capitalize',
-                fontFamily: theme.fonts.sansSerif,
+                fontFamily: this.props.theme.fonts.sansSerif,
                 fontSize: this.props.isMobile ? 12: 14
               }
             }
@@ -1180,12 +1183,12 @@ class StatsChart extends Component {
               direction: 'row',
               anchor: 'bottom-left',
               symbolShape: 'circle',
-              itemTextColor: theme.colors.legend,
+              itemTextColor: this.props.theme.colors.legend,
               effects: [
                 {
                   on: 'hover',
                   style: {
-                    itemTextColor: '#000'
+                    itemTextColor: this.props.themeMode === 'light' ? '#000' : '#fff'
                   }
                 }
               ]
@@ -1197,21 +1200,22 @@ class StatsChart extends Component {
                 text: {
                   fontSize: this.props.isMobile ? 12: 14,
                   fontWeight:600,
-                  fill:theme.colors.legend,
-                  fontFamily: theme.fonts.sansSerif
+                  fill:this.props.theme.colors.legend,
+                  fontFamily: this.props.theme.fonts.sansSerif
                 }
               }
             },
             grid: {
               line: {
-                stroke: theme.colors.lineChartStroke, strokeDasharray: '10 6'
+                stroke: this.props.theme.colors.lineChartStroke, strokeDasharray: '10 6'
               }
             },
             legends:{
               text:{
                 fontWeight:500,
+                fill:this.props.theme.colors.legend,
                 textTransform:'capitalize',
-                fontFamily: theme.fonts.sansSerif,
+                fontFamily: this.props.theme.fonts.sansSerif,
                 fontSize: this.props.isMobile ? 12: 14
               }
             }
@@ -1320,9 +1324,9 @@ class StatsChart extends Component {
 
           const protocolInfo = globalConfigs.stats.protocols[p.name];
 
-          // if (!protocolInfo.enabled || (protocolInfo.startTimestamp && this.functionsUtil.strToMoment(protocolInfo.startTimestamp).isAfter(Date.now()))){
-          //   return;
-          // }
+          if (!protocolInfo.enabled || (protocolInfo.startTimestamp && this.functionsUtil.strToMoment(protocolInfo.startTimestamp).isAfter(Date.now()))){
+            return;
+          }
 
           const rateField = protocolInfo.rateField ? protocolInfo.rateField : 'rate';
 
@@ -1509,15 +1513,15 @@ class StatsChart extends Component {
               direction: 'row',
               anchor: 'bottom-left',
               symbolShape: 'circle',
-              itemTextColor: theme.colors.legend,
-              itemWidth: this.props.isMobile ? 70 : 150,
+              itemTextColor: this.props.theme.colors.legend,
+              itemWidth: this.props.isMobile ? 70 : 160,
               translateX: this.props.isMobile ? -35 : 0,
               translateY: this.props.isMobile ? 40 : 65,
               effects: [
                 {
                   on: 'hover',
                   style: {
-                    itemTextColor: '#000'
+                    itemTextColor: this.props.themeMode === 'light' ? '#000' : '#fff'
                   }
                 }
               ]
@@ -1529,21 +1533,22 @@ class StatsChart extends Component {
                 text: {
                   fontSize: this.props.isMobile ? 12: 14,
                   fontWeight:600,
-                  fill:theme.colors.legend,
-                  fontFamily: theme.fonts.sansSerif
+                  fill:this.props.theme.colors.legend,
+                  fontFamily: this.props.theme.fonts.sansSerif
                 }
               }
             },
             grid: {
               line: {
-                stroke: theme.colors.lineChartStroke, strokeDasharray: '10 6'
+                stroke: this.props.theme.colors.lineChartStroke, strokeDasharray: '10 6'
               }
             },
             legends:{
               text:{
                 fontSize: this.props.isMobile ? 12: 14,
+                fill:this.props.theme.colors.legend,
                 fontWeight:500,
-                fontFamily: theme.fonts.sansSerif
+                fontFamily: this.props.theme.fonts.sansSerif
               }
             }
           },
@@ -1821,12 +1826,12 @@ class StatsChart extends Component {
               direction: 'row',
               anchor: 'bottom-left',
               symbolShape: 'circle',
-              itemTextColor: theme.colors.legend,
+              itemTextColor: this.props.theme.colors.legend,
               effects: [
                 {
                   on: 'hover',
                   style: {
-                    itemTextColor: '#000'
+                    itemTextColor: this.props.themeMode === 'light' ? '#000' : '#fff'
                   }
                 }
               ]
@@ -1838,21 +1843,22 @@ class StatsChart extends Component {
                 text: {
                   fontSize: this.props.isMobile ? 12: 14,
                   fontWeight:600,
-                  fill:theme.colors.legend,
-                  fontFamily: theme.fonts.sansSerif
+                  fill:this.props.theme.colors.legend,
+                  fontFamily: this.props.theme.fonts.sansSerif
                 }
               }
             },
             grid: {
               line: {
-                stroke: theme.colors.lineChartStroke, strokeDasharray: '10 6'
+                stroke: this.props.theme.colors.lineChartStroke, strokeDasharray: '10 6'
               }
             },
             legends:{
               text:{
                 fontWeight:500,
+                fill:this.props.theme.colors.legend,
                 textTransform:'capitalize',
-                fontFamily: theme.fonts.sansSerif,
+                fontFamily: this.props.theme.fonts.sansSerif,
                 fontSize: this.props.isMobile ? 12: 14
               }
             }
