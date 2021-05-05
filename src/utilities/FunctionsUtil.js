@@ -5791,7 +5791,6 @@ class FunctionsUtil {
             const protocolScore = this.BNify(protocolInfo.defiScore);
             if (!protocolScore.isNaN()){
               tokenScore = tokenScore.plus(protocolScore.times(protocolAllocationPerc));
-              // this.customLog(protocolAddr,tokenAllocation.protocolsAllocationsPerc[protocolAddr].toFixed(6),protocolScore.toFixed(6),tokenScore.toFixed(6));
             }
           }
         }
@@ -5800,7 +5799,7 @@ class FunctionsUtil {
 
     // Fallback
     if (!tokenScore || tokenScore.isNaN() || tokenScore.lte(0)){
-      tokenScore = this.getTokenScoreApi(tokenConfig,isRisk);
+      tokenScore = await this.getTokenScoreApi(tokenConfig,isRisk);
     }
 
     return this.setCachedDataWithLocalStorage(cachedDataKey,tokenScore);
@@ -5820,30 +5819,33 @@ class FunctionsUtil {
     const apiInfo = globalConfigs.stats.scores;
     const config = this.getGlobalConfig(['stats','config']);
     const endpoint = `${apiInfo.endpoint}${tokenConfig.address}?isRisk=${isRisk}`;
-    let tokenData = await this.makeCachedRequest(endpoint,apiInfo.TTL,true,false,config);
+    let scores = await this.makeCachedRequest(endpoint,apiInfo.TTL,true,false,config);
 
-    if (tokenData && tokenData.length){
-      let tokenScore = this.BNify(tokenData[0].idleScore);
-      if (tokenScore && tokenScore.gt(0)){
-        // Set cached data
-        return this.setCachedData(cachedDataKey,tokenScore);
-      // Take latest historical valid score
-      } else {
-        const timestamp = parseInt(Date.now()/1000);
-        const startTimestamp = parseInt(timestamp)-(60*60*24);
-        tokenData = await this.getTokenApiData(tokenConfig.address,isRisk,startTimestamp,null,true,null,'DESC');
+    if (scores && scores.length>0){
+      let tokenData = scores.find( s => s.address.toLowerCase() === tokenConfig.address.toLowerCase() );
+      if (tokenData){
+        let tokenScore = this.BNify(tokenData.idleScore);
+        if (tokenScore && tokenScore.gt(0)){
+          // Set cached data
+          return this.setCachedData(cachedDataKey,tokenScore);
+        // Take latest historical valid score
+        } else {
+          const timestamp = parseInt(Date.now()/1000);
+          const startTimestamp = parseInt(timestamp)-(60*60*24);
+          tokenData = await this.getTokenApiData(tokenConfig.address,isRisk,startTimestamp,null,true,null,'DESC');
 
-        const filteredTokenData = tokenData.filter( d => (this.BNify(d.idleScore).gt(0)) );
-        if (filteredTokenData.length){
-          tokenScore = this.BNify(filteredTokenData[0].idleScore);
-          if (!this.BNify(tokenScore).isNaN()){
-            return this.setCachedDataWithLocalStorage(cachedDataKey,tokenScore);
+          const filteredTokenData = tokenData.filter( d => (this.BNify(d.idleScore).gt(0)) );
+          if (filteredTokenData.length){
+            tokenScore = this.BNify(filteredTokenData[0].idleScore);
+            if (!this.BNify(tokenScore).isNaN()){
+              return this.setCachedDataWithLocalStorage(cachedDataKey,tokenScore);
+            }
           }
         }
       }
     }
 
-    return null;
+    return this.BNify(0);
   }
   /*
   Get idleTokens aggregated APR
