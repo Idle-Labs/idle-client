@@ -1041,7 +1041,7 @@ class AssetField extends Component {
       break;
       case 'score':
         output = this.state.score !== undefined && this.state.score !== null && this.functionsUtil.BNify(this.state.score).gt(0) ? (
-          <SmartNumber {...fieldProps} decimals={1} number={this.state.score} />
+          <SmartNumber {...fieldProps} decimals={2} number={this.state.score} />
         ) : this.functionsUtil.BNify(this.state.score).lte(0) ? '-' : loader
       break;
       case 'earningsPerc':

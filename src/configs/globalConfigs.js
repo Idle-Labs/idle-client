@@ -393,8 +393,8 @@ const globalConfigs = {
       showBalance:true, // Include stkAAVE balance in Portfolio Donut
       protocol:'aavev2',
       aprTooltipMode:false,
-      color:'hsl(162, 100%, 41%)',
       distributionMode:'second',
+      color:'hsl(314, 41%, 51%)',
       distributionFrequency:'day',
       disabledTokens:['idleTUSDYield','idleSUSDYield'],
       address:'0x4da27a545c0c5b758a6ba100e3a049001de870f5', // MAIN
@@ -748,9 +748,9 @@ const globalConfigs = {
         decimals:18,
         enabled:true,
         color:{
-          hex:'#e683ce',
-          rgb:[230, 131, 206],
-          hsl:['315', '66%', '71%']
+          hex:'#B6509E',
+          rgb:[182, 80, 158],
+          hsl:['314', '41%', '51%']
         },
         startTimestamp:'2021-04-30',
         conversionRateField:'compDAIPrice',
@@ -815,11 +815,13 @@ const globalConfigs = {
       },
       aavev2WithStkAAVE:{
         enabled:true,
-        rateField:['rate','aaveAdditionalAPR'],
         label:'Aave V2 + stkAAVE',
+        startTimestamp:'2021-05-08',
+        rateField:['rate','aaveAdditionalAPR'],
         color:{
-          rgb:[230, 131, 206],
-          hsl:['315', '66%', '71%']
+          hex:'#B6509E',
+          rgb:[182, 80, 158],
+          hsl:['314', '41%', '51%']
         }
       },
       compoundWithCOMP:{
