@@ -557,10 +557,11 @@ class Stats extends Component {
       );
     }
 
+    const statsTokens = this.functionsUtil.getGlobalConfig(['stats','tokens']);
+
     if (!this.props.selectedToken){
       const strategies = this.functionsUtil.getGlobalConfig(['strategies']);
       const enabledTokens = [];
-      const statsTokens = this.functionsUtil.getGlobalConfig(['stats','tokens']);
       const statsProtocols = this.functionsUtil.getGlobalConfig(['stats','protocols']);
 
       Object.keys(statsTokens).forEach(token => {
@@ -894,6 +895,9 @@ class Stats extends Component {
         </Flex>
       );
     } else {
+
+      const tokenConfig = statsTokens[this.props.selectedToken];
+
       const versionsOptions = Object.keys(globalConfigs.stats.versions).filter( version => {
         const versionInfo = this.getVersionInfo(version);
         return versionInfo.enabledTokens.includes(this.props.selectedToken) && versionInfo.enabledStrategies.includes(this.props.selectedStrategy);
@@ -1044,7 +1048,7 @@ class Stats extends Component {
           </Box>
 
           {
-            this.state.idleVersion && (versionInfo.startTimestamp>parseInt(new Date().getTime()/1000)) ? (
+            this.state.idleVersion && this.functionsUtil.strToMoment(versionInfo.startTimestamp).isAfter(Date.now()) ? (
               <Flex
                 width={1}
                 alignItems={'center'}
@@ -1073,6 +1077,39 @@ class Stats extends Component {
                       textAlign={'center'}
                     >
                       Idle Stats {this.state.idleVersion} will be available shortly!
+                    </Text>
+                  </Flex>
+                </DashboardCard>
+              </Flex>
+            ) : this.functionsUtil.strToMoment(tokenConfig.startTimestamp).isAfter(Date.now()) ? (
+              <Flex
+                width={1}
+                alignItems={'center'}
+                flexDirection={'row'}
+                justifyContent={'center'}
+              >
+                <DashboardCard
+                  cardProps={{
+                    p:3,
+                    width:[1,0.5],
+                  }}
+                >
+                  <Flex
+                    alignItems={'center'}
+                    flexDirection={'column'}
+                  >
+                    <Icon
+                      size={'2.3em'}
+                      color={'cellText'}
+                      name={'AccessTime'}
+                    />
+                    <Text
+                      mt={2}
+                      fontSize={2}
+                      color={'cellText'}
+                      textAlign={'center'}
+                    >
+                      Stats for {this.props.selectedToken} will be available shortly!
                     </Text>
                   </Flex>
                 </DashboardCard>

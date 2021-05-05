@@ -989,7 +989,7 @@ class AssetField extends Component {
         ) : loader
       break;
       case 'govTokens':
-        output = this.state.govTokens ? (
+        output = this.state.govTokens && Object.keys(this.state.govTokens).length>0 ? (
           <Flex
             width={1}
             alignItems={'center'}
@@ -1020,6 +1020,8 @@ class AssetField extends Component {
               ))
             }
           </Flex>
+        ) : this.state.govTokens ? (
+          <Text {...fieldProps}>-</Text>
         ) : loader
       break;
       case 'amountLentCurve':

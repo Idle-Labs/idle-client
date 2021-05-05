@@ -353,13 +353,13 @@ const globalConfigs = {
       showAPR:false, // Include IDLE Apr
       protocol:'idle',
       showPrice:false, // Show price in Yield Farming section
-      disabledTokens:[], // Disable IDLE distribution for idleToken
       showBalance:false, // Include IDLE balance in Portfolio Donut
       aprTooltipMode:false,
       distributionMode:'block',
       distributionFrequency:'day', // Multiply distribution per block
       color:'hsl(162, 100%, 41%)',
       icon:'images/tokens/IDLE.png',
+      disabledTokens:['idleRAIYield'], // Disable IDLE distribution for idleToken
       address:'0x875773784Af8135eA0ef43b5a374AaD105c5D39e' // MAIN
       // address:'0xAB6Bdb5CCF38ECDa7A92d04E86f7c53Eb72833dF', // KOVAN
       // address:'0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f' // Fork
@@ -777,13 +777,13 @@ const globalConfigs = {
       },
       RAI:{
         decimals:18,
-        enabled:false,
+        enabled:true,
         color:{
           hex:'#378879',
           rgb:[55, 136, 121],
           hsl:['169', '42%', '37%']
         },
-        startTimestamp:'2021-05-10',
+        startTimestamp:'2021-05-07',
         icon:'images/tokens/RAI.png',
         conversionRateField:'raiDAIPrice',
         chart:{
