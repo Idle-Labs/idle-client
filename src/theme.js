@@ -94,6 +94,8 @@ export default {
     cardHoverShadow:'0px 0px 0px 1px rgba(0, 54, 255, 0.3)',
     cardBgHover:'#f7f8ff',
     cardBorder:'#eee',
+    pageActive:'#4f4f4f',
+    pageInactive:'#d8d8d8',
     transactions:{
       action:{
         send:'#10a0dd',

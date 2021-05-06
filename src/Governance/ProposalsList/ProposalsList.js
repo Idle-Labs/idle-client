@@ -229,14 +229,14 @@ class ProposalsList extends Component {
                           <Icon
                             name={'KeyboardArrowLeft'}
                             size={'2em'}
-                            color={ this.state.page>1 ? '#4f4f4f' : '#d8d8d8' }
+                            color={ this.state.page>1 ? 'pageActive' : 'pageInactive' }
                           />
                         </Link>
                         <Link onClick={ e => this.nextPage(e) }>
                           <Icon
                             name={'KeyboardArrowRight'}
                             size={'2em'}
-                            color={ this.state.page<this.state.totalPages ? '#4f4f4f' : '#d8d8d8' }
+                            color={ this.state.page<this.state.totalPages ? 'pageActive' : 'pageInactive' }
                           />
                         </Link>
                       </Flex>

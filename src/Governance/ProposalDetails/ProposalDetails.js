@@ -250,6 +250,7 @@ class ProposalDetails extends Component {
                     <ShortHash
                       ml={2}
                       lineHeight={1}
+                      {...this.props}
                       fontSize={[3,4]}
                       fontWeight={[3,4]}
                       color={'statValue'}
@@ -827,6 +828,7 @@ class ProposalDetails extends Component {
                                     <ShortHash
                                       fontSize={1}
                                       fontWeight={2}
+                                      {...this.props}
                                       textAlign={'left'}
                                       color={'statValue'}
                                       hash={voteInfo.voter}

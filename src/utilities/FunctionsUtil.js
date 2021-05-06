@@ -6,6 +6,7 @@ import BigNumber from 'bignumber.js';
 import IdleGovToken from './IdleGovToken';
 import { toBuffer } from "ethereumjs-util";
 import globalConfigs from '../configs/globalConfigs';
+import ENS, { getEnsAddress } from '@ensdomains/ensjs';
 
 const ethereumjsABI = require('ethereumjs-abi');
 const env = process.env;
@@ -160,6 +161,38 @@ class FunctionsUtil {
     }
 
     return action;
+  }
+  shortenHash = hash => {
+    let shortHash = hash;
+    const txStart = shortHash.substr(0, 7);
+    const txEnd = shortHash.substr(shortHash.length - 4);
+    shortHash = txStart + "..." + txEnd;
+    return shortHash;
+  }
+  getENSName = async (address) => {
+    if (!this.checkAddress(address) || !this.props.web3){
+      return null;
+    }
+
+    const cachedDataKey = `getENSName_${address}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData){
+      return cachedData;
+    }
+
+    const TTL = 3600;
+    const provider = this.props.web3.currentProvider;
+    const networkId = this.getGlobalConfig(['network','requiredNetwork']);
+    const ens = new ENS({ provider, ensAddress: getEnsAddress(networkId.toString()) });
+    const ensName = await ens.getName(address);
+    if (ensName && ensName.name){
+      const addressCheck = await ens.name(ensName.name).getAddress();
+      if (addressCheck && address.toLowerCase() === addressCheck.toLowerCase()){
+        return this.setCachedDataWithLocalStorage(cachedDataKey,ensName.name,TTL);
+      }
+    }
+
+    return null;
   }
   getAccountPortfolio = async (availableTokens=null,account=null) => {
     const portfolio = {

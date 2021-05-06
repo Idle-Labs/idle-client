@@ -92,6 +92,8 @@ export default {
     flashColor:'#bac5ff',
     cardBgHover:'#1e3657',
     cardBorder:'#0d2034',
+    pageActive:'#d8d8d8',
+    pageInactive:'#4f4f4f',
     menuRightBorder:'#0d2034',
     cardHoverShadow:'0px 0px 0px 1px rgb(45 74 114)',
     transactions:{

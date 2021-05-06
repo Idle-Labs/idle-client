@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
-import { Flex, Text, Blockie } from "rimble-ui";
+import { Flex, Text, Blockie, Loader } from "rimble-ui";
 import FunctionsUtil from '../../utilities/FunctionsUtil';
 
 class DelegateField extends Component {
 
-  state = {};
+  state = {
+    value:null
+  };
 
   // Utils
   functionsUtil = null;
@@ -19,10 +21,37 @@ class DelegateField extends Component {
 
   async componentWillMount(){
     this.loadUtils();
+    this.loadData();
   }
 
   async componentDidUpdate(prevProps, prevState) {
     this.loadUtils();
+    const delegateChanged = JSON.stringify(prevProps.delegate) !== JSON.stringify(this.props.delegate);
+    if (delegateChanged){
+      this.loadData();
+    }
+  }
+
+  async loadData(){
+    const fieldInfo = this.props.fieldInfo;
+    const delegate = Object.assign({},this.props.delegate);
+
+    let value = delegate[fieldInfo.name];
+    switch (fieldInfo.name){
+      case 'votes':
+        value = this.functionsUtil.formatMoney(this.functionsUtil.BNify(value).toFixed(2,1),2);
+      break;
+      case 'delegate':
+        const ensName = await this.functionsUtil.getENSName(value);
+        value = ensName || value;
+      break;
+      default:
+      break;
+    }
+
+    this.setState({
+      value
+    });
   }
 
   render(){
@@ -71,24 +100,14 @@ class DelegateField extends Component {
           </Flex>
         );
       break;
-      case 'rank':
-      case 'votes':
-      case 'delegate':
-      case 'proposals':
-      case 'vote_weight':
-        let value = delegate[fieldInfo.name];
-        if (fieldInfo.name === 'votes'){
-          value = this.functionsUtil.formatMoney(this.functionsUtil.BNify(value).toFixed(2,1),2);
-        }
-        output = (
+      default:
+        output = this.state.value !== null ? (
           <Text
             {...fieldProps}
           >
-            {value}
+            {this.state.value}
           </Text>
-        );
-      break;
-      default:
+        ) : (<Loader size={"20px"} />);
       break;
     }
     return output;

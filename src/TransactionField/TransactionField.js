@@ -169,6 +169,7 @@ class TransactionField extends Component {
                 fontSize={1}
                 color={'white'}
                 {...fieldProps}
+                resolveAddress={false}
                 hash={transaction.hash}
               />
             </Link>

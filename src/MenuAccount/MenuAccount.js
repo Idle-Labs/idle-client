@@ -138,6 +138,7 @@ class MenuAccount extends Component {
                 <ShortHash
                   fontSize={2}
                   fontWeight={3}
+                  {...this.props}
                   color={'copyColor'}
                   hash={this.props.account}
                 />
