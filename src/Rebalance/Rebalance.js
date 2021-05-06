@@ -20,6 +20,7 @@ class Rebalance extends Component {
 
   // Utils
   functionsUtil = null;
+  componentUnmounted = false;
 
   loadUtils(){
     if (this.functionsUtil){
@@ -27,6 +28,10 @@ class Rebalance extends Component {
     } else {
       this.functionsUtil = new FunctionsUtil(this.props);
     }
+  }
+
+  async componentWillUnmount(){
+    this.componentUnmounted = true;
   }
 
   async componentWillMount(){
@@ -44,14 +49,21 @@ class Rebalance extends Component {
     }
   }
 
+  async setStateSafe(newState,callback=null) {
+    if (!this.componentUnmounted){
+      return this.setState(newState,callback);
+    }
+    return null;
+  }
+
   checkRebalance = async () => {
-    this.setState({
+    this.setStateSafe({
       loading:true,
     });
 
     const shouldRebalance = await this.functionsUtil.checkRebalance(this.props.tokenConfig);
 
-    this.setState({
+    this.setStateSafe({
       loading:false,
       shouldRebalance
     });
@@ -64,9 +76,9 @@ class Rebalance extends Component {
 
       // Send Google Analytics event
       const eventData = {
+        eventLabel: tx.status,
         eventCategory: 'Rebalance',
         eventAction: this.props.selectedToken,
-        eventLabel: tx.status,
       };
 
       let txDenied = false;
@@ -100,7 +112,7 @@ class Rebalance extends Component {
         });
       }
 
-      this.setState((prevState) => ({
+      this.setStateSafe((prevState) => ({
         processing: {
           ...prevState.processing,
           rebalance:{
@@ -115,7 +127,7 @@ class Rebalance extends Component {
 
     const callback_receipt = (tx) => {
       const txHash = tx.transactionHash;
-      this.setState((prevState) => ({
+      this.setStateSafe((prevState) => ({
           processing: {
             ...prevState.processing,
             rebalance:{
@@ -129,7 +141,7 @@ class Rebalance extends Component {
 
     this.props.contractMethodSendWrapper(this.props.tokenConfig.idle.token, 'rebalance', [], null , callback, callback_receipt);
 
-    this.setState({
+    this.setStateSafe({
       processing:{
         rebalance:{
           txHash:null,

@@ -88,8 +88,9 @@ class EarningsEstimation extends Component {
   }
 
   async loadEarnings(){
+    let stepsCount = {};
     let tokensEarnings = {};
-    let estimationStepsPerc = 0;
+    // let estimationStepsPerc = 0;
 
     const isRisk = this.props.selectedStrategy === 'risk';
 
@@ -122,11 +123,10 @@ class EarningsEstimation extends Component {
 
       const earningsPercStep = Math.floor(earnings.div(earningsYear).times(100));
       
-      const possibleSteps = Object.keys(this.state.estimationSteps).filter(perc => perc<earningsPercStep);
+      const possibleSteps = Object.keys(this.state.estimationSteps).filter(perc => perc<=earningsPercStep);
       const maxPossibleStep = parseInt(possibleSteps.pop());
-      estimationStepsPerc = Math.max(estimationStepsPerc,maxPossibleStep);
 
-      // console.log(token,amountLent.toFixed(5),earnings.toFixed(5),earningsYear.toFixed(5),tokenConfig,tokenAprs,tokenAPR.toFixed(5),tokenAPY.toFixed(5),earningsPercStep,maxPossibleStep,estimationStepsPerc);
+      stepsCount[maxPossibleStep] = stepsCount[maxPossibleStep] ? stepsCount[maxPossibleStep]+1 : 1;
 
       if (!this.functionsUtil.BNify(amountLent).isNaN() && !this.functionsUtil.BNify(idleTokenPrice).isNaN() && !this.functionsUtil.BNify(earnings).isNaN() && !this.functionsUtil.BNify(earningsYear).isNaN()){
         tokensEarnings[token] = {
@@ -145,6 +145,20 @@ class EarningsEstimation extends Component {
         aggregatedEarnings.earningsYear = aggregatedEarnings.earningsYear.plus(earningsYear);
       }
     });
+
+    const maxCountStep = Object.keys(stepsCount).reduce( (maxCountStep,step) => {
+      const count = stepsCount[step];
+      if (count>maxCountStep.count){
+        maxCountStep.step = parseInt(step);
+        maxCountStep.count = parseInt(count);
+      }
+      return maxCountStep;
+    },{
+      step:0,
+      count:0
+    });
+
+    const estimationStepsPerc = maxCountStep.step || parseInt(Object.keys(this.state.estimationSteps)[1]);
 
     const orderedTokensEarnings = {};
     this.props.enabledTokens.forEach( token => {
@@ -172,8 +186,6 @@ class EarningsEstimation extends Component {
       }
       return option;
     });
-
-    // console.log(estimationStepsOptions,estimationStepsDefaultOption)
 
     this.setState({
       tokensEarnings,
@@ -247,6 +259,7 @@ class EarningsEstimation extends Component {
             const estimationStepPerc = this.functionsUtil.BNify(Object.values(estimationSteps).pop().perc);
             const finalEarnings = tokenEarnings.earningsYear.times(estimationStepPerc);
             const cursorPerc = Math.min(1,parseFloat(tokenEarnings.earnings.div(finalEarnings)));
+            const tokenIcon = tokenConfig && tokenConfig.icon ? tokenConfig.icon :`images/tokens/${token}.svg`;
             const tokenRGBColor = this.functionsUtil.getGlobalConfig(['stats','tokens',token,'color','rgb']).join(',');
             // console.log(tokenEarnings.earnings.toFixed(10),tokenEarnings.earningsYear.toFixed(10),finalEarnings.toFixed(10),cursorPerc.toFixed(10),estimationStepPerc.toFixed(10));
             return (
@@ -361,7 +374,7 @@ class EarningsEstimation extends Component {
                         alignItems={'center'}
                         justifyContent={'flex-start'}
                       >
-                        <Image src={`images/tokens/${token}.svg`} height={['1.4em','2.2em']} />
+                        <Image src={tokenIcon} height={['1.4em','2.2em']} />
                       </Flex>
                       {
                         <Flex

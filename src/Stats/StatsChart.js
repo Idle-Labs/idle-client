@@ -1,5 +1,4 @@
 import moment from 'moment';
-import theme from '../theme';
 import { Bar } from '@nivo/bar';
 import { Line } from '@nivo/line';
 import React, { Component } from 'react';
@@ -192,7 +191,7 @@ class StatsChart extends Component {
               axis: 'y',
               value: 0,
               lineStyle: { strokeOpacity: 0 },
-              textStyle: { fill: theme.colors.transactions.action.deposit },
+              textStyle: { fill: this.props.theme.colors.transactions.action.deposit },
               legend: 'deposits',
               legendPosition: 'top-left',
               legendOrientation: 'vertical',
@@ -202,8 +201,8 @@ class StatsChart extends Component {
             {
               axis: 'y',
               value: 0,
-              lineStyle: { stroke: theme.colors['dark-gray'], strokeDasharray: '5 3' },
-              textStyle: { fill: theme.colors.transactions.action.redeem },
+              lineStyle: { stroke: this.props.theme.colors['dark-gray'], strokeDasharray: '5 3' },
+              textStyle: { fill: this.props.theme.colors.transactions.action.redeem },
               legend: 'redeems',
               legendPosition: 'bottom-left',
               legendOrientation: 'vertical',
@@ -213,7 +212,7 @@ class StatsChart extends Component {
           ],
           keys:['deposits','redeems'],
           padding:0.4,
-          colors:[theme.colors.transactions.action.deposit, theme.colors.transactions.action.redeem],
+          colors:[this.props.theme.colors.transactions.action.deposit, this.props.theme.colors.transactions.action.redeem],
           labelTextColor: 'inherit:darker(1.4)',
           labelSkipWidth: 16,
           labelSkipHeight: 16,
@@ -240,12 +239,12 @@ class StatsChart extends Component {
               direction: 'row',
               anchor: 'bottom-left',
               symbolShape: 'circle',
-              itemTextColor: theme.colors.legend,
+              itemTextColor: this.props.theme.colors.legend,
               effects: [
                 {
                   on: 'hover',
                   style: {
-                    itemTextColor: '#000'
+                    itemTextColor: this.props.themeMode === 'light' ? '#000' : '#fff'
                   }
                 }
               ]
@@ -257,21 +256,22 @@ class StatsChart extends Component {
                 text: {
                   fontSize: this.props.isMobile ? 12: 14,
                   fontWeight:600,
-                  fill:theme.colors.legend,
-                  fontFamily: theme.fonts.sansSerif
+                  fill:this.props.theme.colors.legend,
+                  fontFamily: this.props.theme.fonts.sansSerif
                 }
               }
             },
             grid: {
               line: {
-                stroke: theme.colors.lineChartStroke, strokeDasharray: '10 6'
+                stroke: this.props.theme.colors.lineChartStroke, strokeDasharray: '10 6'
               }
             },
             legends:{
               text:{
                 fontWeight:500,
+                fill:this.props.theme.colors.legend,
                 textTransform:'capitalize',
-                fontFamily: theme.fonts.sansSerif,
+                fontFamily: this.props.theme.fonts.sansSerif,
                 fontSize: this.props.isMobile ? 12: 14
               }
             },
@@ -300,12 +300,12 @@ class StatsChart extends Component {
               >
                 <CustomTooltipRow
                   label={'Deposits'}
-                  color={theme.colors.deposit}
+                  color={this.props.theme.colors.deposit}
                   value={depositFormatted}
                 />
                 <CustomTooltipRow
                   label={'Redeem'}
-                  color={theme.colors.redeem}
+                  color={this.props.theme.colors.redeem}
                   value={redeemFormatted}
                 />
               </CustomTooltip>
@@ -499,12 +499,12 @@ class StatsChart extends Component {
               direction: 'row',
               anchor: 'bottom-left',
               symbolShape: 'circle',
-              itemTextColor: theme.colors.legend,
+              itemTextColor: this.props.theme.colors.legend,
               effects: [
                 {
                   on: 'hover',
                   style: {
-                    itemTextColor: '#000'
+                    itemTextColor: this.props.themeMode === 'light' ? '#000' : '#fff'
                   }
                 }
               ]
@@ -516,21 +516,22 @@ class StatsChart extends Component {
                 text: {
                   fontSize: this.props.isMobile ? 12: 14,
                   fontWeight:600,
-                  fill:theme.colors.legend,
-                  fontFamily: theme.fonts.sansSerif
+                  fill:this.props.theme.colors.legend,
+                  fontFamily: this.props.theme.fonts.sansSerif
                 }
               }
             },
             grid: {
               line: {
-                stroke: theme.colors.lineChartStroke, strokeDasharray: '10 6'
+                stroke: this.props.theme.colors.lineChartStroke, strokeDasharray: '10 6'
               }
             },
             legends:{
               text:{
                 fontSize: this.props.isMobile ? 12: 14,
+                fill:this.props.theme.colors.legend,
                 fontWeight:500,
-                fontFamily: theme.fonts.sansSerif
+                fontFamily: this.props.theme.fonts.sansSerif
               }
             }
           },
@@ -715,12 +716,12 @@ class StatsChart extends Component {
               direction: 'row',
               anchor: 'bottom-left',
               symbolShape: 'circle',
-              itemTextColor: theme.colors.legend,
+              itemTextColor: this.props.theme.colors.legend,
               effects: [
                 {
                   on: 'hover',
                   style: {
-                    itemTextColor: '#000'
+                    itemTextColor: this.props.themeMode === 'light' ? '#000' : '#fff'
                   }
                 }
               ]
@@ -742,21 +743,22 @@ class StatsChart extends Component {
                 text: {
                   fontSize:this.props.isMobile ? 12 : 14,
                   fontWeight:600,
-                  fill:theme.colors.legend,
-                  fontFamily: theme.fonts.sansSerif
+                  fill:this.props.theme.colors.legend,
+                  fontFamily: this.props.theme.fonts.sansSerif
                 }
               }
             },
             grid: {
               line: {
-                stroke: theme.colors.lineChartStroke, strokeDasharray: '10 6'
+                stroke: this.props.theme.colors.lineChartStroke, strokeDasharray: '10 6'
               }
             },
             legends:{
               text:{
                 fontSize:this.props.isMobile ? 12 : 14,
+                fill:this.props.theme.colors.legend,
                 fontWeight:500,
-                fontFamily: theme.fonts.sansSerif
+                fontFamily: this.props.theme.fonts.sansSerif
               }
             }
           },
@@ -897,10 +899,19 @@ class StatsChart extends Component {
                   return protocolAllocation.protocolAddr.toLowerCase() === p.address.toLowerCase()
               })
               .map((protocolAllocation,z) => {
-                const protocolPaused = this.functionsUtil.BNify(protocolAllocation.rate).eq(0);
+                let protocolRate = this.functionsUtil.BNify(protocolAllocation.rate);
+                const protocolPaused = protocolRate.eq(0);
                 if (!protocolPaused){
+
+                  // Aave V1 wrong rate FIX
+                  if (protocolRate.lt(0) && protocolAllocation.aaveAdditionalAPR && this.functionsUtil.BNify(protocolAllocation.aaveAdditionalAPR).gt(0)){
+                    protocolRate = protocolRate.plus(this.functionsUtil.BNify(protocolAllocation.aaveAdditionalAPR));
+                  }
+
+                  protocolRate = this.functionsUtil.fixTokenDecimals(protocolRate,18);
+
                   const x = moment(d.timestamp*1000).format("YYYY/MM/DD HH:mm");
-                  const y = parseFloat(this.functionsUtil.fixTokenDecimals(protocolAllocation.rate,18));
+                  const y = parseFloat(protocolRate);
 
                   maxChartValue = Math.max(maxChartValue,y);
 
@@ -914,13 +925,11 @@ class StatsChart extends Component {
 
         chartData.push({
           id:'Idle',
-          color: 'hsl('+globalConfigs.stats.protocols.idle.color.hsl.join(',')+')',
-          data: apiResults.map((d,i) => {
+          color:'hsl('+globalConfigs.stats.protocols.idle.color.hsl.join(',')+')',
+          data:apiResults.map((d,i) => {
             const x = moment(d.timestamp*1000).format("YYYY/MM/DD HH:mm");
             const y = parseFloat(this.functionsUtil.fixTokenDecimals(d.idleRate,18));
-
             maxChartValue = Math.max(maxChartValue,y);
-
             return { x, y };
           })
         });
@@ -991,12 +1000,12 @@ class StatsChart extends Component {
               direction: 'row',
               anchor: 'bottom-left',
               symbolShape: 'circle',
-              itemTextColor: theme.colors.legend,
+              itemTextColor: this.props.theme.colors.legend,
               effects: [
                 {
                   on: 'hover',
                   style: {
-                    itemTextColor: '#000'
+                    itemTextColor: this.props.themeMode === 'light' ? '#000' : '#fff'
                   }
                 }
               ]
@@ -1008,21 +1017,22 @@ class StatsChart extends Component {
                 text: {
                   fontSize: this.props.isMobile ? 12: 14,
                   fontWeight:600,
-                  fill:theme.colors.legend,
-                  fontFamily: theme.fonts.sansSerif
+                  fill:this.props.theme.colors.legend,
+                  fontFamily: this.props.theme.fonts.sansSerif
                 }
               }
             },
             grid: {
               line: {
-                stroke: theme.colors.lineChartStroke, strokeDasharray: '10 6'
+                stroke: this.props.theme.colors.lineChartStroke, strokeDasharray: '10 6'
               }
             },
             legends:{
               text:{
                 fontWeight:500,
+                fill:this.props.theme.colors.legend,
                 textTransform:'capitalize',
-                fontFamily: theme.fonts.sansSerif,
+                fontFamily: this.props.theme.fonts.sansSerif,
                 fontSize: this.props.isMobile ? 12: 14
               }
             }
@@ -1173,12 +1183,12 @@ class StatsChart extends Component {
               direction: 'row',
               anchor: 'bottom-left',
               symbolShape: 'circle',
-              itemTextColor: theme.colors.legend,
+              itemTextColor: this.props.theme.colors.legend,
               effects: [
                 {
                   on: 'hover',
                   style: {
-                    itemTextColor: '#000'
+                    itemTextColor: this.props.themeMode === 'light' ? '#000' : '#fff'
                   }
                 }
               ]
@@ -1190,21 +1200,22 @@ class StatsChart extends Component {
                 text: {
                   fontSize: this.props.isMobile ? 12: 14,
                   fontWeight:600,
-                  fill:theme.colors.legend,
-                  fontFamily: theme.fonts.sansSerif
+                  fill:this.props.theme.colors.legend,
+                  fontFamily: this.props.theme.fonts.sansSerif
                 }
               }
             },
             grid: {
               line: {
-                stroke: theme.colors.lineChartStroke, strokeDasharray: '10 6'
+                stroke: this.props.theme.colors.lineChartStroke, strokeDasharray: '10 6'
               }
             },
             legends:{
               text:{
                 fontWeight:500,
+                fill:this.props.theme.colors.legend,
                 textTransform:'capitalize',
-                fontFamily: theme.fonts.sansSerif,
+                fontFamily: this.props.theme.fonts.sansSerif,
                 fontSize: this.props.isMobile ? 12: 14
               }
             }
@@ -1245,9 +1256,9 @@ class StatsChart extends Component {
         // let prevApy = null;
         let prevApr = null;
         let prevData = null;
+        let avgApy = this.functionsUtil.BNify(0);
         let startBalance = this.functionsUtil.BNify(1);
         let currentBalance = this.functionsUtil.BNify(1);
-        let avgApy = this.functionsUtil.BNify(0);
 
         // console.log('PRICE_V4',apiResults);
 
@@ -1313,7 +1324,7 @@ class StatsChart extends Component {
 
           const protocolInfo = globalConfigs.stats.protocols[p.name];
 
-          if (!protocolInfo.enabled){
+          if (!protocolInfo.enabled || (protocolInfo.startTimestamp && this.functionsUtil.strToMoment(protocolInfo.startTimestamp).isAfter(Date.now()))){
             return;
           }
 
@@ -1335,8 +1346,9 @@ class StatsChart extends Component {
           avgApy = this.functionsUtil.BNify(0);
           startBalance = this.functionsUtil.BNify(1);
           currentBalance = this.functionsUtil.BNify(1);
+          const apiResults_filtered = apiResults.filter( d => (!protocolInfo.startTimestamp || moment(protocolInfo.startTimestamp).isSameOrBefore(moment(d.timestamp*1000))) );
 
-          apiResults.forEach( (d,i) => {
+          apiResults_filtered.forEach( (d,i) => {
 
             const protocolData = d.protocolsData.find((pData,x) => {
               return pData.protocolAddr.toLowerCase() === p.address.toLowerCase()
@@ -1348,26 +1360,20 @@ class StatsChart extends Component {
                 firstProtocolData = protocolData;
               }
 
-              const protocolRate = typeof rateField === 'object' && rateField.length ? rateField.reduce((acc,field) => {
+              let protocolRate = typeof rateField === 'object' && rateField.length ? rateField.reduce((acc,field) => {
                 if (protocolData[field]){
                   return this.functionsUtil.BNify(acc).plus(this.functionsUtil.BNify(protocolData[field]));
                 }
                 return this.functionsUtil.BNify(acc);
               },0) : this.functionsUtil.BNify(protocolData[rateField]);
 
+              // Aave V1 wrong rate FIX
+              if (protocolRate.lt(0) && protocolData.aaveAdditionalAPR && this.functionsUtil.BNify(protocolData.aaveAdditionalAPR).gt(0)){
+                protocolRate = protocolRate.plus(this.functionsUtil.BNify(protocolData.aaveAdditionalAPR));
+              }
+
               const protocolPaused = protocolRate.eq(0);
               if (!protocolPaused){
-
-                // Start new protocols from Idle performances
-                if (firstProtocolBlock === null){
-                  firstProtocolBlock = parseInt(d.blocknumber);
-                  if (firstProtocolBlock>firstIdleBlock){
-                    const idlePerformance = idleChartData.find(d1 => (d1.blocknumber>=firstProtocolBlock) );
-                    if (idlePerformance){
-                      baseProfit = idlePerformance.y;
-                    }
-                  }
-                }
 
                 let rowData = {};
 
@@ -1379,7 +1385,20 @@ class StatsChart extends Component {
                 avgApy = avgApy.plus(apr.times(100));
                 // const apy = this.functionsUtil.apr2apy(apr);
 
-                if (prevData){
+                // Start new protocols from Idle performances
+                if (firstProtocolBlock === null) {
+                  firstProtocolBlock = parseInt(d.blocknumber);
+                  if (firstProtocolBlock>firstIdleBlock){
+                    const idlePerformance = idleChartData.find(d1 => (d1.blocknumber>=firstProtocolBlock) );
+                    if (idlePerformance){
+                      baseProfit = idlePerformance.y;
+                      y = baseProfit;
+                      apy = avgApy.toFixed(2);
+                    }
+                  }
+                }
+
+                if (prevData) {
                   const days = (d.timestamp-prevData.timestamp)/86400;
                   // const totDays = (d.timestamp-apiResults[0].timestamp)/86400;
 
@@ -1432,8 +1451,8 @@ class StatsChart extends Component {
 
         chartData.push({
           id:'Idle',
-          color: 'hsl('+globalConfigs.stats.protocols.idle.color.hsl.join(',')+')',
-          data: idleChartData
+          data: idleChartData,
+          color: 'hsl('+globalConfigs.stats.protocols.idle.color.hsl.join(',')+')'
         });
 
         // Set chart type
@@ -1489,20 +1508,20 @@ class StatsChart extends Component {
           legends:[
             {
               itemHeight: 18,
-              itemWidth: this.props.isMobile ? 70 : 100,
-              translateX: this.props.isMobile ? -35 : 0,
-              translateY: this.props.isMobile ? 40 : 65,
               symbolSize: 10,
               itemsSpacing: 5,
               direction: 'row',
               anchor: 'bottom-left',
               symbolShape: 'circle',
-              itemTextColor: theme.colors.legend,
+              itemTextColor: this.props.theme.colors.legend,
+              itemWidth: this.props.isMobile ? 70 : 160,
+              translateX: this.props.isMobile ? -35 : 0,
+              translateY: this.props.isMobile ? 40 : 65,
               effects: [
                 {
                   on: 'hover',
                   style: {
-                    itemTextColor: '#000'
+                    itemTextColor: this.props.themeMode === 'light' ? '#000' : '#fff'
                   }
                 }
               ]
@@ -1514,21 +1533,22 @@ class StatsChart extends Component {
                 text: {
                   fontSize: this.props.isMobile ? 12: 14,
                   fontWeight:600,
-                  fill:theme.colors.legend,
-                  fontFamily: theme.fonts.sansSerif
+                  fill:this.props.theme.colors.legend,
+                  fontFamily: this.props.theme.fonts.sansSerif
                 }
               }
             },
             grid: {
               line: {
-                stroke: theme.colors.lineChartStroke, strokeDasharray: '10 6'
+                stroke: this.props.theme.colors.lineChartStroke, strokeDasharray: '10 6'
               }
             },
             legends:{
               text:{
                 fontSize: this.props.isMobile ? 12: 14,
+                fill:this.props.theme.colors.legend,
                 fontWeight:500,
-                fontFamily: theme.fonts.sansSerif
+                fontFamily: this.props.theme.fonts.sansSerif
               }
             }
           },
@@ -1806,12 +1826,12 @@ class StatsChart extends Component {
               direction: 'row',
               anchor: 'bottom-left',
               symbolShape: 'circle',
-              itemTextColor: theme.colors.legend,
+              itemTextColor: this.props.theme.colors.legend,
               effects: [
                 {
                   on: 'hover',
                   style: {
-                    itemTextColor: '#000'
+                    itemTextColor: this.props.themeMode === 'light' ? '#000' : '#fff'
                   }
                 }
               ]
@@ -1823,21 +1843,22 @@ class StatsChart extends Component {
                 text: {
                   fontSize: this.props.isMobile ? 12: 14,
                   fontWeight:600,
-                  fill:theme.colors.legend,
-                  fontFamily: theme.fonts.sansSerif
+                  fill:this.props.theme.colors.legend,
+                  fontFamily: this.props.theme.fonts.sansSerif
                 }
               }
             },
             grid: {
               line: {
-                stroke: theme.colors.lineChartStroke, strokeDasharray: '10 6'
+                stroke: this.props.theme.colors.lineChartStroke, strokeDasharray: '10 6'
               }
             },
             legends:{
               text:{
                 fontWeight:500,
+                fill:this.props.theme.colors.legend,
                 textTransform:'capitalize',
-                fontFamily: theme.fonts.sansSerif,
+                fontFamily: this.props.theme.fonts.sansSerif,
                 fontSize: this.props.isMobile ? 12: 14
               }
             }

@@ -191,7 +191,13 @@ class App extends Component {
 
     // Load available strategies
     Object.keys(availableTokens[requiredNetwork]).forEach((strategy) => {
-      availableStrategies[strategy] = availableTokens[requiredNetwork][strategy];
+      availableStrategies[strategy] = Object.keys(availableTokens[requiredNetwork][strategy]).reduce( (enabledTokens,token) => {
+        const tokenConfig = availableTokens[requiredNetwork][strategy][token];
+        if (tokenConfig.enabled){
+          enabledTokens[token] = tokenConfig;
+        }
+        return enabledTokens;
+      },{});
     });
 
     newState.availableStrategies = availableStrategies;
@@ -306,7 +312,7 @@ class App extends Component {
       // Clear all localStorage data except walletProvider and connectorName if version has changed
       const version = this.functionsUtil.getStoredItem('version',false);
       if (version !== globalConfigs.version){
-        this.functionsUtil.clearStoredData(['walletProvider','connectorName']);
+        this.functionsUtil.clearStoredData(['walletProvider','connectorName','themeMode']);
         this.functionsUtil.setLocalStorage('version',globalConfigs.version);
       }
     }
@@ -861,6 +867,7 @@ class App extends Component {
                                           isMobile={isMobile}
                                           simpleID={simpleID}
                                           contracts={contracts}
+                                          initContract={initContract}
                                           innerWidth={this.state.width}
                                           logout={this.logout.bind(this)}
                                           innerHeight={this.state.height}

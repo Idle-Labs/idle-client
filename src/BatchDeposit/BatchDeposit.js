@@ -1274,7 +1274,7 @@ class BatchDeposit extends Component {
                                 <Text
                                   mb={1}
                                   fontSize={1}
-                                  color={'#ff9900'}
+                                  color={'alert'}
                                   textAlign={'center'}
                                 >
                                   (The pool size has to reach at least {this.functionsUtil.formatMoney(this.state.selectedTokenConfig.minPoolSize,0)} {this.state.selectedToken} to be executed)

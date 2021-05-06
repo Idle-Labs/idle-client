@@ -263,11 +263,12 @@ class AssetField extends Component {
           }
         break;
         case 'earningsCounter':
-          const [tokenAPY2,earningsStart,amountLent2] = await Promise.all([
+          let [tokenAPY2,earningsStart,amountLent2] = await Promise.all([
             this.functionsUtil.loadAssetField('apy',this.props.token,this.props.tokenConfig,this.props.account,addGovTokens),
             this.functionsUtil.loadAssetField('earnings',this.props.token,this.props.tokenConfig,this.props.account,addGovTokens),
             this.functionsUtil.loadAssetField('amountLent',this.props.token,this.props.tokenConfig,this.props.account,addGovTokens)
           ]);
+
 
           if (amountLent2 && earningsStart && tokenAPY2){
             const earningsEnd = amountLent2.gt(0) ? amountLent2.times(tokenAPY2.div(100)).plus(earningsStart) : 0;
@@ -782,6 +783,7 @@ class AssetField extends Component {
         break;
       }
     }
+
     return output;
   }
 
@@ -816,6 +818,8 @@ class AssetField extends Component {
         }
       });
     }
+
+    const tokenConfig = this.props.tokenConfig || this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token]);
       
     const maxPrecision = fieldProps && fieldProps.maxPrecision ? fieldProps.maxPrecision : 5;
     const decimals = fieldProps && fieldProps.decimals ? fieldProps.decimals : ( this.props.isMobile ? 2 : 3 );
@@ -823,7 +827,7 @@ class AssetField extends Component {
 
     switch (fieldInfo.name){
       case 'iconTooltip':
-        const icon1 = this.props.tokenConfig && this.props.tokenConfig.icon ? this.props.tokenConfig.icon : `images/tokens/${this.props.token}.svg`;
+        const icon1 = tokenConfig && tokenConfig.icon ? tokenConfig.icon : `images/tokens/${this.props.token}.svg`;
         output = (
           <Tooltip
             placement={'top'}
@@ -835,7 +839,7 @@ class AssetField extends Component {
         );
       break;
       case 'icon':
-        const icon2 = this.props.tokenConfig && this.props.tokenConfig.icon ? this.props.tokenConfig.icon : `images/tokens/${this.props.token}.svg`;
+        const icon2 = tokenConfig && tokenConfig.icon ? tokenConfig.icon : `images/tokens/${this.props.token}.svg`;
         output = (
           <Image src={icon2} {...fieldProps} />
         );
@@ -985,7 +989,7 @@ class AssetField extends Component {
         ) : loader
       break;
       case 'govTokens':
-        output = this.state.govTokens ? (
+        output = this.state.govTokens && Object.keys(this.state.govTokens).length>0 ? (
           <Flex
             width={1}
             alignItems={'center'}
@@ -1016,6 +1020,8 @@ class AssetField extends Component {
               ))
             }
           </Flex>
+        ) : this.state.govTokens ? (
+          <Text {...fieldProps}>-</Text>
         ) : loader
       break;
       case 'amountLentCurve':
@@ -1034,10 +1040,9 @@ class AssetField extends Component {
         ) : loader
       break;
       case 'score':
-        // console.log('score',this.state.score);
-        output = this.state.score !== undefined && this.state.score !== null ? (
-          <SmartNumber {...fieldProps} decimals={1} number={this.state.score} />
-        ) : loader
+        output = this.state.score !== undefined && this.state.score !== null && this.functionsUtil.BNify(this.state.score).gt(0) ? (
+          <SmartNumber {...fieldProps} decimals={2} number={this.state.score} />
+        ) : this.functionsUtil.BNify(this.state.score).lte(0) ? '-' : loader
       break;
       case 'earningsPerc':
         output = this.state.earningsPerc ?

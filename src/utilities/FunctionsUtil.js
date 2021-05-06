@@ -2255,6 +2255,29 @@ class FunctionsUtil {
     };
   }
 
+  estimateMethodGasUsage = async (contractName, methodName, methodParams = [], account = null) => {
+    account = account || this.props.account;
+    if (!account){
+      return null;
+    }
+    const contract = this.getContractByName(contractName);
+    if (contract && contract.methods[methodName]){
+      const functionCall = contract.methods[methodName](...methodParams);
+      const [
+        gasPrice,
+        gasLimit
+      ] = await Promise.all([
+        this.props.web3.eth.getGasPrice(),
+        functionCall.estimateGas({from: account})
+      ]);
+
+      if (gasPrice && gasLimit){
+        return this.fixTokenDecimals(this.fixTokenDecimals(gasPrice,9).times(gasLimit),9);
+      }
+    }
+    return null;
+  }
+
   executeMetaTransaction = async (contract, userAddress, signedParameters, callback, callback_receipt) => {
     try {
 
@@ -2905,6 +2928,9 @@ class FunctionsUtil {
           case 'COMP':
             output = await this.getCompUserDistribution(account,govTokenAvailableTokens);
           break;
+          case 'stkAAVE':
+            output = await this.getStkAaveUserDistribution(account,govTokenAvailableTokens);
+          break;
           case 'IDLE':
             const idleGovToken = this.getIdleGovToken();
             output = await idleGovToken.getUserDistribution(account,govTokenAvailableTokens);
@@ -2915,7 +2941,7 @@ class FunctionsUtil {
         if (output && !this.BNify(output).isNaN()){
           output = this.BNify(output).div(1e18);
           if (output){
-            output = this.fixDistributionSpeed(output,tokenConfig.distributionFrequency);
+            output = this.fixDistributionSpeed(output,tokenConfig.distributionFrequency,tokenConfig.distributionMode);
           }
         }
       break;
@@ -2957,6 +2983,9 @@ class FunctionsUtil {
           case 'COMP':
             output = await this.getCompDistribution(selectedTokenConfig);
           break;
+          case 'stkAAVE':
+            output = await this.getStkAaveDistribution(selectedTokenConfig);
+          break;
           case 'IDLE':
             const idleGovToken = this.getIdleGovToken();
             output = await idleGovToken.getSpeed(selectedTokenConfig.idle.address);
@@ -2990,8 +3019,10 @@ class FunctionsUtil {
 
         // console.log('apr',token,tokenApys.avgApr ? tokenApys.avgApr.toString() : null,tokenApys.avgApy ? tokenApys.avgApy.toString() : null);
 
-        if (tokenApys && tokenApys.avgApy !== null){
-          output = tokenApys.avgApy;
+        output = this.BNify(0);
+
+        if (tokenApys && !this.BNify(tokenApys.avgApy).isNaN()){
+          output = this.BNify(tokenApys.avgApy);
 
           if (addCurveApy){
             const curveAPY = await this.getCurveAPY();
@@ -2999,6 +3030,8 @@ class FunctionsUtil {
               output = output.plus(curveAPY);
             }
           }
+        } else {
+
         }
       break;
       case 'avgAPY':
@@ -3089,7 +3122,7 @@ class FunctionsUtil {
           this.loadAssetField('redeemableBalance',token,tokenConfig,account,false),
         ]);
 
-        let redeemableBalanceEnd = null;
+        let redeemableBalanceEnd = redeemableBalanceStart;
 
         if (redeemableBalanceStart && tokenAPY1 && amountLent2){
           const earningPerYear = amountLent2.times(tokenAPY1.div(100));
@@ -3300,7 +3333,7 @@ class FunctionsUtil {
     return false;
   }
   /*
-  Cache data locally for 5 minutes
+  Cache data locally for 3 minutes
   */
   setCachedData = (key,data,TTL=180) => {
     if (this.props.setCachedData && typeof this.props.setCachedData === 'function'){
@@ -3348,7 +3381,7 @@ class FunctionsUtil {
     ]);
 
     let userShare = this.BNify(0);
-    if (idleTokensBalance && idleTokensTotalSupply){
+    if (this.BNify(idleTokensBalance).gt(0) && this.BNify(idleTokensTotalSupply).gt(0)){
       userShare = this.BNify(idleTokensBalance).div(this.BNify(idleTokensTotalSupply));
     }
 
@@ -3613,6 +3646,9 @@ class FunctionsUtil {
   checkAddress = (address) => {
     return address ? address.match(/^0x[a-fA-F0-9]{40}$/) !== null : false;
   }
+  getTokenTotalSupply = async (contractName,blockNumber='latest') => {
+    return await this.genericContractCall(contractName, 'totalSupply', [], {}, blockNumber);
+  }
   getContractBalance = async (contractName,address,blockNumber='latest') => {
     address = address ? address : this.props.tokenConfig.idle.address;
     return await this.genericContractCall(contractName, 'balanceOf', [address], {}, blockNumber);
@@ -3623,7 +3659,14 @@ class FunctionsUtil {
   }
   getAprs = async (contractName) => {
     contractName = contractName ? contractName : this.props.tokenConfig.idle.token;
-    return await this.genericContractCall(contractName, 'getAPRs');
+    const aprs = await this.genericContractCall(contractName, 'getAPRs');
+    if (aprs){
+      return {
+        aprs:aprs[1],
+        addresses:aprs[0]
+      };
+    }
+    return null;
   }
   genericIdleCall = async (methodName, params = [], callParams = {}) => {
     return await this.genericContractCall(this.props.tokenConfig.idle.token, methodName, params, callParams).catch(err => {
@@ -3976,6 +4019,7 @@ class FunctionsUtil {
     // Check for cached data
     const cachedDataKey = `uniswapConversionRate_${tokenConfigFrom.address}_${tokenConfigDest.address}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    // console.log('getUniswapConversionRate - CACHED',cachedDataKey,cachedData);
     if (cachedData && !this.BNify(cachedData).isNaN()){
       return this.BNify(cachedData);
     }
@@ -3993,6 +4037,8 @@ class FunctionsUtil {
       path.push(tokenConfigDest.address);
 
       const unires = await this.genericContractCall('UniswapRouter','getAmountsIn',[one.toFixed(),path]);
+
+      // console.log('getUniswapConversionRate',cachedDataKey,this.BNify(unires[0]).div(one).toFixed());
 
       if (unires){
         const price = this.BNify(unires[0]).div(one);
@@ -4417,6 +4463,159 @@ class FunctionsUtil {
     }
     return null;
   }
+  getStkAaveDistribution = async (tokenConfig,aTokenIdleSupply=null,annualize=true) => {
+
+    const cachedDataKey = `getStkAaveDistribution_${tokenConfig.idle.token}_${aTokenIdleSupply}_${annualize}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData && !this.BNify(cachedData).isNaN()){
+      return this.BNify(cachedData);
+    }
+
+    let aaveDistribution = this.BNify(0);
+    const stkAAVETokenConfig = this.getGlobalConfig(['govTokens','stkAAVE']);
+    const aTokenConfig = tokenConfig.protocols.find( p => p.name === stkAAVETokenConfig.protocol );
+
+    if (!aTokenConfig || stkAAVETokenConfig.disabledTokens.includes(tokenConfig.idle.token)){
+      return aaveDistribution;
+    }
+
+    const aaveIncentivesController_address = await this.genericContractCall(aTokenConfig.token,'getIncentivesController');
+
+    // console.log('getStkAaveDistribution',tokenConfig.idle.token,aTokenConfig.token,aaveIncentivesController_address);
+
+    if (!aaveIncentivesController_address){
+      return aaveDistribution;
+    }
+
+    const IAaveIncentivesController_name = `IAaveIncentivesController_${aTokenConfig.token}`;
+    await this.props.initContract(IAaveIncentivesController_name,aaveIncentivesController_address,stkAAVETokenConfig.abi);
+
+    let [
+      aTokenTotalSupply,
+      tokenAllocation,
+      assetData,
+    ] = await Promise.all([
+      this.getTokenTotalSupply(aTokenConfig.token),
+      this.getTokenAllocation(tokenConfig,false,false),
+      this.genericContractCall(IAaveIncentivesController_name,'getAssetData',[aTokenConfig.address]),
+    ]);
+
+    if (assetData && tokenAllocation){
+
+      const aaveAllocationPerc = tokenAllocation.protocolsAllocationsPerc[aTokenConfig.address.toLowerCase()];
+
+      if (aaveAllocationPerc && aaveAllocationPerc.gte(0.001)){
+        if (!aTokenIdleSupply){
+          aTokenIdleSupply = await this.genericContractCall(aTokenConfig.token,'balanceOf',[tokenConfig.idle.address]);
+        }
+
+        const aaveSpeed = this.BNify(assetData[1]);
+        aTokenIdleSupply = this.BNify(aTokenIdleSupply);
+        aTokenTotalSupply = this.BNify(aTokenTotalSupply);
+        const secondsPerYear = this.getGlobalConfig(['network','secondsPerYear']);
+
+        const aavePoolShare = aTokenIdleSupply.div(aTokenTotalSupply);
+        aaveDistribution = aaveSpeed.times(aavePoolShare);
+
+        if (annualize){
+          aaveDistribution = aaveDistribution.div(1e18).times(secondsPerYear);
+        }
+
+        // console.log('getStkAaveDistribution',tokenConfig.idle.token,aTokenIdleSupply.toFixed(),aTokenTotalSupply.toFixed(),aavePoolShare.toFixed(),aaveSpeed.toFixed(),aaveDistribution.toFixed());
+
+        if (!this.BNify(aaveDistribution).isNaN()){
+          return this.setCachedDataWithLocalStorage(cachedDataKey,aaveDistribution);
+        }
+      }
+    }
+
+    return aaveDistribution;
+  }
+  getStkAaveUserDistribution = async (account=null,availableTokens=null) => {
+    if (!account){
+      account = this.props.account;
+    }
+    if (!availableTokens && this.props.selectedStrategy){
+      availableTokens = this.props.availableStrategies[this.props.selectedStrategy];
+    }
+
+    if (!account || !availableTokens){
+      return false;
+    }
+
+    const stkAAVETokenConfig = this.getGlobalConfig(['govTokens','stkAAVE']);
+
+    let output = this.BNify(0);
+    await this.asyncForEach(Object.keys(availableTokens),async (token) => {
+      const tokenConfig = availableTokens[token];
+      const aTokenInfo = tokenConfig.protocols.find( p => (p.name === stkAAVETokenConfig.protocol) );
+      if (aTokenInfo){
+        const [
+          userPoolShare,
+          aaveDistribution,
+        ] = await Promise.all([
+          this.getUserPoolShare(account,tokenConfig,false),
+          this.getStkAaveDistribution(tokenConfig,null,false),
+        ]);
+
+        if (aaveDistribution && userPoolShare){
+          output = output.plus(aaveDistribution.times(userPoolShare));
+        }
+      }
+    });
+
+    return output;
+  }
+  getStkAaveApr = async (token,tokenConfig,aaveConversionRate=null) => {
+    const stkAAVETokenConfig = this.getGlobalConfig(['govTokens','stkAAVE']);
+    if (!stkAAVETokenConfig.enabled){
+      return false;
+    }
+
+    const cachedDataKey = `getStkAaveApr_${tokenConfig.idle.token}_${aaveConversionRate}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData && !this.BNify(cachedData).isNaN()){
+      return this.BNify(cachedData);
+    }
+
+    let stkAaveAPR = this.BNify(0);
+    const aaveDistribution = await this.getStkAaveDistribution(tokenConfig);
+
+    if (aaveDistribution && this.BNify(aaveDistribution).gt(0)){
+
+      // Get COMP conversion rate
+      if (!aaveConversionRate){
+        const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
+        try {
+          const destTokenConfig = {
+            address:stkAAVETokenConfig.addressForPrice || stkAAVETokenConfig.address
+          };
+          aaveConversionRate = await this.getUniswapConversionRate(DAITokenConfig,destTokenConfig);
+        } catch (error) {
+
+        }
+        if (!aaveConversionRate || aaveConversionRate.isNaN()){
+          aaveConversionRate = this.BNify(1);
+        }
+      }
+
+      const stkAaveValue = this.BNify(aaveConversionRate).times(aaveDistribution);
+
+      const tokenAllocation = await this.getTokenAllocation(tokenConfig,false,false);
+
+      if (tokenAllocation){
+        stkAaveAPR = stkAaveValue.div(tokenAllocation.totalAllocationConverted).times(100);
+
+        // console.log('getStkAaveApr',tokenConfig.idle.token,aaveDistribution.toFixed(),this.BNify(aaveConversionRate).toFixed(),stkAaveValue.toFixed(),tokenAllocation.totalAllocationConverted.toFixed(),stkAaveAPR.toFixed());
+
+        if (!this.BNify(stkAaveAPR).isNaN()){
+          this.setCachedDataWithLocalStorage(cachedDataKey,stkAaveAPR);
+        }
+      }
+    }
+
+    return stkAaveAPR;
+  }
   getCompAPR = async (token,tokenConfig,cTokenIdleSupply=null,compConversionRate=null) => {
     const COMPTokenConfig = this.getGlobalConfig(['govTokens','COMP']);
     if (!COMPTokenConfig.enabled){
@@ -4740,13 +4939,11 @@ class FunctionsUtil {
     const govTokens = this.getGlobalConfig(['govTokens']);
     Object.keys(govTokens).forEach( govToken => {
       const govTokenConfig = govTokens[govToken];
-      if (!govTokenConfig.enabled){
+      if (!govTokenConfig.enabled || govTokenConfig.disabledTokens.includes(tokenConfig.idle.token)){
         return;
       }
       if (govTokenConfig.protocol === 'idle'){
-        if (!govTokenConfig.disabledTokens.includes(tokenConfig.idle.token)){
-          output[govToken] = govTokenConfig;
-        }
+        output[govToken] = govTokenConfig;
       } else {
         const foundProtocol = tokenConfig.protocols.find( p => (p.enabled && p.name.toLowerCase() === govTokenConfig.protocol.toLowerCase()) )
         if (foundProtocol){
@@ -4756,30 +4953,30 @@ class FunctionsUtil {
     });
     return output;
   }
-  fixDistributionSpeed = (speed,frequency) => {
+  fixDistributionSpeed = (speed,frequency='day',mode='block') => {
     const blocksPerYear = this.BNify(this.getGlobalConfig(['network','blocksPerYear']));
+    const secondsPerYear = this.BNify(this.getGlobalConfig(['network','secondsPerYear']));
+    const multipliers = {
+      'day':{
+        'block':blocksPerYear.div(365.242199),
+        'second':secondsPerYear.div(365.242199)
+      },
+      'week':{
+        'block':blocksPerYear.div(52.1429),
+        'second':secondsPerYear.div(52.1429)
+      },
+      'month':{
+        'block':blocksPerYear.div(12),
+        'second':secondsPerYear.div(12)
+      },
+      'year':{
+        'block':blocksPerYear.div(1),
+        'second':secondsPerYear.div(1)
+      }
+    };
     speed = this.BNify(speed);
     if (speed && !speed.isNaN()){
-      switch (frequency){
-        case 'day':
-          const blocksPerDay = blocksPerYear.div(365.242199);
-          speed = speed.times(blocksPerDay);
-        break;
-        case 'week':
-          const blocksPerWeek = blocksPerYear.div(52.1429);
-          speed = speed.times(blocksPerWeek);
-        break;
-        case 'month':
-          const blocksPerMonth = blocksPerYear.div(12);
-          speed = speed.times(blocksPerMonth);
-        break;
-        case 'year':
-          speed = speed.times(blocksPerYear);
-        break;
-        default:
-        break;
-      }
-      return speed;
+      return speed.times(multipliers[frequency][mode]);
     }
     return null;
   }
@@ -4817,7 +5014,7 @@ class FunctionsUtil {
       if (output){
         output = output.div(1e18);
         if (govTokenConfig.distributionFrequency){
-          output = this.fixDistributionSpeed(output,govTokenConfig.distributionFrequency);
+          output = this.fixDistributionSpeed(output,govTokenConfig.distributionFrequency,govTokenConfig.distributionMode);
         }
         govTokensUserDistribution[govToken] = output;
       }
@@ -4827,26 +5024,18 @@ class FunctionsUtil {
   }
   getGovTokensDistributionSpeed = async (tokenConfig,enabledTokens=null) => {
     const govTokensDistribution = {};
-    const govTokens = this.getGlobalConfig(['govTokens']);
-
-    await this.asyncForEach(Object.keys(govTokens),async (govToken) => {
-      if (enabledTokens && !enabledTokens.includes(govToken)){
-        return;
-      }
-
-      const govTokenConfig = govTokens[govToken];
-
-      if (!govTokenConfig.enabled){
-        return;
-      }
-
+    const tokenGovTokens = this.getTokenGovTokens(tokenConfig);
+    
+    await this.asyncForEach(Object.keys(tokenGovTokens), async (govToken) => {
       let govSpeed = null;
+      const govTokenConfig = tokenGovTokens[govToken];
+
       switch (govToken){
         case 'COMP':
-          const cTokenInfo = tokenConfig.protocols.find( p => (p.name === 'compound') );
-          if (cTokenInfo){
-            govSpeed = await this.getCompDistribution(tokenConfig,null,false);
-          }
+          govSpeed = await this.getCompDistribution(tokenConfig,null,false);
+        break;
+        case 'stkAAVE':
+          govSpeed = await this.getStkAaveDistribution(tokenConfig,null,false);
         break;
         case 'IDLE':
           const idleGovToken = this.getIdleGovToken();
@@ -4858,8 +5047,8 @@ class FunctionsUtil {
 
       if (govSpeed){
         govSpeed = govSpeed.div(1e18);
-        if (govTokenConfig.distributionFrequency){
-          govSpeed = this.fixDistributionSpeed(govSpeed,govTokenConfig.distributionFrequency);
+        if (govTokenConfig.distributionFrequency && govTokenConfig.distributionMode){
+          govSpeed = this.fixDistributionSpeed(govSpeed,govTokenConfig.distributionFrequency,govTokenConfig.distributionMode);
         }
         govTokensDistribution[govToken] = govSpeed;
       }
@@ -4887,6 +5076,28 @@ class FunctionsUtil {
       let tokenAllocation = null;
 
       switch (govToken){
+        case 'stkAAVE':
+          switch (govTokenConfig.aprTooltipMode){
+            default:
+            case 'apr':
+              [output,tokenAllocation] = await Promise.all([
+                this.getStkAaveApr(token,tokenConfig),
+                this.getTokenAllocation(tokenConfig,false,false)
+              ]);
+
+              // Cut the AAVE token proportionally on Idle funds allocation in aave
+              if (tokenAllocation){
+                const aTokenConfig = tokenConfig.protocols.find( p => (p.name === govTokenConfig.protocol) );
+                if (aTokenConfig){
+                  if (tokenAllocation.protocolsAllocationsPerc[aTokenConfig.address.toLowerCase()]){
+                    const aaveAllocationPerc = tokenAllocation.protocolsAllocationsPerc[aTokenConfig.address.toLowerCase()];
+                    output = output.times(aaveAllocationPerc);
+                  }
+                }
+              }
+            break;
+          }
+        break;
         case 'COMP':
           switch (govTokenConfig.aprTooltipMode){
             default:
@@ -4898,10 +5109,10 @@ class FunctionsUtil {
 
               // Cut the COMP token proportionally on Idle funds allocation in compound
               if (tokenAllocation){
-                const compoundInfo = tokenConfig.protocols.find( p => (p.name === 'compound') );
-                if (compoundInfo){
-                  if (tokenAllocation.protocolsAllocationsPerc[compoundInfo.address.toLowerCase()]){
-                    const compoundAllocationPerc = tokenAllocation.protocolsAllocationsPerc[compoundInfo.address.toLowerCase()];
+                const cTokenConfig = tokenConfig.protocols.find( p => (p.name === 'compound') );
+                if (cTokenConfig){
+                  if (tokenAllocation.protocolsAllocationsPerc[cTokenConfig.address.toLowerCase()]){
+                    const compoundAllocationPerc = tokenAllocation.protocolsAllocationsPerc[cTokenConfig.address.toLowerCase()];
                     output = output.times(compoundAllocationPerc);
                   }
                 }
@@ -4919,7 +5130,7 @@ class FunctionsUtil {
               output = await idleGovToken.getSpeed(tokenConfig.idle.address);
               if (output){
                 output = this.fixTokenDecimals(output,18);
-                output = this.fixDistributionSpeed(output,govTokenConfig.distributionFrequency);
+                output = this.fixDistributionSpeed(output,govTokenConfig.distributionFrequency,govTokenConfig.distributionMode);
               }
             break;
             case 'userDistribution':
@@ -4944,6 +5155,13 @@ class FunctionsUtil {
     if (!address){
       address = this.props.tokenConfig.idle.address;
     }
+
+    const cachedDataKey = `getGovTokensBalances_${address}_${convertToken}_${JSON.stringify(enabledTokens)}`;
+    const cachedData = this.getCachedData(cachedDataKey);
+    if (cachedData){
+      return cachedData;
+    }
+
     const govTokens = this.getGlobalConfig(['govTokens']);
     const govTokensBalances = {}
 
@@ -4959,6 +5177,10 @@ class FunctionsUtil {
         return;
       }
 
+      const destTokenConfig = {
+        address:govTokenConfig.addressForPrice || govTokenConfig.address
+      };
+
       // Get gov token balance
       let govTokenBalance = await this.getProtocolBalance(token,address);
 
@@ -4968,14 +5190,16 @@ class FunctionsUtil {
         if (convertToken){
           const fromTokenConfig = this.getGlobalConfig(['stats','tokens',convertToken]);
           try {
-            tokenConversionRate = await this.getUniswapConversionRate(fromTokenConfig,govTokenConfig);
+            tokenConversionRate = await this.getUniswapConversionRate(fromTokenConfig,destTokenConfig);
           } catch (error) {
-            
+            tokenConversionRate = this.BNify(0);
           }
         }
 
+        const tokenBalance = this.fixTokenDecimals(govTokenBalance,govTokens[token].decimals,tokenConversionRate);
+
         // Fix token decimals and convert
-        govTokensBalances[token] = this.fixTokenDecimals(govTokenBalance,govTokens[token].decimals,tokenConversionRate);
+        govTokensBalances[token] = tokenBalance;
 
         // Initialize Total gov Tokens
         if (!govTokensBalances.total){
@@ -4987,7 +5211,7 @@ class FunctionsUtil {
       }
     });
 
-    return govTokensBalances;
+    return this.setCachedData(cachedDataKey,govTokensBalances);
   }
   getGovTokenConfigByAddress = (address) => {
     if (!address){
@@ -5015,6 +5239,29 @@ class FunctionsUtil {
       return this.setCachedDataWithLocalStorage(cachedDataKey,govTokensEarnings);
     }
     return this.BNify(0);
+  }
+  getGovTokensIndexes = async (account,tokenConfig) => {
+    if (!account){
+      account = this.props.account;
+    }
+    const output = {};
+    const govTokensAmounts = await this.genericContractCall(tokenConfig.idle.token,'getGovTokensAmounts',[account]);
+    if (govTokensAmounts){
+      await this.asyncForEach(govTokensAmounts, async (govTokenAmount,govTokenIndex) => {
+        // Get gov Token config by index
+        const govTokenAddress = await this.genericContractCall(tokenConfig.idle.token,'govTokens',[govTokenIndex]);
+
+        if (govTokenAddress){
+          const govTokenConfig = this.getGovTokenConfigByAddress(govTokenAddress);
+
+          if (govTokenConfig){
+            output[govTokenConfig.token] = govTokenIndex;
+          }
+        }
+      });
+    }
+
+    return output;
   }
   getGovTokensUserBalances = async (account=null,availableTokens=null,convertToken=null,govTokenConfigForced=null,checkShowBalance=false) => {
     if (!account){
@@ -5462,7 +5709,7 @@ class FunctionsUtil {
       return apr.div(apiResults.length);
     }
 
-    return null;
+    return this.BNify(0);
   }
 
   /*
@@ -5544,7 +5791,6 @@ class FunctionsUtil {
             const protocolScore = this.BNify(protocolInfo.defiScore);
             if (!protocolScore.isNaN()){
               tokenScore = tokenScore.plus(protocolScore.times(protocolAllocationPerc));
-              // this.customLog(protocolAddr,tokenAllocation.protocolsAllocationsPerc[protocolAddr].toFixed(6),protocolScore.toFixed(6),tokenScore.toFixed(6));
             }
           }
         }
@@ -5553,7 +5799,7 @@ class FunctionsUtil {
 
     // Fallback
     if (!tokenScore || tokenScore.isNaN() || tokenScore.lte(0)){
-      tokenScore = this.getTokenScoreApi(tokenConfig,isRisk);
+      tokenScore = await this.getTokenScoreApi(tokenConfig,isRisk);
     }
 
     return this.setCachedDataWithLocalStorage(cachedDataKey,tokenScore);
@@ -5573,38 +5819,46 @@ class FunctionsUtil {
     const apiInfo = globalConfigs.stats.scores;
     const config = this.getGlobalConfig(['stats','config']);
     const endpoint = `${apiInfo.endpoint}${tokenConfig.address}?isRisk=${isRisk}`;
-    let tokenData = await this.makeCachedRequest(endpoint,apiInfo.TTL,true,false,config);
+    let scores = await this.makeCachedRequest(endpoint,apiInfo.TTL,true,false,config);
 
-    if (tokenData && tokenData.length){
-      let tokenScore = this.BNify(tokenData[0].idleScore);
-      if (tokenScore && tokenScore.gt(0)){
-        // Set cached data
-        return this.setCachedData(cachedDataKey,tokenScore);
-      // Take latest historical valid score
-      } else {
-        const timestamp = parseInt(Date.now()/1000);
-        const startTimestamp = parseInt(timestamp)-(60*60*24);
-        tokenData = await this.getTokenApiData(tokenConfig.address,isRisk,startTimestamp,null,true,null,'DESC');
+    if (scores && scores.length>0){
+      let tokenData = scores.find( s => s.address.toLowerCase() === tokenConfig.address.toLowerCase() );
+      if (tokenData){
+        let tokenScore = this.BNify(tokenData.idleScore);
+        if (tokenScore && tokenScore.gt(0)){
+          // Set cached data
+          return this.setCachedData(cachedDataKey,tokenScore);
+        // Take latest historical valid score
+        } else {
+          const timestamp = parseInt(Date.now()/1000);
+          const startTimestamp = parseInt(timestamp)-(60*60*24);
+          tokenData = await this.getTokenApiData(tokenConfig.address,isRisk,startTimestamp,null,true,null,'DESC');
 
-        const filteredTokenData = tokenData.filter( d => (this.BNify(d.idleScore).gt(0)) );
-        if (filteredTokenData.length){
-          tokenScore = this.BNify(filteredTokenData[0].idleScore);
-          if (!this.BNify(tokenScore).isNaN()){
-            return this.setCachedDataWithLocalStorage(cachedDataKey,tokenScore);
+          const filteredTokenData = tokenData.filter( d => (this.BNify(d.idleScore).gt(0)) );
+          if (filteredTokenData.length){
+            tokenScore = this.BNify(filteredTokenData[0].idleScore);
+            if (!this.BNify(tokenScore).isNaN()){
+              return this.setCachedDataWithLocalStorage(cachedDataKey,tokenScore);
+            }
           }
         }
       }
     }
 
-    return null;
+    return this.BNify(0);
   }
   /*
   Get idleTokens aggregated APR
   */
   getTokenAprs = async (tokenConfig,tokenAllocation=false,addGovTokens=true) => {
 
+    const tokenAprs = {
+      avgApr: this.BNify(0),
+      avgApy: this.BNify(0)
+    };
+
     if (!tokenConfig.idle){
-      return false;
+      return tokenAprs;
     }
 
     // Check for cached data
@@ -5620,7 +5874,7 @@ class FunctionsUtil {
     const Aprs = await this.getAprs(tokenConfig.idle.token);
 
     if (!Aprs){
-      return false;
+      return tokenAprs;
     }
 
     if (!tokenAllocation){
@@ -5628,15 +5882,15 @@ class FunctionsUtil {
     }
 
     if (!tokenAllocation){
-      return false;
+      return tokenAprs;
     }
 
     const addresses = Aprs.addresses.map((addr,i) => { return addr.toString().toLowerCase() });
     const aprs = Aprs.aprs;
 
+    const govTokensAprs = {};
     const protocolsAprs = {};
     const protocolsApys = {};
-    let compAPR = null;
 
     await this.asyncForEach(tokenConfig.protocols,async (protocolInfo,i) => {
       const protocolAddr = protocolInfo.address.toString().toLowerCase();
@@ -5645,8 +5899,25 @@ class FunctionsUtil {
         let protocolApr = this.BNify(+this.toEth(aprs[addrIndex]));
         let protocolApy = this.apr2apy(protocolApr.div(100)).times(100);
 
-        if (addGovTokens && protocolInfo.name === 'compound'){
-          compAPR = await this.getCompAPR(tokenConfig.token,tokenConfig);
+        if (addGovTokens){
+          let govTokenAPR = null;
+          const tokenGovTokens = this.getTokenGovTokens(tokenConfig);
+          await this.asyncForEach(Object.keys(tokenGovTokens), async (govToken) => {
+            switch (govToken){
+              case 'COMP':
+                govTokenAPR = await this.getCompAPR(tokenConfig.token,tokenConfig);
+              break;
+              case 'stkAAVE':
+                govTokenAPR = await this.getStkAaveApr(tokenConfig.token,tokenConfig);
+              break;
+              default:
+              break;
+            }
+            if (govTokenAPR){
+              govTokensAprs[govToken] = govTokenAPR;
+            }
+          });
+          
         }
 
         protocolsApys[protocolAddr] = protocolApy;
@@ -5654,19 +5925,14 @@ class FunctionsUtil {
       }
     });
 
-    const tokenAprs = {
-      avgApr: null,
-      avgApy: null
-    };
-
     if (tokenAllocation){
       tokenAprs.avgApr = this.getAvgApr(protocolsAprs,tokenAllocation.protocolsAllocations,tokenAllocation.totalAllocation);
       tokenAprs.avgApy = this.getAvgApr(protocolsApys,tokenAllocation.protocolsAllocations,tokenAllocation.totalAllocation);
 
-      if (compAPR){
-        tokenAprs.avgApr = tokenAprs.avgApr.plus(compAPR);
-        tokenAprs.avgApy = tokenAprs.avgApy.plus(compAPR);
-      }
+      Object.values(govTokensAprs).forEach( govTokenAPR => {
+        tokenAprs.avgApr = tokenAprs.avgApr.plus(govTokenAPR);
+        tokenAprs.avgApy = tokenAprs.avgApy.plus(govTokenAPR);
+      });
 
       // Add $IDLE token APR
       const idleGovTokenShowAPR = this.getGlobalConfig(['govTokens','IDLE','showAPR']);
@@ -5679,10 +5945,20 @@ class FunctionsUtil {
           tokenAprs.avgApy = tokenAprs.avgApy.plus(idleAPR);
         }
       }
+
+      if (this.BNify(tokenAprs.avgApy).isNaN()){
+        tokenAprs.avgApy = this.BNify(0);
+      }
+      if (this.BNify(tokenAprs.avgApr).isNaN()){
+        tokenAprs.avgApr = this.BNify(0);
+      }
+
+      // console.log(tokenConfig.idle.token,tokenAprs,govTokensAprs);
+
       return this.setCachedDataWithLocalStorage(cachedDataKey,tokenAprs);
     }
 
-    return null;
+    return tokenAprs;
   }
   abbreviateNumber(value,decimals=3,maxPrecision=5,minPrecision=0){
 

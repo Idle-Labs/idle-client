@@ -177,6 +177,7 @@ class StrategyPage extends Component {
         let avgAPY = this.functionsUtil.BNify(0);
         let avgScore = this.functionsUtil.BNify(0);
         let totalAmountLent = this.functionsUtil.BNify(0);
+        let totalBalanceWithScore = this.functionsUtil.BNify(0);
 
         await this.functionsUtil.asyncForEach(depositedTokens,async (token) => {
           const tokenConfig = availableTokens[token];
@@ -193,21 +194,27 @@ class StrategyPage extends Component {
 
           const amountLentToken = await this.functionsUtil.convertTokenBalance(amountLent,token,tokenConfig,isRisk);
 
-          const tokenAPY = this.functionsUtil.BNify(tokenAprs.avgApy);
-          const tokenWeight = portfolio.tokensBalance[token].tokenBalance.div(portfolio.totalBalance);
+          const tokenBalance = portfolio.tokensBalance[token].tokenBalance;
+          const tokenWeight = tokenBalance.div(portfolio.totalBalance);
+          const tokenAPY = tokenAprs.avgApy && !this.functionsUtil.BNify(tokenAprs.avgApy).isNaN() ? this.functionsUtil.BNify(tokenAprs.avgApy) : this.functionsUtil.BNify(0);
 
-          if (tokenAPY){
+          if (!tokenAPY.isNaN()){
             avgAPY = avgAPY.plus(tokenAPY.times(tokenWeight));
           }
 
-          if (tokenScore){
-            avgScore = avgScore.plus(tokenScore.times(tokenWeight));
+          if (!tokenScore.isNaN() && tokenScore.gt(0)){
+            avgScore = avgScore.plus(tokenScore.times(tokenBalance));
+            totalBalanceWithScore = totalBalanceWithScore.plus(tokenBalance);
           }
 
           if (amountLentToken){
             totalAmountLent = totalAmountLent.plus(amountLentToken);
           }
         });
+
+        avgScore = avgScore.div(totalBalanceWithScore);
+
+        // console.log('avgAPY',avgAPY.toFixed());
 
         // Add gov tokens to earnings
         const govTokensTotalBalance = await this.functionsUtil.getGovTokensUserTotalBalance(this.props.account,availableTokens,'DAI');
@@ -1489,7 +1496,7 @@ class StrategyPage extends Component {
                   >
                     <Title my={[3,4]}>Yield Farming</Title>
                     <AssetsList
-                      enabledTokens={Object.keys(govTokens)}
+                      enabledTokens={Object.keys(govTokens).filter( govToken => govTokens[govToken].enabled )}
                       cols={[
                         {
                           title:'TOKEN',

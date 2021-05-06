@@ -9,7 +9,7 @@ import PortfolioEquity from '../PortfolioEquity/PortfolioEquity';
 class FundsOverview extends Component {
 
   state = {
-    govTokensAprs:null,
+    // govTokensAprs:null,
     aggregatedValues:[],
     govTokensTotalApr:null,
     govTokensUserBalance:null,
@@ -47,20 +47,26 @@ class FundsOverview extends Component {
     const isRisk = this.props.selectedStrategy === 'risk';
 
     const [
-      govTokensAprs,
+      // govTokensAprs,
       idleTokenUserDistribution,
       govTokensUserBalance,
+      apy,
       depositTimestamp,
-      days,
+      days
     ] = await Promise.all([
-      this.functionsUtil.getGovTokensAprs(this.props.selectedToken,this.props.tokenConfig),
+      // this.functionsUtil.getGovTokensAprs(this.props.selectedToken,this.props.tokenConfig),
       this.idleGovToken.getUserDistribution(this.props.account,govTokenAvailableTokens,true),
       this.functionsUtil.getGovTokensUserBalances(this.props.account,govTokenAvailableTokens,null),
+      this.functionsUtil.loadAssetField('apy',this.props.selectedToken,this.props.tokenConfig,this.props.account,false),
       this.functionsUtil.loadAssetField('depositTimestamp',this.props.selectedToken,this.props.tokenConfig,this.props.account),
       this.functionsUtil.loadAssetField('daysFirstDeposit',this.props.selectedToken,this.props.tokenConfig,this.props.account),
     ]);
 
-    const avgAPY = await this.functionsUtil.getAvgAPYStats(this.props.tokenConfig.address,isRisk,depositTimestamp);
+    let avgAPY = await this.functionsUtil.getAvgAPYStats(this.props.tokenConfig.address,isRisk,depositTimestamp);
+
+    if (!avgAPY || this.functionsUtil.BNify(avgAPY).lte(0)){
+      avgAPY = apy;
+    }
 
     const govTokensTotalBalance = govTokensUserBalance ? Object.values(govTokensUserBalance).reduce( (totBalance,govTokenBalance) => {
       return totBalance.plus(this.functionsUtil.BNify(govTokenBalance));
@@ -77,17 +83,17 @@ class FundsOverview extends Component {
 
     // console.log(govTokensTotalBalance,govTokensUserBalance,govTokensTotalBalanceTooltip);
 
-    const govTokensTotalApr = govTokensAprs ? Object.values(govTokensAprs).reduce( (totApr,govTokenApr) => {
-      return totApr.plus(this.functionsUtil.BNify(govTokenApr));
-    },this.functionsUtil.BNify(0)) : null;
+    // const govTokensTotalApr = govTokensAprs ? Object.values(govTokensAprs).reduce( (totApr,govTokenApr) => {
+    //   return totApr.plus(this.functionsUtil.BNify(govTokenApr));
+    // },this.functionsUtil.BNify(0)) : null;
 
-    const govTokensTotalAprTooltip = govTokensAprs ? Object.keys(govTokensAprs).map( govToken => {
-      const apr = govTokensAprs[govToken];
-      if (apr.gt(0)){
-        return `${govToken}: ${apr.toFixed(2)}%`;
-      }
-      return null;
-    }).filter(v => (v !== null)) : null;
+    // const govTokensTotalAprTooltip = govTokensAprs ? Object.keys(govTokensAprs).map( govToken => {
+    //   const apr = govTokensAprs[govToken];
+    //   if (apr.gt(0)){
+    //     return `${govToken}: ${apr.toFixed(2)}%`;
+    //   }
+    //   return null;
+    // }).filter(v => (v !== null)) : null;
 
     /*
     const govTokensDistributionTooltip = govTokensUserDistribution ? Object.keys(govTokensUserDistribution).map( govToken => {
@@ -122,7 +128,7 @@ class FundsOverview extends Component {
                 color={'copyColor'}
                 fontFamily={'counter'}
                 fontSize={['1.7em','1.7em']}
-                dangerouslySetInnerHTML={{ __html: (avgAPY ? avgAPY.toFixed(2)+'%' : '-') }}
+                dangerouslySetInnerHTML={{ __html: (avgAPY ? avgAPY.toFixed(2)+'%' : '0.00%') }}
               />
             </Flex>
           )
@@ -185,12 +191,12 @@ class FundsOverview extends Component {
     ];
 
     this.setState({
-      govTokensAprs,
+      // govTokensAprs,
       aggregatedValues,
-      govTokensTotalApr,
+      // govTokensTotalApr,
       govTokensUserBalance,
       govTokensTotalBalance,
-      govTokensTotalAprTooltip,
+      // govTokensTotalAprTooltip,
       idleTokenUserDistribution,
       govTokensTotalBalanceTooltip
     });

@@ -66,6 +66,7 @@ export default {
     /*
     NEW COLORS
     */
+    alert:'#ff9900',
     arrowActive:'#4f4f4f',
     arrowInactive:'#d8d8d8',
     selectBgFocused:'#fbfbfb',
