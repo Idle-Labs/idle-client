@@ -215,6 +215,18 @@ const globalConfigs = {
         IdleController
       }
     },
+    proposals:{
+      7:{
+        description:`Upgrade of IdleTokenGovernance contract to include the following changes:<br />
+        <ul>
+          <li>support for EIP 3165 flashLoans (fee is set to 0.08% of the flash loaned amount redistributed to LP)</li>
+          <li>support for stkAAVE distribution</li>
+          <li>support for new cWBCT distribution</li>
+          <li>other minor updates for gas and redeems</li>
+        </ul>
+        See more in the gov forum post: <a class="link" href="https://gov.idle.finance/t/iip-7-idletoken-upgrade-stkaave-distribution/466">https://gov.idle.finance/t/iip-7-idletoken-upgrade-stkaave-distribution/466</a>`
+      }
+    },
     contracts:{
       delegates:'IDLE',
       governance:'GovernorAlpha',

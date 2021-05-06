@@ -570,12 +570,15 @@ class GovernanceUtil {
       p.description = description.split(/\n|↵/g);
       p.description.shift();
       p.description = p.description.join("\n");
+      p.description = p.description.replace(/\n/g,"<br />")
 
-      // Compound
-      // p.title = description.split(/# |\n/g)[1] || 'Untitled';
-      // p.description = description.split(/# |\n/g)[2] || 'No description.';
-
-      // console.log('getProposals',filter_by_state,cachedData);
+      // Overwrite proposal details
+      const proposalDetails = this.functionsUtil.getGlobalConfig(['governance','proposals',proposalId]);
+      if (proposalDetails){
+        Object.keys(proposalDetails).forEach( attr => {
+          p[attr] = proposalDetails[attr];
+        });
+      }
 
       // Save proposal
       proposals[i] = {

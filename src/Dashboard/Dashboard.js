@@ -559,6 +559,7 @@ class Dashboard extends Component {
         width={'100%'}
         position={'fixed'}
         flexDirection={'row'}
+        className={this.props.themeMode}
         backgroundColor={['dashboardBg','white']}
         /*onClick={ e => this.propagateClickEvent(e) }*/
         height={[(window.innerHeight-61)+'px','100vh']}

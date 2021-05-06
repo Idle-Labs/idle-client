@@ -379,8 +379,9 @@ class Dashboard extends Component {
         width={'100%'}
         position={'fixed'}
         flexDirection={'row'}
-        height={[(window.innerHeight-61)+'px','100vh']}
+        className={this.props.themeMode}
         backgroundColor={['dashboardBg','white']}
+        height={[(window.innerHeight-61)+'px','100vh']}
       >
         <Flex
           bottom={0}

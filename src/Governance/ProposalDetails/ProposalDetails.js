@@ -604,7 +604,7 @@ class ProposalDetails extends Component {
               wordBreak:'break-word'
             }}
             dangerouslySetInnerHTML={{
-              __html:proposal.description.replace(/\n/g,"<br />")
+              __html:proposal.description
             }}
           >
           </Text>
