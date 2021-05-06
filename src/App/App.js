@@ -31,6 +31,7 @@ class App extends Component {
   state = {
     cachedData:{},
     buyToken: null,
+    currentEnv:null,
     selectedTab: '1',
     route: "default", // or 'onboarding'
     themeMode:'light',
@@ -193,7 +194,8 @@ class App extends Component {
     Object.keys(availableTokens[requiredNetwork]).forEach((strategy) => {
       availableStrategies[strategy] = Object.keys(availableTokens[requiredNetwork][strategy]).reduce( (enabledTokens,token) => {
         const tokenConfig = availableTokens[requiredNetwork][strategy][token];
-        if (tokenConfig.enabled){
+        const envEnabled = !tokenConfig.enabledEnvs || !tokenConfig.enabledEnvs.length || tokenConfig.enabledEnvs.includes(this.state.currentEnv);
+        if (tokenConfig.enabled && envEnabled){
           enabledTokens[token] = tokenConfig;
         }
         return enabledTokens;
@@ -335,7 +337,17 @@ class App extends Component {
     window.addEventListener('resize', this.handleWindowSizeChange);
 
     this.loadCustomAddress();
-    this.loadAvailableTokens();
+    this.loadCurrentEnvironment();
+  }
+
+  loadCurrentEnvironment(){
+    const isLive = this.functionsUtil.checkUrlOrigin();
+    const currentEnv = isLive ? 'live' : 'beta';
+    this.setState({
+      currentEnv
+    },() => {
+      this.loadAvailableTokens();
+    })
   }
 
   loadCustomAddress(){

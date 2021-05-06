@@ -1068,6 +1068,7 @@ const availableTokens = {
         decimals:18,
         enabled:true,
         abi:ERC20.abi,
+        enabledEnvs:['beta'],
         govTokensDisabled:false,
         color:'hsl(169,42%,37%)',
         icon:'images/tokens/RAI.png',
