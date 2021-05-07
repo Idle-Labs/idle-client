@@ -676,7 +676,7 @@ class DeployB2BVesting extends Component {
                           color={'dark-gray'}
                           textAlign={'center'}
                         >
-                          B2B Vesting contracts has been deployed
+                          B2B Vesting contracts have been deployed
                         </Text>
                       </Flex>
                     </DashboardCard>
