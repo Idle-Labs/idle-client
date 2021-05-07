@@ -170,6 +170,14 @@ class FunctionsUtil {
     return shortHash;
   }
   getENSName = async (address) => {
+
+    const networkId = this.getGlobalConfig(['network','requiredNetwork']);
+    const ensConfig = this.getGlobalConfig(['network','providers','ens']);
+
+    if (!ensConfig.enabled || !ensConfig.supportedNetworks.includes(networkId)){
+      return null;
+    }
+
     if (!this.checkAddress(address) || !this.props.web3){
       return null;
     }
@@ -182,6 +190,7 @@ class FunctionsUtil {
 
     const TTL = 3600;
     const provider = this.props.web3.currentProvider;
+
     const networkId = this.props.network.current.id;
     if (networkId === 1){
       const ens = new ENS({ provider, ensAddress: getEnsAddress(networkId.toString()) });

@@ -45,6 +45,7 @@ import { RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
 import IdleProxyMinter from '../contracts/IdleProxyMinter.json';
 import IdleRebalancerV3 from '../contracts/IdleRebalancerV3.json';
 import LiquidityGaugeV2 from '../abis/curve/LiquidityGaugeV2.json';
+import DeployB2BVesting from '../DeployB2BVesting/DeployB2BVesting';
 import SushiV2Router02 from '../abis/sushiswap/SushiV2Router02.json';
 import IdleBatchConverter from '../contracts/IdleBatchConverter.json';
 import UniswapV2Router02 from '../abis/uniswap/UniswapV2Router02.json';
@@ -52,6 +53,7 @@ import IdleDepositForwarder from '../contracts/IdleDepositForwarder.json';
 import SushiLiquidityPool from '../abis/sushiswap/SushiLiquidityPool.json';
 import BalancerExchangeProxy from '../abis/balancer/BalancerExchangeProxy.json';
 import IdleConverterPersonalSignV4 from '../contracts/IdleConverterPersonalSignV4.json';
+import MinimalInitializableProxyFactory from '../contracts/MinimalInitializableProxyFactory.json';
 
 const env = process.env;
 
@@ -422,6 +424,10 @@ const globalConfigs = {
     }
   },
   contracts:{
+    proxyFactory:{
+      abi:MinimalInitializableProxyFactory,
+      address:'0x91baced76e3e327ba7850ef82a7a8251f6e43fb8'
+    },
     LockedIDLE:{
       abi:LockedIDLE,
       address:'0xF241a0151841AE2E6ea750D50C5794b5EDC31D99'
@@ -1037,6 +1043,10 @@ const globalConfigs = {
         1: 'https://mainnet.infura.io/v3/',
         1337: 'https://mainnet.infura.io/v3/'
       },
+      ens:{
+        enabled:true,
+        supportedNetworks:[1]
+      },
       etherscan:{
         enabled:true, // False for empty txs list (try new wallet)
         endpoints:{
@@ -1126,6 +1136,22 @@ const globalConfigs = {
     }
   ],
   tools:{
+    b2bVesting:{
+      enabled:true,
+      visible:false,
+      icon:'CloudUpload',
+      label:'B2B Vesting',
+      route:'b2b-vesting-contract',
+      subComponent:DeployB2BVesting,
+      desc:'Deploy multiple B2B Vesting Contracts',
+      props:{
+        contracts:{
+          vesterImplementation:{
+            address:'0xc5a5C42992dECbae36851359345FE25997F5C42d'
+          }
+        }
+      }
+    },
     ethWrapper:{
       enabled:true,
       label:'ETH Wrapper',
