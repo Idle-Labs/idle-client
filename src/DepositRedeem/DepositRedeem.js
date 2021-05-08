@@ -170,14 +170,17 @@ class DepositRedeem extends Component {
 
   getSkippedGovTokensFlags = async () => {
     const govTokensIndexes = await this.functionsUtil.getGovTokensIndexes(this.props.account,this.props.tokenConfig);
-    return Object.keys(govTokensIndexes).map( token => {
+    const govTokensFlags = Object.keys(govTokensIndexes).map( token => {
       return this.state.redeemSkipGovTokens.includes(token);
     });
+    // console.log('getSkippedGovTokensFlags',govTokensIndexes,govTokensFlags);
+    return govTokensFlags;
   }
 
   calculateSkippedGovTokens = async () => {
     let skippedGovTokensBalance = this.functionsUtil.BNify(0);
     const DAITokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens','DAI']);
+
     await this.functionsUtil.asyncForEach(this.state.redeemSkipGovTokens, async (govToken) => {
       const govTokenConfig = this.functionsUtil.getGlobalConfig(['govTokens',govToken]);
       const govTokenPrice = await this.functionsUtil.getUniswapConversionRate(DAITokenConfig,govTokenConfig);
@@ -194,8 +197,8 @@ class DepositRedeem extends Component {
       skipGovRedeemGasUsage
     ] = await Promise.all([
       this.functionsUtil.getUniswapConversionRate(DAITokenConfig,WETHTokenConfig),
-      this.functionsUtil.estimateMethodGasUsage(this.props.tokenConfig.idle.token, 'redeemIdleToken', [this.functionsUtil.integerValue(this.props.redeemableBalance)], this.props.account),
-      this.functionsUtil.estimateMethodGasUsage(this.props.tokenConfig.idle.token, 'redeemIdleTokenSkipGov', [this.functionsUtil.integerValue(this.props.redeemableBalance),_skipGovTokenRedeem], this.props.account)
+      this.functionsUtil.estimateMethodGasUsage(this.props.tokenConfig.idle.token, 'redeemIdleToken', [this.functionsUtil.normalizeTokenAmount(this.props.redeemableBalance,this.props.tokenConfig.decimals)], this.props.account),
+      this.functionsUtil.estimateMethodGasUsage(this.props.tokenConfig.idle.token, 'redeemIdleTokenSkipGov', [this.functionsUtil.normalizeTokenAmount(this.props.redeemableBalance,this.props.tokenConfig.decimals),_skipGovTokenRedeem], this.props.account)
     ]);
 
     const skipGovTokensGasSave = redeemGasUsage && skipGovRedeemGasUsage ? redeemGasUsage.minus(skipGovRedeemGasUsage) : this.functionsUtil.BNify(0);
@@ -1139,7 +1142,6 @@ class DepositRedeem extends Component {
             redeemMethod = 'redeemIdleTokenSkipGov';
             const _skipGovTokenRedeem = await this.getSkippedGovTokensFlags();
             redeemParams.push(_skipGovTokenRedeem);
-            console.log(redeemParams);
           }
 
           contractSendResult = await this.functionsUtil.contractMethodSendWrapper(this.props.tokenConfig.idle.token, redeemMethod, redeemParams, callbackRedeem, callbackReceiptRedeem, txData);
@@ -1343,8 +1345,8 @@ class DepositRedeem extends Component {
     const redeemSkipGovEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','redeemSkipGov','enabled']) && govTokensEnabled && showRedeemFlow;
     const redeemSkipGov = redeemSkipGovEnabled && this.state.redeemSkipGov && Object.keys(this.props.govTokensUserBalances).length>0 && this.props.govTokensBalance.gt(0);
 
-    const showAdvancedRedeemOptions = redeemGovTokenEnabled && redeemSkipGovEnabled;
 
+    const showAdvancedRedeemOptions = redeemGovTokenEnabled || redeemSkipGovEnabled;
     // console.log('showAdvancedRedeemOptions',showAdvancedRedeemOptions,redeemGovTokenEnabled,redeemSkipGovEnabled,govTokensEnabled,showRedeemFlow);
 
     const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','erc20ForwarderEnabled']);
@@ -2024,7 +2026,7 @@ class DepositRedeem extends Component {
                           )
                         }
                         {
-                          redeemSkipGov && this.functionsUtil.BNify(this.state.skippedGovTokensBalance).gt(0) && (
+                          redeemSkipGov && this.functionsUtil.BNify(this.state.skippedGovTokensBalance).gt(0) ? (
                             <DashboardCard
                               cardProps={{
                                 p:2,
@@ -2077,6 +2079,26 @@ class DepositRedeem extends Component {
                                   onChange={ e => this.toggleAgreeSkipGovTokens(e.target.checked) }
                                 />
                               </Flex>
+                            </DashboardCard>
+                          ) : redeemSkipGov && this.state.redeemSkipGovTokens.length>0 && (
+                            <DashboardCard
+                              cardProps={{
+                                p:3,
+                                my:2
+                              }}
+                            >
+                              <FlexLoader
+                                flexProps={{
+                                  flexDirection:'row'
+                                }}
+                                loaderProps={{
+                                  size:'25px',
+                                }}
+                                textProps={{
+                                  ml:2
+                                }}
+                                text={'Loading estimated gas usage...'}
+                              />
                             </DashboardCard>
                           )
                         }

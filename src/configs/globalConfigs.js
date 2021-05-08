@@ -399,7 +399,7 @@ const globalConfigs = {
       decimals:18,
       showAUM:true, // Include stkAAVE balance in AUM
       showAPR:true, // Include stkAAVE Apr
-      enabled:false,
+      enabled:true,
       showPrice:true,
       token:'stkAAVE',
       showBalance:true, // Include stkAAVE balance in Portfolio Donut
@@ -993,7 +993,8 @@ const globalConfigs = {
         enabled:true
       },
       redeemSkipGov:{
-        enabled:false
+        enabled:false,
+        disabledTokens:['idleSUSDYield','idleTUSDYield']
       },
       rebalance:{
         enabled:true,

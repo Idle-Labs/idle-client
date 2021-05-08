@@ -69,8 +69,8 @@ class AssetPage extends Component {
           tokenFees,
           idleTokenBalance,
           tokenApproved,
-          govTokensBalance,
-          govTokensUserBalances
+          govTokensUserBalances,
+          govTokensBalance
         ] = await Promise.all([
           this.functionsUtil.getTokenFees(tokenConfig),
           this.functionsUtil.getIdleTokenPrice(tokenConfig),
@@ -79,8 +79,8 @@ class AssetPage extends Component {
           this.functionsUtil.getUserTokenFees(tokenConfig,this.props.account),
           this.functionsUtil.getTokenBalance(tokenConfig.idle.token,this.props.account),
           this.functionsUtil.checkTokenApproved(token,tokenConfig.idle.address,this.props.account),
-          this.functionsUtil.getGovTokensUserTotalBalance(this.props.account,govTokenAvailableTokens,'DAI'),
-          this.functionsUtil.getGovTokensUserBalances(this.props.account,govTokenAvailableTokens,null,null)
+          this.functionsUtil.getGovTokensUserBalances(this.props.account,govTokenAvailableTokens,null,null),
+          this.functionsUtil.getGovTokensUserTotalBalance(this.props.account,govTokenAvailableTokens,'DAI',false)
         ]);
 
         newState.tokenFees[token] = tokenFees;
@@ -97,6 +97,10 @@ class AssetPage extends Component {
       });
 
       newState.availableGovTokens = this.functionsUtil.getTokenGovTokens(this.props.tokenConfig);
+
+      // console.log('govTokensBalance',newState.govTokensBalance);
+      // console.log('availableGovTokens',newState.availableGovTokens);
+      // console.log('govTokensUserBalances',newState.govTokensUserBalances);
 
       newState.componentMounted = true;
 

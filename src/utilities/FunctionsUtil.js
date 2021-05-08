@@ -2214,10 +2214,10 @@ class FunctionsUtil {
 
     for (let protocolIndex=0;protocolIndex<allocations.length;protocolIndex++){
       const lastAllocationsPromise = new Promise( async (resolve, reject) => {
-        try{
+        try {
           const lastAllocations = await this.genericContractCall(tokenConfig.idle.token, 'lastAllocations',[protocolIndex]);
           resolve(lastAllocations);
-        } catch (error){
+        } catch (error) {
           console.log(error);
           resolve(null);
         }
@@ -2296,19 +2296,28 @@ class FunctionsUtil {
     const contract = this.getContractByName(contractName);
     if (contract && contract.methods[methodName]){
       const functionCall = contract.methods[methodName](...methodParams);
-      const [
-        gasPrice,
-        gasLimit
-      ] = await Promise.all([
-        this.props.web3.eth.getGasPrice(),
-        functionCall.estimateGas({from: account})
-      ]);
+
+      let gasPrice = null;
+      let gasLimit = null;
+      
+      try {
+        [
+          gasPrice,
+          gasLimit
+        ] = await Promise.all([
+          this.props.web3.eth.getGasPrice(),
+          functionCall.estimateGas({from: account})
+        ]);
+      } catch (error) {
+
+      }
 
       if (gasPrice && gasLimit){
         return this.fixTokenDecimals(this.fixTokenDecimals(gasPrice,9).times(gasLimit),9);
       }
     }
-    return null;
+
+    return this.BNify(0);
   }
 
   executeMetaTransaction = async (contract, userAddress, signedParameters, callback, callback_receipt) => {
@@ -4049,6 +4058,11 @@ class FunctionsUtil {
   }
   getUniswapConversionRate = async (tokenConfigFrom,tokenConfigDest) => {
 
+    if (tokenConfigDest.addressForPrice){
+      tokenConfigDest = Object.assign({},tokenConfigDest);
+      tokenConfigDest.address = tokenConfigDest.addressForPrice;
+    }
+
     // Check for cached data
     const cachedDataKey = `uniswapConversionRate_${tokenConfigFrom.address}_${tokenConfigDest.address}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
@@ -4071,10 +4085,9 @@ class FunctionsUtil {
 
       const unires = await this.genericContractCall('UniswapRouter','getAmountsIn',[one.toFixed(),path]);
 
-      // console.log('getUniswapConversionRate',cachedDataKey,this.BNify(unires[0]).div(one).toFixed());
-
       if (unires){
         const price = this.BNify(unires[0]).div(one);
+        // console.log('getUniswapConversionRate',path,price.toFixed());
         return this.setCachedDataWithLocalStorage(cachedDataKey,price);
       }
       return null;
@@ -5312,11 +5325,15 @@ class FunctionsUtil {
       // Get govTokens amounts
       const govTokensAmounts = await this.genericContractCall(idleTokenConfig.token,'getGovTokensAmounts',[account]);
 
+      // console.log('getGovTokensUserBalances_1',idleTokenConfig.token,govTokensAmounts);
+
       if (govTokensAmounts){
         await this.asyncForEach(govTokensAmounts, async (govTokenAmount,govTokenIndex) => {
           govTokenAmount = this.BNify(govTokenAmount);
           // Get gov Token config by index
           const govTokenAddress = await this.genericContractCall(idleTokenConfig.token,'govTokens',[govTokenIndex]);
+
+          // console.log('getGovTokensUserBalances_2',idleTokenConfig.token,govTokenIndex,govTokenAddress);
 
           if (govTokenAddress){
             const govTokenConfig = govTokenConfigForced ? govTokenConfigForced : this.getGovTokenConfigByAddress(govTokenAddress);
@@ -5337,6 +5354,8 @@ class FunctionsUtil {
               }
 
               govTokenAmount = this.fixTokenDecimals(govTokenAmount,govTokenConfig.decimals,tokenConversionRate);
+
+              // console.log('getGovTokensUserBalances',idleTokenConfig.token,govTokenIndex,govTokenConfig.token,govTokenAddress,parseFloat(tokenConversionRate),parseFloat(govTokenAmount));
 
               // Initialize govToken balance
               if (!output[govTokenConfig.token]){
