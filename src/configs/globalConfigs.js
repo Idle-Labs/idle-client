@@ -993,8 +993,8 @@ const globalConfigs = {
         enabled:true
       },
       redeemSkipGov:{
-        enabled:false,
-        disabledTokens:['idleSUSDYield','idleTUSDYield']
+        enabled:true,
+        disabledTokens:['idleSUSDYield','idleTUSDYield','idleDAISafe','idleUSDCSafe','idleUSDTSafe']
       },
       rebalance:{
         enabled:true,

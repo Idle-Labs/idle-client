@@ -197,8 +197,8 @@ class DepositRedeem extends Component {
       skipGovRedeemGasUsage
     ] = await Promise.all([
       this.functionsUtil.getUniswapConversionRate(DAITokenConfig,WETHTokenConfig),
-      this.functionsUtil.estimateMethodGasUsage(this.props.tokenConfig.idle.token, 'redeemIdleToken', [this.functionsUtil.normalizeTokenAmount(this.props.redeemableBalance,this.props.tokenConfig.decimals)], this.props.account),
-      this.functionsUtil.estimateMethodGasUsage(this.props.tokenConfig.idle.token, 'redeemIdleTokenSkipGov', [this.functionsUtil.normalizeTokenAmount(this.props.redeemableBalance,this.props.tokenConfig.decimals),_skipGovTokenRedeem], this.props.account)
+      this.functionsUtil.estimateMethodGasUsage(this.props.tokenConfig.idle.token, 'redeemIdleToken', [this.functionsUtil.normalizeTokenAmount(this.props.idleTokenBalance,this.props.tokenConfig.decimals)], this.props.account),
+      this.functionsUtil.estimateMethodGasUsage(this.props.tokenConfig.idle.token, 'redeemIdleTokenSkipGov', [this.functionsUtil.normalizeTokenAmount(this.props.idleTokenBalance,this.props.tokenConfig.decimals),_skipGovTokenRedeem], this.props.account)
     ]);
 
     const skipGovTokensGasSave = redeemGasUsage && skipGovRedeemGasUsage ? redeemGasUsage.minus(skipGovRedeemGasUsage) : this.functionsUtil.BNify(0);
@@ -1342,8 +1342,10 @@ class DepositRedeem extends Component {
     const redeemGovTokenEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','redeemGovTokens','enabled']) && govTokensEnabled && showRedeemFlow && this.props.govTokensBalance.gt(0);
     const redeemGovTokens = redeemGovTokenEnabled && this.state.redeemGovTokens;
 
-    const redeemSkipGovEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','redeemSkipGov','enabled']) && govTokensEnabled && showRedeemFlow;
+    const redeemSkipGovConfig = this.functionsUtil.getGlobalConfig(['contract','methods','redeemSkipGov']);
+    const redeemSkipGovEnabled = redeemSkipGovConfig && !redeemSkipGovConfig.disabledTokens.includes(this.props.tokenConfig.idle.token) && govTokensEnabled && showRedeemFlow;
     const redeemSkipGov = redeemSkipGovEnabled && this.state.redeemSkipGov && Object.keys(this.props.govTokensUserBalances).length>0 && this.props.govTokensBalance.gt(0);
+    const redeemSkipGovNoTokens = redeemSkipGovEnabled && this.state.redeemSkipGov && (!Object.keys(this.props.govTokensUserBalances).length || this.props.govTokensBalance.lte(0));
 
 
     const showAdvancedRedeemOptions = redeemGovTokenEnabled || redeemSkipGovEnabled;
@@ -1938,7 +1940,7 @@ class DepositRedeem extends Component {
                           )
                         }
                         {
-                          redeemSkipGov && (
+                          redeemSkipGov ? (
                             <DashboardCard
                               cardProps={{
                                 mt:2,
@@ -1957,7 +1959,7 @@ class DepositRedeem extends Component {
                                   color={'cellText'}
                                   textAlign={'center'}
                                 >
-                                  Select the gov tokens you want to skip:
+                                  Select the gov tokens you want to give away:
                                 </Text>
                                 <Flex
                                   mt={2}
@@ -2021,6 +2023,33 @@ class DepositRedeem extends Component {
                                     })
                                   }
                                 </Flex>
+                              </Flex>
+                            </DashboardCard>
+                          ) : redeemSkipGovNoTokens && (
+                            <DashboardCard
+                              cardProps={{
+                                p:2,
+                                my:2
+                              }}
+                            >
+                              <Flex
+                                alignItems={'center'}
+                                flexDirection={'column'}
+                                justifyContent={'center'}
+                              >
+                                <Icon
+                                  size={'1.8em'}
+                                  name={'MoneyOff'}
+                                  color={'cellText'}
+                                />
+                                <Text
+                                  mt={1}
+                                  fontSize={1}
+                                  color={'cellText'}
+                                  textAlign={'center'}
+                                >
+                                  You don't have any gov tokens to give away.
+                                </Text>
                               </Flex>
                             </DashboardCard>
                           )
