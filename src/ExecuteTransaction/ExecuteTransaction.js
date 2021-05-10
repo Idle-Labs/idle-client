@@ -63,7 +63,7 @@ class ExecuteTransaction extends Component {
       const txSucceeded = tx.status === 'success';
       if (txSucceeded){
         if (typeof this.props.callback === 'function'){
-          this.props.callback();
+          this.props.callback(tx);
         }
       }
 

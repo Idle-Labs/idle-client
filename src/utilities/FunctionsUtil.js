@@ -2312,6 +2312,10 @@ class FunctionsUtil {
     };
   }
 
+  getContractEvents = async (contractName, eventName, params = {}) => {
+    return await this.getContractPastEvents(contractName, eventName, params);
+  }
+
   estimateMethodGasUsage = async (contractName, methodName, methodParams = [], account = null) => {
     account = account || this.props.account;
     if (!account){
