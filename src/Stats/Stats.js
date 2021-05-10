@@ -383,7 +383,7 @@ class Stats extends Component {
           });
 
           let compoundRate = typeof rateField === 'object' && rateField.length ? rateField.reduce((acc,field) => {
-            if (compoundData[field]){
+            if (compoundData && compoundData[field]){
               return this.functionsUtil.BNify(acc).plus(this.functionsUtil.BNify(compoundData[field]));
             }
             return this.functionsUtil.BNify(acc);
@@ -1046,9 +1046,41 @@ class Stats extends Component {
               </Flex>
             </Flex>
           </Box>
-
           {
-            this.state.idleVersion && this.functionsUtil.strToMoment(versionInfo.startTimestamp).isAfter(Date.now()) ? (
+            !tokenConfig.enabled ? (
+              <Flex
+                width={1}
+                alignItems={'center'}
+                flexDirection={'row'}
+                justifyContent={'center'}
+              >
+                <DashboardCard
+                  cardProps={{
+                    p:3,
+                    width:[1,0.5],
+                  }}
+                >
+                  <Flex
+                    alignItems={'center'}
+                    flexDirection={'column'}
+                  >
+                    <Icon
+                      size={'2.3em'}
+                      color={'cellText'}
+                      name={'DoNotDisturb'}
+                    />
+                    <Text
+                      mt={2}
+                      fontSize={2}
+                      color={'cellText'}
+                      textAlign={'center'}
+                    >
+                      Stats for {this.props.selectedToken} are not available!
+                    </Text>
+                  </Flex>
+                </DashboardCard>
+              </Flex>
+            ) : this.state.idleVersion && this.functionsUtil.strToMoment(versionInfo.startTimestamp).isAfter(Date.now()) ? (
               <Flex
                 width={1}
                 alignItems={'center'}

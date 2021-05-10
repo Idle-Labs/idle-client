@@ -789,7 +789,7 @@ const globalConfigs = {
       },
       RAI:{
         decimals:18,
-        enabled:true,
+        enabled:false,
         color:{
           hex:'#378879',
           rgb:[55, 136, 121],
@@ -828,7 +828,7 @@ const globalConfigs = {
       aavev2WithStkAAVE:{
         enabled:true,
         label:'Aave V2 + stkAAVE',
-        startTimestamp:'2021-05-08',
+        startTimestamp:'2021-05-08 14:30:00',
         rateField:['rate','aaveAdditionalAPR'],
         color:{
           hex:'#B6509E',
