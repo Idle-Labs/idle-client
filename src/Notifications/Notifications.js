@@ -82,6 +82,9 @@ class Notifications extends Component {
 
   async loadNotifications(){
 
+    const requiredNetwork = this.functionsUtil.getGlobalConfig(['network','requiredNetwork']);
+    const isMainnet = requiredNetwork === 1;
+
     // Get stored lastOpenTimestamp for notifications
     const notificationsParams = this.functionsUtil.getStoredItem('notificationsParams',true,{});
     const lastOpenTimestamp = notificationsParams.lastOpenTimestamp || null;
@@ -95,8 +98,8 @@ class Notifications extends Component {
     ] = await Promise.all([
       this.functionsUtil.getSubstackLatestFeed(),
       this.functionsUtil.getSnapshotProposals(true),
-      this.governanceUtil.getProposals(null,'Active'),
-      this.functionsUtil.getBatchedDeposits(this.props.account,'executed')
+      isMainnet ? this.governanceUtil.getProposals(null,'Active') : [],
+      isMainnet ? this.functionsUtil.getBatchedDeposits(this.props.account,'executed') : []
     ]);
 
     let notifications = this.functionsUtil.getGlobalConfig(['notifications']).filter( n => (n.enabled && n.start<=currTime && n.end>currTime) );

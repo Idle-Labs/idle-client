@@ -13,6 +13,7 @@ import Timelock from '../contracts/Timelock.json';
 import CurveZap from '../abis/curve/CurveZap.json';
 import CovToken from '../abis/cover/CovToken.json';
 import LpStaking from '../contracts/LpStaking.json';
+import B2BVester from '../contracts/B2BVester.json';
 // import CurveSwap from '../abis/curve/CurveSwap.json';
 import CurvePool from '../abis/curve/CurvePool.json';
 import NexusMutual from '../NexusMutual/NexusMutual';
@@ -424,7 +425,7 @@ const globalConfigs = {
     }
   },
   contracts:{
-    proxyFactory:{
+    ProxyFactory:{
       abi:MinimalInitializableProxyFactory,
       address:'0x91baced76e3e327ba7850ef82a7a8251f6e43fb8'
     },
@@ -1030,7 +1031,7 @@ const globalConfigs = {
       1337:'Hardhat'
     },
     isForked:false, // If TRUE the tx confirmation callback is fired on the receipt
-    requiredNetwork:1, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
+    requiredNetwork:1337, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
     blocksPerYear:2371428,
     secondsPerYear:31536000,
     firstBlockNumber:8119247,
@@ -1147,7 +1148,8 @@ const globalConfigs = {
       props:{
         contracts:{
           vesterImplementation:{
-            address:'0xc5a5C42992dECbae36851359345FE25997F5C42d'
+            abi:B2BVester,
+            address:'0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB'
           }
         }
       }
