@@ -113,9 +113,9 @@ class ExecuteTransaction extends Component {
               network={this.props.network}
               {...this.props.progressBarProps}
               hash={this.state.processing.txHash}
-              waitText={`${this.props.action} estimated in`}
               cancelTransaction={this.cancelTransaction.bind(this)}
               endMessage={`Finalizing ${this.props.action} request...`}
+              waitText={`${this.functionsUtil.capitalize(this.props.action)} estimated in`}
             />
           ) : (
             <ExecuteComponent

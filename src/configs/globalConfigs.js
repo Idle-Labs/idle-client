@@ -1031,7 +1031,7 @@ const globalConfigs = {
       1337:'Hardhat'
     },
     isForked:false, // If TRUE the tx confirmation callback is fired on the receipt
-    requiredNetwork:1337, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
+    requiredNetwork:1, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
     blocksPerYear:2371428,
     secondsPerYear:31536000,
     firstBlockNumber:8119247,
@@ -1137,47 +1137,6 @@ const globalConfigs = {
     }
   ],
   tools:{
-    b2bVesting:{
-      enabled:true,
-      visible:false,
-      icon:'CloudUpload',
-      label:'B2B Vesting',
-      route:'b2b-vesting-contract',
-      subComponent:DeployB2BVesting,
-      desc:'Deploy multiple B2B Vesting Contracts',
-      props:{
-        contracts:{
-          vesterImplementation:{
-            abi:B2BVester,
-            address:'0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB'
-          }
-        }
-      }
-    },
-    ethWrapper:{
-      enabled:true,
-      label:'ETH Wrapper',
-      route:'eth-wrapper',
-      subComponent:TokenWrapper,
-      image:'images/tokens/WETH.svg',
-      desc:'Wrap your ETH and get WETH. Unwrap your WETH and get back ETH.',
-      props:{
-        startContract:{
-          name:'ETH',
-          token:'ETH',
-          decimals:18,
-          wrapMethod:'deposit',
-        },
-        destContract:{
-          abi:WETH,
-          name:'WETH',
-          decimals:18,
-          token:'WETH',
-          unwrapMethod:'withdraw',
-          address:'0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
-        },
-      }
-    },
     stake:{
       enabled:true,
       icon:'Layers',
@@ -1209,6 +1168,47 @@ const globalConfigs = {
             poolLink:'https://analytics.sushi.com/pairs/0xa7f11e026a0af768d285360a855f2bded3047530',
           }
         }
+      }
+    },
+    b2bVesting:{
+      enabled:true,
+      visible:false,
+      icon:'CloudUpload',
+      label:'B2B Vesting',
+      route:'b2b-vesting-contract',
+      subComponent:DeployB2BVesting,
+      desc:'Deploy/Deposit/Claim for B2B Vesting Contracts',
+      props:{
+        contracts:{
+          vesterImplementation:{
+            abi:B2BVester,
+            address:'0xE6E340D132b5f46d1e472DebcD681B2aBc16e57E'
+          }
+        }
+      }
+    },
+    ethWrapper:{
+      enabled:true,
+      label:'ETH Wrapper',
+      route:'eth-wrapper',
+      subComponent:TokenWrapper,
+      image:'images/tokens/WETH.svg',
+      desc:'Wrap your ETH and get WETH. Unwrap your WETH and get back ETH.',
+      props:{
+        startContract:{
+          name:'ETH',
+          token:'ETH',
+          decimals:18,
+          wrapMethod:'deposit',
+        },
+        destContract:{
+          abi:WETH,
+          name:'WETH',
+          decimals:18,
+          token:'WETH',
+          unwrapMethod:'withdraw',
+          address:'0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+        },
       }
     },
     coverProtocol:{

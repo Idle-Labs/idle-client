@@ -29,6 +29,7 @@ class DeployB2BVesting extends Component {
     contractInfo:null,
     actionValid:false,
     actionInputs:null,
+    claimedTokens:null,
     deployedContracts:[],
     contractDeployed:false,
     inputs:[
@@ -62,7 +63,9 @@ class DeployB2BVesting extends Component {
     this.setState({
       action,
       editAction:null,
-      viewAction:null
+      viewAction:null,
+      claimedTokens:null,
+      contractDeployed:null
     });
   }
 
@@ -97,13 +100,10 @@ class DeployB2BVesting extends Component {
     const vesterImplementation = this.props.toolProps.contracts.vesterImplementation;
     const fromBlock = this.functionsUtil.getGlobalConfig(['network','firstBlockNumber']);
     const proxyCreated = await this.functionsUtil.getContractPastEvents('ProxyFactory', 'ProxyCreated', {fromBlock, toBlock: 'latest'});
-
     const deployedContractsAddresses = proxyCreated.filter( p => p.returnValues.implementation.toLowerCase() === vesterImplementation.address.toLowerCase() ).map( p => p.returnValues.proxy );
-
-    const deployedContracts = [];
-
     // console.log('proxyCreated',proxyCreated,'deployedContractsAddresses',deployedContractsAddresses);
 
+    const deployedContracts = [];
     await this.functionsUtil.asyncForEach(deployedContractsAddresses, async (contractAddress) => {
       const contractName = `b2bVesting_${contractAddress}`;
       const vesterContract = await this.props.initContract(contractName,contractAddress,vesterImplementation.abi);
@@ -112,12 +112,14 @@ class DeployB2BVesting extends Component {
         owner,
         recipient,
         vestingPeriod,
-        depositAmounts
+        availableBalance,
+        depositAmounts,
       ] = await Promise.all([
           this.functionsUtil.genericContractCall(contractName,'initialized'),
           this.functionsUtil.genericContractCall(contractName,'owner'),
           this.functionsUtil.genericContractCall(contractName,'recipient'),
           this.functionsUtil.genericContractCall(contractName,'vestingPeriod'),
+          this.functionsUtil.getTokenBalance(tokenConfig.token,contractAddress),
           this.functionsUtil.genericContractCall(contractName,'getDepositAmounts')
       ]);
 
@@ -139,7 +141,8 @@ class DeployB2BVesting extends Component {
         contractName,
         vestingPeriod,
         totalDeposited,
-        contractAddress
+        contractAddress,
+        availableBalance
       });
     });
     const tokenBalance = await this.functionsUtil.getTokenBalance('IDLE',this.props.account);
@@ -172,7 +175,18 @@ class DeployB2BVesting extends Component {
   }
 
   claimCallback(tx){
-    console.log('claimCallback',tx);
+    // console.log('claimCallback',tx);
+    if (tx.status === 'success'){
+      this.loadContracts();
+
+      const claimedTokensLog = tx.txReceipt && tx.txReceipt.logs ? tx.txReceipt.logs.find( log => log.address.toLowerCase() === this.state.tokenConfig.address.toLowerCase() ) : null;
+      if (claimedTokensLog){
+        const claimedTokens = this.functionsUtil.fixTokenDecimals(parseInt(claimedTokensLog.data,16),this.state.tokenConfig.decimals);
+        this.setState({
+          claimedTokens
+        });
+      }
+    }
   }
 
   depositCallback(tx,amount,params){
@@ -370,17 +384,21 @@ class DeployB2BVesting extends Component {
   }
 
   setViewAction(viewAction){
-    const vesterImplementation = this.props.toolProps.contracts.vesterImplementation;
-    const deployedContract = this.state.deployedContracts[viewAction];
-    const contractInfo = {
-      abi:vesterImplementation.abi,
-      name:deployedContract.contractName,
-      address:deployedContract.contractAddress
-    };
-    this.setState({
-      viewAction,
-      contractInfo
-    });
+
+    if (viewAction !== this.state.viewAction){
+      const vesterImplementation = this.props.toolProps.contracts.vesterImplementation;
+      const deployedContract = this.state.deployedContracts[viewAction];
+      const contractInfo = {
+        abi:vesterImplementation.abi,
+        name:deployedContract.contractName,
+        address:deployedContract.contractAddress
+      };
+      this.setState({
+        viewAction,
+        contractInfo,
+        claimedTokens:null
+      });
+    }
   }
 
   setNewAction(newAction){
@@ -1000,6 +1018,25 @@ class DeployB2BVesting extends Component {
                                 value={contractInfo.totalDeposited.toFixed(6)}
                               />
                             </Field>
+                            <Field
+                              style={{
+                                width:'100%',
+                                display:'flex',
+                                alignItems:'stretch',
+                                flexDirection:'column'
+                              }}
+                              label={`Available Balance`}
+                            >
+                              <Input
+                                required
+                                readOnly
+                                width={1}
+                                type={'address'}
+                                borderColor={'cardBorder'}
+                                backgroundColor={'cardBg'}
+                                value={contractInfo.availableBalance.toFixed(6)}
+                              />
+                            </Field>
                             <Flex
                               mb={2}
                               width={1}
@@ -1180,6 +1217,25 @@ class DeployB2BVesting extends Component {
                                 value={contractInfo.totalDeposited.toFixed(6)}
                               />
                             </Field>
+                            <Field
+                              style={{
+                                width:'100%',
+                                display:'flex',
+                                alignItems:'stretch',
+                                flexDirection:'column'
+                              }}
+                              label={`Available Balance`}
+                            >
+                              <Input
+                                required
+                                readOnly
+                                width={1}
+                                type={'address'}
+                                borderColor={'cardBorder'}
+                                backgroundColor={'cardBg'}
+                                value={contractInfo.availableBalance.toFixed(6)}
+                              />
+                            </Field>
                             <Flex
                               mb={2}
                               width={1}
@@ -1194,19 +1250,45 @@ class DeployB2BVesting extends Component {
                                 flexDirection={'column'}
                                 justifyContent={'center'}
                               >
-                                <ExecuteTransaction
-                                  params={[]}
-                                  {...this.props}
-                                  Component={Button}
-                                  componentProps={{
-                                    size:'medium',
-                                    value:'Claim',
-                                    mainColor:'redeem',
-                                  }}
-                                  methodName={'claim'}
-                                  callback={this.claimCallback.bind(this)}
-                                  contractName={contractInfo.contractName}
-                                />
+                                {
+                                  this.state.claimedTokens && (
+                                    <Text
+                                      mb={2}
+                                      fontSize={2}
+                                      fontWeight={3}
+                                      color={this.props.theme.colors.transactions.status.completed}
+                                    >
+                                      You have successfully claimed {this.state.claimedTokens.toFixed(4)} {this.state.tokenConfig.token}
+                                    </Text>
+                                  )
+                                }
+                                {
+                                  contractInfo.availableBalance && contractInfo.availableBalance.gt(0) ? (
+                                    <ExecuteTransaction
+                                      params={[]}
+                                      {...this.props}
+                                      Component={Button}
+                                      componentProps={{
+                                        size:'medium',
+                                        value:'Claim',
+                                        mainColor:'redeem',
+                                      }}
+                                      methodName={'claim'}
+                                      action={this.state.action}
+                                      callback={this.claimCallback.bind(this)}
+                                      contractName={contractInfo.contractName}
+                                    />
+                                  ) : (
+                                    <Text
+                                      mb={2}
+                                      fontSize={2}
+                                      fontWeight={3}
+                                      color={'cellText'}
+                                    >
+                                      Nothing to Claim yet.
+                                    </Text>
+                                  )
+                                }
                               </Flex>
                             </Flex>
                           </Flex>
