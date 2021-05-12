@@ -1841,7 +1841,8 @@ class FunctionsUtil {
   checkUrlBeta = () => {
     return window.location.origin.toLowerCase().includes(globalConfigs.betaURL.toLowerCase());
   }
-  sendGoogleAnalyticsPageview = async (page) => {
+  sendGoogleAnalyticsPageview = async (page=null) => {
+    page = page || window.location.hash.substr(1);
     const googlePageviewInfo = this.getGlobalConfig(['analytics','google','pageView']);
     const isOrigin = this.checkUrlOrigin();
     if (googlePageviewInfo.enabled && isOrigin && window.ga){

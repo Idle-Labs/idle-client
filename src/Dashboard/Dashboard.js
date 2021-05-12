@@ -202,6 +202,11 @@ class Dashboard extends Component {
       const param1_is_strategy = param1 && Object.keys(this.props.availableStrategies).includes(param1.toLowerCase());
 
       if (section_is_strategy || param1_is_strategy){
+
+        if (!section_is_strategy){
+          currentRoute += '/'+currentSection;
+        }
+
         selectedStrategy = section_is_strategy ? currentSection : param1;
         currentRoute += '/'+selectedStrategy;
 
