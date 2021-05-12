@@ -178,6 +178,9 @@ const globalConfigs = {
         enabled:true, // Enable Google Analytics events
         debugEnabled:false, // Enable sending for test environments
         addPostfixForTestnet:true // Append testnet to eventCategory
+      },
+      pageView:{
+        enabled:true
       }
     }
   },

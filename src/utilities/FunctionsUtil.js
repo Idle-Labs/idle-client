@@ -1841,6 +1841,14 @@ class FunctionsUtil {
   checkUrlBeta = () => {
     return window.location.origin.toLowerCase().includes(globalConfigs.betaURL.toLowerCase());
   }
+  sendGoogleAnalyticsPageview = async (page) => {
+    const googlePageviewInfo = this.getGlobalConfig(['analytics','google','pageView']);
+    const isOrigin = this.checkUrlOrigin();
+    if (googlePageviewInfo.enabled && isOrigin && window.ga){
+      window.ga('set', 'page', page);
+      window.ga('send', 'pageview');
+    }
+  }
   sendGoogleAnalyticsEvent = async (eventData,callback=null) => {
 
     const googleEventsInfo = globalConfigs.analytics.google.events;

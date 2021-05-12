@@ -221,6 +221,9 @@ class Dashboard extends Component {
       return this.goToSection('/',false);
     }
 
+    // Send GA pageview
+    this.functionsUtil.sendGoogleAnalyticsPageview(currentRoute);
+
     await this.setState({
       menu,
       params,

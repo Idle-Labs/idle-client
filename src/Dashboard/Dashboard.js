@@ -286,6 +286,9 @@ class Dashboard extends Component {
 
     // console.log('loadParams',selectedStrategy,selectedToken);
     await this.props.setStrategyToken(selectedStrategy,selectedToken);
+    
+    // Send GA pageview
+    this.functionsUtil.sendGoogleAnalyticsPageview(currentRoute);
 
     await this.setState({
       menu,
