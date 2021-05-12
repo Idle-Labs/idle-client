@@ -114,8 +114,8 @@ export default function Web3ConnectionButtons(props) {
                   caption={name}
                   isMobile={true}
                   width={[1,0.48]}
-                  imageSrc={`images/${walletIcon}`}
                   imageProps={{width:'auto',height:'42px'}}
+                  imageSrc={`images/connectors/${walletIcon}`}
                   handleClick={ async () => await setConnector(connectorName,name)}
                   subcaption={ connectorInfo && connectorInfo.subcaption ? connectorInfo.subcaption : `Connect using ${name}` }
                 />
@@ -145,8 +145,8 @@ export default function Web3ConnectionButtons(props) {
               isMobile={true}
               caption={'Browser Wallet'}
               key={`wallet_${connectorName}`}
-              imageSrc={`images/browser-wallet.png`}
               imageProps={{width:'auto',height:'42px'}}
+              imageSrc={`images/connectors/browser-wallet.png`}
               handleClick={ async () => await setConnector(connectorName) }
               subcaption={ connectorInfo && connectorInfo.subcaption ? connectorInfo.subcaption : `Connect using a browser wallet`}
               buttonStyle={ props.isMobile ? {justifyContent:'flex-start',flex:'0 100%'} : {justifyContent:'flex-start',flex:'0 48%'} }
@@ -167,7 +167,7 @@ export default function Web3ConnectionButtons(props) {
               isMobile={true}
               caption={caption}
               key={`wallet_${connectorName}`}
-              imageSrc={`images/${walletIcon}`}
+              imageSrc={`images/connectors/${walletIcon}`}
               imageProps={{width:'auto',height:'42px'}}
               handleClick={ async () => await setConnector(connectorName) }
               subcaption={ connectorInfo && connectorInfo.subcaption ? connectorInfo.subcaption : `Connect using ${connectorName}`}

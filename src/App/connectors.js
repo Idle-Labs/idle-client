@@ -9,7 +9,9 @@ import globalConfigs from '../configs/globalConfigs';
 import TorusConnector from './connectors/TorusConnector';
 import AuthereumConnector from './connectors/AuthereumConnector';
 import WalletConnectProvider from "@walletconnect/web3-provider";
+import GnosisSafeConnector from './connectors/GnosisSafeConnector';
 import WalletLinkConnector from './connectors/WalletLinkConnector';
+import { SafeAppConnector } from '@gnosis.pm/safe-apps-web3-react';
 import WalletConnectConnector from './connectors/WalletConnectConnector';
 
 const {
@@ -106,10 +108,13 @@ const Torus = new TorusConnector({
   }
 });
 
+const gnosis = new GnosisSafeConnector(SafeAppConnector);
+
 export default {
   Injected,
   Infura,
   WalletConnect,
+  gnosis,
   walletLink,
   Fortmatic,
   Portis,

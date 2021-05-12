@@ -123,8 +123,8 @@ class MenuAccount extends Component {
                       width={'2em'}
                       height={'2em'}
                       display={'inline-flex'}
-                      src={`images/${walletIcon}`}
                       alt={walletProvider.toLowerCase()}
+                      src={`images/connectors/${walletIcon}`}
                     />
                   ) : (
                     <Icon

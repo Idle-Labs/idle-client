@@ -118,6 +118,12 @@ const globalConfigs = {
       name:'Coinbase Wallet',
       subcaption:'Connect with QR code'
     },
+    gnosis:{
+      enabled:true,
+      // icon:'coinbase.png',
+      name:'Gnosis Safe App',
+      subcaption:'Connect with Gnosis Safe App'
+    },
     fortmatic:{
       enabled:true,
       subcaption:'Login with phone-number'

@@ -18,39 +18,8 @@ export default class WalletConnectConnector extends Connector {
       });
     }
 
-    // console.log('onActivation',this.provider);
-
     if (this.provider){
-
       await this.provider.enable();
-
-      /*
-      // Subscribe to accounts change
-      this.provider.on("accountsChanged", (accounts) => {
-        console.log('accountsChanged',accounts);
-      });
-
-      // Subscribe to chainId change
-      this.provider.on("chainChanged", (chainId) => {
-        console.log('chainChanged',chainId);
-      });
-
-      // Subscribe to networkId change
-      this.provider.on("networkChanged", (networkId) => {
-        console.log('networkChanged',networkId);
-      });
-
-      // Subscribe to session connection/open
-      this.provider.on("open", () => {
-        console.log('open');
-      });
-
-      // Subscribe to session disconnection/close
-      this.provider.on("close", (code, reason) => {
-        console.log('close',code, reason);
-      });
-      */
-
       return this.provider;
     }
   }
