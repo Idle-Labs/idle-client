@@ -1602,6 +1602,11 @@ class RimbleTransaction extends React.Component {
       e.preventDefault();
     }
 
+
+    if (!this.state.modals.data.connectionError){
+      return false;
+    }
+
     let modals = { ...this.state.modals };
     modals.data.connectionError = false;
     this.setState({ modals });
@@ -1618,12 +1623,12 @@ class RimbleTransaction extends React.Component {
     if (error==='[object Object]'){
       error = 'Unable to access to the wallet.'
     }
-
-    // this.functionsUtil.customLog('openConnectionErrorModal',typeof error,typeof error === 'object' ? JSON.stringify(error) : error);
-
-    modals.data.connectionError = error;
-
-    this.setState({ modals });
+    
+    if (this.state.modals.data.connectionError !== error){
+      // console.log('openConnectionErrorModal',typeof error,typeof error === 'object' ? JSON.stringify(error) : error);
+      modals.data.connectionError = error;
+      this.setState({ modals });
+    }
   }
 
   closeUserRejectedConnectionModal = e => {
