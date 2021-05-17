@@ -151,7 +151,6 @@ const globalConfigs = {
     },
     custom:{
       enabled:true,
-      icon:'tokens/ETH.svg',
       subcaption:'Custom address'
     }
   },
@@ -1025,6 +1024,7 @@ const globalConfigs = {
     secondsPerYear:31536000,
     firstBlockNumber:8119247,
     requiredConfirmations: 1,
+    enabledNetworks:[1,42,1337],
     accountBalanceMinimum: 0, // in ETH for gas fees
     providers:{
       infura:{
@@ -1038,6 +1038,11 @@ const globalConfigs = {
           1: 'https://api.etherscan.io/api',
           1337: 'https://api.etherscan.io/api',
           42: 'https://api-kovan.etherscan.io/api'
+        },
+        baseUrl:{
+          1: 'https://etherscan.io',
+          1337: 'https://etherscan.io',
+          42: 'https://kovan.etherscan.io',
         }
       },
       snapshot:{

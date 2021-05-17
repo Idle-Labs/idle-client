@@ -39,7 +39,7 @@ Object.keys(globalConfigs.network.providers.infura).forEach((networkId,index) =>
 });
 
 const Injected = new InjectedConnector({
-  supportedNetworks: [defaultNetwork]
+  supportedNetworks: globalConfigs.network.enabledNetworks
 });
 
 const Infura = new NetworkOnlyConnector({

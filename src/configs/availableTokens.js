@@ -101,6 +101,9 @@ const availableTokens = {
         ]
       },
     },
+    risk:{
+      
+    }
   },
   1337:{
     best:{

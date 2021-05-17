@@ -63,7 +63,9 @@ class StrategyPage extends Component {
     this.loadUtils();
 
     const accountChanged = prevProps.account !== this.props.account;
-    if (accountChanged){
+    const availableTokensChanged = JSON.stringify(prevProps.availableTokens) !== JSON.stringify(this.props.availableTokens);
+    if (accountChanged || availableTokensChanged){
+      // console.log('StrategyPage - availableTokensChanged',availableTokensChanged);
       this.setState({
         portfolioLoaded:false
       },() => {
@@ -212,7 +214,9 @@ class StrategyPage extends Component {
           }
         });
 
-        avgScore = avgScore.div(totalBalanceWithScore);
+        if (!totalBalanceWithScore.isNaN() && totalBalanceWithScore.gt(0)){
+          avgScore = avgScore.div(totalBalanceWithScore);
+        }
 
         // console.log('avgAPY',avgAPY.toFixed());
 

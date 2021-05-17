@@ -115,9 +115,11 @@ class AssetPage extends Component {
 
   async componentDidUpdate(prevProps, prevState) {
     this.loadUtils();
-    const transactionsChanged = prevProps.transactions && this.props.transactions && Object.values(prevProps.transactions).filter(tx => (tx.status==='success')).length !== Object.values(this.props.transactions).filter(tx => (tx.status==='success')).length;
     const accountChanged = prevProps.account !== this.props.account;
-    if (accountChanged || transactionsChanged){
+    const availableTokensChanged = JSON.stringify(prevProps.availableTokens) !== JSON.stringify(this.props.availableTokens);
+    const transactionsChanged = prevProps.transactions && this.props.transactions && Object.values(prevProps.transactions).filter(tx => (tx.status==='success')).length !== Object.values(this.props.transactions).filter(tx => (tx.status==='success')).length;
+    if (accountChanged || transactionsChanged || availableTokensChanged){
+      // console.log('AssetPage - availableTokensChanged',availableTokensChanged);
       this.loadTokensInfo();
     }
   }

@@ -124,6 +124,17 @@ class RimbleTransaction extends React.Component {
 
   componentWillMount(){
     this.loadUtils();
+    this.checkNetwork();
+
+    // detect Network account change
+    if (window.ethereum){
+      window.ethereum.on('networkChanged', async (networkId) => {
+        await this.props.clearCachedData(() => {
+          this.checkNetwork();
+        });
+      });
+    }
+
     window.initWeb3 = this.initWeb3;
   }
 
@@ -222,8 +233,22 @@ class RimbleTransaction extends React.Component {
       }
     }
 
-    if (tokenChanged/* || availableTokensChanged*/ || availableStrategiesChanged){
+    if (tokenChanged || availableStrategiesChanged){
       await this.initializeContracts();
+    }
+
+    const networkChanged = JSON.stringify(prevState.network) !== JSON.stringify(this.state.network);
+    // console.log('networkChanged',JSON.stringify(prevState.network),JSON.stringify(this.state.network),networkChanged);
+    if (networkChanged){
+      this.setState({
+        contracts:[],
+        contractsInitialized:false
+      }, () => {
+        this.initWeb3();
+        if (typeof this.props.setNetwork === 'function'){
+          this.props.setNetwork(this.state.network);
+        }
+      });
     }
   }
 
@@ -236,14 +261,16 @@ class RimbleTransaction extends React.Component {
       window.ethereum = metamaskProvider;
     }
 
-    // Suppress console warning
-    if (window.ethereum && window.ethereum.autoRefreshOnNetworkChange) {
-      window.ethereum.autoRefreshOnNetworkChange = false;
+    const context = this.props.context;
+    const networkId = this.state.network.current.id || this.state.network.required.id;
+
+    if (!networkId){
+      return false;
     }
 
-    const context = this.props.context;
+    // console.log('initWeb3',this.state.network.current.id,this.state.network.required.id,networkId);
 
-    const web3Infura = new Web3(new Web3.providers.HttpProvider(globalConfigs.network.providers.infura[globalConfigs.network.requiredNetwork]+INFURA_KEY));
+    const web3Infura = new Web3(new Web3.providers.HttpProvider(globalConfigs.network.providers.infura[networkId]+INFURA_KEY));
 
     let web3 = context.library;
 
@@ -354,7 +381,7 @@ class RimbleTransaction extends React.Component {
         web3Provider = window.web3;
       } else {
         this.functionsUtil.customLog("Non-Ethereum browser detected. Using Infura fallback.");
-        web3Host = globalConfigs.network.providers.infura[globalConfigs.network.requiredNetwork]+INFURA_KEY;
+        web3Host = globalConfigs.network.providers.infura[networkId]+INFURA_KEY;
       }
     } else {
       web3Provider = web3.currentProvider;
@@ -367,14 +394,14 @@ class RimbleTransaction extends React.Component {
         await web3Provider.enable();
       } catch (connectionError){
         web3Provider = null;
-        web3Host = globalConfigs.network.providers.infura[globalConfigs.network.requiredNetwork]+INFURA_KEY;
+        web3Host = globalConfigs.network.providers.infura[networkId]+INFURA_KEY;
         forceCallback = true;
       }
     }
 
     const terminalInfo = globalConfigs.network.providers.terminal;
 
-    if (terminalInfo && terminalInfo.enabled && terminalInfo.supportedNetworks.indexOf(globalConfigs.network.requiredNetwork) !== -1 ){
+    if (terminalInfo && terminalInfo.enabled && terminalInfo.supportedNetworks.indexOf(networkId) !== -1 ){
       const TerminalHttpProviderParams = terminalInfo.params;
       const terminalSourceType = localStorage && localStorage.getItem('walletProvider') ? localStorage.getItem('walletProvider') : SourceType.Infura;
       TerminalHttpProviderParams.source = terminalSourceType;
@@ -468,7 +495,7 @@ class RimbleTransaction extends React.Component {
     const biconomyInfo = globalConfigs.network.providers.biconomy;
     const walletProvider = this.functionsUtil.getWalletProvider();
 
-    if (connectorName !== 'Infura' && biconomyInfo && biconomyInfo.enabled && biconomyInfo.supportedNetworks.includes(globalConfigs.network.requiredNetwork) && (!walletProvider || !biconomyInfo.disabledWallets.includes(walletProvider.toLowerCase()))){
+    if (connectorName !== 'Infura' && biconomyInfo && biconomyInfo.enabled && biconomyInfo.supportedNetworks.includes(networkId) && (!walletProvider || !biconomyInfo.disabledWallets.includes(walletProvider.toLowerCase()))){
 
       if (this.state.biconomy === null){
         const biconomyWeb3Provider = web3Provider ? web3Provider : web3Host;
@@ -568,8 +595,9 @@ class RimbleTransaction extends React.Component {
 
     const simpleIDInfo = globalConfigs.network.providers.simpleID;
     let simpleID = null;
+    const networkId = this.state.network.current.id || this.state.network.required.id;
 
-    if (simpleIDInfo && simpleIDInfo.enabled && simpleIDInfo.supportedNetworks.indexOf(globalConfigs.network.requiredNetwork) !== -1 ){
+    if (simpleIDInfo && simpleIDInfo.enabled && simpleIDInfo.supportedNetworks.indexOf(networkId) !== -1 ){
       const simpleIDParams = simpleIDInfo.params;
       simpleIDParams.network = simpleIDInfo.getNetwork(this.state.network.current.id,globalConfigs.network.availableNetworks);
       simpleID = new SimpleID(simpleIDParams);
@@ -1151,7 +1179,7 @@ class RimbleTransaction extends React.Component {
       id: networkId
     };
 
-    let network = { ...this.state.network };
+    let network = Object.assign({},this.state.network);
     network.required = requiredNetwork;
 
     this.setState({ network });
@@ -1162,8 +1190,9 @@ class RimbleTransaction extends React.Component {
       return this.state.web3.eth.net.getId((error, networkId) => {
         let current = { ...this.state.network.current };
         current.id = networkId;
-        let network = { ...this.state.network };
+        let network = Object.assign({},this.state.network);
         network.current = current;
+        network.isCorrectNetwork = globalConfigs.network.enabledNetworks.includes(networkId);
         this.setState({ network });
       });
     } catch (error) {
@@ -1176,7 +1205,7 @@ class RimbleTransaction extends React.Component {
       return this.state.web3.eth.net.getNetworkType((error, networkName) => {
         let current = { ...this.state.network.current };
         current.name = networkName;
-        let network = { ...this.state.network };
+        let network = Object.assign({},this.state.network);
         network.current = current;
         this.setState({ network });
       });
@@ -1193,12 +1222,9 @@ class RimbleTransaction extends React.Component {
       this.getNetworkName()
     ]);
 
-    let network = { ...this.state.network };
-    network.isCorrectNetwork = this.state.network.current.id === this.state.network.required.id;
-
-    // console.log('checkNetwork',this.state.network.current.id,this.state.network.required.id);
-
-    // To do, check window.web3.currentProvider.networkVersion to see if Metamask is in the requiredNetwork
+    let network = Object.assign({},this.state.network);
+    network.isCorrectNetwork = !this.state.network.current.id || globalConfigs.network.enabledNetworks.includes(this.state.network.current.id);
+    // console.log('checkNetwork',this.state.network.current.id,network.isCorrectNetwork);
 
     this.setState({ network });
   }

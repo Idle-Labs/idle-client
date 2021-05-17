@@ -430,7 +430,34 @@ class Dashboard extends Component {
                 justifyContent={'center'}
               >
                 {
-                  !this.state.showResetButton ? (
+                  !this.props.network.isCorrectNetwork ? (
+                    <DashboardCard
+                      cardProps={{
+                        p:3,
+                        mt:3,
+                        width:[1,0.35]
+                      }}
+                    >
+                      <Flex
+                        alignItems={'center'}
+                        flexDirection={'column'}
+                      >
+                        <Icon
+                          size={'2.3em'}
+                          name={'Warning'}
+                          color={'cellText'}
+                        />
+                        <Text
+                          mt={2}
+                          fontSize={2}
+                          color={'cellText'}
+                          textAlign={'center'}
+                        >
+                          The <strong>{this.functionsUtil.capitalize(this.props.network.current.name)} Network</strong> is not supported, please switch to the correct network.
+                        </Text>
+                      </Flex>
+                    </DashboardCard>
+                  ) : !this.state.showResetButton ? (
                     <FlexLoader
                       textProps={{
                         textSize:4,

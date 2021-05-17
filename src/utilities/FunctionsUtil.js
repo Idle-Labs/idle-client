@@ -72,7 +72,7 @@ class FunctionsUtil {
             .replace(/<\/p>/g,"");
   }
   capitalize = (str) => {
-    return str.substr(0,1).toUpperCase()+str.substr(1);
+    return str ? str.substr(0,1).toUpperCase()+str.substr(1) : '';
   }
   strToMoment = (date,format=null) => {
     return moment(date,format);
@@ -182,13 +182,15 @@ class FunctionsUtil {
 
     const TTL = 3600;
     const provider = this.props.web3.currentProvider;
-    const networkId = this.getGlobalConfig(['network','requiredNetwork']);
-    const ens = new ENS({ provider, ensAddress: getEnsAddress(networkId.toString()) });
-    const ensName = await ens.getName(address);
-    if (ensName && ensName.name){
-      const addressCheck = await ens.name(ensName.name).getAddress();
-      if (addressCheck && address.toLowerCase() === addressCheck.toLowerCase()){
-        return this.setCachedDataWithLocalStorage(cachedDataKey,ensName.name,TTL);
+    const networkId = this.props.network.current.id;
+    if (networkId === 1){
+      const ens = new ENS({ provider, ensAddress: getEnsAddress(networkId.toString()) });
+      const ensName = await ens.getName(address);
+      if (ensName && ensName.name){
+        const addressCheck = await ens.name(ensName.name).getAddress();
+        if (addressCheck && address.toLowerCase() === addressCheck.toLowerCase()){
+          return this.setCachedDataWithLocalStorage(cachedDataKey,ensName.name,TTL);
+        }
       }
     }
 
@@ -713,7 +715,7 @@ class FunctionsUtil {
     const firstIdleBlockNumber = this.getGlobalConfig(['network','firstBlockNumber']);
     firstBlockNumber = Math.max(firstIdleBlockNumber,firstBlockNumber);
 
-    const requiredNetwork = this.getGlobalConfig(['network','requiredNetwork']);
+    const requiredNetwork = this.props.network.current.id || this.getGlobalConfig(['network','requiredNetwork']);
     const etherscanInfo = this.getGlobalConfig(['network','providers','etherscan']);
 
     let results = [];
@@ -1404,7 +1406,7 @@ class FunctionsUtil {
 
     etherscanTxs = Object.assign({},etherscanTxs);
 
-    const networkId = this.getGlobalConfig(['network','requiredNetwork']);
+    const networkId = this.props.network.current.id || this.getGlobalConfig(['network','requiredNetwork']);
 
     // this.customLog('Processing stored txs',enabledTokens);
 
@@ -1923,11 +1925,16 @@ class FunctionsUtil {
     }
     return false;
   }
-  getEtherscanTransactionUrl = (tx_address) => {
-    return tx_address ? 'https://etherscan.io/tx/'+tx_address : null;
+  getEtherscanTransactionUrl = (txHash) => {
+    const requiredNetwork = this.props.network.current.id || this.getGlobalConfig(['network','requiredNetwork']);
+    const baseurl = this.getGlobalConfig(['network','providers','etherscan','baseUrl',requiredNetwork]);
+    return txHash ? `${baseurl}/tx/${txHash}` : null;
   }
   getEtherscanAddressUrl = (address) => {
-    return address ? 'https://etherscan.io/address/'+address : null;
+    const requiredNetwork = this.props.network.current.id || this.getGlobalConfig(['network','requiredNetwork']);
+    const baseurl = this.getGlobalConfig(['network','providers','etherscan','baseUrl',requiredNetwork]);
+    console.log('getEtherscanAddressUrl',requiredNetwork,baseurl);
+    return address ? `${baseurl}/address/${address}` : null;
   }
   formatMoney = (amount, decimalCount = 2, decimal = ".", thousands = ",") => {
     try {
@@ -2418,7 +2425,7 @@ class FunctionsUtil {
 
     try{
       const userAddress = this.props.account;
-      const chainId = this.getGlobalConfig(['network','requiredNetwork']);
+      const chainId = this.props.network.current.id || this.getGlobalConfig(['network','requiredNetwork']);
       const messageToSign = this.constructMetaTransactionMessage(nonce, chainId, functionSignature, contract._address);
 
       const signature = await this.props.web3.eth.personal.sign(
@@ -2517,7 +2524,7 @@ class FunctionsUtil {
     try{
       const userAddress = this.props.account;
       const nonce = await contract.methods.getNonce(userAddress).call();
-      const chainId = this.getGlobalConfig(['network','requiredNetwork']);
+      const chainId = this.props.network.current.id || this.getGlobalConfig(['network','requiredNetwork']);
       const messageToSign = this.constructMetaTransactionMessage(nonce, chainId, functionSignature, contract._address);
 
       const signature = await this.props.web3.eth.personal.sign(
@@ -3068,7 +3075,7 @@ class FunctionsUtil {
       case 'apy':
         const tokenApys = await this.getTokenAprs(tokenConfig,false,addGovTokens);
 
-        // console.log('apr',token,tokenApys.avgApr ? tokenApys.avgApr.toString() : null,tokenApys.avgApy ? tokenApys.avgApy.toString() : null);
+        // console.log('apr',token,tokenApys.avgApr ? tokenApys.avgApr.toFixed() : null,tokenApys.avgApy ? tokenApys.avgApy.toFixed() : null);
 
         output = this.BNify(0);
 
@@ -3484,7 +3491,7 @@ class FunctionsUtil {
     return activeCoverages;
   }
   getBatchedDepositExecutions = async (contractAddress) => {
-    const requiredNetwork = this.getGlobalConfig(['network','requiredNetwork']);
+    const requiredNetwork = this.props.network.current.id || this.getGlobalConfig(['network','requiredNetwork']);
     const etherscanInfo = this.getGlobalConfig(['network','providers','etherscan']);
     if (etherscanInfo.enabled && etherscanInfo.endpoints[requiredNetwork]){
       const etherscanApiUrl = etherscanInfo.endpoints[requiredNetwork];
@@ -5919,6 +5926,7 @@ class FunctionsUtil {
     };
 
     if (!tokenConfig.idle){
+      // console.log('getTokenAprs - !tokenConfig.idle',tokenConfig);
       return tokenAprs;
     }
 
@@ -5926,6 +5934,7 @@ class FunctionsUtil {
     const cachedDataKey = `tokenAprs_${tokenConfig.idle.address}_${addGovTokens}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData && (cachedData.avgApr && !this.BNify(cachedData.avgApr).isNaN()) && (cachedData.avgApy && !this.BNify(cachedData.avgApy).isNaN()) ){
+      // console.log('getTokenAprs - CACHED',tokenConfig.idle.token,cachedData);
       return {
         avgApr:this.BNify(cachedData.avgApr),
         avgApy:this.BNify(cachedData.avgApy)
@@ -5935,6 +5944,7 @@ class FunctionsUtil {
     const Aprs = await this.getAprs(tokenConfig.idle.token);
 
     if (!Aprs){
+      // console.log('getTokenAprs - !Aprs',Aprs);
       return tokenAprs;
     }
 
@@ -5943,6 +5953,7 @@ class FunctionsUtil {
     }
 
     if (!tokenAllocation){
+      // console.log('getTokenAprs - !tokenAllocation',tokenAllocation);
       return tokenAprs;
     }
 
@@ -5995,6 +6006,8 @@ class FunctionsUtil {
         tokenAprs.avgApy = tokenAprs.avgApy.plus(govTokenAPR);
       });
 
+      // console.log('getTokenAprs',tokenConfig.idle.token,tokenConfig,aprs,protocolsAprs,tokenAllocation,tokenAprs,govTokensAprs);
+
       // Add $IDLE token APR
       const idleGovTokenShowAPR = this.getGlobalConfig(['govTokens','IDLE','showAPR']);
       const idleGovTokenEnabled = this.getGlobalConfig(['govTokens','IDLE','enabled']);
@@ -6013,8 +6026,6 @@ class FunctionsUtil {
       if (this.BNify(tokenAprs.avgApr).isNaN()){
         tokenAprs.avgApr = this.BNify(0);
       }
-
-      // console.log(tokenConfig.idle.token,tokenAprs,govTokensAprs);
 
       return this.setCachedDataWithLocalStorage(cachedDataKey,tokenAprs);
     }

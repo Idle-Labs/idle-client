@@ -369,10 +369,11 @@ class Dashboard extends Component {
     const viewOnly = this.props.connectorName === 'custom';
     const accountChanged = prevProps.account !== this.props.account;
     const strategyChanged = this.props.selectedStrategy && prevProps.selectedStrategy !== this.props.selectedStrategy;
+    const availableTokensChanged = JSON.stringify(prevProps.availableTokens) !== JSON.stringify(this.props.availableTokens);
     const accountInizialized = this.props.accountInizialized && prevProps.accountInizialized !== this.props.accountInizialized;
     const contractsInitialized = this.props.contractsInitialized && prevProps.contractsInitialized !== this.props.contractsInitialized;
 
-    if (!viewOnly && (accountChanged || accountInizialized || contractsInitialized || strategyChanged)){
+    if (!viewOnly && (accountChanged || accountInizialized || contractsInitialized || strategyChanged || availableTokensChanged)){
       this.checkModals();
     }
   }
@@ -617,7 +618,34 @@ class Dashboard extends Component {
                 justifyContent={'center'}
               >
                 {
-                  !this.state.showResetButton ? (
+                  !this.props.network.isCorrectNetwork ? (
+                    <DashboardCard
+                      cardProps={{
+                        p:3,
+                        mt:3,
+                        width:[1,0.35]
+                      }}
+                    >
+                      <Flex
+                        alignItems={'center'}
+                        flexDirection={'column'}
+                      >
+                        <Icon
+                          size={'2.3em'}
+                          name={'Warning'}
+                          color={'cellText'}
+                        />
+                        <Text
+                          mt={2}
+                          fontSize={2}
+                          color={'cellText'}
+                          textAlign={'center'}
+                        >
+                          The <strong>{this.functionsUtil.capitalize(this.props.network.current.name)} Network</strong> is not supported, please switch to the correct network.
+                        </Text>
+                      </Flex>
+                    </DashboardCard>
+                  ) : !this.state.showResetButton ? (
                     <FlexLoader
                       textProps={{
                         textSize:4,

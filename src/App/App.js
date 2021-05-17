@@ -29,6 +29,7 @@ const Governance = React.lazy(() => import('../Governance/Governance'));
 
 class App extends Component {
   state = {
+    network:null,
     cachedData:{},
     buyToken: null,
     currentEnv:null,
@@ -106,10 +107,14 @@ class App extends Component {
     */
   }
 
-  clearCachedData = () => {
+  clearCachedData = async (callback=null) => {
     this.functionsUtil.setLocalStorage('cachedData',{},true);
-    this.setState({
+    await this.setState({
       cachedData:{}
+    },() => {
+      if (typeof callback === 'function'){
+        callback();
+      }
     });
     return true;
   }
@@ -188,7 +193,9 @@ class App extends Component {
   async loadAvailableTokens() {
     const newState = {};
     const availableStrategies = {};
-    const requiredNetwork = globalConfigs.network.requiredNetwork;
+    const requiredNetwork = this.state.network && this.state.network.isCorrectNetwork ? (this.state.network.current.id || this.state.network.required.id) : globalConfigs.network.requiredNetwork;
+
+    // console.log('loadAvailableTokens',this.state.network,requiredNetwork,availableTokens);
 
     // Load available strategies
     Object.keys(availableTokens[requiredNetwork]).forEach((strategy) => {
@@ -206,8 +213,8 @@ class App extends Component {
 
     // Load strategy
     const selectedStrategy = this.state.selectedStrategy;
-    if (selectedStrategy && this.state.availableStrategies[selectedStrategy]){
-      newState.availableTokens = this.state.availableStrategies[selectedStrategy];
+    if (selectedStrategy && availableStrategies[selectedStrategy]){
+      newState.availableTokens = availableStrategies[selectedStrategy];
 
       // Load token
       const selectedToken = this.state.selectedToken;
@@ -384,8 +391,9 @@ class App extends Component {
 
     const tokenChanged = prevState.selectedToken !== this.state.selectedToken;
     const strategyChanged = prevState.selectedStrategy !== this.state.selectedStrategy;
+    const networkChanged = JSON.stringify(prevState.network) !== JSON.stringify(this.state.network);
 
-    if (tokenChanged || strategyChanged){
+    if (tokenChanged || strategyChanged || networkChanged){
       this.loadAvailableTokens();
     }
   }
@@ -463,6 +471,12 @@ class App extends Component {
     });
     // Reset Localstorage
     this.functionsUtil.clearStoredData(['version','themeMode','lastLogin']);
+  }
+
+  setNetwork(network){
+    this.setState({
+      network
+    });
   }
 
   setConnector(connectorName,walletProvider){
@@ -598,6 +612,7 @@ class App extends Component {
                     theme={this.state.selectedTheme}
                     cachedData={this.state.cachedData}
                     tokenConfig={this.state.tokenConfig}
+                    setNetwork={this.setNetwork.bind(this)}
                     customAddress={this.state.customAddress}
                     selectedToken={this.state.selectedToken}
                     connectorName={this.state.connectorName}

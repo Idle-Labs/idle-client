@@ -316,7 +316,7 @@ class TransactionsList extends Component {
                           const txHash = tx.hash;
                           const txHashKey = tx.hashKey;
                           const handleClick = (e) => {
-                            return (txHash ? window.open(`https://etherscan.io/tx/${txHash}`) : null);
+                            return (txHash ? window.open(this.functionsUtil.getEtherscanTransactionUrl(txHash)) : null);
                           };
 
                           return (
