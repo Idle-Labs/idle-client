@@ -281,8 +281,8 @@ class GovModal extends React.Component {
                       // Sending transaction
                       this.state.processing && this.state.processing.loading ? (
                         <TxProgressBar
+                          {...this.props}
                           textColor={'white'}
-                          web3={this.props.web3}
                           cancelTextColor={'moon-gray'}
                           cancelTextHoverColor={'white'}
                           waitText={`Claim estimated in`}

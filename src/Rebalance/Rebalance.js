@@ -177,7 +177,7 @@ class Rebalance extends Component {
           />
         ) : (
           this.state.processing.rebalance.loading ? (
-            <TxProgressBar web3={this.props.web3} waitText={`Rebalance estimated in`} endMessage={`Finalizing rebalance request...`} hash={this.state.processing.rebalance.txHash} />
+            <TxProgressBar {...this.props} waitText={`Rebalance estimated in`} endMessage={`Finalizing rebalance request...`} hash={this.state.processing.rebalance.txHash} />
           ) : (
             <Flex
               width={1}

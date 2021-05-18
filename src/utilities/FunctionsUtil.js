@@ -1933,7 +1933,6 @@ class FunctionsUtil {
   getEtherscanAddressUrl = (address) => {
     const requiredNetwork = this.props.network.current.id || this.getGlobalConfig(['network','requiredNetwork']);
     const baseurl = this.getGlobalConfig(['network','providers','etherscan','baseUrl',requiredNetwork]);
-    console.log('getEtherscanAddressUrl',requiredNetwork,baseurl);
     return address ? `${baseurl}/address/${address}` : null;
   }
   formatMoney = (amount, decimalCount = 2, decimal = ".", thousands = ",") => {

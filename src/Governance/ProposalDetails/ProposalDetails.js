@@ -554,7 +554,7 @@ class ProposalDetails extends Component {
                     flexDirection={'column'}
                   >
                     <TxProgressBar
-                      web3={this.props.web3}
+                      {...this.props}
                       hash={this.state.processing.txHash}
                       cancelTransaction={this.cancelTransaction.bind(this)}
                       waitText={`${this.state.processing.action} estimated in`}

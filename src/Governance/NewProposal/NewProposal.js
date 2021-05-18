@@ -1173,7 +1173,7 @@ class NewProposal extends Component {
                 // Sending transaction
                 this.state.processing && this.state.processing.loading ? (
                   <TxProgressBar
-                    web3={this.props.web3}
+                    {...this.props}
                     hash={this.state.processing.txHash}
                     waitText={`Proposal creation estimated in`}
                     endMessage={`Finalizing proposal creation request...`}

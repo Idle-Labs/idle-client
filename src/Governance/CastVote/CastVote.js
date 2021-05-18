@@ -272,7 +272,7 @@ class CastVote extends Component {
                       flexDirection={'column'}
                     >
                       <TxProgressBar
-                        web3={this.props.web3}
+                        {...this.props}
                         waitText={`Vote estimated in`}
                         hash={this.state.processing.txHash}
                         endMessage={`Finalizing vote request...`}

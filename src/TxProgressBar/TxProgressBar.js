@@ -403,8 +403,8 @@ class TxProgressBar extends Component {
               target={'_blank'}
               hoverColor={'dark-gray'}
               rel={"nofollow noopener noreferrer"}
-              href={`https://etherscan.io/tx/${this.props.hash}`}
               color={this.props.textColor ? this.props.textColor : 'cellText'}
+              href={this.functionsUtil.getEtherscanTransactionUrl(this.props.hash)}
             >
               <Flex
                 alignItems={'center'}

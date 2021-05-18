@@ -1107,7 +1107,7 @@ class BatchDeposit extends Component {
                           <Flex
                             flexDirection={'column'}
                           >
-                            <TxProgressBar web3={this.props.web3} waitText={`Claim estimated in`} endMessage={`Finalizing approve request...`} hash={this.state.processing.claim.txHash} />
+                            <TxProgressBar {...this.props} web3={this.props.web3} waitText={`Claim estimated in`} endMessage={`Finalizing approve request...`} hash={this.state.processing.claim.txHash} />
                           </Flex>
                         ) : this.state.claimSucceeded ? (
                           <Flex
@@ -1222,7 +1222,7 @@ class BatchDeposit extends Component {
                             flexDirection={'column'}
                             justifyContent={'center'}
                           >
-                            <TxProgressBar web3={this.props.web3} waitText={`Batch execution estimated in`} endMessage={`Finalizing batch execution request...`} hash={this.state.processing.execute.txHash} />
+                            <TxProgressBar {...this.props} waitText={`Batch execution estimated in`} endMessage={`Finalizing batch execution request...`} hash={this.state.processing.execute.txHash} />
                           </Flex>
                         ) : this.state.executeSucceeded ? (
                           <Flex

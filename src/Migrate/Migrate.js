@@ -978,7 +978,7 @@ class Migrate extends Component {
                           flexDirection={'column'}
                         >
                           <TxProgressBar
-                            web3={this.props.web3}
+                            {...this.props}
                             hash={this.state.processing.migrate.txHash}
                             endMessage={`Finalizing migration request...`}
                             cancelTransaction={this.cancelTransaction.bind(this)}
@@ -1230,7 +1230,7 @@ class Migrate extends Component {
                         flexDirection={'column'}
                       >
                         <TxProgressBar
-                          web3={this.props.web3}
+                          {...this.props}
                           waitText={`Approve estimated in`}
                           hash={this.state.processing.approve.txHash}
                           endMessage={`Finalizing approve request...`}
@@ -1350,7 +1350,7 @@ class Migrate extends Component {
                     flexDirection={'column'}
                   >
                     <TxProgressBar
-                      web3={this.props.web3}
+                      {...this.props}
                       cancelTransaction={this.cancelTransaction.bind(this)}
                       hash={this.state.processing[this.state.action].txHash}
                       endMessage={`Finalizing ${this.state.action} request...`}

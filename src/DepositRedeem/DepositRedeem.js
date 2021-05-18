@@ -2553,7 +2553,7 @@ class DepositRedeem extends Component {
                                     flexDirection={'column'}
                                   >
                                     <TxProgressBar
-                                      web3={this.props.web3}
+                                      {...this.props}
                                       waitText={`Approve estimated in`}
                                       endMessage={`Finalizing approve request...`}
                                       hash={this.state.processing['approve'].txHash}
@@ -2950,7 +2950,7 @@ class DepositRedeem extends Component {
                                 justifyContent={'center'}
                               >
                                 <TxProgressBar
-                                  web3={this.props.web3}
+                                  {...this.props}
                                   cancelTransaction={this.cancelTransaction.bind(this)}
                                   hash={this.state.processing[this.state.action].txHash}
                                   endMessage={`Finalizing ${this.state.action} request...`}

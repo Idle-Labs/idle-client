@@ -542,7 +542,7 @@ class SendTxWithBalance extends Component {
                       flexDirection={'column'}
                     >
                       <TxProgressBar
-                        web3={this.props.web3}
+                        {...this.props}
                         waitText={`Approve estimated in`}
                         hash={this.state.processing.txHash}
                         endMessage={`Finalizing approve request...`}
@@ -590,7 +590,7 @@ class SendTxWithBalance extends Component {
                     flexDirection={'column'}
                   >
                     <TxProgressBar
-                      web3={this.props.web3}
+                      {...this.props}
                       hash={this.state.processing.txHash}
                       endMessage={`Finalizing ${action} request...`}
                       cancelTransaction={this.cancelTransaction.bind(this)}

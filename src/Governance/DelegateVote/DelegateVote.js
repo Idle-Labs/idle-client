@@ -224,7 +224,7 @@ class DelegateVote extends Component {
                     flexDirection={'column'}
                   >
                     <TxProgressBar
-                      web3={this.props.web3}
+                      {...this.props}
                       waitText={`Delegate estimated in`}
                       hash={this.state.processing.txHash}
                       endMessage={`Finalizing delegate request...`}
