@@ -1322,7 +1322,14 @@ class StatsChart extends Component {
 
         protocols.forEach( p => {
 
-          const protocolInfo = globalConfigs.stats.protocols[p.name];
+          const protocolInfo = {...globalConfigs.stats.protocols[p.name]};
+
+          if (protocolInfo.tokensProps && protocolInfo.tokensProps[this.props.selectedToken]){
+            const tokenProps = protocolInfo.tokensProps[this.props.selectedToken];
+            Object.keys(tokenProps).forEach(p => {
+              protocolInfo[p] = tokenProps[p];
+            });
+          }
 
           if (!protocolInfo.enabled || (protocolInfo.startTimestamp && this.functionsUtil.strToMoment(protocolInfo.startTimestamp).isAfter(Date.now()))){
             return;

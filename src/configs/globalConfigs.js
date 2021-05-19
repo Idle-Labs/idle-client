@@ -837,21 +837,26 @@ const globalConfigs = {
         enabled:true,
         label:'Aave V2 + stkAAVE',
         startTimestamp:'2021-05-08 14:30:00',
-        rateField:['rate','aaveAdditionalAPR'],
+        tokensProps:{
+          WETH:{
+            startTimestamp:'2021-05-19 12:20:00',
+          }
+        },
         color:{
           hex:'#B6509E',
           rgb:[182, 80, 158],
           hsl:['314', '41%', '51%']
-        }
+        },
+        rateField:['rate','aaveAdditionalAPR']
       },
       compoundWithCOMP:{
         enabled:true,
-        rateField:['rate','compoundAdditionalAPR'],
         label:'Compound + COMP',
         color:{
           rgb:[0, 153, 107],
           hsl:['162', '100%', '30%']
-        }
+        },
+        rateField:['rate','compoundAdditionalAPR']
       },
       fulcrum:{
         legend:false,

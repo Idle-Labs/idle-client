@@ -1319,6 +1319,7 @@ class Stats extends Component {
                       themeMode={this.props.themeMode}
                       apiResults={this.state.apiResults}
                       idleVersion={this.state.idleVersion}
+                      selectedToken={this.props.selectedToken}
                       apiResults_unfiltered={this.state.apiResults_unfiltered}
                       chartMode={this.state.idleVersion === this.state.latestVersion ? 'PRICE_V4' : 'PRICE'}
                     />
