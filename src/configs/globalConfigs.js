@@ -57,7 +57,7 @@ const env = process.env;
 
 const globalConfigs = {
   appName: 'Idle',
-  version: 'v5.8',
+  version: 'v5.9',
   baseToken: 'ETH',
   baseURL: 'https://idle.finance',
   forumURL:'https://gov.idle.finance',
@@ -416,9 +416,9 @@ const globalConfigs = {
       distributionMode:'second',
       color:'hsl(314, 41%, 51%)',
       distributionFrequency:'day',
+      disabledTokens:['idleTUSDYield','idleSUSDYield'],
       address:'0x4da27a545c0c5b758a6ba100e3a049001de870f5', // MAIN
       addressForPrice:'0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9', // MAIN
-      disabledTokens:['idleTUSDYield','idleSUSDYield','idleWETHYield']
     }
   },
   contracts:{
@@ -1002,7 +1002,7 @@ const globalConfigs = {
       },
       redeemSkipGov:{
         enabled:true,
-        disabledTokens:['idleSUSDYield','idleTUSDYield','idleDAISafe','idleUSDCSafe','idleUSDTSafe']
+        disabledTokens:['idleDAISafe','idleUSDCSafe','idleUSDTSafe']
       },
       rebalance:{
         enabled:true,
