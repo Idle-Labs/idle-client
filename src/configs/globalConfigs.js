@@ -837,11 +837,11 @@ const globalConfigs = {
         enabled:true,
         label:'Aave V2 + stkAAVE',
         startTimestamp:'2021-05-08 14:30:00',
-        tokensProps:{
-          WETH:{
-            startTimestamp:'2021-05-19 12:20:00',
-          }
-        },
+        // tokensProps:{
+        //   WETH:{
+        //     startTimestamp:'2021-05-19 12:20:00',
+        //   }
+        // },
         color:{
           hex:'#B6509E',
           rgb:[182, 80, 158],

@@ -1260,16 +1260,27 @@ class StatsChart extends Component {
         let startBalance = this.functionsUtil.BNify(1);
         let currentBalance = this.functionsUtil.BNify(1);
 
-        // console.log('PRICE_V4',apiResults);
-
         idleChartData = [];
+        const aaveProtocolInfo = protocols.find( p => p.name === 'aavev2' );
 
         apiResults.forEach((d,i) => {
 
+          let idleRate = this.functionsUtil.BNify(d.idleRate);
           let y = 0;
           let apy = 0;
           const x = moment(d.timestamp*1000).format("YYYY/MM/DD HH:mm");
-          const apr = this.functionsUtil.fixTokenDecimals(d.idleRate,18).div(100);
+
+          // Aave V1 wrong rate FIX
+          if (this.props.selectedToken === 'WETH' && moment(x).isSameOrBefore(moment('2021-05-19 12:20','YYYY-MM-DD HH:mm'))){
+            const aaveProtocolData = aaveProtocolInfo ? d.protocolsData.find((pData,x) => {
+              return pData.protocolAddr.toLowerCase() === aaveProtocolInfo.address.toLowerCase()
+            }) : null;
+            if (aaveProtocolData.aaveAdditionalAPR && this.functionsUtil.BNify(aaveProtocolData.aaveAdditionalAPR).gt(0)){
+              idleRate = idleRate.plus(this.functionsUtil.BNify(aaveProtocolData.aaveAdditionalAPR));
+            }
+          }
+
+          const apr = this.functionsUtil.fixTokenDecimals(idleRate,18).div(100);
           // const apy = this.functionsUtil.apr2apy(apr);
           
           avgApy = avgApy.plus(apr.times(100));
