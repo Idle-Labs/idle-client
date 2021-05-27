@@ -797,13 +797,13 @@ const globalConfigs = {
       },
       RAI:{
         decimals:18,
-        enabled:false,
+        enabled:true,
         color:{
           hex:'#378879',
           rgb:[55, 136, 121],
           hsl:['169', '42%', '37%']
         },
-        startTimestamp:'2021-05-07',
+        startTimestamp:'2021-05-25',
         icon:'images/tokens/RAI.png',
         conversionRateField:'raiDAIPrice',
         chart:{
