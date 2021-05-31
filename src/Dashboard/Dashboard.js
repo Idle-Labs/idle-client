@@ -13,6 +13,7 @@ import Swipeable from '../utilities/components/Swipeable';
 import BetaModal from "../utilities/components/BetaModal";
 import DashboardCard from '../DashboardCard/DashboardCard';
 import CurveStrategy from '../CurveStrategy/CurveStrategy';
+import PolygonModal from "../utilities/components/PolygonModal";
 import WelcomeModal from "../utilities/components/WelcomeModal";
 import TooltipModal from "../utilities/components/TooltipModal";
 import MigrateModal from "../utilities/components/MigrateModal";
@@ -30,6 +31,7 @@ class Dashboard extends Component {
     currentRoute:null,
     pageComponent:null,
     currentSection:null,
+    currentNetwork:null,
     selectedSection:null,
     tokensToMigrate:null,
     showResetButton:false,
@@ -58,6 +60,7 @@ class Dashboard extends Component {
     const baseRoute = this.functionsUtil.getGlobalConfig(['dashboard','baseRoute']);
 
     const menu = [];
+    const currentNetwork = this.functionsUtil.getCurrentNetwork();
 
     const strategies = this.functionsUtil.getGlobalConfig(['strategies']);
     Object.keys(strategies).filter( s => ( !strategies[s].comingSoon && (!strategies[s].enabledEnvs.length || strategies[s].enabledEnvs.includes(this.props.currentEnv)) ) ).forEach(strategy => {
@@ -95,7 +98,7 @@ class Dashboard extends Component {
 
     // Add Stake
     const stakeConfig = this.functionsUtil.getGlobalConfig(['tools','stake']);
-    if (stakeConfig.enabled){
+    if (stakeConfig.enabled && (!stakeConfig.availableNetworks || stakeConfig.availableNetworks.includes(currentNetwork.id))){
       menu.push(
         {
           submenu:[],
@@ -118,23 +121,25 @@ class Dashboard extends Component {
       );
     }
 
-    // Add Stats
-    menu.push(
-      {
-        submenu:[],
-        label:'Stats',
-        selected:false,
-        component:Stats,
-        bgColor:'#21f36b',
-        color:'dark-gray',
-        route:'/dashboard/stats',
-        image:extraicons['stats'].icon,
-        imageDark:extraicons['stats'].iconDark,
-        imageInactive:extraicons['stats'].iconInactive,
-        imageInactiveDark:extraicons['stats'].iconInactiveDark,
-      }
-    );
-
+    const statsInfo = this.functionsUtil.getGlobalConfig(['stats']);
+    if (!statsInfo.availableNetworks || statsInfo.availableNetworks.includes(currentNetwork.id)){
+      menu.push(
+        {
+          submenu:[],
+          label:'Stats',
+          selected:false,
+          component:Stats,
+          bgColor:'#21f36b',
+          color:'dark-gray',
+          route:'/dashboard/stats',
+          image:extraicons['stats'].icon,
+          imageDark:extraicons['stats'].iconDark,
+          imageInactive:extraicons['stats'].iconInactive,
+          imageInactiveDark:extraicons['stats'].iconInactiveDark,
+        }
+      );
+    }
+    
     // Add tools
     menu.push(
       {
@@ -148,7 +153,7 @@ class Dashboard extends Component {
         bgColor:this.props.theme.colors.primary,
         imageInactive:extraicons['tools'].iconInactive,
         imageInactiveDark:extraicons['tools'].iconInactiveDark,
-        submenu:Object.values(this.functionsUtil.getGlobalConfig(['tools'])).filter( u => (u.enabled) )
+        submenu:Object.values(this.functionsUtil.getGlobalConfig(['tools'])).filter( tool => (tool.enabled && (!tool.availableNetworks || tool.availableNetworks.includes(currentNetwork.id))) )
       }
     );
 
@@ -172,7 +177,8 @@ class Dashboard extends Component {
     );
 
     await this.setState({
-      menu
+      menu,
+      currentNetwork
     });
   }
 
@@ -401,6 +407,13 @@ class Dashboard extends Component {
       });
     }
 
+    const requiredNetworkChanged = JSON.stringify(prevProps.network.required) !== JSON.stringify(this.props.network.required);
+    const networkChanged = (!prevProps.networkInitialized && this.props.networkInitialized) || requiredNetworkChanged;
+    if (networkChanged){
+      await this.loadMenu();
+      this.loadParams();
+    }
+
     const viewOnly = this.props.connectorName === 'custom';
     const accountChanged = prevProps.account !== this.props.account;
     const strategyChanged = this.props.selectedStrategy && prevProps.selectedStrategy !== this.props.selectedStrategy;
@@ -408,7 +421,7 @@ class Dashboard extends Component {
     const accountInizialized = this.props.accountInizialized && prevProps.accountInizialized !== this.props.accountInizialized;
     const contractsInitialized = this.props.contractsInitialized && prevProps.contractsInitialized !== this.props.contractsInitialized;
 
-    if (!viewOnly && (accountChanged || accountInizialized || contractsInitialized || strategyChanged || availableTokensChanged)){
+    if (!viewOnly && (networkChanged || accountChanged || accountInizialized || contractsInitialized || strategyChanged || availableTokensChanged)){
       this.checkModals();
     }
   }
@@ -420,6 +433,7 @@ class Dashboard extends Component {
     }
 
     await this.checkRiskAdjusted();
+    await this.checkPolygonModal();
     await this.checkBetaApproval();
     await this.checkTokensToMigrate();
     await this.checkWelcomeModal();
@@ -432,7 +446,25 @@ class Dashboard extends Component {
       const activeModal = 'risk';
       if (activeModal !== this.state.activeModal){
         await this.setState({
-          activeModal,
+          activeModal
+        });
+        return activeModal;
+      }
+    }
+  }
+
+  async checkPolygonModal(){
+    const isPolygon = this.state.currentNetwork.provider === 'polygon';
+    const isPolygonApproved = this.functionsUtil.getStoredItem('polygonApproved',false,false);
+
+    console.log('checkPolygonModal',this.state.currentNetwork,isPolygon);
+
+    // Show Beta Warning modal
+    if (isPolygon && !isPolygonApproved){
+      const activeModal = 'polygon';
+      if (activeModal !== this.state.activeModal){
+        await this.setState({
+          activeModal
         });
         return activeModal;
       }
@@ -448,7 +480,7 @@ class Dashboard extends Component {
       const activeModal = 'beta';
       if (activeModal !== this.state.activeModal){
         await this.setState({
-          activeModal,
+          activeModal
         });
         return activeModal;
       }
@@ -807,6 +839,15 @@ class Dashboard extends Component {
               )
             }
           </Flex>
+          {
+            this.state.currentNetwork && 
+              <PolygonModal
+                closeModal={this.resetModal}
+                goToSection={this.goToSection.bind(this)}
+                currentNetwork={this.state.currentNetwork}
+                isOpen={this.state.activeModal === 'polygon'}
+              />
+          }
           <BetaModal
             closeModal={this.resetModal}
             isOpen={this.state.activeModal === 'beta'}

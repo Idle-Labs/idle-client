@@ -14,45 +14,229 @@ import IdleTokenV4 from '../contracts/IdleTokenV4.json';
 import IdleConverterPersonalSignV4 from '../contracts/IdleConverterPersonalSignV4.json';
 
 const availableTokens = {
-  42: {
-    best: {
-      DAI: {
-        abi: DAI,
-        token: 'DAI',
-        decimals: 18,
-        enabled: true,
-        govTokensDisabled: false,
-        color: 'hsl(40, 95%, 59%)',
-        address: '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
-        deposit: {
-          minAmountForMint: 10000,
+  // Goerli
+  5:{
+    best:{
+      DAI:{
+        abi:DAI,
+        token:'DAI',
+        decimals:18,
+        enabled:true,
+        govTokensDisabled:false,
+        color:'hsl(40, 95%, 59%)',
+        address:'0x001B3B4d0F3714Ca98ba10F6042DaEbF0B1B7b6F',
+        deposit:{
+          minAmountForMint:10000,
         },
-        wyre: {
-          destCurrency: 'DAI'
+        wyre:{
+          destCurrency:'DAI'
         },
-        ramp: {
-          swapAsset: 'DAI'
+        ramp:{
+          swapAsset:'DAI'
         },
-        defiPrime: {
-          token: 'dai'
+        defiPrime:{
+          token:'dai'
         },
-        idle: {
-          abi: IdleTokenV4,
-          token: 'idleDAIYield',
-          address: '0x295CA5bC5153698162dDbcE5dF50E436a58BA21e',
+        idle:{
+          abi:IdleTokenV4,
+          token:'idleDAIYield',
+          address:'0x45a3598Ac8aDb2c6233979f710DC6a3D006238E0',
         },
-        protocols: [
+        protocols:[
           {
-            decimals: 28,
-            token: 'cDAI',
-            enabled: true,
-            abi: cToken.abi,
-            name: 'compound',
-            address: '0xf0d0eb522cfa50b716b3b1604c4f0fa6f04376ad',
-            functions: {
-              exchangeRate: {
-                name: 'exchangeRateStored',
-                params: []
+            abi:aToken,
+            name:'aave',
+            enabled:true,
+            token:'amDAI',
+            address:'0x639cB7b21ee2161DF9c882483C9D55c90c20Ca3e',
+            decimals:18,
+            functions:{
+
+            }
+          },
+        ]
+      },
+    },
+    risk:{
+
+    }
+  },
+  80001:{ // Mumbai-Testnet
+    best:{
+      DAI:{
+        abi:DAI,
+        token:'DAI',
+        decimals:18,
+        enabled:true,
+        govTokensDisabled:false,
+        color:'hsl(40, 95%, 59%)',
+        address:'0x001B3B4d0F3714Ca98ba10F6042DaEbF0B1B7b6F',
+        deposit:{
+          minAmountForMint:10000,
+        },
+        wyre:{
+          destCurrency:'DAI'
+        },
+        ramp:{
+          swapAsset:'DAI'
+        },
+        defiPrime:{
+          token:'dai'
+        },
+        idle:{
+          abi:IdleTokenV4,
+          token:'idleDAIYield',
+          address:'0x45a3598Ac8aDb2c6233979f710DC6a3D006238E0',
+        },
+        protocols:[
+          {
+            abi:aToken,
+            name:'aavev2',
+            enabled:true,
+            token:'amDAI',
+            address:'0x639cB7b21ee2161DF9c882483C9D55c90c20Ca3e',
+            decimals:18,
+            functions:{
+
+            }
+          },
+        ]
+      },
+      /*
+      USDC:{
+        abi:USDC,
+        token:'USDC',
+        decimals:6,
+        enabled:true,
+        govTokensDisabled:false,
+        color:'hsl(40, 95%, 59%)',
+        address:'0xb7a4f3e9097c08da09517b5ab877f7a917224ede',
+        deposit:{
+          minAmountForMint:10000,
+        },
+        wyre:{
+          destCurrency:'USDC'
+        },
+        ramp:{
+          swapAsset:'USDC'
+        },
+        defiPrime:{
+          token:'usdc'
+        },
+        idle:{
+          abi:IdleTokenV4,
+          token:'idleUSDCYield',
+          address:'0x0de23D3bc385a74E2196cfE827C8a640B8774B9f',
+        },
+        protocols:[
+          {
+            decimals:16,
+            enabled:true,
+            token:'cUSDC',
+            abi:cToken.abi,
+            name:'compound',
+            address:'0x4a92e71227d294f041bd82dd8f78591b75140d63',
+            functions:{
+              exchangeRate:{
+                name:'exchangeRateStored',
+                params:[]
+              }
+            },
+          }
+        ]
+      },
+      */
+    },
+    risk:{
+      
+    }
+  },
+  137:{ // Matic Mainnet
+    best:{
+      DAI:{
+        abi:DAI,
+        token:'DAI',
+        decimals:18,
+        enabled:true,
+        govTokensDisabled:false,
+        color:'hsl(40, 95%, 59%)',
+        address:'0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
+        deposit:{
+          minAmountForMint:10000,
+        },
+        wyre:{
+          destCurrency:'DAI'
+        },
+        ramp:{
+          swapAsset:'DAI'
+        },
+        defiPrime:{
+          token:'dai'
+        },
+        idle:{
+          abi:IdleTokenV4,
+          token:'idleDAIYield',
+          address:'0x8a999F5A3546F8243205b2c0eCb0627cC10003ab',
+        },
+        protocols:[
+          {
+            abi:aToken,
+            name:'aavev2',
+            enabled:true,
+            token:'amDAI',
+            address:'0x27F8D03b3a2196956ED754baDc28D73be8830A6e',
+            decimals:18,
+            functions:{
+
+            }
+          },
+        ]
+      },
+    },
+    risk:{
+      
+    }
+  },
+  // Ethereum
+  42:{
+    best:{
+      DAI:{
+        abi:DAI,
+        token:'DAI',
+        decimals:18,
+        enabled:true,
+        govTokensDisabled:false,
+        color:'hsl(40, 95%, 59%)',
+        address:'0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
+        deposit:{
+          minAmountForMint:10000,
+        },
+        wyre:{
+          destCurrency:'DAI'
+        },
+        ramp:{
+          swapAsset:'DAI'
+        },
+        defiPrime:{
+          token:'dai'
+        },
+        idle:{
+          abi:IdleTokenV4,
+          token:'idleDAIYield',
+          address:'0x295CA5bC5153698162dDbcE5dF50E436a58BA21e',
+        },
+        protocols:[
+          {
+            decimals:28,
+            token:'cDAI',
+            enabled:true,
+            abi:cToken.abi,
+            name:'compound',
+            address:'0xf0d0eb522cfa50b716b3b1604c4f0fa6f04376ad',
+            functions:{
+              exchangeRate:{
+                name:'exchangeRateStored',
+                params:[]
               }
             },
           }

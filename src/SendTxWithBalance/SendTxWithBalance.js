@@ -573,7 +573,7 @@ class SendTxWithBalance extends Component {
                         flexDirection={'column'}
                       >
                         <Icon
-                          size={'2.3em'}
+                          size={'1.8em'}
                           name={'LockOpen'}
                           color={'cellText'}
                         />
@@ -588,7 +588,7 @@ class SendTxWithBalance extends Component {
                         />
                         <RoundButton
                           buttonProps={{
-                            mt:3,
+                            mt:2,
                             width:[1,1/2]
                           }}
                           handleClick={this.approve.bind(this)}

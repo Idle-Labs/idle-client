@@ -1037,6 +1037,219 @@ class FunctionsUtil {
 
     return amountLents;
   }
+  getBaseToken = () => {
+    const networkConfig = this.getCurrentNetwork();
+    return networkConfig ? networkConfig.baseToken : this.getGlobalConfig(['baseToken']);
+  }
+  getCurrentNetwork = () => {
+    const networkId = this.getCurrentNetworkId();
+    const network = this.getGlobalConfig(['network','availableNetworks',networkId]);
+    network.id = networkId;
+    return network;
+  }
+  getCurrentNetworkId = () => {
+    const defaultNetwork = this.getGlobalConfig(['network','requiredNetwork']);
+    return this.props.network && this.props.network.current ? this.props.network.current.id || defaultNetwork : defaultNetwork;
+  }
+  getPolygonBridgeTxs = async (account=false,enabledTokens=[]) => {
+    account = account ? account : this.props.account;
+
+    if (!account){
+      return [];
+    }
+
+    account = account.toLowerCase();
+
+    const txs = [];
+    let depositTxs = [];
+    const currentNetwork = this.getCurrentNetwork();
+    const covalentInfo = this.getGlobalConfig(['network','providers','covalent']);
+    const etherscanInfo = this.getGlobalConfig(['network','providers','etherscan']);
+    const erc20PredicateConfig = this.getGlobalConfig(['tools','polygonBridge','props','contracts','ERC20Predicate']);
+
+    const currentNetworkId = this.getCurrentNetworkId();
+    const polygonNetworkId = currentNetwork.provider === 'polygon' ? currentNetworkId : this.getGlobalConfig(['network','providers','polygon','networkPairs',currentNetworkId]);
+    // Check if covalent is enabled for the required network
+    if (covalentInfo.enabled && covalentInfo.endpoints[polygonNetworkId]){
+      const covalentApiUrl = covalentInfo.endpoints[polygonNetworkId];
+      const polygonAvailableTokens = this.getGlobalConfig(['tools','polygonBridge','props','availableTokens']);
+      const polygonEndpoint = `${covalentApiUrl}address/${account}/transactions_v2/?block-signed-at-asc=true&skip=0`;
+
+      const ethereumNetworkId = this.getGlobalConfig(['network','providers','polygon','networkPairs',polygonNetworkId]);
+      const etherscanApiUrl = etherscanInfo.endpoints[ethereumNetworkId];
+      const etherscanEndpoint = `${etherscanApiUrl}?&apikey=${env.REACT_APP_ETHERSCAN_KEY}&module=account&action=tokentx&address=${this.props.account}&sort=desc`;
+
+      const [
+        last_state_id,
+        polygonTxs,
+        etherscanTxs
+      ] = await Promise.all([
+        this.getPolygonCurrentLastStateId(),
+        this.makeCachedRequest(polygonEndpoint,120),
+        this.makeCachedRequest(etherscanEndpoint,120)
+      ]);
+
+      const rootTokensAddresses = [];
+      const childTokensAddresses = [];
+      Object.values(polygonAvailableTokens).forEach( tokenConfig => {
+        if (tokenConfig.childToken){
+          childTokensAddresses.push(tokenConfig.childToken.address.toLowerCase())
+        }
+        if (tokenConfig.rootToken){
+          rootTokensAddresses.push(tokenConfig.rootToken.address.toLowerCase())
+        }
+      });
+
+      if (etherscanTxs && etherscanTxs.data && etherscanTxs.data.result){
+        depositTxs = etherscanTxs.data.result.filter( tx => rootTokensAddresses.includes(tx.contractAddress.toLowerCase()) && tx.to.toLowerCase() === erc20PredicateConfig.address.toLowerCase() && tx.from.toLowerCase() === this.props.account.toLowerCase() );
+        await this.asyncForEach(depositTxs, async (tx) => {
+          
+        });
+      }
+
+      if (polygonTxs && polygonTxs.data && polygonTxs.data.data && polygonTxs.data.data.items && Object.values(polygonTxs.data.data.items).length){
+        const filteredTxs = polygonTxs.data.data.items.filter( tx => childTokensAddresses.includes(tx.to_address.toLowerCase()) );
+          await this.asyncForEach(filteredTxs, async (tx) => {
+          const tokenConfig = tokenConfig.childToken ? Object.values(polygonAvailableTokens).find( tokenConfig => tokenConfig.childToken.address.toLowerCase() === tx.to_address.toLowerCase() ) : null;
+          if (!tokenConfig || !tokenConfig.childToken){
+            return;
+          }
+          tokenConfig.address = tokenConfig.childToken.address;
+          if (!enabledTokens || !enabledTokens.length || enabledTokens.includes(tokenConfig.token)){
+            const polygonTx = this.normalizePolygonTx(tx,tokenConfig);
+            if (polygonTx.action === 'Withdraw'){
+              const tx_state_id = parseInt(this.props.web3.utils.hexToNumberString(polygonTx.logs[polygonTx.logs.length-1].topics[1]));
+              polygonTx.included = last_state_id && tx_state_id ? last_state_id>=tx_state_id : false;
+              polygonTx.exited = false;
+              try {
+                await this.props.maticPOSClient.exitERC20(polygonTx.hash, {from: this.props.account, encodeAbi:true});
+              } catch (error){
+                if (error.toString().match('EXIT_ALREADY_PROCESSED')){
+                  polygonTx.exited = true;
+                }
+              }
+              txs.push(polygonTx);
+            }
+          }
+        });
+      }
+    }
+
+    // console.log('getPolygonBridgeTxs',txs);
+
+    return txs;
+  }
+  getPolygonBaseTxs = async (account=false,enabledTokens=[],debug=false) => {
+    account = account ? account : this.props.account;
+
+    if (!account || !enabledTokens || !enabledTokens.length){
+      return [];
+    }
+
+    account = account.toLowerCase();
+
+    let results = [];
+    let baseTxs = null;
+    let baseEndpoint = null;
+    const requiredNetwork = this.getCurrentNetworkId();
+    // const selectedStrategy = this.props.selectedStrategy;
+    const covalentInfo = this.getGlobalConfig(['network','providers','covalent']);
+
+    // Check if covalent is enabled for the required network
+    if (covalentInfo.enabled && covalentInfo.endpoints[requiredNetwork]){
+      const covalentApiUrl = covalentInfo.endpoints[requiredNetwork];
+
+      // Get base endpoint cached transactions
+      baseEndpoint = `${covalentApiUrl}address/${account}/transactions_v2/?block-signed-at-asc=true&skip=0`;
+      baseTxs = this.getCachedRequest(baseEndpoint);
+
+      // Check if the latest blockNumber is actually the latest one
+      if (baseTxs && baseTxs.data && baseTxs.data.data && baseTxs.data.data.items && Object.values(baseTxs.data.data.items).length){
+
+        const cachedRows = Object.values(baseTxs.data.data.items).length;
+        const lastCachedTx = Object.values(baseTxs.data.data.items).pop();
+        const lastCachedBlockNumber = lastCachedTx && lastCachedTx.block_height ? parseInt(lastCachedTx.block_height)+1 : 0;
+
+        const covalentEndpointLastBlock = `${covalentApiUrl}address/${account}/transactions_v2/?block-signed-at-asc=true&skip=${cachedRows}`;
+        let latestTxs = await this.makeCachedRequest(covalentEndpointLastBlock,15);
+
+        if (latestTxs && latestTxs.data.data.items && latestTxs.data.data.items.length){
+          latestTxs = await this.filterPolygonTxs(latestTxs.data.data.items,enabledTokens);
+          // latestTxs = await this.filterEthereumTxs(latestTxs,enabledTokens,true,false);
+
+          if (latestTxs && Object.values(latestTxs).length){
+
+            const latestBlockNumbers = Object.values(latestTxs).map( lastTx => (parseInt(lastTx.block_height)) );
+            const lastRealBlockNumber = Math.max(...latestBlockNumbers);
+
+            // If real tx blockNumber differs from last blockNumber
+            if (lastRealBlockNumber>=lastCachedBlockNumber){
+              // Merge latest Txs with baseTxs
+              Object.values(latestTxs).forEach((tx) => {
+                const txFound = Object.keys(baseTxs.data.data.items).includes(tx.tx_hash);
+                if (!txFound){
+                  baseTxs.data.data.items[tx.tx_hash] = tx;
+                }
+              });
+
+              // Save covalent txs
+              this.saveFetchedTxs(baseEndpoint,baseTxs.data.data.items);
+            }
+          }
+        }
+      } else {
+        baseTxs = null;
+      }
+
+      let txs = baseTxs;
+
+      if (debug){
+        console.log('DEBUG - txs',txs);
+      }
+
+      if (!txs){
+        // Make request
+        txs = await this.makeRequest(baseEndpoint);
+
+        // console.log('makeRequest 1',account,baseEndpoint,txs,txs.data.message,txs.data.status,parseInt(txs.data.status));
+
+        if (!txs || !txs.data || parseInt(txs.data.status)===0){
+          let requestCount = 0;
+          let requestStatus = false;
+          do {
+            await this.asyncTimeout(500);
+            txs = await this.makeRequest(baseEndpoint);
+            requestCount++;
+            requestStatus = txs && txs.data ? parseInt(txs.data.status) : false;
+            // console.log('makeRequest '+(requestCount+1),account,baseEndpoint,txs,txs.data.message,txs.data.status,parseInt(txs.data.status));
+          } while (requestCount<5 && !requestStatus);
+        }
+
+        // Cache request
+        if (txs && txs.data && parseInt(txs.data.status)>0){
+          const timestamp = parseInt(Date.now()/1000);
+          const cachedRequests_polygon = this.getCachedDataWithLocalStorage('cachedRequests_polygon',{});
+          cachedRequests_polygon[baseEndpoint] = {
+            data:txs,
+            timestamp
+          };
+          this.setCachedDataWithLocalStorage('cachedRequests_polygon',cachedRequests_polygon);
+        }
+      }
+
+      if (txs && txs.data && txs.data.data && txs.data.data.items){
+        results = txs.data.data.items;
+      } else {
+        return [];
+      }
+    }
+
+    return {
+      results,
+      baseTxs,
+      baseEndpoint
+    };
+  }
   getEtherscanBaseTxs = async (account=false,firstBlockNumber=0,endBlockNumber='latest',enabledTokens=[],debug=false) => {
     account = account ? account : this.props.account;
 
@@ -1211,6 +1424,43 @@ class FunctionsUtil {
             .filter(tx => (tx.token && enabledTokens.includes(tx.token.toUpperCase())))
             .sort((a,b) => (a.timeStamp < b.timeStamp ? -1 : 1));
   }
+  getPolygonCurrentLastStateId = async () => {
+    const contractInstance = new this.props.web3Polygon.eth.Contract(
+      [
+        {
+          constant: true,
+          inputs: [],
+          name: "lastStateId",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          payable: false,
+          stateMutability: "view",
+          type: "function",
+        },
+      ],
+      "0x0000000000000000000000000000000000001001"
+    );
+
+    return parseInt(await contractInstance.methods.lastStateId().call());
+  }
+  checkPolygonTransactionIncluded = async (txHash) => {
+    const [
+      last_state_id,
+      tx,
+    ] = await Promise.all([
+      this.getPolygonCurrentLastStateId(),
+      this.props.web3Polygon.eth.getTransactionReceipt(txHash)
+    ]);
+
+    const tx_state_id = tx && tx.logs && tx.logs.length ? this.props.web3.utils.hexToNumberString(tx.logs[tx.logs.length-1].topics[1]) : null;
+
+    return tx_state_id ? parseInt(last_state_id) >= parseInt(tx_state_id) : null;
+  }
   filterCurveTxs = async (results,enabledTokens=[]) => {
 
     if (!results || !results.length || typeof results.forEach !== 'function'){
@@ -1231,7 +1481,74 @@ class FunctionsUtil {
 
     return curveTxs;
   }
+  normalizePolygonTx = (tx,tokenConfig=null) => {
+    tokenConfig = tokenConfig || Object.values(this.props.availableTokens).find( tokenConfig => tokenConfig.idle.address.toLowerCase() === tx.to_address.toLowerCase() );
+    
+    const depositLogEvent = tx.log_events && tokenConfig && tokenConfig.idle ? tx.log_events.find( log => log.sender_address.toLowerCase() === tokenConfig.address.toLowerCase() && log.decoded.name === 'Transfer' && log.decoded.params.find(param=>param.name==='from').value.toLowerCase() === this.props.account.toLowerCase() && log.decoded.params.find(param=>param.name==='to').value.toLowerCase() === tokenConfig.idle.address.toLowerCase() ) : null;
+    const redeemLogEvent = tx.log_events && tokenConfig && tokenConfig.idle ? tx.log_events.find( log => log.sender_address.toLowerCase() === tokenConfig.address.toLowerCase() && log.decoded.name === 'Transfer' && log.decoded.params.find(param=>param.name==='to').value.toLowerCase() === this.props.account.toLowerCase() && log.decoded.params.find(param=>param.name==='from').value.toLowerCase() === tokenConfig.idle.address.toLowerCase() ) : null;
+    const withdrawLogEvent = tx.log_events && tokenConfig && tokenConfig.address ? tx.log_events.find( log => log.sender_address.toLowerCase() === tokenConfig.address.toLowerCase() && log.decoded.name === 'Transfer' && log.decoded.params.find(param=>param.name==='from').value.toLowerCase() === this.props.account.toLowerCase() && log.decoded.params.find(param=>param.name==='to').value.toLowerCase() === '0x0000000000000000000000000000000000000000' ) : null;
+
+    const tokenDecimal = 18;
+    const tokenSymbol = tokenConfig.token;
+    const hashKey = `${tx.tx_hash}_${tokenSymbol}`;
+    const idleToken = tokenConfig.idle ? tokenConfig.idle.token : null;
+    const action = depositLogEvent ? 'Deposit' : (redeemLogEvent ? 'Redeem' : (withdrawLogEvent ? 'Withdraw' : null));
+    const timeStamp = parseInt(this.strToMoment(tx.block_signed_at)._d.getTime()/1000);
+
+    let logEvent = null;
+    switch (action){
+      case 'Deposit':
+        logEvent = depositLogEvent;
+      break;
+      case 'Redeem':
+        logEvent = redeemLogEvent;
+      break;
+      case 'Withdraw':
+        logEvent = withdrawLogEvent;
+      break;
+      default:
+      break;
+    }
+
+    const logs = tx.log_events ? tx.log_events.map( log => ({
+      topics:log.raw_log_topics
+    })) : [];
+    const value = logEvent ? this.fixTokenDecimals(logEvent.decoded.params.find( param => param.name==='value' ).value,tokenDecimal) : this.fixTokenDecimals(tx.value,tokenDecimal);
+
+    return {
+      logs,
+      value,
+      action,
+      hashKey,
+      timeStamp,
+      idleToken,
+      tokenSymbol,
+      tokenDecimal,
+      hash:tx.tx_hash,
+      to:tx.to_address,
+      status:'Completed',
+      from:tx.from_address,
+      gasUsed:tx.gas_spent,
+      gasPrice:tx.gas_price,
+      token:tokenConfig.token,
+      contractAddress:tokenConfig.address,
+      blockNumber:tx.log_events[0].block_height
+    };
+  }
+  filterPolygonTxs = async (txs,enabledTokens,processTransactions=true) => {
+    const idleTokensAddresses = Object.values(this.props.availableTokens).map( tokenConfig => tokenConfig.idle.address.toLowerCase() );
+    const polygonTxs = txs ? txs.filter( tx => idleTokensAddresses.includes(tx.to_address.toLowerCase()) ).reduce( (output,tx) => {
+      const mappedTx = this.normalizePolygonTx(tx);
+      output[mappedTx.hashKey] = mappedTx;
+      return output;
+    },{}) : {};
+
+    return processTransactions ? await this.processTransactions(polygonTxs,enabledTokens) : polygonTxs;
+  }
   filterEtherscanTxs = async (results,enabledTokens=[],processTxs=true,processStoredTxs=true) => {
+    return await this.filterEthereumTxs(results,enabledTokens,processTxs,processStoredTxs);
+  }
+  filterEthereumTxs = async (results,enabledTokens=[],processTxs=true,processStoredTxs=true) => {
     if (!this.props.account || !results || !results.length || typeof results.forEach !== 'function'){
       return [];
     }
@@ -2295,14 +2612,20 @@ class FunctionsUtil {
     }
     return false;
   }
-  getEtherscanTransactionUrl = (txHash) => {
-    const requiredNetwork = this.props.network.current.id || this.getGlobalConfig(['network','requiredNetwork']);
-    const baseurl = this.getGlobalConfig(['network','providers','etherscan','baseUrl',requiredNetwork]);
+  getEtherscanTransactionUrl = (txHash,requiredNetwork=null) => {
+    const defaultNetwork = this.getGlobalConfig(['network','requiredNetwork']);
+    requiredNetwork = requiredNetwork || this.getCurrentNetworkId();
+    const explorer = this.getGlobalConfig(['network','availableNetworks',requiredNetwork,'explorer']);
+    const defaultUrl = this.getGlobalConfig(['network','providers','etherscan','baseUrl',defaultNetwork]);
+    const baseurl = this.getGlobalConfig(['network','providers',explorer,'baseUrl',requiredNetwork]) || defaultUrl;
     return txHash ? `${baseurl}/tx/${txHash}` : null;
   }
-  getEtherscanAddressUrl = (address) => {
-    const requiredNetwork = this.props.network.current.id || this.getGlobalConfig(['network','requiredNetwork']);
-    const baseurl = this.getGlobalConfig(['network','providers','etherscan','baseUrl',requiredNetwork]);
+  getEtherscanAddressUrl = (address,requiredNetwork=null) => {
+    const defaultNetwork = this.getGlobalConfig(['network','requiredNetwork']);
+    requiredNetwork = requiredNetwork || this.getCurrentNetworkId();
+    const explorer = this.getGlobalConfig(['network','availableNetworks',requiredNetwork,'explorer']);
+    const defaultUrl = this.getGlobalConfig(['network','providers','etherscan','baseUrl',defaultNetwork]);
+    const baseurl = this.getGlobalConfig(['network','providers',explorer,'baseUrl',requiredNetwork]) || defaultUrl;
     return address ? `${baseurl}/address/${address}` : null;
   }
   formatMoney = (amount, decimalCount = 2, decimal = ".", thousands = ",") => {
@@ -4732,6 +5055,7 @@ class FunctionsUtil {
 
     return await contract.methods[methodName](...params).estimateGas(callParams);
   }
+  getTxReceipt = async (hash) => {}
   getTxDecodedLogs = async (tx,logAddr,decodeLogs,storedTx) => {
 
     let txReceipt = storedTx && storedTx.txReceipt ? storedTx.txReceipt : null;
@@ -5556,8 +5880,6 @@ class FunctionsUtil {
 
     const aaveIncentivesController_address = await this.genericContractCall(aTokenConfig.token,'getIncentivesController');
 
-    // console.log('getStkAaveDistribution_2',aaveIncentivesController_address);
-
     if (!aaveIncentivesController_address){
       return aaveDistribution;
     }
@@ -5597,8 +5919,6 @@ class FunctionsUtil {
         if (annualize){
           aaveDistribution = aaveDistribution.div(1e18).times(secondsPerYear);
         }
-
-        // console.log('getStkAaveDistribution_4',tokenConfig.idle.token,aTokenIdleSupply.toFixed(),aTokenTotalSupply.toFixed(),aavePoolShare.toFixed(),aaveSpeed.toFixed(),aaveDistribution.toFixed());
 
         if (!this.BNify(aaveDistribution).isNaN()){
           return this.setCachedDataWithLocalStorage(cachedDataKey,aaveDistribution);

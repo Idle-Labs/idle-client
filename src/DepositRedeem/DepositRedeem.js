@@ -1380,6 +1380,7 @@ class DepositRedeem extends Component {
     // const depositDisabledMessage1 = isDepositDisabled && this.props.tokenConfig.canDeposit.disabledMessageDepositKey ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageDepositKey]) : null;
     // const depositDisabledMessage2 = this.state.canRedeem ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageRedeemKey]) : "";
     const depositDisabledMessage = isDepositDisabled ? (this.state.canRedeem && this.props.tokenConfig.canDeposit.disabledMessageRedeemKey ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageRedeemKey]) : (this.props.tokenConfig.canDeposit.disabledMessageDepositKey ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageDepositKey]) : null) ) : null;
+    const currentNetwork = this.functionsUtil.getCurrentNetwork();
 
     const govTokensDisabled = this.props.tokenConfig.govTokensDisabled;
     const govTokensEnabled = !govTokensDisabled && this.functionsUtil.getGlobalConfig(['strategies', this.props.selectedStrategy, 'govTokensEnabled']) && Object.keys(this.state.tokenGovTokens).length > 0;
@@ -1441,10 +1442,19 @@ class DepositRedeem extends Component {
     const ETHWrapperComponent = ethWrapperInfo.subComponent;
     const showETHWrapper = this.props.selectedToken === 'WETH' && ethWrapperInfo.enabled && !this.props.isMigrationTool && this.state.action === 'deposit';
 
-    const canPerformAction = /*!depositCurve && !this.state.redeemCurveEnabled && */((this.state.action === 'deposit' && this.state.canDeposit && !isDepositDisabled) || (this.state.action === 'redeem' && this.state.canRedeem) || redeemGovTokens) && (!this.state.showETHWrapperEnabled || this.state.action === 'redeem');
+    const polygonBridgeInfo = this.functionsUtil.getGlobalConfig(['tools','polygonBridge']);
+    // const PolygonBridgeComponent = polygonBridgeInfo.subComponent;
+    const polygonNetworkId = this.functionsUtil.getGlobalConfig(['network','providers','polygon','networkPairs',currentNetwork.id]);
+    // const polygonNetwork = this.functionsUtil.getGlobalConfig(['network','availableNetworks',polygonNetworkId]);
+
+    const canPerformAction = /*!depositCurve && !this.state.redeemCurveEnabled && */((this.state.action === 'deposit' && this.state.canDeposit && !isDepositDisabled) || (this.state.action === 'redeem' && this.state.canRedeem) || redeemGovTokens) && (!this.state.showETHWrapperEnabled || this.state.action === 'redeem') && (!this.state.showPolygonBridgeEnabled || this.state.action === 'redeem');
     const showActionFlow = !redeemGovTokens && canPerformAction;
 
-    const showBuyFlow = this.state.componentMounted && (!showDepositCurve || this.state.showBuyFlow) && !this.state.depositCurveEnabled && this.state.tokenApproved && !this.state.contractPaused && (!this.state.migrationEnabled || this.state.skipMigration) && this.state.action === 'deposit' && !isDepositDisabled && !this.state.canDeposit && !this.state.showETHWrapperEnabled;
+    const showBuyFlow = this.state.componentMounted && currentNetwork.provider === 'infura' && (!showDepositCurve || this.state.showBuyFlow) && !this.state.depositCurveEnabled && this.state.tokenApproved && !this.state.contractPaused && (!this.state.migrationEnabled || this.state.skipMigration) && this.state.action === 'deposit' && !isDepositDisabled && !this.state.canDeposit && !this.state.showETHWrapperEnabled;
+    const showPolygonBridge = this.state.componentMounted && this.state.action === 'deposit' && !this.state.canDeposit && currentNetwork.provider === 'polygon';
+    const showPolygonBridgeBanner = !showPolygonBridge && currentNetwork.provider === 'polygon' && polygonNetworkId && polygonBridgeInfo.enabled && this.state.action === 'deposit';
+
+    const buyToken = this.functionsUtil.BNify(this.props.accountBalance).gt(0) ? this.props.selectedToken : this.functionsUtil.getBaseToken();
 
     const _referral = this.getReferralAddress();
     const showReferral = _referral && this.state.action === 'deposit' && showActionFlow && !showBuyFlow;
@@ -3087,23 +3097,64 @@ class DepositRedeem extends Component {
           )
         }
         {
-          showBuyFlow &&
-          (<Flex
-            mt={3}
-            width={[1, 0.5]}
-            alignItems={'stretch'}
-            flexDirection={'column'}
-            justifyContent={'center'}
-          >
-            <BuyModal
-              {...this.props}
-              showInline={true}
-              availableMethods={[]}
-              buyToken={this.props.selectedToken}
-            />
-          </Flex>)
+          showBuyFlow ? (
+            <Flex
+              mt={3}
+              width={[1,0.5]}
+              alignItems={'stretch'}
+              flexDirection={'column'}
+              justifyContent={'center'}
+            >
+              <BuyModal
+                {...this.props}
+                showInline={true}
+                availableMethods={[]}
+                buyToken={this.props.selectedToken}
+              />
+            </Flex>
+          ) : showPolygonBridge && (
+            <Flex
+              mt={3}
+              width={[1,0.36]}
+              alignItems={'stretch'}
+              flexDirection={'column'}
+              justifyContent={'center'}
+            >
+              <DashboardCard
+                cardProps={{
+                  p:3
+                }}
+              >
+                <Flex
+                  alignItems={'center'}
+                  flexDirection={'column'}
+                >
+                  <Image
+                    height={'2em'}
+                    src={polygonBridgeInfo.image}
+                  />
+                  <Text
+                    mt={1}
+                    fontSize={2}
+                    color={'cellText'}
+                    textAlign={'center'}
+                  >
+                    Use the {polygonBridgeInfo.label} to deposit your {this.props.selectedToken} in the Polygon blockchain.
+                  </Text>
+                  <RoundButton
+                    buttonProps={{
+                      mt:2,
+                      width:[1,1/2]
+                    }}
+                    handleClick={ e => this.props.goToSection(`tools/${polygonBridgeInfo.route}/${this.props.selectedToken}`)}
+                  >
+                    Deposit
+                  </RoundButton>
+                </Flex>
+              </DashboardCard>
+            </Flex>
+          )
         }
-
         <ShareModal
           confettiEnabled={true}
           icon={`images/medal.svg`}
