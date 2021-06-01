@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import SmartNumber from '../SmartNumber/SmartNumber';
-import { Text, Icon, Image, Button } from "rimble-ui";
 import FunctionsUtil from '../utilities/FunctionsUtil';
+import { Text, Icon, Image, Button, Link } from "rimble-ui";
 
 class CustomField extends Component {
 
@@ -75,6 +75,9 @@ class CustomField extends Component {
         customValue = this.functionsUtil.BNify(customValue).toString();
         CustomComponent = SmartNumber;
         fieldProps.number = customValue;
+      break;
+      case 'link':
+        CustomComponent = Link;
       break;
       case 'icon':
         CustomComponent = Icon;

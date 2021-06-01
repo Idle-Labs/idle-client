@@ -9,7 +9,7 @@ import CustomTooltip from '../CustomTooltip/CustomTooltip';
 import VariationNumber from '../VariationNumber/VariationNumber';
 import AllocationChart from '../AllocationChart/AllocationChart';
 import CustomTooltipRow from '../CustomTooltip/CustomTooltipRow';
-import { Image, Text, Loader, Button, Tooltip, Icon, Flex } from "rimble-ui";
+import { Image, Text, Loader, Button, Tooltip, Icon, Flex, Link } from "rimble-ui";
 
 class AssetField extends Component {
 
@@ -1251,24 +1251,30 @@ class AssetField extends Component {
             CustomComponent = SmartNumber;
             fieldProps.number = customValue;
           break;
+          case 'link':
+            CustomComponent = Link;
+          break;
           case 'icon':
             CustomComponent = Icon;
             fieldProps.name = customValue;
-            const customFieldName = Object.values(fieldInfo.path).pop();
-            if (this.props.tokenConfig[`${customFieldName}Props`]){
-              const customFieldProps = this.props.tokenConfig[`${customFieldName}Props`];
-              // Replace props
-              if (customFieldProps && Object.keys(customFieldProps).length){
-                Object.keys(customFieldProps).forEach(p => {
-                  fieldProps[p] = customFieldProps[p];
-                });
-              }
-            }
           break;
           default:
             CustomComponent = Text;
           break;
         }
+
+        // Custom Field Props
+        const customFieldName = Object.values(fieldInfo.path).pop();
+        if (this.props.tokenConfig[`${customFieldName}Props`]){
+          const customFieldProps = this.props.tokenConfig[`${customFieldName}Props`];
+          // Replace props
+          if (customFieldProps && Object.keys(customFieldProps).length){
+            Object.keys(customFieldProps).forEach(p => {
+              fieldProps[p] = customFieldProps[p];
+            });
+          }
+        }
+
         output = customValue ? (
           <CustomComponent {...fieldProps}>{customValue}</CustomComponent>
         ) : loader

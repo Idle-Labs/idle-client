@@ -791,8 +791,9 @@ class RimbleTransaction extends React.Component {
     await this.functionsUtil.asyncForEach(Object.keys(contracts),async (contractName) => {
       const contractInfo = contracts[contractName];
       if (contractInfo.address !== null && contractInfo.abi !== null){
+        const useInfuraProvider = !!contractInfo.useInfuraProvider;
         this.functionsUtil.customLog('initializeContracts, init contract', contractName, contractInfo.address);
-        await this.initContract(contractName, contractInfo.address, contractInfo.abi);
+        await this.initContract(contractName, contractInfo.address, contractInfo.abi, useInfuraProvider);
       }
     });
 

@@ -457,7 +457,7 @@ class Dashboard extends Component {
     const isPolygon = this.state.currentNetwork.provider === 'polygon';
     const isPolygonApproved = this.functionsUtil.getStoredItem('polygonApproved',false,false);
 
-    console.log('checkPolygonModal',this.state.currentNetwork,isPolygon);
+    // console.log('checkPolygonModal',this.state.currentNetwork,isPolygon);
 
     // Show Beta Warning modal
     if (isPolygon && !isPolygonApproved){

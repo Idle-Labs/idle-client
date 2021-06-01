@@ -1058,9 +1058,15 @@ class FunctionsUtil {
       return [];
     }
 
+    const cachedDataKey = `polygonBridgeTxs_${account}_${JSON.stringify(enabledTokens)}`;
+    const cachedData = this.getCachedData(cachedDataKey);
+    if (cachedData) {
+      return cachedData;
+    }
+
     account = account.toLowerCase();
 
-    const txs = [];
+    let txs = [];
     let depositTxs = [];
     const currentNetwork = this.getCurrentNetwork();
     const covalentInfo = this.getGlobalConfig(['network','providers','covalent']);
@@ -1073,11 +1079,11 @@ class FunctionsUtil {
     if (covalentInfo.enabled && covalentInfo.endpoints[polygonNetworkId]){
       const covalentApiUrl = covalentInfo.endpoints[polygonNetworkId];
       const polygonAvailableTokens = this.getGlobalConfig(['tools','polygonBridge','props','availableTokens']);
-      const polygonEndpoint = `${covalentApiUrl}address/${account}/transactions_v2/?block-signed-at-asc=true&skip=0`;
+      const polygonEndpoint = `${covalentApiUrl}address/${account}/transactions_v2/?block-signed-at-asc=true&skip=0&key=${covalentInfo.key}`;
 
       const ethereumNetworkId = this.getGlobalConfig(['network','providers','polygon','networkPairs',polygonNetworkId]);
       const etherscanApiUrl = etherscanInfo.endpoints[ethereumNetworkId];
-      const etherscanEndpoint = `${etherscanApiUrl}?&apikey=${env.REACT_APP_ETHERSCAN_KEY}&module=account&action=tokentx&address=${this.props.account}&sort=desc`;
+      const etherscanEndpoint = `${etherscanApiUrl}?&apikey=${etherscanInfo.key}&module=account&action=tokentx&address=${this.props.account}&sort=desc`;
 
       const [
         last_state_id,
@@ -1088,6 +1094,9 @@ class FunctionsUtil {
         this.makeCachedRequest(polygonEndpoint,120),
         this.makeCachedRequest(etherscanEndpoint,120)
       ]);
+
+      console.log('polygonTxs',polygonTxs);
+      console.log('etherscanTxs',etherscanTxs);
 
       const rootTokensAddresses = [];
       const childTokensAddresses = [];
@@ -1103,22 +1112,33 @@ class FunctionsUtil {
       if (etherscanTxs && etherscanTxs.data && etherscanTxs.data.result){
         depositTxs = etherscanTxs.data.result.filter( tx => rootTokensAddresses.includes(tx.contractAddress.toLowerCase()) && tx.to.toLowerCase() === erc20PredicateConfig.address.toLowerCase() && tx.from.toLowerCase() === this.props.account.toLowerCase() );
         await this.asyncForEach(depositTxs, async (tx) => {
-          
+          const tokenConfig = this.getGlobalConfig(['stats','tokens',tx.tokenSymbol]);
+          const ethereumTx = {...tx};
+          ethereumTx.action = 'Deposit';
+          ethereumTx.networkId = ethereumNetworkId;
+          ethereumTx.value = this.fixTokenDecimals(ethereumTx.value,tokenConfig.decimals);
+          const txReceipt = await this.getTxReceipt(ethereumTx.hash,this.props.web3Infura);
+          const tx_state_id = txReceipt ? parseInt(this.props.web3.utils.hexToNumberString(txReceipt.logs[txReceipt.logs.length-1].topics[1])) : null;
+          ethereumTx.included = last_state_id && tx_state_id ? last_state_id>=tx_state_id : false;
+          txs.push(ethereumTx);
         });
       }
 
       if (polygonTxs && polygonTxs.data && polygonTxs.data.data && polygonTxs.data.data.items && Object.values(polygonTxs.data.data.items).length){
         const filteredTxs = polygonTxs.data.data.items.filter( tx => childTokensAddresses.includes(tx.to_address.toLowerCase()) );
-          await this.asyncForEach(filteredTxs, async (tx) => {
-          const tokenConfig = tokenConfig.childToken ? Object.values(polygonAvailableTokens).find( tokenConfig => tokenConfig.childToken.address.toLowerCase() === tx.to_address.toLowerCase() ) : null;
+        // console.log('polygonTxs',polygonTxs);
+        await this.asyncForEach(filteredTxs, async (tx) => {
+          const tokenConfig = Object.values(polygonAvailableTokens).find( tokenConfig => (tokenConfig.childToken && tokenConfig.childToken.address.toLowerCase() === tx.to_address.toLowerCase()) );
           if (!tokenConfig || !tokenConfig.childToken){
             return;
           }
           tokenConfig.address = tokenConfig.childToken.address;
           if (!enabledTokens || !enabledTokens.length || enabledTokens.includes(tokenConfig.token)){
             const polygonTx = this.normalizePolygonTx(tx,tokenConfig);
+            console.log('polygonTx',polygonTx);
             if (polygonTx.action === 'Withdraw'){
               const tx_state_id = parseInt(this.props.web3.utils.hexToNumberString(polygonTx.logs[polygonTx.logs.length-1].topics[1]));
+              polygonTx.networkId = polygonNetworkId;
               polygonTx.included = last_state_id && tx_state_id ? last_state_id>=tx_state_id : false;
               polygonTx.exited = false;
               try {
@@ -1135,9 +1155,11 @@ class FunctionsUtil {
       }
     }
 
-    // console.log('getPolygonBridgeTxs',txs);
+    txs = txs.sort((a,b) => (a.timeStamp < b.timeStamp ? 1 : -1));
 
-    return txs;
+    console.log('getPolygonBridgeTxs',txs);
+
+    return this.setCachedData(cachedDataKey,txs);
   }
   getPolygonBaseTxs = async (account=false,enabledTokens=[],debug=false) => {
     account = account ? account : this.props.account;
@@ -1160,7 +1182,7 @@ class FunctionsUtil {
       const covalentApiUrl = covalentInfo.endpoints[requiredNetwork];
 
       // Get base endpoint cached transactions
-      baseEndpoint = `${covalentApiUrl}address/${account}/transactions_v2/?block-signed-at-asc=true&skip=0`;
+      baseEndpoint = `${covalentApiUrl}address/${account}/transactions_v2/?block-signed-at-asc=true&key=${covalentInfo.key}`;
       baseTxs = this.getCachedRequest(baseEndpoint);
 
       // Check if the latest blockNumber is actually the latest one
@@ -4775,7 +4797,7 @@ class FunctionsUtil {
     const etherscanInfo = this.getGlobalConfig(['network','providers','etherscan']);
     if (etherscanInfo.enabled && etherscanInfo.endpoints[requiredNetwork]){
       const etherscanApiUrl = etherscanInfo.endpoints[requiredNetwork];
-      const etherscanEndpoint = `${etherscanApiUrl}?&apikey=${env.REACT_APP_ETHERSCAN_KEY}&module=account&action=tokentx&address=${contractAddress}&sort=desc`;
+      const etherscanEndpoint = `${etherscanApiUrl}?&apikey=${etherscanInfo.key}&module=account&action=tokentx&address=${contractAddress}&sort=desc`;
       const transactions = await this.makeCachedRequest(etherscanEndpoint,1800,true);
       if (transactions && typeof transactions.result === 'object'){
         return transactions.result.filter( tx => tx.from === '0x0000000000000000000000000000000000000000' && tx.to.toLowerCase() === contractAddress.toLowerCase() );
@@ -5055,7 +5077,20 @@ class FunctionsUtil {
 
     return await contract.methods[methodName](...params).estimateGas(callParams);
   }
-  getTxReceipt = async (hash) => {}
+  getTxReceipt = async (txHash,web3=null) => {
+    web3 = web3 || this.props.web3;
+    if (!web3 || !web3.eth){
+      return null;
+    }
+    return await (new Promise( async (resolve, reject) => {
+      web3.eth.getTransactionReceipt(txHash,(err,tx)=>{
+        if (err){
+          reject(err);
+        }
+        resolve(tx);
+      });
+    }));
+  }
   getTxDecodedLogs = async (tx,logAddr,decodeLogs,storedTx) => {
 
     let txReceipt = storedTx && storedTx.txReceipt ? storedTx.txReceipt : null;
@@ -5962,6 +5997,57 @@ class FunctionsUtil {
     });
 
     return output;
+  }
+  getWMaticApr = async (token,tokenConfig,maticConversionRate=null) => {
+    const wMaticTokenConfig = this.getGlobalConfig(['govTokens','WMATIC']);
+    if (!wMaticTokenConfig.enabled){
+      return false;
+    }
+
+    const cachedDataKey = `getWMaticApr_${tokenConfig.idle.token}_${maticConversionRate}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData && !this.BNify(cachedData).isNaN()){
+      return this.BNify(cachedData);
+    }
+
+    let wMaticApr = this.BNify(0);
+    const distributionSpeed = await this.getStkAaveDistribution(tokenConfig);
+
+    if (distributionSpeed && this.BNify(distributionSpeed).gt(0)){
+
+      // Get COMP conversion rate
+      if (!maticConversionRate){
+        const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
+        try {
+          const destTokenConfig = {
+            address:wMaticTokenConfig.addressForPrice || wMaticTokenConfig.address
+          };
+          maticConversionRate = await this.getUniswapConversionRate(DAITokenConfig,destTokenConfig);
+        } catch (error) {
+
+        }
+        if (!maticConversionRate || maticConversionRate.isNaN()){
+          maticConversionRate = this.BNify(1);
+        }
+      }
+
+      const wMaticValue = this.BNify(maticConversionRate).times(distributionSpeed);
+      const tokenAllocation = await this.getTokenAllocation(tokenConfig,false,false);
+
+      console.log('wMaticApr',tokenConfig.idle.token,distributionSpeed.toFixed(),this.BNify(maticConversionRate).toFixed(),tokenAllocation);
+
+      if (tokenAllocation){
+        wMaticApr = wMaticValue.div(tokenAllocation.totalAllocationConverted).times(100);
+
+        console.log('wMaticApr',tokenConfig.idle.token,distributionSpeed.toFixed(),this.BNify(maticConversionRate).toFixed(),wMaticValue.toFixed(),tokenAllocation.totalAllocationConverted.toFixed(),wMaticApr.toFixed());
+
+        if (!this.BNify(wMaticApr).isNaN()){
+          this.setCachedDataWithLocalStorage(cachedDataKey,wMaticApr);
+        }
+      }
+    }
+
+    return wMaticApr;
   }
   getStkAaveApr = async (token,tokenConfig,aaveConversionRate=null) => {
     const stkAAVETokenConfig = this.getGlobalConfig(['govTokens','stkAAVE']);
@@ -7311,9 +7397,6 @@ class FunctionsUtil {
     if (tokenAprs.avgApr){
 
       tokenAprs.avgApy = this.apr2apy(tokenAprs.avgApr.div(100)).times(100);
-
-      // tokenAprs.avgApr = tokenAprs.avgApr.plus(govTokensApr);
-      // tokenAprs.avgApy = tokenAprs.avgApy.plus(govTokensApr);
 
       // Add $IDLE token APR
       const idleGovTokenShowAPR = this.getGlobalConfig(['govTokens','IDLE','showAPR']);

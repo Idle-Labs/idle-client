@@ -680,6 +680,8 @@ class App extends Component {
                         simpleID,
                         biconomy,
                         contracts,
+                        web3Infura,
+                        web3Polygon,
                         transaction,
                         initAccount,
                         initContract,
@@ -713,7 +715,7 @@ class App extends Component {
                               <Route
                                 path="/dashboard/:section?/:param1?/:param2?/:param3?"
                                 render={
-                                  (props) =>
+                                  (props) => 
                                     <Suspense
                                       fallback={SuspenseLoader}
                                     >
@@ -730,6 +732,8 @@ class App extends Component {
                                         isMobile={isMobile}
                                         simpleID={simpleID}
                                         contracts={contracts}
+                                        web3Infura={web3Infura}
+                                        web3Polygon={web3Polygon}
                                         initAccount={initAccount}
                                         permitClient={permitClient}
                                         initSimpleID={initSimpleID}
@@ -783,12 +787,11 @@ class App extends Component {
                                         setCallbackAfterLogin={this.setCallbackAfterLogin.bind(this)}
                                       />
                                     </Suspense>
-
                                 }
                               >
                               </Route>
-                              {
-                                governanceEnabled &&
+                            {
+                              governanceEnabled && 
                                 <Route
                                   path="/governance/:section?/:item_id?"
                                   render={
@@ -809,6 +812,8 @@ class App extends Component {
                                           simpleID={simpleID}
                                           isGovernance={true}
                                           contracts={contracts}
+                                          web3Infura={web3Infura}
+                                          web3Polygon={web3Polygon}
                                           initAccount={initAccount}
                                           initSimpleID={initSimpleID}
                                           initContract={initContract}

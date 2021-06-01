@@ -36,10 +36,11 @@ import IdleTokenV3 from "../contracts/IdleTokenV3.json";
 import IdleTokenV4 from "../contracts/IdleTokenV4.json";
 import BatchDeposit from "../BatchDeposit/BatchDeposit";
 import ChildERC20 from '../abis/polygon/ChildERC20.json';
-import EarlyRewards from "../contracts/EarlyRewards.json";
+import EarlyRewards from '../contracts/EarlyRewards.json';
 import PolygonBridge from '../PolygonBridge/PolygonBridge';
 import CoverProtocol from "../CoverProtocol/CoverProtocol";
 import CurveDeposit from "../abis/curve/CurveDeposit.json";
+// import DummyERC20 from '../abis/polygon/DummyERC20.json';
 import VesterFactory from "../contracts/VesterFactory.json";
 import GovernorAlpha from "../contracts/GovernorAlpha.json";
 import EcosystemFund from "../contracts/EcosystemFund.json";
@@ -437,23 +438,44 @@ const globalConfigs = {
       address: "0xc00e94cb662c3520282e6f5717214004a7f26888" // MAIN
       // address:'0x61460874a7196d6a22d1ee4922473664b3e95270' // KOVAN
     },
-    stkAAVE: {
-      abi: aToken,
-      decimals: 18,
-      showAUM: true, // Include stkAAVE balance in AUM
-      showAPR: true, // Include stkAAVE Apr
-      enabled: true,
-      showPrice: true,
-      token: "stkAAVE",
-      showBalance: true, // Include stkAAVE balance in Portfolio Donut
-      protocol: "aavev2",
-      aprTooltipMode: false,
-      distributionMode: "second",
-      color: "hsl(314, 41%, 51%)",
-      distributionFrequency: "day",
-      address: "0x4da27a545c0c5b758a6ba100e3a049001de870f5", // MAIN
-      addressForPrice: "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9", // MAIN
+    stkAAVE:{
+      abi:aToken,
+      decimals:18,
+      showAUM:true, // Include stkAAVE balance in AUM
+      showAPR:true, // Include stkAAVE Apr
+      enabled:true,
+      showPrice:true,
+      token:'stkAAVE',
+      showBalance:true, // Include stkAAVE balance in Portfolio Donut
+      protocol:'aavev2',
+      aprTooltipMode:false,
+      distributionMode:'second',
+      color:'hsl(314, 41%, 51%)',
+      distributionFrequency:'day',
+      availableNetworks:[1,42,1337],
+      address:'0x4da27a545c0c5b758a6ba100e3a049001de870f5', // MAIN
+      addressForPrice:'0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9', // MAIN
       disabledTokens: ["idleTUSDYield", "idleSUSDYield", "idleFEIYield"],
+    },
+    WMATIC:{
+      abi:ERC20,
+      decimals:18,
+      showAUM:true, // Include stkAAVE balance in AUM
+      showAPR:true, // Include stkAAVE Apr
+      enabled:true,
+      token:'WMATIC',
+      showPrice:true,
+      showBalance:true, // Include stkAAVE balance in Portfolio Donut
+      protocol:'aavev2',
+      disabledTokens:[],
+      aprTooltipMode:false,
+      distributionMode:'second',
+      color:'hsl(314, 41%, 51%)',
+      distributionFrequency:'day',
+      availableNetworks:[137,80001],
+      // address:'0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889', // Mumbai
+      address:'0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', // Polygon
+      addressForPrice:'0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0' // Mainnet
     }
   },
   contracts:{
@@ -466,6 +488,11 @@ const globalConfigs = {
         abi:ChildChainManager,
         // address:'0x2e5e27d50EFa501D90Ad3638ff8441a0C0C0d75e' // Mumbai
         address:'0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa' // Matic
+      },
+      UniswapRouter:{
+        abi:UniswapV2Router02,
+        useInfuraProvider:true,
+        address:'0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
       },
     },
     1:{
@@ -1366,23 +1393,33 @@ const globalConfigs = {
           42: "https://api.staging.nexusmutual.io/v1/"
         }
       },
-      etherscan: {
-        enabled: true, // False for empty txs list (try new wallet)
+      covalent:{
+        enabled:true,
+        key:env.REACT_APP_COVALENT_KEY,
+        endpoints:{
+          137:'https://api.covalenthq.com/v1/137/',
+          80001:'https://api.covalenthq.com/v1/80001/'
+        }
+      },
+      etherscan:{
+        enabled:true, // False for empty txs list (try new wallet)
         keys: [
           env.REACT_APP_ETHERSCAN_KEY,
           env.REACT_APP_ETHERSCAN_KEY2,
           env.REACT_APP_ETHERSCAN_KEY3,
           env.REACT_APP_ETHERSCAN_KEY4
         ],
-        endpoints: {
-          1: "https://api.etherscan.io/api",
-          1337: "https://api.etherscan.io/api",
-          42: "https://api-kovan.etherscan.io/api"
+        endpoints:{
+          1: 'https://api.etherscan.io/api',
+          1337: 'https://api.etherscan.io/api',
+          5: 'https://api-goerli.etherscan.io/api',
+          42: 'https://api-kovan.etherscan.io/api'
         },
-        baseUrl: {
-          1: "https://etherscan.io",
-          1337: "https://etherscan.io",
-          42: "https://kovan.etherscan.io"
+        baseUrl:{
+          1: 'https://etherscan.io',
+          1337: 'https://etherscan.io',
+          5: 'https://goerli.etherscan.io',
+          42: 'https://kovan.etherscan.io',
         }
       },
       snapshot: {
@@ -1672,6 +1709,7 @@ const globalConfigs = {
             }
           },
           */
+          /*
           ETH:{
             name:'ETH',
             token:'ETH',
@@ -1683,6 +1721,7 @@ const globalConfigs = {
               address:'0x8cc8538d60901d19692F5ba22684732Bc28F54A3' // Matic
             }
           },
+          */
           DAI:{
             name:'DAI',
             token:'DAI',

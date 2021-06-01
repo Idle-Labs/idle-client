@@ -2364,7 +2364,7 @@ class DepositRedeem extends Component {
                                   textAlign={'center'}
                                 >
                                   How do you prefer to pay gas fees for this {this.state.action}?
-                              </Text>
+                                </Text>
                                 <Flex
                                   width={[1, 0.7]}
                                   alignItems={'center'}
@@ -2489,7 +2489,7 @@ class DepositRedeem extends Component {
                                   name={'LocalGasStation'}
                                 />
                               </Flex>
-                            ) : showETHWrapper && (
+                            ) : showETHWrapper ? (
                               <Flex
                                 width={1}
                                 alignItems={'center'}
@@ -2529,6 +2529,43 @@ class DepositRedeem extends Component {
                                     toolProps={ethWrapperInfo.props}
                                   />
                                 }
+                              </Flex>
+                            ) : showPolygonBridgeBanner && (
+                              <Flex
+                                p={2}
+                                mt={3}
+                                width={1}
+                                borderRadius={2}
+                                alignItems={'center'}
+                                flexDirection={'column'}
+                                justifyContent={'center'}
+                                backgroundColor={'DashboardCard'}
+                                border={`1px solid ${this.props.theme.colors.primary}`}
+                              >
+                                <Image
+                                  height={'1.2em'}
+                                  src={polygonBridgeInfo.image}
+                                />
+                                <Flex
+                                  width={1}
+                                  alignItems={'center'}
+                                  flexDirection={'row'}
+                                  justifyContent={'center'}
+                                >
+                                  <Link
+                                    textAlign={'center'}
+                                    hoverColor={'primary'}
+                                    href={`/#/dashboard/tools/${polygonBridgeInfo.route}/${this.props.selectedToken}`}
+                                  >
+                                    Use the {polygonBridgeInfo.label} to deposit your {this.props.selectedToken}
+                                  </Link>
+                                  <Icon
+                                    ml={1}
+                                    size={'1em'}
+                                    color={'primary'}
+                                    name={'ArrowForward'}
+                                  />
+                                </Flex>
                               </Flex>
                             )
                           }

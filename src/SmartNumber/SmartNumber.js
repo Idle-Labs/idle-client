@@ -50,7 +50,7 @@ class SmartNumber extends Component {
       });
     }
 
-    const showUnit = formattedNumber !== '-';
+    const showUnit = this.props.unit && formattedNumber !== '-';
     const unitPos = this.props.unitPos ? this.props.unitPos : 'right';
 
     return (
@@ -58,12 +58,12 @@ class SmartNumber extends Component {
         {...flexProps}
       >
         {
-          this.props.unit && unitPos === 'left' && showUnit &&
+          unitPos === 'left' && showUnit &&
             <Text {...this.props.unitProps}>{this.props.unit}</Text>
         }
         <Text {...this.props}>{formattedNumber}</Text>
         {
-          this.props.unit && unitPos === 'right' && showUnit &&
+          unitPos === 'right' && showUnit &&
             <Text {...this.props.unitProps}>{this.props.unit}</Text>
         }
       </Flex>

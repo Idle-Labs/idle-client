@@ -86,6 +86,7 @@ class Notifications extends Component {
     const isMainnet = requiredNetwork === 1;
 
     // Get stored lastOpenTimestamp for notifications
+    const polygonBridgeConfig = this.functionsUtil.getGlobalConfig(['tools','polygonBridge']);
     const notificationsParams = this.functionsUtil.getStoredItem('notificationsParams',true,{});
     const lastOpenTimestamp = notificationsParams.lastOpenTimestamp || null;
 
@@ -98,11 +99,13 @@ class Notifications extends Component {
       latestFeed,
       activeSnapshotProposals,
       governanceProposals,
+      polygonTransactions,
       batchedDeposits,
     ] = await Promise.all([
       this.functionsUtil.getSubstackLatestFeed(),
       this.functionsUtil.getSnapshotProposals(true),
-      (isMainnet && !this.props.isMobile) ? this.governanceUtil.getProposals(null,'Active',oneWeekAgoBlock) : [],
+      (isMainnet && !this.props.isMobile) ? this.governanceUtil.getProposals(null,'Active') : [],
+      polygonBridgeConfig.enabled ? this.functionsUtil.getPolygonBridgeTxs(this.props.account) : null,
       [],// (isMainnet && !this.props.isMobile) ? this.functionsUtil.getBatchedDeposits(this.props.account,'executed') : []
     ]);
 
@@ -112,16 +115,14 @@ class Notifications extends Component {
     if (latestFeed){
       const latestFeedDate = this.functionsUtil.strToMoment(latestFeed.isoDate);
       if (latestFeedDate.isAfter(this.functionsUtil.strToMoment().subtract(7,'d'))){
-        notifications.push(
-          {
-            link:latestFeed.link,
-            image:'/images/substack.png',
-            timestamp:latestFeedDate._d.getTime(),
-            title:this.functionsUtil.htmlDecode(latestFeed.title),
-            text:this.functionsUtil.htmlDecode(latestFeed.content),
-            date:latestFeedDate.utc().format('MMM DD, YYYY HH:mm UTC'),
-          }
-        );
+        notifications.push({
+          link:latestFeed.link,
+          image:'/images/substack.png',
+          timestamp:latestFeedDate._d.getTime(),
+          title:this.functionsUtil.htmlDecode(latestFeed.title),
+          text:this.functionsUtil.htmlDecode(latestFeed.content),
+          date:latestFeedDate.utc().format('MMM DD, YYYY HH:mm UTC'),
+        });
       }
     }
 
@@ -132,16 +133,16 @@ class Notifications extends Component {
 
     if (activeSnapshotProposals){
       activeSnapshotProposals.forEach( p => {
-          const text = this.functionsUtil.htmlDecode(p.msg.payload.body.replace(/^[#]*/,''));
-          // const text = p.msg.payload.name.replace(/^[#]*/,'');
-          notifications.push({
-            text,
-            image:'/images/snapshot.png',
-            timestamp:p.msg.payload.start*1000,
-            link:snapshotProposalBaseUrl+p.authorIpfsHash,
-            title:this.functionsUtil.htmlDecode(p.msg.payload.name),
-            date:this.functionsUtil.strToMoment(p.msg.payload.start*1000).utc().format('MMM DD, YYYY HH:mm UTC'),
-          });
+        const text = this.functionsUtil.htmlDecode(p.msg.payload.body.replace(/^[#]*/,''));
+        // const text = p.msg.payload.name.replace(/^[#]*/,'');
+        notifications.push({
+          text,
+          image:'/images/snapshot.png',
+          timestamp:p.msg.payload.start*1000,
+          link:snapshotProposalBaseUrl+p.authorIpfsHash,
+          title:this.functionsUtil.htmlDecode(p.msg.payload.name),
+          date:this.functionsUtil.strToMoment(p.msg.payload.start*1000).utc().format('MMM DD, YYYY HH:mm UTC'),
+        });
       });
     }
 
@@ -184,6 +185,40 @@ class Notifications extends Component {
           },
           date:this.functionsUtil.strToMoment(timestamp).utc().format('MMM DD, YYYY HH:mm UTC')
         });
+      });
+    }
+
+    if (polygonTransactions){
+      const polygonBridgeBaseUrl = this.functionsUtil.getGlobalConfig(['dashboard','baseRoute'])+`/tools/${polygonBridgeConfig.route}/`;
+      const polygonWithdrawalsToExit = polygonTransactions.filter( tx => tx.action === 'Withdraw' && tx.included && !tx.exited );
+      polygonWithdrawalsToExit.forEach( tx => {
+        const timestamp = tx.timeStamp*1000;
+        const text = `You can Exit ${this.functionsUtil.BNify(tx.value).toFixed(2)} ${tx.tokenSymbol} from Polygon`;
+        notifications.push({
+          text,
+          timestamp,
+          image:polygonBridgeConfig.image,
+          title:'Polygon Withdraw Completed',
+          hash:polygonBridgeBaseUrl+tx.tokenSymbol,
+          date:this.functionsUtil.strToMoment(timestamp).utc().format('MMM DD, YYYY HH:mm UTC')
+        });
+      });
+
+      const polygonCompletedDeposits = polygonTransactions.filter( tx => tx.action === 'Deposit' && tx.included );
+      polygonCompletedDeposits.forEach( tx => {
+        const timestamp = tx.timeStamp*1000;
+        const txDate = this.functionsUtil.strToMoment(timestamp);
+        if (txDate.isAfter(this.functionsUtil.strToMoment().subtract(1,'d'))){
+          const text = `Your ${this.functionsUtil.BNify(tx.value).toFixed(2)} ${tx.tokenSymbol} are now available in Polygon`;
+          notifications.push({
+            text,
+            timestamp,
+            image:polygonBridgeConfig.image,
+            title:'Polygon Deposit Completed',
+            link:this.functionsUtil.getEtherscanTransactionUrl(tx.hash,tx.networkId),
+            date:this.functionsUtil.strToMoment(timestamp).utc().format('MMM DD, YYYY HH:mm UTC')
+          });
+        }
       });
     }
 
