@@ -153,24 +153,29 @@ class TxProgressBar extends Component {
   }
 
   getTxEstimatedTime = (gasPrice) => {
-    let prediction = null;
-    if (this.state.predictTable){
-      this.state.predictTable.forEach((p,i) => {
-        if (!prediction && parseFloat(p.gasprice)>=parseFloat(gasPrice)){
-          prediction = p;
-          return true;
-        }
-      });
-    }
+    const currentNetwork = this.functionsUtil.getCurrentNetwork();
+    if (currentNetwork.provider === 'polygon'){
+      return 30;
+    } else {
+      let prediction = null;
+      if (this.state.predictTable){
+        this.state.predictTable.forEach((p,i) => {
+          if (!prediction && parseFloat(p.gasprice)>=parseFloat(gasPrice)){
+            prediction = p;
+            return true;
+          }
+        });
+      }
 
-    if (this.state.blockTime && prediction){
-      const pdValues = this._estimateWait(prediction,this.state.transaction.gas);
-      const blocksWait = pdValues[0];
-      const blockInterval = this.state.blockTime.block_time;
-      let txMeanSecs = blocksWait * blockInterval;
-      txMeanSecs = parseInt(txMeanSecs.toFixed(0));
-      this.functionsUtil.customLog('getTxEstimatedTime',prediction,this.state.transaction.gas,pdValues,txMeanSecs);
-      return txMeanSecs; // Customized
+      if (this.state.blockTime && prediction){
+        const pdValues = this._estimateWait(prediction,this.state.transaction.gas);
+        const blocksWait = pdValues[0];
+        const blockInterval = this.state.blockTime.block_time;
+        let txMeanSecs = blocksWait * blockInterval;
+        txMeanSecs = parseInt(txMeanSecs.toFixed(0));
+        this.functionsUtil.customLog('getTxEstimatedTime',prediction,this.state.transaction.gas,pdValues,txMeanSecs);
+        return txMeanSecs; // Customized
+      }
     }
 
     return null;

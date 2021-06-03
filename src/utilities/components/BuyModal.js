@@ -567,8 +567,8 @@ class BuyModal extends React.Component {
                 !this.state.selectedProvider &&
                 <Box
                   mb={3}
-                  maxWidth={ this.props.showInline ? '35em' : 'initial' }
-                  width={ (this.props.showInline && !this.props.isMobile) ? 0.72 : 1 }
+                  width={1}
+                  maxWidth={this.props.showInline ? '31em' : 'initial'}
                 >
                   {
                     !this.props.showInline &&

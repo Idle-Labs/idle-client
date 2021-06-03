@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import SmartNumber from '../SmartNumber/SmartNumber';
 import FunctionsUtil from '../utilities/FunctionsUtil';
-import { Text, Icon, Image, Button, Link } from "rimble-ui";
+import { Text, Icon, Image, Button, Link, Flex } from "rimble-ui";
 
 class CustomField extends Component {
 
@@ -81,6 +81,25 @@ class CustomField extends Component {
       break;
       case 'icon':
         CustomComponent = Icon;
+        fieldProps.name = customValue;
+      break;
+      case 'bgIcon':
+        CustomComponent = (props) => (
+          <Flex
+            p={'5px'}
+            borderRadius={'50%'}
+            alignItems={'center'}
+            justifyContent={'center'}
+            backgroundColor={props.bgColor}
+          >
+            <Icon
+              align={'center'}
+              name={customValue}
+              color={props.color}
+              size={this.props.isMobile ? '1em' : '1.4em'}
+            />
+          </Flex>
+        );
         fieldProps.name = customValue;
       break;
       case 'button':

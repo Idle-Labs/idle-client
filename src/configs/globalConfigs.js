@@ -38,24 +38,24 @@ import BatchDeposit from "../BatchDeposit/BatchDeposit";
 import ChildERC20 from '../abis/polygon/ChildERC20.json';
 import EarlyRewards from '../contracts/EarlyRewards.json';
 import PolygonBridge from '../PolygonBridge/PolygonBridge';
-import CoverProtocol from "../CoverProtocol/CoverProtocol";
-import CurveDeposit from "../abis/curve/CurveDeposit.json";
-// import DummyERC20 from '../abis/polygon/DummyERC20.json';
-import VesterFactory from "../contracts/VesterFactory.json";
-import GovernorAlpha from "../contracts/GovernorAlpha.json";
-import EcosystemFund from "../contracts/EcosystemFund.json";
-import Comptroller from "../abis/compound/Comptroller.json";
-import erc20Forwarder from "../contracts/erc20Forwarder.json";
-import BalancerPool from "../abis/balancer/BalancerPool.json";
-import IdleController from "../contracts/IdleController.json";
-import TokenMigration from "../TokenMigration/TokenMigration";
-import BatchMigration from "../BatchMigration/BatchMigration";
-import IdleBatchedMint from "../contracts/IdleBatchedMint.json";
-import { RampInstantSDK } from "@ramp-network/ramp-instant-sdk";
-import IdleProxyMinter from "../contracts/IdleProxyMinter.json";
-import IdleRebalancerV3 from "../contracts/IdleRebalancerV3.json";
-import LiquidityGaugeV2 from "../abis/curve/LiquidityGaugeV2.json";
-import DeployB2BVesting from "../DeployB2BVesting/DeployB2BVesting";
+import CoverProtocol from '../CoverProtocol/CoverProtocol';
+import CurveDeposit from '../abis/curve/CurveDeposit.json';
+import VesterFactory from '../contracts/VesterFactory.json';
+import GovernorAlpha from '../contracts/GovernorAlpha.json';
+import EcosystemFund from '../contracts/EcosystemFund.json';
+import Comptroller from '../abis/compound/Comptroller.json';
+import erc20Forwarder from '../contracts/erc20Forwarder.json';
+import BalancerPool from '../abis/balancer/BalancerPool.json';
+import IdleController from '../contracts/IdleController.json';
+import TokenMigration from '../TokenMigration/TokenMigration';
+import BatchMigration from '../BatchMigration/BatchMigration';
+import IdleBatchedMint from '../contracts/IdleBatchedMint.json';
+import { RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
+import IdleProxyMinter from '../contracts/IdleProxyMinter.json';
+import DepositManager from '../abis/polygon/DepositManager.json';
+import IdleRebalancerV3 from '../contracts/IdleRebalancerV3.json';
+import LiquidityGaugeV2 from '../abis/curve/LiquidityGaugeV2.json';
+import DeployB2BVesting from '../DeployB2BVesting/DeployB2BVesting';
 import RootChainManager from '../abis/polygon/RootChainManager.json';
 import SushiV2Router02 from "../abis/sushiswap/SushiV2Router02.json";
 import IdleBatchConverter from "../contracts/IdleBatchConverter.json";
@@ -239,14 +239,15 @@ const globalConfigs = {
       darkModeEnabled: true
     }
   },
-  governance: {
-    test: false,
-    enabled: true,
-    startBlock: 11333729,
-    baseRoute: "/governance",
-    props: {
-      tokenName: "IDLE",
-      availableContracts: {
+  governance:{
+    test:false,
+    enabled:true,
+    startBlock:11333729,
+    availableNetworks:[1],
+    baseRoute:'/governance',
+    props:{
+      tokenName:'IDLE',
+      availableContracts:{
         IDLE,
         FeeTreasury,
         PriceOracle,
@@ -496,6 +497,10 @@ const globalConfigs = {
       },
     },
     1:{
+      DepositManager:{
+        abi:DepositManager,
+        address:'0x401f6c983ea34274ec46f84d70b31c151321188b'
+      },
       RootChainManager:{
         abi:RootChainManager,
         // address:'0xBbD7cBFA79faee899Eaf900F13C9065bF03B1A74' // Goerli
@@ -1360,14 +1365,64 @@ const globalConfigs = {
       }
     }
   },
-  network: {
-    // Network configurations
-    availableNetworks: {
-      1: "Mainnet",
-      3: "Ropsten",
-      4: "Rinkeby",
-      42: "Kovan",
-      1337: "Hardhat"
+  network:{ // Network configurations
+    availableNetworks:{
+      1:{
+        version:'v1',
+        name:'Mainnet',
+        baseToken:'ETH',
+        provider:'infura',
+        network:'mainnet',
+        explorer:'etherscan'
+      },
+      42:{
+        name:'Kovan',
+        baseToken:'ETH',
+        provider:'infura',
+        explorer:'etherscan'
+      },
+      3:{
+        name:'Ropsten',
+        baseToken:'ETH',
+        provider:'infura',
+        explorer:'etherscan'
+      },
+      4:{
+        name:'Rinkeby',
+        baseToken:'ETH',
+        provider:'infura',
+        explorer:'etherscan'
+      },
+      137:{
+        name:'Matic',
+        version:'v1',
+        network:'mainnet',
+        baseToken:'MATIC',
+        explorer:'polygon',
+        provider:'polygon',
+      },
+      5:{
+        name:'Goerli',
+        baseToken:'ETH',
+        version:'mumbai',
+        network:'testnet',
+        provider:'infura',
+        explorer:'etherscan'
+      },
+      1337:{
+        name:'Hardhat',
+        baseToken:'ETH',
+        provider:'infura',
+        explorer:'etherscan'
+      },
+      80001:{
+        name:'Mumbai',
+        version:'mumbai',
+        network:'testnet',
+        baseToken:'MATIC',
+        explorer:'polygon',
+        provider:'polygon'
+      }
     },
     isForked: false, // If TRUE the tx confirmation callback is fired on the receipt
     requiredNetwork: 1, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
@@ -1386,6 +1441,29 @@ const globalConfigs = {
       ens: {
         enabled: true,
         supportedNetworks: [1]
+      },
+      polygon:{
+        enabled:true,
+        key:env.REACT_APP_POLYGON_KEY,
+        // key:env.REACT_APP_INFURA_KEY,
+        baseUrl:{
+          137:'https://explorer-mainnet.maticvigil.com',
+          80001:'https://explorer-mumbai.maticvigil.com'
+        },
+        networkPairs:{
+          1:137,
+          137:1,
+          5:80001,
+          80001:5
+        },
+        rpc:{
+          1:'https://rpc-mainnet.maticvigil.com/v1/',
+          5:'https://rpc-mumbai.maticvigil.com/v1/',
+          137:'https://rpc-mainnet.maticvigil.com/v1/',
+          80001:'https://rpc-mumbai.maticvigil.com/v1/'
+          // 1:'https://polygon-mainnet.infura.io/',
+          // 137:'https://polygon-mainnet.infura.io/'
+        }
       },
       nexus: {
         endpoints: {
@@ -1652,9 +1730,9 @@ const globalConfigs = {
     polygonBridge:{
       enabled:true,
       route:'polygon-bridge',
-      label:'Polygon PoS Bridge',
       subComponent:PolygonBridge,
       availableNetworks:[1,5,137,80001],
+      label:'Ethereum <> Polygon Bridge',
       image:'images/protocols/polygon.svg',
       desc:'Deposit and Withdraw your tokens from Polygon network with PoS Bridge.',
       props:{
@@ -1670,6 +1748,14 @@ const globalConfigs = {
             name:'EtherPredicate',
             // address:'0xdD6596F2029e6233DEFfaCa316e6A95217d4Dc34', // Goerli
             address:'0x8484Ef722627bf18ca5Ae6BcF031c23E6e922B30' // Mainnet
+          },
+          DepositManager:{
+            name:'DepositManager',
+            address:'0x401f6c983ea34274ec46f84d70b31c151321188b'
+          },
+          StateSender:{
+            name:'StateSender',
+            address:'0x28e4F3a7f651294B9564800b2D01f35189A5bFbE'
           }
         },
         availableTokens:{
@@ -1691,12 +1777,13 @@ const globalConfigs = {
             }
           },
           */
-          /*
           MATIC:{
             name:'MATIC',
             token:'MATIC',
             decimals:18,
             enabled:true,
+            sendValue:true,
+            bridgeType:'plasma',
             rootToken:{
               abi:ERC20,
               name:'MATIC',
@@ -1708,7 +1795,6 @@ const globalConfigs = {
               address:'0x0000000000000000000000000000000000001010' // Matic
             }
           },
-          */
           /*
           ETH:{
             name:'ETH',
@@ -1727,6 +1813,8 @@ const globalConfigs = {
             token:'DAI',
             decimals:18,
             enabled:true,
+            sendValue:false,
+            bridgeType:'pos',
             rootToken:{
               abi:DAI,
               name:'DAI',

@@ -3176,16 +3176,16 @@ class DepositRedeem extends Component {
                     color={'cellText'}
                     textAlign={'center'}
                   >
-                    Use the {polygonBridgeInfo.label} to deposit your {this.props.selectedToken} in the Polygon blockchain.
+                    <strong>You don't have enough {buyToken} in your wallet!</strong><br />Use the {polygonBridgeInfo.label} to deposit your {buyToken} in Polygon.
                   </Text>
                   <RoundButton
                     buttonProps={{
                       mt:2,
                       width:[1,1/2]
                     }}
-                    handleClick={ e => this.props.goToSection(`tools/${polygonBridgeInfo.route}/${this.props.selectedToken}`)}
+                    handleClick={ e => this.props.goToSection(`tools/${polygonBridgeInfo.route}/${buyToken}`)}
                   >
-                    Deposit
+                    Deposit {buyToken}
                   </RoundButton>
                 </Flex>
               </DashboardCard>

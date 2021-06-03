@@ -3,6 +3,7 @@ import FlexLoader from '../FlexLoader/FlexLoader';
 import { Flex, Box, Text, Icon } from "rimble-ui";
 import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
+import BuyModal from '../utilities/components/BuyModal';
 // import TokenWrapper from '../TokenWrapper/TokenWrapper';
 import AssetSelector from '../AssetSelector/AssetSelector';
 import DashboardCard from '../DashboardCard/DashboardCard';
@@ -71,6 +72,7 @@ class PolygonBridge extends Component {
 
   async loadPolygonTxs(){
     const polygonTxs = await this.functionsUtil.getPolygonBridgeTxs();
+    // console.log('polygonTxs',polygonTxs);
     this.setState({
       polygonTxs
     });
@@ -122,6 +124,7 @@ class PolygonBridge extends Component {
     let methodParams = [];
     let contractName = null;
     amount = this.functionsUtil.toBN(amount);
+    const bridgeType = this.state.tokenConfig.bridgeType;
     switch (this.state.selectedAction){
       case 'Deposit':
         switch (this.state.selectedToken){
@@ -132,10 +135,20 @@ class PolygonBridge extends Component {
             methodParams = [this.props.account];
           break;
           default:
-            methodName = 'depositFor';
-            contractName = 'RootChainManager';
             const depositData = this.props.web3.eth.abi.encodeParameter('uint256', amount);
-            methodParams = [this.props.account,this.state.tokenConfig.rootToken.address,depositData];
+            switch (bridgeType){
+              case 'plasma':
+                contractName = 'DepositManager';
+                methodName = 'depositERC20ForUser';
+                methodParams = [this.state.tokenConfig.rootToken.address,this.props.account,depositData];
+              break;
+              default:
+              case 'pos':
+                methodName = 'depositFor';
+                contractName = 'RootChainManager';
+                methodParams = [this.props.account,this.state.tokenConfig.rootToken.address,depositData];
+              break;
+            }
           break;
         }
       break;
@@ -143,17 +156,20 @@ class PolygonBridge extends Component {
         methodName = 'withdraw';
         methodParams = [amount];
         contractName = this.state.tokenConfig.childToken.name;
+        if (this.state.tokenConfig.sendValue){
+          value = this.props.web3.eth.abi.encodeParameter('uint256', amount);
+        }
       break;
       default:
       break;
     }
 
-    // console.log('getTransactionParams',{
-    //   value,
-    //   methodName,
-    //   methodParams,
-    //   contractName
-    // });
+    console.log('getTransactionParams',{
+      value,
+      methodName,
+      methodParams,
+      contractName
+    });
 
     return {
       value,
@@ -170,6 +186,7 @@ class PolygonBridge extends Component {
   async getExitTransactionParams(){
     const txHash = this.state.selectedTransaction;
     const exitCalldata = await this.props.maticPOSClient.exitERC20(txHash, { from:this.props.account, encodeAbi: true })
+    debugger;
     if (exitCalldata && exitCalldata.data){
       return exitCalldata.data;
     }
@@ -214,14 +231,15 @@ class PolygonBridge extends Component {
   async updateData(selectedActionChanged=false){
     const newState = {};
     const isETH = this.state.selectedToken==='ETH';
+    const bridgeType = this.state.tokenConfig.bridgeType;
     switch (this.state.selectedAction){
       case 'Deposit':
         newState.steps = [];
         newState.permitEnabled = false;
         newState.availableNetworks = [1,5];
         newState.approveEnabled = !isETH;
-        newState.contractInfo = this.props.toolProps.contracts.ERC20Predicate;
         newState.approveDescription = `Approve the contract to deposit your ${this.state.selectedToken}`;
+        newState.contractInfo = bridgeType === 'pos' ? this.props.toolProps.contracts.ERC20Predicate : this.props.toolProps.contracts.DepositManager;
         newState.balanceProp = isETH ? await this.functionsUtil.getETHBalance(this.props.account) : await this.functionsUtil.getTokenBalance(this.state.tokenConfig.rootToken.name,this.props.account);
         if (this.state.transactionSucceeded){
           let depositedTokensLog = null;
@@ -234,7 +252,6 @@ class PolygonBridge extends Component {
             depositedTokensLog = this.state.transactionSucceeded.txReceipt && this.state.transactionSucceeded.txReceipt.logs ? this.state.transactionSucceeded.txReceipt.logs.find( log => log.address.toLowerCase() === this.props.toolProps.contracts.EtherPredicate.address.toLowerCase() && log.topics.find( t => t.toLowerCase().includes(this.props.account.replace('0x','').toLowerCase()) ) && log.data.toLowerCase()!=='0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'.toLowerCase() ) : null;
           }
           const depositedTokens = depositedTokensLog ? this.functionsUtil.fixTokenDecimals(parseInt(depositedTokensLog.data,16),this.state.tokenConfig.decimals) : ( depositedTokensEvent ? this.functionsUtil.fixTokenDecimals(parseInt(depositedTokensEvent.raw.data,16),this.state.tokenConfig.decimals) : this.functionsUtil.BNify(0));
-          debugger;
           newState.infoBox = {
             icon:'DoneAll',
             iconProps:{
@@ -292,12 +309,22 @@ class PolygonBridge extends Component {
             text:`You have successfully withdrawn <strong>${withdrawnTokens.toFixed(4)} ${this.state.selectedToken}</strong> from the Polygon chain. Please wait up to 2-3 hours to be able to complete the withdrawal.`
           }
         } else {
+          let text = '';
+          switch (bridgeType){
+            case 'plasma':
+              text = `Please note that withdraw of funds takes ~7 days in Plasma.`;
+            break;
+            default:
+            case 'pos':
+              text = `Please note that withdraw of funds takes ~45 mins to 1 hour in PoS.`;
+            break;
+          }
           newState.infoBox = {
+            text,
             icon:'InfoOutline',
             iconProps:{
               color:'cellText'
             },
-            text:`Please note that withdrawals from the Polygon chain take up to 2-3 hours to be completed.`
           }
         }
       break;
@@ -346,9 +373,14 @@ class PolygonBridge extends Component {
       return output;
     },[]);
 
-    const selectedToken = this.props.urlParams.param2 && this.props.toolProps.availableTokens[this.props.urlParams.param2] ? this.props.urlParams.param2 : (this.props.selectedToken || this.state.selectedToken || availableTokens[0].value);
+    const currentNetwork = this.functionsUtil.getCurrentNetwork();
+    const paramIsToken = this.props.urlParams.param2 && this.props.toolProps.availableTokens[this.props.urlParams.param2];
+    const selectedToken = paramIsToken ? this.props.urlParams.param2 : (this.props.selectedToken || this.state.selectedToken || availableTokens[0].value);
     const selectedOption = availableTokens.find( t => t.value === selectedToken );
-    const selectedAction = this.props.action || this.state.action || 'Deposit';
+    const defaultAction = !paramIsToken ? (currentNetwork.provider === 'infura' ? 'Deposit' : 'Withdraw') : 'Deposit';
+    const selectedAction = this.props.action || this.state.action || defaultAction;
+
+    // console.log('loadData',this.props.urlParams);
 
     this.setState({
       selectedToken,
@@ -429,7 +461,7 @@ class PolygonBridge extends Component {
                     alignItems={'stretch'}
                     flexDirection={'column'}
                     justifyContent={'center'}
-                    width={[1,fullWidth ? 1 : 0.36]}
+                    width={[1,fullWidth ? 1 : 0.38]}
                   >
                     {
                       !this.props.selectedToken && (
@@ -587,36 +619,49 @@ class PolygonBridge extends Component {
                                       changeInputCallback={this.changeInputCallback.bind(this)}
                                       getTransactionParams={this.getTransactionParams.bind(this)}
                                     >
-                                      <DashboardCard
-                                        cardProps={{
-                                          p:3
-                                        }}
-                                      >
-                                        <Flex
-                                          alignItems={'center'}
-                                          flexDirection={'column'}
-                                        >
-                                          <Icon
-                                            name={'MoneyOff'}
-                                            color={'cellText'}
-                                            size={this.props.isMobile ? '1.8em' : '2.3em'}
-                                          />
-                                          <Text
-                                            mt={1}
-                                            fontSize={2}
-                                            color={'cellText'}
-                                            textAlign={'center'}
+                                      {
+                                        isDeposit ? (
+                                          <Flex
+                                            width={1}
+                                            alignItems={'stretch'}
+                                            flexDirection={'column'}
+                                            justifyContent={'center'}
                                           >
-                                            {
-                                              isDeposit ? (
-                                                `You don't have any ${this.state.selectedToken} in your wallet.`
-                                              ) : isWithdraw && (
-                                                `You don't have any ${this.state.selectedToken} to withdraw.`
-                                              )
-                                            }
-                                          </Text>
-                                        </Flex>
-                                      </DashboardCard>
+                                            <BuyModal
+                                              {...this.props}
+                                              showInline={true}
+                                              availableMethods={[]}
+                                              buyToken={this.state.selectedToken}
+                                            />
+                                          </Flex>
+                                          // `You don't have any ${this.state.selectedToken} in your wallet.`
+                                        ) : isWithdraw && (
+                                          <DashboardCard
+                                            cardProps={{
+                                              p:3
+                                            }}
+                                          >
+                                            <Flex
+                                              alignItems={'center'}
+                                              flexDirection={'column'}
+                                            >
+                                              <Icon
+                                                name={'MoneyOff'}
+                                                color={'cellText'}
+                                                size={this.props.isMobile ? '1.8em' : '2.3em'}
+                                              />
+                                              <Text
+                                                mt={1}
+                                                fontSize={2}
+                                                color={'cellText'}
+                                                textAlign={'center'}
+                                              >
+                                                You don't have any {this.state.selectedToken} to withdraw.
+                                              </Text>
+                                            </Flex>
+                                          </DashboardCard>
+                                        )
+                                      }
                                     </SendTxWithBalance>
                                   ) : isExit && (
                                     <Box

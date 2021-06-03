@@ -1052,6 +1052,7 @@ class FunctionsUtil {
     return this.props.network && this.props.network.current ? this.props.network.current.id || defaultNetwork : defaultNetwork;
   }
   getPolygonBridgeTxs = async (account=false,enabledTokens=[]) => {
+
     account = account ? account : this.props.account;
 
     if (!account){
@@ -1060,7 +1061,7 @@ class FunctionsUtil {
 
     const cachedDataKey = `polygonBridgeTxs_${account}_${JSON.stringify(enabledTokens)}`;
     const cachedData = this.getCachedData(cachedDataKey);
-    if (cachedData) {
+    if (cachedData !== null) {
       return cachedData;
     }
 
@@ -1071,7 +1072,9 @@ class FunctionsUtil {
     const currentNetwork = this.getCurrentNetwork();
     const covalentInfo = this.getGlobalConfig(['network','providers','covalent']);
     const etherscanInfo = this.getGlobalConfig(['network','providers','etherscan']);
+    const stateSenderConfig = this.getGlobalConfig(['tools','polygonBridge','props','contracts','StateSender']);
     const erc20PredicateConfig = this.getGlobalConfig(['tools','polygonBridge','props','contracts','ERC20Predicate']);
+    const depositManagerConfig = this.getGlobalConfig(['tools','polygonBridge','props','contracts','DepositManager']);
 
     const currentNetworkId = this.getCurrentNetworkId();
     const polygonNetworkId = currentNetwork.provider === 'polygon' ? currentNetworkId : this.getGlobalConfig(['network','providers','polygon','networkPairs',currentNetworkId]);
@@ -1095,8 +1098,8 @@ class FunctionsUtil {
         this.makeCachedRequest(etherscanEndpoint,120)
       ]);
 
-      console.log('polygonTxs',polygonTxs);
-      console.log('etherscanTxs',etherscanTxs);
+      // console.log('polygonTxs',polygonTxs);
+      // console.log('etherscanTxs',etherscanTxs);
 
       const rootTokensAddresses = [];
       const childTokensAddresses = [];
@@ -1110,16 +1113,19 @@ class FunctionsUtil {
       });
 
       if (etherscanTxs && etherscanTxs.data && etherscanTxs.data.result){
-        depositTxs = etherscanTxs.data.result.filter( tx => rootTokensAddresses.includes(tx.contractAddress.toLowerCase()) && tx.to.toLowerCase() === erc20PredicateConfig.address.toLowerCase() && tx.from.toLowerCase() === this.props.account.toLowerCase() );
+        depositTxs = etherscanTxs.data.result.filter( tx => rootTokensAddresses.includes(tx.contractAddress.toLowerCase()) &&  [erc20PredicateConfig.address.toLowerCase(),depositManagerConfig.address.toLowerCase()].includes(tx.to.toLowerCase())  && tx.from.toLowerCase() === this.props.account.toLowerCase() );
         await this.asyncForEach(depositTxs, async (tx) => {
-          const tokenConfig = this.getGlobalConfig(['stats','tokens',tx.tokenSymbol]);
+          const tokenConfig = Object.values(polygonAvailableTokens).find( t => t.name === tx.tokenSymbol );
           const ethereumTx = {...tx};
           ethereumTx.action = 'Deposit';
           ethereumTx.networkId = ethereumNetworkId;
+          ethereumTx.bridgeType = tokenConfig.bridgeType;
           ethereumTx.value = this.fixTokenDecimals(ethereumTx.value,tokenConfig.decimals);
           const txReceipt = await this.getTxReceipt(ethereumTx.hash,this.props.web3Infura);
-          const tx_state_id = txReceipt ? parseInt(this.props.web3.utils.hexToNumberString(txReceipt.logs[txReceipt.logs.length-1].topics[1])) : null;
+          const stateSenderLog = txReceipt ? txReceipt.logs.find( log => log.address.toLowerCase() === stateSenderConfig.address.toLowerCase() ) : null;
+          const tx_state_id = stateSenderLog ? parseInt(this.props.web3.utils.hexToNumberString(stateSenderLog.topics[1])) : null;
           ethereumTx.included = last_state_id && tx_state_id ? last_state_id>=tx_state_id : false;
+          // console.log(ethereumTx.hash,tx_state_id,last_state_id);
           txs.push(ethereumTx);
         });
       }
@@ -1135,14 +1141,15 @@ class FunctionsUtil {
           tokenConfig.address = tokenConfig.childToken.address;
           if (!enabledTokens || !enabledTokens.length || enabledTokens.includes(tokenConfig.token)){
             const polygonTx = this.normalizePolygonTx(tx,tokenConfig);
-            console.log('polygonTx',polygonTx);
+            // console.log('polygonTx',polygonTx);
             if (polygonTx.action === 'Withdraw'){
               const tx_state_id = parseInt(this.props.web3.utils.hexToNumberString(polygonTx.logs[polygonTx.logs.length-1].topics[1]));
-              polygonTx.networkId = polygonNetworkId;
-              polygonTx.included = last_state_id && tx_state_id ? last_state_id>=tx_state_id : false;
               polygonTx.exited = false;
+              polygonTx.networkId = polygonNetworkId;
+              polygonTx.bridgeType = tokenConfig.bridgeType;
+              polygonTx.included = last_state_id && tx_state_id ? last_state_id>=tx_state_id : false;
               try {
-                await this.props.maticPOSClient.exitERC20(polygonTx.hash, {from: this.props.account, encodeAbi:true});
+                // await this.props.maticPOSClient.exitERC20(polygonTx.hash, {from: this.props.account, encodeAbi:true});
               } catch (error){
                 if (error.toString().match('EXIT_ALREADY_PROCESSED')){
                   polygonTx.exited = true;
@@ -1157,9 +1164,9 @@ class FunctionsUtil {
 
     txs = txs.sort((a,b) => (a.timeStamp < b.timeStamp ? 1 : -1));
 
-    console.log('getPolygonBridgeTxs',txs);
+    // console.log('getPolygonBridgeTxs',txs);
 
-    return this.setCachedData(cachedDataKey,txs);
+    return this.setCachedData(cachedDataKey,txs,120);
   }
   getPolygonBaseTxs = async (account=false,enabledTokens=[],debug=false) => {
     account = account ? account : this.props.account;
@@ -2669,7 +2676,7 @@ class FunctionsUtil {
 
     const cachedDataKey = `snapshotProposals_${activeOnly}`;
     const cachedData = this.getCachedData(cachedDataKey);
-    if (cachedData){
+    if (cachedData !== null){
       return cachedData;
     }
 
@@ -2739,7 +2746,7 @@ class FunctionsUtil {
     const cachedDataKey = `tokenApiData_${address}_${isRisk}_${frequency}_${order}_${limit}`;
     let cachedData = this.getCachedData(cachedDataKey);
 
-    if (cachedData){
+    if (cachedData !== null){
       // Check for fittable start and end time
       const filteredCachedData = cachedData.filter( c => ( (c.startTimestamp===null || (startTimestamp && c.startTimestamp<=startTimestamp)) && (c.endTimestamp===null || (endTimestamp && c.endTimestamp>=endTimestamp)) ) )
 
@@ -4818,7 +4825,7 @@ class FunctionsUtil {
 
     const cachedDataKey = `batchedDeposits_${account}_${filter_by_status}`;
     const cachedData = this.getCachedData(cachedDataKey);
-    if (cachedData) {
+    if (cachedData !== null) {
       return cachedData;
     }
 
@@ -5154,8 +5161,11 @@ class FunctionsUtil {
       return null;
     }
 
+    // console.log('getContractPastEvents',contractName,methodName);
+
     return await contract.getPastEvents(methodName, params);
   }
+
   genericContractCallCached = async (contractName, methodName, params = [], callParams = {}, blockNumber = 'latest', TTL=180) => {
     const cachedDataKey = `genericContractCall_${contractName}_${methodName}_${JSON.stringify(params)}_${JSON.stringify(callParams)}_${blockNumber}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
@@ -5172,6 +5182,11 @@ class FunctionsUtil {
 
     return this.setCachedDataWithLocalStorage(cachedDataKey,result,TTL);
   }
+
+  cachedContractCall = async (contractName, methodName, params = [], callParams = {}, blockNumber = 'latest', TTL=180) => {
+    return await this.genericContractCallCached(contractName, methodName, params, callParams, blockNumber, TTL);
+  }
+
   genericContractCall = async (contractName, methodName, params = [], callParams = {}, blockNumber = 'latest') => {
 
     if (!contractName){
@@ -5272,7 +5287,7 @@ class FunctionsUtil {
     // Check for cached data
     const cachedDataKey = `tokenAllocation_${tokenConfig.idle.address}_${addGovTokens}`;
     const cachedData = this.getCachedData(cachedDataKey);
-    if (cachedData) {
+    if (cachedData !== null) {
       return cachedData;
     }
 
@@ -6034,12 +6049,12 @@ class FunctionsUtil {
       const wMaticValue = this.BNify(maticConversionRate).times(distributionSpeed);
       const tokenAllocation = await this.getTokenAllocation(tokenConfig,false,false);
 
-      console.log('wMaticApr',tokenConfig.idle.token,distributionSpeed.toFixed(),this.BNify(maticConversionRate).toFixed(),tokenAllocation);
+      // console.log('wMaticApr',tokenConfig.idle.token,distributionSpeed.toFixed(),this.BNify(maticConversionRate).toFixed(),tokenAllocation);
 
       if (tokenAllocation){
         wMaticApr = wMaticValue.div(tokenAllocation.totalAllocationConverted).times(100);
 
-        console.log('wMaticApr',tokenConfig.idle.token,distributionSpeed.toFixed(),this.BNify(maticConversionRate).toFixed(),wMaticValue.toFixed(),tokenAllocation.totalAllocationConverted.toFixed(),wMaticApr.toFixed());
+        // console.log('wMaticApr',tokenConfig.idle.token,distributionSpeed.toFixed(),this.BNify(maticConversionRate).toFixed(),wMaticValue.toFixed(),tokenAllocation.totalAllocationConverted.toFixed(),wMaticApr.toFixed());
 
         if (!this.BNify(wMaticApr).isNaN()){
           this.setCachedDataWithLocalStorage(cachedDataKey,wMaticApr);
@@ -6089,7 +6104,7 @@ class FunctionsUtil {
       if (tokenAllocation){
         stkAaveAPR = stkAaveValue.div(tokenAllocation.totalAllocationConverted).times(100);
 
-        console.log('getStkAaveApr',tokenConfig.idle.token,aaveDistribution.toFixed(),this.BNify(aaveConversionRate).toFixed(),stkAaveValue.toFixed(),tokenAllocation.totalAllocationConverted.toFixed(),stkAaveAPR.toFixed());
+        // console.log('getStkAaveApr',tokenConfig.idle.token,aaveDistribution.toFixed(),this.BNify(aaveConversionRate).toFixed(),stkAaveValue.toFixed(),tokenAllocation.totalAllocationConverted.toFixed(),stkAaveAPR.toFixed());
 
         if (!this.BNify(stkAaveAPR).isNaN()){
           this.setCachedDataWithLocalStorage(cachedDataKey,stkAaveAPR);
@@ -6643,7 +6658,7 @@ class FunctionsUtil {
 
     const cachedDataKey = `getGovTokensBalances_${address}_${convertToken}_${JSON.stringify(enabledTokens)}`;
     const cachedData = this.getCachedData(cachedDataKey);
-    if (cachedData){
+    if (cachedData !== null){
       return cachedData;
     }
 
