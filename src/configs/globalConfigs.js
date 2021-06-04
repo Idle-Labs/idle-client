@@ -1444,8 +1444,8 @@ const globalConfigs = {
       },
       polygon:{
         enabled:true,
-        key:env.REACT_APP_POLYGON_KEY,
-        // key:env.REACT_APP_INFURA_KEY,
+        // key:env.REACT_APP_POLYGON_KEY,
+        key:env.REACT_APP_INFURA_KEY,
         baseUrl:{
           137:'https://explorer-mainnet.maticvigil.com',
           80001:'https://explorer-mumbai.maticvigil.com'
@@ -1457,12 +1457,20 @@ const globalConfigs = {
           80001:5
         },
         rpc:{
-          1:'https://rpc-mainnet.maticvigil.com/v1/',
-          5:'https://rpc-mumbai.maticvigil.com/v1/',
-          137:'https://rpc-mainnet.maticvigil.com/v1/',
-          80001:'https://rpc-mumbai.maticvigil.com/v1/'
-          // 1:'https://polygon-mainnet.infura.io/',
-          // 137:'https://polygon-mainnet.infura.io/'
+          // 1:'https://rpc-mainnet.maticvigil.com/v1/',
+          // 5:'https://rpc-mumbai.maticvigil.com/v1/',
+          // 137:'https://rpc-mainnet.maticvigil.com/v1/',
+          // 80001:'https://rpc-mumbai.maticvigil.com/v1/'
+
+          1:'https://polygon-mainnet.infura.io/v3/',
+          5:'https://polygon-mainnet.infura.io/v3/',
+          137:'https://polygon-mainnet.infura.io/v3/',
+          80001:'https://polygon-mainnet.infura.io/v3/'
+
+          // 1:'https://matic-mainnet.chainstacklabs.com/',
+          // 137:'https://matic-mainnet.chainstacklabs.com/',
+          // 5:'https://matic-mumbai.chainstacklabs.com/',
+          // 80001:'https://matic-mumbai.chainstacklabs.com/' 
         }
       },
       nexus: {
@@ -1734,7 +1742,7 @@ const globalConfigs = {
       availableNetworks:[1,5,137,80001],
       label:'Ethereum <> Polygon Bridge',
       image:'images/protocols/polygon.svg',
-      desc:'Deposit and Withdraw your tokens from Polygon network with PoS Bridge.',
+      desc:'Transfer your tokens from Ethereum to Polygon and vice versa with Plasma and PoS Bridge.',
       props:{
         contracts:{
           ERC20Predicate:{

@@ -414,11 +414,8 @@ class RimbleTransaction extends React.Component {
       const web3PolygonRpc = polygonConfig.rpc[polygonNetworkId]+this.functionsUtil.getGlobalConfig(['network','providers','polygon','key']);
       web3Polygon = new Web3(new Web3.providers.HttpProvider(web3PolygonRpc));
 
-      // const maticProvider = networkConfig.provider==='polygon' ? web3 : new Web3(new Web3.providers.HttpProvider(web3PolygonRpc));
-      // const parentProvider = networkConfig.provider==='infura' ? web3 : new Web3(new Web3.providers.HttpProvider(web3InfuraRpc));
-      const maticProvider = web3PolygonRpc;
-      const parentProvider = web3InfuraRpc;
-
+      const maticProvider = new Web3(new Web3.providers.HttpProvider(web3PolygonRpc));
+      const parentProvider = new Web3(new Web3.providers.HttpProvider(web3InfuraRpc));
       // console.log('maticProvider',web3PolygonRpc);
       // console.log('parentProvider',web3InfuraRpc);
 

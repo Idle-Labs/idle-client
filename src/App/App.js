@@ -817,6 +817,7 @@ class App extends Component {
                                           initAccount={initAccount}
                                           initSimpleID={initSimpleID}
                                           initContract={initContract}
+                                          checkNetwork={checkNetwork}
                                           transactions={transactions}
                                           buyToken={this.state.buyToken}
                                           logout={this.logout.bind(this)}
@@ -835,6 +836,7 @@ class App extends Component {
                                           getAccountBalance={getAccountBalance}
                                           accountBalanceLow={accountBalanceLow}
                                           accountInizialized={accountInizialized}
+                                          networkInitialized={networkInitialized}
                                           selectedToken={this.state.selectedToken}
                                           connectorName={this.state.connectorName}
                                           setStrategy={this.setStrategy.bind(this)}

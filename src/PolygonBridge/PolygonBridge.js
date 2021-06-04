@@ -186,7 +186,6 @@ class PolygonBridge extends Component {
   async getExitTransactionParams(){
     const txHash = this.state.selectedTransaction;
     const exitCalldata = await this.props.maticPOSClient.exitERC20(txHash, { from:this.props.account, encodeAbi: true })
-    debugger;
     if (exitCalldata && exitCalldata.data){
       return exitCalldata.data;
     }

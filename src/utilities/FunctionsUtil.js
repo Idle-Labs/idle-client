@@ -1068,7 +1068,6 @@ class FunctionsUtil {
     account = account.toLowerCase();
 
     let txs = [];
-    let depositTxs = [];
     const currentNetwork = this.getCurrentNetwork();
     const covalentInfo = this.getGlobalConfig(['network','providers','covalent']);
     const etherscanInfo = this.getGlobalConfig(['network','providers','etherscan']);
@@ -1113,7 +1112,7 @@ class FunctionsUtil {
       });
 
       if (etherscanTxs && etherscanTxs.data && etherscanTxs.data.result){
-        depositTxs = etherscanTxs.data.result.filter( tx => rootTokensAddresses.includes(tx.contractAddress.toLowerCase()) &&  [erc20PredicateConfig.address.toLowerCase(),depositManagerConfig.address.toLowerCase()].includes(tx.to.toLowerCase())  && tx.from.toLowerCase() === this.props.account.toLowerCase() );
+        const depositTxs = etherscanTxs.data.result.filter( tx => rootTokensAddresses.includes(tx.contractAddress.toLowerCase()) &&  [erc20PredicateConfig.address.toLowerCase(),depositManagerConfig.address.toLowerCase()].includes(tx.to.toLowerCase())  && tx.from.toLowerCase() === this.props.account.toLowerCase() );
         await this.asyncForEach(depositTxs, async (tx) => {
           const tokenConfig = Object.values(polygonAvailableTokens).find( t => t.name === tx.tokenSymbol );
           const ethereumTx = {...tx};
@@ -1125,7 +1124,17 @@ class FunctionsUtil {
           const stateSenderLog = txReceipt ? txReceipt.logs.find( log => log.address.toLowerCase() === stateSenderConfig.address.toLowerCase() ) : null;
           const tx_state_id = stateSenderLog ? parseInt(this.props.web3.utils.hexToNumberString(stateSenderLog.topics[1])) : null;
           ethereumTx.included = last_state_id && tx_state_id ? last_state_id>=tx_state_id : false;
-          // console.log(ethereumTx.hash,tx_state_id,last_state_id);
+          txs.push(ethereumTx);
+        });
+        const exitTxs = etherscanTxs.data.result.filter( tx => rootTokensAddresses.includes(tx.contractAddress.toLowerCase()) &&  [erc20PredicateConfig.address.toLowerCase(),depositManagerConfig.address.toLowerCase()].includes(tx.from.toLowerCase())  && tx.to.toLowerCase() === this.props.account.toLowerCase() );
+        await this.asyncForEach(exitTxs, async (tx) => {
+          const tokenConfig = Object.values(polygonAvailableTokens).find( t => t.name === tx.tokenSymbol );
+          const ethereumTx = {...tx};
+          ethereumTx.action = 'Exit';
+          ethereumTx.included = true;
+          ethereumTx.networkId = ethereumNetworkId;
+          ethereumTx.bridgeType = tokenConfig.bridgeType;
+          ethereumTx.value = this.fixTokenDecimals(ethereumTx.value,tokenConfig.decimals);
           txs.push(ethereumTx);
         });
       }
@@ -1149,7 +1158,7 @@ class FunctionsUtil {
               polygonTx.bridgeType = tokenConfig.bridgeType;
               polygonTx.included = last_state_id && tx_state_id ? last_state_id>=tx_state_id : false;
               try {
-                // await this.props.maticPOSClient.exitERC20(polygonTx.hash, {from: this.props.account, encodeAbi:true});
+                await this.props.maticPOSClient.exitERC20(polygonTx.hash, {from: this.props.account, encodeAbi:true});
               } catch (error){
                 if (error.toString().match('EXIT_ALREADY_PROCESSED')){
                   polygonTx.exited = true;
@@ -2543,7 +2552,7 @@ class FunctionsUtil {
     if (path.length>0){
       const prop = path.shift();
       if (!path.length){
-        return configs[prop] ? configs[prop] : null;
+        return configs[prop] !== undefined ? configs[prop] : null;
       } else if (configs[prop]) {
         return this.getGlobalConfig(path,configs[prop]);
       }

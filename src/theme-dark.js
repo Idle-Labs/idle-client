@@ -104,6 +104,7 @@ export default {
       action:{
         send:'#10a0dd',
         swap:'#3d53c0',
+        exit:'#10a0dd',
         boost:'#ffff00',
         redeem:'#10a0dd',
         swapout:'#10a0dd',
@@ -120,6 +121,7 @@ export default {
       actionBg:{
         send:'#ceeff6',
         swap:'#ced6ff',
+        exit:'#ceeff6',
         boost:'#ff7979',
         redeem:'#ceeff6',
         swapout:'#ceeff6',

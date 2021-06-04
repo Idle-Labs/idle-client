@@ -159,7 +159,21 @@ class StrategyPage extends Component {
       if (newState.polygonTransactions){
         newState.polygonTransactionsAvailableTokens = polygonTransactions.map( (tx) => {
           const tokenConfig = this.functionsUtil.getGlobalConfig(['tools','polygonBridge','props','availableTokens',tx.tokenSymbol]);
+          let actionIcon = null;
+          switch (tx.action){
+            default:
+            case 'Deposit':
+              actionIcon = 'ArrowDownward';
+            break;
+            case 'Withdraw':
+              actionIcon = 'ArrowUpward';
+            break;
+            case 'Exit':
+              actionIcon = 'Undo';
+            break;
+          }
           const depositInfo = {
+            actionIcon,
             amount:tx.value,
             token:tx.tokenSymbol,
             action:tx.action.toUpperCase(),
@@ -167,7 +181,6 @@ class StrategyPage extends Component {
             status:tx.included ? 'Completed' : 'pending',
             hash:this.functionsUtil.shortenHash(tx.hash),
             statusIcon:tx.included ? 'Done' : 'Timelapse',
-            actionIcon:tx.action === 'Deposit' ? 'ArrowDownward' : 'ArrowUpward',
             actionIconProps:{
               color:this.props.theme.colors.transactions.action[tx.action.toLowerCase()],
               bgColor:this.props.theme.colors.transactions.actionBg[tx.action.toLowerCase()]
