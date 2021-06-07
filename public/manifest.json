@@ -1,6 +1,8 @@
 {
   "short_name": "Idle",
   "name": "Idle",
+  "description": "Earn the yield you deserve without worry about finding the best option, either if you want to optimize returns or risks.",
+  "iconPath":"images/idle-mark.png",
   "icons": [
     {
       "src": "favicon.ico",
