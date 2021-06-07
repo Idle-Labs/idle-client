@@ -7,7 +7,7 @@
     "@babel/core": "^7.4.5",
     "@biconomy/mexa": "^2.0.8",
     "@ensdomains/ensjs": "^2.0.1",
-    "@gnosis.pm/safe-apps-web3-react": "^0.3.0",
+    "@gnosis.pm/safe-apps-web3-react": "0.5.0",
     "@metamask/detect-provider": "^1.2.0",
     "@nivo/bar": "^0.59.2",
     "@nivo/line": "^0.59.2",
