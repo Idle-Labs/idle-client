@@ -401,9 +401,9 @@ class App extends Component {
   componentDidMount() {
 
     // Close iFrame
-    if (window.self !== window.top && window.top.location.href.indexOf(globalConfigs.baseURL) !== -1 && typeof window.parent.closeIframe === 'function' ){
-      window.parent.closeIframe(window.self);
-    }
+    // if (window.self !== window.top && window.top.location.href.indexOf(globalConfigs.baseURL) !== -1 && typeof window.parent.closeIframe === 'function' ){
+    //   window.parent.closeIframe(window.self);
+    // }
 
     window.showToastMessage = this.showToastMessage;
     window.closeToastMessage = this.closeToastMessage;
