@@ -473,10 +473,11 @@ class Dashboard extends Component {
 
   async checkBetaApproval(){
     const isOriginUrl = this.functionsUtil.checkUrlOrigin();
+    const isPolygon = this.state.currentNetwork.provider === 'polygon';
     const isBetaApproved = this.functionsUtil.getStoredItem('betaApproved',false,false);
 
     // Show Beta Warning modal
-    if (!isOriginUrl && !isBetaApproved && this.state.activeModal === null){
+    if (!isOriginUrl && !isBetaApproved && !isPolygon && this.state.activeModal === null){
       const activeModal = 'beta';
       if (activeModal !== this.state.activeModal){
         await this.setState({

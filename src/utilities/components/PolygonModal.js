@@ -61,7 +61,7 @@ class PolygonModal extends React.Component {
                 textAlign={'left'}
                 color={'dark-gray'}
               >
-                You're about to enter Idle Finance in the Polygon Network, make sure to have some <ExtLink color={'link'} fontSize={2} href={this.functionsUtil.getEtherscanAddressUrl(this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.currentNetwork.baseToken,'address']))}>{this.props.currentNetwork.baseToken}</ExtLink> tokens in your wallet to send your transactions! Also you can use our <Link color={'link'} fontSize={2} mainColor={'link'} onClick={ e => this.props.goToSection(`tools/${polygonBridgeInfo.route}`)}>{polygonBridgeInfo.label}</Link> to transfer your tokens from Mainnet to Polygon.<br />If you are not confident with this just switch to Mainnet using your wallet provider.
+                You're about to enter Idle Finance in the Polygon Network, make sure to have some <ExtLink color={'link'} fontSize={2} href={this.functionsUtil.getEtherscanAddressUrl(this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.currentNetwork.baseToken,'address']))}>{this.props.currentNetwork.baseToken}</ExtLink> tokens in your wallet to send your transactions! Also you can use our <Link color={'link'} fontSize={2} mainColor={'link'} onClick={ e => this.props.goToSection(`tools/${polygonBridgeInfo.route}/MATIC`)}>{polygonBridgeInfo.label}</Link> to transfer your tokens from Mainnet to Polygon.<br />If you are not confident with this just switch to Mainnet using your wallet provider.
               </Text>
             </Flex>
             <Flex
