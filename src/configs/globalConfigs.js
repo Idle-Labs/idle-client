@@ -1859,6 +1859,83 @@ const globalConfigs = {
         }
       }
     },
+    stake:{
+      enabled:true,
+      icon:'Layers',
+      label:'Staking',
+      route:'staking',
+      subComponent:Staking,
+      availableNetworks:[1],
+      desc:'Stake your IDLE / Sushi Swap LP tokens and earn $IDLE rewards',
+      props:{
+        availableTokens:{
+          IDLE:{
+            component:IdleStaking,
+            contract:{
+              abi:stkIDLE,
+              decimals:18,
+              name:'stkIDLE',
+              fromBlock:12561464,
+              rewardToken:'IDLE',
+              address:'0xaac13a116ea7016689993193fce4badc8038136f' // Mainnet
+            },
+            feeDistributor:{
+              fromBlock:12649361,
+              abi:StakingFeeDistributor,
+              name:'StakingFeeDistributor',
+              address:'0xbabb82456c013fd7e3f25857e0729de8207f80e2' // Mainnet
+            },
+            abi:IDLE,
+            name:'IDLE',
+            token:'IDLE',
+            decimals:18,
+            enabled:true,
+            label:'IDLE Token',
+            icon:'images/tokens/IDLE.png',
+            address:'0x875773784Af8135eA0ef43b5a374AaD105c5D39e', // Mainnet
+            poolLink:'https://etherscan.com/address/0x875773784Af8135eA0ef43b5a374AaD105c5D39e',
+          },
+          SLP:{
+            component:LpStaking,
+            contract:{
+              decimals:24,
+              name:'LpStaking',
+              maxMultiplier:3,
+              abi:LpStakingAbi,
+              maxBonusDays:120,
+              rewardToken:'IDLE',
+              address:'0xcc0b9f7ed0e6bc7c2e69dbd247e8420f29aeb48d' // Mainnet
+            },
+            name:'SLP',
+            token:'SLP',
+            decimals:18,
+            enabled:true,
+            abi:SushiLiquidityPool,
+            label:'SushiSwap IDLE/ETH LP Token',
+            icon:'images/protocols/sushiswap.png',
+            address:'0xa7f11e026a0af768d285360a855f2bded3047530', // Mainnet
+            poolLink:'https://analytics.sushi.com/pairs/0xa7f11e026a0af768d285360a855f2bded3047530',
+          }
+        }
+      }
+    },
+    b2bVesting:{
+      enabled:true,
+      visible:true,
+      icon:'CloudUpload',
+      label:'B2B Vesting',
+      route:'b2b-vesting-contract',
+      subComponent:DeployB2BVesting,
+      desc:'Deploy/Deposit/Claim for B2B Vesting Contracts<br /><small style="color:#ff9900">(only for partners that joined the B2B Affiliate program)</small>',
+      props:{
+        contracts:{
+          vesterImplementation:{
+            abi:B2BVester,
+            address:'0x3024656ae91d7bf724f613c314bc56030ba2344c'
+          }
+        }
+      }
+    },
     ethWrapper:{
       enabled:true,
       label:'ETH Wrapper',
@@ -1882,33 +1959,25 @@ const globalConfigs = {
           unwrapMethod:'withdraw',
           address:'0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
         },
-        destContract: {
-          abi: WETH,
-          name: "WETH",
-          decimals: 18,
-          token: "WETH",
-          unwrapMethod: "withdraw",
-          address: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
-        }
       }
     },
-    coverProtocol: {
-      enabled: false,
-      label: "Cover Protocol",
-      route: "cover-protocol",
-      subComponent: CoverProtocol,
-      image: "images/protocols/cover-logo.svg",
-      desc: "Get your Idle Portfolio covered against Smart Contract risk",
-      fileClaimUrl:
-        "https://app.coverprotocol.com/app/claims/new?protocol=IDLE",
-      props: {
-        contract: {
-          decimals: 18,
-          abi: CoverMint,
-          name: "CoverMint",
-          address: "0x46f2f34742c1d9b9b220aabf0ff26bf59ec9f8a0"
+    coverProtocol:{
+      enabled:false,
+      availableNetworks:[1],
+      label:'Cover Protocol',
+      route:'cover-protocol',
+      subComponent:CoverProtocol,
+      image:'images/protocols/cover-logo.svg',
+      desc:'Get your Idle Portfolio covered against Smart Contract risk',
+      fileClaimUrl:'https://app.coverprotocol.com/app/claims/new?protocol=IDLE',
+      props:{
+        contract:{
+          decimals:18,
+          abi:CoverMint,
+          name:'CoverMint',
+          address:'0x46f2f34742c1d9b9b220aabf0ff26bf59ec9f8a0'
         },
-        coverages: [
+        coverages:[
           {
             collateral: "DAI",
             expirationTimestamp: 1714470400,
@@ -2601,16 +2670,17 @@ const globalConfigs = {
         }
       }
     },
-    addFunds: {
-      enabled: true,
-      icon: "AddCircleOutline",
-      route: "add-funds",
-      label: "Add Funds",
-      desc: "Buy tokens with your Bank account, Credit card or Ethereum Wallet",
-      subComponent: BuyModal,
-      directProps: {
-        showInline: true,
-        showAllTokens: true
+    addFunds:{
+      enabled:true,
+      route:'add-funds',
+      label:'Add Funds',
+      availableNetworks:[1],
+      icon:'AddCircleOutline',
+      desc:'Buy tokens with your Bank account, Credit card or Ethereum Wallet',
+      subComponent:BuyModal,
+      directProps:{
+        showInline:true,
+        showAllTokens:true
       }
     },
     tokenSwap: {
