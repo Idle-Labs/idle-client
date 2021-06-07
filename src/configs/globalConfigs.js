@@ -1171,13 +1171,13 @@ const globalConfigs = {
       }
     },
     b2bVesting:{
-      enabled:true,
+      enabled:false,
       visible:false,
       icon:'CloudUpload',
       label:'B2B Vesting',
       route:'b2b-vesting-contract',
       subComponent:DeployB2BVesting,
-      desc:'Deploy/Deposit/Claim for B2B Vesting Contracts',
+      desc:'Deploy/Deposit/Claim for B2B Vesting Contracts<br /><small style="color:#ff9900">(only for partners that joined the B2B Affiliate program)</small>',
       props:{
         contracts:{
           vesterImplementation:{

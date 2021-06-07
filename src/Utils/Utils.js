@@ -69,8 +69,10 @@ class Utils extends Component {
                 </Title>
                 <Text
                   textAlign={'center'}
+                  dangerouslySetInnerHTML={{
+                    __html:this.props.selectedSubsection.desc
+                  }}
                 >
-                  {this.props.selectedSubsection.desc}
                 </Text>
               </Flex>
               <SubComponent
@@ -151,8 +153,10 @@ class Utils extends Component {
                     <Text
                       fontSize={[2,2]}
                       textAlign={'center'}
+                      dangerouslySetInnerHTML={{
+                        __html:tool.desc
+                      }}
                     >
-                      {tool.desc}
                     </Text>
                   </DashboardCard>
                 ) )
