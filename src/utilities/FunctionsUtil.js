@@ -5766,6 +5766,7 @@ class FunctionsUtil {
     tokenBalance = this.BNify(tokenBalance);
     if (tokenBalance.gt(0)){
       const tokenUsdConversionRate = await this.getTokenConversionRate(tokenConfig,isRisk);
+      // console.log('convertTokenBalance',token,isRisk,tokenUsdConversionRate);
       if (tokenUsdConversionRate){
         tokenBalance = tokenBalance.times(tokenUsdConversionRate);
       }
@@ -5806,30 +5807,25 @@ class FunctionsUtil {
     const cachedDataKey = `tokenConversionRate_${tokenConfig.address}_${isRisk}_${conversionRateField}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData && !this.BNify(cachedData).isNaN()){
-      // console.log('CACHED -',count,cachedDataKey,this.BNify(cachedData).toFixed());
       return this.BNify(cachedData);
     }
 
     let tokenData = await this.getTokenApiData(tokenConfig.address,isRisk,null,null,false,null,'desc',1);
-
-    // console.log('TOKEN DATA - ',tokenConfig.address,isRisk,tokenData);
 
     if (tokenData && tokenData.length){
       tokenData = tokenData.pop();
       if (tokenData && !this.BNify(tokenData[conversionRateField]).isNaN()){
         const conversionRate = this.fixTokenDecimals(tokenData[conversionRateField],18);
         if (!this.BNify(conversionRate).isNaN()){
-          // console.log('NOT CACHED -',count,cachedDataKey,this.BNify(conversionRate).toFixed());
           return this.setCachedDataWithLocalStorage(cachedDataKey,conversionRate);
         }
       }
-    } else {
-      const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
-      const conversionRate = await this.getUniswapConversionRate(DAITokenConfig,tokenConfig);
-      if (!this.BNify(conversionRate).isNaN()){
-        // console.log('NOT CACHED -',count,cachedDataKey,this.BNify(conversionRate).toFixed());
-        return this.setCachedDataWithLocalStorage(cachedDataKey,conversionRate);
-      }
+    }
+
+    const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
+    const conversionRate = await this.getUniswapConversionRate(DAITokenConfig,tokenConfig);
+    if (!this.BNify(conversionRate).isNaN()){
+      return this.setCachedDataWithLocalStorage(cachedDataKey,conversionRate);
     }
 
     if (count<3){
