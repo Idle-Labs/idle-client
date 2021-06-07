@@ -476,7 +476,7 @@ class Dashboard extends Component {
     const isBetaApproved = this.functionsUtil.getStoredItem('betaApproved',false,false);
 
     // Show Beta Warning modal
-    if (!isOriginUrl && !isBetaApproved){
+    if (!isOriginUrl && !isBetaApproved && this.state.activeModal === null){
       const activeModal = 'beta';
       if (activeModal !== this.state.activeModal){
         await this.setState({
