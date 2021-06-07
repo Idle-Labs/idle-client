@@ -106,16 +106,16 @@ class DeployB2BVesting extends Component {
     const deployedContracts = [];
     await this.functionsUtil.asyncForEach(deployedContractsAddresses, async (contractAddress) => {
       const contractName = `b2bVesting_${contractAddress}`;
-      const vesterContract = await this.props.initContract(contractName,contractAddress,vesterImplementation.abi);
+      await this.props.initContract(contractName,contractAddress,vesterImplementation.abi);
       const [
-        initialized,
+        // initialized,
         owner,
         recipient,
         vestingPeriod,
         availableBalance,
         depositAmounts,
       ] = await Promise.all([
-          this.functionsUtil.genericContractCall(contractName,'initialized'),
+          // this.functionsUtil.genericContractCall(contractName,'initialized'),
           this.functionsUtil.genericContractCall(contractName,'owner'),
           this.functionsUtil.genericContractCall(contractName,'recipient'),
           this.functionsUtil.genericContractCall(contractName,'vestingPeriod'),
@@ -196,21 +196,6 @@ class DeployB2BVesting extends Component {
     }
   }
 
-  validateField(value,type){
-    if (value===null){
-      return false;
-    }
-    let valid = true;
-    if (type === 'json'){
-      valid = this.functionsUtil.isValidJSON(value);
-    } else {
-      const fieldPattern = this.getPatternByFieldType(type);
-      if (fieldPattern){
-        valid = value.toString().match(fieldPattern) !== null;
-      }
-    }
-    return valid;
-  }
   getPatternByFieldType(type,returnString=false){
     let fieldPattern = null;
     switch (type){
@@ -921,407 +906,421 @@ class DeployB2BVesting extends Component {
                   </Flex>
                 </Form>
               ) : this.state.action === 'deposit' ?
-                this.state.deployedContracts.filter( c => c.owner.toLowerCase() === this.props.account.toLowerCase() ).map( (contractInfo,actionIndex) => {
-                  return (
-                    <DashboardCard
-                      cardProps={{
-                        py:2,
-                        px:3,
-                        mb:3,
-                        width:1
-                      }}
-                      titleParentProps={{
-                        ml:0,
-                        my:1,
-                        justifyContent:'center'
-                      }}
-                      titleProps={{
-                        fontSize:2,
-                        fontWeight:3
-                      }}
-                      isInteractive={true}
-                      key={`action_${actionIndex}`}
-                      handleClick={ e => this.setViewAction(actionIndex) }
-                      title={ this.state.viewAction === actionIndex ? 'View Contract' : null }
-                    >
-                      {
-                        this.state.viewAction === actionIndex ? (
-                          <Flex
-                            width={1}
-                            alignItems={'center'}
-                            flexDirection={'column'}
-                            justifyContent={'center'}
-                          >
-                            <Field
-                              style={{
-                                width:'100%',
-                                display:'flex',
-                                alignItems:'stretch',
-                                flexDirection:'column'
-                              }}
-                              label={`Contract Address`}
-                            >
-                              <Input
-                                required
-                                readOnly
-                                width={1}
-                                type={'address'}
-                                borderColor={'cardBorder'}
-                                backgroundColor={'cardBg'}
-                                value={contractInfo.contractAddress}
-                              />
-                            </Field>
-                            {
-                              this.state.inputs.map( (input,inputIndex) => {
-                                const fieldType = ['uint256','bool'].includes(input.type) ? 'number' : 'text';
-                                const fieldPattern = this.getPatternByFieldType(input.type,true);
-                                return (
-                                  <Field
-                                    style={{
-                                      width:'100%',
-                                      display:'flex',
-                                      alignItems:'stretch',
-                                      flexDirection:'column'
-                                    }}
-                                    key={`input_${inputIndex}`}
-                                    label={`${input.name} (${input.type})`}
-                                  >
-                                    <Input
-                                      required
-                                      readOnly
-                                      width={1}
-                                      type={fieldType}
-                                      borderColor={'cardBorder'}
-                                      backgroundColor={'cardBg'}
-                                      value={contractInfo[input.name]}
-                                    />
-                                  </Field>
-                                )
-                              })
-                            }
-                            <Field
-                              style={{
-                                width:'100%',
-                                display:'flex',
-                                alignItems:'stretch',
-                                flexDirection:'column'
-                              }}
-                              label={`Total Deposited`}
-                            >
-                              <Input
-                                required
-                                readOnly
-                                width={1}
-                                type={'address'}
-                                borderColor={'cardBorder'}
-                                backgroundColor={'cardBg'}
-                                value={contractInfo.totalDeposited.toFixed(6)}
-                              />
-                            </Field>
-                            <Field
-                              style={{
-                                width:'100%',
-                                display:'flex',
-                                alignItems:'stretch',
-                                flexDirection:'column'
-                              }}
-                              label={`Available Balance`}
-                            >
-                              <Input
-                                required
-                                readOnly
-                                width={1}
-                                type={'address'}
-                                borderColor={'cardBorder'}
-                                backgroundColor={'cardBg'}
-                                value={contractInfo.availableBalance.toFixed(6)}
-                              />
-                            </Field>
+                this.state.deployedContracts.length>0 ?
+                  this.state.deployedContracts.filter( c => c.owner.toLowerCase() === this.props.account.toLowerCase() ).map( (contractInfo,actionIndex) => {
+                    return (
+                      <DashboardCard
+                        cardProps={{
+                          py:2,
+                          px:3,
+                          mb:3,
+                          width:1
+                        }}
+                        titleParentProps={{
+                          ml:0,
+                          my:1,
+                          justifyContent:'center'
+                        }}
+                        titleProps={{
+                          fontSize:2,
+                          fontWeight:3
+                        }}
+                        isInteractive={true}
+                        key={`action_${actionIndex}`}
+                        handleClick={ e => this.setViewAction(actionIndex) }
+                        title={ this.state.viewAction === actionIndex ? 'View Contract' : null }
+                      >
+                        {
+                          this.state.viewAction === actionIndex ? (
                             <Flex
-                              mb={2}
                               width={1}
                               alignItems={'center'}
                               flexDirection={'column'}
                               justifyContent={'center'}
-                              borderTop={'1px solid transparent'}
                             >
-                              <Flex
-                                width={1}
-                                alignItems={'center'}
-                                flexDirection={'column'}
-                                justifyContent={'center'}
+                              <Field
+                                style={{
+                                  width:'100%',
+                                  display:'flex',
+                                  alignItems:'stretch',
+                                  flexDirection:'column'
+                                }}
+                                label={`Contract Address`}
                               >
-                                <SendTxWithBalance
-                                  {...this.props}
-                                  action={this.state.action}
-                                  tokenConfig={this.state.tokenConfig}
-                                  tokenBalance={this.state.tokenBalance}
-                                  contractInfo={this.state.contractInfo}
-                                  callback={this.depositCallback.bind(this)}
-                                  getTransactionParams={this.getTransactionParams.bind(this)}
-                                  approveDescription={'You need to approve the Smart-Contract first'}
-                                >
-                                  <DashboardCard
-                                    cardProps={{
-                                      p:3,
-                                    }}
-                                  >
-                                    <Flex
-                                      alignItems={'center'}
-                                      flexDirection={'column'}
-                                    >
-                                      <Icon
-                                        size={'2.3em'}
-                                        name={'MoneyOff'}
-                                        color={'cellText'}
-                                      />
-                                      <Text
-                                        mt={2}
-                                        fontSize={2}
-                                        color={'cellText'}
-                                        textAlign={'center'}
-                                      >
-                                        You don't have any $IDLE in your wallet.
-                                      </Text>
-                                    </Flex>
-                                  </DashboardCard>
-                                </SendTxWithBalance>
-                              </Flex>
-                            </Flex>
-                          </Flex>
-                        ) : (
-                          <Flex
-                            width={1}
-                            alignItems={'center'}
-                            flexDirection={'row'}
-                            justifyContent={'space-between'}
-                          >
-                            <Text>
-                              {this.functionsUtil.shortenHash(contractInfo.owner)} - {this.functionsUtil.shortenHash(contractInfo.recipient)} - {contractInfo.vestingPeriod} 
-                            </Text>
-                            <Flex
-                              p={['4px','7px']}
-                              borderRadius={'50%'}
-                              alignItems={'center'}
-                              justifyContent={'center'}
-                              backgroundColor={ this.props.theme.colors.transactions.actionBg.redeem }
-                            >
-                              <Icon
-                                name={'ZoomIn'}
-                                align={'center'}
-                                color={'redeem'}
-                                size={ this.props.isMobile ? '1.2em' : '1.4em' }
-                              />
-                            </Flex>
-                          </Flex>
-                        )
-                      }
-                    </DashboardCard>
-                  );
-                })
-              : this.state.action === 'claim' &&
-                this.state.deployedContracts.filter( c => c.recipient.toLowerCase() === this.props.account.toLowerCase() ).map( (contractInfo,actionIndex) => {
-                  return (
-                    <DashboardCard
-                      cardProps={{
-                        py:2,
-                        px:3,
-                        mb:3,
-                        width:1
-                      }}
-                      titleParentProps={{
-                        ml:0,
-                        my:1,
-                        justifyContent:'center'
-                      }}
-                      titleProps={{
-                        fontSize:2,
-                        fontWeight:3
-                      }}
-                      isInteractive={true}
-                      key={`action_${actionIndex}`}
-                      handleClick={ e => this.setViewAction(actionIndex) }
-                      title={ this.state.viewAction === actionIndex ? 'View Contract' : null }
-                    >
-                      {
-                        this.state.viewAction === actionIndex ? (
-                          <Flex
-                            width={1}
-                            alignItems={'center'}
-                            flexDirection={'column'}
-                            justifyContent={'center'}
-                          >
-                            <Field
-                              style={{
-                                width:'100%',
-                                display:'flex',
-                                alignItems:'stretch',
-                                flexDirection:'column'
-                              }}
-                              label={`Contract Address`}
-                            >
-                              <Input
-                                required
-                                readOnly
-                                width={1}
-                                type={'address'}
-                                borderColor={'cardBorder'}
-                                backgroundColor={'cardBg'}
-                                value={contractInfo.contractAddress}
-                              />
-                            </Field>
-                            {
-                              this.state.inputs.map( (input,inputIndex) => {
-                                const fieldType = ['uint256','bool'].includes(input.type) ? 'number' : 'text';
-                                const fieldPattern = this.getPatternByFieldType(input.type,true);
-                                return (
-                                  <Field
-                                    style={{
-                                      width:'100%',
-                                      display:'flex',
-                                      alignItems:'stretch',
-                                      flexDirection:'column'
-                                    }}
-                                    key={`input_${inputIndex}`}
-                                    label={`${input.name} (${input.type})`}
-                                  >
-                                    <Input
-                                      required
-                                      readOnly
-                                      width={1}
-                                      type={fieldType}
-                                      borderColor={'cardBorder'}
-                                      backgroundColor={'cardBg'}
-                                      value={contractInfo[input.name]}
-                                    />
-                                  </Field>
-                                )
-                              })
-                            }
-                            <Field
-                              style={{
-                                width:'100%',
-                                display:'flex',
-                                alignItems:'stretch',
-                                flexDirection:'column'
-                              }}
-                              label={`Total Deposited`}
-                            >
-                              <Input
-                                required
-                                readOnly
-                                width={1}
-                                type={'address'}
-                                borderColor={'cardBorder'}
-                                backgroundColor={'cardBg'}
-                                value={contractInfo.totalDeposited.toFixed(6)}
-                              />
-                            </Field>
-                            <Field
-                              style={{
-                                width:'100%',
-                                display:'flex',
-                                alignItems:'stretch',
-                                flexDirection:'column'
-                              }}
-                              label={`Available Balance`}
-                            >
-                              <Input
-                                required
-                                readOnly
-                                width={1}
-                                type={'address'}
-                                borderColor={'cardBorder'}
-                                backgroundColor={'cardBg'}
-                                value={contractInfo.availableBalance.toFixed(6)}
-                              />
-                            </Field>
-                            <Flex
-                              mb={2}
-                              width={1}
-                              alignItems={'center'}
-                              flexDirection={'column'}
-                              justifyContent={'center'}
-                              borderTop={'1px solid transparent'}
-                            >
-                              <Flex
-                                width={1}
-                                alignItems={'center'}
-                                flexDirection={'column'}
-                                justifyContent={'center'}
-                              >
-                                {
-                                  this.state.claimedTokens && (
-                                    <Text
-                                      mb={2}
-                                      fontSize={2}
-                                      fontWeight={3}
-                                      color={this.props.theme.colors.transactions.status.completed}
-                                    >
-                                      You have successfully claimed {this.state.claimedTokens.toFixed(4)} {this.state.tokenConfig.token}
-                                    </Text>
-                                  )
-                                }
-                                {
-                                  contractInfo.availableBalance && contractInfo.availableBalance.gt(0) ? (
-                                    <ExecuteTransaction
-                                      params={[]}
-                                      {...this.props}
-                                      Component={Button}
-                                      componentProps={{
-                                        size:'medium',
-                                        value:'Claim',
-                                        mainColor:'redeem',
+                                <Input
+                                  required
+                                  readOnly
+                                  width={1}
+                                  type={'address'}
+                                  borderColor={'cardBorder'}
+                                  backgroundColor={'cardBg'}
+                                  value={contractInfo.contractAddress}
+                                />
+                              </Field>
+                              {
+                                this.state.inputs.map( (input,inputIndex) => {
+                                  const fieldType = ['uint256','bool'].includes(input.type) ? 'number' : 'text';
+                                  return (
+                                    <Field
+                                      style={{
+                                        width:'100%',
+                                        display:'flex',
+                                        alignItems:'stretch',
+                                        flexDirection:'column'
                                       }}
-                                      methodName={'claim'}
-                                      action={this.state.action}
-                                      callback={this.claimCallback.bind(this)}
-                                      contractName={contractInfo.contractName}
-                                    />
-                                  ) : (
-                                    <Text
-                                      mb={2}
-                                      fontSize={2}
-                                      fontWeight={3}
-                                      color={'cellText'}
+                                      key={`input_${inputIndex}`}
+                                      label={`${input.name} (${input.type})`}
                                     >
-                                      Nothing to Claim yet.
-                                    </Text>
+                                      <Input
+                                        required
+                                        readOnly
+                                        width={1}
+                                        type={fieldType}
+                                        borderColor={'cardBorder'}
+                                        backgroundColor={'cardBg'}
+                                        value={contractInfo[input.name]}
+                                      />
+                                    </Field>
                                   )
-                                }
+                                })
+                              }
+                              <Field
+                                style={{
+                                  width:'100%',
+                                  display:'flex',
+                                  alignItems:'stretch',
+                                  flexDirection:'column'
+                                }}
+                                label={`Total Deposited`}
+                              >
+                                <Input
+                                  required
+                                  readOnly
+                                  width={1}
+                                  type={'address'}
+                                  borderColor={'cardBorder'}
+                                  backgroundColor={'cardBg'}
+                                  value={contractInfo.totalDeposited.toFixed(6)}
+                                />
+                              </Field>
+                              <Field
+                                style={{
+                                  width:'100%',
+                                  display:'flex',
+                                  alignItems:'stretch',
+                                  flexDirection:'column'
+                                }}
+                                label={`Available Balance`}
+                              >
+                                <Input
+                                  required
+                                  readOnly
+                                  width={1}
+                                  type={'address'}
+                                  borderColor={'cardBorder'}
+                                  backgroundColor={'cardBg'}
+                                  value={contractInfo.availableBalance.toFixed(6)}
+                                />
+                              </Field>
+                              <Flex
+                                mb={2}
+                                width={1}
+                                alignItems={'center'}
+                                flexDirection={'column'}
+                                justifyContent={'center'}
+                                borderTop={'1px solid transparent'}
+                              >
+                                <Flex
+                                  width={1}
+                                  alignItems={'center'}
+                                  flexDirection={'column'}
+                                  justifyContent={'center'}
+                                >
+                                  <SendTxWithBalance
+                                    {...this.props}
+                                    action={this.state.action}
+                                    tokenConfig={this.state.tokenConfig}
+                                    tokenBalance={this.state.tokenBalance}
+                                    contractInfo={this.state.contractInfo}
+                                    callback={this.depositCallback.bind(this)}
+                                    getTransactionParams={this.getTransactionParams.bind(this)}
+                                    approveDescription={'You need to approve the Smart-Contract first'}
+                                  >
+                                    <DashboardCard
+                                      cardProps={{
+                                        p:3,
+                                      }}
+                                    >
+                                      <Flex
+                                        alignItems={'center'}
+                                        flexDirection={'column'}
+                                      >
+                                        <Icon
+                                          size={'2.3em'}
+                                          name={'MoneyOff'}
+                                          color={'cellText'}
+                                        />
+                                        <Text
+                                          mt={2}
+                                          fontSize={2}
+                                          color={'cellText'}
+                                          textAlign={'center'}
+                                        >
+                                          You don't have any $IDLE in your wallet.
+                                        </Text>
+                                      </Flex>
+                                    </DashboardCard>
+                                  </SendTxWithBalance>
+                                </Flex>
                               </Flex>
                             </Flex>
-                          </Flex>
-                        ) : (
-                          <Flex
-                            width={1}
-                            alignItems={'center'}
-                            flexDirection={'row'}
-                            justifyContent={'space-between'}
-                          >
-                            <Text>
-                              {this.functionsUtil.shortenHash(contractInfo.owner)} - {this.functionsUtil.shortenHash(contractInfo.recipient)} - {contractInfo.vestingPeriod} 
-                            </Text>
+                          ) : (
                             <Flex
-                              p={['4px','7px']}
-                              borderRadius={'50%'}
+                              width={1}
                               alignItems={'center'}
-                              justifyContent={'center'}
-                              backgroundColor={ this.props.theme.colors.transactions.actionBg.redeem }
+                              flexDirection={'row'}
+                              justifyContent={'space-between'}
                             >
-                              <Icon
-                                name={'ZoomIn'}
-                                align={'center'}
-                                color={'redeem'}
-                                size={ this.props.isMobile ? '1.2em' : '1.4em' }
-                              />
+                              <Text>
+                                {this.functionsUtil.shortenHash(contractInfo.owner)} - {this.functionsUtil.shortenHash(contractInfo.recipient)} - {contractInfo.vestingPeriod} 
+                              </Text>
+                              <Flex
+                                p={['4px','7px']}
+                                borderRadius={'50%'}
+                                alignItems={'center'}
+                                justifyContent={'center'}
+                                backgroundColor={ this.props.theme.colors.transactions.actionBg.redeem }
+                              >
+                                <Icon
+                                  name={'ZoomIn'}
+                                  align={'center'}
+                                  color={'redeem'}
+                                  size={ this.props.isMobile ? '1.2em' : '1.4em' }
+                                />
+                              </Flex>
                             </Flex>
-                          </Flex>
-                        )
-                      }
-                    </DashboardCard>
-                  );
-                })
+                          )
+                        }
+                      </DashboardCard>
+                    );
+                  })
+                : (
+                  <Text
+                    textAlign={'center'}
+                  >
+                    You can't deposit in any contract yet.
+                  </Text>
+                )
+              : this.state.action === 'claim' &&
+                this.state.deployedContracts.length>0 ?
+                  this.state.deployedContracts.filter( c => c.recipient.toLowerCase() === this.props.account.toLowerCase() ).map( (contractInfo,actionIndex) => {
+                    return (
+                      <DashboardCard
+                        cardProps={{
+                          py:2,
+                          px:3,
+                          mb:3,
+                          width:1
+                        }}
+                        titleParentProps={{
+                          ml:0,
+                          my:1,
+                          justifyContent:'center'
+                        }}
+                        titleProps={{
+                          fontSize:2,
+                          fontWeight:3
+                        }}
+                        isInteractive={true}
+                        key={`action_${actionIndex}`}
+                        handleClick={ e => this.setViewAction(actionIndex) }
+                        title={ this.state.viewAction === actionIndex ? 'View Contract' : null }
+                      >
+                        {
+                          this.state.viewAction === actionIndex ? (
+                            <Flex
+                              width={1}
+                              alignItems={'center'}
+                              flexDirection={'column'}
+                              justifyContent={'center'}
+                            >
+                              <Field
+                                style={{
+                                  width:'100%',
+                                  display:'flex',
+                                  alignItems:'stretch',
+                                  flexDirection:'column'
+                                }}
+                                label={`Contract Address`}
+                              >
+                                <Input
+                                  required
+                                  readOnly
+                                  width={1}
+                                  type={'address'}
+                                  borderColor={'cardBorder'}
+                                  backgroundColor={'cardBg'}
+                                  value={contractInfo.contractAddress}
+                                />
+                              </Field>
+                              {
+                                this.state.inputs.map( (input,inputIndex) => {
+                                  const fieldType = ['uint256','bool'].includes(input.type) ? 'number' : 'text';
+                                  return (
+                                    <Field
+                                      style={{
+                                        width:'100%',
+                                        display:'flex',
+                                        alignItems:'stretch',
+                                        flexDirection:'column'
+                                      }}
+                                      key={`input_${inputIndex}`}
+                                      label={`${input.name} (${input.type})`}
+                                    >
+                                      <Input
+                                        required
+                                        readOnly
+                                        width={1}
+                                        type={fieldType}
+                                        borderColor={'cardBorder'}
+                                        backgroundColor={'cardBg'}
+                                        value={contractInfo[input.name]}
+                                      />
+                                    </Field>
+                                  )
+                                })
+                              }
+                              <Field
+                                style={{
+                                  width:'100%',
+                                  display:'flex',
+                                  alignItems:'stretch',
+                                  flexDirection:'column'
+                                }}
+                                label={`Total Deposited`}
+                              >
+                                <Input
+                                  required
+                                  readOnly
+                                  width={1}
+                                  type={'address'}
+                                  borderColor={'cardBorder'}
+                                  backgroundColor={'cardBg'}
+                                  value={contractInfo.totalDeposited.toFixed(6)}
+                                />
+                              </Field>
+                              <Field
+                                style={{
+                                  width:'100%',
+                                  display:'flex',
+                                  alignItems:'stretch',
+                                  flexDirection:'column'
+                                }}
+                                label={`Available Balance`}
+                              >
+                                <Input
+                                  required
+                                  readOnly
+                                  width={1}
+                                  type={'address'}
+                                  borderColor={'cardBorder'}
+                                  backgroundColor={'cardBg'}
+                                  value={contractInfo.availableBalance.toFixed(6)}
+                                />
+                              </Field>
+                              <Flex
+                                mb={2}
+                                width={1}
+                                alignItems={'center'}
+                                flexDirection={'column'}
+                                justifyContent={'center'}
+                                borderTop={'1px solid transparent'}
+                              >
+                                <Flex
+                                  width={1}
+                                  alignItems={'center'}
+                                  flexDirection={'column'}
+                                  justifyContent={'center'}
+                                >
+                                  {
+                                    this.state.claimedTokens && (
+                                      <Text
+                                        mb={2}
+                                        fontSize={2}
+                                        fontWeight={3}
+                                        color={this.props.theme.colors.transactions.status.completed}
+                                      >
+                                        You have successfully claimed {this.state.claimedTokens.toFixed(4)} {this.state.tokenConfig.token}
+                                      </Text>
+                                    )
+                                  }
+                                  {
+                                    contractInfo.availableBalance && contractInfo.availableBalance.gt(0) ? (
+                                      <ExecuteTransaction
+                                        params={[]}
+                                        {...this.props}
+                                        Component={Button}
+                                        componentProps={{
+                                          size:'medium',
+                                          value:'Claim',
+                                          mainColor:'redeem',
+                                        }}
+                                        methodName={'claim'}
+                                        action={this.state.action}
+                                        callback={this.claimCallback.bind(this)}
+                                        contractName={contractInfo.contractName}
+                                      />
+                                    ) : (
+                                      <Text
+                                        mb={2}
+                                        fontSize={2}
+                                        fontWeight={3}
+                                        color={'cellText'}
+                                      >
+                                        Nothing to Claim yet.
+                                      </Text>
+                                    )
+                                  }
+                                </Flex>
+                              </Flex>
+                            </Flex>
+                          ) : (
+                            <Flex
+                              width={1}
+                              alignItems={'center'}
+                              flexDirection={'row'}
+                              justifyContent={'space-between'}
+                            >
+                              <Text>
+                                {this.functionsUtil.shortenHash(contractInfo.owner)} - {this.functionsUtil.shortenHash(contractInfo.recipient)} - {contractInfo.vestingPeriod} 
+                              </Text>
+                              <Flex
+                                p={['4px','7px']}
+                                borderRadius={'50%'}
+                                alignItems={'center'}
+                                justifyContent={'center'}
+                                backgroundColor={ this.props.theme.colors.transactions.actionBg.redeem }
+                              >
+                                <Icon
+                                  name={'ZoomIn'}
+                                  align={'center'}
+                                  color={'redeem'}
+                                  size={ this.props.isMobile ? '1.2em' : '1.4em' }
+                                />
+                              </Flex>
+                            </Flex>
+                          )
+                        }
+                      </DashboardCard>
+                    );
+                  })
+                : (
+                  <Text
+                    textAlign={'center'}
+                  >
+                    You can't claim from any contract yet.
+                  </Text>
+                )
             }
           </Flex>
         </Flex>
