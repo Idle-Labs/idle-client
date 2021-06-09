@@ -192,6 +192,84 @@ const availableTokens = {
           },
         ]
       },
+      USDC:{
+        abi:USDC,
+        decimals:6,
+        token:'USDC',
+        enabled:true,
+        govTokensDisabled:false,
+        color:'hsl(211, 67%, 47%)',
+        address:'0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+        deposit:{
+          minAmountForMint:10000,
+        },
+        wyre:{
+          destCurrency:'USDC'
+        },
+        ramp:{
+          swapAsset:'USDC'
+        },
+        defiPrime:{
+          token:'usdc'
+        },
+        idle:{
+          abi:IdleTokenV4,
+          token:'idleUSDCYield',
+          address:'0x1ee6470CD75D5686d0b2b90C0305Fa46fb0C89A1',
+        },
+        protocols:[
+          {
+            abi:aToken,
+            name:'aavev2',
+            enabled:true,
+            token:'amUSDC',
+            address:'0x1a13F4Ca1d028320A707D99520AbFefca3998b7F',
+            decimals:18,
+            functions:{
+
+            }
+          },
+        ]
+      },
+      WETH:{
+        abi:WETH,
+        token:'WETH',
+        decimals:18,
+        enabled:true,
+        govTokensDisabled:false,
+        color:'hsl(40, 95%, 59%)',
+        address:'0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
+        deposit:{
+          minAmountForMint:5000,
+        },
+        wyre:{
+          destCurrency:'WETH'
+        },
+        ramp:{
+          swapAsset:'WETH'
+        },
+        defiPrime:{
+          token:'weth'
+        },
+        idle:{
+          abi:IdleTokenV4,
+          token:'idleWETHYield',
+          address:'0xfdA25D931258Df948ffecb66b5518299Df6527C4',
+        },
+        protocols:[
+          {
+            abi:aToken,
+            decimals:18,
+            enabled:true,
+            token:'aWETH',
+            name:'aavev2',
+            address:'0x28424507fefb6f7f8E9D3860F56504E4e5f5f390',
+            functions:{
+
+            }
+          },
+        ]
+      },
     },
     risk:{
       

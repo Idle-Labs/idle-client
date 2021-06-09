@@ -1577,9 +1577,8 @@ class StrategyPage extends Component {
                 this.state.polygonTransactions && (
                   <Flex
                     width={1}
-                    mb={[0,3]}
-                    id={'batched-deposits'}
                     flexDirection={'column'}
+                    id={'polygon-transactions'}
                   >
                     <Title my={[3,4]}>Polygon Bridge Transactions</Title>
                     <Flex
@@ -1587,6 +1586,7 @@ class StrategyPage extends Component {
                       flexDirection={'column'}
                     >
                       <CustomList
+                        paginationEnabled={true}
                         handleClick={(props) => this.functionsUtil.openWindow(props.row.url)}
                         cols={[
                           {

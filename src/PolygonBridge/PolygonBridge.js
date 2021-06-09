@@ -20,29 +20,22 @@ class PolygonBridge extends Component {
     txsToExit:[],
     infoBox:null,
     polygonTxs:[],
-    globalStats:[],
     inputValue:null,
+    dataLoaded:false,
     description:null,
     tokenConfig:null,
     balanceProp:null,
     tokenBalance:null,
     contractInfo:null,
-    stakedBalance:null,
     selectedToken:null,
-    rewardMultiplier:1,
-    accountingData:null,
     selectedAction:null,
     selectedOption:null,
     successMessage:null,
     permitEnabled:false,
-    poolTokenPrice:null,
     availableTokens:null,
     availableNetworks:[],
     approveEnabled:false,
-    rewardTokenPrice:null,
     contractApproved:false,
-    tokenWrapperProps:null,
-    distributionSpeed:null,
     defaultTransaction:null,
     approveDescription:null,
     selectedTransaction:null,
@@ -67,14 +60,15 @@ class PolygonBridge extends Component {
 
   componentDidMount(){
     this.loadData();
-    this.loadPolygonTxs();
   }
 
   async loadPolygonTxs(){
     const polygonTxs = await this.functionsUtil.getPolygonBridgeTxs();
-    // console.log('polygonTxs',polygonTxs);
     this.setState({
-      polygonTxs
+      polygonTxs,
+      dataLoaded:true
+    },() => {
+      this.updateData();
     });
   }
 
@@ -88,12 +82,10 @@ class PolygonBridge extends Component {
       const childTokenConfig = tokenConfig.childToken;
 
       // Init contracts
-      if (rootTokenConfig && childTokenConfig){
-        await Promise.all([
-          this.props.initContract(rootTokenConfig.name,rootTokenConfig.address,rootTokenConfig.abi),
-          this.props.initContract(childTokenConfig.name,childTokenConfig.address,childTokenConfig.abi)
-        ]);
-      }
+      await Promise.all([
+        rootTokenConfig ? this.props.initContract(rootTokenConfig.name,rootTokenConfig.address,rootTokenConfig.abi) : null,
+        childTokenConfig ? this.props.initContract(childTokenConfig.name,childTokenConfig.address,childTokenConfig.abi) : null
+      ]);
 
       this.setState({
         tokenConfig
@@ -104,7 +96,7 @@ class PolygonBridge extends Component {
       const selectedActionChanged = prevState.selectedAction !== this.state.selectedAction;
       const contractApprovedChanged = prevState.contractApproved !== this.state.contractApproved;
       if (selectedActionChanged || contractApprovedChanged){
-        this.updateData(selectedActionChanged);
+        this.updateData();
       }
     }
 
@@ -164,12 +156,12 @@ class PolygonBridge extends Component {
       break;
     }
 
-    console.log('getTransactionParams',{
-      value,
-      methodName,
-      methodParams,
-      contractName
-    });
+    // console.log('getTransactionParams',{
+    //   value,
+    //   methodName,
+    //   methodParams,
+    //   contractName
+    // });
 
     return {
       value,
@@ -227,9 +219,9 @@ class PolygonBridge extends Component {
     });
   }
 
-  async updateData(selectedActionChanged=false){
+  async updateData(){
     const newState = {};
-    const isETH = this.state.selectedToken==='ETH';
+    const isETH = this.state.tokenConfig.token==='ETH';
     const bridgeType = this.state.tokenConfig.bridgeType;
     switch (this.state.selectedAction){
       case 'Deposit':
@@ -256,7 +248,7 @@ class PolygonBridge extends Component {
             iconProps:{
               color:this.props.theme.colors.transactions.status.completed
             },
-            text:`You have successfully deposited <strong>${depositedTokens.toFixed(4)} ${this.state.selectedToken}</strong> in the Polygon chain. Please wait up to 10 minutes for your balance to be accounted in the Polygon chain.`
+            text:`You have successfully deposited <strong>${depositedTokens.toFixed(4)} ${this.state.selectedToken}</strong> in the Polygon chain. Please wait ~7-8 minutes for your balance to be accounted in the Polygon chain.`
           }
         } else {
           newState.infoBox = {
@@ -278,7 +270,8 @@ class PolygonBridge extends Component {
 
         const currentNetwork = this.functionsUtil.getCurrentNetwork();
         const maticNetwork = currentNetwork.name;
-        const mainNetwork = currentNetwork.network === 'mainnet' ? this.functionsUtil.getGlobalConfig(['network','availableNetworks',1,'name']) : this.functionsUtil.getGlobalConfig(['network','availableNetworks',5,'name']);
+        const mainNetworkId = this.functionsUtil.getGlobalConfig(['network','providers','polygon','networkPairs',currentNetwork.id]);
+        const mainNetworkName = this.functionsUtil.getGlobalConfig(['network','availableNetworks',mainNetworkId,'name']);
         newState.steps = [
           {
             icon:'LooksOne',
@@ -293,7 +286,7 @@ class PolygonBridge extends Component {
           {
             icon:'Looks3',
             completed:false,
-            description:`Exit ${this.state.selectedToken} from ${mainNetwork} network`
+            description:`Exit ${this.state.selectedToken} from ${mainNetworkName} network`
           },
         ];
         if (this.state.transactionSucceeded){
@@ -329,7 +322,7 @@ class PolygonBridge extends Component {
       break;
       case 'Exit':
         newState.availableNetworks = [1,5];
-        newState.txsToExit = this.state.polygonTxs.filter( tx => tx.included && !tx.exited && tx.token === this.state.selectedToken ).map( tx => {
+        newState.txsToExit = this.state.polygonTxs.filter( tx => tx.included && tx.action === 'Withdraw' && !tx.exited && tx.tokenSymbol === this.state.selectedToken ).map( tx => {
           const label = this.functionsUtil.strToMoment(tx.timeStamp*1000).format('DD-MM-YYYY HH:mm')+' - '+tx.value.toFixed(6)+' '+tx.token;
           return {
             label,
@@ -343,11 +336,6 @@ class PolygonBridge extends Component {
       break;
       default:
       break;
-    }
-
-    if (selectedActionChanged){
-      newState.infoBox = null;
-      newState.transactionSucceeded = false;
     }
 
     if (!newState.balanceProp){
@@ -378,14 +366,18 @@ class PolygonBridge extends Component {
     const selectedOption = availableTokens.find( t => t.value === selectedToken );
     const defaultAction = !paramIsToken ? (currentNetwork.provider === 'infura' ? 'Deposit' : 'Withdraw') : 'Deposit';
     const selectedAction = this.props.action || this.state.action || defaultAction;
+    const tokenConfig = this.props.toolProps.availableTokens[selectedToken];
 
     // console.log('loadData',this.props.urlParams);
 
     this.setState({
+      tokenConfig,
       selectedToken,
       selectedOption,
       selectedAction,
       availableTokens
+    },() => {
+      this.loadPolygonTxs();
     });
   }
 
@@ -667,7 +659,25 @@ class PolygonBridge extends Component {
                                       width={1}
                                     >
                                       {
-                                        this.state.txsToExit.length ? (
+                                        !this.state.dataLoaded ? (
+                                          <Flex
+                                            mt={4}
+                                            flexDirection={'column'}
+                                          >
+                                            <FlexLoader
+                                              flexProps={{
+                                                flexDirection:'row'
+                                              }}
+                                              loaderProps={{
+                                                size:'30px'
+                                              }}
+                                              textProps={{
+                                                ml:2
+                                              }}
+                                              text={'Loading transactions...'}
+                                            />
+                                          </Flex>
+                                        ) : this.state.txsToExit.length ? (
                                           <Box
                                             width={1}
                                           >
