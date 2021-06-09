@@ -1073,7 +1073,9 @@ class FunctionsUtil {
     const etherscanInfo = this.getGlobalConfig(['network','providers','etherscan']);
     const stateSenderConfig = this.getGlobalConfig(['tools','polygonBridge','props','contracts','StateSender']);
     const erc20PredicateConfig = this.getGlobalConfig(['tools','polygonBridge','props','contracts','ERC20Predicate']);
+    const etherPredicateConfig = this.getGlobalConfig(['tools','polygonBridge','props','contracts','EtherPredicate']);
     const depositManagerConfig = this.getGlobalConfig(['tools','polygonBridge','props','contracts','DepositManager']);
+    const rootChainManagerConfig = this.getGlobalConfig(['tools','polygonBridge','props','contracts','RootChainManager']);
 
     const currentNetworkId = this.getCurrentNetworkId();
     const polygonNetworkId = currentNetwork.provider === 'polygon' ? currentNetworkId : this.getGlobalConfig(['network','providers','polygon','networkPairs',currentNetworkId]);
@@ -1085,20 +1087,28 @@ class FunctionsUtil {
 
       const ethereumNetworkId = this.getGlobalConfig(['network','providers','polygon','networkPairs',polygonNetworkId]);
       const etherscanApiUrl = etherscanInfo.endpoints[ethereumNetworkId];
-      const etherscanEndpoint = `${etherscanApiUrl}?&apikey=${etherscanInfo.key}&module=account&action=tokentx&address=${this.props.account}&sort=desc`;
+      const etherscanEndpoint = `${etherscanApiUrl}?module=account&action=tokentx&address=${this.props.account}&sort=desc`;
+      const etherscanTxlistEndpoint =`${etherscanApiUrl}?module=account&action=txlist&address=${this.props.account}&sort=desc`;
+      const etherscanTxlistInternalEndpoint =`${etherscanApiUrl}?module=account&action=txlistinternal&address=${this.props.account}&sort=desc`;
 
       const [
         last_state_id,
         polygonTxs,
-        etherscanTxs
+        etherscanTxs,
+        etherscanTxlist,
+        etherscanTxlistInternal
       ] = await Promise.all([
         this.getPolygonCurrentLastStateId(),
         this.makeCachedRequest(polygonEndpoint,120),
-        this.makeCachedRequest(etherscanEndpoint,120)
+        this.makeEtherscanApiRequest(etherscanEndpoint,etherscanInfo.keys,120),
+        this.makeEtherscanApiRequest(etherscanTxlistEndpoint,etherscanInfo.keys,120),
+        this.makeEtherscanApiRequest(etherscanTxlistInternalEndpoint,etherscanInfo.keys,120),
       ]);
 
       // console.log('polygonTxs',polygonTxs);
       // console.log('etherscanTxs',etherscanTxs);
+      // console.log('etherscanTxlist',etherscanTxlist);
+      // console.log('etherscanTxlistInternal',etherscanTxlistInternal);
 
       const rootTokensAddresses = [];
       const childTokensAddresses = [];
@@ -1111,8 +1121,10 @@ class FunctionsUtil {
         }
       });
 
-      if (etherscanTxs && etherscanTxs.data && etherscanTxs.data.result){
-        const depositTxs = etherscanTxs.data.result.filter( tx => rootTokensAddresses.includes(tx.contractAddress.toLowerCase()) &&  [erc20PredicateConfig.address.toLowerCase(),depositManagerConfig.address.toLowerCase()].includes(tx.to.toLowerCase())  && tx.from.toLowerCase() === this.props.account.toLowerCase() );
+      let depositTxs = [];
+
+      if (etherscanTxs && etherscanTxs.data && etherscanTxs.data.result && typeof etherscanTxs.data.result.filter === 'function'){
+        depositTxs = etherscanTxs.data.result.filter( tx => rootTokensAddresses.includes(tx.contractAddress.toLowerCase()) &&  [erc20PredicateConfig.address.toLowerCase(),depositManagerConfig.address.toLowerCase()].includes(tx.to.toLowerCase())  && tx.from.toLowerCase() === this.props.account.toLowerCase() );
         await this.asyncForEach(depositTxs, async (tx) => {
           const tokenConfig = Object.values(polygonAvailableTokens).find( t => t.name === tx.tokenSymbol );
           const ethereumTx = {...tx};
@@ -1126,13 +1138,49 @@ class FunctionsUtil {
           ethereumTx.included = last_state_id && tx_state_id ? last_state_id>=tx_state_id : false;
           txs.push(ethereumTx);
         });
-        const exitTxs = etherscanTxs.data.result.filter( tx => rootTokensAddresses.includes(tx.contractAddress.toLowerCase()) &&  [erc20PredicateConfig.address.toLowerCase(),depositManagerConfig.address.toLowerCase()].includes(tx.from.toLowerCase())  && tx.to.toLowerCase() === this.props.account.toLowerCase() );
+        const exitTxs = etherscanTxs.data.result.filter( tx => rootTokensAddresses.includes(tx.contractAddress.toLowerCase()) && [erc20PredicateConfig.address.toLowerCase(),depositManagerConfig.address.toLowerCase()].includes(tx.from.toLowerCase()) && tx.to.toLowerCase() === this.props.account.toLowerCase() );
         await this.asyncForEach(exitTxs, async (tx) => {
           const tokenConfig = Object.values(polygonAvailableTokens).find( t => t.name === tx.tokenSymbol );
           const ethereumTx = {...tx};
           ethereumTx.action = 'Exit';
           ethereumTx.included = true;
           ethereumTx.networkId = ethereumNetworkId;
+          ethereumTx.bridgeType = tokenConfig.bridgeType;
+          ethereumTx.value = this.fixTokenDecimals(ethereumTx.value,tokenConfig.decimals);
+          txs.push(ethereumTx);
+        });
+      }
+
+      const depositTxsHashes = depositTxs.map( tx => tx.hash.toLowerCase() );
+      const depositETHInputRexExp = new RegExp(this.props.account.replace('0x','').toLowerCase()+'$');
+      if (etherscanTxlist && etherscanTxlist.data && etherscanTxlist.data.result && typeof etherscanTxlist.data.result.filter === 'function'){
+        const depositETHTxs = etherscanTxlist.data.result.filter( tx => !depositTxsHashes.includes(tx.hash.toLowerCase()) && tx.to.toLowerCase() === rootChainManagerConfig.address.toLowerCase() && tx.input.toLowerCase().match(depositETHInputRexExp) && tx.from.toLowerCase() === this.props.account.toLowerCase() );
+        await this.asyncForEach(depositETHTxs, async (tx) => {
+          const tokenConfig = Object.values(polygonAvailableTokens).find( t => t.name === 'WETH' );
+          const ethereumTx = {...tx};
+          ethereumTx.action = 'Deposit';
+          ethereumTx.tokenSymbol = 'WETH';
+          ethereumTx.networkId = ethereumNetworkId;
+          ethereumTx.bridgeType = tokenConfig.bridgeType;
+          ethereumTx.value = this.fixTokenDecimals(ethereumTx.value,tokenConfig.decimals);
+          const txReceipt = await this.getTxReceipt(ethereumTx.hash,this.props.web3Infura);
+          const stateSenderLog = txReceipt ? txReceipt.logs.find( log => log.address.toLowerCase() === stateSenderConfig.address.toLowerCase() ) : null;
+          const tx_state_id = stateSenderLog ? parseInt(this.props.web3.utils.hexToNumberString(stateSenderLog.topics[1])) : null;
+          ethereumTx.included = last_state_id && tx_state_id ? last_state_id>=tx_state_id : false;
+          txs.push(ethereumTx);
+        });
+      }
+
+      if (etherscanTxlistInternal && etherscanTxlistInternal.data && etherscanTxlistInternal.data.result && typeof etherscanTxlistInternal.data.result.filter === 'function'){
+        const exitETHTxs = etherscanTxlistInternal.data.result.filter( tx => !depositTxsHashes.includes(tx.hash.toLowerCase()) && tx.from.toLowerCase() === etherPredicateConfig.address.toLowerCase() && !tx.input.toLowerCase().match(depositETHInputRexExp) && tx.to.toLowerCase() === this.props.account.toLowerCase() );
+        await this.asyncForEach(exitETHTxs, async (tx) => {
+          const tokenConfig = Object.values(polygonAvailableTokens).find( t => t.name === 'WETH' );
+          const ethereumTx = {...tx};
+          ethereumTx.action = 'Exit';
+          ethereumTx.included = true;
+          ethereumTx.tokenSymbol = 'WETH';
+          ethereumTx.networkId = ethereumNetworkId;
+          ethereumTx.timeStamp = parseInt(tx.timeStamp);
           ethereumTx.bridgeType = tokenConfig.bridgeType;
           ethereumTx.value = this.fixTokenDecimals(ethereumTx.value,tokenConfig.decimals);
           txs.push(ethereumTx);
@@ -1171,9 +1219,9 @@ class FunctionsUtil {
       }
     }
 
-    txs = txs.sort((a,b) => (a.timeStamp < b.timeStamp ? 1 : -1));
+    txs = txs.sort((a,b) => (parseInt(a.timeStamp) < parseInt(b.timeStamp) ? 1 : -1));
 
-    // console.log('getPolygonBridgeTxs',txs);
+    // console.log('getPolygonBridgeTxs',cachedDataKey,txs);
 
     return this.setCachedData(cachedDataKey,txs,120);
   }
@@ -1328,8 +1376,9 @@ class FunctionsUtil {
         const lastCachedTx = Object.values(etherscanBaseTxs.data.result).pop();
         const lastCachedBlockNumber = lastCachedTx && lastCachedTx.blockNumber ? parseInt(lastCachedTx.blockNumber)+1 : firstBlockNumber;
 
-        const etherscanEndpointLastBlock = `${etherscanApiUrl}?strategy=${selectedStrategy}&apikey=${env.REACT_APP_ETHERSCAN_KEY}&module=account&action=tokentx&address=${account}&startblock=${lastCachedBlockNumber}&endblock=${endBlockNumber}&sort=asc`;
-        let latestTxs = await this.makeCachedRequest(etherscanEndpointLastBlock,15);
+        const etherscanEndpointLastBlock = `${etherscanApiUrl}?strategy=${selectedStrategy}&module=account&action=tokentx&address=${account}&startblock=${lastCachedBlockNumber}&endblock=${endBlockNumber}&sort=asc`;
+        // let latestTxs = await this.makeCachedRequest(etherscanEndpointLastBlock,15);
+        let latestTxs = await this.makeEtherscanApiRequest(etherscanEndpointLastBlock,etherscanInfo.keys,15);        
 
         if (latestTxs && latestTxs.data.result && latestTxs.data.result.length){
           
@@ -1526,8 +1575,8 @@ class FunctionsUtil {
     const redeemLogEvent = tx.log_events && tokenConfig && tokenConfig.idle ? tx.log_events.find( log => log.sender_address.toLowerCase() === tokenConfig.address.toLowerCase() && log.decoded.name === 'Transfer' && log.decoded.params.find(param=>param.name==='to').value.toLowerCase() === this.props.account.toLowerCase() && log.decoded.params.find(param=>param.name==='from').value.toLowerCase() === tokenConfig.idle.address.toLowerCase() ) : null;
     const withdrawLogEvent = tx.log_events && tokenConfig && tokenConfig.address ? tx.log_events.find( log => log.sender_address.toLowerCase() === tokenConfig.address.toLowerCase() && log.decoded.name === 'Transfer' && log.decoded.params.find(param=>param.name==='from').value.toLowerCase() === this.props.account.toLowerCase() && log.decoded.params.find(param=>param.name==='to').value.toLowerCase() === '0x0000000000000000000000000000000000000000' ) : null;
 
-    const tokenDecimal = 18;
-    const tokenSymbol = tokenConfig.token;
+    const tokenSymbol = tokenConfig.name;
+    const tokenDecimal = tokenConfig.decimals;
     const hashKey = `${tx.tx_hash}_${tokenSymbol}`;
     const idleToken = tokenConfig.idle ? tokenConfig.idle.token : null;
     const action = depositLogEvent ? 'Deposit' : (redeemLogEvent ? 'Redeem' : (withdrawLogEvent ? 'Withdraw' : null));
@@ -1552,6 +1601,10 @@ class FunctionsUtil {
       topics:log.raw_log_topics
     })) : [];
     const value = logEvent ? this.fixTokenDecimals(logEvent.decoded.params.find( param => param.name==='value' ).value,tokenDecimal) : this.fixTokenDecimals(tx.value,tokenDecimal);
+
+    // if (tokenSymbol === 'USDC'){
+    //   debugger;
+    // }
 
     return {
       logs,
@@ -2496,7 +2549,7 @@ class FunctionsUtil {
     const timestamp = parseInt(Date.now()/1000);
     
     // Check if already exists
-    const cachedRequests = this.getCachedDataWithLocalStorage('cachedRequests',{});
+    let cachedRequests = this.getCachedDataWithLocalStorage('cachedRequests',{});
     // Check if it's not expired
     if (cachedRequests && cachedRequests[key] && cachedRequests[key].timestamp && timestamp-cachedRequests[key].timestamp<TTL){
       return (cachedRequests[key].data && return_data ? cachedRequests[key].data.data : cachedRequests[key].data);
@@ -3632,16 +3685,20 @@ class FunctionsUtil {
       }
     }, null, txData);
   }
-  contractMethodSendWrapper = (contractName,methodName,params,callback,callback_receipt,txData) => {
-    this.props.contractMethodSendWrapper(contractName, methodName, params, null, (tx)=>{
-      if (typeof callback === 'function'){
-        callback(tx);
-      }
-    }, (tx) => {
-      if (typeof callback_receipt === 'function'){
-        callback_receipt(tx);
-      }
-    }, null, txData);
+  contractMethodSendWrapper = (contractName,methodName,params,callback,callback_receipt,txData=null,send_raw=false,raw_tx_data=null) => {
+    try{
+      this.props.contractMethodSendWrapper(contractName, methodName, params, null, (tx)=>{
+        if (typeof callback === 'function'){
+          callback(tx);
+        }
+      }, (tx) => {
+        if (typeof callback_receipt === 'function'){
+          callback_receipt(tx);
+        }
+      }, null, txData, send_raw, raw_tx_data);
+    } catch (error) {
+      callback(null,error);
+    }
   }
   disableERC20 = (contractName,address,callback,callback_receipt) => {
     this.props.contractMethodSendWrapper(contractName, 'approve', [
@@ -5196,7 +5253,7 @@ class FunctionsUtil {
     return await this.genericContractCallCached(contractName, methodName, params, callParams, blockNumber, TTL);
   }
 
-  genericContractCall = async (contractName, methodName, params = [], callParams = {}, blockNumber = 'latest') => {
+  genericContractCall = async (contractName, methodName, params = [], callParams = {}, blockNumber = 'latest', count=0) => {
 
     if (!contractName){
       return null;
@@ -5229,6 +5286,10 @@ class FunctionsUtil {
     } catch (error) {
       // console.log('genericContractCall ERROR - ',contractName,methodName,params);
       this.customLog("genericContractCall error", error);
+      // if (count<=3){
+      //   await this.asyncTimeout(1000);
+      //   return await this.genericContractCall(contractName, methodName, params, callParams, blockNumber, count+1);
+      // }
     }
   }
   asyncForEach = async (array, callback, async=true) => {
@@ -6732,7 +6793,7 @@ class FunctionsUtil {
   getGovTokensUserTotalBalance = async (account=null,availableTokens=null,convertToken=null,checkShowBalance=true) => {
 
     // Check for cached data
-    const cachedDataKey = `govTokensUserTotalBalance_${account}_${JSON.stringify(Object.keys(availableTokens))}_${convertToken}_${checkShowBalance}`;
+    const cachedDataKey = `govTokensUserTotalBalance_${account}_${availableTokens ? JSON.stringify(Object.keys(availableTokens)) : 'null'}_${convertToken}_${checkShowBalance}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData && !this.BNify(cachedData).isNaN()){
       return this.BNify(cachedData);
@@ -7279,7 +7340,8 @@ class FunctionsUtil {
     }
 
     const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
-    const conversionRate = await this.getUniswapConversionRate(DAITokenConfig,tokenConfig);
+    const ToTokenConfig = tokenConfig.token ? this.getGlobalConfig(['stats','tokens',tokenConfig.token]) : tokenConfig;
+    const conversionRate = await this.getUniswapConversionRate(DAITokenConfig,ToTokenConfig);
     if (!this.BNify(conversionRate).isNaN()){
       return this.setCachedDataWithLocalStorage(cachedDataKey,conversionRate);
     }
