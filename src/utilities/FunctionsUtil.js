@@ -1576,8 +1576,8 @@ class FunctionsUtil {
     const withdrawLogEvent = tx.log_events && tokenConfig && tokenConfig.address ? tx.log_events.find( log => log.sender_address.toLowerCase() === tokenConfig.address.toLowerCase() && log.decoded.name === 'Transfer' && log.decoded.params.find(param=>param.name==='from').value.toLowerCase() === this.props.account.toLowerCase() && log.decoded.params.find(param=>param.name==='to').value.toLowerCase() === '0x0000000000000000000000000000000000000000' ) : null;
 
     const tokenDecimal = tokenConfig.decimals;
-    const hashKey = `${tx.tx_hash}_${tokenSymbol}`;
     const tokenSymbol = tokenConfig.name || tokenConfig.token;
+    const hashKey = `${tx.tx_hash}_${tokenSymbol}`;
     const idleToken = tokenConfig.idle ? tokenConfig.idle.token : null;
     const action = depositLogEvent ? 'Deposit' : (redeemLogEvent ? 'Redeem' : (withdrawLogEvent ? 'Withdraw' : null));
     const timeStamp = parseInt(this.strToMoment(tx.block_signed_at)._d.getTime()/1000);
