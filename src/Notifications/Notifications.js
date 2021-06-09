@@ -82,9 +82,6 @@ class Notifications extends Component {
 
   async loadNotifications(){
 
-    const requiredNetwork = this.functionsUtil.getGlobalConfig(['network','requiredNetwork']);
-    const isMainnet = requiredNetwork === 1;
-
     // Get stored lastOpenTimestamp for notifications
     const currentNetwork = this.functionsUtil.getCurrentNetwork();
     const governanceConfig = this.functionsUtil.getGlobalConfig(['governance']);
@@ -199,7 +196,7 @@ class Notifications extends Component {
       const polygonWithdrawalsToExit = polygonTransactions.filter( tx => tx.action === 'Withdraw' && tx.included && !tx.exited );
       polygonWithdrawalsToExit.forEach( tx => {
         const timestamp = tx.timeStamp*1000;
-        const text = `You can Exit ${this.functionsUtil.BNify(tx.value).toFixed(2)} ${tx.tokenSymbol} from Polygon`;
+        const text = `You can Exit ${this.functionsUtil.BNify(tx.value).toFixed(4)} ${tx.token} from Polygon`;
         notifications.push({
           text,
           timestamp,
@@ -210,18 +207,19 @@ class Notifications extends Component {
         });
       });
 
+      const depositBaseUrl = this.functionsUtil.getGlobalConfig(['dashboard','baseRoute'])+`/best/`;
       const polygonCompletedDeposits = polygonTransactions.filter( tx => tx.action === 'Deposit' && tx.included );
       polygonCompletedDeposits.forEach( tx => {
         const timestamp = tx.timeStamp*1000;
         const txDate = this.functionsUtil.strToMoment(timestamp);
         if (txDate.isAfter(this.functionsUtil.strToMoment().subtract(1,'d'))){
-          const text = `Your ${this.functionsUtil.BNify(tx.value).toFixed(2)} ${tx.tokenSymbol} are now available in Polygon`;
+          const text = `Your ${this.functionsUtil.BNify(tx.value).toFixed(4)} ${tx.tokenSymbol} are now available in Polygon`;
           notifications.push({
             text,
             timestamp,
             image:polygonBridgeConfig.image,
             title:'Polygon Deposit Completed',
-            link:this.functionsUtil.getEtherscanTransactionUrl(tx.hash,tx.networkId),
+            hash:depositBaseUrl+tx.tokenSymbol,
             date:this.functionsUtil.strToMoment(timestamp).utc().format('MMM DD, YYYY HH:mm UTC')
           });
         }
