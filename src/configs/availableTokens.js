@@ -713,7 +713,7 @@ const availableTokens = {
             token:'cWBTC',
             abi:cToken.abi,
             name:'compound',
-            address:'0xc11b1268c1a384e55c48c2391d8d480264a3a7f4',
+            address:'0xccF4429DB6322D5C611ee964527D42E5d685DD6a',
             decimals:18,
             functions:{
               exchangeRate:{
@@ -1745,7 +1745,7 @@ const availableTokens = {
             token:'cWBTC',
             abi:cToken.abi,
             name:'compound',
-            address:'0xc11b1268c1a384e55c48c2391d8d480264a3a7f4',
+            address:'0xccF4429DB6322D5C611ee964527D42E5d685DD6a',
             decimals:18,
             functions:{
               exchangeRate:{
