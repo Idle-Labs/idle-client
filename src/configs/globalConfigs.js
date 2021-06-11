@@ -5,6 +5,8 @@ import COMP from '../abis/compound/COMP.json';
 import aToken from '../abis/aave/AToken.json';
 import TokenSwap from '../TokenSwap/TokenSwap';
 import yDAIv3 from '../abis/iearn/yDAIv3.json';
+import LpStaking from '../LpStaking/LpStaking';
+import stkIDLE from '../contracts/stkIDLE.json';
 import yUSDCv3 from '../abis/iearn/yUSDCv3.json';
 import yUSDTv3 from '../abis/iearn/yUSDTv3.json';
 import ySUSDv3 from '../abis/iearn/ySUSDv3.json';
@@ -12,14 +14,15 @@ import yTUSDv3 from '../abis/iearn/yTUSDv3.json';
 import Timelock from '../contracts/Timelock.json';
 import CurveZap from '../abis/curve/CurveZap.json';
 import CovToken from '../abis/cover/CovToken.json';
-import LpStaking from '../contracts/LpStaking.json';
 import B2BVester from '../contracts/B2BVester.json';
+import IdleStaking from '../IdleStaking/IdleStaking';
 // import CurveSwap from '../abis/curve/CurveSwap.json';
 import CurvePool from '../abis/curve/CurvePool.json';
 import NexusMutual from '../NexusMutual/NexusMutual';
 import CoverMint from '../abis/cover/CoverMint.json';
 import LockedIDLE from '../contracts/LockedIDLE.json';
 import { Web3Versions } from '@terminal-packages/sdk';
+import LpStakingAbi from '../contracts/LpStaking.json';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import TokenWrapper from '../TokenWrapper/TokenWrapper';
 import PriceOracle from '../contracts/PriceOracle.json';
@@ -1146,12 +1149,32 @@ const globalConfigs = {
       desc:'Stake your Sushi Swap LP tokens and earn $IDLE rewards',
       props:{
         availableTokens:{
+          IDLE:{
+            component:IdleStaking,
+            contract:{
+              abi:stkIDLE,
+              name:'stkIDLE',
+              rewardToken:'IDLE',
+              address:'0xaac13a116ea7016689993193fce4badc8038136f' // Mainnet
+              // address:'0x95274E30C33083F3E3fEA9454347b9BD59e85225' // Fork
+            },
+            abi:IDLE,
+            name:'IDLE',
+            token:'IDLE',
+            decimals:18,
+            enabled:true,
+            label:'IDLE Token',
+            icon:'images/tokens/IDLE.png',
+            address:'0x875773784Af8135eA0ef43b5a374AaD105c5D39e', // Mainnet
+            poolLink:'https://etherscan.com/address/0x875773784Af8135eA0ef43b5a374AaD105c5D39e',
+          },
           SLP:{
+            component:LpStaking,
             contract:{
               decimals:24,
-              abi:LpStaking,
               name:'LpStaking',
               maxMultiplier:3,
+              abi:LpStakingAbi,
               maxBonusDays:120,
               rewardToken:'IDLE',
               address:'0xcc0b9f7ed0e6bc7c2e69dbd247e8420f29aeb48d' // Mainnet
