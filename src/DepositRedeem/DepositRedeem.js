@@ -1374,13 +1374,14 @@ class DepositRedeem extends Component {
       return null;
     }
 
+
     const viewOnly = this.props.connectorName === 'custom';
+    const currentNetwork = this.functionsUtil.getCurrentNetwork();
 
     const isDepositDisabled = this.props.tokenConfig.canDeposit && !this.props.tokenConfig.canDeposit.enabled;
     // const depositDisabledMessage1 = isDepositDisabled && this.props.tokenConfig.canDeposit.disabledMessageDepositKey ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageDepositKey]) : null;
     // const depositDisabledMessage2 = this.state.canRedeem ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageRedeemKey]) : "";
     const depositDisabledMessage = isDepositDisabled ? (this.state.canRedeem && this.props.tokenConfig.canDeposit.disabledMessageRedeemKey ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageRedeemKey]) : (this.props.tokenConfig.canDeposit.disabledMessageDepositKey ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageDepositKey]) : null) ) : null;
-    const currentNetwork = this.functionsUtil.getCurrentNetwork();
 
     const govTokensDisabled = this.props.tokenConfig.govTokensDisabled;
     const govTokensEnabled = !govTokensDisabled && this.functionsUtil.getGlobalConfig(['strategies', this.props.selectedStrategy, 'govTokensEnabled']) && Object.keys(this.state.tokenGovTokens).length > 0;
@@ -1432,8 +1433,10 @@ class DepositRedeem extends Component {
     const showRebalanceOption = false && this.state.canDeposit && skipMintCheckboxEnabled && this.state.action === 'deposit';
     const showAdvancedDepositOptions = showDepositCurve || showRebalanceOption;
 
-    const batchDepositInfo = this.functionsUtil.getGlobalConfig(['tools', 'batchDeposit']);
-    const batchDepositEnabled = batchDepositInfo.enabled && typeof batchDepositInfo.props.availableTokens[this.props.tokenConfig.idle.token] !== 'undefined';
+    const batchDepositInfo = this.functionsUtil.getGlobalConfig(['tools','batchDeposit']);
+
+    const batchDepositEnabled = batchDepositInfo.enabled && typeof batchDepositInfo.props.availableTokens[this.props.tokenConfig.idle.token] !== 'undefined' && batchDepositInfo.availableNetworks.includes(currentNetwork.id);
+    
     const batchDepositDepositEnabled = batchDepositInfo.depositEnabled;
 
     const showBatchDeposit = !useMetaTx && batchDepositEnabled && batchDepositDepositEnabled && !this.props.isMigrationTool && this.state.action === 'deposit';

@@ -60,7 +60,7 @@ class Dashboard extends Component {
     const baseRoute = this.functionsUtil.getGlobalConfig(['dashboard','baseRoute']);
 
     const menu = [];
-    const currentNetwork = this.functionsUtil.getCurrentNetwork();
+    const currentNetwork = this.functionsUtil.getRequiredNetwork();
 
     const strategies = this.functionsUtil.getGlobalConfig(['strategies']);
     Object.keys(strategies).filter( s => ( !strategies[s].comingSoon && (!strategies[s].enabledEnvs.length || strategies[s].enabledEnvs.includes(this.props.currentEnv)) ) ).forEach(strategy => {
@@ -665,6 +665,9 @@ class Dashboard extends Component {
   render() {
 
     const PageComponent = this.state.pageComponent ? this.state.pageComponent : null;
+    const networkInitialized = this.props.networkInitialized && this.props.network.current.id && this.props.network.required.id;
+    const networkCorrect = this.props.network.isCorrectNetwork;
+    const networkSupported = this.props.network.isSupportedNetwork;
     return (
       <Swipeable
         callback={this.swipeCallback.bind(this)}
@@ -719,7 +722,7 @@ class Dashboard extends Component {
             backgroundColor={'dashboardBg'}
           >
             {
-              !this.props.accountInizialized || !this.props.contractsInitialized || !PageComponent ? (
+              !networkInitialized || !this.props.accountInizialized || !this.props.contractsInitialized || !PageComponent || !networkCorrect || !networkSupported ? (
                 <Flex
                   width={1}
                   minHeight={'50vg'}
@@ -728,7 +731,47 @@ class Dashboard extends Component {
                   justifyContent={'center'}
                 >
                   {
-                    !this.props.network.isCorrectNetwork ? (
+                    networkInitialized && !networkCorrect ? (
+                      <DashboardCard
+                        cardProps={{
+                          p:3,
+                          mt:3,
+                          width:[1,0.35]
+                        }}
+                      >
+                        <Flex
+                          alignItems={'center'}
+                          flexDirection={'column'}
+                        >
+                          <Icon
+                            size={'2.3em'}
+                            name={'Warning'}
+                            color={'cellText'}
+                          />
+                          <Text
+                            mt={2}
+                            fontSize={2}
+                            color={'cellText'}
+                            textAlign={'center'}
+                          >
+                            You should be on the <strong>{this.functionsUtil.capitalize(this.props.network.required.name)} network</strong>. You are currently connected to the <strong>{this.functionsUtil.capitalize(this.props.network.current.name)} network</strong>, please switch to the correct network.
+                          </Text>
+                          {
+                            parseInt(this.props.network.required.id)!==1 && (
+                              <RoundButton
+                                buttonProps={{
+                                  mt:3,
+                                  width:[1,1/2]
+                                }}
+                                handleClick={e => this.functionsUtil.addEthereumChain(this.props.network.required.id)}
+                              >
+                                Switch Network
+                              </RoundButton>
+                            )
+                          }
+                        </Flex>
+                      </DashboardCard>
+                    ) : networkInitialized && !networkSupported ? (
                       <DashboardCard
                         cardProps={{
                           p:3,
@@ -769,7 +812,7 @@ class Dashboard extends Component {
                           my:3,
                           flexDirection:'column'
                         }}
-                        text={ !this.props.accountInizialized ? 'Loading account...' : ( !this.props.contractsInitialized ? 'Loading contracts...' : 'Loading assets...' )}
+                        text={ !this.props.networkInitialized ? 'Loading network...' : (!this.props.accountInizialized ? 'Loading account...' : ( !this.props.contractsInitialized ? 'Loading contracts...' : 'Loading assets...' ))}
                       />
                     ) : (
                       <DashboardCard

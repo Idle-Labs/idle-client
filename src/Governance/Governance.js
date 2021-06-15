@@ -304,7 +304,18 @@ class Dashboard extends Component {
     this.loadData();
   }
 
-  async componentDidUpdate(prevProps, prevState) {
+  checkEnabled(){
+    const currentNetwork = this.functionsUtil.getRequiredNetwork();
+    const governanceConfig = this.functionsUtil.getGlobalConfig(['governance']);
+    const governanceEnabled = governanceConfig.enabled && governanceConfig.availableNetworks.includes(currentNetwork.id);
+    console.log('governanceEnabled',currentNetwork,governanceEnabled);
+    if (!governanceEnabled){
+      this.goToSection('/',false);
+    }
+    return governanceEnabled;
+  }
+
+  async componentDidUpdate(prevProps,prevState) {
     this.loadUtils();
 
     const prevParams = prevProps.match.params;

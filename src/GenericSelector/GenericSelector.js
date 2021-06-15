@@ -61,6 +61,8 @@ class GenericSelector extends Component {
         >
           <Flex
             width={1}
+            height={'100%'}
+            alignItems={'center'}
             flexDirection={'row'}
           >
             {props.children}
@@ -154,6 +156,8 @@ class GenericSelector extends Component {
       if (selectedValue && selectedValue === props.value){
         return null;
       }
+
+      // console.log('CustomOption',this.props.customOptionProps);
 
       return (
         <Flex

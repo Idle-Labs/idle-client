@@ -286,8 +286,7 @@ class StrategyPage extends Component {
 
   render(){
     const viewOnly = this.props.connectorName === 'custom';
-    
-    const currentNetwork = this.functionsUtil.getCurrentNetwork();
+    const currentNetwork = this.functionsUtil.getRequiredNetwork();
     const currentNetworkId = currentNetwork.id;
 
     const govTokens = this.functionsUtil.getGlobalConfig(['govTokens']);

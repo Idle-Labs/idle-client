@@ -207,7 +207,6 @@ class FundsOverview extends Component {
   }
 
   render() {
-
     return (
       <Flex
         width={1}

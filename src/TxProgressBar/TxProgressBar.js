@@ -153,7 +153,7 @@ class TxProgressBar extends Component {
   }
 
   getTxEstimatedTime = (gasPrice) => {
-    const currentNetwork = this.functionsUtil.getCurrentNetwork();
+    const currentNetwork = this.functionsUtil.getRequiredNetwork();
     if (currentNetwork.provider === 'polygon'){
       return 30;
     } else {
@@ -346,6 +346,7 @@ class TxProgressBar extends Component {
   }
 
   render() {
+    const currentNetwork = this.functionsUtil.getRequiredNetwork();
     return (
       <Flex flexDirection={'column'} alignItems={'center'}>
         {

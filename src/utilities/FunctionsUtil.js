@@ -1,3 +1,4 @@
+import Web3 from "web3";
 import React from "react";
 import axios from 'axios';
 import moment from 'moment';
@@ -190,9 +191,49 @@ class FunctionsUtil {
     shortHash = txStart + "..." + txEnd;
     return shortHash;
   }
+  addEthereumChain = (chainId) => {
+    const web3 = this.getCurrentWeb3();
+
+    // console.log('addEthereumChain',chainId,web3.utils,typeof web3.currentProvider.request);
+
+    if (!web3 || !web3.utils || !web3.currentProvider || typeof web3.currentProvider.request !== 'function'){
+      return false;
+    }
+
+    chainId = parseInt(chainId);
+    const networkConfig = this.getGlobalConfig(['network','availableNetworks',chainId]);
+
+    // console.log('networkConfig',networkConfig);
+
+    if (!networkConfig){
+      return false;
+    }
+
+    const providerConfig = this.getGlobalConfig(['network','providers',networkConfig.provider]);
+    const blockExplorerUrl = this.getGlobalConfig(['network','providers',networkConfig.explorer,'baseUrl',chainId]);
+    const rpcUrl = providerConfig.rpc[chainId]+providerConfig.key;
+    const params = [{
+      rpcUrls:[rpcUrl],
+      chainId: web3.utils.toHex(chainId),
+      chainName: networkConfig.name,
+      nativeCurrency: {
+        decimals: 18,
+        name: providerConfig.baseToken,
+        symbol: providerConfig.baseToken
+      },
+      blockExplorerUrls: [blockExplorerUrl]
+    }];
+
+    // console.log('addEthereumChain',params);
+
+    web3.currentProvider.request({
+      params,
+      method:'wallet_addEthereumChain',
+    })
+  }
   getENSName = async (address) => {
 
-    const networkId = this.props.network.current.id || this.getGlobalConfig(['network','requiredNetwork']);
+    const networkId = this.getRequiredNetworkId();
     const ensConfig = this.getGlobalConfig(['network','providers','ens']);
 
     if (!ensConfig.enabled || !ensConfig.supportedNetworks.includes(networkId)){
@@ -439,6 +480,24 @@ class FunctionsUtil {
     // debugger;
 
     return portfolio;
+  }
+  getCurrentWeb3 = () => {
+    const requiredNetwork = this.getRequiredNetwork();
+    const networkConfig = this.getGlobalConfig(['network','availableNetworks',requiredNetwork.id]);
+    const provider = networkConfig ? networkConfig.provider : 'infura';
+    const web3RpcKey = this.getGlobalConfig(['network','providers',provider,'key']);
+    const web3Rpc = this.getGlobalConfig(['network','providers',provider,'rpc',requiredNetwork.id])+web3RpcKey;
+
+    let currentWeb3 = null;
+    if (window.ethereum) {
+      currentWeb3 = new Web3(window.ethereum);
+    } else if (window.web3) {
+      currentWeb3 = new Web3(window.web3);
+    } else {
+      currentWeb3 = new Web3(new Web3.providers.HttpProvider(web3Rpc));
+    }
+
+    return currentWeb3;
   }
   getCurveAvgSlippage = async (enabledTokens=[],account=null,fixDecimals=true) => {
     account = account ? account : this.props.account;
@@ -1047,6 +1106,16 @@ class FunctionsUtil {
     network.id = networkId;
     return network;
   }
+  getRequiredNetwork = () => {
+    const networkId = this.getRequiredNetworkId();
+    const network = this.getGlobalConfig(['network','availableNetworks',networkId]);
+    network.id = networkId;
+    return network;
+  }
+  getRequiredNetworkId = () => {
+    const defaultNetwork = this.getGlobalConfig(['network','requiredNetwork']);
+    return this.props.network && this.props.network.required ? this.props.network.required.id || defaultNetwork : defaultNetwork;
+  }
   getCurrentNetworkId = () => {
     const defaultNetwork = this.getGlobalConfig(['network','requiredNetwork']);
     return this.props.network && this.props.network.current ? this.props.network.current.id || defaultNetwork : defaultNetwork;
@@ -1077,7 +1146,7 @@ class FunctionsUtil {
     const depositManagerConfig = this.getGlobalConfig(['tools','polygonBridge','props','contracts','DepositManager']);
     const rootChainManagerConfig = this.getGlobalConfig(['tools','polygonBridge','props','contracts','RootChainManager']);
 
-    const currentNetworkId = this.getCurrentNetworkId();
+    const currentNetworkId = this.getRequiredNetworkId();
     const polygonNetworkId = currentNetwork.provider === 'polygon' ? currentNetworkId : this.getGlobalConfig(['network','providers','polygon','networkPairs',currentNetworkId]);
     // Check if covalent is enabled for the required network
     if (covalentInfo.enabled && covalentInfo.endpoints[polygonNetworkId]){
@@ -1237,7 +1306,7 @@ class FunctionsUtil {
     let results = [];
     let baseTxs = null;
     let baseEndpoint = null;
-    const requiredNetwork = this.getCurrentNetworkId();
+    const requiredNetwork = this.getRequiredNetworkId();
     // const selectedStrategy = this.props.selectedStrategy;
     const covalentInfo = this.getGlobalConfig(['network','providers','covalent']);
 
@@ -1350,8 +1419,7 @@ class FunctionsUtil {
     // Check if firstBlockNumber is less that firstIdleBlockNumber
     const firstIdleBlockNumber = this.getGlobalConfig(['network','firstBlockNumber']);
     firstBlockNumber = Math.max(firstIdleBlockNumber,firstBlockNumber);
-
-    const requiredNetwork = this.props.network.current.id || this.getGlobalConfig(['network','requiredNetwork']);
+    const requiredNetwork = this.getRequiredNetworkId();
     const etherscanInfo = this.getGlobalConfig(['network','providers','etherscan']);
 
     let results = [];
@@ -2151,7 +2219,7 @@ class FunctionsUtil {
 
     etherscanTxs = Object.assign({},etherscanTxs);
 
-    const networkId = this.props.network.current.id || this.getGlobalConfig(['network','requiredNetwork']);
+    const networkId = this.getRequiredNetworkId();
 
     // this.customLog('Processing stored txs',enabledTokens);
 
@@ -2705,7 +2773,7 @@ class FunctionsUtil {
   }
   getEtherscanTransactionUrl = (txHash,requiredNetwork=null) => {
     const defaultNetwork = this.getGlobalConfig(['network','requiredNetwork']);
-    requiredNetwork = requiredNetwork || this.getCurrentNetworkId();
+    requiredNetwork = requiredNetwork || this.getRequiredNetworkId();
     const explorer = this.getGlobalConfig(['network','availableNetworks',requiredNetwork,'explorer']);
     const defaultUrl = this.getGlobalConfig(['network','providers','etherscan','baseUrl',defaultNetwork]);
     const baseurl = this.getGlobalConfig(['network','providers',explorer,'baseUrl',requiredNetwork]) || defaultUrl;
@@ -2713,7 +2781,7 @@ class FunctionsUtil {
   }
   getEtherscanAddressUrl = (address,requiredNetwork=null) => {
     const defaultNetwork = this.getGlobalConfig(['network','requiredNetwork']);
-    requiredNetwork = requiredNetwork || this.getCurrentNetworkId();
+    requiredNetwork = requiredNetwork || this.getRequiredNetworkId();
     const explorer = this.getGlobalConfig(['network','availableNetworks',requiredNetwork,'explorer']);
     const defaultUrl = this.getGlobalConfig(['network','providers','etherscan','baseUrl',defaultNetwork]);
     const baseurl = this.getGlobalConfig(['network','providers',explorer,'baseUrl',requiredNetwork]) || defaultUrl;
@@ -3255,7 +3323,7 @@ class FunctionsUtil {
 
     try{
       const userAddress = this.props.account;
-      const chainId = this.props.network.current.id || this.getGlobalConfig(['network','requiredNetwork']);
+      const chainId = this.getRequiredNetworkId();
       const messageToSign = this.constructMetaTransactionMessage(nonce, chainId, functionSignature, contract._address);
 
       const signature = await this.props.web3.eth.personal.sign(
@@ -3369,7 +3437,7 @@ class FunctionsUtil {
     try{
       const userAddress = this.props.account;
       const nonce = await contract.methods.getNonce(userAddress).call();
-      const chainId = this.props.network.current.id || this.getGlobalConfig(['network','requiredNetwork']);
+      const chainId = this.getRequiredNetworkId();
       const messageToSign = this.constructMetaTransactionMessage(nonce, chainId, functionSignature, contract._address);
 
       const signature = await this.props.web3.eth.personal.sign(
@@ -4866,7 +4934,7 @@ class FunctionsUtil {
     return nexusMutualCoverages;
   }
   getBatchedDepositExecutions = async (contractAddress) => {
-    const requiredNetwork = this.props.network.current.id || this.getGlobalConfig(['network','requiredNetwork']);
+    const requiredNetwork = this.getRequiredNetworkId();
     const etherscanInfo = this.getGlobalConfig(['network','providers','etherscan']);
     if (etherscanInfo.enabled && etherscanInfo.endpoints[requiredNetwork]){
       const etherscanApiUrl = etherscanInfo.endpoints[requiredNetwork];
@@ -6501,11 +6569,14 @@ class FunctionsUtil {
   getIdleGovToken = () => {
     if (!this.idleGovToken){
       this.idleGovToken = new IdleGovToken(this.props);
+    } else {
+      this.idleGovToken.setProps(this.props);
     }
     return this.idleGovToken;
   }
   getTokenGovTokens = (tokenConfig) => {
     const output = {};
+    const currentNetworkId = this.getRequiredNetworkId();
     const govTokens = this.getGlobalConfig(['govTokens']);
     Object.keys(govTokens).forEach( govToken => {
       const govTokenConfig = govTokens[govToken];

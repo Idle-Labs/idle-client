@@ -1,6 +1,7 @@
 import Staking from "../Staking/Staking";
 import DAI from '../abis/tokens/DAI.json';
 import IDLE from '../contracts/IDLE.json';
+import Tranches from '../Tranches/Tranches';
 import USDC from '../abis/tokens/USDC.json';
 import WETH from '../abis/tokens/WETH.json';
 import COMP from '../abis/compound/COMP.json';
@@ -1445,15 +1446,17 @@ const globalConfigs = {
     requiredConfirmations: 1,
     enabledNetworks: [1, 42, 1337],
     accountBalanceMinimum: 0, // in ETH for gas fees
-    providers: {
-      infura: {
-        42: "https://kovan.infura.io/v3/",
-        1: "https://mainnet.infura.io/v3/",
-        1337: "https://mainnet.infura.io/v3/"
-      },
-      ens: {
-        enabled: true,
-        supportedNetworks: [1]
+    providers:{
+      infura:{
+        key:env.REACT_APP_INFURA_KEY,
+        rpc:{
+          5: 'https://goerli.infura.io/v3/',
+          42: 'https://kovan.infura.io/v3/',
+          1: 'https://mainnet.infura.io/v3/',
+          1337: 'https://mainnet.infura.io/v3/',
+          137: 'https://mainnet.infura.io/v3/',
+          80001: 'https://goerli.infura.io/v3/'
+        }
       },
       polygon:{
         enabled:true,

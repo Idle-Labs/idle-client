@@ -268,7 +268,7 @@ class PolygonBridge extends Component {
         newState.contractInfo = this.state.tokenConfig.childToken;
         newState.balanceProp = await this.functionsUtil.getTokenBalance(this.state.tokenConfig.childToken.name,this.props.account);
 
-        const currentNetwork = this.functionsUtil.getCurrentNetwork();
+        const currentNetwork = this.functionsUtil.getRequiredNetwork();
         const maticNetwork = currentNetwork.name;
         const mainNetworkId = this.functionsUtil.getGlobalConfig(['network','providers','polygon','networkPairs',currentNetwork.id]);
         const mainNetworkName = this.functionsUtil.getGlobalConfig(['network','availableNetworks',mainNetworkId,'name']);
@@ -360,7 +360,7 @@ class PolygonBridge extends Component {
       return output;
     },[]);
 
-    const currentNetwork = this.functionsUtil.getCurrentNetwork();
+    const currentNetwork = this.functionsUtil.getRequiredNetwork();
     const paramIsToken = this.props.urlParams.param2 && this.props.toolProps.availableTokens[this.props.urlParams.param2];
     const selectedToken = paramIsToken ? this.props.urlParams.param2 : (this.props.selectedToken || this.state.selectedToken || availableTokens[0].value);
     const selectedOption = availableTokens.find( t => t.value === selectedToken );
@@ -402,7 +402,7 @@ class PolygonBridge extends Component {
     const isExit = this.state.selectedAction === 'Exit';
     const isDeposit = this.state.selectedAction === 'Deposit';
     const isWithdraw = this.state.selectedAction === 'Withdraw';
-    const currentNetwork = this.functionsUtil.getCurrentNetwork();
+    const currentNetwork = this.functionsUtil.getRequiredNetwork();
     const currentNetworkId = currentNetwork.id;
 
     return (

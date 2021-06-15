@@ -54,6 +54,7 @@ class App extends Component {
     width: window.innerWidth,
     availableStrategies: null,
     height: window.innerHeight,
+    config:globalConfigs.network,
     unsubscribeFromHistory: null,
     enableUnderlyingWithdraw: false,
   };
@@ -217,7 +218,7 @@ class App extends Component {
   async loadAvailableTokens() {
     const newState = {};
     const availableStrategies = {};
-    const requiredNetwork = this.state.network && this.state.network.isCorrectNetwork ? (this.state.network.current.id || this.state.network.required.id) : globalConfigs.network.requiredNetwork;
+    const requiredNetwork = this.state.network && this.state.network.isCorrectNetwork ? (this.state.network.current.id || this.state.network.required.id) : this.state.config.requiredNetwork;
 
     // console.log('loadAvailableTokens',this.state.network,requiredNetwork,availableTokens);
 
@@ -283,6 +284,21 @@ class App extends Component {
     // console.log('setStrategyToken',newState);
 
     await this.setState(newState, callback);
+  }
+
+  async setRequiredNetwork(requiredNetwork){
+    requiredNetwork = parseInt(requiredNetwork);
+    if (globalConfigs.network.enabledNetworks.includes(requiredNetwork)){
+      this.functionsUtil.setLocalStorage('requiredNetwork',requiredNetwork);
+      // console.log('setRequiredNetwork',requiredNetwork);
+      this.functionsUtil.addEthereumChain(requiredNetwork);
+      return this.setState(prevState => ({
+        config:{
+          ...prevState.config,
+          requiredNetwork
+        }
+      }));
+    }
   }
 
   async setStrategy(selectedStrategy) {
@@ -357,6 +373,12 @@ class App extends Component {
     const themeMode = this.functionsUtil.getStoredItem('themeMode', false);
     if (themeMode) {
       this.setThemeMode(themeMode);
+    }
+
+    const requiredNetwork = this.functionsUtil.getStoredItem('requiredNetwork',false);
+    // console.log('requiredNetwork',requiredNetwork);
+    if (requiredNetwork){
+      this.setRequiredNetwork(requiredNetwork);
     }
 
     window.closeIframe = (w) => {
@@ -474,9 +496,6 @@ class App extends Component {
     return null;
   };
 
-  // Optional parameters to pass into RimbleWeb3
-  config = globalConfigs.network;
-
   showRoute(route) {
     return this.setState({ route });
   }
@@ -550,8 +569,6 @@ class App extends Component {
           break;
       }
     }
-
-    // console.log('setConnector - AFTER',connectorName,walletProvider);
 
     this.functionsUtil.setLocalStorage('connectorName', connectorName);
     this.functionsUtil.setLocalStorage('walletProvider', walletProvider);
@@ -650,8 +667,8 @@ class App extends Component {
                   <RimbleWeb3
                     context={context}
                     isMobile={isMobile}
-                    config={this.config}
                     connectors={connectors}
+                    config={this.state.config}
                     theme={this.state.selectedTheme}
                     cachedData={this.state.cachedData}
                     availableTranches={availableTranches}
@@ -685,6 +702,7 @@ class App extends Component {
                         transaction,
                         initAccount,
                         initContract,
+                        checkNetwork,
                         transactions,
                         initSimpleID,
                         permitClient,
@@ -697,6 +715,7 @@ class App extends Component {
                         getTokenDecimals,
                         getAccountBalance,
                         accountBalanceLow,
+                        networkInitialized,
                         accountInizialized,
                         accountBalanceToken,
                         userRejectedConnect,
@@ -707,7 +726,8 @@ class App extends Component {
                         userRejectedValidation,
                         accountValidationPending,
                         connectAndValidateAccount,
-                        contractMethodSendWrapper
+                        contractMethodSendWrapper,
+                        initContractCustomProvider
                       }) => {
                         return (
                           <Box>
@@ -784,91 +804,95 @@ class App extends Component {
                                         setCurrentSection={this.setCurrentSection.bind(this)}
                                         connectAndValidateAccount={connectAndValidateAccount}
                                         contractMethodSendWrapper={contractMethodSendWrapper}
+                                        setRequiredNetwork={this.setRequiredNetwork.bind(this)}
+                                        initContractCustomProvider={initContractCustomProvider}
                                         setCallbackAfterLogin={this.setCallbackAfterLogin.bind(this)}
                                       />
                                     </Suspense>
+
                                 }
                               >
                               </Route>
-                            {
-                              governanceEnabled && 
-                                <Route
-                                  path="/governance/:section?/:item_id?"
-                                  render={
-                                    (props) =>
-                                      <Suspense
-                                        fallback={SuspenseLoader}
-                                      >
-                                        <Governance
-                                          {...props}
-                                          web3={web3}
-                                          modals={modals}
-                                          network={network}
-                                          context={context}
-                                          account={account}
-                                          initWeb3={initWeb3}
-                                          biconomy={biconomy}
-                                          isMobile={isMobile}
-                                          simpleID={simpleID}
-                                          isGovernance={true}
-                                          contracts={contracts}
-                                          web3Infura={web3Infura}
-                                          web3Polygon={web3Polygon}
-                                          initAccount={initAccount}
-                                          initSimpleID={initSimpleID}
-                                          initContract={initContract}
-                                          checkNetwork={checkNetwork}
-                                          transactions={transactions}
-                                          buyToken={this.state.buyToken}
-                                          logout={this.logout.bind(this)}
-                                          accountBalance={accountBalance}
-                                          themeMode={this.state.themeMode}
-                                          theme={this.state.selectedTheme}
-                                          validateAccount={validateAccount}
-                                          currentEnv={this.state.currentEnv}
-                                          connecting={this.state.connecting}
-                                          cachedData={this.state.cachedData}
-                                          setToken={this.setToken.bind(this)}
-                                          accountValidated={accountValidated}
-                                          getTokenDecimals={getTokenDecimals}
-                                          rejectValidation={rejectValidation}
-                                          tokenConfig={this.state.tokenConfig}
-                                          getAccountBalance={getAccountBalance}
-                                          accountBalanceLow={accountBalanceLow}
-                                          accountInizialized={accountInizialized}
-                                          networkInitialized={networkInitialized}
-                                          selectedToken={this.state.selectedToken}
-                                          connectorName={this.state.connectorName}
-                                          setStrategy={this.setStrategy.bind(this)}
-                                          userRejectedConnect={userRejectedConnect}
-                                          accountBalanceToken={accountBalanceToken}
-                                          initializeContracts={initializeContracts}
-                                          walletProvider={this.state.walletProvider}
-                                          buyModalOpened={this.state.buyModalOpened}
-                                          contractsInitialized={contractsInitialized}
-                                          openBuyModal={this.openBuyModal.bind(this)}
-                                          rejectAccountConnect={rejectAccountConnect}
-                                          handleMenuClick={this.selectTab.bind(this)}
-                                          setConnector={this.setConnector.bind(this)}
-                                          setThemeMode={this.setThemeMode.bind(this)}
-                                          availableTokens={this.state.availableTokens}
-                                          closeBuyModal={this.closeBuyModal.bind(this)}
-                                          setCachedData={this.setCachedData.bind(this)}
-                                          selectedStrategy={this.state.selectedStrategy}
-                                          userRejectedValidation={userRejectedValidation}
-                                          clearCachedData={this.clearCachedData.bind(this)}
-                                          setStrategyToken={this.setStrategyToken.bind(this)}
-                                          accountValidationPending={accountValidationPending}
-                                          availableStrategies={this.state.availableStrategies}
-                                          setCurrentSection={this.setCurrentSection.bind(this)}
-                                          connectAndValidateAccount={connectAndValidateAccount}
-                                          contractMethodSendWrapper={contractMethodSendWrapper}
-                                          setCallbackAfterLogin={this.setCallbackAfterLogin.bind(this)}
-                                        />
-                                      </Suspense>
-                                  }
-                                >
-                                </Route>
+                              {
+                                governanceEnabled && (
+                                  <Route
+                                    path="/governance/:section?/:item_id?"
+                                    render={
+                                      (props) =>
+                                        <Suspense
+                                          fallback={SuspenseLoader}
+                                        >
+                                          <Governance
+                                            {...props}
+                                            web3={web3}
+                                            modals={modals}
+                                            network={network}
+                                            context={context}
+                                            account={account}
+                                            initWeb3={initWeb3}
+                                            biconomy={biconomy}
+                                            isMobile={isMobile}
+                                            simpleID={simpleID}
+                                            isGovernance={true}
+                                            contracts={contracts}
+                                            web3Infura={web3Infura}
+                                            web3Polygon={web3Polygon}
+                                            initAccount={initAccount}
+                                            initSimpleID={initSimpleID}
+                                            initContract={initContract}
+                                            checkNetwork={checkNetwork}
+                                            transactions={transactions}
+                                            buyToken={this.state.buyToken}
+                                            logout={this.logout.bind(this)}
+                                            accountBalance={accountBalance}
+                                            themeMode={this.state.themeMode}
+                                            theme={this.state.selectedTheme}
+                                            validateAccount={validateAccount}
+                                            currentEnv={this.state.currentEnv}
+                                            connecting={this.state.connecting}
+                                            cachedData={this.state.cachedData}
+                                            setToken={this.setToken.bind(this)}
+                                            accountValidated={accountValidated}
+                                            getTokenDecimals={getTokenDecimals}
+                                            rejectValidation={rejectValidation}
+                                            tokenConfig={this.state.tokenConfig}
+                                            getAccountBalance={getAccountBalance}
+                                            accountBalanceLow={accountBalanceLow}
+                                            accountInizialized={accountInizialized}
+                                            networkInitialized={networkInitialized}
+                                            selectedToken={this.state.selectedToken}
+                                            connectorName={this.state.connectorName}
+                                            setStrategy={this.setStrategy.bind(this)}
+                                            userRejectedConnect={userRejectedConnect}
+                                            accountBalanceToken={accountBalanceToken}
+                                            initializeContracts={initializeContracts}
+                                            walletProvider={this.state.walletProvider}
+                                            buyModalOpened={this.state.buyModalOpened}
+                                            contractsInitialized={contractsInitialized}
+                                            openBuyModal={this.openBuyModal.bind(this)}
+                                            rejectAccountConnect={rejectAccountConnect}
+                                            handleMenuClick={this.selectTab.bind(this)}
+                                            setConnector={this.setConnector.bind(this)}
+                                            setThemeMode={this.setThemeMode.bind(this)}
+                                            availableTokens={this.state.availableTokens}
+                                            closeBuyModal={this.closeBuyModal.bind(this)}
+                                            setCachedData={this.setCachedData.bind(this)}
+                                            selectedStrategy={this.state.selectedStrategy}
+                                            userRejectedValidation={userRejectedValidation}
+                                            clearCachedData={this.clearCachedData.bind(this)}
+                                            setStrategyToken={this.setStrategyToken.bind(this)}
+                                            accountValidationPending={accountValidationPending}
+                                            availableStrategies={this.state.availableStrategies}
+                                            setCurrentSection={this.setCurrentSection.bind(this)}
+                                            connectAndValidateAccount={connectAndValidateAccount}
+                                            contractMethodSendWrapper={contractMethodSendWrapper}
+                                            setCallbackAfterLogin={this.setCallbackAfterLogin.bind(this)}
+                                          />
+                                        </Suspense>
+                                    }
+                                  >
+                                  </Route>
+                                )
                               }
                               <Route>
                                 <Header
