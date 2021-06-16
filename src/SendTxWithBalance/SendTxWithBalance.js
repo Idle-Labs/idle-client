@@ -705,15 +705,15 @@ class SendTxWithBalance extends Component {
                         justifyContent={'center'}
                       >
                         <RoundButton
+                          handleClick={this.executeTx.bind(this)}
                           buttonProps={{
                             mt:2,
                             width:[1,1/2],
                             style:{
                               textTransform:'capitalize'
                             },
-                            disabled:this.state.buttonDisabled
+                            disabled:this.state.buttonDisabled||this.props.buttonDisabled
                           }}
-                          handleClick={this.executeTx.bind(this)}
                         >
                           {this.props.action}
                         </RoundButton>

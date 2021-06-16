@@ -55,6 +55,7 @@ import IdleBatchConverter from '../contracts/IdleBatchConverter.json';
 import UniswapV2Router02 from '../abis/uniswap/UniswapV2Router02.json';
 import IdleDepositForwarder from '../contracts/IdleDepositForwarder.json';
 import SushiLiquidityPool from '../abis/sushiswap/SushiLiquidityPool.json';
+import StakingFeeDistributor from '../contracts/StakingFeeDistributor.json';
 import BalancerExchangeProxy from '../abis/balancer/BalancerExchangeProxy.json';
 import IdleConverterPersonalSignV4 from '../contracts/IdleConverterPersonalSignV4.json';
 import MinimalInitializableProxyFactory from '../contracts/MinimalInitializableProxyFactory.json';
@@ -1143,10 +1144,10 @@ const globalConfigs = {
     stake:{
       enabled:true,
       icon:'Layers',
-      label:'LP Staking',
-      route:'lp-staking',
+      label:'Staking',
+      route:'staking',
       subComponent:Staking,
-      desc:'Stake your Sushi Swap LP tokens and earn $IDLE rewards',
+      desc:'Stake your IDLE / Sushi Swap LP tokens and earn $IDLE rewards',
       props:{
         availableTokens:{
           IDLE:{
@@ -1157,6 +1158,11 @@ const globalConfigs = {
               rewardToken:'IDLE',
               address:'0xaac13a116ea7016689993193fce4badc8038136f' // Mainnet
               // address:'0x95274E30C33083F3E3fEA9454347b9BD59e85225' // Fork
+            },
+            feeDistributor:{
+              abi:StakingFeeDistributor,
+              name:'StakingFeeDistributor',
+              address:'0x16e29fd127774e76ea946f19511a1eff2b319fbe' // Mainnet
             },
             abi:IDLE,
             name:'IDLE',
