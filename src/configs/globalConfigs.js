@@ -1171,8 +1171,8 @@ const globalConfigs = {
       }
     },
     b2bVesting:{
-      enabled:false,
-      visible:false,
+      enabled:true,
+      visible:true,
       icon:'CloudUpload',
       label:'B2B Vesting',
       route:'b2b-vesting-contract',
@@ -1182,7 +1182,7 @@ const globalConfigs = {
         contracts:{
           vesterImplementation:{
             abi:B2BVester,
-            address:'0xE6E340D132b5f46d1e472DebcD681B2aBc16e57E'
+            address:'0x4f0c0f1ea254988f0c53bec4bf292be8b9300705'
           }
         }
       }
