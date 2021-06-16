@@ -467,6 +467,9 @@ class DeployB2BVesting extends Component {
 
   render() {
 
+    const depositContracts = this.state.deployedContracts.filter( c => c.owner.toLowerCase() === this.props.account.toLowerCase() );
+    const claimContracts = this.state.deployedContracts.filter( c => c.recipient.toLowerCase() === this.props.account.toLowerCase() );
+
     return (
       <Flex
         width={1}
@@ -885,7 +888,7 @@ class DeployB2BVesting extends Component {
                         </DashboardCard>
                       ) : this.state.processing && this.state.processing.loading ? (
                         <TxProgressBar
-                          web3={this.props.web3}
+                          {...this.props}
                           hash={this.state.processing.txHash}
                           waitText={`Deployment estimated in`}
                           endMessage={`Finalizing deployment request...`}
@@ -906,8 +909,8 @@ class DeployB2BVesting extends Component {
                   </Flex>
                 </Form>
               ) : this.state.action === 'deposit' ?
-                this.state.deployedContracts.length>0 ?
-                  this.state.deployedContracts.filter( c => c.owner.toLowerCase() === this.props.account.toLowerCase() ).map( (contractInfo,actionIndex) => {
+                depositContracts.length>0 ?
+                  depositContracts.map( (contractInfo,actionIndex) => {
                     return (
                       <DashboardCard
                         cardProps={{
@@ -1112,8 +1115,8 @@ class DeployB2BVesting extends Component {
                   </Text>
                 )
               : this.state.action === 'claim' &&
-                this.state.deployedContracts.length>0 ?
-                  this.state.deployedContracts.filter( c => c.recipient.toLowerCase() === this.props.account.toLowerCase() ).map( (contractInfo,actionIndex) => {
+                claimContracts.length>0 ?
+                  claimContracts.map( (contractInfo,actionIndex) => {
                     return (
                       <DashboardCard
                         cardProps={{
@@ -1255,7 +1258,7 @@ class DeployB2BVesting extends Component {
                                     )
                                   }
                                   {
-                                    contractInfo.availableBalance && contractInfo.availableBalance.gt(0) ? (
+                                    contractInfo.availableBalance && contractInfo.availableBalance.gt(0.00000001) ? (
                                       <ExecuteTransaction
                                         params={[]}
                                         {...this.props}
@@ -1277,7 +1280,7 @@ class DeployB2BVesting extends Component {
                                         fontWeight={3}
                                         color={'cellText'}
                                       >
-                                        Nothing to Claim yet.
+                                        No balance available.
                                       </Text>
                                     )
                                   }
