@@ -1162,7 +1162,7 @@ const globalConfigs = {
             feeDistributor:{
               abi:StakingFeeDistributor,
               name:'StakingFeeDistributor',
-              address:'0x16e29fd127774e76ea946f19511a1eff2b319fbe' // Mainnet
+              address:'0xbabb82456c013fd7e3f25857e0729de8207f80e2' // Mainnet
             },
             abi:IDLE,
             name:'IDLE',
