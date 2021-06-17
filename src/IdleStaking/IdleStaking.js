@@ -1,4 +1,5 @@
 import ExtLink from '../ExtLink/ExtLink';
+import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import ImageButton from '../ImageButton/ImageButton';
@@ -55,6 +56,7 @@ class IdleStaking extends Component {
     poolTokenPrice:null,
     lockPeriodInput:null,
     buttonDisabled:false,
+    internalInfoBox:null,
     availableTokens:null,
     approveEnabled:false,
     rewardTokenPrice:null,
@@ -102,9 +104,11 @@ class IdleStaking extends Component {
     const tokenConfigChanged = JSON.stringify(prevProps.tokenConfig) !== JSON.stringify(this.props.tokenConfig);
     const contractInfoChanged = JSON.stringify(prevProps.contractInfo) !== JSON.stringify(this.props.contractInfo);
     if (selectedActionChanged || contractApprovedChanged || tokenConfigChanged){
+      const increaseAction = selectedActionChanged ? null : this.state.increaseAction;
       this.setState({
+        increaseAction,
         tokenWrapperProps:null,
-        showTokenWrapperEnabled:false
+        showTokenWrapperEnabled:false,
       },() => {
         this.updateData(selectedActionChanged);
       });
@@ -114,17 +118,22 @@ class IdleStaking extends Component {
       this.changeInputCallback();
     }
 
-    const lockPeriodChanged = prevState.lockPeriodInput !== this.state.lockPeriodInput;
+    const lockPeriodChanged = prevState.lockPeriodTimestamp !== this.state.lockPeriodTimestamp;
     const increaseActionChanged = prevState.increaseAction !== this.state.increaseAction;
     if (lockPeriodChanged || increaseActionChanged || selectedActionChanged){
+      if (increaseActionChanged){
+        this.setState({
+          internalInfoBox:null
+        });
+      }
       this.checkButtonDisabled();
     }
   }
 
   checkButtonDisabled(){
     let buttonDisabled = false;
-    const minDate = this.state.lockedEnd ? this.functionsUtil.strToMoment(this.state.lockedEnd*1000).add(7,'day') : this.functionsUtil.strToMoment();
-    const mDate = this.functionsUtil.strToMoment(this.state.lockPeriodInput+' 00:00:00','YYYY-MM-DD HH:mm:ss');
+    const minDate = this.state.lockedEnd ? this.functionsUtil.strToMoment(this.state.lockedEnd*1000).add(7,'day') : this.functionsUtil.strToMoment().add(7,'day');
+    const mDate = this.functionsUtil.strToMoment(this.state.lockPeriodTimestamp*1000);
     const maxDate = this.functionsUtil.strToMoment(minDate).add(4,'year');
     switch (this.state.selectedAction){
       default:
@@ -439,7 +448,10 @@ class IdleStaking extends Component {
   changelockPeriodInput(e){
     const selectedLockPeriod = null;
     const lockPeriodInput = e.target.value;
-    const lockPeriodTimestamp = this.functionsUtil.strToMoment(lockPeriodInput+' 00:00:00','YYYY-MM-DD HH:mm:ss');
+    const currDate = this.functionsUtil.strToMoment();
+    const mDate = this.functionsUtil.strToMoment(lockPeriodInput+' '+currDate.format('HH:mm:ss'),'YYYY-MM-DD HH:mm:ss').add(1,'second');
+    const lockPeriodTimestamp = parseInt(mDate._d.getTime()/1000);
+    // console.log('changelockPeriodInput',lockPeriodTimestamp);
     this.setState({
       lockPeriodInput,
       selectedLockPeriod,
@@ -451,7 +463,8 @@ class IdleStaking extends Component {
     const minDate = this.state.lockedEnd ? this.functionsUtil.strToMoment(this.state.lockedEnd*1000) : this.functionsUtil.strToMoment();
     const mDate = minDate.add(selectedLockPeriod,'day').add(1,'second');
     const lockPeriodInput = mDate.format('YYYY-MM-DD');
-    const lockPeriodTimestamp = parseInt(mDate._d.getTime()/7);
+    const lockPeriodTimestamp = parseInt(mDate._d.getTime()/1000);
+    // console.log('selectLockPeriod',lockPeriodTimestamp);
     this.setState({
       lockPeriodInput,
       selectedLockPeriod,
@@ -460,8 +473,9 @@ class IdleStaking extends Component {
   }
 
   async transactionSucceeded(tx,amount,params){
-    console.log('transactionSucceeded',tx);
+    // console.log('transactionSucceeded',tx);
     let infoBox = null;
+    let internalInfoBox = null;
     switch (this.state.selectedAction){
       case 'Lock':
         const lockedTokensLog = tx.txReceipt && tx.txReceipt.logs ? tx.txReceipt.logs.find( log => log.address.toLowerCase() === this.props.tokenConfig.address.toLowerCase() && log.topics.find( t => t.toLowerCase().includes(this.props.contractInfo.address.replace('0x','').toLowerCase()) ) && log.topics.find( t => t.toLowerCase().includes(this.props.account.replace('0x','').toLowerCase()) ) && log.data.toLowerCase()!=='0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'.toLowerCase() ) : null;
@@ -477,12 +491,12 @@ class IdleStaking extends Component {
       case 'Increase Lock':
         switch (this.state.increaseAction){
           case 'time':
-            infoBox = {
+            internalInfoBox = {
               icon:'DoneAll',
               iconProps:{
                 color:this.props.theme.colors.transactions.status.completed
               },
-              text:`You have successfully increased the lock until <strong>${this.functionsUtil.strToMoment(this.state.lockPeriodInput+' 00:00:00','YYYY-MM-DD HH:mm:ss').utc().format('YYYY/MM/DD HH:mm')} UTC</strong>`
+              text:`You have successfully increased the lock until <strong>${this.functionsUtil.strToMoment(this.state.lockPeriodTimestamp*1000).utc().format('YYYY/MM/DD HH:mm')} UTC</strong>`
             }
           break;
           case 'amount':
@@ -503,15 +517,24 @@ class IdleStaking extends Component {
       case 'Withdraw':
         const unstakedTokensLog = tx.txReceipt && tx.txReceipt.logs ? tx.txReceipt.logs.find( log => log.address.toLowerCase() === this.props.tokenConfig.address.toLowerCase() ) : null;
         const unstakedTokens = unstakedTokensLog ? this.functionsUtil.fixTokenDecimals(parseInt(unstakedTokensLog.data,16),this.props.tokenConfig.decimals) : this.functionsUtil.BNify(0);
-        const rewardTokenConfig = this.functionsUtil.getGlobalConfig(['govTokens',this.props.contractInfo.rewardToken]);
-        const receivedRewardsLog = tx.txReceipt && tx.txReceipt.logs ? tx.txReceipt.logs.find( log => (log.address.toLowerCase() === rewardTokenConfig.address.toLowerCase() && log.topics.find( t => t.toLowerCase().includes(this.props.account.replace('0x','').toLowerCase()) )) ) : null;
-        const receivedRewards = receivedRewardsLog ? this.functionsUtil.fixTokenDecimals(parseInt(receivedRewardsLog.data,16),this.props.tokenConfig.decimals) : this.functionsUtil.BNify(0);
-        infoBox = {
+        internalInfoBox = {
           icon:'DoneAll',
           iconProps:{
             color:this.props.theme.colors.transactions.status.completed
           },
-          text:`You have successfully withdrawn <strong>${unstakedTokens.toFixed(4)} ${this.props.selectedToken}</strong> and received <strong>${receivedRewards.toFixed(4)} ${this.props.contractInfo.rewardToken}</strong>`
+          text:`You have successfully withdrawn <strong>${unstakedTokens.toFixed(4)} ${this.props.selectedToken}</strong>`
+        }
+      break;
+      case 'Claim':
+        const rewardTokenConfig = this.functionsUtil.getGlobalConfig(['govTokens',this.props.contractInfo.rewardToken]);
+        const receivedRewardsLog = tx.txReceipt && tx.txReceipt.logs ? tx.txReceipt.logs.find( log => (log.address.toLowerCase() === rewardTokenConfig.address.toLowerCase() && log.topics.find( t => t.toLowerCase().includes(this.props.account.replace('0x','').toLowerCase()) )) ) : null;
+        const receivedRewards = receivedRewardsLog ? this.functionsUtil.fixTokenDecimals(parseInt(receivedRewardsLog.data,16),rewardTokenConfig.decimals) : this.functionsUtil.BNify(0);
+        internalInfoBox = {
+          icon:'DoneAll',
+          iconProps:{
+            color:this.props.theme.colors.transactions.status.completed
+          },
+          text:`You have successfully claimed <strong>${receivedRewards.toFixed(4)} ${this.props.contractInfo.rewardToken}</strong>`
         }
       break;
       default:
@@ -522,6 +545,7 @@ class IdleStaking extends Component {
 
     this.setState({
       infoBox,
+      internalInfoBox,
       transactionSucceeded
     },() => {
       this.updateData();
@@ -547,11 +571,18 @@ class IdleStaking extends Component {
 
     let selectedAction = this.state.selectedAction;
 
+    if (selectedAction==='Withdraw' && !newState.lockExpired){
+      selectedAction = 'Lock';
+      newState.selectedAction = selectedAction;
+    }
+
     // Select Increase if already created a lock
-    if (newState.lockedEnd && selectedAction === 'Lock'){
+    if (newState.lockedEnd && selectedAction==='Lock'){
       selectedAction = 'Increase Lock';
       newState.increaseAction = 'time';
       newState.selectedAction = selectedAction;
+    } else if (selectedAction==='Increase Lock' && !newState.increaseAction && !this.state.increaseAction){
+      newState.increaseAction = 'time';
     }
 
     // Select Withdraw if the lock has expired
@@ -586,10 +617,11 @@ class IdleStaking extends Component {
 
     if (selectedActionChanged){
       newState.infoBox = null;
+      newState.internalInfoBox = null;
       newState.transactionSucceeded = false;
     }
 
-    console.log('updateData',selectedAction,newState);
+    // console.log('updateData',selectedAction,newState);
 
     this.setState(newState,() => {
       this.loadStats();
@@ -816,6 +848,17 @@ class IdleStaking extends Component {
                 handleClick={ e => this.setAction('Stats') }
               />
             </Flex>
+            {
+              this.state.internalInfoBox && (
+                <IconBox
+                  cardProps={{
+                    mt:1,
+                    mb:3
+                  }}
+                  {...this.state.internalInfoBox}
+                />
+              )
+            }
             {
               isStats ? (
                 <Flex
@@ -1141,8 +1184,8 @@ class IdleStaking extends Component {
                                     mainColor:'redeem',
                                     value:'Withdraw',
                                   }}
+                                  action={'Withdraw'}
                                   methodName={'withdraw'}
-                                  action={this.state.action}
                                   contractName={this.props.contractInfo.name}
                                   callback={this.transactionSucceeded.bind(this)}
                                 />
@@ -1188,6 +1231,7 @@ class IdleStaking extends Component {
                                 />
                                 <Text
                                   mt={1}
+                                  mb={3}
                                   fontSize={2}
                                   color={'cellText'}
                                   textAlign={'center'}
@@ -1197,21 +1241,25 @@ class IdleStaking extends Component {
                                 <ExecuteTransaction
                                   params={[]}
                                   {...this.props}
+                                  Component={Button}
                                   parentProps={{
                                     width:1,
                                     alignItems:'center',
                                     justifyContent:'center'
                                   }}
-                                  Component={Button}
                                   componentProps={{
+                                    fontSize:3,
+                                    fontWeight:3,
                                     size:'medium',
+                                    width:[1,1/3],
                                     value:'Claim',
+                                    borderRadius:4,
                                     mainColor:'redeem',
                                   }}
+                                  action={'Claim'}
                                   methodName={'claim'}
-                                  action={this.state.action}
                                   callback={this.transactionSucceeded.bind(this)}
-                                  contractName={this.props.tokenConfig.feeDistributor}
+                                  contractName={this.props.tokenConfig.feeDistributor.name}
                                 />
                               </Flex>
                             ) : (

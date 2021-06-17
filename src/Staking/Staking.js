@@ -37,7 +37,6 @@ class Staking extends Component {
 
     const selectedTokenChanged = prevState.selectedToken !== this.state.selectedToken;
     if (selectedTokenChanged){
-      console.log('selectedToken',this.state.selectedToken);
       const tokenConfig = this.props.toolProps.availableTokens[this.state.selectedToken];
       const contractInfo = tokenConfig.contract;
 
