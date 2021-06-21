@@ -5,9 +5,9 @@ class RoundButton extends Component {
   render() {
     const buttonProps = Object.assign({
       width:1,
-      fontSize:3,
       fontWeight:3,
       height:'45px',
+      fontSize:[2,3],
       boxShadow:null,
       borderRadius:4,
       mainColor:'blue'

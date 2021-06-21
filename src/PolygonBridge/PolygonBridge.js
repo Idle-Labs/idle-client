@@ -582,6 +582,16 @@ class PolygonBridge extends Component {
                                   >
                                     The <strong>{this.functionsUtil.capitalize(currentNetwork.name)} network</strong> is not supported for this function, please switch to <strong>{this.functionsUtil.getGlobalConfig(['network','availableNetworks',this.functionsUtil.getGlobalConfig(['network','providers','polygon','networkPairs',currentNetworkId]),'name'])} network</strong>.
                                   </Text>
+                                  <RoundButton
+                                    buttonProps={{
+                                      mt:3,
+                                      width:[1,1/2],
+                                      fontSize:[1,2]
+                                    }}
+                                    handleClick={e => this.props.setRequiredNetwork(this.functionsUtil.getGlobalConfig(['network','providers','polygon','networkPairs',currentNetworkId]))}
+                                  >
+                                    Switch Network
+                                  </RoundButton>
                                 </Flex>
                               </DashboardCard>
                             ) : (this.state.tokenConfig && this.state.balanceProp && this.state.contractInfo) ? (

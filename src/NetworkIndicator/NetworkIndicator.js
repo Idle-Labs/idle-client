@@ -63,7 +63,11 @@ class NetworkIndicator extends Component {
     const networkInitialized = !prevProps.networkInitialized && this.props.networkInitialized;
     const requiredNetworkChanged = JSON.stringify(prevProps.network.required) !== JSON.stringify(this.props.network.required);
     if (requiredNetworkChanged || networkInitialized){
-      this.loadNetworks();
+      this.setState({
+        defaultNetwork:null
+      },() => {
+        this.loadNetworks();
+      });
     }
   }
 
@@ -177,7 +181,7 @@ class NetworkIndicator extends Component {
           width:[1,'auto'],
           alignItems:'center',
           justifyContent:'center',
-          height:this.props.innerProps.height || ['38px','42px'],
+          height:(this.props.innerProps && this.props.innerProps.height) || ['38px','42px'],
         }}
         isInteractive={false}
       >

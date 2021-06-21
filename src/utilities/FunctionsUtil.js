@@ -209,17 +209,18 @@ class FunctionsUtil {
       return false;
     }
 
+    const chainName = networkConfig.chainName || networkConfig.name;
     const providerConfig = this.getGlobalConfig(['network','providers',networkConfig.provider]);
     const blockExplorerUrl = this.getGlobalConfig(['network','providers',networkConfig.explorer,'baseUrl',chainId]);
-    const rpcUrl = providerConfig.rpc[chainId]+providerConfig.key;
+    const rpcUrl = (providerConfig.publicRpc && providerConfig.publicRpc[chainId]) || (providerConfig.rpc[chainId]+providerConfig.key);
     const params = [{
+      chainName,
       rpcUrls:[rpcUrl],
       chainId: web3.utils.toHex(chainId),
-      chainName: networkConfig.name,
       nativeCurrency: {
         decimals: 18,
-        name: providerConfig.baseToken,
-        symbol: providerConfig.baseToken
+        name: networkConfig.baseToken,
+        symbol: networkConfig.baseToken
       },
       blockExplorerUrls: [blockExplorerUrl]
     }];
