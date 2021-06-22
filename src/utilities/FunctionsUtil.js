@@ -1779,6 +1779,33 @@ class FunctionsUtil {
                   });
     return data;
   }
+  makeEtherscanApiRequest = async (endpoint,keys=[],TTL=120,apiKeyIndex=0) => {
+    const timestamp = parseInt(Date.now()/1000);
+    
+    // Check if already exists
+    let cachedRequests = this.getCachedDataWithLocalStorage('cachedRequests',{});
+    // Check if it's not expired
+    if (cachedRequests && cachedRequests[endpoint] && cachedRequests[endpoint].timestamp && timestamp-cachedRequests[endpoint].timestamp<TTL){
+      return cachedRequests[endpoint].data;
+    }
+
+    const apiKey = keys[apiKeyIndex];
+    const data = await this.makeRequest(endpoint+'&apikey='+apiKey);
+
+    // console.log('makeEtherscanApiRequest',endpoint,apiKeyIndex+'/'+keys.length,(data.data ? data.data.message : null),apiKeyIndex<keys.length-1);
+
+    if (data && data.data && data.data.message === 'OK'){
+      cachedRequests[endpoint] = {
+        data,
+        timestamp
+      };
+      this.setCachedDataWithLocalStorage('cachedRequests',cachedRequests);
+      return data;
+    } else if (apiKeyIndex<keys.length-1) {
+      return await this.makeEtherscanApiRequest(endpoint,keys,TTL,apiKeyIndex+1);
+    }
+    return null;
+  }
   makeCachedRequest = async (endpoint,TTL=60,return_data=false,alias=false,config=null) => {
     const key = alias ? alias : endpoint;
     const timestamp = parseInt(Date.now()/1000);
@@ -2134,6 +2161,18 @@ class FunctionsUtil {
       week:604800
     };
     return frequency_seconds[frequency]*quantity;
+  }
+  getIdleStakingRewardsTxs = async () => {
+    const idleTokenConfig = this.getGlobalConfig(['govTokens','IDLE']);
+    const feeDistributorConfig = this.getGlobalConfig(['tools','stake','props','availableTokens','IDLE','feeDistributor']);
+    const etherscanInfo = this.getGlobalConfig(['network','providers','etherscan']);
+    const etherscanApiUrl = etherscanInfo.endpoints[1];
+    const etherscanEndpoint = `${etherscanApiUrl}?module=account&action=tokentx&address=${feeDistributorConfig.address}&sort=desc`;
+    const etherscanTxlist = await this.makeEtherscanApiRequest(etherscanEndpoint,etherscanInfo.keys,3600);
+    if (etherscanTxlist && etherscanTxlist.data && etherscanTxlist.data.result && typeof etherscanTxlist.data.result.filter === 'function'){
+      return etherscanTxlist.data.result.filter( tx => (tx.contractAddress.toLowerCase() === idleTokenConfig.address.toLowerCase() && tx.to.toLowerCase() === feeDistributorConfig.address.toLowerCase() && this.BNify(tx.value).gt(0) ));
+    }
+    return [];
   }
   getProtocolInfoByAddress = (addr) => {
     return this.props.tokenConfig.protocols.find(c => c.address.toLowerCase() === addr.toLowerCase());

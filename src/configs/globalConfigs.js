@@ -1154,6 +1154,7 @@ const globalConfigs = {
             component:IdleStaking,
             contract:{
               abi:stkIDLE,
+              decimals:18,
               name:'stkIDLE',
               rewardToken:'IDLE',
               address:'0xaac13a116ea7016689993193fce4badc8038136f' // Mainnet

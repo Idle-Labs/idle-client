@@ -63,6 +63,7 @@ class IdleStaking extends Component {
     contractApproved:false,
     tokenWrapperProps:null,
     distributionSpeed:null,
+    distributedRewards:null,
     selectedLockPeriod:null,
     approveDescription:null,
     balanceSelectorInfo:null,
@@ -99,11 +100,12 @@ class IdleStaking extends Component {
   async componentDidUpdate(prevProps,prevState){
     this.loadUtils();
 
+    const accountChanged = prevProps.account !== this.props.account;
     const selectedActionChanged = prevState.selectedAction !== this.state.selectedAction;
     const contractApprovedChanged = prevState.contractApproved !== this.state.contractApproved;
     const tokenConfigChanged = JSON.stringify(prevProps.tokenConfig) !== JSON.stringify(this.props.tokenConfig);
     const contractInfoChanged = JSON.stringify(prevProps.contractInfo) !== JSON.stringify(this.props.contractInfo);
-    if (selectedActionChanged || contractApprovedChanged || tokenConfigChanged){
+    if (selectedActionChanged || accountChanged || contractApprovedChanged || tokenConfigChanged){
       const increaseAction = selectedActionChanged ? null : this.state.increaseAction;
       this.setState({
         increaseAction,
@@ -134,7 +136,7 @@ class IdleStaking extends Component {
     let buttonDisabled = false;
     const minDate = this.state.lockedEnd ? this.functionsUtil.strToMoment(this.state.lockedEnd*1000).add(7,'day') : this.functionsUtil.strToMoment().add(7,'day');
     const mDate = this.functionsUtil.strToMoment(this.state.lockPeriodTimestamp*1000);
-    const maxDate = this.functionsUtil.strToMoment(minDate).add(4,'year');
+    const maxDate = this.functionsUtil.strToMoment().add(4,'year');
     switch (this.state.selectedAction){
       default:
       case 'Lock':
@@ -233,55 +235,136 @@ class IdleStaking extends Component {
   }
 
   async loadStats(){
+
+    if (!this.props.account){
+      return false;
+    }
+
     const stats = [];
     const globalStats = [];
     const statsLoaded = true;
 
     let [
+      etherscanRewardsTxs,
+      tokenTotalSupply,
       totalSupply,
+      tokenUserBalance,
       lockedInfo,
       claimable,
-      totalRewards,
+      claimableRewards,
+      claimEvents,
+      checkpointEvents,
+      depositEvents,
     ] = await Promise.all([
+      this.functionsUtil.getIdleStakingRewardsTxs(),
+      this.functionsUtil.getTokenTotalSupply(this.props.contractInfo.name),
       this.functionsUtil.genericContractCall(this.props.contractInfo.name,'supply'),
+      this.functionsUtil.getContractBalance(this.props.contractInfo.name,this.props.account),
       this.functionsUtil.genericContractCall(this.props.contractInfo.name,'locked',[this.props.account]),
       this.functionsUtil.genericContractCall(this.props.tokenConfig.feeDistributor.name,'claim',[this.props.account]),
-      this.functionsUtil.getTokenBalance(this.props.contractInfo.rewardToken,this.props.tokenConfig.feeDistributor.address)
+      this.functionsUtil.getTokenBalance(this.props.contractInfo.rewardToken,this.props.tokenConfig.feeDistributor.address),
+      this.functionsUtil.getContractEvents(this.props.tokenConfig.feeDistributor.name,'Claimed',{fromBlock: 0, toBlock:'latest'}),
+      this.functionsUtil.getContractEvents(this.props.tokenConfig.feeDistributor.name,'CheckpointToken',{fromBlock: 0, toBlock:'latest'}),
+      this.functionsUtil.getContractEvents(this.props.contractInfo.name,'Deposit',{fromBlock: 0, toBlock:'latest',filter:{provider:this.props.account}})
     ]);
+
+    const rewardTokenConfig = this.functionsUtil.getGlobalConfig(['govTokens',this.props.contractInfo.rewardToken]);
+
+    const distributedRewards = etherscanRewardsTxs.map( tx => (
+      {
+        hash:tx.hash,
+        amount:this.functionsUtil.fixTokenDecimals(tx.value,rewardTokenConfig.decimals),
+        date:this.functionsUtil.strToMoment(parseInt(tx.timeStamp)*1000).format('YYYY-MM-DD HH:mm')
+      }
+    ));
+
+    tokenUserBalance = this.functionsUtil.fixTokenDecimals(tokenUserBalance,this.props.contractInfo.decimals);
 
     const totalDeposits = this.functionsUtil.fixTokenDecimals(totalSupply,this.props.tokenConfig.decimals);
     stats.push({
-      title:'Total Deposits',
+      title:'Total Locked Funds',
       value:this.functionsUtil.formatMoney(parseFloat(totalDeposits))+' '+this.props.selectedToken
     });
 
+    tokenTotalSupply = this.functionsUtil.fixTokenDecimals(tokenTotalSupply,this.props.contractInfo.decimals);
+    stats.push({
+      title:`${this.props.contractInfo.name} Total Supply`,
+      value:this.functionsUtil.formatMoney(parseFloat(tokenTotalSupply))+' '+this.props.selectedToken
+    });
+
+    stats.push({
+      title:'Claimable Rewards',
+      value:this.functionsUtil.formatMoney(parseFloat(claimableRewards))+' '+this.props.contractInfo.rewardToken
+    });
+
+    const totalClaimed = claimEvents.reduce( (totalClaimed,event) => {
+      const claimedAmount = this.functionsUtil.fixTokenDecimals(event.returnValues.amount,rewardTokenConfig.decimals);
+      totalClaimed = totalClaimed.plus(claimedAmount);
+      return totalClaimed;
+    },this.functionsUtil.BNify(0));
+    const totalRewards = totalClaimed.plus(claimableRewards);
     stats.push({
       title:'Total Rewards',
-      value:this.functionsUtil.formatMoney(parseFloat(totalRewards))+' '+this.props.selectedToken
+      value:this.functionsUtil.formatMoney(totalRewards)+' '+this.props.contractInfo.rewardToken
     });
 
     const stakedBalance = lockedInfo && lockedInfo.amount ? this.functionsUtil.fixTokenDecimals(lockedInfo.amount,this.props.tokenConfig.decimals) : this.functionsUtil.BNify(0);
     const userDeposited = this.functionsUtil.formatMoney(stakedBalance);
     globalStats.push({
-      title:'Deposited',
+      title:'Total Deposited',
       description:'Your total deposited amount',
       value:userDeposited+' '+this.props.contractInfo.rewardToken,
     });
 
-
-    const stakingShare = stakedBalance.div(totalDeposits);
+    const stakingShare = tokenUserBalance.div(tokenTotalSupply);
     globalStats.push({
       title:'Share',
       value:`${stakingShare.times(100).toFixed(2)}%`,
       description:'Your share of the total deposits',
     });
 
-    claimable = this.functionsUtil.BNify(claimable);
-    const currentRewards = this.functionsUtil.formatMoney(this.functionsUtil.fixTokenDecimals(claimable,this.props.tokenConfig.decimals));
     globalStats.push({
-      title:'Rewards',
-      value:currentRewards+' '+this.props.contractInfo.rewardToken,
-      description:'Your claimable rewards'
+      title:`${this.props.contractInfo.name} balance`,
+      value:`${this.functionsUtil.formatMoney(tokenUserBalance)} ${this.props.contractInfo.rewardToken}`,
+    });
+
+    claimable = this.functionsUtil.fixTokenDecimals(claimable,this.props.tokenConfig.decimals);
+    const currentRewards = this.functionsUtil.formatMoney(claimable);
+    globalStats.push({
+      title:'Claimable Rewards',
+      value:`${currentRewards} ${this.props.contractInfo.rewardToken}`,
+      // description:'Your claimable rewards'
+    });
+
+    let stakeStartTime = depositEvents.reduce( (stakedTime,event) => {
+      const depositTimestamp = this.functionsUtil.BNify(event.returnValues.ts);
+      const depositValue = this.functionsUtil.fixTokenDecimals(event.returnValues.value,this.props.tokenConfig.decimals);
+      if (depositValue.gt(0)){
+        stakedTime = stakedTime.plus(depositValue.times(depositTimestamp));
+        // console.log(depositTimestamp.toString(),depositValue.toFixed(),stakedTime.toString());
+      }
+      return stakedTime;
+    },this.functionsUtil.BNify(0));
+
+    stakeStartTime = stakedBalance.gt(0) ? Math.ceil(stakeStartTime.div(stakedBalance)) : 0;
+    const latestCheckpoint = checkpointEvents.length ? checkpointEvents[checkpointEvents.length-1] : null;
+    const lastCheckpointTime = latestCheckpoint ? this.functionsUtil.BNify(latestCheckpoint.returnValues.time) : this.functionsUtil.BNify(parseInt(Date.now()/1000));
+    const stakePeriod = lastCheckpointTime.minus(stakeStartTime);
+
+    const currentProfit = stakedBalance.gt(0) ? claimable.div(stakedBalance) : this.functionsUtil.BNify(0);
+    const apr = stakePeriod.gt(0) ? currentProfit.times(this.functionsUtil.getGlobalConfig(['network','secondsPerYear'])).div(stakePeriod).times(100) : this.functionsUtil.BNify(0);
+    // console.log('APR',apr.toFixed(),currentProfit.toFixed(),stakePeriod.toFixed(),claimable.toFixed(),stakedBalance.toFixed());
+    globalStats.push({
+      title:'APR',
+      value:`${apr.toFixed(2)}%`,
+      description:'APR is based on your claimable rewards and total deposited'
+    });
+
+    const lockEndDate = this.state.lockedEnd ? this.functionsUtil.strToMoment(this.state.lockedEnd*1000).utc().format('YYYY/MM/DD HH:mm') : '';
+    globalStats.push({
+      value:lockEndDate,
+      title:'Lock End Date',
+      description:'Ending date of your Lock'
     });
 
     this.setState({
@@ -289,142 +372,9 @@ class IdleStaking extends Component {
       claimable,
       globalStats,
       statsLoaded,
-      stakedBalance
+      stakedBalance,
+      distributedRewards
     });
-    /*
-    const [
-      totalLocked,
-      totalUnlocked,
-      totalStakingShares,
-      unlockScheduleCount,
-      accountingData,
-      collectedRewards
-    ] = await Promise.all([
-      this.functionsUtil.genericContractCall(this.props.contractInfo.name,'supply'),
-      this.functionsUtil.genericContractCall(this.props.contractInfo.name,'totalUnlocked'),
-      this.functionsUtil.genericContractCall(this.props.contractInfo.name,'totalStakingShares'),
-      this.functionsUtil.genericContractCall(this.props.contractInfo.name,'unlockScheduleCount'),
-      this.functionsUtil.genericContractCall(this.props.contractInfo.name,'updateAccounting',[],{from:this.props.account}),
-      this.state.stakedBalance.gt(0) ? this.functionsUtil.genericContractCall(this.props.contractInfo.name,'unstakeQuery',[this.functionsUtil.integerValue(this.state.stakedBalance)],{from:this.props.account}) : this.functionsUtil.BNify(0)
-    ]);
-
-    const unlockSchedulesPromises = [];
-    for (let i = 0; i < unlockScheduleCount ; i++){
-      unlockSchedulesPromises.push(this.functionsUtil.genericContractCall(this.props.contractInfo.name,'unlockSchedules',[i]));
-    }
-
-    const unlockSchedules = await Promise.all(unlockSchedulesPromises);
-
-    const totalRewards = this.functionsUtil.fixTokenDecimals(this.functionsUtil.BNify(totalLocked).plus(this.functionsUtil.BNify(totalUnlocked)),this.props.tokenConfig.decimals);
-    stats.push({
-      title:'Total Rewards',
-      value:this.functionsUtil.formatMoney(parseFloat(totalRewards))+' '+this.props.contractInfo.rewardToken
-    });
-
-    const totalDeposits = this.functionsUtil.fixTokenDecimals(totalStakingShares,this.props.contractInfo.decimals);
-    stats.push({
-      title:'Total Deposits',
-      value:this.functionsUtil.formatMoney(parseFloat(totalDeposits))+' '+this.props.tokenConfig.token
-    });
-
-    const lockedRewards = this.functionsUtil.fixTokenDecimals(totalLocked,this.props.tokenConfig.decimals);
-    stats.push({
-      title:'Locked Rewards',
-      value:this.functionsUtil.formatMoney(parseFloat(lockedRewards))+' '+this.props.contractInfo.rewardToken
-    });
-
-    const unlockedRewards = this.functionsUtil.fixTokenDecimals(totalUnlocked,this.props.tokenConfig.decimals);
-    stats.push({
-      title:'Unlocked Rewards',
-      value:this.functionsUtil.formatMoney(parseFloat(unlockedRewards))+' '+this.props.contractInfo.rewardToken
-    });
-
-    const programEndTime = unlockSchedules.length>0 ? unlockSchedules.reduce( (endTime,s) => {
-      endTime = Math.max(s.endAtSec,endTime);
-      return endTime;
-    },parseInt(Date.now()/1000)) : null;
-
-    const programDuration = programEndTime ? `${this.functionsUtil.strToMoment(programEndTime*1000).utc().format('DD MMM, YYYY @ HH:mm')} UTC` : 'None';
-    stats.push({
-      title:'Program End-Date',
-      value:programDuration
-    });
-
-    const distributionSpeed = unlockSchedules.reduce( (distributionSpeed,s) => {
-      if (this.functionsUtil.BNify(s.initialLockedShares).gt(0) && this.functionsUtil.BNify(s.durationSec).gt(0)){
-        const tokensPerSecond = this.functionsUtil.fixTokenDecimals(s.initialLockedShares,this.props.contractInfo.decimals).div(s.durationSec);
-        if (!tokensPerSecond.isNaN()){
-          distributionSpeed = distributionSpeed.plus(tokensPerSecond);
-        }
-      }
-      return distributionSpeed;
-    },this.functionsUtil.BNify(0));
-
-    stats.push({
-      title:'Reward unlock rate',
-      value:this.functionsUtil.formatMoney(distributionSpeed.times(86400))+' '+this.props.contractInfo.rewardToken+' / day'
-    });
-
-    const globalStats = [];
-
-    const stakedBalance = this.functionsUtil.fixTokenDecimals(this.state.stakedBalance,this.props.tokenConfig.decimals);
-    const stakingShare = stakedBalance.div(totalDeposits); // accountingData && accountingData[2] && this.functionsUtil.BNify(accountingData[3]).gt(0) ? this.functionsUtil.BNify(accountingData[2]).div(this.functionsUtil.BNify(accountingData[3])) : this.functionsUtil.BNify(0);
-
-    const rewardMultiplier = accountingData && this.functionsUtil.BNify(accountingData[4]).gt(0) ? this.functionsUtil.BNify(Math.max(1,parseFloat(this.functionsUtil.BNify(collectedRewards).div(this.functionsUtil.BNify(accountingData[4])).times(this.props.contractInfo.maxMultiplier)))) : this.functionsUtil.BNify(1);
-
-    const distributionSpeedMultiplier = this.functionsUtil.BNify(1).div(this.props.contractInfo.maxMultiplier).times(rewardMultiplier);
-    const userDistributionSpeed = distributionSpeed.times(stakingShare).times(distributionSpeedMultiplier);
-    const rewardsPerDay = userDistributionSpeed.times(86400);
-
-    // console.log(parseFloat(this.functionsUtil.BNify(collectedRewards)),parseFloat(this.functionsUtil.BNify(accountingData[4])),this.props.contractInfo.maxMultiplier,parseFloat(this.functionsUtil.BNify(collectedRewards).div(this.functionsUtil.BNify(accountingData[4])).times(this.props.contractInfo.maxMultiplier)),parseFloat(rewardMultiplier));
-
-    // globalStats.push({
-    //   title:'Distribution rate',
-    //   description:'Your daily rewards distribution based on your current multiplier',
-    //   value:this.functionsUtil.formatMoney(rewardsPerDay)+' '+this.props.contractInfo.rewardToken+' / day',
-    // });
-
-    const stakedBalanceUSD = stakedBalance.times(this.state.poolTokenPrice);
-    const rewardsPerYearUSD = rewardsPerDay.times(365).times(this.state.rewardTokenPrice);
-    const apy = stakedBalanceUSD.gt(0) ? rewardsPerYearUSD.div(stakedBalanceUSD).times(100) : this.functionsUtil.BNify(0);
-
-    // console.log(parseFloat(this.state.stakedBalance),parseFloat(this.state.poolTokenPrice),parseFloat(stakedBalanceUSD),parseFloat(rewardsPerDay),parseFloat(this.state.rewardTokenPrice),parseFloat(rewardsPerYearUSD),parseFloat(apy));
-
-    globalStats.push({
-      title:'APY',
-      value:`${apy.toFixed(2)}%`,
-      description:'Annualized rewards based on your current multiplier',
-    });
-
-    globalStats.push({
-      title:'Share',
-      value:`${stakingShare.times(100).toFixed(2)}%`,
-      description:'Your share of the total deposits',
-    });
-
-    const currentRewards = this.functionsUtil.formatMoney(this.functionsUtil.fixTokenDecimals(collectedRewards,this.props.tokenConfig.decimals));
-    globalStats.push({
-      title:'Rewards',
-      value:currentRewards+' '+this.props.contractInfo.rewardToken,
-      description:'Your share of the total unlocked reward pool. Larger your deposit and for longer, higher your share'
-    });
-
-    console.log('loadStats',stats,globalStats);
-
-    this.setState({
-      stats,
-      statsLoaded,
-      globalStats,
-      stakingShare,
-      totalRewards,
-      accountingData,
-      rewardMultiplier,
-      distributionSpeed,
-      totalStakingShares,
-      userDistributionSpeed,
-      distributionSpeedMultiplier
-    });
-    */
   }
 
   async contractApprovedCallback(contractApproved){
@@ -461,7 +411,14 @@ class IdleStaking extends Component {
 
   selectLockPeriod(selectedLockPeriod){
     const minDate = this.state.lockedEnd ? this.functionsUtil.strToMoment(this.state.lockedEnd*1000) : this.functionsUtil.strToMoment();
-    const mDate = minDate.add(selectedLockPeriod,'day').add(1,'second');
+    const maxDate = this.functionsUtil.strToMoment().add(4,'year');
+    let mDate = minDate.add(selectedLockPeriod,'day').add(1,'second');
+
+    // Check if after 4 years from now
+    if (mDate.isAfter(maxDate)){
+      mDate = maxDate;
+    }
+
     const lockPeriodInput = mDate.format('YYYY-MM-DD');
     const lockPeriodTimestamp = parseInt(mDate._d.getTime()/1000);
     // console.log('selectLockPeriod',lockPeriodTimestamp);
@@ -480,7 +437,7 @@ class IdleStaking extends Component {
       case 'Lock':
         const lockedTokensLog = tx.txReceipt && tx.txReceipt.logs ? tx.txReceipt.logs.find( log => log.address.toLowerCase() === this.props.tokenConfig.address.toLowerCase() && log.topics.find( t => t.toLowerCase().includes(this.props.contractInfo.address.replace('0x','').toLowerCase()) ) && log.topics.find( t => t.toLowerCase().includes(this.props.account.replace('0x','').toLowerCase()) ) && log.data.toLowerCase()!=='0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'.toLowerCase() ) : null;
         const lockedTokens = lockedTokensLog ? this.functionsUtil.fixTokenDecimals(parseInt(lockedTokensLog.data,16),this.props.tokenConfig.decimals) : this.functionsUtil.BNify(0);
-        infoBox = {
+        internalInfoBox = {
           icon:'DoneAll',
           iconProps:{
             color:this.props.theme.colors.transactions.status.completed
@@ -502,7 +459,7 @@ class IdleStaking extends Component {
           case 'amount':
             const increaseAmountTokensLog = tx.txReceipt && tx.txReceipt.logs ? tx.txReceipt.logs.find( log => log.address.toLowerCase() === this.props.tokenConfig.address.toLowerCase() && log.topics.find( t => t.toLowerCase().includes(this.props.contractInfo.address.replace('0x','').toLowerCase()) ) && log.topics.find( t => t.toLowerCase().includes(this.props.account.replace('0x','').toLowerCase()) ) && log.data.toLowerCase()!=='0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'.toLowerCase() ) : null;
             const increaseTokens = increaseAmountTokensLog ? this.functionsUtil.fixTokenDecimals(parseInt(increaseAmountTokensLog.data,16),this.props.tokenConfig.decimals) : this.functionsUtil.BNify(0);
-            infoBox = {
+            internalInfoBox = {
               icon:'DoneAll',
               iconProps:{
                 color:this.props.theme.colors.transactions.status.completed
@@ -720,8 +677,13 @@ class IdleStaking extends Component {
             </Text>
             <Flex
               mt={1}
+              mb={1}
               width={1}
-              flexDirection={['column','row']}
+              style={{
+                flexBasis:'0',
+                flex:'1 1 0px',
+                flexWrap:'wrap'
+              }}
               justifyContent={'space-between'}
             >
               {
@@ -729,9 +691,9 @@ class IdleStaking extends Component {
                   <StatsCard
                     key={`globalStats_${index}`}
                     cardProps={{
-                      mb:[2,0],
-                      mr:[0,index<this.state.globalStats.length-1 ? 1 : 0],
-                      width:[1,'100%']
+                      mb:2,
+                      width:[1,'33%'],
+                      // mr:[0,index<this.state.globalStats.length-1 ? 1 : 0]
                     }}
                     textProps={{
                       fontSize:[1,2]
@@ -900,6 +862,108 @@ class IdleStaking extends Component {
                       />
                     )
                   }
+                  <Text
+                    mb={1}
+                  >
+                    Distributed Rewards:
+                  </Text>
+                  <Flex
+                    width={1}
+                    alignItems={'center'}
+                    justifyContent={'center'}
+                  >
+                    <DashboardCard
+                      cardProps={{
+                        p:3,
+                        width:1,
+                        display:'flex',
+                        alignItems:'center',
+                        justifyContent:'center'
+                      }}
+                      isActive={false}
+                      isInteractive={false}
+                    >
+                      {
+                        this.state.distributedRewards && this.state.distributedRewards.length ? (
+                          <Flex
+                            width={1}
+                            flexDirection={'column'}
+                          >
+                            <Flex
+                              py={1}
+                              width={1}
+                              flexDirection={'row'}
+                              borderBottom={`1px solid ${this.props.theme.colors.divider}`}
+                            >
+                              <Text
+                                fontSize={1}
+                                width={0.333}
+                                fontWeight={3}
+                              >
+                                Date
+                              </Text>
+                              <Text
+                                fontSize={1}
+                                width={0.333}
+                                fontWeight={3}
+                              >
+                                Amount
+                              </Text>
+                              <Text
+                                fontSize={1}
+                                width={0.333}
+                                fontWeight={3}
+                              >
+                                Hash
+                              </Text>
+                            </Flex>
+                            {
+                              this.state.distributedRewards.map( reward => (
+                                <Flex
+                                  py={1}
+                                  width={1}
+                                  flexDirection={'row'}
+                                  borderBottom={`1px solid ${this.props.theme.colors.divider}`}
+                                >
+                                  <Text
+                                    fontSize={2}
+                                    width={0.333}
+                                    fontWeight={2}
+                                    color={'statValue'}
+                                  >
+                                    {reward.date}
+                                  </Text>
+                                  <Text
+                                    fontSize={2}
+                                    width={0.333}
+                                    fontWeight={2}
+                                    color={'statValue'}
+                                  >
+                                    {reward.amount}
+                                  </Text>
+                                  <Text
+                                    fontSize={2}
+                                    width={0.333}
+                                    fontWeight={2}
+                                    color={'statValue'}
+                                  >
+                                    {this.functionsUtil.shortenHash(reward.hash)}
+                                  </Text>
+                                </Flex>
+                              ))
+                            }
+                          </Flex>
+                        ) : (
+                          <Text
+                            fontSize={2}
+                            color={'statValue'}
+                          >
+                            No reward distributed yet.
+                          </Text>
+                        )
+                      }
+                    </DashboardCard>
+                  </Flex>
                 </Flex>
               ) : (this.props.tokenConfig && this.state.balanceProp && this.state.statsLoaded && this.props.contractInfo) ? (
                   <Box
@@ -1236,7 +1300,7 @@ class IdleStaking extends Component {
                                   color={'cellText'}
                                   textAlign={'center'}
                                 >
-                                  You can claim {this.functionsUtil.fixTokenDecimals(this.state.claimable,this.props.tokenConfig.decimals).toFixed(8)} {this.props.contractInfo.rewardToken}.
+                                  You can claim {this.state.claimable.toFixed(8)} {this.props.contractInfo.rewardToken}.
                                 </Text>
                                 <ExecuteTransaction
                                   params={[]}
