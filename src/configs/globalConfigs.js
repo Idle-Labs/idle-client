@@ -1182,7 +1182,7 @@ const globalConfigs = {
         contracts:{
           vesterImplementation:{
             abi:B2BVester,
-            address:'0x4f0c0f1ea254988f0c53bec4bf292be8b9300705'
+            address:'0x3024656ae91d7bf724f613c314bc56030ba2344c'
           }
         }
       }
