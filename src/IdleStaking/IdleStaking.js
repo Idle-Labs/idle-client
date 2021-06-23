@@ -2,6 +2,7 @@ import ExtLink from '../ExtLink/ExtLink';
 import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
+import ConnectBox from '../ConnectBox/ConnectBox';
 import ImageButton from '../ImageButton/ImageButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import DashboardCard from '../DashboardCard/DashboardCard';
@@ -283,18 +284,18 @@ class IdleStaking extends Component {
     const totalDeposits = this.functionsUtil.fixTokenDecimals(totalSupply,this.props.tokenConfig.decimals);
     stats.push({
       title:'Total Locked Funds',
-      value:this.functionsUtil.formatMoney(parseFloat(totalDeposits))+' '+this.props.selectedToken
+      value:this.functionsUtil.formatMoney(totalDeposits,4)+' '+this.props.selectedToken
     });
 
     tokenTotalSupply = this.functionsUtil.fixTokenDecimals(tokenTotalSupply,this.props.contractInfo.decimals);
     stats.push({
       title:`${this.props.contractInfo.name} Total Supply`,
-      value:this.functionsUtil.formatMoney(parseFloat(tokenTotalSupply))+' '+this.props.selectedToken
+      value:this.functionsUtil.formatMoney(tokenTotalSupply,4)+' '+this.props.selectedToken
     });
 
     stats.push({
       title:'Claimable Rewards',
-      value:this.functionsUtil.formatMoney(parseFloat(claimableRewards))+' '+this.props.contractInfo.rewardToken
+      value:this.functionsUtil.formatMoney(claimableRewards,4)+' '+this.props.contractInfo.rewardToken
     });
 
     const totalClaimed = claimEvents.reduce( (totalClaimed,event) => {
@@ -305,11 +306,11 @@ class IdleStaking extends Component {
     const totalRewards = totalClaimed.plus(claimableRewards);
     stats.push({
       title:'Total Rewards',
-      value:this.functionsUtil.formatMoney(totalRewards)+' '+this.props.contractInfo.rewardToken
+      value:this.functionsUtil.formatMoney(totalRewards,4)+' '+this.props.contractInfo.rewardToken
     });
 
     const stakedBalance = lockedInfo && lockedInfo.amount ? this.functionsUtil.fixTokenDecimals(lockedInfo.amount,this.props.tokenConfig.decimals) : this.functionsUtil.BNify(0);
-    const userDeposited = this.functionsUtil.formatMoney(stakedBalance);
+    const userDeposited = this.functionsUtil.formatMoney(stakedBalance,4);
     globalStats.push({
       title:'Total Deposited',
       description:'Your total deposited amount',
@@ -325,11 +326,11 @@ class IdleStaking extends Component {
 
     globalStats.push({
       title:`${this.props.contractInfo.name} balance`,
-      value:`${this.functionsUtil.formatMoney(tokenUserBalance)} ${this.props.contractInfo.rewardToken}`,
+      value:`${this.functionsUtil.formatMoney(tokenUserBalance,4)} ${this.props.contractInfo.rewardToken}`,
     });
-
+    
     claimable = this.functionsUtil.fixTokenDecimals(claimable,this.props.tokenConfig.decimals);
-    const currentRewards = this.functionsUtil.formatMoney(claimable);
+    const currentRewards = this.functionsUtil.formatMoney(claimable,4);
     globalStats.push({
       title:'Claimable Rewards',
       value:`${currentRewards} ${this.props.contractInfo.rewardToken}`,
@@ -553,7 +554,7 @@ class IdleStaking extends Component {
         newState.permitEnabled = false;
         newState.approveEnabled = true;
         newState.balanceProp = newState.tokenBalance;
-        newState.approveDescription = 'Approve the Staking contract to stake your LP tokens';
+        newState.approveDescription = `Approve the Staking contract to stake your ${this.props.selectedToken} tokens`;
       break;
       case 'Increase Lock':
         newState.permitEnabled = false;
@@ -1351,6 +1352,10 @@ class IdleStaking extends Component {
                       )
                     }
                   </Box>
+                ) : !this.props.account ? (
+                  <ConnectBox
+                    {...this.props}
+                  />
                 ) : (
                   <Flex
                     mt={3}
