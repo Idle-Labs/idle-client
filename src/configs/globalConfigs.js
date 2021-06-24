@@ -55,6 +55,7 @@ import UniswapV2Router02 from '../abis/uniswap/UniswapV2Router02.json';
 import IdleDepositForwarder from '../contracts/IdleDepositForwarder.json';
 import SushiLiquidityPool from '../abis/sushiswap/SushiLiquidityPool.json';
 import StakingFeeDistributor from '../contracts/StakingFeeDistributor.json';
+import NexusMutualDistributor from '../abis/nexus/NexusMutualDistributor.json';
 import BalancerExchangeProxy from '../abis/balancer/BalancerExchangeProxy.json';
 import IdleConverterPersonalSignV4 from '../contracts/IdleConverterPersonalSignV4.json';
 import MinimalInitializableProxyFactory from '../contracts/MinimalInitializableProxyFactory.json';
@@ -1250,7 +1251,7 @@ const globalConfigs = {
         coverages:[
           {
             collateral:'DAI',
-            expirationTimestamp:1614470400,
+            expirationTimestamp:1714470400,
             tokens:{
               Claim:{
                 abi:CovToken,
@@ -1949,22 +1950,37 @@ const globalConfigs = {
         showAllTokens:true
       }
     },
-    insurance:{
-      enabled:false,
+    nexusMutual:{
+      enabled:true,
       icon:'Security',
       route:'nexus-mutual',
       label:'Nexus Mutual',
-      desc:'Buy tokens with Bank account or Credit card',
+      desc:'Buy NexusMutual cover without KYC',
       subComponent:NexusMutual,
       props:{
         availableTokens:{
-          "ETH":{"token":"ETH"},
-          "DAI":{"token":"DAI"},
-        }
+          ETH:{
+            token:"ETH",
+            decimals:18,
+            address:'0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+          },
+          DAI:{
+            token:"DAI",
+            decimals:18,
+            address:'0x6b175474e89094c44da98b954eedeac495271d0f'
+          },
+        },
       },
       directProps:{
-        ens:'idlefinancev3.nexusmutual.eth',
-        address:'0x78751B12Da02728F467A44eAc40F5cbc16Bd7934'
+        contractInfo:{
+          abi:NexusMutualDistributor,
+          name:'NexusMutualDistributor',
+          address:'0x3fe7940616e5bc47b0775a0dccf6237893353bb4'
+        },
+        poolInfo:{
+          ens:'idlefinancev4.nexusmutual.eth',
+          address:'0x3fe7940616e5bc47b0775a0dccf6237893353bb4'
+        }
       }
     },
     tokenSwap:{
