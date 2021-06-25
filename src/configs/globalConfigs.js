@@ -1037,7 +1037,7 @@ const globalConfigs = {
       1337:'Hardhat'
     },
     isForked:false, // If TRUE the tx confirmation callback is fired on the receipt
-    requiredNetwork:1, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
+    requiredNetwork:42, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
     blocksPerYear:2371428,
     secondsPerYear:31536000,
     firstBlockNumber:8119247,
@@ -1975,7 +1975,7 @@ const globalConfigs = {
         contractInfo:{
           abi:NexusMutualDistributor,
           name:'NexusMutualDistributor',
-          address:'0x3fe7940616e5bc47b0775a0dccf6237893353bb4'
+          address:'0x08Bf224a6a19935F741636d8427df77B32386531' // Kovan
         },
         poolInfo:{
           ens:'idlefinancev4.nexusmutual.eth',

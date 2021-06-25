@@ -44,6 +44,9 @@ class ExecuteTransaction extends Component {
   async execute(){
 
     const callback = (tx,error) => {
+
+      console.log('callback',tx,error);
+
       // Send Google Analytics event
       const eventData = {
         eventCategory: 'Transaction',
@@ -60,7 +63,7 @@ class ExecuteTransaction extends Component {
         this.functionsUtil.sendGoogleAnalyticsEvent(eventData);
       }
 
-      const txSucceeded = tx.status === 'success';
+      const txSucceeded = tx && tx.status === 'success';
       if (txSucceeded){
         if (typeof this.props.callback === 'function'){
           this.props.callback(tx);
@@ -68,11 +71,11 @@ class ExecuteTransaction extends Component {
       }
 
       this.setState({
-        txStatus:tx.status,
         processing: {
           txHash:null,
           loading:false
-        }
+        },
+        txStatus:tx ? tx.status : null
       });
     };
 

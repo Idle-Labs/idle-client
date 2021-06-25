@@ -5,7 +5,7 @@ import ButtonLoader from '../ButtonLoader/ButtonLoader';
 import AssetSelector from '../AssetSelector/AssetSelector';
 import DashboardCard from '../DashboardCard/DashboardCard';
 import ExecuteTransaction from '../ExecuteTransaction/ExecuteTransaction';
-import { Flex, Box, Text, Input, Link, Progress, Button } from "rimble-ui";
+import { Flex, Box, Text, Input, Link, Progress, Button, Icon } from "rimble-ui";
 
 class NexusMutual extends Component {
 
@@ -38,9 +38,11 @@ class NexusMutual extends Component {
     amountValid:true,
     periodValid:true,
     tokenConfig:null,
+    tokenBalance:null,
     selectedToken:null,
     selectedPeriod:null,
-    transactionParams:[]
+    transactionParams:[],
+    transactionValue:null
   };
 
   // Utils
@@ -57,11 +59,14 @@ class NexusMutual extends Component {
   async componentWillMount(){
     this.loadUtils();
     this.loadPoolCapacity();
+
+    await this.props.initContract(this.props.contractInfo.name, this.props.contractInfo.address, this.props.contractInfo.abi);
   }
 
   async loadPoolCapacity(){
     const selectedToken = Object.keys(this.props.toolProps.availableTokens)[0];
-    const response = await this.functionsUtil.makeRequest(`https://api.nexusmutual.io/v1/contracts/${this.props.poolInfo.address}/capacity`);
+    // const response = await this.functionsUtil.makeRequest(`https://api.nexusmutual.io/v1/contracts/${this.props.poolInfo.address}/capacity`);
+    const response = await this.functionsUtil.makeRequest(`https://api.staging.nexusmutual.io/v1/contracts/${this.props.poolInfo.address}/capacity`);
     if (response && response.data){
       const capacity = response.data;
       this.setState({
@@ -79,15 +84,17 @@ class NexusMutual extends Component {
   }
 
   async changeSelectedToken(selectedToken){
-    const tokenConfig = this.props.toolProps.availableTokens[selectedToken];
-    const maxCapacity = this.state.capacity && this.state.capacity[`capacity${selectedToken}`] ? this.functionsUtil.fixTokenDecimals(this.state.capacity[`capacity${selectedToken}`],tokenConfig.decimals) : this.functionsUtil.BNify(0);
     const periodValue = '';
     const amountValue = '';
+    const tokenConfig = this.props.toolProps.availableTokens[selectedToken];
+    const maxCapacity = this.state.capacity && this.state.capacity[`capacity${selectedToken}`] ? this.functionsUtil.fixTokenDecimals(this.state.capacity[`capacity${selectedToken}`],tokenConfig.decimals) : this.functionsUtil.BNify(0);
+    const tokenBalance = selectedToken === 'ETH' ? await this.functionsUtil.getETHBalance(this.props.account,false) : await this.functionsUtil.getTokenBalance(selectedToken,this.props.account,false);
     this.setState({
       amountValue,
       periodValue,
       maxCapacity,
       tokenConfig,
+      tokenBalance,
       selectedToken
     });
   }
@@ -163,12 +170,12 @@ class NexusMutual extends Component {
       [quote.price, quote.priceInNXM, quote.expiresAt, quote.generatedAt, quote.v, quote.r, quote.s],
     );
 
-    const COVER_TYPE = 0;
-    const feePercentage = this.functionsUtil.BNify(10000); //await this.functionsUtil.genericContractCall(this.props.contractInfo.name,'feePercentage');
+    const COVER_TYPE = this.functionsUtil.toBN(0);
+    const feePercentage = await this.functionsUtil.genericContractCall(this.props.contractInfo.name,'feePercentage');
     const basePrice = this.functionsUtil.BNify(quote.price);
     const priceWithFee = basePrice.times(feePercentage).div(10000).plus(basePrice);
     const amountInWei = this.functionsUtil.toWei(coverData.coverAmount.toString());
-    const maxPriceWithFee = priceWithFee;
+    const maxPriceWithFee = this.functionsUtil.toBN(priceWithFee.toFixed());
 
     const transactionParams = [
       coverData.contractAddress,
@@ -177,12 +184,12 @@ class NexusMutual extends Component {
       coverData.period,
       COVER_TYPE,
       maxPriceWithFee,
-      data, {
-        value: priceWithFee,
-      }
+      data
     ];
 
-    console.log(transactionParams);
+    const transactionValue = this.state.selectedToken === 'ETH' ? this.functionsUtil.toBN(priceWithFee.toFixed()) : null;
+
+    console.log(transactionParams,transactionValue);
 
     const step = 2;
     const loading = false;
@@ -191,12 +198,28 @@ class NexusMutual extends Component {
       step,
       quote,
       loading,
+      transactionValue,
       transactionParams
     });
   }
 
   transactionSucceeded = (tx) => {
     debugger;
+  }
+
+  reset(){
+    const step = 1;
+    const quote = null;
+    const periodValue = '';
+    const amountValue = '';
+    const transactionParams = [];
+    this.setState({
+      step,
+      quote,
+      periodValue,
+      amountValue,
+      transactionParams
+    });
   }
 
   render() {
@@ -441,128 +464,159 @@ class NexusMutual extends Component {
               flexDirection={'column'}
               justifyContent={'center'}
             >
+              <Text
+                mt={1}
+                mb={2}
+                fontSize={3}
+                fontWeight={3}
+                color={'primary'}
+              >
+                Cover Summary:
+              </Text>
               <DashboardCard
                 cardProps={{
-                  pt:2,
-                  pb:3,
+                  py:2,
+                  mb:2,
                   px:3
                 }}
-                isActive={false}
+                isActive={true}
                 isInteractive={false}
               >
                 <Text
-                  mt={1}
+                  mb={1}
+                  fontSize={1}
+                  fontWeight={2}
+                  color={'cellText'}
+                >
+                  Protocol:
+                </Text>
+                <Text
                   mb={2}
-                  fontSize={3}
+                  fontSize={2}
                   fontWeight={3}
                   color={'primary'}
                 >
-                  Cover Summary:
+                  Idle Finance
                 </Text>
-                <DashboardCard
-                  cardProps={{
-                    py:2,
-                    mb:2,
-                    px:3
-                  }}
-                  isActive={true}
-                  isInteractive={false}
+                <Text
+                  mb={1}
+                  fontSize={1}
+                  fontWeight={2}
+                  color={'cellText'}
                 >
-                  <Text
-                    mb={1}
-                    fontSize={1}
-                    fontWeight={2}
-                    color={'cellText'}
-                  >
-                    Protocol:
-                  </Text>
-                  <Text
-                    mb={2}
-                    fontSize={2}
-                    fontWeight={3}
-                    color={'primary'}
-                  >
-                    Idle Finance
-                  </Text>
-                  <Text
-                    mb={1}
-                    fontSize={1}
-                    fontWeight={2}
-                    color={'cellText'}
-                  >
-                    Cover Amount:
-                  </Text>
-                  <Text
-                    mb={2}
-                    fontSize={2}
-                    fontWeight={3}
-                    color={'primary'}
-                  >
-                    {this.state.amountValue} {this.state.selectedToken}
-                  </Text>
-                  <Text
-                    mb={1}
-                    fontSize={1}
-                    fontWeight={2}
-                    color={'cellText'}
-                  >
-                    Cover Period:
-                  </Text>
-                  <Text
-                    mb={2}
-                    fontSize={2}
-                    fontWeight={3}
-                    color={'primary'}
-                  >
-                    {this.state.periodValue} days
-                  </Text>
-                  <Text
-                    mb={1}
-                    fontSize={1}
-                    fontWeight={2}
-                    color={'cellText'}
-                  >
-                    Cover Price:
-                  </Text>
-                  <Text
-                    mb={2}
-                    fontSize={2}
-                    fontWeight={3}
-                    color={'primary'}
-                  >
-                    {this.functionsUtil.fixTokenDecimals(this.state.quote.price,this.state.tokenConfig.decimals).toFixed(6)} {this.state.selectedToken}
-                  </Text>
-                </DashboardCard>
-                <Flex
-                  width={1}
-                  flexDirection={'column'}
+                  Cover Amount:
+                </Text>
+                <Text
+                  mb={2}
+                  fontSize={2}
+                  fontWeight={3}
+                  color={'primary'}
                 >
-                  <ExecuteTransaction
-                    {...this.props}
-                    parentProps={{
-                      width:1,
-                      alignItems:'center',
-                      justifyContent:'center'
-                    }}
-                    Component={Button}
-                    componentProps={{
-                      fontSize:3,
-                      fontWeight:3,
-                      size:'medium',
-                      width:[1,1/2],
-                      borderRadius:4,
-                      mainColor:'deposit',
-                      value:'Increase Time',
-                      disabled:this.state.buttonDisabled
-                    }}
-                    action={'Buy Coverage'}
-                    methodName={'buyCover'}
-                    params={this.state.transactionParams}
-                    contractName={this.props.contractInfo.name}
-                    callback={this.transactionSucceeded.bind(this)}
-                  />
-                </Flex>
+                  {this.state.amountValue} {this.state.selectedToken}
+                </Text>
+                <Text
+                  mb={1}
+                  fontSize={1}
+                  fontWeight={2}
+                  color={'cellText'}
+                >
+                  Cover Period:
+                </Text>
+                <Text
+                  mb={2}
+                  fontSize={2}
+                  fontWeight={3}
+                  color={'primary'}
+                >
+                  {this.state.periodValue} days
+                </Text>
+                <Text
+                  mb={1}
+                  fontSize={1}
+                  fontWeight={2}
+                  color={'cellText'}
+                >
+                  Cover Price:
+                </Text>
+                <Text
+                  mb={2}
+                  fontSize={2}
+                  fontWeight={3}
+                  color={'primary'}
+                >
+                  {this.functionsUtil.fixTokenDecimals(this.state.quote.price,this.state.tokenConfig.decimals).toFixed(6)} {this.state.selectedToken}
+                </Text>
               </DashboardCard>
+              <Flex
+                mt={2}
+                width={1}
+                alignItems={'center'}
+                flexDirection={'column'}
+                justifyContent={'center'}
+              >
+                {
+                  this.state.tokenBalance.lt(this.functionsUtil.BNify(this.state.quote.price)) ? (
+                    <DashboardCard
+                      cardProps={{
+                        p:3
+                      }}
+                    >
+                      <Flex
+                        alignItems={'center'}
+                        flexDirection={'column'}
+                      >
+                        <Icon
+                          name={'MoneyOff'}
+                          color={'cellText'}
+                          size={this.props.isMobile ? '1.8em' : '2.3em'}
+                        />
+                        <Text
+                          mt={1}
+                          fontSize={2}
+                          color={'cellText'}
+                          textAlign={'center'}
+                        >
+                          You don't have enough {this.state.selectedToken} in your wallet.
+                        </Text>
+                      </Flex>
+                    </DashboardCard>
+                  ) : (
+                    <ExecuteTransaction
+                      {...this.props}
+                      parentProps={{
+                        width:1,
+                        alignItems:'center',
+                        justifyContent:'center'
+                      }}
+                      Component={Button}
+                      componentProps={{
+                        fontSize:3,
+                        fontWeight:3,
+                        size:'medium',
+                        width:[1,1/2],
+                        borderRadius:4,
+                        mainColor:'deposit',
+                        value:'Buy Coverage',
+                        disabled:this.state.buttonDisabled
+                      }}
+                      action={'Buy Coverage'}
+                      methodName={'buyCover'}
+                      value={this.state.transactionValue}
+                      params={this.state.transactionParams}
+                      contractName={this.props.contractInfo.name}
+                      callback={this.transactionSucceeded.bind(this)}
+                    />
+                  )
+                }
+                <Link
+                  mt={1}
+                  color={'link'}
+                  hoverColor={'primary'}
+                  onClick={this.reset.bind(this)}
+                >
+                  Get New Quote
+                </Link>
+              </Flex>
             </Flex>
           )
         }

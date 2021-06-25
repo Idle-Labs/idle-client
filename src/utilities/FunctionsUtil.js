@@ -2878,6 +2878,17 @@ class FunctionsUtil {
       contractName, 'allowance', [walletAddr, contractAddr]
     );
   }
+  contractMethodSendWrapperWithValue = (contractName,methodName,params,value,callback,callback_receipt,txData) => {
+    this.props.contractMethodSendWrapper(contractName, methodName, params, value, (tx)=>{
+      if (typeof callback === 'function'){
+        callback(tx);
+      }
+    }, (tx) => {
+      if (typeof callback_receipt === 'function'){
+        callback_receipt(tx);
+      }
+    }, null, txData);
+  }
   contractMethodSendWrapper = (contractName,methodName,params,callback,callback_receipt,txData) => {
     this.props.contractMethodSendWrapper(contractName, methodName, params, null, (tx)=>{
       if (typeof callback === 'function'){
