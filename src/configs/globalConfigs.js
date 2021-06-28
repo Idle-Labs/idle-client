@@ -1234,7 +1234,7 @@ const globalConfigs = {
       }
     },
     coverProtocol:{
-      enabled:false,
+      enabled:true,
       label:'Cover Protocol',
       route:'cover-protocol',
       subComponent:CoverProtocol,
@@ -1959,16 +1959,24 @@ const globalConfigs = {
       subComponent:NexusMutual,
       props:{
         availableTokens:{
-          ETH:{
-            token:"ETH",
+          idleDAIYield:{
             decimals:18,
-            address:'0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
-          },
-          DAI:{
-            token:"DAI",
-            decimals:18,
-            address:'0x6b175474e89094c44da98b954eedeac495271d0f'
-          },
+            token:'idleDAIYield',
+            address:'0x0000000000000000000000000000000000000007',
+            underlying:{
+              ETH:{
+                token:"ETH",
+                decimals:18,
+                address:'0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' // Ethereum
+              },
+              DAI:{
+                token:"DAI",
+                decimals:18,
+                // address:'0x6b175474e89094c44da98b954eedeac495271d0f' // Mainnet
+                address:'0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa' // Kovan
+              },
+            }
+          }
         },
       },
       directProps:{
