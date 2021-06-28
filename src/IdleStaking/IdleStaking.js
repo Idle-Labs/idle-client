@@ -358,10 +358,10 @@ class IdleStaking extends Component {
     globalStats.push({
       title:'APR',
       value:`${apr.toFixed(2)}%`,
-      description:'APR is based on your claimable rewards and total deposited'
+      description:'APR is based on your Claimable Rewards and Total Deposited'
     });
 
-    const lockEndDate = this.state.lockedEnd ? this.functionsUtil.strToMoment(this.state.lockedEnd*1000).utc().format('YYYY/MM/DD HH:mm') : '';
+    const lockEndDate = this.state.lockedEnd ? this.functionsUtil.strToMoment(this.state.lockedEnd*1000).utc().format('YYYY/MM/DD HH:mm')+' UTC' : '';
     globalStats.push({
       value:lockEndDate,
       title:'Lock End Date',
@@ -642,7 +642,7 @@ class IdleStaking extends Component {
             <Text
               mb={1}
             >
-              Pool link:
+              Token link:
             </Text>
             <ExtLink
               mt={1}

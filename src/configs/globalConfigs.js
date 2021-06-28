@@ -1158,7 +1158,6 @@ const globalConfigs = {
               name:'stkIDLE',
               rewardToken:'IDLE',
               address:'0xaac13a116ea7016689993193fce4badc8038136f' // Mainnet
-              // address:'0x95274E30C33083F3E3fEA9454347b9BD59e85225' // Fork
             },
             feeDistributor:{
               abi:StakingFeeDistributor,
@@ -1185,7 +1184,6 @@ const globalConfigs = {
               maxBonusDays:120,
               rewardToken:'IDLE',
               address:'0xcc0b9f7ed0e6bc7c2e69dbd247e8420f29aeb48d' // Mainnet
-              // address:'0x95274E30C33083F3E3fEA9454347b9BD59e85225' // Fork
             },
             name:'SLP',
             token:'SLP',
