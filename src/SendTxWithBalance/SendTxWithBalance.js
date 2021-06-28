@@ -287,7 +287,7 @@ class SendTxWithBalance extends Component {
     const permitEnabled = this.props.permitEnabled && this.state.permitEnabled && !contractApproved;
     if (permitEnabled){
       const signedParameters = await this.functionsUtil.signPermit(this.props.tokenConfig.token, this.props.account, contractName);
-      console.log('signedParameters',signedParameters);
+      // console.log('signedParameters',signedParameters);
       if (signedParameters){
         params = this.props.getPermitTransactionParams(_amount,signedParameters);
       }

@@ -113,7 +113,7 @@ class ExecuteTransaction extends Component {
       return false;
     }
 
-    console.log('ExecuteTransaction',this.props.contractName,this.props.methodName,params);
+    // console.log('ExecuteTransaction',this.props.contractName,this.props.methodName,params);
 
     if (this.props.sendRawTransaction){
       this.functionsUtil.contractMethodSendWrapper(this.props.contractName,this.props.methodName,params,callback,callbackReceipt,null,true,params);

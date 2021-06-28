@@ -229,6 +229,7 @@ class IdleStaking extends Component {
       case 'Lock':
         methodName = 'create_lock';
         methodParams = [_value,_unlock_time];
+        // console.log('getTransactionParams',methodName,methodParams);
       break;
       case 'Increase Lock':
         methodName = 'increase_amount';
@@ -433,7 +434,7 @@ class IdleStaking extends Component {
     const lockPeriodInput = mDate.format('YYYY-MM-DD');
     const lockPeriodTimestamp = parseInt(mDate._d.getTime()/1000);
 
-    console.log('selectLockPeriod',lockPeriodInput,lockPeriodTimestamp);
+    // console.log('selectLockPeriod',lockPeriodInput,lockPeriodTimestamp);
 
     this.setState({
       lockPeriodInput,
@@ -591,8 +592,10 @@ class IdleStaking extends Component {
       newState.transactionSucceeded = false;
     }
 
-    const maxDate = this.functionsUtil.strToMoment().add(4,'year');
-    newState.lockEndDateIsMaxEndDate = this.functionsUtil.strToMoment(newState.lockedEnd*1000).isSameOrAfter(maxDate);
+    const maxDate = this.functionsUtil.strToMoment().add(4,'year').format('YYYY-MM-DD');
+    newState.lockEndDateIsMaxEndDate = newState.lockedEnd ? this.functionsUtil.strToMoment(newState.lockedEnd*1000).format('YYYY-MM-DD')===maxDate : false;
+
+    // console.log('lockEndDateIsMaxEndDate',newState.lockEndDateIsMaxEndDate,maxDate,this.functionsUtil.strToMoment(newState.lockedEnd*1000).format('YYYY-MM-DD'));
 
     // console.log('updateData',selectedAction,newState);
 
@@ -1054,7 +1057,7 @@ class IdleStaking extends Component {
                                   Choose lock period:
                                 </Text>
                                 {
-                                  this.state.lockEndDateIsMaxEndDate ? (
+                                  !this.state.lockEndDateIsMaxEndDate ? (
                                     <Flex
                                       width={1}
                                       alignItems={'center'}
