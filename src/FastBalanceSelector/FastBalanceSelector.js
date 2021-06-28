@@ -36,7 +36,7 @@ class FastBalanceSelector extends Component {
       fontSize:2,
       fontWeight:3,
       textAlign:'center',
-      color:this.props.isActive ? 'copyColor' : 'legend'
+      color:this.props.isActive ? 'copyColor' : 'cellText'
     }
 
     cardProps = this.functionsUtil.replaceArrayProps(cardProps,this.props.cardProps);
