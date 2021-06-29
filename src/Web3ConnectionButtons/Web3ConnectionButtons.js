@@ -41,6 +41,7 @@ export default function Web3ConnectionButtons(props) {
     return connectorName;
     // return await context.setConnector(connectorName);
   };
+
   const unsetConnector = async () => {
     context.unsetConnector();
     if (props.setConnector && typeof props.setConnector === 'function'){
@@ -55,6 +56,7 @@ export default function Web3ConnectionButtons(props) {
   const isDapper = GeneralUtil.hasDapper();
   const isMetamask = GeneralUtil.hasMetaMask();
   const isTrustWallet = GeneralUtil.isTrustWallet();
+  const isGnosisSafe = !!connectors.gnosis.provider.safe;
   const isCoinbaseWallet = GeneralUtil.isCoinbaseWallet();
   const browserWalletDetected = isMetamask || isOpera || isDapper || isCoinbaseWallet || isTrustWallet;
   
@@ -77,8 +79,23 @@ export default function Web3ConnectionButtons(props) {
     basicConnectorsName = basicConnectorsName.filter(n => allowedConnectors.map((v) => { return v.toLowerCase(); }).indexOf(n.toLowerCase()) !== -1 );
   }
 
-  const buttons = basicConnectorsName.map(connectorName => {
+  // Handle Gnosis Safe connector
+  if (isGnosisSafe){
+    const injectedIndex = basicConnectorsName.indexOf('Injected');
+    // Remove Injected
+    basicConnectorsName.splice(injectedIndex,1);
+    // Remove Gnosis
+    const gnosisIndex = basicConnectorsName.indexOf('gnosis');
+    basicConnectorsName.splice(gnosisIndex,1);
+    // Insert Gnosis in first place
+    basicConnectorsName.unshift('gnosis');
+  } else {
+    const gnosisIndex = basicConnectorsName.indexOf('gnosis');
+    // Remove Gnosis
+    basicConnectorsName.splice(gnosisIndex,1);
+  }
 
+  const buttons = basicConnectorsName.map( (connectorName,index) => {
     switch (connectorName) {
       case 'Injected':
         if (browserWalletDetected) {
