@@ -196,7 +196,7 @@ class IdleStaking extends Component {
           if (Math.ceil(percentage)<100){
             text += `<br />Stake your tokens for <strong>4 years</strong> to reach the maximum staking power.`;
           }
-          text += `<br /><span style="color:${this.props.theme.colors.alert};font-size:14px">Keep in mind that once you stake you cannot reverse this operation until the lock end date has been reached</span>`;
+          text += `<br /><span style="color:${this.props.theme.colors.alert};font-size:14px">Keep in mind that once you lock ${this.props.selectedToken} you cannot reverse the operation until the lock end date has been reached.</span>`;
           internalInfoBox = {
             text,
             icon:'LockOutline',
