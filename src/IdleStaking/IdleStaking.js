@@ -246,7 +246,12 @@ class IdleStaking extends Component {
 
   async loadStats(){
 
+    // const isDebug = window.location.hash.includes("debug=1");
+
     if (!this.props.account){
+      // if (isDebug){
+      //   alert(`loadStats: !account=${this.props.account}`)
+      // }
       return false;
     }
 
@@ -273,9 +278,9 @@ class IdleStaking extends Component {
       this.functionsUtil.genericContractCall(this.props.contractInfo.name,'locked',[this.props.account]),
       this.functionsUtil.genericContractCall(this.props.tokenConfig.feeDistributor.name,'claim',[this.props.account]),
       this.functionsUtil.getTokenBalance(this.props.contractInfo.rewardToken,this.props.tokenConfig.feeDistributor.address),
-      this.functionsUtil.getContractEvents(this.props.tokenConfig.feeDistributor.name,'Claimed',{fromBlock: 0, toBlock:'latest'}),
-      this.functionsUtil.getContractEvents(this.props.tokenConfig.feeDistributor.name,'CheckpointToken',{fromBlock: 0, toBlock:'latest'}),
-      this.functionsUtil.getContractEvents(this.props.contractInfo.name,'Deposit',{fromBlock: 0, toBlock:'latest',filter:{provider:this.props.account}})
+      this.functionsUtil.getContractEvents(this.props.tokenConfig.feeDistributor.name,'Claimed',{fromBlock: this.props.tokenConfig.feeDistributor.fromBlock, toBlock:'latest'}),
+      this.functionsUtil.getContractEvents(this.props.tokenConfig.feeDistributor.name,'CheckpointToken',{fromBlock: this.props.tokenConfig.feeDistributor.fromBlock, toBlock:'latest'}),
+      this.functionsUtil.getContractEvents(this.props.contractInfo.name,'Deposit',{fromBlock: this.props.contractInfo.fromBlock, toBlock:'latest',filter:{provider:this.props.account}})
     ]);
 
     const rewardTokenConfig = this.functionsUtil.getGlobalConfig(['govTokens',this.props.contractInfo.rewardToken]);
@@ -376,6 +381,10 @@ class IdleStaking extends Component {
       title:'Lock End Date (UTC)',
       description:'Ending date of your Lock'
     });
+
+    // if (isDebug){
+    //   alert(`loadStats: statsLoaded=${statsLoaded}`);
+    // }
 
     this.setState({
       stats,
@@ -598,6 +607,10 @@ class IdleStaking extends Component {
     // console.log('lockEndDateIsMaxEndDate',newState.lockEndDateIsMaxEndDate,maxDate,this.functionsUtil.strToMoment(newState.lockedEnd*1000).format('YYYY-MM-DD'));
 
     // console.log('updateData',selectedAction,newState);
+    // const isDebug = window.location.hash.includes("debug=1");
+    // if (isDebug){
+    //   alert(`updateData: action=${selectedAction}, balanceProp=${newState.balanceProp.toFixed()}, contractInfo=${this.props.contractInfo.name}`);
+    // }
 
     this.setState(newState,() => {
       this.loadStats();

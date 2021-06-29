@@ -362,9 +362,10 @@ class GovernanceUtil {
       return cachedData;
     }
 
+    const fromBlock = this.functionsUtil.getGlobalConfig(['governance','startBlock']);
     const governanceContractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
 
-    let votes = await this.functionsUtil.getContractPastEvents(governanceContractName,'VoteCast', {fromBlock: 0, toBlock: 'latest'});
+    let votes = await this.functionsUtil.getContractPastEvents(governanceContractName,'VoteCast', {fromBlock, toBlock: 'latest'});
 
     if (votes){
       votes = votes.map( e => {
@@ -420,6 +421,8 @@ class GovernanceUtil {
       proposalStateGets.push(this.functionsUtil.genericContractCall(governanceContractName,'state',[i]));
     }
 
+    const fromBlock = this.functionsUtil.getGlobalConfig(['governance','startBlock']);
+
     let [
       votes,
       proposals,
@@ -432,10 +435,10 @@ class GovernanceUtil {
       this.getVotes(),
       Promise.all(proposalGets),
       Promise.all(proposalStateGets),
-      this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalQueued', {fromBlock: 0, toBlock: 'latest'}),
-      this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalCreated', {fromBlock: 0, toBlock: 'latest'}),
-      this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalCanceled', {fromBlock: 0, toBlock: 'latest'}),
-      this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalExecuted', {fromBlock: 0, toBlock: 'latest'}),
+      this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalQueued', {fromBlock, toBlock: 'latest'}),
+      this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalCreated', {fromBlock, toBlock: 'latest'}),
+      this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalCanceled', {fromBlock, toBlock: 'latest'}),
+      this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalExecuted', {fromBlock, toBlock: 'latest'}),
     ]);
 
     if (!proposals){
@@ -564,7 +567,7 @@ class GovernanceUtil {
       const { description, signatures, targets, values, calldatas } = createdEvent.returnValues;
       p.timestamp = createdBlockInfo ? createdBlockInfo.timestamp : null;
 
-      
+
       // Idle
       p.title = description.split(/# |\n|↵/g)[0].replace(/^#/,'') || 'Untitled';
       p.description = description.split(/\n|↵/g);

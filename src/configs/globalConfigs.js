@@ -1156,10 +1156,12 @@ const globalConfigs = {
               abi:stkIDLE,
               decimals:18,
               name:'stkIDLE',
+              fromBlock:12561464,
               rewardToken:'IDLE',
               address:'0xaac13a116ea7016689993193fce4badc8038136f' // Mainnet
             },
             feeDistributor:{
+              fromBlock:12649361,
               abi:StakingFeeDistributor,
               name:'StakingFeeDistributor',
               address:'0xbabb82456c013fd7e3f25857e0729de8207f80e2' // Mainnet
