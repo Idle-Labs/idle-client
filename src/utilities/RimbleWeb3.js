@@ -180,7 +180,7 @@ class RimbleTransaction extends React.Component {
       if (isGnosisSafe){
         this.props.setConnector('gnosis','gnosis');
       } else if (walletProvider === 'gnosis') {
-        this.props.setConnector('Infura');
+        this.props.setConnector('Infura',null);
       }
     }
   }
