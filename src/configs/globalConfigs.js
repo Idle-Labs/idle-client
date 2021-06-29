@@ -1904,7 +1904,26 @@ const globalConfigs = {
               // address:'0x6D4dd09982853F08d9966aC3cA4Eb5885F16f2b2' // Mubai
               address:'0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174' // Matic
             }
+          },
+          /*
+          AAVE:{
+            decimals:18,
+            name:'AAVE',
+            token:'AAVE',
+            enabled:true,
+            bridgeType:'pos',
+            rootToken:{
+              abi:ERC20,
+              name:'AAVE',
+              address:'0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9', // Mainnet
+            },
+            childToken:{
+              abi:ChildERC20,
+              name:'childAAVE',
+              address:'0xD6DF932A45C0f255f85145f286eA0b292B21C90B' // Matic
+            }
           }
+          */
         }
       }
     },
