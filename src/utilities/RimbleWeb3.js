@@ -144,6 +144,8 @@ class RimbleTransaction extends React.Component {
     // this.functionsUtil.customLog('RimbleWeb3 componentDidMount');
     this.initWeb3();
 
+    this.connectGnosisSafe();
+
     // TEST - Manually triggers transaction error
     // this.openTransactionErrorModal(null,'Your Ledger device is Ineligible');
 
@@ -169,11 +171,35 @@ class RimbleTransaction extends React.Component {
     }
   }
 
+  connectGnosisSafe = () => {
+    const gnosisSafeLoaded = this.props.connectors.gnosis.safeLoaded;
+    if (gnosisSafeLoaded){
+      const walletProvider = this.functionsUtil.getWalletProvider();
+      const isGnosisSafe = this.props.connectors.gnosis.safeLoaded && !!this.props.connectors.gnosis.provider.safe;
+      // console.log('isGnosisSafe',this.props.connectors.gnosis.provider.safe,isGnosisSafe);
+      if (isGnosisSafe){
+        this.props.setConnector('gnosis','gnosis');
+      } else if (walletProvider === 'gnosis') {
+        this.props.setConnector('Infura');
+      }
+    }
+  }
+
   componentDidUpdate = async (prevProps, prevState) => {
 
     this.loadUtils();
 
     // this.functionsUtil.customLog('componentDidUpdate',prevProps.connectorName,this.props.connectorName,this.props.context.connectorName,this.props.context.active,(this.props.context.error ? this.props.context.error.message : null));
+
+    const gnosisSafeLoaded = !this.state.gnosisSafeLoaded && this.props.connectors.gnosis.safeLoaded;
+    // console.log('gnosisSafeLoaded',this.state.gnosisSafeLoaded,this.props.connectors.gnosis.safeLoaded,gnosisSafeLoaded);
+    if (gnosisSafeLoaded){
+      this.setState({
+        gnosisSafeLoaded:true
+      },() => {
+        this.connectGnosisSafe();
+      });
+    }
 
     if (prevProps.connectorName !== this.props.connectorName && this.props.connectorName){
       this.initWeb3();
@@ -306,6 +332,11 @@ class RimbleTransaction extends React.Component {
     if (!context.active || connectorNameChanged) {
       // Select preferred web3 provider
       if (connectorName && connectorNameChanged){
+
+        if (connectorName === 'gnosis' && !this.state.gnosisSafeLoaded){
+          return false;
+        }
+
         // this.functionsUtil.customLog('initWeb3 set connector',connectorName);
         setConnectorName = connectorName;
         await context.setConnector(connectorName);
@@ -1772,11 +1803,12 @@ class RimbleTransaction extends React.Component {
     accountBalance: null,
     web3Subscription: null,
     accountValidated: null,
+    gnosisSafeLoaded:false,
     accountBalanceDAI: null,
-    erc20ForwarderClient:null,
     initWeb3: this.initWeb3,
     accountBalanceLow: null,
     accountInizialized:false,
+    erc20ForwarderClient:null,
     subscribedTransactions:{},
     contractsInitialized:false,
     initAccount: this.initAccount,

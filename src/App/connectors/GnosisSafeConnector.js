@@ -4,7 +4,7 @@ export default class GnosisSafeConnector extends Connector {
 
   constructor(SafeAppConnector) {
     super(...arguments);
-    this.isSafeApp = false;
+    this.safeLoaded = false;
     this.SafeAppConnector = SafeAppConnector;
     this.provider = new this.SafeAppConnector();
     this.checkSafeApp();
@@ -47,8 +47,9 @@ export default class GnosisSafeConnector extends Connector {
 
   async checkSafeApp() {
     if (this.provider){
-      this.isSafeApp = await this.provider.isSafeApp();
-      return this.isSafeApp;
+      const isSafeApp = await this.provider.isSafeApp();
+      this.safeLoaded = true;
+      return isSafeApp;
     }
   }
 
