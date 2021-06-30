@@ -98,8 +98,8 @@ class Notifications extends Component {
     ] = await Promise.all([
       this.functionsUtil.getSubstackLatestFeed(),
       this.functionsUtil.getSnapshotProposals(true),
-      (isMainnet && !this.props.isMobile) ? this.governanceUtil.getProposals(null,'Active') : [],
-      (isMainnet && !this.props.isMobile) ? this.functionsUtil.getBatchedDeposits(this.props.account,'executed') : []
+      [],// (isMainnet && !this.props.isMobile) ? this.governanceUtil.getProposals(null,'Active') : [],
+      [],// (isMainnet && !this.props.isMobile) ? this.functionsUtil.getBatchedDeposits(this.props.account,'executed') : []
     ]);
 
     let notifications = this.functionsUtil.getGlobalConfig(['notifications']).filter( n => (n.enabled && n.start<=currTime && n.end>currTime) );

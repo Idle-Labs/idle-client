@@ -159,6 +159,10 @@ const globalConfigs = {
       enabled:true,
       subcaption:'Hardware wallet'
     },
+    ledgerlive:{
+      enabled:true,
+      subcaption:'Ledger Live Browser'
+    },
     custom:{
       enabled:true,
       subcaption:'Custom address'

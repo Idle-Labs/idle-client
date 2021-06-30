@@ -109,7 +109,7 @@ class StrategyPage extends Component {
         // Load active coverages
         this.functionsUtil.getActiveCoverages(this.props.account),
         // Load claimable batches
-        this.functionsUtil.getBatchedDeposits(this.props.account),
+        [],//this.functionsUtil.getBatchedDeposits(this.props.account),
         // Load tokens to be migrated
         this.functionsUtil.getTokensToMigrate(this.props.selectedStrategy),
         // Load portfolio

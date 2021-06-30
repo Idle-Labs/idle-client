@@ -409,8 +409,16 @@ class App extends Component {
     window.closeToastMessage = this.closeToastMessage;
 
     if (localStorage){
-      const connectorName = localStorage.getItem('connectorName') ? localStorage.getItem('connectorName') : 'Infura';
-      const walletProvider = localStorage.getItem('walletProvider') ? localStorage.getItem('walletProvider') : 'Infura';
+      let connectorName = localStorage.getItem('connectorName') ? localStorage.getItem('connectorName') : 'Infura';
+      let walletProvider = localStorage.getItem('walletProvider') ? localStorage.getItem('walletProvider') : 'Infura';
+
+      // Check Ledger Live
+      const isLedgerLive = window.location.href.includes("ledger-live=1");
+      if (isLedgerLive){
+        connectorName = 'ledgerLive';
+        walletProvider = 'ledger';
+      }
+      console.log('isLedgerLive',isLedgerLive,connectorName,walletProvider);
 
       this.setConnector(connectorName,walletProvider);
     }
@@ -486,6 +494,8 @@ class App extends Component {
       connectorInfo = globalConfigs.connectors[walletProvider.toLowerCase()];
     }
 
+    console.log('setConnector - BEFORE',connectorInfo,connectorName,walletProvider);
+
     if ( (connectorInfo && !connectorInfo.enabled) || (connectorName !== 'Injected' && !Object.keys(globalConfigs.connectors).includes(connectorName.toLowerCase())) || (walletProvider && !Object.keys(globalConfigs.connectors).includes(walletProvider.toLowerCase()))) {
       connectorName = 'Infura';
       walletProvider = 'Infura';
@@ -509,6 +519,8 @@ class App extends Component {
         break;
       }
     }
+
+    console.log('setConnector - AFTER',connectorName,walletProvider);
 
     this.functionsUtil.setLocalStorage('connectorName', connectorName);
     this.functionsUtil.setLocalStorage('walletProvider', walletProvider);

@@ -9,6 +9,7 @@ import FunctionsUtil from './FunctionsUtil';
 import globalConfigs from '../configs/globalConfigs';
 import ConnectionModalUtil from "./ConnectionModalsUtil";
 import detectEthereumProvider from '@metamask/detect-provider';
+import { IFrameEthereumProvider } from '@ledgerhq/iframe-provider';
 import ConnectionErrorModal from './components/ConnectionErrorModal';
 import TransactionErrorModal from './components/TransactionErrorModal';
 
@@ -328,76 +329,23 @@ class RimbleTransaction extends React.Component {
 
     // this.functionsUtil.customLog('initWeb3',context.active,connectorNameChanged,context.connectorName,connectorName,setConnectorName);
 
-    if (!context.active || connectorNameChanged) {
-      // Select preferred web3 provider
-      if (connectorName && connectorNameChanged){
+    if (connectorName !== 'ledgerLive'){
+      if (!context.active || connectorNameChanged) {
+        // Select preferred web3 provider
+        if (connectorName && connectorNameChanged){
 
-        if (connectorName === 'gnosis' && !this.state.gnosisSafeLoaded){
-          return false;
-        }
-
-        // this.functionsUtil.customLog('initWeb3 set connector',connectorName);
-        setConnectorName = connectorName;
-        await context.setConnector(connectorName);
-        // await context.setFirstValidConnector([connectorName, 'Infura']);
-        return web3;
-      }
-      /*
-      else if (setConnectorName){
-        // Catch WalletConnect unexpected disconnect and fallback to Infura
-        if (connectorName === 'WalletConnect' && connectorName === setConnectorName && last_context && last_context.active && last_context.connectorName==='WalletConnect' && !context.connectorName){
-          this.functionsUtil.customLog('WalletConnect disconnected! Set Infura connector');
-          this.props.setConnector('Infura',null);
-          this.functionsUtil.removeStoredItem('walletProvider');
-          this.functionsUtil.removeStoredItem('connectorName');
-          this.functionsUtil.setLocalStorage('context',JSON.stringify({active:context.active,connectorName:context.connectorName}));
-          setConnectorName = null;
-          await context.setConnector('Infura');
-          if (context.connector && typeof context.connector.disable === 'function'){
-            await context.connector.disable();
+          if (connectorName === 'gnosis' && !this.state.gnosisSafeLoaded){
+            return false;
           }
-        }
 
-        this.functionsUtil.customLog('initWeb3 skip due to setConnectorName ('+setConnectorName+') already set');
-        return web3;
-      }
-      */
-    }
-    /* else if (context.connectorName === "WalletConnect") {
-      if (!context.account) {
-
-        // WalletConnect already opened
-        if (document.getElementById('walletconnect-wrapper')){
+          // this.functionsUtil.customLog('initWeb3 set connector',connectorName);
+          setConnectorName = connectorName;
+          await context.setConnector(connectorName);
+          // await context.setFirstValidConnector([connectorName, 'Infura']);
           return web3;
         }
-
-        WalletConnectQRCodeModal.open(
-          context.connector.walletConnector.uri,
-          async () => {
-            document.getElementById('walletconnect-wrapper').remove();
-            this.props.setConnector('Infura',null);
-            await context.setConnector('Infura');
-            setConnectorName = null;
-          }
-        );
-      } else {
-        try {
-          WalletConnectQRCodeModal.close();
-        } catch {}
       }
-    // Reset web3 if Infura
-    } */
-    /*
-    else if (context.active && (connectorName === 'Infura' || context.connectorName === "Infura")){
-      if (typeof web3.currentProvider.disable === 'function'){
-        await web3.currentProvider.disable();
-      } else if (context.connector && typeof context.connector.disable === 'function'){
-        await context.connector.disable();
-      }
-      web3 = null;
-      setConnectorName = null;
     }
-    */
 
     let web3Host = null;
     let web3Provider = null;
@@ -427,6 +375,11 @@ class RimbleTransaction extends React.Component {
         web3Host = globalConfigs.network.providers.infura[networkId]+INFURA_KEY;
         forceCallback = true;
       }
+    }
+
+    // Ledger Live
+    if (connectorName === 'ledgerLive'){
+      web3Provider = new IFrameEthereumProvider();
     }
 
     // Injected web3 provider
@@ -491,10 +444,12 @@ class RimbleTransaction extends React.Component {
 
             await this.initAccount(context.account);
           } else {
-            await this.setState({
-              accountInizialized: true,
-              account: this.props.customAddress
-            });
+
+            await this.initAccount();
+            // await this.setState({
+            //   accountInizialized: true,
+            //   account: this.props.customAddress
+            // });
           }
         }
       // Initialize Infura Web3 and display error
@@ -645,7 +600,10 @@ class RimbleTransaction extends React.Component {
 
     try {
       if (!account){
-        const wallets = await this.state.web3.eth.getAccounts();
+        const wallets = await Promise.race([
+            this.state.web3.eth.getAccounts(),
+            new Promise((resolve) => setTimeout(resolve, 300)),
+        ]);
         if (wallets && wallets.length){
           account = wallets[0];
         }
@@ -709,195 +667,6 @@ class RimbleTransaction extends React.Component {
           eventAction: 'connected',
           eventLabel: walletProvider
         });
-
-        /*
-        // Unsubscribes to all subscriptions
-        if (this.state.web3SocketProvider && typeof this.state.web3SocketProvider.clearSubscriptions === 'function'){
-          this.functionsUtil.customLog('Clear all web3SocketProvider subscriptions');
-          this.state.web3SocketProvider.clearSubscriptions();
-        }
-
-        const networkName = globalConfigs.network.availableNetworks[globalConfigs.network.requiredNetwork].toLowerCase();
-        const web3SocketProvider = new Web3(new Web3.providers.WebsocketProvider(`wss://${networkName}.infura.io/ws/v3/${INFURA_KEY}`));
-
-        // Subscribe to logs
-        const addressTopic = '0x00000000000000000000000'+account.toLowerCase().replace('x','');
-
-        // Subscribe for payment methods
-        const paymentProviders = Object.keys(globalConfigs.payments.providers).filter((providerName,i) => { const providerInfo = globalConfigs.payments.providers[providerName]; return providerInfo.enabled && providerInfo.web3Subscription && providerInfo.web3Subscription.enabled  })
-        if (paymentProviders && paymentProviders.length){
-          paymentProviders.forEach((providerName,i) => {
-            const providerInfo = globalConfigs.payments.providers[providerName];
-
-            this.functionsUtil.customLog(`Subscribe to ${providerName} logs`);
-
-            // Subscribe for deposit transactions
-            web3SocketProvider.eth.subscribe('logs', {
-                address: [account,providerInfo.web3Subscription.contractAddress],
-                topics: [null,[addressTopic]]
-            }, function(error, result){
-              
-            })
-            .on("data", async (log) => {
-              this.functionsUtil.customLog(providerName,'logs',log);
-
-              if (log){
-                const txHash = log.transactionHash;
-                const subscribedTransactions = this.state.subscribedTransactions;
-                const walletAddressFound = log.topics.filter((addr,i) => { return addr.toLowerCase().includes(addressTopic); });
-
-                this.functionsUtil.customLog(providerName,txHash,walletAddressFound);
-
-                if (!subscribedTransactions[txHash] && walletAddressFound.length){
-                  const decodedLogs = web3SocketProvider.eth.abi.decodeLog(providerInfo.web3Subscription.decodeLogsData,log.data,log.topics);
-
-                  this.functionsUtil.customLog(providerName,txHash,decodedLogs);
-
-                  if (decodedLogs && decodedLogs._tokenAmount && decodedLogs._tokenAddress && decodedLogs._tokenAddress.toLowerCase() === this.props.tokenConfig.address.toLowerCase()){
-
-                    const receiptCallback = async (tx,decodedLogs) => {
-                      const tokenDecimals = await this.getTokenDecimals();
-                      const tokenAmount = this.functionsUtil.BNify(decodedLogs._tokenAmount);
-                      const tokenAmountFixed = this.functionsUtil.fixTokenDecimals(tokenAmount,tokenDecimals);
-                      const tokenAmountFormatted = parseFloat(tokenAmountFixed.toString()).toFixed(2);
-                      const isProviderTx = tx.from.toLowerCase() === account.toLowerCase() && tx.to.toLowerCase() === providerInfo.web3Subscription.contractAddress.toLowerCase();
-
-                      if (isProviderTx){
-
-                        // Mined
-                        if (tx.blockNumber && tx.status){
-                          // Toast message
-                          window.showToastMessage({
-                            variant:'success',
-                            message:'Deposit completed',
-                            secondaryMessage:`${providerName} sent you ${tokenAmountFormatted} ${this.props.selectedToken}`,
-                          });
-
-                          // Update User Balance
-                          this.getAccountBalance(tokenAmount);
-                        } else {
-                          // Toast message
-                          window.showToastMessage({
-                            variant:'processing',
-                            message:'Deposit pending',
-                            secondaryMessage:`${providerName} is sending ${tokenAmountFormatted} ${this.props.selectedToken}`,
-                          });
-                        }
-                      }
-                    }
-
-                    let checkTransactionReceiptTimeoutID = null;
-
-                    const checkTransactionReceipt = (txHash,decodedLogs) => {
-                      if (checkTransactionReceiptTimeoutID){
-                        window.clearTimeout(checkTransactionReceiptTimeoutID);
-                      }
-                      web3SocketProvider.eth.getTransactionReceipt(txHash,(err,txReceipt)=>{
-                        if (!err){
-                          if (txReceipt){
-                            receiptCallback(txReceipt,decodedLogs);
-                          } else{
-                            checkTransactionReceiptTimeoutID = window.setTimeout(() => { checkTransactionReceipt(txHash,decodedLogs) },3000);
-                          }
-                        }
-                      });
-                    }
-
-                    checkTransactionReceipt(txHash,decodedLogs);
-
-                    subscribedTransactions[txHash] = log;
-                    this.setState({subscribedTransactions});
-                  }
-                }
-              }
-            });
-          })
-        }
-
-        // Subscribe for deposit transactions
-        web3SocketProvider.eth.subscribe('logs', {
-            address: [account,this.props.tokenConfig.address],
-            topics: [null,null,[addressTopic]]
-        }, function(error, result){
-
-        })
-        .on("data", async (log) => {
-          if (log){
-            const txHash = log.transactionHash;
-            const subscribedTransactions = this.state.subscribedTransactions;
-            const walletAddressFound = log.topics.filter((addr,i) => { return addr.toLowerCase().includes(addressTopic); });
-
-            if (!subscribedTransactions[txHash] && walletAddressFound.length){
-              const decodedLogs = web3SocketProvider.eth.abi.decodeLog([
-                {
-                  "internalType": "uint256",
-                  "name": "_tokenAmount",
-                  "type": "uint256"
-                },
-              ],log.data,log.topics);
-
-              if (decodedLogs && decodedLogs._tokenAmount){
-
-                const receiptCallback = async (tx,decodedLogs) => {
-                  const tokenDecimals = await this.getTokenDecimals();
-                  const tokenAmount = this.functionsUtil.BNify(decodedLogs._tokenAmount);
-                  const tokenAmountFixed = this.functionsUtil.fixTokenDecimals(tokenAmount,tokenDecimals);
-                  const tokenAmountFormatted = parseFloat(tokenAmountFixed.toString()).toFixed(2);
-                  const isDepositTokenTx = tx.to.toLowerCase() === this.props.tokenConfig.address.toLowerCase();
-
-                  if (isDepositTokenTx){
-
-                    // Mined
-                    if (tx.blockNumber && tx.status){
-                      // Toast message
-                      window.showToastMessage({
-                        message:'Deposit completed',
-                        secondaryMessage: `${tokenAmountFormatted} ${this.props.selectedToken} has been deposited`,
-                        variant: "success",
-                      });
-
-                      // Update User Balance
-                      this.getAccountBalance(tokenAmount);
-                    } else {
-                      // Toast message
-                      window.showToastMessage({
-                        message:'Deposit pending',
-                        secondaryMessage: `${tokenAmountFormatted} ${this.props.selectedToken} are on the way`,
-                        variant: "processing",
-                      });
-                    }
-                  }
-                }
-
-                let checkTransactionReceiptTimeoutID = null;
-
-                const checkTransactionReceipt = (txHash,decodedLogs) => {
-                  if (checkTransactionReceiptTimeoutID){
-                    window.clearTimeout(checkTransactionReceiptTimeoutID);
-                  }
-                  web3SocketProvider.eth.getTransactionReceipt(txHash,(err,txReceipt)=>{
-                    if (!err){
-                      if (txReceipt){
-                        receiptCallback(txReceipt,decodedLogs);
-                      } else{
-                        checkTransactionReceiptTimeoutID = window.setTimeout(() => { checkTransactionReceipt(txHash,decodedLogs) },3000);
-                      }
-                    }
-                  });
-                }
-
-                checkTransactionReceipt(txHash,decodedLogs);
-
-                subscribedTransactions[txHash] = log;
-                this.setState({subscribedTransactions});
-              }
-            }
-          }
-        })
-        .on("changed", log => {
-          
-        });
-        */
 
         // this.functionsUtil.customLog('initAccount',account);
 

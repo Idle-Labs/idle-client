@@ -3426,6 +3426,13 @@
     "@ledgerhq/errors" "^4.63.2"
     events "^3.0.0"
 
+"@ledgerhq/iframe-provider@^0.4.2":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/iframe-provider/-/iframe-provider-0.4.2.tgz#2b63892bb3ab9a0719d2b00488be18b176ad6b7e"
+  integrity sha512-RbdwvQow/ITLk0TLb6c3M7y8IyjopIGXhhuUEMjqTU6PZhAL9Gl7TzH8INit9x9cOeG2WCuV+ZbHQ2oWsLfJ+A==
+  dependencies:
+    eventemitter3 "^4.0.0"
+
 "@ledgerhq/logs@^4.62.0":
   version "4.62.0"
   resolved "https://registry.yarnpkg.com/@ledgerhq/logs/-/logs-4.62.0.tgz#6696e6d74576e09d72bc1d7a8fcff76cd190461e"

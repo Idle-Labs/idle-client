@@ -11,6 +11,8 @@ import ENS, { getEnsAddress } from '@ensdomains/ensjs';
 const ethereumjsABI = require('ethereumjs-abi');
 const env = process.env;
 
+window.profiler = {};
+
 class FunctionsUtil {
 
   // Attributes
@@ -635,6 +637,12 @@ class FunctionsUtil {
     return null;
   }
   getAmountDeposited = async (tokenConfig,account) => {
+    const cachedDataKey = `amountDeposited_${tokenConfig.idle.token}_${account}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData && !this.BNify(cachedData).isNaN()){
+      return this.BNify(cachedData);
+    }
+
     let [tokenBalance,userAvgPrice] = await Promise.all([
       this.getTokenBalance(tokenConfig.idle.token,account),
       this.genericContractCall(tokenConfig.idle.token, 'userAvgPrices', [account])
@@ -643,7 +651,7 @@ class FunctionsUtil {
     if (tokenBalance && userAvgPrice){
       userAvgPrice = this.fixTokenDecimals(userAvgPrice,tokenConfig.decimals);
       const amountDeposited = tokenBalance.times(userAvgPrice);
-      return amountDeposited;
+      return this.setCachedDataWithLocalStorage(cachedDataKey,amountDeposited);
     }
 
     return null;
@@ -2138,9 +2146,28 @@ class FunctionsUtil {
 
     return data;
   }
+  getTokenExchangeRate = async (contractName,exchangeRateParams) => {
+    const cachedDataKey = `exchangeRate_${contractName}_${exchangeRateParams.name}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData && !this.BNify(cachedData).isNaN()){
+      return this.BNify(cachedData);
+    }
+
+    const exchangeRate = this.genericContractCall(contractName,exchangeRateParams.name,exchangeRateParams.params);
+    return this.setCachedDataWithLocalStorage(cachedDataKey,exchangeRate);
+  }
   getTokenDecimals = async (contractName) => {
+    const cachedDataKey = `contractDecimals_${contractName}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData && !this.BNify(cachedData).isNaN()){
+      return this.BNify(cachedData);
+    }
+
     contractName = contractName ? contractName : this.props.selectedToken;
-    return await this.genericContractCall(contractName,'decimals');
+    const tokenConfig = this.getGlobalConfig(['stats','tokens',contractName]);
+    const decimals = tokenConfig && tokenConfig.decimals ? tokenConfig.decimals : await this.genericContractCall(contractName,'decimals');
+
+    return this.setCachedDataWithLocalStorage(cachedDataKey,decimals);
   }
   getAvgApr = (aprs,allocations,totalAllocation) => {
     if (aprs && allocations && totalAllocation){
@@ -3221,7 +3248,7 @@ class FunctionsUtil {
             output = '-';
           }
         } else {
-          output = await this.genericContractCall(tokenConfig.idle.token, 'tokenPrice');
+          output = await this.getTokenPrice(tokenConfig.idle.token);
         }
       break;
       case 'fee':
@@ -3344,7 +3371,7 @@ class FunctionsUtil {
       return this.BNify(cachedData);
     }
 
-    let idleTokenSupply = await this.genericContractCall(idleToken,'totalSupply',[],{},blockNumber);
+    let idleTokenSupply = await this.getTokenTotalSupply(idleToken,blockNumber);
     if (idleTokenSupply){
       idleTokenSupply = this.BNify(idleTokenSupply);
       return this.setCachedDataWithLocalStorage(cachedDataKey,idleTokenSupply);
@@ -3383,10 +3410,10 @@ class FunctionsUtil {
 
     const cachedDataKey = `idleTokenPrice_${tokenConfig.idle.token}_${blockNumber}`;
     // if (blockNumber !== 'latest'){
-      const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
-      if (cachedData && !this.BNify(cachedData).isNaN()){
-        return this.BNify(cachedData);
-      }
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData && !this.BNify(cachedData).isNaN()){
+      return this.BNify(cachedData);
+    }
     // }
 
     let decimals = tokenConfig.decimals;
@@ -3509,7 +3536,7 @@ class FunctionsUtil {
       idleTokensTotalSupply
     ] = await Promise.all([
       this.getTokenBalance(tokenConfig.idle.token,walletAddr,false),
-      this.genericContractCall(tokenConfig.idle.token,'totalSupply')
+      this.getTokenTotalSupply(tokenConfig.idle.token)
     ]);
 
     let userShare = this.BNify(0);
@@ -3613,6 +3640,9 @@ class FunctionsUtil {
           this.genericContractCall(migrationContract.name,'batchRedeemedTotals',[batchIndex]),
           this.genericContractCall(migrationContract.name,'batchDeposits',[this.props.account,batchIndex])
         ]);
+
+        console.log(`Batch #${batchIndex} - ${batchTotal} - ${batchRedeem} - ${batchDeposit}`);
+
         let batchTotals = null;
         let batchRedeems = null;
         let batchDeposits = null;
@@ -3779,15 +3809,39 @@ class FunctionsUtil {
     return address ? address.match(/^0x[a-fA-F0-9]{40}$/) !== null : false;
   }
   getTokenTotalSupply = async (contractName,blockNumber='latest') => {
-    return await this.genericContractCall(contractName, 'totalSupply', [], {}, blockNumber);
+    const cachedDataKey = `totalSupply_${contractName}_${blockNumber}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData && !this.BNify(cachedData).isNaN()){
+      return this.BNify(cachedData);
+    }
+
+    const totalSupply = await this.genericContractCall(contractName, 'totalSupply', [], {}, blockNumber);
+    return this.setCachedDataWithLocalStorage(cachedDataKey,totalSupply);
+  }
+  getTokenPrice = async (contractName,blockNumber='latest') => {
+    const cachedDataKey = `tokenPrice_${contractName}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData && !this.BNify(cachedData).isNaN()){
+      return this.BNify(cachedData);
+    }
+
+    const tokenPrice = await this.genericContractCall(contractName, 'tokenPrice',[]);
+    return this.setCachedDataWithLocalStorage(cachedDataKey,tokenPrice,60);
   }
   getContractBalance = async (contractName,address,blockNumber='latest') => {
     address = address ? address : this.props.tokenConfig.idle.address;
-    return await this.genericContractCall(contractName, 'balanceOf', [address], {}, blockNumber);
+
+    const cachedDataKey = `balanceOf_${contractName}_${address}_${blockNumber}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData && !this.BNify(cachedData).isNaN()){
+      return this.BNify(cachedData);
+    }
+
+    const balance = await this.genericContractCall(contractName, 'balanceOf', [address], {}, blockNumber);
+    return this.setCachedDataWithLocalStorage(cachedDataKey,balance,60);
   }
   getProtocolBalance = async (contractName,address) => {
-    address = address ? address : this.props.tokenConfig.idle.address;
-    return await this.genericContractCall(contractName, 'balanceOf', [address]);
+    return await this.getContractBalance(contractName,address);
   }
   getAprs = async (contractName) => {
     contractName = contractName ? contractName : this.props.tokenConfig.idle.token;
@@ -3896,7 +3950,7 @@ class FunctionsUtil {
       const value = await contract.methods[methodName](...params).call(callParams,blockNumber).catch(error => {
         this.customLog(`${contractName} contract method ${methodName} error: `, error);
       });
-      this.customLog(`genericContractCall - ${contractName} - ${methodName} : ${value}`);
+      console.log(`genericContractCall - ${contractName} - ${methodName} : ${value}`);
       return value;
     } catch (error) {
       this.customLog("genericContractCall error", error);
@@ -3977,6 +4031,11 @@ class FunctionsUtil {
     const protocolsAllocationsPerc = {};
 
     await this.asyncForEach(tokenConfig.protocols,async (protocolInfo,i) => {
+
+      if (!protocolInfo.enabled){
+        return;
+      }
+
       const contractName = protocolInfo.token;
       const protocolAddr = protocolInfo.address.toLowerCase();
 
@@ -3987,7 +4046,7 @@ class FunctionsUtil {
       ] = await Promise.all([
         this.getTokenDecimals(contractName),
         this.getProtocolBalance(contractName,tokenConfig.idle.address),
-        ( protocolInfo.functions.exchangeRate ? this.genericContractCall(contractName,protocolInfo.functions.exchangeRate.name,protocolInfo.functions.exchangeRate.params) : null )
+        ( protocolInfo.functions.exchangeRate ? this.getTokenExchangeRate(contractName,protocolInfo.functions.exchangeRate) : null )
       ]);
 
       if (!protocolBalance){
@@ -4060,11 +4119,6 @@ class FunctionsUtil {
 
     return this.setCachedData(cachedDataKey,tokenAllocation);
   }
-  getUniswapConversionRate_path = async (path) => {
-    const one = this.normalizeTokenDecimals(18);
-    const unires = await this.genericContractCall('UniswapRouter','getAmountsIn',[one.toFixed(),path]);
-    return unires;
-  }
   getSushiswapPoolTokenPrice = async (contractName,pairAddresses) => {
     const [
       token0_address,
@@ -4075,7 +4129,7 @@ class FunctionsUtil {
       this.genericContractCall(contractName,'token0'),
       this.genericContractCall(contractName,'token1'),
       this.genericContractCall(contractName,'getReserves'),
-      this.genericContractCall(contractName,'totalSupply')
+      this.getTokenTotalSupply(contractName)
     ]);
 
     if (token0_address && token1_address && poolReserves && totalSupply){
@@ -4347,7 +4401,7 @@ class FunctionsUtil {
   getCurveTokenSupply = async () => {
     const curvePoolContract = await this.getCurvePoolContract();
     if (curvePoolContract){
-      return await this.genericContractCall(curvePoolContract.name,'totalSupply');
+      return await this.getTokenTotalSupply(curvePoolContract.name);
     }
     return null;
   }
@@ -4828,7 +4882,7 @@ class FunctionsUtil {
           cTokenTotalSupply
         ] = await Promise.all([
           this.getCompSpeed(cTokenInfo.address),
-          this.genericContractCall(cTokenInfo.token,'totalSupply'),
+          this.getTokenTotalSupply(cTokenInfo.token)
         ]);
 
         if (compSpeed && cTokenTotalSupply){
@@ -5399,6 +5453,26 @@ class FunctionsUtil {
 
     return output;
   }
+  getGovTokenAddessByIndex = async (token,govTokenIndex) => {
+    const cachedDataKey = `govTokenAddressByIndex_${token}_${govTokenIndex}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData){
+      return cachedData;
+    }
+
+    const govTokenAddress = await this.genericContractCall(token,'govTokens',[govTokenIndex]);
+    return this.setCachedDataWithLocalStorage(cachedDataKey,govTokenAddress);
+  }
+  getGovTokensUserAmounts = async (token,account) => {
+    const cachedDataKey = `govTokenUserAmount_${token}_${account}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData){
+      return cachedData;
+    }
+
+    const govTokenAddress = await this.genericContractCall(token,'getGovTokensAmounts',[account]);
+    return this.setCachedDataWithLocalStorage(cachedDataKey,govTokenAddress);
+  }
   getGovTokensUserBalances = async (account=null,availableTokens=null,convertToken=null,govTokenConfigForced=null,checkShowBalance=false) => {
     if (!account){
       account = this.props.account;
@@ -5413,7 +5487,7 @@ class FunctionsUtil {
       const idleTokenConfig = availableTokens[token].idle;
 
       // Get govTokens amounts
-      const govTokensAmounts = await this.genericContractCall(idleTokenConfig.token,'getGovTokensAmounts',[account]);
+      const govTokensAmounts = await this.getGovTokensUserAmounts(idleTokenConfig.token,account);
 
       // console.log('getGovTokensUserBalances_1',idleTokenConfig.token,govTokensAmounts);
 
@@ -5421,7 +5495,7 @@ class FunctionsUtil {
         await this.asyncForEach(govTokensAmounts, async (govTokenAmount,govTokenIndex) => {
           govTokenAmount = this.BNify(govTokenAmount);
           // Get gov Token config by index
-          const govTokenAddress = await this.genericContractCall(idleTokenConfig.token,'govTokens',[govTokenIndex]);
+          const govTokenAddress = await this.getGovTokenAddessByIndex(idleTokenConfig.token,govTokenIndex);
 
           // console.log('getGovTokensUserBalances_2',idleTokenConfig.token,govTokenIndex,govTokenAddress);
 
