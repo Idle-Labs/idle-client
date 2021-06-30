@@ -2154,22 +2154,15 @@ class FunctionsUtil {
       return this.BNify(cachedData);
     }
 
-    const exchangeRate = await this.genericContractCall(contractName,exchangeRateParams.name,exchangeRateParams.params);
-    return this.setCachedDataWithLocalStorage(cachedDataKey,exchangeRate,null);
+    const exchangeRate = this.genericContractCall(contractName,exchangeRateParams.name,exchangeRateParams.params);
+    return this.setCachedDataWithLocalStorage(cachedDataKey,exchangeRate);
   }
   getTokenDecimals = async (contractName) => {
-    contractName = contractName || this.props.selectedToken;
-
-    if (!contractName){
-      return false;
-    }
-
     const cachedDataKey = `contractDecimals_${contractName}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData && !this.BNify(cachedData).isNaN()){
       return this.BNify(cachedData);
     }
-
     const tokenConfig = this.getGlobalConfig(['stats','tokens',contractName]);
     const decimals = tokenConfig && tokenConfig.decimals ? tokenConfig.decimals : await this.genericContractCall(contractName,'decimals');
 
@@ -3849,7 +3842,6 @@ class FunctionsUtil {
     if (cachedData && !this.BNify(cachedData).isNaN()){
       return this.BNify(cachedData);
     }
-
     const tokenPrice = await this.genericContractCall(contractName,'tokenPrice',[],{},blockNumber);
     return this.setCachedDataWithLocalStorage(cachedDataKey,tokenPrice,60);
   }
@@ -3862,7 +3854,7 @@ class FunctionsUtil {
     }
 
     const balance = await this.genericContractCall(contractName, 'balanceOf', [address], {}, blockNumber);
-    return this.setCachedDataWithLocalStorage(cachedDataKey,balance,30);
+    return this.setCachedDataWithLocalStorage(cachedDataKey,balance,60);
   }
   getProtocolBalance = async (contractName,address) => {
     return await this.getContractBalance(contractName,address);
@@ -3998,7 +3990,7 @@ class FunctionsUtil {
       const value = await contract.methods[methodName](...params).call(callParams,blockNumber).catch(error => {
         this.customLog(`${contractName} contract method ${methodName} error: `, error);
       });
-      // console.log(`${moment().format('HH:mm:ss')} - genericContractCall (${blockNumber}) - ${contractName} - ${methodName} (${JSON.stringify(params)}) : ${value}`);
+      console.log(`${moment().format('HH:mm:ss')} - genericContractCall (${blockNumber}) - ${contractName} - ${methodName} (${JSON.stringify(params)}) : ${value}`);
       return value;
     } catch (error) {
       this.customLog("genericContractCall error", error);
@@ -5508,7 +5500,6 @@ class FunctionsUtil {
   getGovTokenAddessByIndex = async (token,govTokenIndex) => {
     const cachedDataKey = `govTokenAddressByIndex_${token}_${govTokenIndex}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
-    // console.log(cachedDataKey,cachedData);
     if (cachedData){
       return cachedData;
     }

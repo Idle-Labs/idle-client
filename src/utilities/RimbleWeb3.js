@@ -382,6 +382,11 @@ class RimbleTransaction extends React.Component {
       web3Provider = new IFrameEthereumProvider();
     }
 
+<<<<<<< HEAD
+=======
+    console.log('web3Provider',web3Provider);
+
+>>>>>>> 3c848b3 (FIX: contract call optimization)
     // Injected web3 provider
     if (web3Provider){
       web3 = new Web3(web3Provider);
@@ -602,7 +607,11 @@ class RimbleTransaction extends React.Component {
       if (!account){
         const wallets = await Promise.race([
             this.state.web3.eth.getAccounts(),
+<<<<<<< HEAD
             new Promise((resolve) => setTimeout(resolve, 300))
+=======
+            new Promise((resolve) => setTimeout(resolve, 300)),
+>>>>>>> 3c848b3 (FIX: contract call optimization)
         ]);
         if (wallets && wallets.length){
           account = wallets[0];

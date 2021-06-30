@@ -444,6 +444,7 @@ class App extends Component {
         connectorName = 'ledgerLive';
         walletProvider = 'ledger';
       }
+
       // console.log('isLedgerLive',isLedgerLive,connectorName,walletProvider);
 
       this.setConnector(connectorName,walletProvider);
@@ -523,8 +524,6 @@ class App extends Component {
       connectorInfo = globalConfigs.connectors[walletProvider.toLowerCase()];
     }
 
-    // console.log('setConnector - BEFORE',connectorInfo,connectorName,walletProvider);
-
     if ( (connectorInfo && !connectorInfo.enabled) || (connectorName !== 'Injected' && !Object.keys(globalConfigs.connectors).includes(connectorName.toLowerCase())) || (walletProvider && !Object.keys(globalConfigs.connectors).includes(walletProvider.toLowerCase()))) {
       connectorName = 'Infura';
       walletProvider = 'Infura';
@@ -548,8 +547,6 @@ class App extends Component {
         break;
       }
     }
-
-    // console.log('setConnector - AFTER',connectorName,walletProvider);
 
     this.functionsUtil.setLocalStorage('connectorName', connectorName);
     this.functionsUtil.setLocalStorage('walletProvider', walletProvider);
