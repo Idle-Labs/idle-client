@@ -1836,6 +1836,16 @@ const availableTokens = {
               }
             },
             address:'0x752F119bD4Ee2342CE35E2351648d21962c7CAfE',
+          },
+          {
+            abi:aToken,
+            decimals:18,
+            token:'aRAI',
+            enabled:true,
+            name:'aavev2',
+            functions:{
+            },
+            address:'0xc9bc48c72154ef3e5425641a3c747242112a46af',
           }
         ]
       },
