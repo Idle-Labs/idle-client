@@ -21,7 +21,6 @@ import CurvePool from '../abis/curve/CurvePool.json';
 import NexusMutual from '../NexusMutual/NexusMutual';
 import CoverMint from '../abis/cover/CoverMint.json';
 import LockedIDLE from '../contracts/LockedIDLE.json';
-import { Web3Versions } from '@terminal-packages/sdk';
 import LpStakingAbi from '../contracts/LpStaking.json';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import TokenWrapper from '../TokenWrapper/TokenWrapper';
@@ -423,9 +422,9 @@ const globalConfigs = {
       distributionMode:'second',
       color:'hsl(314, 41%, 51%)',
       distributionFrequency:'day',
-      disabledTokens:['idleTUSDYield','idleSUSDYield'],
       address:'0x4da27a545c0c5b758a6ba100e3a049001de870f5', // MAIN
       addressForPrice:'0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9', // MAIN
+      disabledTokens:['idleTUSDYield','idleSUSDYield','idleRAIYield']
     }
   },
   contracts:{
@@ -1091,16 +1090,6 @@ const globalConfigs = {
           dappId: env.REACT_APP_BICONOMY_APPID,
           apiId: '36572ec9-ae5c-4c4a-9530-f3ae7c7ac829',
           // apiKey: env.REACT_APP_BICONOMY_KEY_KOVAN, // Kovan
-        }
-      },
-      terminal:{
-        enabled:false,
-        supportedNetworks:[1,42],
-        params:{
-          apiKey: env.REACT_APP_TERMINAL_KEY,
-          projectId: env.REACT_APP_TERMINAL_PROJECT_ID,
-          source: null,
-          web3Version: Web3Versions.one
         }
       },
       simpleID:{

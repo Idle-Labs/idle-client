@@ -11,7 +11,6 @@ import ConnectionModalUtil from "./ConnectionModalsUtil";
 import detectEthereumProvider from '@metamask/detect-provider';
 import ConnectionErrorModal from './components/ConnectionErrorModal';
 import TransactionErrorModal from './components/TransactionErrorModal';
-import { TerminalHttpProvider, SourceType } from '@terminal-packages/sdk';
 
 require('dotenv').config();
 const INFURA_KEY = process.env["REACT_APP_INFURA_KEY"];
@@ -430,31 +429,14 @@ class RimbleTransaction extends React.Component {
       }
     }
 
-    const terminalInfo = globalConfigs.network.providers.terminal;
-
-    if (terminalInfo && terminalInfo.enabled && terminalInfo.supportedNetworks.indexOf(networkId) !== -1 ){
-      const TerminalHttpProviderParams = terminalInfo.params;
-      const terminalSourceType = localStorage && localStorage.getItem('walletProvider') ? localStorage.getItem('walletProvider') : SourceType.Infura;
-      TerminalHttpProviderParams.source = terminalSourceType;
-
-      if (web3Provider){
-        TerminalHttpProviderParams.customHttpProvider = web3Provider;
-      } else if (web3Host){
-        TerminalHttpProviderParams.host = web3Host;
-      }
-
-      const terminalHttpProvider = new TerminalHttpProvider(TerminalHttpProviderParams);
-      web3 = new Web3(terminalHttpProvider);
-    } else {
-      // Injected web3 provider
-      if (web3Provider){
-        web3 = new Web3(web3Provider);
-      // Infura
-      } else if (web3Host) {
-        web3 = new Web3(new Web3.providers.HttpProvider(web3Host));
-        if (connectorName !== 'Infura'){
-          this.props.setConnector('Infura',null);
-        }
+    // Injected web3 provider
+    if (web3Provider){
+      web3 = new Web3(web3Provider);
+    // Infura
+    } else if (web3Host) {
+      web3 = new Web3(new Web3.providers.HttpProvider(web3Host));
+      if (connectorName !== 'Infura'){
+        this.props.setConnector('Infura',null);
       }
     }
 
