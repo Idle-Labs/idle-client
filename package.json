@@ -20,7 +20,6 @@
     "@rimble/network-indicator": "^1.2.1",
     "@sentry/browser": "^5.29.1",
     "@svgr/webpack": "2.4.1",
-    "@terminal-packages/sdk": "^1.1.1",
     "@toruslabs/torus-embed": "^1.2.4",
     "@walletconnect/client": "^1.1.0",
     "@walletconnect/qrcode-modal": "^1.1.0",

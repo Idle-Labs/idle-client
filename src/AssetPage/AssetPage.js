@@ -56,45 +56,46 @@ class AssetPage extends Component {
   async loadTokensInfo(){
     if (this.props.account){
       const newState = {...this.state};
-      await this.functionsUtil.asyncForEach(Object.keys(this.props.availableTokens),async (token) => {
-        const tokenConfig = this.props.availableTokens[token];
-        const govTokenAvailableTokens = {};
-        govTokenAvailableTokens[token] = tokenConfig;
+      // await this.functionsUtil.asyncForEach(Object.keys(this.props.availableTokens),async (token) => {
+      const token = this.props.selectedToken;
+      const tokenConfig = this.props.availableTokens[token];
+      const govTokenAvailableTokens = {};
+      govTokenAvailableTokens[token] = tokenConfig;
 
-        const [
-          tokenFeesPercentage,
-          idleTokenPrice,
-          tokenApy,
-          tokenBalance,
-          tokenFees,
-          idleTokenBalance,
-          tokenApproved,
-          govTokensUserBalances,
-          govTokensBalance
-        ] = await Promise.all([
-          this.functionsUtil.getTokenFees(tokenConfig),
-          this.functionsUtil.getIdleTokenPrice(tokenConfig),
-          this.functionsUtil.getTokenApy(this.props.tokenConfig),
-          this.functionsUtil.getTokenBalance(token,this.props.account),
-          this.functionsUtil.getUserTokenFees(tokenConfig,this.props.account),
-          this.functionsUtil.getTokenBalance(tokenConfig.idle.token,this.props.account),
-          this.functionsUtil.checkTokenApproved(token,tokenConfig.idle.address,this.props.account),
-          this.functionsUtil.getGovTokensUserBalances(this.props.account,govTokenAvailableTokens,null,null),
-          this.functionsUtil.getGovTokensUserTotalBalance(this.props.account,govTokenAvailableTokens,'DAI',false)
-        ]);
+      const [
+        tokenFeesPercentage,
+        idleTokenPrice,
+        tokenApy,
+        tokenBalance,
+        tokenFees,
+        idleTokenBalance,
+        tokenApproved,
+        govTokensUserBalances,
+        govTokensBalance
+      ] = await Promise.all([
+        this.functionsUtil.getTokenFees(tokenConfig),
+        this.functionsUtil.getIdleTokenPrice(tokenConfig),
+        this.functionsUtil.getTokenApy(this.props.tokenConfig),
+        this.functionsUtil.getTokenBalance(token,this.props.account),
+        this.functionsUtil.getUserTokenFees(tokenConfig,this.props.account),
+        this.functionsUtil.getTokenBalance(tokenConfig.idle.token,this.props.account),
+        this.functionsUtil.checkTokenApproved(token,tokenConfig.idle.address,this.props.account),
+        this.functionsUtil.getGovTokensUserBalances(this.props.account,govTokenAvailableTokens,null,null),
+        this.functionsUtil.getGovTokensUserTotalBalance(this.props.account,govTokenAvailableTokens,'DAI',false)
+      ]);
 
-        newState.tokenFees[token] = tokenFees;
-        newState.tokenBalance[token] = tokenBalance;
-        newState.tokenApproved[token] = tokenApproved;
-        newState.idleTokenPrice[token] = idleTokenPrice;
-        newState.idleTokenBalance[token] = idleTokenBalance;
-        newState.govTokensBalance[token] = govTokensBalance;
-        newState.tokenFeesPercentage[token] = tokenFeesPercentage;
-        newState.govTokensUserBalances[token] = govTokensUserBalances;
-        newState.govTokensDisabled[token] = tokenConfig.govTokensDisabled;
-        newState.tokenApy[token] = tokenApy && !tokenApy.isNaN() ? tokenApy : null;
-        newState.redeemableBalance[token] = idleTokenBalance && idleTokenPrice ? idleTokenBalance.times(idleTokenPrice) : this.functionsUtil.BNify(0);
-      });
+      newState.tokenFees[token] = tokenFees;
+      newState.tokenBalance[token] = tokenBalance;
+      newState.tokenApproved[token] = tokenApproved;
+      newState.idleTokenPrice[token] = idleTokenPrice;
+      newState.idleTokenBalance[token] = idleTokenBalance;
+      newState.govTokensBalance[token] = govTokensBalance;
+      newState.tokenFeesPercentage[token] = tokenFeesPercentage;
+      newState.govTokensUserBalances[token] = govTokensUserBalances;
+      newState.govTokensDisabled[token] = tokenConfig.govTokensDisabled;
+      newState.tokenApy[token] = tokenApy && !tokenApy.isNaN() ? tokenApy : null;
+      newState.redeemableBalance[token] = idleTokenBalance && idleTokenPrice ? idleTokenBalance.times(idleTokenPrice) : this.functionsUtil.BNify(0);
+      // });
 
       newState.availableGovTokens = this.functionsUtil.getTokenGovTokens(this.props.tokenConfig);
 
@@ -116,9 +117,10 @@ class AssetPage extends Component {
   async componentDidUpdate(prevProps, prevState) {
     this.loadUtils();
     const accountChanged = prevProps.account !== this.props.account;
+    const selectedToken = prevProps.selectedToken !== this.props.selectedToken;
     const availableTokensChanged = JSON.stringify(prevProps.availableTokens) !== JSON.stringify(this.props.availableTokens);
     const transactionsChanged = prevProps.transactions && this.props.transactions && Object.values(prevProps.transactions).filter(tx => (tx.status==='success')).length !== Object.values(this.props.transactions).filter(tx => (tx.status==='success')).length;
-    if (accountChanged || transactionsChanged || availableTokensChanged){
+    if (accountChanged || transactionsChanged || availableTokensChanged || selectedToken){
       // console.log('AssetPage - availableTokensChanged',availableTokensChanged);
       this.loadTokensInfo();
     }

@@ -125,7 +125,7 @@ class App extends Component {
     const cachedKeyFound = this.state.cachedData[key];
     const currentTime = parseInt(Date.now()/1000);
 
-    const update_key = !cachedKeyFound || ( (!cachedKeyFound.expirationDate || cachedKeyFound.expirationDate>=currentTime) || JSON.stringify(cachedKeyFound.data) !== JSON.stringify(data));
+    const update_key = !cachedKeyFound || ( (cachedKeyFound.expirationDate !== null && cachedKeyFound.expirationDate>=currentTime) || JSON.stringify(cachedKeyFound.data) !== JSON.stringify(data));
 
     let output = false;
 

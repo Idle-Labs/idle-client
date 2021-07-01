@@ -127,7 +127,7 @@ class IdleGovToken{
       return this.functionsUtil.BNify(cachedData);
     }
 
-    let idleSpeeds = await this.functionsUtil.genericContractCall('IdleController','idleSpeeds',[idleTokenAddress]);
+    let idleSpeeds = await this.functionsUtil.genericContractCallCached('IdleController','idleSpeeds',[idleTokenAddress]);
     if (idleSpeeds && !this.functionsUtil.BNify(idleSpeeds).isNaN()){
       idleSpeeds = this.functionsUtil.BNify(idleSpeeds);
       return this.functionsUtil.setCachedDataWithLocalStorage(cachedDataKey,idleSpeeds);

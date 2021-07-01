@@ -2154,7 +2154,7 @@ class FunctionsUtil {
     }
 
     const exchangeRate = this.genericContractCall(contractName,exchangeRateParams.name,exchangeRateParams.params);
-    return this.setCachedDataWithLocalStorage(cachedDataKey,exchangeRate);
+    return this.setCachedDataWithLocalStorage(cachedDataKey,exchangeRate,null);
   }
   getTokenDecimals = async (contractName) => {
     const cachedDataKey = `contractDecimals_${contractName}`;
@@ -2167,7 +2167,7 @@ class FunctionsUtil {
     const tokenConfig = this.getGlobalConfig(['stats','tokens',contractName]);
     const decimals = tokenConfig && tokenConfig.decimals ? tokenConfig.decimals : await this.genericContractCall(contractName,'decimals');
 
-    return this.setCachedDataWithLocalStorage(cachedDataKey,decimals);
+    return this.setCachedDataWithLocalStorage(cachedDataKey,decimals,null);
   }
   getAvgApr = (aprs,allocations,totalAllocation) => {
     if (aprs && allocations && totalAllocation){
@@ -2227,7 +2227,7 @@ class FunctionsUtil {
   }
   checkContractPaused = async (contractName=null) => {
     contractName = contractName ? contractName : this.props.tokenConfig.idle.token;
-    const contractPaused = await this.genericContractCall(contractName, 'paused', [], {}).catch(err => {
+    const contractPaused = await this.genericContractCallCached(contractName, 'paused').catch(err => {
       this.customLogError('Generic Idle call err:', err);
     });
     // this.customLog('checkContractPaused',this.props.tokenConfig.idle.token,contractPaused);
@@ -3390,9 +3390,9 @@ class FunctionsUtil {
       tokenPrice,
       userAvgPrice
     ] = await Promise.all([
-      this.genericContractCall(tokenConfig.idle.token, 'fee', [], {}, blockNumber),
-      this.genericContractCall(tokenConfig.idle.token, 'tokenPrice', [], {}, blockNumber),
-      this.genericContractCall(tokenConfig.idle.token, 'userAvgPrices', [account], {}, blockNumber)
+      this.genericContractCallCached(tokenConfig.idle.token, 'fee', [], {}, blockNumber),
+      this.genericContractCallCached(tokenConfig.idle.token, 'tokenPrice', [], {}, blockNumber),
+      this.genericContractCallCached(tokenConfig.idle.token, 'userAvgPrices', [account], {}, blockNumber)
     ]);
     
     fee = this.BNify(fee);
@@ -3816,7 +3816,7 @@ class FunctionsUtil {
     }
 
     const totalSupply = await this.genericContractCall(contractName, 'totalSupply', [], {}, blockNumber);
-    return this.setCachedDataWithLocalStorage(cachedDataKey,totalSupply);
+    return this.setCachedDataWithLocalStorage(cachedDataKey,totalSupply,null);
   }
   getTokenPrice = async (contractName,blockNumber='latest') => {
     const cachedDataKey = `tokenPrice_${contractName}`;
@@ -3826,7 +3826,7 @@ class FunctionsUtil {
     }
 
     const tokenPrice = await this.genericContractCall(contractName, 'tokenPrice',[]);
-    return this.setCachedDataWithLocalStorage(cachedDataKey,tokenPrice,60);
+    return this.setCachedDataWithLocalStorage(cachedDataKey,tokenPrice);
   }
   getContractBalance = async (contractName,address,blockNumber='latest') => {
     address = address ? address : this.props.tokenConfig.idle.address;
@@ -3838,7 +3838,7 @@ class FunctionsUtil {
     }
 
     const balance = await this.genericContractCall(contractName, 'balanceOf', [address], {}, blockNumber);
-    return this.setCachedDataWithLocalStorage(cachedDataKey,balance,60);
+    return this.setCachedDataWithLocalStorage(cachedDataKey,balance);
   }
   getProtocolBalance = async (contractName,address) => {
     return await this.getContractBalance(contractName,address);
@@ -3925,6 +3925,17 @@ class FunctionsUtil {
 
     return await contract.getPastEvents(methodName, params);
   }
+  genericContractCallCached = async (contractName, methodName, params = [], callParams = {}, blockNumber = 'latest', TTL=180) => {
+    const cachedDataKey = `genericContractCall_${contractName}_${methodName}_${JSON.stringify(params)}_${JSON.stringify(callParams)}_${blockNumber}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData){
+      return cachedData;
+    }
+
+    const result = await this.genericContractCall(contractName, methodName, params, callParams, blockNumber);
+
+    return this.setCachedDataWithLocalStorage(cachedDataKey,result,TTL);
+  }
   genericContractCall = async (contractName, methodName, params = [], callParams = {}, blockNumber = 'latest') => {
 
     if (!contractName){
@@ -3950,7 +3961,7 @@ class FunctionsUtil {
       const value = await contract.methods[methodName](...params).call(callParams,blockNumber).catch(error => {
         this.customLog(`${contractName} contract method ${methodName} error: `, error);
       });
-      console.log(`genericContractCall - ${contractName} - ${methodName} : ${value}`);
+      console.log(`${moment().format('HH:mm:ss')} - genericContractCall (${blockNumber}) - ${contractName} - ${methodName} (${JSON.stringify(params)}) : ${value}`);
       return value;
     } catch (error) {
       this.customLog("genericContractCall error", error);
@@ -4110,8 +4121,13 @@ class FunctionsUtil {
       }
     }
 
-    tokenAllocation.totalAllocationConverted = await this.convertTokenBalance(tokenAllocation.totalAllocation,tokenConfig.token,tokenConfig);
-    tokenAllocation.totalAllocationWithUnlentConverted = await this.convertTokenBalance(tokenAllocation.totalAllocationWithUnlent,tokenConfig.token,tokenConfig);
+    [
+      tokenAllocation.totalAllocationConverted,
+      tokenAllocation.totalAllocationWithUnlentConverted
+    ] = await Promise.all([
+      this.convertTokenBalance(tokenAllocation.totalAllocation,tokenConfig.token,tokenConfig),
+      this.convertTokenBalance(tokenAllocation.totalAllocationWithUnlent,tokenConfig.token,tokenConfig)
+    ]);
 
     if (protocolsAprs){
       tokenAllocation.avgApr = this.getAvgApr(protocolsAprs,protocolsAllocations,totalAllocation);
@@ -4126,9 +4142,9 @@ class FunctionsUtil {
       poolReserves,
       totalSupply
     ] = await Promise.all([
-      this.genericContractCall(contractName,'token0'),
-      this.genericContractCall(contractName,'token1'),
-      this.genericContractCall(contractName,'getReserves'),
+      this.genericContractCallCached(contractName,'token0'),
+      this.genericContractCallCached(contractName,'token1'),
+      this.genericContractCallCached(contractName,'getReserves'),
       this.getTokenTotalSupply(contractName)
     ]);
 
@@ -4669,7 +4685,7 @@ class FunctionsUtil {
       return aaveDistribution;
     }
 
-    const aaveIncentivesController_address = await this.genericContractCall(aTokenConfig.token,'getIncentivesController');
+    const aaveIncentivesController_address = await this.genericContractCallCached(aTokenConfig.token,'getIncentivesController',[],{},'latest',null);
 
     // console.log('getStkAaveDistribution',tokenConfig.idle.token,aTokenConfig.token,aaveIncentivesController_address);
 
@@ -4687,7 +4703,7 @@ class FunctionsUtil {
     ] = await Promise.all([
       this.getTokenTotalSupply(aTokenConfig.token),
       this.getTokenAllocation(tokenConfig,false,false),
-      this.genericContractCall(IAaveIncentivesController_name,'getAssetData',[aTokenConfig.address]),
+      this.genericContractCallCached(IAaveIncentivesController_name,'getAssetData',[aTokenConfig.address]),
     ]);
 
     if (assetData && tokenAllocation){
@@ -4696,7 +4712,7 @@ class FunctionsUtil {
 
       if (aaveAllocationPerc && aaveAllocationPerc.gte(0.001)){
         if (!aTokenIdleSupply){
-          aTokenIdleSupply = await this.genericContractCall(aTokenConfig.token,'balanceOf',[tokenConfig.idle.address]);
+          aTokenIdleSupply = await this.getContractBalance(aTokenConfig.token,tokenConfig.idle.address);
         }
 
         const aaveSpeed = this.BNify(assetData[1]);
@@ -4852,7 +4868,7 @@ class FunctionsUtil {
     return compAPR;
   }
   getCompSpeed = async (cTokenAddress) => {
-    let compSpeed = await this.genericContractCall('Comptroller','compSpeeds',[cTokenAddress]);
+    let compSpeed = await this.genericContractCallCached('Comptroller','compSpeeds',[cTokenAddress]);
     if (compSpeed){
       return this.BNify(compSpeed);
     }
@@ -4889,7 +4905,7 @@ class FunctionsUtil {
 
           // Get Idle liquidity supply
           if (!cTokenIdleSupply){
-            cTokenIdleSupply = await this.genericContractCall(cTokenInfo.token,'balanceOf',[tokenConfig.idle.address]);
+            cTokenIdleSupply = await this.getContractBalance(cTokenInfo.token,tokenConfig.idle.address);
           }
 
           if (cTokenIdleSupply){
@@ -5435,15 +5451,14 @@ class FunctionsUtil {
       account = this.props.account;
     }
     const output = {};
-    const govTokensAmounts = await this.genericContractCall(tokenConfig.idle.token,'getGovTokensAmounts',[account]);
+    const govTokensAmounts = await this.genericContractCallCached(tokenConfig.idle.token,'getGovTokensAmounts',[account]);
     if (govTokensAmounts){
       await this.asyncForEach(govTokensAmounts, async (govTokenAmount,govTokenIndex) => {
         // Get gov Token config by index
-        const govTokenAddress = await this.genericContractCall(tokenConfig.idle.token,'govTokens',[govTokenIndex]);
+        const govTokenAddress = await this.getGovTokenAddessByIndex(tokenConfig.idle.token,govTokenIndex);
 
         if (govTokenAddress){
           const govTokenConfig = this.getGovTokenConfigByAddress(govTokenAddress);
-
           if (govTokenConfig){
             output[govTokenConfig.token] = govTokenIndex;
           }
@@ -5540,7 +5555,7 @@ class FunctionsUtil {
     if (!tokenConfig && this.props.tokenConfig){
       tokenConfig = this.props.tokenConfig;
     }
-    const fee = await this.genericContractCall(tokenConfig.idle.token, 'fee');
+    const fee = await this.genericContractCallCached(tokenConfig.idle.token, 'fee');
     if (fee){
       return this.BNify(fee).div(this.BNify(100000));
     }
