@@ -631,11 +631,13 @@ const globalConfigs = {
             decimals:16,
             protocol:'compound',
             name:'compoundWithCOMP',
+            enabledTokens:['DAI','USDC','USDT','TUSD','SUSD','WBTC','WETH'],
           },
           {
             decimals:18,
             protocol:'aavev2',
             name:'aavev2WithStkAAVE',
+            enabledTokens:['DAI','USDC','USDT','TUSD','SUSD','WBTC','WETH'],
           }
         ]
       }

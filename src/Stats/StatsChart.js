@@ -1323,7 +1323,7 @@ class StatsChart extends Component {
         if (versionInfo.additionalProtocols && versionInfo.additionalProtocols.length>0){
           versionInfo.additionalProtocols.forEach( additionalProtocol => {
             const protocolInfo = this.props.tokenConfig.protocols.find( p => (p.name === additionalProtocol.protocol));
-            if (protocolInfo){
+            if (protocolInfo && additionalProtocol.enabledTokens.includes(this.props.selectedToken)){
               additionalProtocol.enabled = true;
               additionalProtocol.address = protocolInfo.address;
               protocols.unshift(additionalProtocol);
@@ -1643,7 +1643,7 @@ class StatsChart extends Component {
         if (versionInfo.additionalProtocols && versionInfo.additionalProtocols.length>0){
           versionInfo.additionalProtocols.forEach( additionalProtocol => {
             const protocolInfo = this.props.tokenConfig.protocols.find( p => (p.name === additionalProtocol.protocol));
-            if (protocolInfo){
+            if (protocolInfo && additionalProtocol.enabledTokens.includes(this.props.selectedToken)){
               additionalProtocol.enabled = true;
               additionalProtocol.address = protocolInfo.address;
               protocols.unshift(additionalProtocol);
