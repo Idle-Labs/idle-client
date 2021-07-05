@@ -3773,7 +3773,7 @@ class FunctionsUtil {
       // Set cached data
       if (!tokenBalance.isNaN()){
         if (blockNumber !== 'latest'){
-          return this.setCachedDataWithLocalStorage(cachedDataKey,tokenBalance);
+          return this.setCachedDataWithLocalStorage(cachedDataKey,tokenBalance,30);
         } else {
           return tokenBalance;
         }
@@ -3854,15 +3854,15 @@ class FunctionsUtil {
   }
   getContractBalance = async (contractName,address,blockNumber='latest') => {
     address = address ? address : this.props.tokenConfig.idle.address;
-
+    /*
     const cachedDataKey = `balanceOf_${contractName}_${address}_${blockNumber}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData && !this.BNify(cachedData).isNaN()){
       return this.BNify(cachedData);
     }
-
-    const balance = await this.genericContractCall(contractName, 'balanceOf', [address], {}, blockNumber);
-    return this.setCachedDataWithLocalStorage(cachedDataKey,balance);
+    */
+    return await this.genericContractCall(contractName, 'balanceOf', [address], {}, blockNumber);
+    // return this.setCachedDataWithLocalStorage(cachedDataKey,balance);
   }
   getProtocolBalance = async (contractName,address) => {
     return await this.getContractBalance(contractName,address);

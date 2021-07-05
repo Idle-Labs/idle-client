@@ -387,10 +387,10 @@ class GovernanceUtil {
     return this.functionsUtil.setCachedData(cachedDataKey,votes);
   }
 
-  getProposals = async (voted_by=null,filter_by_state=null,fromBlock=null) => {
+  getProposals = async (voted_by=null,filter_by_state=null,startBlock=null) => {
 
     // Check for cached data
-    const cachedDataKey = `getProposals_${fromBlock}`;
+    const cachedDataKey = `getProposals`;
     let cachedData = this.functionsUtil.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData){
       if (filter_by_state){
@@ -398,6 +398,9 @@ class GovernanceUtil {
       }
       if (voted_by){
         cachedData = cachedData.filter( p => (p && p.votes.find( v => (v.voter && v.voter.toLowerCase() === voted_by.toLowerCase()) )) );
+      }
+      if (startBlock){
+        cachedData = cachedData.filter( p => parseInt(p.startBlock)>=parseInt(startBlock) );
       }
       return cachedData;
     }
@@ -421,7 +424,7 @@ class GovernanceUtil {
       proposalStateGets.push(this.functionsUtil.genericContractCall(governanceContractName,'state',[i]));
     }
 
-    fromBlock = fromBlock || this.functionsUtil.getGlobalConfig(['governance','startBlock']);
+    const fromBlock = this.functionsUtil.getGlobalConfig(['governance','startBlock']);
 
     let [
       votes,
@@ -452,8 +455,6 @@ class GovernanceUtil {
     proposalCanceledEvents.reverse();
     proposalExecutedEvents.reverse();
 
-    console.log('proposals',proposals,'proposalCreatedEvents',proposalCreatedEvents);
-
     // await this.functionsUtil.asyncForEach(proposals, async (p,i) => {
     await this.functionsUtil.asyncForEach(proposalCreatedEvents, async (createdEvent,i) => {
       const p = proposals[i];
@@ -467,11 +468,24 @@ class GovernanceUtil {
       const executedEvent = proposalExecutedEvents.find( e => (parseInt(e.returnValues.id) === proposalId ) );
       const queuedEvent = proposalQueuedEvents.find( e => (parseInt(e.returnValues.id) === proposalId ) );
 
+      const [
+        endBlockInfo,
+        queuedBlockInfo,
+        createdBlockInfo,
+        canceledBlockInfo,
+        executedBlockInfo,
+      ] = await Promise.all([
+        p.endBlock ? this.props.web3.eth.getBlock(p.endBlock) : null,
+        queuedEvent ? this.props.web3.eth.getBlock(queuedEvent.blockNumber) : null,
+        createdEvent ? this.props.web3.eth.getBlock(createdEvent.blockNumber) : null,
+        canceledEvent ? this.props.web3.eth.getBlock(canceledEvent.blockNumber) : null,
+        executedEvent ? this.props.web3.eth.getBlock(executedEvent.blockNumber) : null,
+      ]);
+
       // Init states array
       p.states = [];
 
       // Create created state
-      const createdBlockInfo = await this.props.web3.eth.getBlock(createdEvent.blockNumber);
       const createdState = {
         state: "Pending",
         blockNumber: createdEvent.blockNumber,
@@ -493,7 +507,6 @@ class GovernanceUtil {
 
       // Push canceled state
       if (canceledEvent){
-        const canceledBlockInfo = await this.props.web3.eth.getBlock(canceledEvent.blockNumber);
         const canceledState = {
           end_time: null,
           state: "Canceled",
@@ -507,7 +520,6 @@ class GovernanceUtil {
       } else {
         // Push queued state
         if (queuedEvent){
-          const queuedBlockInfo = await this.props.web3.eth.getBlock(queuedEvent.blockNumber);
           const succeededState = {
             end_time: null,
             trx_hash: null,
@@ -534,7 +546,6 @@ class GovernanceUtil {
 
         // Push executed state
         if (executedEvent){
-          const executedBlockInfo = await this.props.web3.eth.getBlock(executedEvent.blockNumber);
           const executedState = {
             end_time: null,
             state: "Executed",
@@ -552,7 +563,6 @@ class GovernanceUtil {
       p.state = enumerateProposalState(proposalStates[i]);
       const foundState = p.states.find( s => (s.state === p.state) );
       if (!foundState){
-        const endBlockInfo = await this.props.web3.eth.getBlock(p.endBlock);
         const endState = {
           state: p.state,
           end_time: null,
@@ -612,7 +622,7 @@ class GovernanceUtil {
       };
     });
 
-    this.functionsUtil.setCachedDataWithLocalStorage(cachedDataKey,proposals);
+    this.functionsUtil.setCachedDataWithLocalStorage(cachedDataKey,proposals,3600);
 
     // console.log('getProposals',filter_by_state,cachedData);
 
@@ -622,6 +632,10 @@ class GovernanceUtil {
 
     if (voted_by){
       proposals = proposals.filter( p => (p && p.votes.find( v => (v.voter && v.voter.toLowerCase() === voted_by.toLowerCase()) )) );
+    }
+
+    if (startBlock){
+      proposals = proposals.filter( p => parseInt(p.startBlock)>=parseInt(startBlock) );
     }
     
     return proposals;

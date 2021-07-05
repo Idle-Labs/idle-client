@@ -93,8 +93,6 @@ class Notifications extends Component {
     const blocksPerWeek = this.functionsUtil.BNify(this.functionsUtil.getGlobalConfig(['network','blocksPerYear'])).div(52.1429);
     const oneWeekAgoBlock = parseInt(blockNumber.minus(blocksPerWeek));
 
-    console.log('loadNotifications',parseInt(blockNumber),oneWeekAgoBlock);
-
     // Get active snapshot proposals
     const [
       latestFeed,
