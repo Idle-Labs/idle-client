@@ -56,6 +56,7 @@ import IdleDepositForwarder from '../contracts/IdleDepositForwarder.json';
 import SushiLiquidityPool from '../abis/sushiswap/SushiLiquidityPool.json';
 import StakingFeeDistributor from '../contracts/StakingFeeDistributor.json';
 import NexusMutualDistributor from '../abis/nexus/NexusMutualDistributor.json';
+import NexusMutualIncidents from '../abis/nexus/NexusMutualIncidents.json';
 import BalancerExchangeProxy from '../abis/balancer/BalancerExchangeProxy.json';
 import IdleConverterPersonalSignV4 from '../contracts/IdleConverterPersonalSignV4.json';
 import MinimalInitializableProxyFactory from '../contracts/MinimalInitializableProxyFactory.json';
@@ -1980,10 +1981,17 @@ const globalConfigs = {
         },
       },
       directProps:{
+        // Yield token covers have a 14 days grace period
+        yieldTokenCoverGracePeriod: 14 * 24 * 60 * 60 * 1000,
         contractInfo:{
           abi:NexusMutualDistributor,
           name:'NexusMutualDistributor',
           address:'0x08Bf224a6a19935F741636d8427df77B32386531' // Kovan
+        },
+        incidentsInfo:{
+          abi:Incidents,
+          name:'NexusMutualIncidents',
+          address:'0xbB602632cbea10755ceA15fdF03A71b3DA7b7a0B' // Kovan
         },
         poolInfo:{
           ens:'idlefinancev4.nexusmutual.eth',
@@ -2822,7 +2830,7 @@ const globalConfigs = {
                 const observer = new window.MutationObserver(function(mutations) {
                   mutations.forEach((m,i) => {
                     if (m.addedNodes.length && m.target.className === 'kyber_widget-broadcast'){
-                      
+
                       // Show persistent toast message
                       window.showToastMessage({
                         variant:'processing',

@@ -34,6 +34,7 @@ class NexusMutual extends Component {
         label:'1y'
       }
     },
+    idleDAIYieldBalance: null, // [todo] this needs to be changed to the user's balance
     coverId:null,
     claimId:null,
     capacity:null,
@@ -75,14 +76,17 @@ class NexusMutual extends Component {
 
   async loadContracts(){
     await this.props.initContract(this.props.contractInfo.name, this.props.contractInfo.address, this.props.contractInfo.abi);
+    await this.props.initContract(this.props.incidentsInfo.name, this.props.incidentsInfo.address, this.props.incidentsInfo.abi);
     // const masterAddress = await this.functionsUtil.genericContractCall(this.props.contractInfo.name,'master');
     // await this.props.initContract('NXMaster', masterAddress, NXMaster);
     const [
       coverBoughtEvents,
-      claimSubmittedEvents
+      claimSubmittedEvents,
+      incidentEvents,
     ] = await Promise.all([
        this.functionsUtil.getContractEvents(this.props.contractInfo.name,'CoverBought',{fromBlock: 0, toBlock:'latest',filter:{buyer:this.props.account}}),
        this.functionsUtil.getContractEvents(this.props.contractInfo.name,'ClaimSubmitted',{fromBlock: 0, toBlock:'latest',filter:{buyer:this.props.account}}),
+       this.functionsUtil.getContractEvents(this.props.incidentsInfo.name,'IncidentAdded',{fromBlock: 0, toBlock:'latest'}),
     ]);
 
     const claimableCovers = [];
@@ -90,16 +94,42 @@ class NexusMutual extends Component {
     // coverBoughtEvents.forEach( cover => {
       const coverId = parseInt(cover.returnValues.coverId);
       const claimSubmittedEvent = claimSubmittedEvents.find( claim => parseInt(claim.returnValues.coverId)===coverId );
+      const coverDetails = await this.functionsUtil.genericContractCall(this.props.contractInfo.name,'getCover',[coverId]);
+
+      // Check if the cover matches any incidents
+      const matchedIncidents = incidentEvents.filter(incident =>
+        incident.productId === coverDetails.contractAddress &&
+        incident.date.gt(coverDetails.purchaseDate)  &&
+        incident.date.lt(coverDetails.expiry) &&
+        coverDetails.validUntil + this.props.yieldTokenCoverGracePeriod >= Date.now() / 1000);
+
+      // If multiple incidents match, return the one with the highest priceBefore
+      const matchedIncident = matchedIncidents.reduce((prev, curr) => {
+        if (!prev) {
+          return curr;
+        }
+        if (curr.priceBefore.gt(prev.priceBefore)) {
+          return curr;
+        }
+        return prev;
+      }, null);
+
+
       const claimId = claimSubmittedEvent ? claimSubmittedEvent.returnValues.claimId : null;
       const payoutOutcome = await this.functionsUtil.genericContractCall(this.props.contractInfo.name,'getPayoutOutcome',[claimId]);
       const label = `Cover #${coverId}`;
       const value = coverId;
-      claimableCovers.push({
-        label,
-        value,
-        claimId,
-        payoutOutcome
-      });
+
+      // Yield token cover is claimable only when there is a matching incident
+      if (matchedIncident) {
+        claimableCovers.push({
+          label,
+          value,
+          claimId,
+          payoutOutcome,
+          incident: {...matchedIncident, id: incidentEvents.findIndex(x => x.date === matchedIncident.date)},
+        });
+      }
     });
 
     claimableCovers.push({
@@ -617,7 +647,7 @@ class NexusMutual extends Component {
                                   key={`coverPeriod_${period}`}
                                   handleClick={e => this.selectPeriod(period)}
                                 >
-                                  <Text 
+                                  <Text
                                     fontSize={2}
                                     fontWeight={3}
                                     textAlign={'center'}
@@ -913,12 +943,12 @@ class NexusMutual extends Component {
                                   value:'Submit Claim',
                                   disabled:this.state.buttonDisabled
                                 }}
-                                methodName={'submitClaim'}
+                                methodName={'claimTokens'}
                                 action={'Claim submission'}
                                 contractName={this.props.contractInfo.name}
                                 callback={this.submitClaimTransactionSucceeded.bind(this)}
-                                params={[this.state.selectedCoverToClaim.value,this.props.web3.eth.abi.encodeParameters([], [])]}
-                              />
+                                params={[this.state.selectedCoverToClaim.value,this.state.selectedCoverToClaim.incident.id,this.state.idleDAIYieldBalance,'0x3fe7940616e5bc47b0775a0dccf6237893353bb4']}
+                              /> {/* [todo] replace the hardcoded address param with the idleDAIYield from globalConfigs*/}
                             </Flex>
                           </DashboardCard>
                         )
