@@ -108,9 +108,18 @@ class App extends Component {
   }
 
   clearCachedData = async (callback=null) => {
-    this.functionsUtil.setLocalStorage('cachedData',{},true);
+
+    const cachedData = {...this.state.cachedData};
+    Object.keys(cachedData).forEach( key => {
+      const data = cachedData[key];
+      if (data.expirationDate !== null){
+        delete cachedData[key];
+      }
+    });
+
+    this.functionsUtil.setLocalStorage('cachedData',cachedData,true);
     await this.setState({
-      cachedData:{}
+      cachedData
     },() => {
       if (typeof callback === 'function'){
         callback();
@@ -138,6 +147,9 @@ class App extends Component {
         if (!storedCachedData){
           storedCachedData = {};
         }
+
+        // const storedData = typeof data === 'object' ? JSON.stringify(data) : data;
+
         storedCachedData = {
           ...storedCachedData,
           [key]:{
@@ -158,7 +170,9 @@ class App extends Component {
             expirationDate
           }
         }
-      }));
+      }),() => {
+        window.cachedData = this.state.cachedData;
+      });
 
       output = true;
     }

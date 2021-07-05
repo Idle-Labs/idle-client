@@ -89,6 +89,12 @@ class Notifications extends Component {
     const notificationsParams = this.functionsUtil.getStoredItem('notificationsParams',true,{});
     const lastOpenTimestamp = notificationsParams.lastOpenTimestamp || null;
 
+    const blockNumber = this.functionsUtil.BNify(await this.functionsUtil.getBlockNumber());
+    const blocksPerWeek = this.functionsUtil.BNify(this.functionsUtil.getGlobalConfig(['network','blocksPerYear'])).div(52.1429);
+    const oneWeekAgoBlock = parseInt(blockNumber.minus(blocksPerWeek));
+
+    console.log('loadNotifications',parseInt(blockNumber),oneWeekAgoBlock);
+
     // Get active snapshot proposals
     const [
       latestFeed,
@@ -98,7 +104,7 @@ class Notifications extends Component {
     ] = await Promise.all([
       this.functionsUtil.getSubstackLatestFeed(),
       this.functionsUtil.getSnapshotProposals(true),
-      [],// (isMainnet && !this.props.isMobile) ? this.governanceUtil.getProposals(null,'Active') : [],
+      (isMainnet && !this.props.isMobile) ? this.governanceUtil.getProposals(null,'Active',oneWeekAgoBlock) : [],
       [],// (isMainnet && !this.props.isMobile) ? this.functionsUtil.getBatchedDeposits(this.props.account,'executed') : []
     ]);
 

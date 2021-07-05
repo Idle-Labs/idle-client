@@ -602,7 +602,7 @@ class RimbleTransaction extends React.Component {
       if (!account){
         const wallets = await Promise.race([
             this.state.web3.eth.getAccounts(),
-            new Promise((resolve) => setTimeout(resolve, 300)),
+            new Promise((resolve) => setTimeout(resolve, 300))
         ]);
         if (wallets && wallets.length){
           account = wallets[0];

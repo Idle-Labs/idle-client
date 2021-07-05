@@ -384,7 +384,7 @@ const globalConfigs = {
       token:'IDLE',
       enabled:true,
       showAUM:false, // Include IDLE balance in AUM
-      showAPR:false, // Include IDLE Apr
+      showAPR:true, // Include IDLE Apr
       protocol:'idle',
       showPrice:false, // Show price in Yield Farming section
       showBalance:false, // Include IDLE balance in Portfolio Donut

@@ -387,10 +387,10 @@ class GovernanceUtil {
     return this.functionsUtil.setCachedData(cachedDataKey,votes);
   }
 
-  getProposals = async (voted_by=null,filter_by_state=null) => {
+  getProposals = async (voted_by=null,filter_by_state=null,fromBlock=null) => {
 
     // Check for cached data
-    const cachedDataKey = 'getProposals';
+    const cachedDataKey = `getProposals_${fromBlock}`;
     let cachedData = this.functionsUtil.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData){
       if (filter_by_state){
@@ -421,7 +421,7 @@ class GovernanceUtil {
       proposalStateGets.push(this.functionsUtil.genericContractCall(governanceContractName,'state',[i]));
     }
 
-    const fromBlock = this.functionsUtil.getGlobalConfig(['governance','startBlock']);
+    fromBlock = fromBlock || this.functionsUtil.getGlobalConfig(['governance','startBlock']);
 
     let [
       votes,
@@ -452,14 +452,17 @@ class GovernanceUtil {
     proposalCanceledEvents.reverse();
     proposalExecutedEvents.reverse();
 
-    await this.functionsUtil.asyncForEach(proposals, async (p,i) => {
+    console.log('proposals',proposals,'proposalCreatedEvents',proposalCreatedEvents);
+
+    // await this.functionsUtil.asyncForEach(proposals, async (p,i) => {
+    await this.functionsUtil.asyncForEach(proposalCreatedEvents, async (createdEvent,i) => {
+      const p = proposals[i];
 
       if (!p || !p.id){
         return;
       }
 
       const proposalId = parseInt(p.id);
-      const createdEvent = proposalCreatedEvents[i];
       const canceledEvent = proposalCanceledEvents.find( e => (parseInt(e.returnValues.id) === proposalId ) );
       const executedEvent = proposalExecutedEvents.find( e => (parseInt(e.returnValues.id) === proposalId ) );
       const queuedEvent = proposalQueuedEvents.find( e => (parseInt(e.returnValues.id) === proposalId ) );

@@ -329,6 +329,8 @@ class DepositRedeem extends Component {
   async componentDidUpdate(prevProps,prevState){
     this.loadUtils();
 
+    // console.log('componentDidUpdate',this.props.tokenBalance);
+
     if (this.props.tokenBalance === null){
       return false;
     }
@@ -686,6 +688,8 @@ class DepositRedeem extends Component {
     };
 
     newState.componentMounted = true;
+
+    // console.log('loadTokenInfo',newState);
 
     this.setState(newState,() => {
       this.checkAction();

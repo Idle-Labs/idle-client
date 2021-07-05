@@ -154,7 +154,7 @@ class Landing extends Component {
       let [protocolBalance, tokenDecimals, exchangeRate] = await Promise.all([
         this.functionsUtil.getProtocolBalance(contractName),
         this.functionsUtil.getTokenDecimals(contractName),
-        ( protocolInfo.functions.exchangeRate ? this.functionsUtil.genericContractCall(contractName,protocolInfo.functions.exchangeRate.name,protocolInfo.functions.exchangeRate.params) : null )
+        ( protocolInfo.functions.exchangeRate ? this.getTokenExchangeRate(contractName,protocolInfo.functions.exchangeRate) : null )
       ]);
 
       if (!protocolBalance){
