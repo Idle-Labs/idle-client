@@ -1,6 +1,7 @@
 import Staking from '../Staking/Staking';
 import IDLE from '../contracts/IDLE.json';
 import WETH from '../abis/tokens/WETH.json';
+import ERC20 from '../contracts/ERC20.json';
 import COMP from '../abis/compound/COMP.json';
 import aToken from '../abis/aave/AToken.json';
 import TokenSwap from '../TokenSwap/TokenSwap';
@@ -30,6 +31,7 @@ import IdleTokenV2 from '../contracts/IdleTokenV2.json';
 import StrategyPage from '../StrategyPage/StrategyPage';
 import BuyModal from '../utilities/components/BuyModal';
 import IdleTokenV3 from '../contracts/IdleTokenV3.json';
+import IdleTokenV4 from '../contracts/IdleTokenV4.json';
 import BatchDeposit from '../BatchDeposit/BatchDeposit';
 import EarlyRewards from '../contracts/EarlyRewards.json';
 import CoverProtocol from '../CoverProtocol/CoverProtocol';
@@ -54,9 +56,9 @@ import IdleBatchConverter from '../contracts/IdleBatchConverter.json';
 import UniswapV2Router02 from '../abis/uniswap/UniswapV2Router02.json';
 import IdleDepositForwarder from '../contracts/IdleDepositForwarder.json';
 import SushiLiquidityPool from '../abis/sushiswap/SushiLiquidityPool.json';
+import NexusMutualIncidents from '../abis/nexus/NexusMutualIncidents.json';
 import StakingFeeDistributor from '../contracts/StakingFeeDistributor.json';
 import NexusMutualDistributor from '../abis/nexus/NexusMutualDistributor.json';
-import NexusMutualIncidents from '../abis/nexus/NexusMutualIncidents.json';
 import BalancerExchangeProxy from '../abis/balancer/BalancerExchangeProxy.json';
 import IdleConverterPersonalSignV4 from '../contracts/IdleConverterPersonalSignV4.json';
 import MinimalInitializableProxyFactory from '../contracts/MinimalInitializableProxyFactory.json';
@@ -1055,6 +1057,12 @@ const globalConfigs = {
         enabled:true,
         supportedNetworks:[1]
       },
+      nexus:{
+        endpoints:{
+          1:'https://api.nexusmutual.io/v1/',
+          42:'https://api.staging.nexusmutual.io/v1/',
+        }
+      },
       etherscan:{
         enabled:true, // False for empty txs list (try new wallet)
         endpoints:{
@@ -1235,7 +1243,7 @@ const globalConfigs = {
       }
     },
     coverProtocol:{
-      enabled:true,
+      enabled:false,
       label:'Cover Protocol',
       route:'cover-protocol',
       subComponent:CoverProtocol,
@@ -1952,46 +1960,69 @@ const globalConfigs = {
       }
     },
     nexusMutual:{
+      test:true,
       enabled:true,
       icon:'Security',
       route:'nexus-mutual',
       label:'Nexus Mutual',
-      desc:'Buy NexusMutual cover without KYC',
+      desc:'Buy NexusMutual cover without KYC for idleDAIYield or idleUSDTYield',
       subComponent:NexusMutual,
       props:{
         availableTokens:{
           idleDAIYield:{
             decimals:18,
-            token:'idleDAIYield',
-            address:'0x0000000000000000000000000000000000000007',
+            abi:IdleTokenV4,
+            name:'idleDAIYield',
+            token:'idleDAIYieldMock',
+            address:'0x0000000000000000000000000000000000000011',
+            // realAddress:'0x3fe7940616e5bc47b0775a0dccf6237893353bb4', // Mainnet
+            realAddress:'0xbd0b0205408509544815d377214d8f2cbe3e5381', // Kovan
             underlying:{
-              ETH:{
-                token:"ETH",
-                decimals:18,
-                address:'0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' // Ethereum
-              },
               DAI:{
-                token:"DAI",
+                abi:ERC20,
+                token:'DAI',
                 decimals:18,
+                name:'DAIMock',
                 // address:'0x6b175474e89094c44da98b954eedeac495271d0f' // Mainnet
-                address:'0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa' // Kovan
+                address:'0x5C422252C6a47CdacF667521566Bf7bD5b0d769B' // Kovan
+              },
+            }
+          },
+          idleUSDTYield:{
+            decimals:18,
+            abi:IdleTokenV4,
+            name:'idleUSDTYield',
+            token:'idleUSDTYieldMock',
+            address:'0x0000000000000000000000000000000000000012',
+            realAddress:'0xF34842d05A1c888Ca02769A633DF37177415C2f8',
+            underlying:{
+              DAI:{
+                abi:ERC20,
+                token:'DAI',
+                decimals:18,
+                name:'DAIMock',
+                // address:'0x6b175474e89094c44da98b954eedeac495271d0f' // Mainnet
+                address:'0x5C422252C6a47CdacF667521566Bf7bD5b0d769B' // Kovan
               },
             }
           }
         },
       },
       directProps:{
+        startBlock:25858186, // Kovan
         // Yield token covers have a 14 days grace period
         yieldTokenCoverGracePeriod: 14 * 24 * 60 * 60 * 1000,
         contractInfo:{
           abi:NexusMutualDistributor,
           name:'NexusMutualDistributor',
-          address:'0x08Bf224a6a19935F741636d8427df77B32386531' // Kovan
+          // address:'0x08Bf224a6a19935F741636d8427df77B32386531' // Kovan
+          address:'0xe2d569dc064b3b91f514e775c6026e04d2c887a9' // Kovan
         },
         incidentsInfo:{
-          abi:Incidents,
+          abi:NexusMutualIncidents,
           name:'NexusMutualIncidents',
-          address:'0xbB602632cbea10755ceA15fdF03A71b3DA7b7a0B' // Kovan
+          address:'0x322f9a880189E3FFFf59b74644e13e5763C5AdB9' // Kovan
+          // address:'0x8ceba69a8e96a4ce71aa65859dbdb180b489a719' // Mainnet
         },
         poolInfo:{
           ens:'idlefinancev4.nexusmutual.eth',

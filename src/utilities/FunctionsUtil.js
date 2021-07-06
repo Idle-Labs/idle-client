@@ -2514,6 +2514,17 @@ class FunctionsUtil {
     return tx;
   }
 
+  getTransactionReceipt = async (hash) => {
+    return await (new Promise( async (resolve, reject) => {
+      this.props.web3.eth.getTransactionReceipt(hash,(err,tx)=>{
+        if (err){
+          reject(err);
+        }
+        resolve(tx);
+      });
+    }));
+  }
+
   sendBiconomyTxWithErc20Forwarder = async (req,metaInfo,callback,callback_receipt) => {
 
     let transactionHash = null;
