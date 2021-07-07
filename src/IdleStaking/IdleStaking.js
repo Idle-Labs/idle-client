@@ -296,7 +296,7 @@ class IdleStaking extends Component {
     tokenTotalSupply = this.functionsUtil.fixTokenDecimals(tokenTotalSupply,this.props.contractInfo.decimals);
     stats.push({
       title:`${this.props.contractInfo.name} Total Supply`,
-      value:this.functionsUtil.formatMoney(tokenTotalSupply,4)+' '+this.props.selectedToken
+      value:this.functionsUtil.formatMoney(tokenTotalSupply,4)+' '+this.props.contractInfo.name
     });
 
     stats.push({
@@ -332,7 +332,7 @@ class IdleStaking extends Component {
 
     globalStats.push({
       title:`${this.props.contractInfo.name} balance`,
-      value:`${this.functionsUtil.formatMoney(tokenUserBalance,4)} ${this.props.contractInfo.rewardToken}`,
+      value:`${this.functionsUtil.formatMoney(tokenUserBalance,4)} ${this.props.contractInfo.name}`,
     });
     
     claimable = this.functionsUtil.fixTokenDecimals(claimable,this.props.tokenConfig.decimals);
