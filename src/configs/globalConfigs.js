@@ -1065,6 +1065,12 @@ const globalConfigs = {
       },
       etherscan:{
         enabled:true, // False for empty txs list (try new wallet)
+        keys:[
+          env.REACT_APP_ETHERSCAN_KEY,
+          env.REACT_APP_ETHERSCAN_KEY2,
+          env.REACT_APP_ETHERSCAN_KEY3,
+          env.REACT_APP_ETHERSCAN_KEY4
+        ],
         endpoints:{
           1: 'https://api.etherscan.io/api',
           1337: 'https://api.etherscan.io/api',
@@ -1973,7 +1979,7 @@ const globalConfigs = {
             abi:IdleTokenV4,
             name:'idleDAIYield',
             token:'idleDAIYield', // Mainnet
-            token:'idleDAIYieldMock', // Kovan
+            // token:'idleDAIYieldMock', // Kovan
             address:'0x0000000000000000000000000000000000000011',
             realAddress:'0x3fe7940616e5bc47b0775a0dccf6237893353bb4', // Mainnet
             // realAddress:'0xbd0b0205408509544815d377214d8f2cbe3e5381', // Kovan
@@ -1994,7 +2000,7 @@ const globalConfigs = {
             abi:IdleTokenV4,
             name:'idleUSDTYield',
             token:'idleUSDTYield', // Mainnet
-            token:'idleUSDTYieldMock', // Kovan
+            // token:'idleUSDTYieldMock', // Kovan
             address:'0x0000000000000000000000000000000000000012',
             realAddress:'0xF34842d05A1c888Ca02769A633DF37177415C2f8',
             underlying:{

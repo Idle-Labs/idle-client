@@ -1792,7 +1792,7 @@ class FunctionsUtil {
     const apiKey = keys[apiKeyIndex];
     const data = await this.makeRequest(endpoint+'&apikey='+apiKey);
 
-    // console.log('makeEtherscanApiRequest',endpoint,apiKeyIndex+'/'+keys.length,(data.data ? data.data.message : null),apiKeyIndex<keys.length-1);
+    console.log('makeEtherscanApiRequest',endpoint+'&apikey='+apiKey,apiKeyIndex+'/'+keys.length,data,(data.data ? data.data.message : null),apiKeyIndex<keys.length-1);
 
     if (data && data.data && data.data.message === 'OK'){
       cachedRequests[endpoint] = {
@@ -2171,6 +2171,7 @@ class FunctionsUtil {
     const etherscanApiUrl = etherscanInfo.endpoints[1];
     const etherscanEndpoint = `${etherscanApiUrl}?module=account&action=tokentx&address=${feeDistributorConfig.address}&sort=desc`;
     const etherscanTxlist = await this.makeEtherscanApiRequest(etherscanEndpoint,etherscanInfo.keys,3600);
+    // console.log('getIdleStakingRewardsTxs',etherscanEndpoint,etherscanTxlist);
     if (etherscanTxlist && etherscanTxlist.data && etherscanTxlist.data.result && typeof etherscanTxlist.data.result.filter === 'function'){
       return etherscanTxlist.data.result.filter( tx => (tx.contractAddress.toLowerCase() === idleTokenConfig.address.toLowerCase() && tx.to.toLowerCase() === feeDistributorConfig.address.toLowerCase() && this.BNify(tx.value).gt(0) ));
     }

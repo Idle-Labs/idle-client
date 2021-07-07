@@ -288,8 +288,9 @@ class IdleStaking extends Component {
     const distributedRewards = etherscanRewardsTxs.map( tx => (
       {
         hash:tx.hash,
+        tokenName:tx.tokenSymbol,
         amount:this.functionsUtil.fixTokenDecimals(tx.value,rewardTokenConfig.decimals),
-        date:this.functionsUtil.strToMoment(parseInt(tx.timeStamp)*1000).format('YYYY-MM-DD HH:mm')
+        date:this.functionsUtil.strToMoment(parseInt(tx.timeStamp)*1000).utc().format('YYYY-MM-DD HH:mm')+' UTC'
       }
     ));
 
@@ -907,7 +908,9 @@ class IdleStaking extends Component {
                   >
                     <DashboardCard
                       cardProps={{
-                        p:3,
+                        pt:2,
+                        pb:3,
+                        px:3,
                         width:1,
                         display:'flex',
                         alignItems:'center',
@@ -923,65 +926,94 @@ class IdleStaking extends Component {
                             flexDirection={'column'}
                           >
                             <Flex
-                              py={1}
+                              pt={0}
+                              pb={1}
                               width={1}
                               flexDirection={'row'}
                               borderBottom={`1px solid ${this.props.theme.colors.divider}`}
                             >
                               <Text
                                 fontSize={1}
-                                width={0.333}
                                 fontWeight={3}
+                                width={this.props.isMobile ? 0.5 : 0.4}
                               >
                                 Date
                               </Text>
                               <Text
                                 fontSize={1}
-                                width={0.333}
                                 fontWeight={3}
+                                width={this.props.isMobile ? 0.5 : 0.3}
+                                textAlign={this.props.isMobile ? 'right' : 'left'}
                               >
                                 Amount
                               </Text>
-                              <Text
-                                fontSize={1}
-                                width={0.333}
-                                fontWeight={3}
-                              >
-                                Hash
-                              </Text>
+                              {
+                                !this.props.isMobile && (
+                                  <Text
+                                    width={0.3}
+                                    fontSize={1}
+                                    fontWeight={3}
+                                  >
+                                    Hash
+                                  </Text>
+                                )
+                              }
                             </Flex>
                             {
-                              this.state.distributedRewards.map( reward => (
+                              this.state.distributedRewards.map( (reward,index) => (
                                 <Flex
                                   py={1}
                                   width={1}
                                   flexDirection={'row'}
+                                  key={`rewards_${index}`}
                                   borderBottom={`1px solid ${this.props.theme.colors.divider}`}
                                 >
                                   <Text
-                                    fontSize={2}
-                                    width={0.333}
                                     fontWeight={2}
                                     color={'statValue'}
+                                    fontSize={this.props.isMobile ? 1 : 2}
+                                    width={this.props.isMobile ? 0.5 : 0.4}
                                   >
                                     {reward.date}
                                   </Text>
                                   <Text
-                                    fontSize={2}
-                                    width={0.333}
                                     fontWeight={2}
                                     color={'statValue'}
+                                    fontSize={this.props.isMobile ? 1 : 2}
+                                    width={this.props.isMobile ? 0.5 : 0.3}
+                                    textAlign={this.props.isMobile ? 'right' : 'left'}
                                   >
-                                    {reward.amount}
+                                    {reward.amount.toFixed(4)} {reward.tokenName}
                                   </Text>
-                                  <Text
-                                    fontSize={2}
-                                    width={0.333}
-                                    fontWeight={2}
-                                    color={'statValue'}
-                                  >
-                                    {this.functionsUtil.shortenHash(reward.hash)}
-                                  </Text>
+                                  {
+                                    !this.props.isMobile && (
+                                      <ExtLink
+                                        width={0.3}
+                                        color={'link'}
+                                        hoverColor={'link'}
+                                        href={this.functionsUtil.getEtherscanTransactionUrl(reward.hash)}
+                                      >
+                                        <Flex
+                                          alignItems={'center'}
+                                          flexDirection={'row'}
+                                        >
+                                          <Text
+                                            fontSize={2}
+                                            fontWeight={2}
+                                            color={'link'}
+                                          >
+                                            {this.functionsUtil.shortenHash(reward.hash)}
+                                          </Text>
+                                          <Icon
+                                            ml={1}
+                                            size={'1.2em'}
+                                            color={'link'}
+                                            name={'OpenInNew'}
+                                          />
+                                        </Flex>
+                                      </ExtLink>
+                                    )
+                                  }
                                 </Flex>
                               ))
                             }
