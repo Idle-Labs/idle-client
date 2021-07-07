@@ -1040,7 +1040,7 @@ const globalConfigs = {
       1337:'Hardhat'
     },
     isForked:false, // If TRUE the tx confirmation callback is fired on the receipt
-    requiredNetwork:42, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
+    requiredNetwork:1, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
     blocksPerYear:2371428,
     secondsPerYear:31536000,
     firstBlockNumber:8119247,
@@ -1960,8 +1960,7 @@ const globalConfigs = {
       }
     },
     nexusMutual:{
-      test:true,
-      enabled:true,
+      enabled:false,
       icon:'Security',
       route:'nexus-mutual',
       label:'Nexus Mutual',
@@ -1973,18 +1972,20 @@ const globalConfigs = {
             decimals:18,
             abi:IdleTokenV4,
             name:'idleDAIYield',
-            token:'idleDAIYieldMock',
+            token:'idleDAIYield', // Mainnet
+            token:'idleDAIYieldMock', // Kovan
             address:'0x0000000000000000000000000000000000000011',
-            // realAddress:'0x3fe7940616e5bc47b0775a0dccf6237893353bb4', // Mainnet
-            realAddress:'0xbd0b0205408509544815d377214d8f2cbe3e5381', // Kovan
+            realAddress:'0x3fe7940616e5bc47b0775a0dccf6237893353bb4', // Mainnet
+            // realAddress:'0xbd0b0205408509544815d377214d8f2cbe3e5381', // Kovan
             underlying:{
               DAI:{
                 abi:ERC20,
+                name:'DAI', // Mainnet
                 token:'DAI',
                 decimals:18,
-                name:'DAIMock',
-                // address:'0x6b175474e89094c44da98b954eedeac495271d0f' // Mainnet
-                address:'0x5C422252C6a47CdacF667521566Bf7bD5b0d769B' // Kovan
+                // name:'DAIMock', // Kovan
+                address:'0x6b175474e89094c44da98b954eedeac495271d0f' // Mainnet
+                // address:'0x5C422252C6a47CdacF667521566Bf7bD5b0d769B' // Kovan
               },
             }
           },
@@ -1992,17 +1993,19 @@ const globalConfigs = {
             decimals:18,
             abi:IdleTokenV4,
             name:'idleUSDTYield',
-            token:'idleUSDTYieldMock',
+            token:'idleUSDTYield', // Mainnet
+            token:'idleUSDTYieldMock', // Kovan
             address:'0x0000000000000000000000000000000000000012',
             realAddress:'0xF34842d05A1c888Ca02769A633DF37177415C2f8',
             underlying:{
               DAI:{
                 abi:ERC20,
+                name:'DAI', // Mainnet
                 token:'DAI',
                 decimals:18,
-                name:'DAIMock',
-                // address:'0x6b175474e89094c44da98b954eedeac495271d0f' // Mainnet
-                address:'0x5C422252C6a47CdacF667521566Bf7bD5b0d769B' // Kovan
+                // name:'DAIMock', // Kovan
+                address:'0x6b175474e89094c44da98b954eedeac495271d0f' // Mainnet
+                // address:'0x5C422252C6a47CdacF667521566Bf7bD5b0d769B' // Kovan
               },
             }
           }
@@ -2015,18 +2018,14 @@ const globalConfigs = {
         contractInfo:{
           abi:NexusMutualDistributor,
           name:'NexusMutualDistributor',
-          // address:'0x08Bf224a6a19935F741636d8427df77B32386531' // Kovan
-          address:'0xe2d569dc064b3b91f514e775c6026e04d2c887a9' // Kovan
+          // address:'0xe2d569dc064b3b91f514e775c6026e04d2c887a9' // Kovan
+          address:'0xA5F3cE699276cf70400ae6a3E8651619b39668a8' // Mainnet
         },
         incidentsInfo:{
           abi:NexusMutualIncidents,
           name:'NexusMutualIncidents',
-          address:'0x322f9a880189E3FFFf59b74644e13e5763C5AdB9' // Kovan
-          // address:'0x8ceba69a8e96a4ce71aa65859dbdb180b489a719' // Mainnet
-        },
-        poolInfo:{
-          ens:'idlefinancev4.nexusmutual.eth',
-          address:'0x3fe7940616e5bc47b0775a0dccf6237893353bb4'
+          // address:'0x322f9a880189E3FFFf59b74644e13e5763C5AdB9' // Kovan
+          address:'0x8ceba69a8e96a4ce71aa65859dbdb180b489a719' // Mainnet
         }
       }
     },

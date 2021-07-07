@@ -1996,7 +1996,9 @@ class FunctionsUtil {
     const endpoint = this.getGlobalConfig(['network','providers','snapshot','endpoints','proposals']);
     let proposals = await this.makeCachedRequest(endpoint,1440,true);
 
-    if (proposals){
+    // console.log('getSnapshotProposals',proposals);
+
+    if (proposals && !proposals.error){
       proposals = Object.values(proposals);
 
       const currTime = parseInt(Date.now()/1000);

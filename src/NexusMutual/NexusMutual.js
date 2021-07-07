@@ -265,7 +265,7 @@ class NexusMutual extends Component {
     const tokenConfig = this.props.toolProps.availableTokens[selectedToken];
     const selectedUnderlying = Object.keys(tokenConfig.underlying)[0];
 
-    console.log('changeSelectedToken',selectedToken,tokenConfig);
+    // console.log('changeSelectedToken',selectedToken,tokenConfig);
 
     this.setState({
       amountValue,
@@ -657,149 +657,168 @@ class NexusMutual extends Component {
                           availableTokens={this.state.tokenConfig.underlying}
                         />
                       </Box>
-                      <Box
-                        mt={2}
-                        width={1}
-                      >
-                        <Text
-                          mb={1}
-                        >
-                          How much do you want to cover?
-                        </Text>
-                        <Input
-                          min={0}
-                          width={'100%'}
-                          type={"number"}
-                          required={true}
-                          height={'3.4em'}
-                          borderRadius={2}
-                          fontWeight={500}
-                          borderColor={'cardBorder'}
-                          backgroundColor={'cardBg'}
-                          boxShadow={'none !important'}
-                          value={this.state.amountValue}
-                          onChange={this.changeAmount.bind(this)}
-                          border={`1px solid ${this.props.theme.colors.divider}`}
-                          placeholder={`Insert ${this.state.selectedUnderlying.toUpperCase()} amount`}
-                        />
-                        <Flex
-                          width={1}
-                          maxWidth={'100%'}
-                          alignItems={'center'}
-                          flexDirection={'row'}
-                          justifyContent={'flex-end'}
-                        >
-                          <Link
-                            mt={1}
-                            fontSize={1}
-                            fontWeight={3}
-                            color={'dark-gray'}
-                            textAlign={'right'}
-                            hoverColor={'copyColor'}
-                            onClick={ (e) => this.setMaxCoverAmount() }
-                            style={{
-                              maxWidth:'100%',
-                              overflow:'hidden',
-                              whiteSpace:'nowrap',
-                              textOverflow:'ellipsis'
-                            }}
+                      {
+                        this.state.maxCapacity.gt(0) ? (
+                          <Box
+                            width={1}
                           >
-                            Max Available: {this.state.maxCapacity.toFixed(this.props.isMobile ? 2 : 4)} {this.state.selectedUnderlying}
-                          </Link>
-                        </Flex>
-                      </Box>
-                      <Box
-                        mt={2}
-                        width={1}
-                      >
-                        <Text
-                          mb={1}
-                        >
-                          For how many days?
-                        </Text>
-                        <Input
-                          min={0}
-                          width={'100%'}
-                          type={"number"}
-                          required={true}
-                          height={'3.4em'}
-                          borderRadius={2}
-                          fontWeight={500}
-                          borderWidth={'1px'}
-                          borderStyle={'solid'}
-                          backgroundColor={'cardBg'}
-                          boxShadow={'none !important'}
-                          value={this.state.periodValue}
-                          placeholder={'Insert days of coverage'}
-                          onChange={this.changePeriod.bind(this)}
-                          borderColor={this.state.periodValid ? 'cardBorder' : 'red'}
-                        />
-                        {
-                          !this.state.periodValid && (
-                            <Text
-                              my={1}
-                              fontSize={2}
-                              color={'red'}
+                            <Box
+                              mt={2}
+                              width={1}
                             >
-                              Enter a period between 30 and 365 days!
-                            </Text>
-                          )
-                        }
-                        <Flex
-                          mt={2}
-                          alignItems={'center'}
-                          flexDirection={'row'}
-                          justifyContent={'space-between'}
-                        >
-                          {
-                            Object.keys(this.state.periodOptions).map( period => {
-                              const periodInfo = this.state.periodOptions[period];
-                              const isActive = this.state.selectedPeriod===period;
-                              const width = (1/Object.keys(this.state.periodOptions).length)-0.01;
-                              return (
-                                <DashboardCard
-                                  cardProps={{
-                                    p:2,
-                                    width:width,
+                              <Text
+                                mb={1}
+                              >
+                                How much do you want to cover?
+                              </Text>
+                              <Input
+                                min={0}
+                                width={'100%'}
+                                type={"number"}
+                                required={true}
+                                height={'3.4em'}
+                                borderRadius={2}
+                                fontWeight={500}
+                                borderColor={'cardBorder'}
+                                backgroundColor={'cardBg'}
+                                boxShadow={'none !important'}
+                                value={this.state.amountValue}
+                                onChange={this.changeAmount.bind(this)}
+                                border={`1px solid ${this.props.theme.colors.divider}`}
+                                placeholder={`Insert ${this.state.selectedUnderlying.toUpperCase()} amount`}
+                              />
+                              <Flex
+                                width={1}
+                                maxWidth={'100%'}
+                                alignItems={'center'}
+                                flexDirection={'row'}
+                                justifyContent={'flex-end'}
+                              >
+                                <Link
+                                  mt={1}
+                                  fontSize={1}
+                                  fontWeight={3}
+                                  color={'dark-gray'}
+                                  textAlign={'right'}
+                                  hoverColor={'copyColor'}
+                                  onClick={ (e) => this.setMaxCoverAmount() }
+                                  style={{
+                                    maxWidth:'100%',
+                                    overflow:'hidden',
+                                    whiteSpace:'nowrap',
+                                    textOverflow:'ellipsis'
                                   }}
-                                  isActive={isActive}
-                                  isInteractive={true}
-                                  key={`coverPeriod_${period}`}
-                                  handleClick={e => this.selectPeriod(period)}
                                 >
+                                  Max Available: {this.state.maxCapacity.toFixed(this.props.isMobile ? 2 : 4)} {this.state.selectedUnderlying}
+                                </Link>
+                              </Flex>
+                            </Box>
+                            <Box
+                              mt={2}
+                              width={1}
+                            >
+                              <Text
+                                mb={1}
+                              >
+                                For how many days?
+                              </Text>
+                              <Input
+                                min={0}
+                                width={'100%'}
+                                type={"number"}
+                                required={true}
+                                height={'3.4em'}
+                                borderRadius={2}
+                                fontWeight={500}
+                                borderWidth={'1px'}
+                                borderStyle={'solid'}
+                                backgroundColor={'cardBg'}
+                                boxShadow={'none !important'}
+                                value={this.state.periodValue}
+                                placeholder={'Insert days of coverage'}
+                                onChange={this.changePeriod.bind(this)}
+                                borderColor={this.state.periodValid ? 'cardBorder' : 'red'}
+                              />
+                              {
+                                !this.state.periodValid && (
                                   <Text
+                                    my={1}
                                     fontSize={2}
-                                    fontWeight={3}
-                                    textAlign={'center'}
-                                    color={this.props.isActive ? 'copyColor' : 'legend'}
+                                    color={'red'}
                                   >
-                                    {periodInfo.label}
+                                    Enter a period between 30 and 365 days!
                                   </Text>
-                                </DashboardCard>
-                              );
-                            })
-                          }
-                        </Flex>
-                      </Box>
-                      <Flex
-                        mt={2}
-                        width={1}
-                        justifyContent={'center'}
-                      >
-                        <ButtonLoader
-                          buttonProps={{
-                            my:2,
-                            mx:[0, 2],
-                            size:'medium',
-                            borderRadius:4,
-                            mainColor:'blue',
-                            disabled:(!this.state.amountValid || !this.state.selectedUnderlying || !this.state.periodValue || !this.state.periodValid)
-                          }}
-                          buttonText={'GET QUOTE'}
-                          isLoading={this.state.loading}
-                          handleClick={ e => this.getQuote(e) }
-                        />
-                      </Flex>
+                                )
+                              }
+                              <Flex
+                                mt={2}
+                                alignItems={'center'}
+                                flexDirection={'row'}
+                                justifyContent={'space-between'}
+                              >
+                                {
+                                  Object.keys(this.state.periodOptions).map( period => {
+                                    const periodInfo = this.state.periodOptions[period];
+                                    const isActive = this.state.selectedPeriod===period;
+                                    const width = (1/Object.keys(this.state.periodOptions).length)-0.01;
+                                    return (
+                                      <DashboardCard
+                                        cardProps={{
+                                          p:2,
+                                          width:width,
+                                        }}
+                                        isActive={isActive}
+                                        isInteractive={true}
+                                        key={`coverPeriod_${period}`}
+                                        handleClick={e => this.selectPeriod(period)}
+                                      >
+                                        <Text
+                                          fontSize={2}
+                                          fontWeight={3}
+                                          textAlign={'center'}
+                                          color={this.props.isActive ? 'copyColor' : 'legend'}
+                                        >
+                                          {periodInfo.label}
+                                        </Text>
+                                      </DashboardCard>
+                                    );
+                                  })
+                                }
+                              </Flex>
+                            </Box>
+                            <Flex
+                              mt={2}
+                              width={1}
+                              justifyContent={'center'}
+                            >
+                              <ButtonLoader
+                                buttonProps={{
+                                  my:2,
+                                  mx:[0, 2],
+                                  size:'medium',
+                                  borderRadius:4,
+                                  mainColor:'blue',
+                                  disabled:(!this.state.amountValid || !this.state.selectedUnderlying || !this.state.periodValue || !this.state.periodValid)
+                                }}
+                                buttonText={'GET QUOTE'}
+                                isLoading={this.state.loading}
+                                handleClick={ e => this.getQuote(e) }
+                              />
+                            </Flex>
+                          </Box>
+                        ) : (
+                          <IconBox
+                            cardProps={{
+                              mt:2,
+                            }}
+                            icon={'MoneyOff'}
+                            iconProps={{
+                              color:'cellText'
+                            }}
+                            text={`Coverage for ${this.state.selectedToken} is not available at the moment.`}
+                          />
+                        )
+                      }
                     </Flex>
                   ) : (
                     <Flex
