@@ -30,7 +30,8 @@ class ConnectBox extends Component {
       <DashboardCard
         cardProps={{
           p:3,
-          mt:3
+          mt:3,
+          ...this.props.cardProps
         }}
       >
         <Flex

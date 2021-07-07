@@ -246,15 +246,6 @@ class IdleStaking extends Component {
 
   async loadStats(){
 
-    // const isDebug = window.location.hash.includes("debug=1");
-
-    if (!this.props.account){
-      // if (isDebug){
-      //   alert(`loadStats: !account=${this.props.account}`)
-      // }
-      return false;
-    }
-
     const stats = [];
     const globalStats = [];
     const statsLoaded = true;
@@ -263,10 +254,10 @@ class IdleStaking extends Component {
       etherscanRewardsTxs,
       tokenTotalSupply,
       totalSupply,
-      tokenUserBalance,
-      lockedInfo,
-      claimable,
       claimableRewards,
+      lockedInfo,
+      tokenUserBalance,
+      claimable,
       claimEvents,
       checkpointEvents,
       depositEvents,
@@ -274,13 +265,13 @@ class IdleStaking extends Component {
       this.functionsUtil.getIdleStakingRewardsTxs(),
       this.functionsUtil.getTokenTotalSupply(this.props.contractInfo.name),
       this.functionsUtil.genericContractCall(this.props.contractInfo.name,'supply'),
-      this.functionsUtil.getContractBalance(this.props.contractInfo.name,this.props.account),
-      this.functionsUtil.genericContractCall(this.props.contractInfo.name,'locked',[this.props.account]),
-      this.functionsUtil.genericContractCall(this.props.tokenConfig.feeDistributor.name,'claim',[this.props.account]),
       this.functionsUtil.getTokenBalance(this.props.contractInfo.rewardToken,this.props.tokenConfig.feeDistributor.address),
+      this.props.account ? this.functionsUtil.genericContractCall(this.props.contractInfo.name,'locked',[this.props.account]) : null,
+      this.props.account ? this.functionsUtil.getContractBalance(this.props.contractInfo.name,this.props.account) : this.functionsUtil.BNify(0),
+      this.props.account ? this.functionsUtil.genericContractCall(this.props.tokenConfig.feeDistributor.name,'claim',[this.props.account]) : this.functionsUtil.BNify(0),
       this.functionsUtil.getContractEvents(this.props.tokenConfig.feeDistributor.name,'Claimed',{fromBlock: this.props.tokenConfig.feeDistributor.fromBlock, toBlock:'latest'}),
       this.functionsUtil.getContractEvents(this.props.tokenConfig.feeDistributor.name,'CheckpointToken',{fromBlock: this.props.tokenConfig.feeDistributor.fromBlock, toBlock:'latest'}),
-      this.functionsUtil.getContractEvents(this.props.contractInfo.name,'Deposit',{fromBlock: this.props.contractInfo.fromBlock, toBlock:'latest',filter:{provider:this.props.account}})
+      this.props.account ? this.functionsUtil.getContractEvents(this.props.contractInfo.name,'Deposit',{fromBlock: this.props.contractInfo.fromBlock, toBlock:'latest',filter:{provider:this.props.account}}) : []
     ]);
 
     const rewardTokenConfig = this.functionsUtil.getGlobalConfig(['govTokens',this.props.contractInfo.rewardToken]);
@@ -382,10 +373,6 @@ class IdleStaking extends Component {
       title:'Lock End Date (UTC)',
       description:'Ending date of your Lock'
     });
-
-    // if (isDebug){
-    //   alert(`loadStats: statsLoaded=${statsLoaded}`);
-    // }
 
     this.setState({
       stats,
@@ -606,12 +593,6 @@ class IdleStaking extends Component {
     newState.lockEndDateIsMaxEndDate = newState.lockedEnd ? this.functionsUtil.strToMoment(newState.lockedEnd*1000).format('YYYY-MM-DD')===maxDate : false;
 
     // console.log('lockEndDateIsMaxEndDate',newState.lockEndDateIsMaxEndDate,maxDate,this.functionsUtil.strToMoment(newState.lockedEnd*1000).format('YYYY-MM-DD'));
-
-    // console.log('updateData',selectedAction,newState);
-    // const isDebug = window.location.hash.includes("debug=1");
-    // if (isDebug){
-    //   alert(`updateData: action=${selectedAction}, balanceProp=${newState.balanceProp.toFixed()}, contractInfo=${this.props.contractInfo.name}`);
-    // }
 
     this.setState(newState,() => {
       this.loadStats();
@@ -1030,210 +1011,384 @@ class IdleStaking extends Component {
                     </DashboardCard>
                   </Flex>
                 </Flex>
-              ) : (this.props.tokenConfig && this.state.balanceProp && this.state.statsLoaded && this.props.contractInfo) ? (
-                  <Box
-                    mt={1}
-                    width={1}
-                    mb={[4,3]}
-                  >
-                    {
-                      (isIncrease && canIncrease) && (
-                        <Box
-                          mb={2}
-                          width={1}
+              ) : (this.props.account && this.props.tokenConfig && this.state.balanceProp && this.state.statsLoaded && this.props.contractInfo) ? (
+                <Box
+                  mt={1}
+                  width={1}
+                  mb={[4,3]}
+                >
+                  {
+                    (isIncrease && canIncrease) && (
+                      <Box
+                        mb={2}
+                        width={1}
+                      >
+                        <Text mb={1}>
+                          Choose increase value:
+                        </Text>
+                        <Flex
+                          alignItems={'center'}
+                          flexDirection={'row'}
+                          justifyContent={'space-between'}
                         >
-                          <Text mb={1}>
-                            Choose increase value:
-                          </Text>
-                          <Flex
-                            alignItems={'center'}
-                            flexDirection={'row'}
-                            justifyContent={'space-between'}
-                          >
-                            <CardIconButton
-                              {...this.props}
-                              textProps={{
-                                fontSize:[1,2]
-                              }}
-                              cardProps={{
-                                px:3,
-                                py:2,
-                                width:0.49
-                              }}
-                              icon={'AccessTime'}
-                              iconColor={'deposit'}
-                              iconBgColor={'#ced6ff'}
-                              isActive={ this.state.increaseAction === 'time' }
-                              handleClick={ e => this.setIncreaseAction('time') }
-                              text={this.props.isMobile ? 'Time' : 'Increase Time'}
-                            />
-                            <CardIconButton
-                              {...this.props}
-                              textProps={{
-                                fontSize:[1,2]
-                              }}
-                              cardProps={{
-                                px:3,
-                                py:2,
-                                width:0.49
-                              }}
-                              icon={'AttachMoney'}
-                              iconColor={'redeem'}
-                              iconBgColor={'#ceeff6'}
-                              isActive={ this.state.increaseAction === 'amount' }
-                              handleClick={ e => this.setIncreaseAction('amount') }
-                              text={this.props.isMobile ? 'Amount' : 'Increase Amount'}
-                            />
-                          </Flex>
-                        </Box>
-                      )
-                    }
-                    {
-                      ((isLock && this.state.balanceProp && this.state.contractApproved && this.state.balanceProp.gt(0)) || (isIncrease && canIncrease)) && (
-                        <Box
-                          width={1}
-                        > 
-                          {
-                            (isLock || this.state.increaseAction === 'time') && (
-                              <Box
-                                width={1}
-                              >
-                                <Text mb={1}>
-                                  Choose lock period:
-                                </Text>
-                                {
-                                  !this.state.lockEndDateIsMaxEndDate ? (
+                          <CardIconButton
+                            {...this.props}
+                            textProps={{
+                              fontSize:[1,2]
+                            }}
+                            cardProps={{
+                              px:3,
+                              py:2,
+                              width:0.49
+                            }}
+                            icon={'AccessTime'}
+                            iconColor={'deposit'}
+                            iconBgColor={'#ced6ff'}
+                            isActive={ this.state.increaseAction === 'time' }
+                            handleClick={ e => this.setIncreaseAction('time') }
+                            text={this.props.isMobile ? 'Time' : 'Increase Time'}
+                          />
+                          <CardIconButton
+                            {...this.props}
+                            textProps={{
+                              fontSize:[1,2]
+                            }}
+                            cardProps={{
+                              px:3,
+                              py:2,
+                              width:0.49
+                            }}
+                            icon={'AttachMoney'}
+                            iconColor={'redeem'}
+                            iconBgColor={'#ceeff6'}
+                            isActive={ this.state.increaseAction === 'amount' }
+                            handleClick={ e => this.setIncreaseAction('amount') }
+                            text={this.props.isMobile ? 'Amount' : 'Increase Amount'}
+                          />
+                        </Flex>
+                      </Box>
+                    )
+                  }
+                  {
+                    ((isLock && this.state.balanceProp && this.state.contractApproved && this.state.balanceProp.gt(0)) || (isIncrease && canIncrease)) && (
+                      <Box
+                        width={1}
+                      > 
+                        {
+                          (isLock || this.state.increaseAction === 'time') && (
+                            <Box
+                              width={1}
+                            >
+                              <Text mb={1}>
+                                Choose lock period:
+                              </Text>
+                              {
+                                !this.state.lockEndDateIsMaxEndDate ? (
+                                  <Flex
+                                    width={1}
+                                    alignItems={'center'}
+                                    justifyContent={'center'}
+                                    flexDirection={'column'}
+                                  >
+                                    <Input
+                                      mb={2}
+                                      width={1}
+                                      type={"date"}
+                                      required={true}
+                                      height={'3.4em'}
+                                      borderRadius={2}
+                                      fontWeight={500}
+                                      borderColor={'cardBorder'}
+                                      backgroundColor={'cardBg'}
+                                      boxShadow={'none !important'}
+                                      value={this.state.lockPeriodInput || ''}
+                                      onChange={this.changelockPeriodInput.bind(this)}
+                                      border={`1px solid ${this.props.theme.colors.divider}`}
+                                    />
                                     <Flex
+                                      mb={3}
                                       width={1}
                                       alignItems={'center'}
-                                      justifyContent={'center'}
-                                      flexDirection={'column'}
+                                      flexDirection={'row'}
+                                      justifyContent={'space-between'}
                                     >
-                                      <Input
-                                        mb={2}
-                                        width={1}
-                                        type={"date"}
-                                        required={true}
-                                        height={'3.4em'}
-                                        borderRadius={2}
-                                        fontWeight={500}
-                                        borderColor={'cardBorder'}
-                                        backgroundColor={'cardBg'}
-                                        boxShadow={'none !important'}
-                                        value={this.state.lockPeriodInput || ''}
-                                        onChange={this.changelockPeriodInput.bind(this)}
-                                        border={`1px solid ${this.props.theme.colors.divider}`}
-                                      />
-                                      <Flex
-                                        mb={3}
-                                        width={1}
-                                        alignItems={'center'}
-                                        flexDirection={'row'}
-                                        justifyContent={'space-between'}
-                                      >
-                                        {
-                                          this.state.lockPeriods.map( (p,index) => {
-                                            const isActive = this.state.selectedLockPeriod ? this.state.selectedLockPeriod.value===p.value && this.state.selectedLockPeriod.type === p.type : false;
-                                            return (
-                                              <DashboardCard
-                                                cardProps={{
-                                                  p:2,
-                                                  width:0.24,
-                                                }}
-                                                isActive={isActive}
-                                                isInteractive={true}
-                                                key={`lockPeriod_${index}`}
-                                                handleClick={e => this.selectLockPeriod(p)}
-                                              >
-                                                <Text 
-                                                  fontWeight={3}
-                                                  fontSize={[1,2]}
-                                                  textAlign={'center'}
-                                                  color={isActive ? 'copyColor' : 'cellText'}
-                                                >
-                                                  {p.label}
-                                                </Text>
-                                              </DashboardCard>
-                                            );
-                                          })
-                                        }
-                                      </Flex>
                                       {
-                                        isIncrease && (
-                                          <ExecuteTransaction
-                                            params={[]}
-                                            {...this.props}
-                                            parentProps={{
-                                              width:1,
-                                              alignItems:'center',
-                                              justifyContent:'center'
-                                            }}
-                                            Component={Button}
-                                            componentProps={{
-                                              fontSize:3,
-                                              fontWeight:3,
-                                              size:'medium',
-                                              width:[1,1/2],
-                                              borderRadius:4,
-                                              mainColor:'deposit',
-                                              value:'Increase Time',
-                                              disabled:this.state.buttonDisabled
-                                            }}
-                                            action={'Increase Time'}
-                                            methodName={'increase_unlock_time'}
-                                            contractName={this.props.contractInfo.name}
-                                            callback={this.transactionSucceeded.bind(this)}
-                                            getTransactionParams={this.getIncreaseTimeParams.bind(this)}
-                                          />
-                                        )
+                                        this.state.lockPeriods.map( (p,index) => {
+                                          const isActive = this.state.selectedLockPeriod ? this.state.selectedLockPeriod.value===p.value && this.state.selectedLockPeriod.type === p.type : false;
+                                          return (
+                                            <DashboardCard
+                                              cardProps={{
+                                                p:2,
+                                                width:0.24,
+                                              }}
+                                              isActive={isActive}
+                                              isInteractive={true}
+                                              key={`lockPeriod_${index}`}
+                                              handleClick={e => this.selectLockPeriod(p)}
+                                            >
+                                              <Text 
+                                                fontWeight={3}
+                                                fontSize={[1,2]}
+                                                textAlign={'center'}
+                                                color={isActive ? 'copyColor' : 'cellText'}
+                                              >
+                                                {p.label}
+                                              </Text>
+                                            </DashboardCard>
+                                          );
+                                        })
                                       }
                                     </Flex>
-                                  ) : (
-                                    <IconBox
-                                      cardProps={{
-                                        mt:1,
-                                        mb:3
-                                      }}
-                                      icon={'Warning'}
-                                      iconProps={{
-                                        color:'cellText'
-                                      }}
-                                      text={`Your tokens are locked for the maxumum allowed period.`}
-                                    />
-                                  )
-                                }
-                              </Box>
-                            )
-                          }
-                        </Box>
-                      )
-                    }
-                    {
-                      (isLock || this.state.increaseAction==='amount') ? (
-                        <SendTxWithBalance
-                          error={null}
-                          {...this.props}
-                          action={txAction}
-                          steps={this.state.steps}
-                          infoBox={this.state.infoBox}
-                          tokenConfig={this.props.tokenConfig}
-                          tokenBalance={this.state.balanceProp}
-                          contractInfo={this.props.contractInfo}
-                          permitEnabled={this.state.permitEnabled}
-                          buttonDisabled={this.state.buttonDisabled}
-                          approveEnabled={this.state.approveEnabled}
-                          callback={this.transactionSucceeded.bind(this)}
-                          approveDescription={this.state.approveDescription}
-                          balanceSelectorInfo={this.state.balanceSelectorInfo}
-                          changeInputCallback={this.changeInputCallback.bind(this)}
-                          contractApproved={this.contractApprovedCallback.bind(this)}
-                          getTransactionParams={this.getTransactionParams.bind(this)}
+                                    {
+                                      isIncrease && (
+                                        <ExecuteTransaction
+                                          params={[]}
+                                          {...this.props}
+                                          parentProps={{
+                                            width:1,
+                                            alignItems:'center',
+                                            justifyContent:'center'
+                                          }}
+                                          Component={Button}
+                                          componentProps={{
+                                            fontSize:3,
+                                            fontWeight:3,
+                                            size:'medium',
+                                            width:[1,1/2],
+                                            borderRadius:4,
+                                            mainColor:'deposit',
+                                            value:'Increase Time',
+                                            disabled:this.state.buttonDisabled
+                                          }}
+                                          action={'Increase Time'}
+                                          methodName={'increase_unlock_time'}
+                                          contractName={this.props.contractInfo.name}
+                                          callback={this.transactionSucceeded.bind(this)}
+                                          getTransactionParams={this.getIncreaseTimeParams.bind(this)}
+                                        />
+                                      )
+                                    }
+                                  </Flex>
+                                ) : (
+                                  <IconBox
+                                    cardProps={{
+                                      mt:1,
+                                      mb:3
+                                    }}
+                                    icon={'Warning'}
+                                    iconProps={{
+                                      color:'cellText'
+                                    }}
+                                    text={`Your tokens are locked for the maxumum allowed period.`}
+                                  />
+                                )
+                              }
+                            </Box>
+                          )
+                        }
+                      </Box>
+                    )
+                  }
+                  {
+                    (isLock || this.state.increaseAction==='amount') ? (
+                      <SendTxWithBalance
+                        error={null}
+                        {...this.props}
+                        action={txAction}
+                        steps={this.state.steps}
+                        infoBox={this.state.infoBox}
+                        tokenConfig={this.props.tokenConfig}
+                        tokenBalance={this.state.balanceProp}
+                        contractInfo={this.props.contractInfo}
+                        permitEnabled={this.state.permitEnabled}
+                        buttonDisabled={this.state.buttonDisabled}
+                        approveEnabled={this.state.approveEnabled}
+                        callback={this.transactionSucceeded.bind(this)}
+                        approveDescription={this.state.approveDescription}
+                        balanceSelectorInfo={this.state.balanceSelectorInfo}
+                        changeInputCallback={this.changeInputCallback.bind(this)}
+                        contractApproved={this.contractApprovedCallback.bind(this)}
+                        getTransactionParams={this.getTransactionParams.bind(this)}
+                      >
+                        <DashboardCard
+                          cardProps={{
+                            p:3
+                          }}
                         >
-                          <DashboardCard
-                            cardProps={{
-                              p:3
-                            }}
+                          <Flex
+                            alignItems={'center'}
+                            flexDirection={'column'}
                           >
+                            <Icon
+                              name={'MoneyOff'}
+                              color={'cellText'}
+                              size={this.props.isMobile ? '1.8em' : '2.3em'}
+                            />
+                            <Text
+                              mt={1}
+                              fontSize={2}
+                              color={'cellText'}
+                              textAlign={'center'}
+                            >
+                              {
+                                (isLock || isIncrease) ? (
+                                  `You don't have any ${this.props.selectedToken} in your wallet.`
+                                ) : isUnstake && (
+                                  `You don't have any staked ${this.props.selectedToken} to withdraw.`
+                                )
+                              }
+                            </Text>
+                          </Flex>
+                        </DashboardCard>
+                      </SendTxWithBalance>
+                    ) : (isIncrease && !canIncrease) ? (
+                      <DashboardCard
+                        cardProps={{
+                          p:3
+                        }}
+                      >
+                        <Flex
+                          alignItems={'center'}
+                          flexDirection={'column'}
+                        >
+                          <Icon
+                            name={'LockOpen'}
+                            color={'cellText'}
+                            size={this.props.isMobile ? '1.8em' : '2.3em'}
+                          />
+                          <Text
+                            mt={1}
+                            fontSize={2}
+                            color={'cellText'}
+                            textAlign={'center'}
+                          >
+                            You cannot increase an expired lock, please Withdraw.
+                          </Text>
+                        </Flex>
+                      </DashboardCard>
+                    ) : isUnstake ? (
+                      <DashboardCard
+                        cardProps={{
+                          p:3
+                        }}
+                      >
+                        {
+                          this.state.lockExpired ? (
+                            <Flex
+                              alignItems={'center'}
+                              flexDirection={'column'}
+                            >
+                              <Icon
+                                name={'LockOpen'}
+                                color={'cellText'}
+                                size={this.props.isMobile ? '1.8em' : '2.3em'}
+                              />
+                              <Text
+                                mt={1}
+                                mb={3}
+                                fontSize={2}
+                                color={'cellText'}
+                                textAlign={'center'}
+                              >
+                                The lock has expired, you can withdraw your {this.props.selectedToken}.
+                              </Text>
+                              <ExecuteTransaction
+                                params={[]}
+                                {...this.props}
+                                Component={Button}
+                                parentProps={{
+                                  width:1,
+                                  alignItems:'center',
+                                  justifyContent:'center'
+                                }}
+                                componentProps={{
+                                  fontSize:3,
+                                  fontWeight:3,
+                                  size:'medium',
+                                  width:[1,1/2],
+                                  borderRadius:4,
+                                  mainColor:'redeem',
+                                  value:'Withdraw',
+                                }}
+                                action={'Withdraw'}
+                                methodName={'withdraw'}
+                                contractName={this.props.contractInfo.name}
+                                callback={this.transactionSucceeded.bind(this)}
+                              />
+                            </Flex>
+                          ) : (
+                            <Flex
+                              alignItems={'center'}
+                              flexDirection={'column'}
+                            >
+                              <Icon
+                                name={'LockOpen'}
+                                color={'cellText'}
+                                size={this.props.isMobile ? '1.8em' : '2.3em'}
+                              />
+                              <Text
+                                mt={1}
+                                fontSize={2}
+                                color={'cellText'}
+                                textAlign={'center'}
+                              >
+                                The lock is not expired yet, please wait until {this.functionsUtil.strToMoment(this.state.lockedEnd*1000).utc().format('YYYY/MM/DD HH:mm')} UTC to withdraw your {this.props.selectedToken}.
+                              </Text>
+                            </Flex>
+                          )
+                        }
+                      </DashboardCard>
+                    ) : isClaim && (
+                      <DashboardCard
+                        cardProps={{
+                          p:3
+                        }}
+                      >
+                        {
+                          (this.state.claimable && this.state.claimable.gt(0)) ? (
+                            <Flex
+                              alignItems={'center'}
+                              flexDirection={'column'}
+                            >
+                              <Icon
+                                color={'cellText'}
+                                name={'MonetizationOn'}
+                                size={this.props.isMobile ? '1.8em' : '2.3em'}
+                              />
+                              <Text
+                                mt={1}
+                                mb={3}
+                                fontSize={2}
+                                color={'cellText'}
+                                textAlign={'center'}
+                              >
+                                You can claim {this.state.claimable.toFixed(8)} {this.props.contractInfo.rewardToken}.
+                              </Text>
+                              <ExecuteTransaction
+                                params={[]}
+                                {...this.props}
+                                Component={Button}
+                                parentProps={{
+                                  width:1,
+                                  alignItems:'center',
+                                  justifyContent:'center'
+                                }}
+                                componentProps={{
+                                  fontSize:3,
+                                  fontWeight:3,
+                                  size:'medium',
+                                  width:[1,1/3],
+                                  value:'Claim',
+                                  borderRadius:4,
+                                  mainColor:'redeem',
+                                }}
+                                action={'Claim'}
+                                methodName={'claim'}
+                                callback={this.transactionSucceeded.bind(this)}
+                                contractName={this.props.tokenConfig.feeDistributor.name}
+                              />
+                            </Flex>
+                          ) : (
                             <Flex
                               alignItems={'center'}
                               flexDirection={'column'}
@@ -1249,213 +1404,42 @@ class IdleStaking extends Component {
                                 color={'cellText'}
                                 textAlign={'center'}
                               >
-                                {
-                                  (isLock || isIncrease) ? (
-                                    `You don't have any ${this.props.selectedToken} in your wallet.`
-                                  ) : isUnstake && (
-                                    `You don't have any staked ${this.props.selectedToken} to withdraw.`
-                                  )
-                                }
+                                You don't have rewards to Claim yet.
                               </Text>
                             </Flex>
-                          </DashboardCard>
-                        </SendTxWithBalance>
-                      ) : (isIncrease && !canIncrease) ? (
-                        <DashboardCard
-                          cardProps={{
-                            p:3
-                          }}
-                        >
-                          <Flex
-                            alignItems={'center'}
-                            flexDirection={'column'}
-                          >
-                            <Icon
-                              name={'LockOpen'}
-                              color={'cellText'}
-                              size={this.props.isMobile ? '1.8em' : '2.3em'}
-                            />
-                            <Text
-                              mt={1}
-                              fontSize={2}
-                              color={'cellText'}
-                              textAlign={'center'}
-                            >
-                              You cannot increase an expired lock, please Withdraw.
-                            </Text>
-                          </Flex>
-                        </DashboardCard>
-                      ) : isUnstake ? (
-                        <DashboardCard
-                          cardProps={{
-                            p:3
-                          }}
-                        >
-                          {
-                            this.state.lockExpired ? (
-                              <Flex
-                                alignItems={'center'}
-                                flexDirection={'column'}
-                              >
-                                <Icon
-                                  name={'LockOpen'}
-                                  color={'cellText'}
-                                  size={this.props.isMobile ? '1.8em' : '2.3em'}
-                                />
-                                <Text
-                                  mt={1}
-                                  mb={3}
-                                  fontSize={2}
-                                  color={'cellText'}
-                                  textAlign={'center'}
-                                >
-                                  The lock has expired, you can withdraw your {this.props.selectedToken}.
-                                </Text>
-                                <ExecuteTransaction
-                                  params={[]}
-                                  {...this.props}
-                                  Component={Button}
-                                  parentProps={{
-                                    width:1,
-                                    alignItems:'center',
-                                    justifyContent:'center'
-                                  }}
-                                  componentProps={{
-                                    fontSize:3,
-                                    fontWeight:3,
-                                    size:'medium',
-                                    width:[1,1/2],
-                                    borderRadius:4,
-                                    mainColor:'redeem',
-                                    value:'Withdraw',
-                                  }}
-                                  action={'Withdraw'}
-                                  methodName={'withdraw'}
-                                  contractName={this.props.contractInfo.name}
-                                  callback={this.transactionSucceeded.bind(this)}
-                                />
-                              </Flex>
-                            ) : (
-                              <Flex
-                                alignItems={'center'}
-                                flexDirection={'column'}
-                              >
-                                <Icon
-                                  name={'LockOpen'}
-                                  color={'cellText'}
-                                  size={this.props.isMobile ? '1.8em' : '2.3em'}
-                                />
-                                <Text
-                                  mt={1}
-                                  fontSize={2}
-                                  color={'cellText'}
-                                  textAlign={'center'}
-                                >
-                                  The lock is not expired yet, please wait until {this.functionsUtil.strToMoment(this.state.lockedEnd*1000).utc().format('YYYY/MM/DD HH:mm')} UTC to withdraw your {this.props.selectedToken}.
-                                </Text>
-                              </Flex>
-                            )
-                          }
-                        </DashboardCard>
-                      ) : isClaim && (
-                        <DashboardCard
-                          cardProps={{
-                            p:3
-                          }}
-                        >
-                          {
-                            (this.state.claimable && this.state.claimable.gt(0)) ? (
-                              <Flex
-                                alignItems={'center'}
-                                flexDirection={'column'}
-                              >
-                                <Icon
-                                  color={'cellText'}
-                                  name={'MonetizationOn'}
-                                  size={this.props.isMobile ? '1.8em' : '2.3em'}
-                                />
-                                <Text
-                                  mt={1}
-                                  mb={3}
-                                  fontSize={2}
-                                  color={'cellText'}
-                                  textAlign={'center'}
-                                >
-                                  You can claim {this.state.claimable.toFixed(8)} {this.props.contractInfo.rewardToken}.
-                                </Text>
-                                <ExecuteTransaction
-                                  params={[]}
-                                  {...this.props}
-                                  Component={Button}
-                                  parentProps={{
-                                    width:1,
-                                    alignItems:'center',
-                                    justifyContent:'center'
-                                  }}
-                                  componentProps={{
-                                    fontSize:3,
-                                    fontWeight:3,
-                                    size:'medium',
-                                    width:[1,1/3],
-                                    value:'Claim',
-                                    borderRadius:4,
-                                    mainColor:'redeem',
-                                  }}
-                                  action={'Claim'}
-                                  methodName={'claim'}
-                                  callback={this.transactionSucceeded.bind(this)}
-                                  contractName={this.props.tokenConfig.feeDistributor.name}
-                                />
-                              </Flex>
-                            ) : (
-                              <Flex
-                                alignItems={'center'}
-                                flexDirection={'column'}
-                              >
-                                <Icon
-                                  name={'MoneyOff'}
-                                  color={'cellText'}
-                                  size={this.props.isMobile ? '1.8em' : '2.3em'}
-                                />
-                                <Text
-                                  mt={1}
-                                  fontSize={2}
-                                  color={'cellText'}
-                                  textAlign={'center'}
-                                >
-                                  You don't have rewards to Claim yet.
-                                </Text>
-                              </Flex>
-                            )
-                          }
-                        </DashboardCard>
-                      )
-                    }
-                  </Box>
-                ) : !this.props.account ? (
-                  <ConnectBox
-                    {...this.props}
+                          )
+                        }
+                      </DashboardCard>
+                    )
+                  }
+                </Box>
+              ) : !this.props.account ? (
+                <ConnectBox
+                  cardProps={{
+                    mt:2
+                  }}
+                  {...this.props}
+                />
+              ) : (
+                <Flex
+                  mt={3}
+                  mb={3}
+                  width={1}
+                >
+                  <FlexLoader
+                    flexProps={{
+                      flexDirection:'row'
+                    }}
+                    loaderProps={{
+                      size:'30px'
+                    }}
+                    textProps={{
+                      ml:2
+                    }}
+                    text={'Loading info...'}
                   />
-                ) : (
-                  <Flex
-                    mt={3}
-                    mb={3}
-                    width={1}
-                  >
-                    <FlexLoader
-                      flexProps={{
-                        flexDirection:'row'
-                      }}
-                      loaderProps={{
-                        size:'30px'
-                      }}
-                      textProps={{
-                        ml:2
-                      }}
-                      text={'Loading info...'}
-                    />
-                  </Flex>
-                )
+                </Flex>
+              )
             }
           </Box>
         )
