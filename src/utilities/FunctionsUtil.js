@@ -1792,7 +1792,7 @@ class FunctionsUtil {
     const apiKey = keys[apiKeyIndex];
     const data = await this.makeRequest(endpoint+'&apikey='+apiKey);
 
-    console.log('makeEtherscanApiRequest',endpoint+'&apikey='+apiKey,apiKeyIndex+'/'+keys.length,data,(data.data ? data.data.message : null),apiKeyIndex<keys.length-1);
+    // console.log('makeEtherscanApiRequest',endpoint+'&apikey='+apiKey,apiKeyIndex+'/'+keys.length,data,(data.data ? data.data.message : null),apiKeyIndex<keys.length-1);
 
     if (data && data.data && data.data.message === 'OK'){
       cachedRequests[endpoint] = {

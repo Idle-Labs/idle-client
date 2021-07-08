@@ -193,7 +193,8 @@ class NexusMutual extends Component {
       defaultClaimableCover
     });
 
-    const selectedToken = Object.keys(this.props.toolProps.availableTokens)[0];
+    const paramIsValidToken = this.props.urlParams.param2 && Object.keys(this.props.toolProps.availableTokens).includes(this.props.urlParams.param2);
+    const selectedToken = paramIsValidToken ? this.props.urlParams.param2 : Object.keys(this.props.toolProps.availableTokens)[0];
     this.changeSelectedToken(selectedToken);
     // console.log('coverBoughtEvents',coverBoughtEvents,'claimSubmittedEvents',claimSubmittedEvents,'claimableCovers',claimableCovers);
   }
@@ -629,7 +630,7 @@ class NexusMutual extends Component {
                         width={1}
                       >
                         <Text mb={1}>
-                          Select token to cover:
+                          Select Token to Cover:
                         </Text>
                         <AssetSelector
                           {...this.props}
@@ -647,7 +648,7 @@ class NexusMutual extends Component {
                       >
                         <Text
                           mb={1}>
-                          Select underlying:
+                          Select Payment Asset:
                         </Text>
                         <AssetSelector
                           {...this.props}

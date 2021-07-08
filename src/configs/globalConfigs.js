@@ -1966,7 +1966,7 @@ const globalConfigs = {
       }
     },
     nexusMutual:{
-      enabled:false,
+      enabled:true,
       icon:'Security',
       route:'nexus-mutual',
       label:'Nexus Mutual',
@@ -2018,14 +2018,15 @@ const globalConfigs = {
         },
       },
       directProps:{
-        startBlock:25858186, // Kovan
+        // startBlock:25858186, // Kovan
+        startBlock:12783137, // Mainnet
         // Yield token covers have a 14 days grace period
         yieldTokenCoverGracePeriod: 14 * 24 * 60 * 60 * 1000,
         contractInfo:{
           abi:NexusMutualDistributor,
           name:'NexusMutualDistributor',
           // address:'0xe2d569dc064b3b91f514e775c6026e04d2c887a9' // Kovan
-          address:'0xA5F3cE699276cf70400ae6a3E8651619b39668a8' // Mainnet
+          address:'0xf2b36f823eae36e53a5408d8bd452748b24fbf76' // Mainnet
         },
         incidentsInfo:{
           abi:NexusMutualIncidents,
