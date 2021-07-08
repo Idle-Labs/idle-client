@@ -123,14 +123,16 @@ class IdleGovToken{
 
     const cachedDataKey = `getIdleSpeed_${idleTokenAddress}`;
     const cachedData = this.functionsUtil.getCachedDataWithLocalStorage(cachedDataKey);
+
     if (cachedData !== null && !this.functionsUtil.BNify(cachedData).isNaN()){
       return this.functionsUtil.BNify(cachedData);
     }
 
-    let idleSpeeds = await this.functionsUtil.genericContractCallCached('IdleController','idleSpeeds',[idleTokenAddress]);
+    let idleSpeeds = await this.functionsUtil.genericContractCall('IdleController','idleSpeeds',[idleTokenAddress]);
+
     if (idleSpeeds && !this.functionsUtil.BNify(idleSpeeds).isNaN()){
       idleSpeeds = this.functionsUtil.BNify(idleSpeeds);
-      return this.functionsUtil.setCachedDataWithLocalStorage(cachedDataKey,idleSpeeds);
+      return this.functionsUtil.setCachedDataWithLocalStorage(cachedDataKey,idleSpeeds,1800);
     }
     return null;
   }

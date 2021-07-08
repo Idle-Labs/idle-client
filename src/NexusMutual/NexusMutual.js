@@ -10,7 +10,7 @@ import CardIconButton from '../CardIconButton/CardIconButton';
 import GenericSelector from '../GenericSelector/GenericSelector';
 import SendTxWithBalance from '../SendTxWithBalance/SendTxWithBalance';
 import ExecuteTransaction from '../ExecuteTransaction/ExecuteTransaction';
-import { Flex, Box, Text, Input, Link, Progress, Button, Icon } from "rimble-ui";
+import { Flex, Box, Text, Input, Link, Progress, Button, Icon, Tooltip } from "rimble-ui";
 
 class NexusMutual extends Component {
 
@@ -646,10 +646,26 @@ class NexusMutual extends Component {
                         mt={2}
                         width={1}
                       >
-                        <Text
-                          mb={1}>
-                          Select Payment Asset:
-                        </Text>
+                        <Flex
+                          mb={1}
+                          alignItems={'center'}
+                          flexDirection={'row'}
+                        >
+                          <Text>
+                            Select Payment Asset:
+                          </Text>
+                          <Tooltip
+                            placement={'top'}
+                            message={`This is the asset that you will use as payment method for the coverage premium`}
+                          >
+                            <Icon
+                              ml={1}
+                              size={'1em'}
+                              name={"Info"}
+                              color={'cellTitle'}
+                            />
+                          </Tooltip>
+                        </Flex>
                         <AssetSelector
                           {...this.props}
                           showBalance={false}
@@ -810,7 +826,7 @@ class NexusMutual extends Component {
                         ) : (
                           <IconBox
                             cardProps={{
-                              mt:2,
+                              mt:3
                             }}
                             icon={'MoneyOff'}
                             iconProps={{

@@ -2149,11 +2149,12 @@ class FunctionsUtil {
   getTokenExchangeRate = async (contractName,exchangeRateParams) => {
     const cachedDataKey = `exchangeRate_${contractName}_${exchangeRateParams.name}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+
     if (cachedData && !this.BNify(cachedData).isNaN()){
       return this.BNify(cachedData);
     }
 
-    const exchangeRate = this.genericContractCall(contractName,exchangeRateParams.name,exchangeRateParams.params);
+    const exchangeRate = await this.genericContractCall(contractName,exchangeRateParams.name,exchangeRateParams.params);
     return this.setCachedDataWithLocalStorage(cachedDataKey,exchangeRate,null);
   }
   getTokenDecimals = async (contractName) => {
@@ -3436,7 +3437,7 @@ class FunctionsUtil {
 
     let decimals = tokenConfig.decimals;
 
-    let tokenPrice = await this.genericContractCall(tokenConfig.idle.token,'tokenPrice',[],{},blockNumber);
+    let tokenPrice = await this.genericContractCallCached(tokenConfig.idle.token,'tokenPrice',[],{},blockNumber);
 
     // If price is NaN try to take it from APIs
     if (!tokenPrice && timestamp){
@@ -3849,20 +3850,19 @@ class FunctionsUtil {
       return this.BNify(cachedData);
     }
 
-    const tokenPrice = await this.genericContractCall(contractName, 'tokenPrice',[]);
-    return this.setCachedDataWithLocalStorage(cachedDataKey,tokenPrice);
+    const tokenPrice = await this.genericContractCall(contractName,'tokenPrice',[],{},blockNumber);
+    return this.setCachedDataWithLocalStorage(cachedDataKey,tokenPrice,60);
   }
   getContractBalance = async (contractName,address,blockNumber='latest') => {
     address = address ? address : this.props.tokenConfig.idle.address;
-    /*
     const cachedDataKey = `balanceOf_${contractName}_${address}_${blockNumber}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData && !this.BNify(cachedData).isNaN()){
       return this.BNify(cachedData);
     }
-    */
-    return await this.genericContractCall(contractName, 'balanceOf', [address], {}, blockNumber);
-    // return this.setCachedDataWithLocalStorage(cachedDataKey,balance);
+
+    const balance = await this.genericContractCall(contractName, 'balanceOf', [address], {}, blockNumber);
+    return this.setCachedDataWithLocalStorage(cachedDataKey,balance,30);
   }
   getProtocolBalance = async (contractName,address) => {
     return await this.getContractBalance(contractName,address);
@@ -3962,6 +3962,11 @@ class FunctionsUtil {
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData){
       return cachedData;
+    }
+
+    // Store forever for past block
+    if (blockNumber !== 'latest'){
+      TTL = null;
     }
 
     const result = await this.genericContractCall(contractName, methodName, params, callParams, blockNumber);
@@ -4433,7 +4438,7 @@ class FunctionsUtil {
         const blocksForPrevTokenPrice = 10;
         let [tokenPrice,prevTokenPrice] = await Promise.all([
           this.genericContractCall(curveSwapContract.name,'get_virtual_price'),
-          this.genericContractCall(curveSwapContract.name,'get_virtual_price',[],{},blockNumber-blocksForPrevTokenPrice)
+          this.genericContractCallCached(curveSwapContract.name,'get_virtual_price',[],{},blockNumber-blocksForPrevTokenPrice)
         ]);
 
         if (tokenPrice && prevTokenPrice){
@@ -4463,7 +4468,7 @@ class FunctionsUtil {
   }
   getCurveTokenPrice = async (blockNumber='latest',fixDecimals=true) => {
     const migrationContract = await this.getCurveDepositContract();
-    let curveTokenPrice = await this.genericContractCall(migrationContract.name,'get_virtual_price',[],{},blockNumber);
+    let curveTokenPrice = await this.genericContractCallCached(migrationContract.name,'get_virtual_price',[],{},blockNumber);
     if (curveTokenPrice){
       curveTokenPrice = this.BNify(curveTokenPrice);
       if (fixDecimals){
@@ -5483,7 +5488,7 @@ class FunctionsUtil {
       account = this.props.account;
     }
     const output = {};
-    const govTokensAmounts = await this.genericContractCallCached(tokenConfig.idle.token,'getGovTokensAmounts',[account]);
+    const govTokensAmounts = await this.getGovTokensUserAmounts(tokenConfig.idle.token,account);
     if (govTokensAmounts){
       await this.asyncForEach(govTokensAmounts, async (govTokenAmount,govTokenIndex) => {
         // Get gov Token config by index
@@ -5503,6 +5508,7 @@ class FunctionsUtil {
   getGovTokenAddessByIndex = async (token,govTokenIndex) => {
     const cachedDataKey = `govTokenAddressByIndex_${token}_${govTokenIndex}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    // console.log(cachedDataKey,cachedData);
     if (cachedData){
       return cachedData;
     }

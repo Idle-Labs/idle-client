@@ -1211,6 +1211,77 @@ const globalConfigs = {
         }
       }
     },
+    nexusMutual:{
+      enabled:true,
+      icon:'Security',
+      route:'nexus-mutual',
+      label:'Nexus Mutual',
+      desc:'Buy NexusMutual cover without KYC for idleDAIYield or idleUSDTYield',
+      subComponent:NexusMutual,
+      props:{
+        availableTokens:{
+          idleDAIYield:{
+            decimals:18,
+            abi:IdleTokenV4,
+            name:'idleDAIYield',
+            token:'idleDAIYield', // Mainnet
+            // token:'idleDAIYieldMock', // Kovan
+            address:'0x0000000000000000000000000000000000000011',
+            realAddress:'0x3fe7940616e5bc47b0775a0dccf6237893353bb4', // Mainnet
+            // realAddress:'0xbd0b0205408509544815d377214d8f2cbe3e5381', // Kovan
+            underlying:{
+              DAI:{
+                abi:ERC20,
+                name:'DAI', // Mainnet
+                token:'DAI',
+                decimals:18,
+                // name:'DAIMock', // Kovan
+                address:'0x6b175474e89094c44da98b954eedeac495271d0f' // Mainnet
+                // address:'0x5C422252C6a47CdacF667521566Bf7bD5b0d769B' // Kovan
+              },
+            }
+          },
+          idleUSDTYield:{
+            decimals:18,
+            abi:IdleTokenV4,
+            name:'idleUSDTYield',
+            token:'idleUSDTYield', // Mainnet
+            // token:'idleUSDTYieldMock', // Kovan
+            address:'0x0000000000000000000000000000000000000012',
+            realAddress:'0xF34842d05A1c888Ca02769A633DF37177415C2f8',
+            underlying:{
+              DAI:{
+                abi:ERC20,
+                name:'DAI', // Mainnet
+                token:'DAI',
+                decimals:18,
+                // name:'DAIMock', // Kovan
+                address:'0x6b175474e89094c44da98b954eedeac495271d0f' // Mainnet
+                // address:'0x5C422252C6a47CdacF667521566Bf7bD5b0d769B' // Kovan
+              },
+            }
+          }
+        },
+      },
+      directProps:{
+        // startBlock:25858186, // Kovan
+        startBlock:12783137, // Mainnet
+        // Yield token covers have a 14 days grace period
+        yieldTokenCoverGracePeriod: 14 * 24 * 60 * 60 * 1000,
+        contractInfo:{
+          abi:NexusMutualDistributor,
+          name:'NexusMutualDistributor',
+          // address:'0xe2d569dc064b3b91f514e775c6026e04d2c887a9' // Kovan
+          address:'0xf2b36f823eae36e53a5408d8bd452748b24fbf76' // Mainnet
+        },
+        incidentsInfo:{
+          abi:NexusMutualIncidents,
+          name:'NexusMutualIncidents',
+          // address:'0x322f9a880189E3FFFf59b74644e13e5763C5AdB9' // Kovan
+          address:'0x8ceba69a8e96a4ce71aa65859dbdb180b489a719' // Mainnet
+        }
+      }
+    },
     b2bVesting:{
       enabled:true,
       visible:true,
@@ -1967,77 +2038,6 @@ const globalConfigs = {
       directProps:{
         showInline:true,
         showAllTokens:true
-      }
-    },
-    nexusMutual:{
-      enabled:true,
-      icon:'Security',
-      route:'nexus-mutual',
-      label:'Nexus Mutual',
-      desc:'Buy NexusMutual cover without KYC for idleDAIYield or idleUSDTYield',
-      subComponent:NexusMutual,
-      props:{
-        availableTokens:{
-          idleDAIYield:{
-            decimals:18,
-            abi:IdleTokenV4,
-            name:'idleDAIYield',
-            token:'idleDAIYield', // Mainnet
-            // token:'idleDAIYieldMock', // Kovan
-            address:'0x0000000000000000000000000000000000000011',
-            realAddress:'0x3fe7940616e5bc47b0775a0dccf6237893353bb4', // Mainnet
-            // realAddress:'0xbd0b0205408509544815d377214d8f2cbe3e5381', // Kovan
-            underlying:{
-              DAI:{
-                abi:ERC20,
-                name:'DAI', // Mainnet
-                token:'DAI',
-                decimals:18,
-                // name:'DAIMock', // Kovan
-                address:'0x6b175474e89094c44da98b954eedeac495271d0f' // Mainnet
-                // address:'0x5C422252C6a47CdacF667521566Bf7bD5b0d769B' // Kovan
-              },
-            }
-          },
-          idleUSDTYield:{
-            decimals:18,
-            abi:IdleTokenV4,
-            name:'idleUSDTYield',
-            token:'idleUSDTYield', // Mainnet
-            // token:'idleUSDTYieldMock', // Kovan
-            address:'0x0000000000000000000000000000000000000012',
-            realAddress:'0xF34842d05A1c888Ca02769A633DF37177415C2f8',
-            underlying:{
-              DAI:{
-                abi:ERC20,
-                name:'DAI', // Mainnet
-                token:'DAI',
-                decimals:18,
-                // name:'DAIMock', // Kovan
-                address:'0x6b175474e89094c44da98b954eedeac495271d0f' // Mainnet
-                // address:'0x5C422252C6a47CdacF667521566Bf7bD5b0d769B' // Kovan
-              },
-            }
-          }
-        },
-      },
-      directProps:{
-        // startBlock:25858186, // Kovan
-        startBlock:12783137, // Mainnet
-        // Yield token covers have a 14 days grace period
-        yieldTokenCoverGracePeriod: 14 * 24 * 60 * 60 * 1000,
-        contractInfo:{
-          abi:NexusMutualDistributor,
-          name:'NexusMutualDistributor',
-          // address:'0xe2d569dc064b3b91f514e775c6026e04d2c887a9' // Kovan
-          address:'0xf2b36f823eae36e53a5408d8bd452748b24fbf76' // Mainnet
-        },
-        incidentsInfo:{
-          abi:NexusMutualIncidents,
-          name:'NexusMutualIncidents',
-          // address:'0x322f9a880189E3FFFf59b74644e13e5763C5AdB9' // Kovan
-          address:'0x8ceba69a8e96a4ce71aa65859dbdb180b489a719' // Mainnet
-        }
       }
     },
     tokenSwap:{

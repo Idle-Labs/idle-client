@@ -264,7 +264,7 @@ class IdleStaking extends Component {
     ] = await Promise.all([
       this.functionsUtil.getIdleStakingRewardsTxs(),
       this.functionsUtil.getTokenTotalSupply(this.props.contractInfo.name),
-      this.functionsUtil.genericContractCall(this.props.contractInfo.name,'supply'),
+      this.functionsUtil.genericContractCallCached(this.props.contractInfo.name,'supply'),
       this.functionsUtil.getTokenBalance(this.props.contractInfo.rewardToken,this.props.tokenConfig.feeDistributor.address),
       this.props.account ? this.functionsUtil.genericContractCall(this.props.contractInfo.name,'locked',[this.props.account]) : null,
       this.props.account ? this.functionsUtil.getContractBalance(this.props.contractInfo.name,this.props.account) : this.functionsUtil.BNify(0),
