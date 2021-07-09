@@ -117,7 +117,17 @@ class App extends Component {
       }
     });
 
-    this.functionsUtil.setLocalStorage('cachedData',cachedData,true);
+
+    let storedCachedData = this.functionsUtil.getStoredItem('cachedData');
+    Object.keys(storedCachedData).forEach( key => {
+      const storedData = storedCachedData[key];
+      if (storedData.expirationDate !== null){
+        delete storedCachedData[key];
+      }
+    });
+
+    this.functionsUtil.setLocalStorage('cachedData',storedCachedData,true);
+
     await this.setState({
       cachedData
     },() => {
@@ -316,6 +326,8 @@ class App extends Component {
 
   async componentWillMount() {
 
+    window.clearCachedData = this.clearCachedData;
+
     this.loadUtils();
 
     window.BNify = this.functionsUtil.BNify;
@@ -491,8 +503,11 @@ class App extends Component {
     this.setState({
       customAddress:null
     });
-    // Reset Localstorage
-    this.functionsUtil.clearStoredData(['version','themeMode','lastLogin']);
+    // Clear cached data
+    this.clearCachedData(()=>{
+      // Reset Localstorage
+      this.functionsUtil.clearStoredData(['version','themeMode','lastLogin','cachedData']);
+    });
   }
 
   setNetwork(network){
