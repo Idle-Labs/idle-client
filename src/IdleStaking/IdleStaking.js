@@ -20,9 +20,9 @@ class IdleStaking extends Component {
     globalStats:[],
     lockPeriods:[
       {
-        value:7,
+        value:14,
         type:'day',
-        label:'1 week'
+        label:'2 week'
       },
       {
         value:1,
@@ -142,9 +142,11 @@ class IdleStaking extends Component {
 
   checkButtonDisabled(){
     let buttonDisabled = false;
-    const minDate = this.state.lockedEnd ? this.functionsUtil.strToMoment(this.state.lockedEnd*1000).add(7,'day') : this.functionsUtil.strToMoment().add(7,'day');
+    const minLockPeriod = this.state.lockPeriods[0];
+    const maxLockPeriod = Object.assign([],this.state.lockPeriods).pop();
+    const minDate = this.state.lockedEnd ? this.functionsUtil.strToMoment(this.state.lockedEnd*1000).add(minLockPeriod.value,minLockPeriod.type) : this.functionsUtil.strToMoment().add(minLockPeriod.value,minLockPeriod.type);
     const mDate = this.functionsUtil.strToMoment(this.state.lockPeriodTimestamp*1000);
-    const maxDate = this.functionsUtil.strToMoment().add(4,'year');
+    const maxDate = this.functionsUtil.strToMoment().add(maxLockPeriod.value,maxLockPeriod.type);
     switch (this.state.selectedAction){
       default:
       case 'Lock':
