@@ -22,7 +22,7 @@ class IdleStaking extends Component {
       {
         value:14,
         type:'day',
-        label:'2 week'
+        label:'2 weeks'
       },
       {
         value:1,
