@@ -1,3 +1,4 @@
+import ExtLink from '../ExtLink/ExtLink';
 import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
@@ -126,7 +127,7 @@ class NexusMutual extends Component {
           return curr;
         }
 
-        if (curr.returnValues.priceBefore.gt(prev.returnValues.priceBefore)) {
+        if (this.functionsUtil.BNify(curr.returnValues.priceBefore).gt(prev.returnValues.priceBefore)) {
           return curr;
         }
         return prev;
@@ -531,6 +532,51 @@ class NexusMutual extends Component {
             </Flex>
           </Box>
           {
+            this.state.selectedAction === 'deposit' &&
+              <IconBox
+                cardProps={{
+                  py:2,
+                  px:3,
+                  my:2,
+                  width:1,
+                  isActive:true,
+                  isInteractive:false
+                }}
+                icon={'LightbulbOutline'}
+                iconProps={{
+                  color:'flashColor'
+                }}
+                textProps={{
+                  color:'flashColor'
+                }}
+                text={`If your yield bearing token de-pegs in value by more than 10%, claim up to 90% of your loss by swapping your yield bearing token for a claim payment.`}
+              >
+                <ExtLink
+                  ml={1}
+                  fontWeight={500}
+                  color={'primary'}
+                  fontSize={'15px'}
+                  hoverColor={'primary'}
+                  href={'https://nexusmutual.io/pages/YieldTokenCoverv1.0.pdf'}
+                >
+                  <Flex
+                    alignItems={'center'}
+                    flexDirection={'row'}
+                    justifyContent={'center'}
+                  >
+                    Read More
+                    <Icon
+                      ml={1}
+                      size={'0.9em'}
+                      color={'primary'}
+                      name={'OpenInNew'}
+                    />
+                    .
+                  </Flex>
+                </ExtLink>
+              </IconBox>
+          }
+          {
             this.state.selectedAction === 'deposit' ? (
               <Flex
                 width={1}
@@ -675,7 +721,7 @@ class NexusMutual extends Component {
                         />
                       </Box>
                       {
-                        this.state.maxCapacity.gt(0) ? (
+                        this.functionsUtil.BNify(this.state.maxCapacity).gt(0) ? (
                           <Box
                             width={1}
                           >
@@ -950,7 +996,7 @@ class NexusMutual extends Component {
                         justifyContent={'center'}
                       >
                         {
-                          this.state.tokenBalance.lt(this.functionsUtil.BNify(this.state.quote.price)) ? (
+                          this.functionsUtil.BNify(this.state.tokenBalance).lt(this.functionsUtil.BNify(this.state.quote.price)) ? (
                             <DashboardCard
                               cardProps={{
                                 p:3,
@@ -1183,7 +1229,7 @@ class NexusMutual extends Component {
                               contractApproved={this.yieldTokenApproveSucceeded.bind(this)}
                               getTransactionParams={this.getClaimTransactionParams.bind(this)}
                               approveDescription={'To claim your tokens you need to approve the Smart-Contract.'}
-                              tokenBalance={this.state.yieldTokenBalance.gt(this.state.selectedCoverToClaim.maxCoveredAmount) ? this.state.selectedCoverToClaim.maxCoveredAmount : this.state.yieldTokenBalance }
+                              tokenBalance={this.functionsUtil.BNify(this.state.yieldTokenBalance).gt(this.state.selectedCoverToClaim.maxCoveredAmount) ? this.state.selectedCoverToClaim.maxCoveredAmount : this.state.yieldTokenBalance }
                             >
                               <DashboardCard
                                 cardProps={{
