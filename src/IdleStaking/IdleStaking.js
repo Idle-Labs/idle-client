@@ -261,8 +261,8 @@ class IdleStaking extends Component {
       tokenUserBalance,
       claimable,
       claimEvents,
-      checkpointEvents,
-      depositEvents,
+      // checkpointEvents,
+      depositEvents
     ] = await Promise.all([
       this.functionsUtil.getIdleStakingRewardsTxs(),
       this.functionsUtil.getTokenTotalSupply(this.props.contractInfo.name),
@@ -272,7 +272,7 @@ class IdleStaking extends Component {
       this.props.account ? this.functionsUtil.getContractBalance(this.props.contractInfo.name,this.props.account) : this.functionsUtil.BNify(0),
       this.props.account ? this.functionsUtil.genericContractCall(this.props.tokenConfig.feeDistributor.name,'claim',[this.props.account]) : this.functionsUtil.BNify(0),
       this.functionsUtil.getContractEvents(this.props.tokenConfig.feeDistributor.name,'Claimed',{fromBlock: this.props.tokenConfig.feeDistributor.fromBlock, toBlock:'latest'}),
-      this.functionsUtil.getContractEvents(this.props.tokenConfig.feeDistributor.name,'CheckpointToken',{fromBlock: this.props.tokenConfig.feeDistributor.fromBlock, toBlock:'latest'}),
+      // this.functionsUtil.getContractEvents(this.props.tokenConfig.feeDistributor.name,'CheckpointToken',{fromBlock: this.props.tokenConfig.feeDistributor.fromBlock, toBlock:'latest'}),
       this.props.account ? this.functionsUtil.getContractEvents(this.props.contractInfo.name,'Deposit',{fromBlock: this.props.contractInfo.fromBlock, toBlock:'latest',filter:{provider:this.props.account}}) : []
     ]);
 
@@ -289,21 +289,24 @@ class IdleStaking extends Component {
 
     tokenUserBalance = this.functionsUtil.fixTokenDecimals(tokenUserBalance,this.props.contractInfo.decimals);
 
-    const totalDeposits = this.functionsUtil.fixTokenDecimals(totalSupply,this.props.tokenConfig.decimals);
+    const totalDeposited = totalSupply ? this.functionsUtil.fixTokenDecimals(totalSupply,this.props.tokenConfig.decimals) : this.functionsUtil.BNify(0);
+    const totalLockedFunds = totalSupply ? this.functionsUtil.formatMoney(totalDeposited,4)+' '+this.props.selectedToken : (this.state.stats.length ? this.state.stats[0] : this.functionsUtil.formatMoney(totalDeposited,4)+' '+this.props.selectedToken);
     stats.push({
       title:'Total Locked Funds',
-      value:this.functionsUtil.formatMoney(totalDeposits,4)+' '+this.props.selectedToken
+      value:totalLockedFunds
     });
 
-    tokenTotalSupply = this.functionsUtil.fixTokenDecimals(tokenTotalSupply,this.props.contractInfo.decimals);
+    tokenTotalSupply = tokenTotalSupply ? this.functionsUtil.fixTokenDecimals(tokenTotalSupply,this.props.tokenConfig.decimals) : this.functionsUtil.BNify(0);
+    const stkTokenTotalSupply = tokenTotalSupply ? this.functionsUtil.formatMoney(tokenTotalSupply,4)+' '+this.props.contractInfo.name : (this.state.stats.length ? this.state.stats[1] : this.functionsUtil.formatMoney(tokenTotalSupply,4)+' '+this.props.contractInfo.name);
     stats.push({
       title:`${this.props.contractInfo.name} Total Supply`,
-      value:this.functionsUtil.formatMoney(tokenTotalSupply,4)+' '+this.props.contractInfo.name
+      value:stkTokenTotalSupply
     });
 
+    const claimableRewardsFormatted = claimableRewards ? this.functionsUtil.formatMoney(claimableRewards,4)+' '+this.props.contractInfo.rewardToken : (this.state.stats.length ? this.state.stats[2] : this.functionsUtil.formatMoney(claimableRewards,4)+' '+this.props.contractInfo.rewardToken);
     stats.push({
       title:'Claimable Rewards',
-      value:this.functionsUtil.formatMoney(claimableRewards,4)+' '+this.props.contractInfo.rewardToken
+      value:claimableRewardsFormatted
     });
 
     const totalClaimed = claimEvents.reduce( (totalClaimed,event) => {
@@ -311,10 +314,11 @@ class IdleStaking extends Component {
       totalClaimed = totalClaimed.plus(claimedAmount);
       return totalClaimed;
     },this.functionsUtil.BNify(0));
-    const totalRewards = totalClaimed.plus(claimableRewards);
+    const totalRewards = claimableRewards ? totalClaimed.plus(claimableRewards) : this.functionsUtil.BNify(0);
+    const totalRewardsFormatted = claimableRewards ? this.functionsUtil.formatMoney(totalRewards,4)+' '+this.props.contractInfo.rewardToken : (this.state.stats.length ? this.state.stats[3] : this.functionsUtil.formatMoney(totalRewards,4)+' '+this.props.contractInfo.rewardToken);
     stats.push({
       title:'Total Rewards',
-      value:this.functionsUtil.formatMoney(totalRewards,4)+' '+this.props.contractInfo.rewardToken
+      value:totalRewardsFormatted
     });
 
     const stakedBalance = lockedInfo && lockedInfo.amount ? this.functionsUtil.fixTokenDecimals(lockedInfo.amount,this.props.tokenConfig.decimals) : this.functionsUtil.BNify(0);
