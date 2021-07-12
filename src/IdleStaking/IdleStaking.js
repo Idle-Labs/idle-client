@@ -337,7 +337,7 @@ class IdleStaking extends Component {
       value:`${this.functionsUtil.formatMoney(tokenUserBalance,4)} ${this.props.contractInfo.name}`,
     });
     
-    claimable = this.functionsUtil.fixTokenDecimals(claimable,this.props.tokenConfig.decimals);
+    claimable = claimable ? this.functionsUtil.fixTokenDecimals(claimable,this.props.tokenConfig.decimals) : this.functionsUtil.BNify(0);
     const currentRewards = this.functionsUtil.formatMoney(claimable,4);
     globalStats.push({
       title:'Claimable Rewards',
@@ -356,13 +356,15 @@ class IdleStaking extends Component {
     },this.functionsUtil.BNify(0));
 
     stakeStartTime = stakedBalance.gt(0) ? Math.ceil(stakeStartTime.div(stakedBalance)) : 0;
-    const latestCheckpoint = checkpointEvents.length ? checkpointEvents[checkpointEvents.length-1] : null;
-    const lastCheckpointTime = latestCheckpoint ? this.functionsUtil.BNify(latestCheckpoint.returnValues.time) : this.functionsUtil.BNify(parseInt(Date.now()/1000));
-    const stakePeriod = lastCheckpointTime.minus(stakeStartTime);
+    // const latestCheckpoint = checkpointEvents.length ? checkpointEvents[checkpointEvents.length-1] : null;
+    const latestDistribution = Object.assign([],etherscanRewardsTxs).pop();
+    const latestDistributionTime = latestDistribution ? this.functionsUtil.BNify(latestDistribution.timeStamp) : this.functionsUtil.BNify(parseInt(Date.now()/1000));
+    // const latestDistributionTime = latestCheckpoint ? this.functionsUtil.BNify(latestCheckpoint.returnValues.time) : this.functionsUtil.BNify(parseInt(Date.now()/1000));
+    const stakePeriod = latestDistributionTime.minus(stakeStartTime);
 
     const currentProfit = stakedBalance.gt(0) ? claimable.div(stakedBalance) : this.functionsUtil.BNify(0);
     const apr = stakePeriod.gt(0) ? currentProfit.times(this.functionsUtil.getGlobalConfig(['network','secondsPerYear'])).div(stakePeriod).times(100) : this.functionsUtil.BNify(0);
-    // console.log('APR',apr.toFixed(),currentProfit.toFixed(),stakePeriod.toFixed(),claimable.toFixed(),stakedBalance.toFixed());
+    // console.log('APR',apr.toFixed(),currentProfit.toFixed(),stakePeriod.toFixed(),claimable.toFixed(),stakedBalance.toFixed(),latestCheckpoint);
     globalStats.push({
       title:'APR',
       value:`${apr.toFixed(2)}%`,
@@ -1360,11 +1362,11 @@ class IdleStaking extends Component {
                               <Text
                                 mt={1}
                                 mb={3}
-                                fontSize={2}
+                                fontSize={[2,3]}
                                 color={'cellText'}
                                 textAlign={'center'}
                               >
-                                You can claim {this.state.claimable.toFixed(8)} {this.props.contractInfo.rewardToken}.
+                                You can claim <strong>{this.state.claimable.toFixed(8)} {this.props.contractInfo.rewardToken}</strong>.
                               </Text>
                               <ExecuteTransaction
                                 params={[]}
