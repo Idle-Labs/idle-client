@@ -40,8 +40,10 @@ class NexusMutual extends Component {
     claimId:null,
     capacity:null,
     loading:false,
+    coverCost:null,
     amountValue:'',
     periodValue:'',
+    yearlyCost:null,
     maxCapacity:null,
     amountValid:true,
     periodValid:true,
@@ -294,7 +296,7 @@ class NexusMutual extends Component {
   }
 
   changeAmount = (e) => {
-    const amountValue = e.target.value.length && !isNaN(e.target.value) ? e.target.value : '';
+    const amountValue = e.target.value.length && !isNaN(e.target.value) ? Math.floor(e.target.value) : '';
     const amountValid = this.functionsUtil.BNify(amountValue).gt(0) && this.functionsUtil.BNify(amountValue).lte(this.state.maxCapacity);
     this.setState({
       amountValue,
@@ -364,6 +366,10 @@ class NexusMutual extends Component {
     const priceWithFee = basePrice.mul(this.functionsUtil.toBN(feePercentage)).divn(10000).add(basePrice);
     const amountInWei = this.functionsUtil.toWei(coverData.coverAmount.toString());
     const maxPriceWithFee = priceWithFee;
+    const coverCost = this.functionsUtil.fixTokenDecimals(maxPriceWithFee,this.state.tokenConfig.decimals);
+    const yearlyCost = coverCost.div(this.state.amountValue).times(365).div(this.state.periodValue).times(100);
+
+    // console.log('coverCost',maxPriceWithFee,coverCost.toFixed(),this.state.amountValue.toFixed(),this.state.periodValue,yearlyCost.toFixed());
 
     const transactionParams = [
       coverData.contractAddress,
@@ -388,6 +394,8 @@ class NexusMutual extends Component {
       step,
       quote,
       loading,
+      coverCost,
+      yearlyCost,
       maxPriceWithFee,
       transactionValue,
       transactionParams
@@ -539,9 +547,9 @@ class NexusMutual extends Component {
                   px:3,
                   my:2,
                   width:1,
-                  isActive:true,
-                  isInteractive:false
                 }}
+                isActive={true}
+                isInteractive={false}
                 icon={'LightbulbOutline'}
                 iconProps={{
                   color:'flashColor'
@@ -736,6 +744,7 @@ class NexusMutual extends Component {
                               </Text>
                               <Input
                                 min={0}
+                                step={1}
                                 width={'100%'}
                                 type={"number"}
                                 required={true}
@@ -985,7 +994,23 @@ class NexusMutual extends Component {
                           fontWeight={3}
                           color={'primary'}
                         >
-                          {this.functionsUtil.fixTokenDecimals(this.state.maxPriceWithFee,this.state.tokenConfig.decimals).toFixed(6)} {this.state.selectedUnderlying}
+                          {this.state.coverCost.toFixed(6)} {this.state.selectedUnderlying}
+                        </Text>
+                        <Text
+                          mb={1}
+                          fontSize={1}
+                          fontWeight={2}
+                          color={'cellText'}
+                        >
+                          Yearly Cost:
+                        </Text>
+                        <Text
+                          mb={2}
+                          fontSize={2}
+                          fontWeight={3}
+                          color={'primary'}
+                        >
+                          {this.state.yearlyCost.toFixed(2)}%
                         </Text>
                       </DashboardCard>
                       <Flex

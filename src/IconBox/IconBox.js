@@ -11,6 +11,9 @@ class IconBox extends Component {
     return (
       <DashboardCard
         cardProps={cardProps}
+        isActive={this.props.isActive}
+        isVisible={this.props.isVisible}
+        isInteractive={this.props.isInteractive}
       >
         <Flex
           alignItems={'center'}
