@@ -1575,10 +1575,10 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@biconomy/mexa@^2.0.8":
-  version "2.0.8"
-  resolved "https://registry.yarnpkg.com/@biconomy/mexa/-/mexa-2.0.8.tgz#7ec3df6397d5fd7d913cfe6054c4878f5cdeea86"
-  integrity sha512-6doj2ResssslkJSnmgETlN5eo/f86B1WatmCGUfYq9yhrjLFIFPTnCn88yS7nC+WJtHY7/GmzXe0hjOU8HfHzg==
+"@biconomy/mexa@^2.0.10":
+  version "2.0.10"
+  resolved "https://registry.yarnpkg.com/@biconomy/mexa/-/mexa-2.0.10.tgz#f97fd51caab56476e9c9622340c9270a79f5d93f"
+  integrity sha512-rVYmg+PPsu+4QWrMmEWlOd9Hu+CMIuToA0JnUAPIfEkENZxN4fzYqA39HluFKVBbi5L+ps8iSwFrx12veN42ug==
   dependencies:
     "@babel/core" "^7.12.13"
     "@babel/runtime" "^7.12.13"
