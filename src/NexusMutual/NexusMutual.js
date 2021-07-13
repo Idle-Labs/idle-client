@@ -83,112 +83,18 @@ class NexusMutual extends Component {
   }
 
   async loadContracts(){
-    await Promise.all([
-      this.props.initContract(this.props.contractInfo.name, this.props.contractInfo.address, this.props.contractInfo.abi),
-      this.props.initContract(this.props.incidentsInfo.name, this.props.incidentsInfo.address, this.props.incidentsInfo.abi),
-    ]);
-
-    const fromBlock = this.props.startBlock;
-    // const masterAddress = await this.functionsUtil.genericContractCall(this.props.contractInfo.name,'master');
-    // await this.props.initContract('NXMaster', masterAddress, NXMaster);
-    const [
-      coverBoughtEvents,
-      claimSubmittedEvents,
-    ] = await Promise.all([
-       this.functionsUtil.getContractEvents(this.props.contractInfo.name,'CoverBought',{fromBlock, toBlock:'latest',filter:{buyer:this.props.account}}),
-       this.functionsUtil.getContractEvents(this.props.contractInfo.name,'ClaimSubmitted',{fromBlock, toBlock:'latest',filter:{buyer:this.props.account}})
-    ]);
-
-    // console.log('coverBoughtEvents',coverBoughtEvents,'claimSubmittedEvents',claimSubmittedEvents);
-
     const claimableCovers = [];
-    await this.functionsUtil.asyncForEach(coverBoughtEvents,async (cover) => {
-    // coverBoughtEvents.forEach( cover => {
-      const coverId = parseInt(cover.returnValues.coverId);
-      const claimSubmittedEvent = claimSubmittedEvents.find( claim => parseInt(claim.returnValues.coverId)===coverId );
-      const [
-        coverDetails,
-        incidentEvents
-      ] = await Promise.all([
-        this.functionsUtil.genericContractCall(this.props.contractInfo.name,'getCover',[coverId]),
-        this.functionsUtil.getContractEvents(this.props.incidentsInfo.name,'IncidentAdded',{fromBlock:cover.blockNumber, toBlock:'latest',filter:{productId:cover.contractAddress}})
-      ]);
-
-      // Check if the cover matches any incidents
-      const matchedIncidents = incidentEvents.filter(incident => {
-        // console.log(incident.returnValues.productId,coverDetails.contractAddress,cover.blockNumber,incident.blockNumber,incident.returnValues.incidentDate,coverDetails.validUntil,parseInt(coverDetails.validUntil) + this.props.yieldTokenCoverGracePeriod >= Date.now() / 1000);
-        return incident.returnValues.productId === coverDetails.contractAddress &&
-        this.functionsUtil.BNify(incident.blockNumber).gt(cover.blockNumber)  &&
-        this.functionsUtil.BNify(incident.returnValues.incidentDate).lt(coverDetails.validUntil) &&
-        parseInt(coverDetails.validUntil) + this.props.yieldTokenCoverGracePeriod >= Date.now() / 1000
-      });
-
-      // If multiple incidents match, return the one with the highest priceBefore
-      const matchedIncident = matchedIncidents.reduce((prev, curr) => {
-        if (!prev) {
-          return curr;
-        }
-
-        if (this.functionsUtil.BNify(curr.returnValues.priceBefore).gt(prev.returnValues.priceBefore)) {
-          return curr;
-        }
-        return prev;
-      }, null);
-
-      // console.log('cover',cover,'coverDetails',coverDetails,'matchedIncident',matchedIncident);
-
-      const yieldTokenConfig = Object.values(this.props.toolProps.availableTokens).find( tokenConfig => tokenConfig.address === coverDetails.contractAddress );
-      const sumAssured = this.functionsUtil.fixTokenDecimals(coverDetails.sumAssured,yieldTokenConfig.decimals);
-      const coverAssetConfig = Object.values(yieldTokenConfig.underlying).find( underlyingConfig => underlyingConfig.address === coverDetails.coverAsset );
-      const expiryDate = this.functionsUtil.strToMoment(coverDetails.validUntil*1000).format('YYYY-MM-DD');
-
-      const claimId = claimSubmittedEvent ? claimSubmittedEvent.returnValues.claimId : null;
-      const payoutOutcome = await this.functionsUtil.genericContractCall(this.props.contractInfo.name,'getPayoutOutcome',[claimId]);
-      const label = `${yieldTokenConfig.name} - ${sumAssured.toFixed(4)} ${coverAssetConfig.token} - Exp. ${expiryDate}`;
-      const value = coverId;
-
-      let claimedAmount = null;
-      if (claimSubmittedEvent){
-        const claimTxReceipt = await this.functionsUtil.getTransactionReceipt(claimSubmittedEvent.transactionHash);
-        const claimedAmountLog = claimTxReceipt ? claimTxReceipt.logs.find( log => log.address.toLowerCase() === coverAssetConfig.address.toLowerCase() ) : null;
-        claimedAmount = claimedAmountLog ? this.functionsUtil.fixTokenDecimals(parseInt(claimedAmountLog.data,16),coverAssetConfig.decimals) : this.functionsUtil.BNify(0);
-      }
-
-      // Yield token cover is claimable only when there is a matching incident
-      if (matchedIncident) {
-        const claimableAmount = this.functionsUtil.fixTokenDecimals(coverDetails.sumAssured,coverAssetConfig.decimals);
-
-        const claimablePrice = this.functionsUtil.BNify(matchedIncident.returnValues.priceBefore).times(0.9);
-        const maxCoveredAmount = this.functionsUtil.BNify(coverDetails.sumAssured).div(claimablePrice);
-        const coveredTokenAmount = this.functionsUtil.normalizeTokenAmount(maxCoveredAmount,coverAssetConfig.decimals);
-
-        claimableCovers.push({
-          label,
-          value,
-          sumAssured,
-          claimId:null,
-          claimedAmount,
-          payoutOutcome,
-          claimableAmount,
-          maxCoveredAmount,
-          coveredTokenAmount,
-          coverAsset:coverAssetConfig.token,
-          incident: {...matchedIncident, id: incidentEvents.findIndex(x => x.date === matchedIncident.date)},
-        });
+    const nexusMutualCoverages = await this.functionsUtil.getNexusMutualCoverages(this.props.account);
+    nexusMutualCoverages.forEach( coverage => {
+      if (coverage.incident){
+        claimableCovers.push(coverage);
       }
     });
 
-    /*
-    claimableCovers.push({
-      label:'prova',
-      value:'prova',
-      claimId:true,
-      payoutOutcome:null
-    });
-    */
+    const validClaimableCoverFromParam = this.props.urlParams.param3 ? claimableCovers.find( cover => parseInt(cover.value) === parseInt(this.props.urlParams.param3) ) : null;
 
     const defaultClaimableCover = claimableCovers.length>0 ? claimableCovers[0] : null;
-    const selectedCoverToClaim = defaultClaimableCover || null;
+    const selectedCoverToClaim = validClaimableCoverFromParam ? validClaimableCoverFromParam : defaultClaimableCover || null;
 
     this.setState({
       claimableCovers,
@@ -196,8 +102,11 @@ class NexusMutual extends Component {
       defaultClaimableCover
     });
 
-    const paramIsValidToken = this.props.urlParams.param2 && Object.keys(this.props.toolProps.availableTokens).includes(this.props.urlParams.param2);
-    const selectedToken = paramIsValidToken ? this.props.urlParams.param2 : Object.keys(this.props.toolProps.availableTokens)[0];
+    const selectedAction = ['deposit','claim'].includes(this.props.urlParams.param2) ? this.props.urlParams.param2 : this.state.selectedAction;
+    const paramIsValidToken = this.props.urlParams.param3 && Object.keys(this.props.toolProps.availableTokens).includes(this.props.urlParams.param3);
+    const selectedToken = paramIsValidToken ? this.props.urlParams.param3 : Object.keys(this.props.toolProps.availableTokens)[0];
+
+    this.setSelectedAction(selectedAction);
     this.changeSelectedToken(selectedToken);
     // console.log('coverBoughtEvents',coverBoughtEvents,'claimSubmittedEvents',claimSubmittedEvents,'claimableCovers',claimableCovers);
   }
@@ -268,8 +177,6 @@ class NexusMutual extends Component {
     const amountValue = '';
     const tokenConfig = this.props.toolProps.availableTokens[selectedToken];
     const selectedUnderlying = Object.keys(tokenConfig.underlying)[0];
-
-    // console.log('changeSelectedToken',selectedToken,tokenConfig);
 
     this.setState({
       amountValue,
@@ -447,9 +354,11 @@ class NexusMutual extends Component {
   }
 
   setSelectedAction(selectedAction){
-    this.setState({
-      selectedAction
-    });
+    if (selectedAction !== this.state.selectedAction){
+      this.setState({
+        selectedAction
+      });
+    }
   }
 
   selectCoverToClaim(coverId){
@@ -1238,7 +1147,7 @@ class NexusMutual extends Component {
                                 >
                                   Keep in mind that the cover becomes inactive once any amount of tokens are claimed.
                                 </Text>
-                                </Flex>
+                              </Flex>
                             </DashboardCard>
                             <SendTxWithBalance
                               error={null}
@@ -1282,34 +1191,6 @@ class NexusMutual extends Component {
                                 </Flex>
                               </DashboardCard>
                             </SendTxWithBalance>
-                            {
-                              /*
-                              <ExecuteTransaction
-                                {...this.props}
-                                parentProps={{
-                                  width:1,
-                                  alignItems:'center',
-                                  justifyContent:'center'
-                                }}
-                                Component={Button}
-                                action={'Token claim'}
-                                methodName={'claimTokens'}
-                                componentProps={{
-                                  fontSize:3,
-                                  fontWeight:3,
-                                  size:'medium',
-                                  width:[1,1/2],
-                                  borderRadius:4,
-                                  mainColor:'redeem',
-                                  value:'Claim Tokens',
-                                  disabled:this.state.buttonDisabled
-                                }}
-                                contractName={this.props.contractInfo.name}
-                                callback={this.claimTransactionSucceeded.bind(this)}
-                                params={}
-                              />
-                              */
-                            }
                           </Flex>
                         )
                       }

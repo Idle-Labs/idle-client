@@ -3583,6 +3583,7 @@ class FunctionsUtil {
     }
 
     const currTimestamp = parseInt(Date.now()/1000);
+
     const coverProtocolConfig = this.getGlobalConfig(['tools','coverProtocol']);
     if (coverProtocolConfig.enabled){
       await this.asyncForEach(coverProtocolConfig.props.coverages, async (coverage) => {
@@ -3594,27 +3595,181 @@ class FunctionsUtil {
         // Take balance
         const balance = await this.getTokenBalance(tokenConfig.name,account);
         if (balance && balance.gt(0)){
+          const actionLabel = 'File Claim';
           const collateral = coverage.collateral;
           const protocolName = coverProtocolConfig.label;
           const protocolImage = coverProtocolConfig.image;
-          const fileClaimUrl = coverProtocolConfig.fileClaimUrl;
+          const actionUrl = coverProtocolConfig.fileClaimUrl;
           const status = coverage.expirationTimestamp<=currTimestamp ? 'Expired' : 'Active';
+          const actionDisabled = status === 'Expired';
           const expirationDate = moment(coverage.expirationTimestamp*1000).utc().format('YYYY-MM-DD HH:mm:ss')+' UTC';
           activeCoverages.push({
             token,
             status,
             balance,
+            actionUrl,
             collateral,
+            actionLabel,
             protocolName,
-            fileClaimUrl,
             protocolImage,
-            expirationDate
+            expirationDate,
+            actionDisabled
           });
         }
       });
     }
+    const nexusMutualConfig = this.getGlobalConfig(['tools','nexusMutual']);
+    if (nexusMutualConfig.enabled){
+      const nexusMutualCoverages = await this.getNexusMutualCoverages(account);
+      nexusMutualCoverages.forEach( coverage => {
+        const actionLabel = 'Claim';
+        const balance = coverage.sumAssured;
+        const token = coverage.coverAssetConfig.token;
+        const collateral = coverage.yieldTokenConfig.token;
+        const portfolioCoverage = coverage.portfolioCoverage;
+        const collateralIcon = `images/tokens/${collateral}.svg`;
+        const actionDisabled = !coverage.incident && !coverage.claimId;
+        const protocolName = this.getGlobalConfig(['insurance','nexusMutual','label']);
+        const protocolImage = this.getGlobalConfig(['insurance','nexusMutual','image']);
+        const protocolImageDark = this.getGlobalConfig(['insurance','nexusMutual','imageDark']);
+        const expirationDate = moment(coverage.coverDetails.validUntil*1000).utc().format('YYYY-MM-DD HH:mm:ss')+' UTC';
+        const status = coverage.claimId ? 'Claimed' : parseInt(coverage.coverDetails.validUntil)<=currTimestamp ? 'Expired' : 'Active';
+        const actionUrl = `${window.location.origin}/#${this.getGlobalConfig(['dashboard','baseRoute'])}/tools/${nexusMutualConfig.route}/${coverage.yieldTokenConfig.token}/claim`;
+        activeCoverages.push({
+          token,
+          status,
+          balance,
+          actionUrl,
+          collateral,
+          actionLabel,
+          protocolName,
+          protocolImage,
+          expirationDate,
+          actionDisabled,
+          collateralIcon,
+          portfolioCoverage,
+          protocolImageDark
+        });
+      });
+    }
 
     return activeCoverages;
+  }
+  getNexusMutualCoverages = async (account) => {
+    const nexusMutualConfig = this.getGlobalConfig(['tools','nexusMutual']);
+
+    const fromBlock = nexusMutualConfig.directProps.startBlock;
+    const feeDistributorConfig = nexusMutualConfig.directProps.contractInfo;
+    const incidentsInfo = nexusMutualConfig.directProps.incidentsInfo;
+    
+    await Promise.all([
+      this.props.initContract(incidentsInfo.name,incidentsInfo.address,incidentsInfo.abi),
+      this.props.initContract(feeDistributorConfig.name,feeDistributorConfig.address,feeDistributorConfig.abi),
+    ]);
+
+    const [
+      coverBoughtEvents,
+      claimSubmittedEvents,
+    ] = await Promise.all([
+       this.getContractEvents(feeDistributorConfig.name,'CoverBought',{fromBlock, toBlock:'latest',filter:{buyer:account}}),
+       this.getContractEvents(feeDistributorConfig.name,'ClaimSubmitted',{fromBlock, toBlock:'latest',filter:{buyer:account}})
+    ]);
+
+    const nexusMutualCoverages = [];
+
+    await this.asyncForEach(coverBoughtEvents,async (cover) => {
+    // coverBoughtEvents.forEach( cover => {
+      const coverId = parseInt(cover.returnValues.coverId);
+      const claimSubmittedEvent = claimSubmittedEvents.find( claim => parseInt(claim.returnValues.coverId)===coverId );
+      const [
+        coverDetails,
+        incidentEvents
+      ] = await Promise.all([
+        this.genericContractCall(feeDistributorConfig.name,'getCover',[coverId]),
+        this.getContractEvents(incidentsInfo.name,'IncidentAdded',{fromBlock:cover.blockNumber, toBlock:'latest',filter:{productId:cover.contractAddress}})
+      ]);
+
+      if (!coverDetails){
+        return false;
+      }
+
+      // Check if the cover matches any incidents
+      const matchedIncidents = incidentEvents.filter(incident => {
+        return incident.returnValues.productId === coverDetails.contractAddress &&
+        this.BNify(incident.blockNumber).gt(cover.blockNumber)  &&
+        this.BNify(incident.returnValues.incidentDate).lt(coverDetails.validUntil) &&
+        parseInt(coverDetails.validUntil) + nexusMutualConfig.directProps.yieldTokenCoverGracePeriod >= Date.now() / 1000
+      });
+
+      // If multiple incidents match, return the one with the highest priceBefore
+      const matchedIncident = matchedIncidents.reduce((prev, curr) => {
+        if (!prev) {
+          return curr;
+        }
+
+        if (this.BNify(curr.returnValues.priceBefore).gt(prev.returnValues.priceBefore)) {
+          return curr;
+        }
+        return prev;
+      }, null);
+
+      const yieldTokenConfig = Object.values(nexusMutualConfig.props.availableTokens).find( tokenConfig => tokenConfig.address.toLowerCase() === coverDetails.contractAddress.toLowerCase() );
+      const sumAssured = this.fixTokenDecimals(coverDetails.sumAssured,yieldTokenConfig.decimals);
+      const coverAssetConfig = Object.values(yieldTokenConfig.underlying).find( underlyingConfig => underlyingConfig.address.toLowerCase() === coverDetails.coverAsset.toLowerCase() );
+      const expiryDate = this.strToMoment(coverDetails.validUntil*1000).format('YYYY-MM-DD');
+
+      const claimId = claimSubmittedEvent ? claimSubmittedEvent.returnValues.claimId : null;
+      const payoutOutcome = await this.genericContractCall(feeDistributorConfig.name,'getPayoutOutcome',[claimId]);
+      const label = `${yieldTokenConfig.name} - ${sumAssured.toFixed(4)} ${coverAssetConfig.token} - Exp. ${expiryDate}`;
+      const value = coverId;
+
+      let claimedAmount = null;
+      if (claimSubmittedEvent){
+        const claimTxReceipt = await this.getTransactionReceipt(claimSubmittedEvent.transactionHash);
+        const claimedAmountLog = claimTxReceipt ? claimTxReceipt.logs.find( log => log.address.toLowerCase() === coverAssetConfig.address.toLowerCase() ) : null;
+        claimedAmount = claimedAmountLog ? this.fixTokenDecimals(parseInt(claimedAmountLog.data,16),coverAssetConfig.decimals) : this.BNify(0);
+      }
+
+      const claimableAmount = this.fixTokenDecimals(coverDetails.sumAssured,coverAssetConfig.decimals);
+
+      const claimablePrice = matchedIncident ? this.BNify(matchedIncident.returnValues.priceBefore).times(0.9) : this.BNify(0);
+      const maxCoveredAmount = claimablePrice.gt(0) ? this.BNify(coverDetails.sumAssured).div(claimablePrice) : this.BNify(0);
+      const coveredTokenAmount = this.normalizeTokenAmount(maxCoveredAmount,coverAssetConfig.decimals);
+
+      let [
+        tokenPrice,
+        idleTokenBalance
+      ] = await Promise.all([
+        this.getTokenPrice(yieldTokenConfig.token),
+        this.getTokenBalance(yieldTokenConfig.token,account,false)
+      ]);
+
+      tokenPrice = this.fixTokenDecimals(tokenPrice,yieldTokenConfig.decimals);
+      idleTokenBalance = this.fixTokenDecimals(idleTokenBalance,yieldTokenConfig.decimals);
+      const tokenBalance = idleTokenBalance.times(tokenPrice);
+      const portfolioCoverage = tokenBalance.gt(0) ? sumAssured.div(tokenBalance).times(100).toFixed(2)+'%' : 'N/A';
+
+      // console.log('portfolioCoverage',sumAssured.toFixed(),idleTokenBalance.toFixed(),tokenPrice.toFixed(),portfolioCoverage.toFixed());
+
+      nexusMutualCoverages.push({
+        label,
+        value,
+        claimId,
+        sumAssured,
+        coverDetails,
+        claimedAmount,
+        payoutOutcome,
+        claimableAmount,
+        maxCoveredAmount,
+        yieldTokenConfig,
+        coverAssetConfig,
+        portfolioCoverage,
+        coveredTokenAmount,
+        incident: matchedIncident ? {...matchedIncident, id: incidentEvents.findIndex(x => x.date === matchedIncident.date)} : null
+      });
+    });
+
+    return nexusMutualCoverages;
   }
   getBatchedDepositExecutions = async (contractAddress) => {
     const requiredNetwork = this.props.network.current.id || this.getGlobalConfig(['network','requiredNetwork']);

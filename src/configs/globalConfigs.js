@@ -1214,9 +1214,9 @@ const globalConfigs = {
     nexusMutual:{
       enabled:true,
       icon:'Security',
-      route:'nexus-mutual',
-      label:'Nexus Mutual',
-      desc:'Buy NexusMutual cover without KYC for idleDAIYield or idleUSDTYield',
+      route:'coverage',
+      label:'Coverage',
+      desc:'Buy Nexus Mutual coverage without KYC for your deposits',
       subComponent:NexusMutual,
       props:{
         availableTokens:{
@@ -2136,6 +2136,18 @@ const globalConfigs = {
       },
       directProps:{
       }
+    }
+  },
+  insurance:{
+    nexusMutual:{
+      label:'Nexus Mutual',
+      image:'images/protocols/nexus-mutual.png',
+      imageDark:'images/protocols/nexus-mutual-white.png'
+    },
+    coverProtocol:{
+      label:'Cover Protocol',
+      image:'images/protocols/cover-logo.svg',
+      imageDark:'images/protocols/cover-logo.svg',
     }
   },
   payments: { // Payment methods & providers

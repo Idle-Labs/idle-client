@@ -708,7 +708,7 @@ class App extends Component {
                         <Box>
                           <Switch>
                             <Route
-                              path="/dashboard/:section?/:param1?/:param2?"
+                              path="/dashboard/:section?/:param1?/:param2?/:param3?"
                               render={
                                 (props) => 
                                   <Suspense

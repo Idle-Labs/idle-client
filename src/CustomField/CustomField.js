@@ -86,7 +86,7 @@ class CustomField extends Component {
       case 'button':
         CustomComponent = Button;
         componentHasChildren = true;
-        customValue = fieldInfo.label;
+        customValue = fieldInfo.label || fieldProps.label;
         fieldProps.onClick=() => fieldProps.handleClick(this.props)
       break;
       default:

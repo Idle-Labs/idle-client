@@ -1,13 +1,16 @@
 import Title from '../Title/Title';
-import { Box, Flex } from "rimble-ui";
 import React, { Component } from 'react';
+import { Box, Flex, Icon, Text } from "rimble-ui";
 import Breadcrumb from '../Breadcrumb/Breadcrumb';
 import AssetsList from '../AssetsList/AssetsList';
+import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import BuyModal from '../utilities/components/BuyModal';
 import FundsOverview from '../FundsOverview/FundsOverview';
+import DashboardCard from '../DashboardCard/DashboardCard';
 import DepositRedeem from '../DepositRedeem/DepositRedeem';
 import CardIconButton from '../CardIconButton/CardIconButton';
+import ActiveCoverages from '../ActiveCoverages/ActiveCoverages';
 import TransactionsList from '../TransactionsList/TransactionsList';
 import EstimatedEarnings from '../EstimatedEarnings/EstimatedEarnings';
 
@@ -128,6 +131,7 @@ class AssetPage extends Component {
 
   render() {
 
+    const nexusMutualConfig = this.functionsUtil.getGlobalConfig(['tools','nexusMutual']);
     const userHasFunds = this.props.account && this.state.idleTokenBalance[this.props.selectedToken] && this.functionsUtil.BNify(this.state.idleTokenBalance[this.props.selectedToken]).gt(0);
 
     return (
@@ -184,6 +188,98 @@ class AssetPage extends Component {
             govTokensUserBalances={this.state.govTokensUserBalances[this.props.selectedToken]}
           />
         </Flex>
+        {
+          userHasFunds && nexusMutualConfig.enabled && Object.keys(nexusMutualConfig.props.availableTokens).includes(this.props.tokenConfig.idle.token) &&
+            <Flex
+              width={1}
+              id={'active-coverages'}
+              flexDirection={'column'}
+            >
+              <ActiveCoverages
+                {...this.props}
+                titleProps={{
+                  mb:3,
+                  mt:[3,4],
+                }}
+                title={'Coverage'}
+                availableTokens={[this.props.tokenConfig.idle.token]}
+              >
+                <Flex
+                  width={1}
+                  alignItems={'center'}
+                  id={'no-active-cover'}
+                  flexDirection={'column'}
+                  justifyContent={'center'}
+                >
+                  <DashboardCard
+                    cardProps={{
+                      py:3,
+                      px:[3,4],
+                      width:[1,'auto'],
+                    }}
+                  >
+                    <Flex
+                      alignItems={'center'}
+                      flexDirection={'column'}
+                      justifyContent={'center'}
+                    >
+                      <Icon
+                        my={[0,2]}
+                        size={'3em'}
+                        name={nexusMutualConfig.icon}
+                      />
+                      <Text
+                        mb={1}
+                        fontSize={[2,3]}
+                        fontWeight={500}
+                        textAlign={'center'}
+                      >
+                        You don't have an active coverage
+                      </Text>
+                      <Text
+                        mb={2}
+                        color={'link'}
+                        fontSize={[1,2]}
+                        fontWeight={500}
+                        textAlign={'center'}
+                      >
+                        {nexusMutualConfig.desc}
+                      </Text>
+                      <RoundButton
+                        buttonProps={{
+                          mt:1,
+                          width:'auto',
+                          minHeight:'40px',
+                          mainColor:'redeem',
+                          size:this.props.isMobile ? 'small' : 'medium'
+                        }}
+                        handleClick={ e => this.props.goToSection(`tools/${nexusMutualConfig.route}/deposit/${this.props.tokenConfig.idle.token}`) }
+                      >
+                        <Flex
+                          alignItems={'center'}
+                          flexDirection={'row'}
+                          justifyContent={'center'}
+                        >
+                          <Text
+                            color={'white'}
+                            fontSize={[1,2]}
+                            fontWeight={500}
+                          >
+                            Get Covered
+                          </Text>
+                          <Icon
+                            ml={1}
+                            size={'1.3em'}
+                            name={'KeyboardArrowRight'}
+                          />
+                        </Flex>
+                      </RoundButton>
+                    </Flex>
+                  </DashboardCard>
+                </Flex>
+              </ActiveCoverages>
+            </Flex>
+        }
         {
           userHasFunds &&
             <Flex

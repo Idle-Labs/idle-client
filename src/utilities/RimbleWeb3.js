@@ -610,10 +610,9 @@ class RimbleTransaction extends React.Component {
       }
 
       if (!account || this.state.account === account){
-        this.setState({
+        return this.setState({
           accountInizialized: true
         });
-        return false;
       }
 
       // Request account access if needed
@@ -683,6 +682,10 @@ class RimbleTransaction extends React.Component {
         // TODO subscribe for account changes, no polling
         // set a state flag which indicates if the subscribe handler has been
         // called at least once
+      } else {
+        return this.setState({
+          accountInizialized: true
+        });
       }
     } catch (error) {
 

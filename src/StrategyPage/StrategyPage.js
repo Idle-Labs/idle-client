@@ -2,11 +2,10 @@ import Title from '../Title/Title';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import AssetsList from '../AssetsList/AssetsList';
-import CustomList from '../CustomList/CustomList';
-// import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import DashboardCard from '../DashboardCard/DashboardCard';
 import PortfolioDonut from '../PortfolioDonut/PortfolioDonut';
+import ActiveCoverages from '../ActiveCoverages/ActiveCoverages';
 import GenericSelector from '../GenericSelector/GenericSelector';
 import PortfolioEquity from '../PortfolioEquity/PortfolioEquity';
 import TransactionsList from '../TransactionsList/TransactionsList';
@@ -24,7 +23,6 @@ class StrategyPage extends Component {
     portfolio:null,
     tokensToMigrate:{},
     aggregatedValues:[],
-    activeCoverages:null,
     depositedTokens:null,
     remainingTokens:null,
     batchedDeposits:null,
@@ -101,13 +99,10 @@ class StrategyPage extends Component {
 
       // Load data
       const [
-        activeCoverages,
         batchedDeposits,
         tokensToMigrate,
         portfolio
       ] = await Promise.all([
-        // Load active coverages
-        this.functionsUtil.getActiveCoverages(this.props.account),
         // Load claimable batches
         [],//this.functionsUtil.getBatchedDeposits(this.props.account),
         // Load tokens to be migrated
@@ -119,21 +114,6 @@ class StrategyPage extends Component {
       ]);
 
       newState.portfolio = portfolio;
-
-      newState.activeCoverages = activeCoverages && activeCoverages.length>0 ? activeCoverages.map( c => {
-        const statusColors = this.props.theme.colors.transactions.status;
-        const statusIcon = c.status === 'Expired' ? 'Error' : 'VerifiedUser';
-        const statusColor = c.status === 'Expired' ? statusColors.failed : statusColors.completed;
-        const portfolioCoverage = portfolio.totalBalance.gt(0) ? c.balance.div(portfolio.totalBalance).times(100).toFixed(2)+'%' : 'N/A';
-        const statusIconProps = {
-          color:statusColor
-        };
-        return Object.assign(c,{
-          statusIcon,
-          statusIconProps,
-          portfolioCoverage
-        });
-      }) : null;
 
       newState.batchedDeposits = batchedDeposits && Object.keys(batchedDeposits).length>0 ? batchedDeposits : null;
 
@@ -263,8 +243,8 @@ class StrategyPage extends Component {
     const apyLong = this.functionsUtil.getGlobalConfig(['messages','apyLong']);
     const riskScore = this.functionsUtil.getGlobalConfig(['messages','riskScore']);
     const yieldFarming = this.functionsUtil.getGlobalConfig(['messages','yieldFarming']);
+    const nexusMutualConfig = this.functionsUtil.getGlobalConfig(['tools','nexusMutual']);
     const batchDepositConfig = this.functionsUtil.getGlobalConfig(['tools','batchDeposit']);
-    const coverProtocolConfig = this.functionsUtil.getGlobalConfig(['tools','coverProtocol']);
 
     return (
       <Box
@@ -674,85 +654,72 @@ class StrategyPage extends Component {
                 )
               }
               {
-                /*
-                !this.state.activeCoverages && coverProtocolConfig.enabled && this.state.portfolio && this.state.portfolio.totalBalance.gt(0) && (
+                !viewOnly && this.props.account && nexusMutualConfig.enabled && (
                   <Flex
+                    mt={3}
                     width={1}
-                    mt={[3,4]}
-                    alignItems={'center'}
-                    id={'no-active-cover'}
+                    id={"tools"}
                     flexDirection={'column'}
-                    justifyContent={'center'}
                   >
-                    <DashboardCard
-                      cardProps={{
-                        py:3,
-                        px:[3,4],
-                        width:[1,'auto'],
-                      }}
+                    <Flex
+                      pb={2}
+                      width={1}
+                      mb={[2,3]}
+                      borderColor={'divider'}
+                      borderBottom={'1px solid transparent'}
                     >
-                      <Flex
-                        alignItems={'center'}
-                        flexDirection={'column'}
-                        justifyContent={'center'}
+                      <Heading.h4
+                        fontSize={[2,4]}
+                        fontWeight={[3,4]}
                       >
-                        <Image
-                          mb={2}
-                          height={['1.8em','2.2em']}
-                          src={coverProtocolConfig.image}
-                        />
-                        <Text
-                          mb={1}
-                          fontSize={[2,4]}
-                          fontWeight={500}
-                          textAlign={'center'}
-                        >
-                          You don't have an active coverage
-                        </Text>
-                        <Text
-                          mb={2}
-                          color={'blue'}
-                          fontSize={[1,2]}
-                          fontWeight={500}
-                          hoverColor={'blue'}
-                          textAlign={'center'}
-                        >
-                          Cover Protocol provides coverage against Smart-Contract attacks
-                        </Text>
-                        <RoundButton
-                          buttonProps={{
-                            mt:1,
-                            width:'auto',
-                            minHeight:'40px',
-                            mainColor:'redeem',
-                            size:this.props.isMobile ? 'small' : 'medium'
-                          }}
-                          handleClick={ e => this.props.goToSection(`tools/${coverProtocolConfig.route}`) }
-                        >
-                          <Flex
-                            alignItems={'center'}
-                            flexDirection={'row'}
-                            justifyContent={'center'}
-                          >
-                            <Text
-                              color={'white'}
-                              fontSize={[1,2]}
-                              fontWeight={500}
+                        Tools
+                      </Heading.h4>
+                    </Flex>
+                    <Flex
+                      flexDirection={['column','row']}
+                    >
+                      {
+                        ['addFunds','nexusMutual','tokenSwap'].map( (toolName,toolIndex) => {
+                          const toolConfig = this.functionsUtil.getGlobalConfig(['tools',toolName]);
+                          return (
+                            <Flex
+                              width={[1,1/3]}
+                              key={`tool_${toolIndex}`}
+                              mb={toolIndex<2 ? [2,0] : 0}
+                              pr={toolIndex<2 ? [0,3] : 0}
                             >
-                              Get Covered
-                            </Text>
-                            <Icon
-                              ml={1}
-                              size={'1.3em'}
-                              name={'KeyboardArrowRight'}
-                            />
-                          </Flex>
-                        </RoundButton>
-                      </Flex>
-                    </DashboardCard>
+                              <DashboardIconButton
+                                {...this.props}  
+                                icon={toolConfig.icon}
+                                text={toolConfig.desc}
+                                image={toolConfig.image}
+                                title={toolConfig.label}
+                                handleClick={ e => this.props.goToSection(`tools/${toolConfig.route}`) }
+                              />
+                            </Flex>
+                          );
+                        })
+                      }
+                    </Flex>
                   </Flex>
                 )
-                */
+              }
+              {
+                nexusMutualConfig.enabled && this.state.portfolio && this.state.portfolio.totalBalance.gt(0) && (
+                  <Flex
+                    width={1}
+                    id={'active-coverages'}
+                    flexDirection={'column'}
+                  >
+                    <ActiveCoverages
+                      {...this.props}
+                      title={'Coverage'}
+                      titleProps={{
+                        my:4
+                      }}
+                    />
+                  </Flex>
+                )
               }
               {
                 this.state.batchedDeposits && (
@@ -1441,57 +1408,6 @@ class StrategyPage extends Component {
                 </Flex>
               </Flex>
               {
-                !viewOnly && this.props.account && coverProtocolConfig.enabled && (
-                  <Flex
-                    mt={3}
-                    width={1}
-                    id={"tools"}
-                    flexDirection={'column'}
-                  >
-                    <Flex
-                      pb={2}
-                      width={1}
-                      mb={[2,3]}
-                      borderColor={'divider'}
-                      borderBottom={'1px solid transparent'}
-                    >
-                      <Heading.h4
-                        fontSize={[2,4]}
-                        fontWeight={[3,4]}
-                      >
-                        Tools
-                      </Heading.h4>
-                    </Flex>
-                    <Flex
-                      flexDirection={['column','row']}
-                    >
-                      {
-                        ['addFunds','coverProtocol','tokenSwap'].map( (toolName,toolIndex) => {
-                          const toolConfig = this.functionsUtil.getGlobalConfig(['tools',toolName]);
-                          return (
-                            <Flex
-                              width={[1,1/3]}
-                              key={`tool_${toolIndex}`}
-                              mb={toolIndex<2 ? [2,0] : 0}
-                              pr={toolIndex<2 ? [0,3] : 0}
-                            >
-                              <DashboardIconButton
-                                {...this.props}  
-                                icon={toolConfig.icon}
-                                text={toolConfig.desc}
-                                image={toolConfig.image}
-                                title={toolConfig.label}
-                                handleClick={ e => this.props.goToSection(`tools/${toolConfig.route}`) }
-                              />
-                            </Flex>
-                          );
-                        })
-                      }
-                    </Flex>
-                  </Flex>
-                )
-              }
-              {
                 this.state.depositedTokens.length>0 &&
                   <Flex
                     width={1}
@@ -1613,169 +1529,6 @@ class StrategyPage extends Component {
                       availableTokens={govTokens}
                     />
                   </Flex>
-              }
-              {
-                this.state.activeCoverages && (
-                  <Flex
-                    width={1}
-                    mb={[0,3]}
-                    id={'active-coverages'}
-                    flexDirection={'column'}
-                  >
-                    <Title my={[3,4]}>Coverages</Title>
-                    <Flex
-                      width={1}
-                      alignItems={'center'}
-                      flexDirection={'column'}
-                      justifyContent={'center'}
-                    >
-                      <CustomList
-                        rows={this.state.activeCoverages}
-                        handleClick={ this.props.isMobile ? (props) => props.row.status!=='Expired' && props.row.fileClaimUrl && this.functionsUtil.openWindow(props.row.fileClaimUrl) : null }
-                        cols={[
-                          {
-                            title:'PROTOCOL',
-                            props:{
-                              width:[0.42,0.17]
-                            },
-                            fields:[
-                              {
-                                type:'image',
-                                path:['protocolImage'],
-                                props:{
-                                  mr:[1,2],
-                                  size:this.props.isMobile ? '1.2em' : '1.8em'
-                                }
-                              },
-                              {
-                                type:'text',
-                                path:['protocolName'],
-                              }
-                            ]
-                          },
-                          {
-                            title:'BALANCE',
-                            props:{
-                              width:[0.34, 0.15],
-                            },
-                            fields:[
-                              {
-                                type:'number',
-                                path:['balance'],
-                                props:{
-                                  decimals: 4,
-                                }
-                              },
-                              {
-                                type:'text',
-                                path:['token'],
-                                props:{
-                                  ml:[1,2],
-                                  style:{
-                                    textTransform:'uppercase'
-                                  }
-                                }
-                              }
-                            ]
-                          },
-                          {
-                            mobile:false,
-                            title:'EXPIRATION DATE',
-                            props:{
-                              width:0.23,
-                              justifyContent:['center','flex-start']
-                            },
-                            fields:[
-                              {
-                                type:'text',
-                                path:['expirationDate'],
-                                props:{
-                                  
-                                }
-                              },
-                            ]
-                          },
-                          {
-                            mobile:false,
-                            title:'COVERAGE',
-                            props:{
-                              width:0.15,
-                              justifyContent:['center','flex-start']
-                            },
-                            fields:[
-                              {
-                                type:'text',
-                                path:['portfolioCoverage'],
-                                props:{
-                                  
-                                }
-                              },
-                            ]
-                          },
-                          {
-                            title:'STATUS',
-                            props:{
-                              width:[0.24,0.15],
-                              justifyContent:['center','flex-start']
-                            },
-                            fields:[
-                              {
-                                type:'icon',
-                                name:'custom',
-                                path:['statusIcon'],
-                                props:{
-                                  mr:[1,2],
-                                  size:this.props.isMobile ? '1.2em' : '1.8em'
-                                }
-                              },
-                              {
-                                name:'custom',
-                                path:['status'],
-                                props:{
-                                  style:{
-                                    textTransform:'capitalize'
-                                  }
-                                }
-                              }
-                            ]
-                          },
-                          {
-                            title:'',
-                            mobile:false,
-                            props:{
-                              width:0.17,
-                            },
-                            parentProps:{
-                              width:1
-                            },
-                            fields:[
-                              {
-                                type:'button',
-                                name:'custom',
-                                label:'File Claim',
-                                funcProps:{
-                                  disabled:(props) => (props.row.status==='Expired')
-                                },
-                                props:{
-                                  width:1,
-                                  fontSize:3,
-                                  fontWeight:3,
-                                  height:'45px',
-                                  borderRadius:4,
-                                  boxShadow:null,
-                                  mainColor:'redeem',
-                                  size: this.props.isMobile ? 'small' : 'medium',
-                                  handleClick:(props) => props.row.status!=='Expired' && props.row.fileClaimUrl && this.functionsUtil.openWindow(props.row.fileClaimUrl)
-                                }
-                              }
-                            ]
-                          }
-                        ]}
-                        {...this.props}
-                      />
-                    </Flex>
-                  </Flex>
-                )
               }
               {
                 this.state.depositedTokens.length>0 &&
