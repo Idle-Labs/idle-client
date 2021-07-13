@@ -77,7 +77,7 @@ class MenuAccount extends Component {
   render() {
     const walletProvider = this.functionsUtil.getStoredItem('walletProvider',false,null);
     const connectorInfo = walletProvider ? this.functionsUtil.getGlobalConfig(['connectors',walletProvider.toLowerCase()]) : null;
-    const walletIcon = connectorInfo && connectorInfo.icon ? connectorInfo.icon : walletProvider ? `${walletProvider.toLowerCase()}.svg` : null;
+    const walletIcon = connectorInfo && ((this.props.themeMode === 'dark' && connectorInfo.iconDark) || connectorInfo.icon) ? (this.props.themeMode === 'dark' ? connectorInfo.iconDark || connectorInfo.icon : connectorInfo.icon) : (walletProvider ? `${walletProvider.toLowerCase()}.svg` : null);
 
     const governanceRoute = this.functionsUtil.getGlobalConfig(['governance','baseRoute']);
     const governanceEnabled = this.functionsUtil.getGlobalConfig(['governance','enabled']);

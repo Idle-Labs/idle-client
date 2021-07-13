@@ -3990,7 +3990,7 @@ class FunctionsUtil {
       const value = await contract.methods[methodName](...params).call(callParams,blockNumber).catch(error => {
         this.customLog(`${contractName} contract method ${methodName} error: `, error);
       });
-      console.log(`${moment().format('HH:mm:ss')} - genericContractCall (${blockNumber}) - ${contractName} - ${methodName} (${JSON.stringify(params)}) : ${value}`);
+      // console.log(`${moment().format('HH:mm:ss')} - genericContractCall (${blockNumber}) - ${contractName} - ${methodName} (${JSON.stringify(params)}) : ${value}`);
       return value;
     } catch (error) {
       this.customLog("genericContractCall error", error);

@@ -426,11 +426,6 @@ class App extends Component {
 
   componentDidMount() {
 
-    // Close iFrame
-    // if (window.self !== window.top && window.top.location.href.indexOf(globalConfigs.baseURL) !== -1 && typeof window.parent.closeIframe === 'function' ){
-    //   window.parent.closeIframe(window.self);
-    // }
-
     window.showToastMessage = this.showToastMessage;
     window.closeToastMessage = this.closeToastMessage;
 
@@ -445,8 +440,7 @@ class App extends Component {
         walletProvider = 'ledger';
       }
 
-      // console.log('isLedgerLive',isLedgerLive,connectorName,walletProvider);
-
+      // console.log('isLedgerLive',window.location.href,isLedgerLive,connectorName,walletProvider);
       this.setConnector(connectorName,walletProvider);
     }
   }

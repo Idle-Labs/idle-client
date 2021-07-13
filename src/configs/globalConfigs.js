@@ -157,6 +157,7 @@ const globalConfigs = {
     },
     ledger:{
       enabled:true,
+      iconDark:'ledger-white.svg',
       subcaption:'Hardware wallet'
     },
     ledgerlive:{
