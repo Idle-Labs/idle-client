@@ -475,11 +475,11 @@ class GovernanceUtil {
         canceledBlockInfo,
         executedBlockInfo,
       ] = await Promise.all([
-        p.endBlock ? this.props.web3.eth.getBlock(p.endBlock) : null,
-        queuedEvent ? this.props.web3.eth.getBlock(queuedEvent.blockNumber) : null,
-        createdEvent ? this.props.web3.eth.getBlock(createdEvent.blockNumber) : null,
-        canceledEvent ? this.props.web3.eth.getBlock(canceledEvent.blockNumber) : null,
-        executedEvent ? this.props.web3.eth.getBlock(executedEvent.blockNumber) : null,
+        p.endBlock ? this.functionsUtil.getBlockInfo(p.endBlock) : null,
+        queuedEvent ? this.functionsUtil.getBlockInfo(queuedEvent.blockNumber) : null,
+        createdEvent ? this.functionsUtil.getBlockInfo(createdEvent.blockNumber) : null,
+        canceledEvent ? this.functionsUtil.getBlockInfo(canceledEvent.blockNumber) : null,
+        executedEvent ? this.functionsUtil.getBlockInfo(executedEvent.blockNumber) : null,
       ]);
 
       // Init states array

@@ -52,6 +52,7 @@ class IdleStaking extends Component {
     stakedBalance:null,
     selectedToken:null,
     rewardMultiplier:1,
+    claimedRewards:null,
     accountingData:null,
     increaseAction:null,
     selectedAction:null,
@@ -287,6 +288,19 @@ class IdleStaking extends Component {
       }
     ));
 
+    const claimedRewards = [];
+    await this.functionsUtil.asyncForEach(claimEvents, async (e) => {
+      const blockInfo = await this.functionsUtil.getBlockInfo(e.blockNumber);
+      if (blockInfo){
+        claimedRewards.push({
+          hash:e.transactionHash,
+          tokenName:this.props.contractInfo.rewardToken,
+          amount:this.functionsUtil.fixTokenDecimals(e.returnValues.amount,rewardTokenConfig.decimals),
+          date:this.functionsUtil.strToMoment(parseInt(blockInfo.timestamp)*1000).utc().format('YYYY-MM-DD HH:mm')+' UTC'
+        });
+      }
+    });
+
     tokenUserBalance = this.functionsUtil.fixTokenDecimals(tokenUserBalance,this.props.contractInfo.decimals);
 
     const totalDeposited = totalSupply ? this.functionsUtil.fixTokenDecimals(totalSupply,this.props.tokenConfig.decimals) : this.functionsUtil.BNify(0);
@@ -388,6 +402,7 @@ class IdleStaking extends Component {
       globalStats,
       statsLoaded,
       stakedBalance,
+      claimedRewards,
       distributedRewards
     });
   }
@@ -1347,77 +1362,217 @@ class IdleStaking extends Component {
                         }
                       </DashboardCard>
                     ) : isClaim && (
-                      <DashboardCard
-                        cardProps={{
-                          p:3
-                        }}
+                      <Flex
+                        width={1}
+                        flexDirection={'column'}
                       >
-                        {
-                          (this.state.claimable && this.state.claimable.gt(0)) ? (
-                            <Flex
-                              alignItems={'center'}
-                              flexDirection={'column'}
-                            >
-                              <Icon
-                                color={'cellText'}
-                                name={'MonetizationOn'}
-                                size={this.props.isMobile ? '1.8em' : '2.3em'}
-                              />
-                              <Text
-                                mt={1}
-                                mb={3}
-                                fontSize={[2,3]}
-                                color={'cellText'}
-                                textAlign={'center'}
+                        <DashboardCard
+                          cardProps={{
+                            p:3,
+                            mb:1
+                          }}
+                        >
+                          {
+                            (this.state.claimable && this.state.claimable.gt(0)) ? (
+                              <Flex
+                                alignItems={'center'}
+                                flexDirection={'column'}
                               >
-                                You can claim <strong>{this.state.claimable.toFixed(8)} {this.props.contractInfo.rewardToken}</strong>.
-                              </Text>
-                              <ExecuteTransaction
-                                params={[]}
-                                {...this.props}
-                                Component={Button}
-                                parentProps={{
-                                  width:1,
-                                  alignItems:'center',
-                                  justifyContent:'center'
-                                }}
-                                componentProps={{
-                                  fontSize:3,
-                                  fontWeight:3,
-                                  size:'medium',
-                                  width:[1,1/3],
-                                  value:'Claim',
-                                  borderRadius:4,
-                                  mainColor:'redeem',
-                                }}
-                                action={'Claim'}
-                                methodName={'claim'}
-                                callback={this.transactionSucceeded.bind(this)}
-                                contractName={this.props.tokenConfig.feeDistributor.name}
-                              />
-                            </Flex>
-                          ) : (
-                            <Flex
-                              alignItems={'center'}
-                              flexDirection={'column'}
-                            >
-                              <Icon
-                                name={'MoneyOff'}
-                                color={'cellText'}
-                                size={this.props.isMobile ? '1.8em' : '2.3em'}
-                              />
-                              <Text
-                                mt={1}
-                                fontSize={2}
-                                color={'cellText'}
-                                textAlign={'center'}
+                                <Icon
+                                  color={'cellText'}
+                                  name={'MonetizationOn'}
+                                  size={this.props.isMobile ? '1.8em' : '2.3em'}
+                                />
+                                <Text
+                                  mt={1}
+                                  mb={3}
+                                  fontSize={[2,3]}
+                                  color={'cellText'}
+                                  textAlign={'center'}
+                                >
+                                  You can claim <strong>{this.state.claimable.toFixed(8)} {this.props.contractInfo.rewardToken}</strong>.
+                                </Text>
+                                <ExecuteTransaction
+                                  params={[]}
+                                  {...this.props}
+                                  Component={Button}
+                                  parentProps={{
+                                    width:1,
+                                    alignItems:'center',
+                                    justifyContent:'center'
+                                  }}
+                                  componentProps={{
+                                    fontSize:3,
+                                    fontWeight:3,
+                                    size:'medium',
+                                    width:[1,1/3],
+                                    value:'Claim',
+                                    borderRadius:4,
+                                    mainColor:'redeem',
+                                  }}
+                                  action={'Claim'}
+                                  methodName={'claim'}
+                                  callback={this.transactionSucceeded.bind(this)}
+                                  contractName={this.props.tokenConfig.feeDistributor.name}
+                                />
+                              </Flex>
+                            ) : (
+                              <Flex
+                                alignItems={'center'}
+                                flexDirection={'column'}
                               >
-                                You don't have rewards to Claim yet.
-                              </Text>
-                            </Flex>
-                          )
-                        }
-                      </DashboardCard>
+                                <Icon
+                                  name={'MoneyOff'}
+                                  color={'cellText'}
+                                  size={this.props.isMobile ? '1.8em' : '2.3em'}
+                                />
+                                <Text
+                                  mt={1}
+                                  fontSize={2}
+                                  color={'cellText'}
+                                  textAlign={'center'}
+                                >
+                                  You don't have rewards to Claim yet.
+                                </Text>
+                              </Flex>
+                            )
+                          }
+                        </DashboardCard>
+                        <Text
+                          mb={1}
+                        >
+                          Claimed Rewards:
+                        </Text>
+                        <Flex
+                          mb={3}
+                          width={1}
+                          alignItems={'center'}
+                          justifyContent={'center'}
+                        >
+                          <DashboardCard
+                            cardProps={{
+                              pt:2,
+                              pb:3,
+                              px:3,
+                              width:1,
+                              display:'flex',
+                              alignItems:'center',
+                              justifyContent:'center'
+                            }}
+                            isActive={false}
+                            isInteractive={false}
+                          >
+                            {
+                              this.state.claimedRewards && this.state.claimedRewards.length ? (
+                                <Flex
+                                  width={1}
+                                  flexDirection={'column'}
+                                >
+                                  <Flex
+                                    pt={0}
+                                    pb={1}
+                                    width={1}
+                                    flexDirection={'row'}
+                                    borderBottom={`1px solid ${this.props.theme.colors.divider}`}
+                                  >
+                                    <Text
+                                      fontSize={1}
+                                      fontWeight={3}
+                                      width={this.props.isMobile ? 0.5 : 0.4}
+                                    >
+                                      Date
+                                    </Text>
+                                    <Text
+                                      fontSize={1}
+                                      fontWeight={3}
+                                      width={this.props.isMobile ? 0.5 : 0.3}
+                                      textAlign={this.props.isMobile ? 'right' : 'left'}
+                                    >
+                                      Amount
+                                    </Text>
+                                    {
+                                      !this.props.isMobile && (
+                                        <Text
+                                          width={0.3}
+                                          fontSize={1}
+                                          fontWeight={3}
+                                        >
+                                          Hash
+                                        </Text>
+                                      )
+                                    }
+                                  </Flex>
+                                  {
+                                    this.state.claimedRewards.map( (claim,index) => (
+                                      <Flex
+                                        py={1}
+                                        width={1}
+                                        flexDirection={'row'}
+                                        key={`claim_${index}`}
+                                        borderBottom={`1px solid ${this.props.theme.colors.divider}`}
+                                      >
+                                        <Text
+                                          fontWeight={2}
+                                          color={'statValue'}
+                                          fontSize={this.props.isMobile ? 1 : 2}
+                                          width={this.props.isMobile ? 0.5 : 0.4}
+                                        >
+                                          {claim.date}
+                                        </Text>
+                                        <Text
+                                          fontWeight={2}
+                                          color={'statValue'}
+                                          fontSize={this.props.isMobile ? 1 : 2}
+                                          width={this.props.isMobile ? 0.5 : 0.3}
+                                          textAlign={this.props.isMobile ? 'right' : 'left'}
+                                        >
+                                          {claim.amount.toFixed(4)} {claim.tokenName}
+                                        </Text>
+                                        {
+                                          !this.props.isMobile && (
+                                            <ExtLink
+                                              width={0.3}
+                                              color={'link'}
+                                              hoverColor={'link'}
+                                              href={this.functionsUtil.getEtherscanTransactionUrl(claim.hash)}
+                                            >
+                                              <Flex
+                                                alignItems={'center'}
+                                                flexDirection={'row'}
+                                              >
+                                                <Text
+                                                  fontSize={2}
+                                                  fontWeight={2}
+                                                  color={'link'}
+                                                >
+                                                  {this.functionsUtil.shortenHash(claim.hash)}
+                                                </Text>
+                                                <Icon
+                                                  ml={1}
+                                                  size={'1.2em'}
+                                                  color={'link'}
+                                                  name={'OpenInNew'}
+                                                />
+                                              </Flex>
+                                            </ExtLink>
+                                          )
+                                        }
+                                      </Flex>
+                                    ))
+                                  }
+                                </Flex>
+                              ) : (
+                                <Text
+                                  fontSize={2}
+                                  color={'statValue'}
+                                >
+                                  No reward claimed yet.
+                                </Text>
+                              )
+                            }
+                          </DashboardCard>
+                        </Flex>
+                      </Flex>
                     )
                   }
                 </Box>

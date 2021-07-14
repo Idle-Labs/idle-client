@@ -42,9 +42,9 @@ class CustomField extends Component {
       fontWeight:3,
       fontSize:[0,2],
       color:'cellText',
-      flexProps:{
-        justifyContent:'flex-start'
-      }
+      // flexProps:{
+      //   justifyContent:'flex-start'
+      // }
     };
 
     // Replace props

@@ -4098,6 +4098,15 @@ class FunctionsUtil {
   getBlockNumber = async () => {
     return await this.props.web3.eth.getBlockNumber();
   }
+  getBlockInfo = async (blockNumber) => {
+    const cachedDataKey = `getBlockInfo_${blockNumber}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData){
+      return cachedData;
+    }
+    const blockInfo = await this.props.web3.eth.getBlock(blockNumber);
+    return blockInfo ? this.setCachedDataWithLocalStorage(cachedDataKey,blockInfo,null) : null;
+  }
   getContractPastEvents = async (contractName,methodName,params = {}) => {
     if (!contractName){
       return null;
