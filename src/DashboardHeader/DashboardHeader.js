@@ -11,6 +11,7 @@ class DashboardHeader extends Component {
 
   state = {
     unclaimed:null,
+    activeNews:null,
     vestingAmount:null,
     govModalOpened:false
   }
@@ -49,10 +50,49 @@ class DashboardHeader extends Component {
     const idleGovTokenEnabled = this.functionsUtil.getGlobalConfig(['govTokens','IDLE','enabled']);
     if (idleGovTokenEnabled && this.props.account){
       const unclaimed = await this.idleGovToken.getUnclaimedTokens(this.props.account);
-      return this.setState({
+      this.setState({
         unclaimed
       });
     }
+
+    const stakingConfig = this.functionsUtil.getGlobalConfig(['tools','stake']);
+    const nexusMutualConfig = this.functionsUtil.getGlobalConfig(['tools','nexusMutual']);
+
+    const flashNews = [
+      {
+        name:'Governance Forum',
+        icon:'LightbulbOutline',
+        text:`Do you have any idea to improve the Idle Protocol? Let's discuss it in our`,
+        link:{
+          text:`Governance Forum`,
+          url:this.functionsUtil.getGlobalConfig(['forumURL'])
+        }
+      },
+      {
+        icon:stakingConfig.icon,
+        name:stakingConfig.label,
+        text:`You can now stake your $IDLE token and take part of the fee-sharing for long-term holders.`,
+        link:{
+          text:`Stake Now`,
+          url:this.functionsUtil.getDashboardSectionUrl(`tools/${stakingConfig.route}`)
+        }
+      },
+      {
+        icon:nexusMutualConfig.icon,
+        name:nexusMutualConfig.label,
+        text:`Protect your funds against smart-contract attacks with Nexus Mutual.`,
+        link:{
+          text:`Get Covered`,
+          url:this.functionsUtil.getDashboardSectionUrl(`tools/${this.functionsUtil.getGlobalConfig(['tools','nexusMutual','route'])}`)
+        }
+      }
+    ];
+
+    const activeNews = flashNews[Math.floor(Math.random()*flashNews.length)];
+    this.setState({
+      activeNews
+    });
+
     return null;
   }
 
@@ -143,7 +183,7 @@ class DashboardHeader extends Component {
                 </Button>
               </Flex>
             </DashboardCard>
-          ) : this.props.isDashboard && (
+          ) : this.props.isDashboard && this.state.activeNews && (
             <DashboardCard
               cardProps={{
                 p:2,
@@ -162,7 +202,7 @@ class DashboardHeader extends Component {
                   mr={1}
                   size={'1.2em'}
                   color={'flashColor'}
-                  name={'LightbulbOutline'}
+                  name={this.state.activeNews.icon}
                 />
                 <Text
                   fontWeight={500}
@@ -170,7 +210,7 @@ class DashboardHeader extends Component {
                   color={'flashColor'}
                   textAlign={'center'}
                 >
-                  Do you have any idea to improve the Idle Protocol? Let's discuss it in our
+                  {this.state.activeNews.text}
                 </Text>
                 <ExtLink
                   ml={1}
@@ -178,14 +218,19 @@ class DashboardHeader extends Component {
                   color={'primary'}
                   fontSize={'15px'}
                   hoverColor={'primary'}
-                  href={this.functionsUtil.getGlobalConfig(['forumURL'])}
+                  href={this.state.activeNews.link.url}
+                  onClick={ e => this.functionsUtil.sendGoogleAnalyticsEvent({
+                    eventCategory: 'UI',
+                    eventAction: 'flashNews',
+                    eventLabel: this.state.activeNews.name
+                  })}
                 >
                   <Flex
                     alignItems={'center'}
                     flexDirection={'row'}
                     justifyContent={'center'}
                   >
-                    Governance Forum
+                    {this.state.activeNews.link.text}
                     <Icon
                       ml={1}
                       size={'0.9em'}

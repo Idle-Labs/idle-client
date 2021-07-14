@@ -620,6 +620,9 @@ class FunctionsUtil {
 
     return deposits;
   }
+  getDashboardSectionUrl = (section) => {
+    return `${window.location.origin}/#${this.getGlobalConfig(['dashboard','baseRoute'])}/${section}`;
+  }
   asyncTimeout = (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
   }

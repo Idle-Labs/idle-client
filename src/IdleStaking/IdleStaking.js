@@ -290,14 +290,16 @@ class IdleStaking extends Component {
 
     const claimedRewards = [];
     await this.functionsUtil.asyncForEach(claimEvents, async (e) => {
-      const blockInfo = await this.functionsUtil.getBlockInfo(e.blockNumber);
-      if (blockInfo){
-        claimedRewards.push({
-          hash:e.transactionHash,
-          tokenName:this.props.contractInfo.rewardToken,
-          amount:this.functionsUtil.fixTokenDecimals(e.returnValues.amount,rewardTokenConfig.decimals),
-          date:this.functionsUtil.strToMoment(parseInt(blockInfo.timestamp)*1000).utc().format('YYYY-MM-DD HH:mm')+' UTC'
-        });
+      if (this.props.account && e.returnValues.recipient.toLowerCase() === this.props.account.toLowerCase()){
+        const blockInfo = await this.functionsUtil.getBlockInfo(e.blockNumber);
+        if (blockInfo){
+          claimedRewards.push({
+            hash:e.transactionHash,
+            tokenName:this.props.contractInfo.rewardToken,
+            amount:this.functionsUtil.fixTokenDecimals(e.returnValues.amount,rewardTokenConfig.decimals),
+            date:this.functionsUtil.strToMoment(parseInt(blockInfo.timestamp)*1000).utc().format('YYYY-MM-DD HH:mm')+' UTC'
+          });
+        }
       }
     });
 
