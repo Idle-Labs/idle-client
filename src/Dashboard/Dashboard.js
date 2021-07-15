@@ -7,6 +7,7 @@ import DashboardMenu from '../DashboardMenu/DashboardMenu';
 // Import page components
 import Stats from '../Stats/Stats';
 import Utils from '../Utils/Utils';
+import Tranches from '../Tranches/Tranches';
 import AssetPage from '../AssetPage/AssetPage';
 import RoundButton from '../RoundButton/RoundButton';
 import BetaModal from "../utilities/components/BetaModal";
@@ -52,21 +53,36 @@ class Dashboard extends Component {
 
   async loadMenu() {
     const baseRoute = this.functionsUtil.getGlobalConfig(['dashboard','baseRoute']);
-    const strategies = this.functionsUtil.getGlobalConfig(['strategies']);
-    const menu = Object.keys(strategies).filter( s => ( !strategies[s].comingSoon ) ).map(strategy => ({
-        submenu:[],
-        color:'#fff',
-        selected:false,
-        route:baseRoute+'/'+strategy,
-        label:strategies[strategy].title,
-        image:strategies[strategy].icon,
-        bgColor:strategies[strategy].color,
-        component:strategies[strategy].component,
-        imageInactive:strategies[strategy].iconInactive,
-        imageInactiveDark:strategies[strategy].iconInactiveDark
-      })
-    );
 
+    const menu = [];
+
+    menu.push({
+      submenu:[],
+      color:'#fff',
+      selected:false,
+      label:'Tranches',
+      icon:'DonutSmall',
+      component:Tranches,
+      route:baseRoute+'/tranches',
+      bgColor:this.props.theme.colors.primary
+    });
+
+    const strategies = this.functionsUtil.getGlobalConfig(['strategies']);
+    Object.keys(strategies).filter( s => ( !strategies[s].comingSoon ) ).forEach(strategy => {
+        menu.push({
+          submenu:[],
+          color:'#fff',
+          selected:false,
+          route:baseRoute+'/'+strategy,
+          label:strategies[strategy].title,
+          image:strategies[strategy].icon,
+          bgColor:strategies[strategy].color,
+          component:strategies[strategy].component,
+          imageInactive:strategies[strategy].iconInactive,
+          imageInactiveDark:strategies[strategy].iconInactiveDark
+        });
+      }
+    );
 
     const curveConfig = this.functionsUtil.getGlobalConfig(['curve']);
 

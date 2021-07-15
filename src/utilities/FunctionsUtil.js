@@ -2982,6 +2982,46 @@ class FunctionsUtil {
       }
     });
   }
+  loadTrancheField = async (field,fieldProps,protocol,token,tokenConfig,account,addGovTokens=true) => {
+    let output = null;
+
+    const maxPrecision = (fieldProps && fieldProps.maxPrecision) || 5;
+    const decimals = (fieldProps && fieldProps.decimals) || (this.props.isMobile ? 2 : 3);
+    const minPrecision = (fieldProps && fieldProps.minPrecision) || (this.props.isMobile ? 3 : 4);
+
+    switch (field){
+      case 'protocolName':
+        output = this.getGlobalConfig(['stats','protocols',protocol,'label']) || this.capitalize(protocol); 
+      break;
+      case 'tokenName':
+        output = this.getGlobalConfig(['stats','tokens',token,'label']) || this.capitalize(token);
+      break;
+      case 'pool':
+        output = this.abbreviateNumber('123456789',decimals,maxPrecision,minPrecision);
+      break;
+      case 'seniorApy':
+        output = '4.25%';
+      break;
+      case 'juniorApy':
+        output = '10.43%';
+      break;
+      case 'govTokens':
+        output = {};
+        const govTokens = this.getGlobalConfig(['govTokens']);
+        Object.keys(govTokens).forEach( govToken => {
+          const govTokenConfig = govTokens[govToken];
+          if (!govTokenConfig.enabled){
+            return;
+          }
+          output[govToken] = govTokenConfig;
+        });
+      break;
+      default:
+      break;
+    }
+
+    return output;
+  }
   loadAssetField = async (field,token,tokenConfig,account,addGovTokens=true,addCurveApy=false) => {
 
     let output = null;
