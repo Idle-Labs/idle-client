@@ -289,14 +289,17 @@ class IdleStaking extends Component {
     ));
 
     const claimedRewards = [];
+    let totalClaimedUser = this.functionsUtil.BNify(0);
     await this.functionsUtil.asyncForEach(claimEvents, async (e) => {
       if (this.props.account && e.returnValues.recipient.toLowerCase() === this.props.account.toLowerCase()){
         const blockInfo = await this.functionsUtil.getBlockInfo(e.blockNumber);
         if (blockInfo){
+          const claimedAmount = this.functionsUtil.fixTokenDecimals(e.returnValues.amount,rewardTokenConfig.decimals);
+          totalClaimedUser = totalClaimedUser.plus(claimedAmount);
           claimedRewards.push({
+            amount:claimedAmount,
             hash:e.transactionHash,
             tokenName:this.props.contractInfo.rewardToken,
-            amount:this.functionsUtil.fixTokenDecimals(e.returnValues.amount,rewardTokenConfig.decimals),
             date:this.functionsUtil.strToMoment(parseInt(blockInfo.timestamp)*1000).utc().format('YYYY-MM-DD HH:mm')+' UTC'
           });
         }
@@ -330,6 +333,7 @@ class IdleStaking extends Component {
       totalClaimed = totalClaimed.plus(claimedAmount);
       return totalClaimed;
     },this.functionsUtil.BNify(0));
+
     const totalRewards = claimableRewards ? totalClaimed.plus(claimableRewards) : this.functionsUtil.BNify(0);
     const totalRewardsFormatted = claimableRewards ? this.functionsUtil.formatMoney(totalRewards,4)+' '+this.props.contractInfo.rewardToken : (this.state.stats.length ? this.state.stats[3] : this.functionsUtil.formatMoney(totalRewards,4)+' '+this.props.contractInfo.rewardToken);
     stats.push({
@@ -365,6 +369,8 @@ class IdleStaking extends Component {
       // description:'Your claimable rewards'
     });
 
+    const totalCollectedRewards = claimable.plus(totalClaimedUser);
+
     let stakeStartTime = depositEvents.reduce( (stakedTime,event) => {
       const depositTimestamp = this.functionsUtil.BNify(event.returnValues.ts);
       const depositValue = this.functionsUtil.fixTokenDecimals(event.returnValues.value,this.props.tokenConfig.decimals);
@@ -375,16 +381,23 @@ class IdleStaking extends Component {
       return stakedTime;
     },this.functionsUtil.BNify(0));
 
+    // console.log('stakeStartTime',stakeStartTime,stakedBalance.toFixed());
+
     stakeStartTime = stakedBalance.gt(0) ? Math.ceil(stakeStartTime.div(stakedBalance)) : 0;
     // const latestCheckpoint = checkpointEvents.length ? checkpointEvents[checkpointEvents.length-1] : null;
-    const latestDistribution = Object.assign([],etherscanRewardsTxs).pop();
-    const latestDistributionTime = latestDistribution ? this.functionsUtil.BNify(latestDistribution.timeStamp) : this.functionsUtil.BNify(parseInt(Date.now()/1000));
+    // const latestDistribution = etherscanRewardsTxs[0];
+    // const latestDistributionTime = latestDistribution ? this.functionsUtil.BNify(latestDistribution.timeStamp) : this.functionsUtil.BNify(parseInt(Date.now()/1000));
     // const latestDistributionTime = latestCheckpoint ? this.functionsUtil.BNify(latestCheckpoint.returnValues.time) : this.functionsUtil.BNify(parseInt(Date.now()/1000));
-    const stakePeriod = latestDistributionTime.minus(stakeStartTime);
+    const currTime = parseInt(Date.now()/1000);
+    const stakePeriod = this.functionsUtil.BNify(currTime).minus(stakeStartTime);
+    const currentProfit = stakedBalance.gt(0) ? totalCollectedRewards.div(stakedBalance) : this.functionsUtil.BNify(0);
+    const weeksPerYear = 52.14;
+    const secondsPerWeek = 604800;
+    const stakePeriodWeeks = Math.max(1,Math.floor(stakePeriod.div(secondsPerWeek)));
+    const apr = stakePeriod.gt(0) ? currentProfit.times(weeksPerYear).div(stakePeriodWeeks).times(100) : this.functionsUtil.BNify(0);
+    
+    // console.log('APR',currTime,stakeStartTime,apr.toFixed(),currentProfit.toFixed(),stakePeriod.toFixed(),stakePeriodWeeks,totalCollectedRewards.toFixed(),stakedBalance.toFixed());
 
-    const currentProfit = stakedBalance.gt(0) ? claimable.div(stakedBalance) : this.functionsUtil.BNify(0);
-    const apr = stakePeriod.gt(0) ? currentProfit.times(this.functionsUtil.getGlobalConfig(['network','secondsPerYear'])).div(stakePeriod).times(100) : this.functionsUtil.BNify(0);
-    // console.log('APR',apr.toFixed(),currentProfit.toFixed(),stakePeriod.toFixed(),claimable.toFixed(),stakedBalance.toFixed(),latestCheckpoint);
     globalStats.push({
       title:'APR',
       value:`${apr.toFixed(2)}%`,
