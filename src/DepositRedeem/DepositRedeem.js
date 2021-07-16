@@ -981,9 +981,9 @@ class DepositRedeem extends Component {
                     permitOptions.r = r;
                     permitOptions.s = s;
                     permitOptions.allowed = true;
-                    permitOptions.value = permitValue;
                     permitOptions.expiry = parseInt(expiry);
                     permitOptions.holder = this.props.account;
+                    permitOptions.value = setValue ? permitValue : 0;
                     permitOptions.nonce = parseInt(nonce.toString());
                     permitOptions.spender = erc20ForwarderBaseContract.address;
 
