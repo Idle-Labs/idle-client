@@ -2365,7 +2365,7 @@ class DepositRedeem extends Component {
                                 />
                               </Flex>
                               {
-                                this.state.txError[this.state.action] && (
+                                this.state.erc20ForwarderEnabled && this.state.txError[this.state.action] && (
                                   <Text
                                     mt={2}
                                     fontSize={1}
