@@ -806,7 +806,7 @@ class DepositRedeem extends Component {
         };
 
         const callbackReceiptDeposit = (tx) => {
-          console.log('callbackReceiptDeposit',tx);
+          // console.log('callbackReceiptDeposit',tx);
           const txHash = tx.transactionHash;
           this.setState((prevState) => ({
             processing: {
@@ -866,6 +866,7 @@ class DepositRedeem extends Component {
             // Use Erc20 Forwarder
             } else if (depositErc20ForwarderEnabled){
 
+              // Check if the deposit method require the nonce
               const methodAbi = mintProxyContractInfo.contract._jsonInterface.find( f => f.name === mintProxyContractInfo.function );
               const useNonce = methodAbi ? methodAbi.inputs.find( i => i.name === 'nonce' ) : true;
 
@@ -880,7 +881,7 @@ class DepositRedeem extends Component {
                   const erc20ForwarderContract = this.state.erc20ForwarderContract[this.state.action];
                   const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken, this.props.account, erc20ForwarderContract.name, 0, tokensToDeposit);
                   
-                  console.log('signedParameters_1',signedParameters);
+                  // console.log('signedParameters_1',signedParameters);
 
                   if (signedParameters){
 
@@ -896,7 +897,7 @@ class DepositRedeem extends Component {
                       depositParams = [];
                     }
 
-                    console.log('permitAndDeposit',mintProxyContractInfo.name, mintProxyContractInfo.function, depositParams);
+                    // console.log('permitAndDeposit',mintProxyContractInfo.name, mintProxyContractInfo.function, depositParams);
 
                     // contractSendResult = await this.functionsUtil.contractMethodSendWrapper(mintProxyContractInfo.name, mintProxyContractInfo.function, depositParams, callbackDeposit, callbackReceiptDeposit);
 
@@ -904,7 +905,7 @@ class DepositRedeem extends Component {
                     const functionCall = erc20ForwarderContract.contract.methods[erc20ForwarderContract.function](...depositParams);
                     const functionSignature = functionCall.encodeABI();
 
-                    console.log('functionSignature',permitType, erc20ForwarderContract.function, depositParams, functionSignature);
+                    // console.log('functionSignature',permitType, erc20ForwarderContract.function, depositParams);
 
                     let gasLimit = null;
                     try {
@@ -915,19 +916,19 @@ class DepositRedeem extends Component {
                         gasLimit = this.functionsUtil.BNify(1000000);
                       }
                     } catch (error) {
-                      
+                      // console.log('Gas Estimate - Error: ',error);
                     }
                     
                     if (!gasLimit){
                       gasLimit = this.functionsUtil.BNify(1000000);
                     }
 
-                    console.log('gasEstimate',mintProxyContractInfo.name, depositParams, functionSignature, parseFloat(gasLimit));
+                    // console.log('gasEstimate',mintProxyContractInfo.name, depositParams, parseFloat(gasLimit));
 
                     // debugger;
 
                     const erc20ForwarderTx = await this.functionsUtil.buildBiconomyErc20ForwarderTx(erc20ForwarderContract.name, this.props.tokenConfig.address, permitType, functionSignature, gasLimit);
-                    console.log('erc20ForwarderTx',erc20ForwarderTx);
+                    // console.log('erc20ForwarderTx',erc20ForwarderTx);
                     return this.setState({
                       erc20ForwarderTx,
                       loadingErc20ForwarderTx:false
@@ -960,10 +961,11 @@ class DepositRedeem extends Component {
                   const erc20ForwarderContract = this.state.erc20ForwarderContract[this.state.action];
                   const erc20ForwarderBaseContract = this.functionsUtil.getGlobalConfig(['contract','methods',this.state.action,'erc20ForwarderProxyContract','forwarder']);
 
+                  const permitValue = `${tokensToDeposit}00`;
                   const incrementNonce = 1; // useNonce ? 1 : 0;
-                  const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken, this.props.account, erc20ForwarderBaseContract.name, incrementNonce);
+                  const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken, this.props.account, erc20ForwarderBaseContract.name, incrementNonce, permitValue);
 
-                  console.log('signedParameters_2',signedParameters);
+                  // console.log('signedParameters_2',signedParameters);
 
                   if (signedParameters){
 
@@ -979,16 +981,16 @@ class DepositRedeem extends Component {
                     permitOptions.r = r;
                     permitOptions.s = s;
                     permitOptions.allowed = true;
+                    permitOptions.value = permitValue;
                     permitOptions.expiry = parseInt(expiry);
                     permitOptions.holder = this.props.account;
                     permitOptions.nonce = parseInt(nonce.toString());
-                    permitOptions.value = setValue ? tokensToDeposit : 0;
                     permitOptions.spender = erc20ForwarderBaseContract.address;
 
                     metaInfo.permitData = permitOptions;
                     metaInfo.permitType = erc20ForwarderContract.permitType;
 
-                    console.log('sendBiconomyTxWithErc20Forwarder',permitOptions,metaInfo);
+                    // console.log('sendBiconomyTxWithErc20Forwarder',permitOptions,metaInfo);
 
                     await this.functionsUtil.asyncTimeout(200);
 
@@ -2898,7 +2900,7 @@ class DepositRedeem extends Component {
                                   color={'cellText'}
                                   textAlign={'center'}
                                 >
-                                  The required fee to perform the {this.state.action} is <strong>{this.state.erc20ForwarderTx.cost} {this.props.selectedToken}</strong>
+                                  The required gas fee to perform the {this.state.action} is <strong>{this.state.erc20ForwarderTx.cost} {this.props.selectedToken}</strong>
                                 </Text>
                                 <Flex
                                   width={1}
