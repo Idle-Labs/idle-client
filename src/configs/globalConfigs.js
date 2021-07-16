@@ -823,6 +823,7 @@ const globalConfigs = {
           rgb:[55, 136, 121],
           hsl:['169', '42%', '37%']
         },
+        disabledCharts:['score'],
         startTimestamp:'2021-05-25',
         icon:'images/tokens/RAI.png',
         conversionRateField:'raiDAIPrice',
@@ -1099,7 +1100,7 @@ const globalConfigs = {
         }
       },
       biconomy:{
-        enabled:true,
+        enabled:false,
         enableLogin:false,
         supportedNetworks:[1,42],
         disabledWallets:['authereum'],

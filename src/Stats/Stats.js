@@ -909,6 +909,8 @@ class Stats extends Component {
         }
       });
 
+      const disabledCharts = tokenConfig.disabledCharts || [];
+
       const versionInfo = this.getVersionInfo(this.state.idleVersion);
 
       let performanceTooltip = null;
@@ -1516,43 +1518,46 @@ class Stats extends Component {
                         </Flex>
                       </Flex>
                     </DashboardCard>
-                    <DashboardCard
-                      cardProps={{
-                        mr:4,
-                        height:'fit-content',
-                        style:this.props.isMobile ? {width:'100%'} : {width:'32vw'}
-                      }}
-                      title={'Risk Score'}
-                      description={'Idle Risk Score is a weighted average of the underlying protocols risks assessed by DeFi Score'}
-                      titleParentProps={{
-                        ml:16,
-                        mt:16
-                      }}
-                    >
-                      <Flex id='chart-SCORE' width={1}>
-                        <Flex
-                          mb={3}
-                          width={1}
-                          flexDirection={'column'}
-                          alignItems={'flex-start'}
-                          justifyContent={'center'}
+                    {
+                      !disabledCharts.includes('score') &&
+                        <DashboardCard
+                          cardProps={{
+                            mr:4,
+                            height:'fit-content',
+                            style:this.props.isMobile ? {width:'100%'} : {width:'32vw'}
+                          }}
+                          title={'Risk Score'}
+                          description={'Idle Risk Score is a weighted average of the underlying protocols risks assessed by DeFi Score'}
+                          titleParentProps={{
+                            ml:16,
+                            mt:16
+                          }}
                         >
-                          <StatsChart
-                            height={300}
-                            {...this.state}
-                            chartMode={'SCORE'}
-                            parentId={'chart-SCORE'}
-                            theme={this.props.theme}
-                            isMobile={this.props.isMobile}
-                            themeMode={this.props.themeMode}
-                            contracts={this.props.contracts}
-                            apiResults={this.state.apiResults}
-                            idleVersion={this.state.idleVersion}
-                            apiResults_unfiltered={this.state.apiResults_unfiltered}
-                          />
-                        </Flex>
-                      </Flex>
-                    </DashboardCard>
+                          <Flex id='chart-SCORE' width={1}>
+                            <Flex
+                              mb={3}
+                              width={1}
+                              flexDirection={'column'}
+                              alignItems={'flex-start'}
+                              justifyContent={'center'}
+                            >
+                              <StatsChart
+                                height={300}
+                                {...this.state}
+                                chartMode={'SCORE'}
+                                parentId={'chart-SCORE'}
+                                theme={this.props.theme}
+                                isMobile={this.props.isMobile}
+                                themeMode={this.props.themeMode}
+                                contracts={this.props.contracts}
+                                apiResults={this.state.apiResults}
+                                idleVersion={this.state.idleVersion}
+                                apiResults_unfiltered={this.state.apiResults_unfiltered}
+                              />
+                            </Flex>
+                          </Flex>
+                        </DashboardCard>
+                    }
                     <DashboardCard
                       cardProps={{
                         mr:4,
