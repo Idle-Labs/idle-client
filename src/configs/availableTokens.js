@@ -180,6 +180,20 @@ const availableTokens = {
         },
         protocols:[
           {
+            abi:crToken,
+            decimals:28,
+            name:'cream',
+            enabled:true,
+            token:'crDAI',
+            functions:{
+              exchangeRate:{
+                name:'exchangeRateStored',
+                params:[]
+              }
+            },
+            address:'0x4eCEDdF62277eD78623f9A94995c680f8fd6C00e',
+          },
+          {
             abi:aToken,
             name:'aavev2',
             enabled:true,
@@ -219,6 +233,20 @@ const availableTokens = {
         },
         protocols:[
           {
+            abi:crToken,
+            decimals:16,
+            name:'cream',
+            enabled:true,
+            token:'crUSDC',
+            functions:{
+              exchangeRate:{
+                name:'exchangeRateStored',
+                params:[]
+              }
+            },
+            address:'0x73CF8c5D14Aa0EbC89f18272A568319F5BAB6cBD',
+          },
+          {
             abi:aToken,
             name:'aavev2',
             enabled:true,
@@ -257,6 +285,20 @@ const availableTokens = {
           address:'0xfdA25D931258Df948ffecb66b5518299Df6527C4',
         },
         protocols:[
+          {
+            abi:crToken,
+            decimals:28,
+            name:'cream',
+            enabled:true,
+            token:'crWETH',
+            functions:{
+              exchangeRate:{
+                name:'exchangeRateStored',
+                params:[]
+              }
+            },
+            address:'0x7ef18d0a9C3Fb1A716FF6c3ED0Edf52a2427F716',
+          },
           {
             abi:aToken,
             decimals:18,
