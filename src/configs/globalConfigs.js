@@ -1992,6 +1992,7 @@ const globalConfigs = {
       visible:true,
       icon:'CloudUpload',
       label:'B2B Vesting',
+      availableNetworks:[1],
       route:'b2b-vesting-contract',
       subComponent:DeployB2BVesting,
       desc:'Deploy/Deposit/Claim for B2B Vesting Contracts<br /><small style="color:#ff9900">(only for partners that joined the B2B Affiliate program)</small>',
