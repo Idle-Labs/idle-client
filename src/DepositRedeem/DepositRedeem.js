@@ -1397,12 +1397,13 @@ class DepositRedeem extends Component {
 
     const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','erc20ForwarderEnabled']);
     const depositMetaTransactionsEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','metaTransactionsEnabled']);
+    const depositErc20ForwarderEnabledTokens = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','erc20ForwarderProxyContract','tokens']);
 
     // Biconomy Start
     const metaTransactionsAvailable = depositMetaTransactionsEnabled && this.props.biconomy && this.state.actionProxyContract[this.state.action];
     const useMetaTx = metaTransactionsAvailable && this.state.metaTransactionsEnabled;
 
-    const erc20ForwarderEnabled = depositErc20ForwarderEnabled && this.props.biconomy && this.props.erc20ForwarderClient && this.state.actionProxyContract[this.state.action];
+    const erc20ForwarderEnabled = depositErc20ForwarderEnabled && Object.keys(depositErc20ForwarderEnabledTokens).includes(this.props.selectedToken) && depositErc20ForwarderEnabledTokens[this.props.selectedToken].enabled && this.props.biconomy && this.props.erc20ForwarderClient && this.state.actionProxyContract[this.state.action];
 
     // console.log(erc20ForwarderEnabled,depositErc20ForwarderEnabled,this.props.biconomy,this.props.erc20ForwarderClient,this.state.actionProxyContract[this.state.action]);
     // Biconomy End
