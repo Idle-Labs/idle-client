@@ -45,19 +45,18 @@ class TranchesList extends Component {
         <Flex id="tranches-list" flexDirection={'column'}>
           {
             enabledProtocols.map(protocol => {
-              const trancheConfig = this.props.availableTranches[protocol];
-              if (!trancheConfig){
+              const protocolConfig = this.props.availableTranches[protocol];
+              if (!protocolConfig){
                 return null;
               }
-              return Object.keys(trancheConfig).map( token => (
+              return Object.keys(protocolConfig).map( token => (
                 <TableRow
                   {...this.props}
                   token={token}
                   protocol={protocol}
                   key={`tranche-${protocol}`}
-                  trancheConfig={trancheConfig}
                   rowId={`tranche-col-${protocol}`}
-                  tokenConfig={trancheConfig[token]}
+                  tokenConfig={protocolConfig[token]}
                   cardId={`tranche-card-${protocol}`}
                   fieldComponent={this.props.fieldComponent || TrancheField}
                 />

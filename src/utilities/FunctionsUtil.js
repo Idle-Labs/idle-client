@@ -2982,28 +2982,71 @@ class FunctionsUtil {
       }
     });
   }
-  loadTrancheField = async (field,fieldProps,protocol,token,tokenConfig,account,addGovTokens=true) => {
+  loadTrancheField = async (field,fieldProps,protocol,token,tranche,tokenConfig,account,addGovTokens=true) => {
     let output = null;
 
     const maxPrecision = (fieldProps && fieldProps.maxPrecision) || 5;
     const decimals = (fieldProps && fieldProps.decimals) || (this.props.isMobile ? 2 : 3);
     const minPrecision = (fieldProps && fieldProps.minPrecision) || (this.props.isMobile ? 3 : 4);
+    const tokenName = this.getGlobalConfig(['stats','tokens',token,'label']) || this.capitalize(token);
 
     switch (field){
       case 'protocolName':
         output = this.getGlobalConfig(['stats','protocols',protocol,'label']) || this.capitalize(protocol); 
       break;
       case 'tokenName':
-        output = this.getGlobalConfig(['stats','tokens',token,'label']) || this.capitalize(token);
+        output = tokenName;
       break;
       case 'pool':
-        output = this.abbreviateNumber('123456789',decimals,maxPrecision,minPrecision);
+        output = this.abbreviateNumber('98765',decimals,maxPrecision,minPrecision)+` ${tokenName}`;
+      break;
+      case 'seniorPool':
+        output = this.abbreviateNumber('54321',decimals,maxPrecision,minPrecision)+` ${tokenName}`;
+      break;
+      case 'juniorPool':
+        output = this.abbreviateNumber('12345',decimals,maxPrecision,minPrecision)+` ${tokenName}`;
       break;
       case 'seniorApy':
         output = '4.25%';
       break;
       case 'juniorApy':
         output = '10.43%';
+      break;
+      case 'tranchePool':
+        switch (tranche){
+          case 'junior':
+          case 'senior':
+            output = await this.loadTrancheField(`${tranche}Pool`,fieldProps,protocol,token,tranche,tokenConfig,account,addGovTokens);
+          break;
+          default:
+          break;
+        }
+      break;
+      case 'trancheApy':
+        switch (tranche){
+          case 'junior':
+          case 'senior':
+            output = await this.loadTrancheField(`${tranche}Apy`,fieldProps,protocol,token,tranche,tokenConfig,account,addGovTokens);
+          break;
+          default:
+          break;
+        }
+      break;
+      case 'trancheIDLEDistribution':
+        switch (tranche){
+          case 'junior':
+          case 'senior':
+            output = await this.loadTrancheField(`${tranche}IDLEDistribution`,fieldProps,protocol,token,tranche,tokenConfig,account,addGovTokens);
+          break;
+          default:
+          break;
+        }
+      break;
+      case 'seniorIDLEDistribution':
+        output = this.abbreviateNumber('1234',decimals,maxPrecision,minPrecision)+` IDLE/day`;
+      break;
+      case 'juniorIDLEDistribution':
+        output = this.abbreviateNumber('4321',decimals,maxPrecision,minPrecision)+` IDLE/day`;
       break;
       case 'govTokens':
         output = {};

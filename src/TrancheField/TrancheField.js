@@ -78,7 +78,7 @@ class TrancheField extends Component {
 
   loadField = async(fieldName=null) => {
 
-    if (this.componentUnmounted || !this.props.protocol || !this.props.trancheConfig){
+    if (this.componentUnmounted || !this.props.protocol || !this.props.tokenConfig){
       return false;
     }
 
@@ -97,7 +97,7 @@ class TrancheField extends Component {
     if (this.props.token){
       switch (fieldName){
         default:
-          output = await this.functionsUtil.loadTrancheField(fieldName,fieldProps,this.props.protocol,this.props.token,this.props.tokenConfig,this.props.account,addGovTokens);
+          output = await this.functionsUtil.loadTrancheField(fieldName,fieldProps,this.props.protocol,this.props.token,this.props.tranche,this.props.tokenConfig,this.props.account,addGovTokens);
           if (output && setState){
             this.setStateSafe({
               ready:true,
@@ -143,7 +143,7 @@ class TrancheField extends Component {
       });
     }
 
-    const trancheConfig = this.props.trancheConfig;// || this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token]);
+    const tokenConfig = this.props.tokenConfig;// || this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token]);
       
     const maxPrecision = fieldProps && fieldProps.maxPrecision ? fieldProps.maxPrecision : 5;
     const decimals = fieldProps && fieldProps.decimals ? fieldProps.decimals : ( this.props.isMobile ? 2 : 3 );
@@ -181,6 +181,7 @@ class TrancheField extends Component {
             alignItems={'center'}
             flexDirection={'row'}
             justifyContent={'flex-start'}
+            {...fieldInfo.parentProps}
           >
             {
               Object.values(this.state.govTokens).map( (govTokenConfig,govTokenIndex) => (
@@ -196,7 +197,7 @@ class TrancheField extends Component {
                     props:{
                       borderRadius:'50%',
                       position:'relative',
-                      height:['1.1em','2em'],
+                      height:['1.4em','2em'],
                       ml:govTokenIndex ? '-10px' : 0,
                       zIndex:Object.values(this.state.govTokens).length-govTokenIndex,
                       boxShadow:['1px 1px 1px 0px rgba(0,0,0,0.1)','1px 2px 3px 0px rgba(0,0,0,0.1)'],
