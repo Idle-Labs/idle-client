@@ -2549,7 +2549,7 @@ class FunctionsUtil {
       txGas:parseInt(gasLimit)
     };
 
-    console.log('buildBiconomyErc20ForwarderTx',buildParams);
+    // console.log('buildBiconomyErc20ForwarderTx',buildParams);
 
     //Create the call data that the recipient contract will receive
     const tx = await this.props.erc20ForwarderClient.buildTx(buildParams);
@@ -2575,15 +2575,15 @@ class FunctionsUtil {
     try {
       const txResponse = await this.props.erc20ForwarderClient.permitAndSendTxEIP712({req,metaInfo});
       transactionHash = txResponse.txHash;
-      console.log('permitAndSendTxEIP712',transactionHash);
+      // console.log('permitAndSendTxEIP712',transactionHash);
     } catch (error) {
-      console.log('permitAndSendTxEIP712 ERROR',error);
+      // console.log('permitAndSendTxEIP712 ERROR',error);
       callback(null,true);
       return false;
     }
 
     if (!transactionHash){
-      console.log('!transactionHash ERROR');
+      // console.log('!transactionHash ERROR');
       callback(null,true);
       return false;
     }
@@ -2592,13 +2592,13 @@ class FunctionsUtil {
       method:'mintIdleToken',
       transactionHash
     };
-    console.log('sendBiconomyTxWithErc20Forwarder - TX',tx);
+    // console.log('sendBiconomyTxWithErc20Forwarder - TX',tx);
     callback_receipt(tx);
 
     // fetch mined transaction receipt 
     const fetchReceiptIntervalId = window.setInterval(()=> {
       this.props.web3.eth.getTransactionReceipt(transactionHash, (err, receipt)=> {
-        console.log('sendBiconomyTxWithErc20Forwarder - RECEIPT',transactionHash,err,receipt);
+        // console.log('sendBiconomyTxWithErc20Forwarder - RECEIPT',transactionHash,err,receipt);
         if(!err && receipt){
           window.clearInterval(fetchReceiptIntervalId);
           tx.txReceipt = receipt;
@@ -2791,7 +2791,7 @@ class FunctionsUtil {
       primaryType: 'Permit',
     });
 
-    console.log('Permit',JSON.parse(data));
+    // console.log('Permit',JSON.parse(data));
 
     return new Promise((resolve, reject) => {
       this.props.web3.currentProvider.send({

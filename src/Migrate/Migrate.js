@@ -661,7 +661,7 @@ class Migrate extends Component {
           }
         }
 
-        const useMetaTx = this.props.biconomy && this.state.metaTransactionsEnabled && !this.state.biconomyLimitReached;
+        const useMetaTx = this.props.useMetaTx !== false && this.props.biconomy && this.state.metaTransactionsEnabled && !this.state.biconomyLimitReached;
 
         // Call migration contract function to migrate funds
         const oldIdleTokens = this.state.oldIdleTokens;

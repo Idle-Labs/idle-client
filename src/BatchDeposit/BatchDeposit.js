@@ -1031,6 +1031,7 @@ class BatchDeposit extends Component {
                     this.state.batchDepositEnabled ? (
                       <Migrate
                         {...this.props}
+                        useMetaTx={false}
                         showActions={false}
                         usePermit={usePermit}
                         getTokenPrice={false}
