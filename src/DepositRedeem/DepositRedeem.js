@@ -65,7 +65,7 @@ class DepositRedeem extends Component {
     skipGovTokensGasSave:null,
     depositCurveSlippage:null,
     erc20ForwarderContract:{},
-    erc20ForwarderEnabled:true,
+    erc20ForwarderEnabled:false,
     showETHWrapperEnabled:false,
     skipGovTokensGasSaveUSD:null,
     metaTransactionsEnabled:true,

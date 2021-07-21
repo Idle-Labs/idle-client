@@ -1100,7 +1100,7 @@ const globalConfigs = {
         }
       },
       biconomy:{
-        enabled:false,
+        enabled:true,
         enableLogin:false,
         supportedNetworks:[1,42],
         disabledWallets:['authereum'],
