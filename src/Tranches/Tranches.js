@@ -4,7 +4,6 @@ import { Box, Flex, Heading } from "rimble-ui";
 import TranchePage from '../TranchePage/TranchePage';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import TranchesList from '../TranchesList/TranchesList';
-import availableTranches from '../configs/availableTranches';
 
 class Tranches extends Component {
 
@@ -32,8 +31,8 @@ class Tranches extends Component {
   async componentDidMount(){
     const selectedToken = this.props.urlParams.param2;
     const selectedProtocol = this.props.urlParams.param1;
-    const tokenConfig = availableTranches[selectedProtocol] && availableTranches[selectedProtocol][selectedToken] ? availableTranches[selectedProtocol][selectedToken] : null;
-    console.log('componentDidMount',tokenConfig);
+    const tokenConfig = this.props.availableTranches[selectedProtocol] && this.props.availableTranches[selectedProtocol][selectedToken] ? this.props.availableTranches[selectedProtocol][selectedToken] : null;
+    // console.log('componentDidMount',tokenConfig);
     if (tokenConfig){
       this.setState({
         tokenConfig,
@@ -48,10 +47,10 @@ class Tranches extends Component {
   }
 
   selectTranche(protocol,token){
-    const tokenConfig = availableTranches[protocol] && availableTranches[protocol][token] ? availableTranches[protocol][token] : null;
+    const tokenConfig = this.props.availableTranches[protocol] && this.props.availableTranches[protocol][token] ? this.props.availableTranches[protocol][token] : null;
     if (tokenConfig){
       const route = `${this.props.selectedSection.route}/${protocol}/${token}`;
-      console.log('selectTranche',route);
+      // console.log('selectTranche',route);
       this.props.goToSection(route);
     }
   }
@@ -65,10 +64,10 @@ class Tranches extends Component {
           this.state.tokenConfig ? (
             <TranchePage
               {...this.props}
-              availableTranches={availableTranches}
-              selectedToken={this.state.selectedToken}
               tokenConfig={this.state.tokenConfig}
+              selectedToken={this.state.selectedToken}
               selectedProtocol={this.state.selectedProtocol}
+              availableTranches={this.props.availableTranches}
             />
           ) : (
             <Box
@@ -101,7 +100,7 @@ class Tranches extends Component {
                 </Flex>
                 <TranchesList
                   enabledProtocols={[]}
-                  availableTranches={availableTranches}
+                  availableTranches={this.props.availableTranches}
                   handleClick={(props) => this.selectTranche(props.protocol,props.token)}
                   cols={[
                     {
@@ -114,7 +113,7 @@ class Tranches extends Component {
                           name:'protocolIcon',
                           props:{
                             mr:2,
-                            height:['1.4em','2.3em']
+                            height:['1.4em','2em']
                           }
                         },
                         {
@@ -132,7 +131,7 @@ class Tranches extends Component {
                           name:'tokenIcon',
                           props:{
                             mr:2,
-                            height:['1.4em','2.3em']
+                            height:['1.4em','2em']
                           }
                         },
                         {
@@ -188,7 +187,7 @@ class Tranches extends Component {
                     },
                     {
                       mobile:false,
-                      title:'AUTO-HARVEST',
+                      title:'REWARD TOKENS',
                       props:{
                         width:[0.25,0.15],
                       },

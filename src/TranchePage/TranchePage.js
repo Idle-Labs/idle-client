@@ -33,11 +33,12 @@ class TranchePage extends Component {
   render() {
     return (
       <Box
+        mb={4}
         width={1}
       >
         <Flex
-          mb={3}
           width={1}
+          mb={[2,0]}
           alignItems={'center'}
           flexDirection={'row'}
           justifyContent={'flex-start'}
@@ -76,8 +77,9 @@ class TranchePage extends Component {
           >
             <TrancheDetails
               {...this.props}
-              selectedTranche={'senior'}
-              trancheConfig={this.props.tokenConfig['senior']}
+              selectedTranche={'AA'}
+              cdoConfig={this.props.tokenConfig.CDO}
+              trancheConfig={this.props.tokenConfig['AA']}
             />
           </Flex>
           <Flex
@@ -86,8 +88,9 @@ class TranchePage extends Component {
           >
             <TrancheDetails
               {...this.props}
-              selectedTranche={'junior'}
-              trancheConfig={this.props.tokenConfig['junior']}
+              selectedTranche={'BB'}
+              cdoConfig={this.props.tokenConfig.CDO}
+              trancheConfig={this.props.tokenConfig['BB']}
             />
           </Flex>
         </Flex>

@@ -97,7 +97,7 @@ class TrancheField extends Component {
     if (this.props.token){
       switch (fieldName){
         default:
-          output = await this.functionsUtil.loadTrancheField(fieldName,fieldProps,this.props.protocol,this.props.token,this.props.tranche,this.props.tokenConfig,this.props.account,addGovTokens);
+          output = await this.functionsUtil.loadTrancheField(fieldName,fieldProps,this.props.protocol,this.props.token,this.props.tranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account,addGovTokens);
           if (output && setState){
             this.setStateSafe({
               ready:true,
@@ -175,7 +175,9 @@ class TrancheField extends Component {
         );
       break;
       case 'govTokens':
-        output = this.state.govTokens && Object.keys(this.state.govTokens).length>0 ? (
+      case 'autoFarming':
+      case 'stakingRewards':
+        output = this.state[fieldInfo.name] && Object.keys(this.state[fieldInfo.name]).length>0 ? (
           <Flex
             width={1}
             alignItems={'center'}
@@ -184,7 +186,7 @@ class TrancheField extends Component {
             {...fieldInfo.parentProps}
           >
             {
-              Object.values(this.state.govTokens).map( (govTokenConfig,govTokenIndex) => (
+              Object.values(this.state[fieldInfo.name]).map( (govTokenConfig,govTokenIndex) => (
                 <AssetField
                   token={govTokenConfig.token}
                   tokenConfig={govTokenConfig}
@@ -199,7 +201,7 @@ class TrancheField extends Component {
                       position:'relative',
                       height:['1.4em','2em'],
                       ml:govTokenIndex ? '-10px' : 0,
-                      zIndex:Object.values(this.state.govTokens).length-govTokenIndex,
+                      zIndex:Object.values(this.state[fieldInfo.name]).length-govTokenIndex,
                       boxShadow:['1px 1px 1px 0px rgba(0,0,0,0.1)','1px 2px 3px 0px rgba(0,0,0,0.1)'],
                     }
                   }}
@@ -207,7 +209,7 @@ class TrancheField extends Component {
               ))
             }
           </Flex>
-        ) : this.state.govTokens ? (
+        ) : this.state[fieldInfo.name] ? (
           <Text {...fieldProps}>-</Text>
         ) : loader
       break;

@@ -15,6 +15,7 @@ class CardIconButton extends Component {
          cardProps={cardProps}
          isInteractive={true}
          isActive={this.props.isActive}
+         isDisabled={this.props.isDisabled}
          handleClick={this.props.handleClick}
        >
          <Flex

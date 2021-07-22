@@ -18,6 +18,7 @@ import FunctionsUtil from '../utilities/FunctionsUtil';
 import PageNotFound from "../PageNotFound/PageNotFound";
 import Web3Debugger from "../Web3Debugger/Web3Debugger";
 import availableTokens from '../configs/availableTokens';
+import availableTranches from '../configs/availableTranches';
 import TransactionToastUtil from "../utilities/TransactionToastUtil";
 import { HashRouter as Router, Switch, Route } from "react-router-dom";
 import { ThemeProvider, Box, Text, Link, Image, Flex } from 'rimble-ui';
@@ -652,6 +653,7 @@ class App extends Component {
                     connectors={connectors}
                     theme={this.state.selectedTheme}
                     cachedData={this.state.cachedData}
+                    availableTranches={availableTranches}
                     tokenConfig={this.state.tokenConfig}
                     setNetwork={this.setNetwork.bind(this)}
                     customAddress={this.state.customAddress}
@@ -745,6 +747,7 @@ class App extends Component {
                                       getTokenDecimals={getTokenDecimals}
                                       rejectValidation={rejectValidation}
                                       tokenConfig={this.state.tokenConfig}
+                                      availableTranches={availableTranches}
                                       getAccountBalance={getAccountBalance}
                                       accountBalanceLow={accountBalanceLow}
                                       accountInizialized={accountInizialized}

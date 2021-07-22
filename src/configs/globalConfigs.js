@@ -524,10 +524,12 @@ const globalConfigs = {
     },
   },
   tranches:{
-    junior:{
+    BB:{
+      name:'Junior Tranche',
       description:'By depositing in the Junior Tranche in case of Smart-Contract breach your funds will be used to cover eventual losses on the Senior Tranche.'
     },
-    senior:{
+    AA:{
+      name:'Senior Tranche',
       description:'By depositing in the Senior Tranche in case of Smart-Contract breach your funds are covered by the funds deposited in the Junior Tranche.'
     }
   },

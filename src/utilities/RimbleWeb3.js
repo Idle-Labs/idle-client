@@ -871,6 +871,21 @@ class RimbleTransaction extends React.Component {
       });
     }
 
+    await this.functionsUtil.asyncForEach(Object.keys(this.props.availableTranches),async (protocol) => {
+      const tokens = this.props.availableTranches[protocol];
+      await this.functionsUtil.asyncForEach(Object.keys(tokens),async (token) => {
+        const tokenConfig = tokens[token];
+        await Promise.all([
+          this.initContract(tokenConfig.name,tokenConfig.address,tokenConfig.abi),
+          this.initContract(tokenConfig.AA.name,tokenConfig.AA.address,tokenConfig.AA.abi),
+          this.initContract(tokenConfig.BB.name,tokenConfig.BB.address,tokenConfig.BB.abi),
+          this.initContract(tokenConfig.CDO.name,tokenConfig.CDO.address,tokenConfig.CDO.abi),
+          this.initContract(tokenConfig.AA.CDORewards.name,tokenConfig.AA.CDORewards.address,tokenConfig.AA.CDORewards.abi),
+          this.initContract(tokenConfig.BB.CDORewards.name,tokenConfig.BB.CDORewards.address,tokenConfig.BB.CDORewards.abi)
+        ]);
+      });
+    });
+
     return this.setState({
       contractsInitialized:true
     });

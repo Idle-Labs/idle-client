@@ -2227,6 +2227,9 @@ class FunctionsUtil {
     return this.BNify(tokenBalance).times(normalizedTokenDecimals).integerValue(BigNumber.ROUND_FLOOR).toFixed();
   }
   fixTokenDecimals = (tokenBalance,tokenDecimals,exchangeRate=null) => {
+    if (!tokenDecimals){
+      return this.BNify(tokenBalance);
+    }
     const normalizedTokenDecimals = this.normalizeTokenDecimals(tokenDecimals);
     let balance = this.BNify(tokenBalance).div(normalizedTokenDecimals);
     if (exchangeRate && !exchangeRate.isNaN()){
@@ -2982,9 +2985,8 @@ class FunctionsUtil {
       }
     });
   }
-  loadTrancheField = async (field,fieldProps,protocol,token,tranche,tokenConfig,account,addGovTokens=true) => {
+  loadTrancheField = async (field,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens=true) => {
     let output = null;
-
     const maxPrecision = (fieldProps && fieldProps.maxPrecision) || 5;
     const decimals = (fieldProps && fieldProps.decimals) || (this.props.isMobile ? 2 : 3);
     const minPrecision = (fieldProps && fieldProps.minPrecision) || (this.props.isMobile ? 3 : 4);
@@ -2992,71 +2994,79 @@ class FunctionsUtil {
 
     switch (field){
       case 'protocolName':
-        output = this.getGlobalConfig(['stats','protocols',protocol,'label']) || this.capitalize(protocol); 
+        output = (this.getGlobalConfig(['stats','protocols',protocol,'label']) || this.capitalize(protocol)).toUpperCase();
       break;
       case 'tokenName':
         output = tokenName;
       break;
       case 'pool':
-        output = this.abbreviateNumber('98765',decimals,maxPrecision,minPrecision)+` ${tokenName}`;
+        let poolSize = await this.genericContractCallCached(tokenConfig.CDO.name,'getContractValue');
+        if (poolSize){
+          output = this.formatMoney(this.fixTokenDecimals(poolSize,tokenConfig.CDO.decimals),decimals)+` ${tokenName}`;
+        }
       break;
       case 'seniorPool':
-        output = this.abbreviateNumber('54321',decimals,maxPrecision,minPrecision)+` ${tokenName}`;
+        output = await this.loadTrancheField(`tranchePool`,fieldProps,protocol,token,tranche,tokenConfig,tokenConfig.AA,account,addGovTokens);
       break;
       case 'juniorPool':
-        output = this.abbreviateNumber('12345',decimals,maxPrecision,minPrecision)+` ${tokenName}`;
+        output = await this.loadTrancheField(`tranchePool`,fieldProps,protocol,token,tranche,tokenConfig,tokenConfig.BB,account,addGovTokens);
       break;
       case 'seniorApy':
-        output = '4.25%';
+        output = await this.loadTrancheField(`trancheApy`,fieldProps,protocol,token,tranche,tokenConfig,tokenConfig.AA,account,addGovTokens);
       break;
       case 'juniorApy':
-        output = '10.43%';
+        output = await this.loadTrancheField(`trancheApy`,fieldProps,protocol,token,tranche,tokenConfig,tokenConfig.BB,account,addGovTokens);
       break;
       case 'tranchePool':
-        switch (tranche){
-          case 'junior':
-          case 'senior':
-            output = await this.loadTrancheField(`${tranche}Pool`,fieldProps,protocol,token,tranche,tokenConfig,account,addGovTokens);
-          break;
-          default:
-          break;
+        let tranchePool = await this.genericContractCallCached(tokenConfig.CDO.name,'virtualBalance',[trancheConfig.address]);
+        // console.log('tranchePool',tokenConfig,trancheConfig,output);
+        if (tranchePool){
+          output = this.formatMoney(this.fixTokenDecimals(tranchePool,tokenConfig.CDO.decimals),decimals)+` ${tokenName}`;
         }
       break;
       case 'trancheApy':
-        switch (tranche){
-          case 'junior':
-          case 'senior':
-            output = await this.loadTrancheField(`${tranche}Apy`,fieldProps,protocol,token,tranche,tokenConfig,account,addGovTokens);
-          break;
-          default:
-          break;
+        let trancheApy = await this.genericContractCallCached(tokenConfig.CDO.name,'getApr',[trancheConfig.address]);
+        // console.log('trancheApy',tokenConfig,trancheConfig,output);
+        if (trancheApy){
+          output = this.fixTokenDecimals(trancheApy,tokenConfig.CDO.decimals).toFixed(2)+'%';
         }
       break;
       case 'trancheIDLEDistribution':
         switch (tranche){
-          case 'junior':
-          case 'senior':
-            output = await this.loadTrancheField(`${tranche}IDLEDistribution`,fieldProps,protocol,token,tranche,tokenConfig,account,addGovTokens);
+          case 'BB':
+          case 'AA':
+            // output = await this.loadTrancheField(`${tranche}IDLEDistribution`,fieldProps,protocol,token,tranche,tokenConfig,account,addGovTokens);
           break;
           default:
           break;
         }
       break;
-      case 'seniorIDLEDistribution':
+      case 'AAIDLEDistribution':
         output = this.abbreviateNumber('1234',decimals,maxPrecision,minPrecision)+` IDLE/day`;
       break;
-      case 'juniorIDLEDistribution':
+      case 'BBIDLEDistribution':
         output = this.abbreviateNumber('4321',decimals,maxPrecision,minPrecision)+` IDLE/day`;
       break;
       case 'govTokens':
+      case 'autoFarming':
+      case 'stakingRewards':
         output = {};
-        const govTokens = this.getGlobalConfig(['govTokens']);
-        Object.keys(govTokens).forEach( govToken => {
-          const govTokenConfig = govTokens[govToken];
-          if (!govTokenConfig.enabled){
+        const [
+          rewardsTokens,
+          incentiveTokens
+        ] = await Promise.all([
+          this.genericContractCall(tokenConfig.CDO.name,'getRewards'),
+          this.genericContractCall(tokenConfig.CDO.name,'getIncentiveTokens')
+        ]);
+
+        const govTokens = field === 'govTokens' ? rewardsTokens : (field === 'autoFarming' ? rewardsTokens.filter( rewardTokenAddr => !incentiveTokens.map( addr => addr.toLowerCase() ).includes(rewardTokenAddr.toLowerCase()) ) : incentiveTokens);
+
+        govTokens.forEach( govTokenAddress => {
+          const govTokenConfig = this.getGovTokenConfigByAddress(govTokenAddress);
+          if (govTokenConfig && !govTokenConfig.enabled){
             return;
           }
-          output[govToken] = govTokenConfig;
+          output[govTokenConfig.token] = govTokenConfig;
         });
       break;
       default:

@@ -192,7 +192,7 @@ class SendTxWithBalance extends Component {
         }));
       };
 
-      // console.log(this.props.tokenConfig.token,this.props.contractInfo.address);
+      console.log('Approve',this.props.tokenConfig.token,this.props.contractInfo.address);
 
       this.functionsUtil.enableERC20(this.props.tokenConfig.token,this.props.contractInfo.address,callbackApprove,callbackReceiptApprove);
 
@@ -303,6 +303,8 @@ class SendTxWithBalance extends Component {
 
       const value = params.value || null;
 
+      console.log('SendTxWithBalance',contractName, methodName, methodParams, value);
+
       this.props.contractMethodSendWrapper(contractName, methodName, methodParams, value, callback, callbackReceipt);
 
       this.setState((prevState) => ({
@@ -339,8 +341,8 @@ class SendTxWithBalance extends Component {
     if (this.props.approveEnabled !== undefined && !this.props.approveEnabled){
       return true;
     }
-
     const contractInfo = await this.props.initContract(this.props.contractInfo.name,this.props.contractInfo.address,this.props.contractInfo.abi);
+
     if (contractInfo){
       const contractApproved = await this.functionsUtil.checkTokenApproved(this.props.tokenConfig.token,this.props.contractInfo.address,this.props.account);
       return contractApproved;
@@ -569,9 +571,10 @@ class SendTxWithBalance extends Component {
                           fontSize={2}
                           color={'cellText'}
                           textAlign={'center'}
-                        >
-                          {this.props.approveDescription}
-                        </Text>
+                          dangerouslySetInnerHTML={{
+                            __html:this.props.approveDescription
+                          }}
+                        />
                         <RoundButton
                           buttonProps={{
                             mt:3,
