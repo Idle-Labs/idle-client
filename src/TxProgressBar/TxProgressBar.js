@@ -61,13 +61,13 @@ class TxProgressBar extends Component {
 
   getTransaction = async () => {
     const transaction = await (new Promise( async (resolve, reject) => {
-      console.log('getTransaction',this.props.hash);
+      // console.log('getTransaction',this.props.hash);
       this.props.web3.eth.getTransaction(this.props.hash,(err,transaction) => {
         resolve(transaction);
       });
     }));
 
-    console.log('getTransaction',transaction);
+    // console.log('getTransaction',transaction);
 
     const newState = {};
     if (transaction){
@@ -301,7 +301,7 @@ class TxProgressBar extends Component {
     };
     this.setState(newState);
 
-    console.log('initProgressBar',this.state.txCount,this.props.hash);
+    // console.log('initProgressBar',this.state.txCount,this.props.hash);
 
     const transaction = await this.getTransaction();
 

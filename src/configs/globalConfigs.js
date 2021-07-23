@@ -526,11 +526,25 @@ const globalConfigs = {
   tranches:{
     BB:{
       name:'Junior Tranche',
-      description:'By depositing in the Junior Tranche in case of Smart-Contract breach your funds will be used to cover eventual losses on the Senior Tranche.'
+      description:{
+        deposit:'By depositing in the Junior Tranche in case of Smart-Contract breach your funds will be used to cover eventual losses on the Senior Tranche.',
+        stake:'Stake your tranche tokens to earn additional rewards and boost the APY.',
+        unstake:'By unstaking your tranche tokens you will no more get additional rewards.',
+        withdraw:'You can withdraw your funds at any time from the tranche.',
+        cantUnstake:'To unstake your funds you just need to wait 10 blocks after your last stake transaction.',
+        cantWithdraw:'To withdraw your funds you just need to wait at least 1 block from the latest harvest transaction.'
+      }
     },
     AA:{
       name:'Senior Tranche',
-      description:'By depositing in the Senior Tranche in case of Smart-Contract breach your funds are covered by the funds deposited in the Junior Tranche.'
+      description:{
+        deposit:'By depositing in the Senior Tranche in case of Smart-Contract breach your funds are covered by the funds deposited in the Junior Tranche.',
+        stake:'Stake your tranche tokens to earn additional rewards and boost the APY.',
+        unstake:'By unstaking your tranche tokens you will no more get additional rewards.',
+        withdraw:'You can withdraw your funds at any time from the tranche.',
+        cantUnstake:'To unstake your funds you just need to wait 10 blocks after your last stake transaction.',
+        cantWithdraw:'To withdraw your funds you just need to wait at least 1 block from the latest harvest transaction.'
+      }
     }
   },
   strategies:{

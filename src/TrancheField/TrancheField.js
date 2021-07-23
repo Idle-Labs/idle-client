@@ -7,10 +7,10 @@ import CustomField from '../CustomField/CustomField';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 // import GenericChart from '../GenericChart/GenericChart';
 // import CustomTooltip from '../CustomTooltip/CustomTooltip';
+import { Image, Text, Loader, Button, Flex } from "rimble-ui";
 // import VariationNumber from '../VariationNumber/VariationNumber';
 // import AllocationChart from '../AllocationChart/AllocationChart';
 // import CustomTooltipRow from '../CustomTooltip/CustomTooltipRow';
-import { Image, Text, Loader, Button, Tooltip, Icon, Flex } from "rimble-ui";
 
 class TrancheField extends Component {
 
@@ -89,7 +89,7 @@ class TrancheField extends Component {
     }
 
     const fieldProps = fieldInfo.props;
-    const decimals = fieldProps && fieldProps.decimals ? fieldProps.decimals : ( this.props.isMobile ? 2 : 3 );
+    // const decimals = fieldProps && fieldProps.decimals ? fieldProps.decimals : ( this.props.isMobile ? 2 : 3 );
     // const addCurveApy = typeof this.props.addCurveApy !== 'undefined' ? this.props.addCurveApy : false;
     const addGovTokens = typeof this.props.addGovTokens !== 'undefined' ? this.props.addGovTokens : true;
 
@@ -143,11 +143,10 @@ class TrancheField extends Component {
       });
     }
 
-    const tokenConfig = this.props.tokenConfig;// || this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token]);
-      
-    const maxPrecision = fieldProps && fieldProps.maxPrecision ? fieldProps.maxPrecision : 5;
+    // const tokenConfig = this.props.tokenConfig;// || this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token]);
+    // const maxPrecision = fieldProps && fieldProps.maxPrecision ? fieldProps.maxPrecision : 5;
     const decimals = fieldProps && fieldProps.decimals ? fieldProps.decimals : ( this.props.isMobile ? 2 : 3 );
-    const minPrecision = fieldProps && fieldProps.minPrecision ? fieldProps.minPrecision : ( this.props.isMobile ? 3 : 4 );
+    // const minPrecision = fieldProps && fieldProps.minPrecision ? fieldProps.minPrecision : ( this.props.isMobile ? 3 : 4 );
 
     switch (fieldInfo.name){
       case 'protocolIcon':

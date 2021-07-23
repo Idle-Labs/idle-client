@@ -192,7 +192,7 @@ class SendTxWithBalance extends Component {
         }));
       };
 
-      console.log('Approve',this.props.tokenConfig.token,this.props.contractInfo.address);
+      // console.log('Approve',this.props.tokenConfig.token,this.props.contractInfo.address);
 
       this.functionsUtil.enableERC20(this.props.tokenConfig.token,this.props.contractInfo.address,callbackApprove,callbackReceiptApprove);
 

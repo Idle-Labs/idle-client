@@ -18,10 +18,12 @@ const availableTranches = {
         decimals:18,
         functions:{
           stake:'stake',
+          unstake:'unstake',
           deposit:'depositAA',
           withdraw:'withdrawAA'
         },
         CDORewards:{
+          decimals:18,
           abi:IdleCDOTrancheRewards,
           name:'IdleCDOTrancheRewards_idleDAIYield_AA',
           address:'0xa8c7b9c4F18B227Abc4b099bA92d6a1CfEb9649C'
@@ -35,10 +37,12 @@ const availableTranches = {
         decimals:18,
         functions:{
           stake:'stake',
+          unstake:'unstake',
           deposit:'depositBB',
           withdraw:'withdrawBB'
         },
         CDORewards:{
+          decimals:18,
           abi:IdleCDOTrancheRewards,
           name:'IdleCDOTrancheRewards_idleDAIYield_BB',
           address:'0x0962fB33A7E0172d0E413b0fab003bEe5142E6B6'

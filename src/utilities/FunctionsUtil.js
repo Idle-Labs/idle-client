@@ -2985,6 +2985,27 @@ class FunctionsUtil {
       }
     });
   }
+  getTrancheStakedBalance = async (contractName,walletAddr,decimals=null) => {
+    // Check for cached data
+    const cachedDataKey = `trancheStakedBalance_${contractName}_${walletAddr}_${decimals}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData && !this.BNify(cachedData).isNaN()){
+      return this.BNify(cachedData);
+    }
+
+    let stakedBalance = await this.genericContractCall(contractName,'usersStakes',[walletAddr]);
+    if (stakedBalance){
+      if (decimals){
+        stakedBalance = this.fixTokenDecimals(stakedBalance,decimals);
+      }
+      stakedBalance = this.BNify(stakedBalance);
+
+      if (!stakedBalance.isNaN()){
+        return this.setCachedDataWithLocalStorage(cachedDataKey,stakedBalance,30);
+      }
+    }
+    return this.BNify(0);
+  }
   loadTrancheField = async (field,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens=true) => {
     let output = null;
     const maxPrecision = (fieldProps && fieldProps.maxPrecision) || 5;
@@ -3022,6 +3043,59 @@ class FunctionsUtil {
         // console.log('tranchePool',tokenConfig,trancheConfig,output);
         if (tranchePool){
           output = this.formatMoney(this.fixTokenDecimals(tranchePool,tokenConfig.CDO.decimals),decimals)+` ${tokenName}`;
+        }
+      break;
+      case 'trancheDeposited':
+        let [
+          deposited,
+          staked
+        ] = await Promise.all([
+          this.getTokenBalance(trancheConfig.name,account),
+          this.getTrancheStakedBalance(trancheConfig.CDORewards.name,account,trancheConfig.CDORewards.decimals)
+        ]);
+
+        output = output || this.BNify(0);
+        staked = staked || this.BNify(0);
+
+        output = this.BNify(deposited).plus(staked);
+        if (output.gt(0)){
+          output = this.formatMoney(output,decimals)+` ${tokenName}`;
+        } else {
+          output = '-';
+        }
+      break;
+      case 'lastTranchePrice':
+        output = await this.genericContractCall(tokenConfig.CDO.name,'lastTranchePrice',[trancheConfig.address]);
+        if (output){
+          output = this.fixTokenDecimals(output,trancheConfig.decimals);
+        }
+      break;
+      case 'trancheStaked':
+        let [
+          staked1,
+          lastPrice1
+        ] = await Promise.all([
+          this.getTrancheStakedBalance(trancheConfig.CDORewards.name,account,trancheConfig.CDORewards.decimals),
+          this.loadTrancheField(`lastTranchePrice`,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens)
+        ]);
+
+        output = '-';
+        if (staked1 && lastPrice1){
+          output = this.formatMoney(parseFloat(this.BNify(staked1).times(lastPrice1)),decimals)+` ${tokenName}`;
+        }
+      break;
+      case 'trancheRedeemable':
+        let [
+          deposited1,
+          lastPrice
+        ] = await Promise.all([
+          this.getTokenBalance(trancheConfig.name,account),
+          this.loadTrancheField(`lastTranchePrice`,fieldProps,protocol,token,tranche,tokenConfig,tokenConfig.AA,account,addGovTokens)
+        ]);
+
+        output = '-';
+        if (deposited1 && lastPrice){
+          output = this.formatMoney(parseFloat(this.BNify(deposited1).times(lastPrice)),decimals)+` ${tokenName}`;
         }
       break;
       case 'trancheApy':
@@ -6493,7 +6567,7 @@ class FunctionsUtil {
 
     return tokenAprs;
   }
-  abbreviateNumber(value,decimals=3,maxPrecision=5,minPrecision=0){
+  abbreviateNumber = (value,decimals=3,maxPrecision=5,minPrecision=0) => {
 
     const isNegative = parseFloat(value)<0;
     let newValue = this.BNify(value).abs();
