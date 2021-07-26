@@ -144,15 +144,15 @@ class PortfolioDonut extends Component {
         }
       },
       slicesLabelsSkipAngle:5,
-      slicesLabelsTextColor:'#fff',
-      radialLabelsLinkStrokeWidth:0,
-      radialLabelsTextColor:'#333',
       radialLabelsSkipAngle:10,
       radialLabelsTextXOffset:0,
-      radialLabelsLinkOffset:-parseInt(this.state.parentWidth*0.2),
+      slicesLabelsTextColor:'#fff',
+      radialLabelsTextColor:'#333',
+      radialLabelsLinkStrokeWidth:0,
       radialLabelsLinkDiagonalLength:0,
       radialLabelsLinkHorizontalLength:0,
       radialLabelsLinkColor:{ from: 'color' },
+      radialLabelsLinkOffset:-parseInt(this.state.parentWidth*0.2),
       margin: this.props.isMobile ? { top: 15, right: 25, bottom: 30, left: 25 } : { top: 30, right: 50, bottom: 60, left: 50 },
       onMouseEnter:(data, e) => {
         const selectedToken = data.id;

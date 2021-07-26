@@ -525,6 +525,11 @@ const globalConfigs = {
   },
   tranches:{
     BB:{
+      color:{
+        hex:'#e3660c',
+        rgb:[227, 102, 12],
+        hsl:['25', '90%', '47%']
+      },
       name:'Junior Tranche',
       description:{
         deposit:'By depositing in the Junior Tranche in case of Smart-Contract breach your funds will be used to cover eventual losses on the Senior Tranche.',
@@ -536,6 +541,11 @@ const globalConfigs = {
       }
     },
     AA:{
+      color:{
+        hex:'#04AA6D',
+        rgb:[4, 170, 109],
+        hsl:['158', '95%', '34%']
+      },
       name:'Senior Tranche',
       description:{
         deposit:'By depositing in the Senior Tranche in case of Smart-Contract breach your funds are covered by the funds deposited in the Junior Tranche.',

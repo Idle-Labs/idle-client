@@ -205,6 +205,103 @@ class FunctionsUtil {
 
     return null;
   }
+  getAccountPortfolioTranches = async (availableTranches=null,account=null) => {
+    const portfolio = {
+      tranchesBalance:[],
+      avgAPY:this.BNify(0),
+      totalBalance:this.BNify(0),
+      totalEarnings:this.BNify(0),
+      totalAmountLent:this.BNify(0),
+      totalEarningsPerc:this.BNify(0),
+    };
+
+    availableTranches = availableTranches ? availableTranches : this.props.availableTranches;
+    account = account ? account : this.props.account;
+
+    if (!account || !availableTranches){
+      return portfolio;
+    }
+
+    const tranches = this.getGlobalConfig(['tranches']);
+
+    await this.asyncForEach(Object.keys(availableTranches),async (protocol) => {
+      const protocolConfig = availableTranches[protocol];
+      await this.asyncForEach(Object.keys(protocolConfig),async (token) => {
+        const tokenConfig = protocolConfig[token];
+        await this.asyncForEach(Object.keys(tranches),async (tranche) => {
+          const trancheConfig = tokenConfig[tranche];
+          const trancheTokenBalance = await this.loadTrancheFieldRaw('trancheDeposited',{},protocol,token,tranche,tokenConfig,trancheConfig,account);
+          if (trancheTokenBalance){
+            const tranchePrice = await this.loadTrancheFieldRaw('lastTranchePrice',{},protocol,token,tranche,tokenConfig,trancheConfig,account);
+            const tokenBalance = trancheTokenBalance.times(tranchePrice);
+
+            if (!tranchePrice.isNaN() && !tokenBalance.isNaN()){
+              const [
+                trancheApy,
+                amountDeposited
+              ] = await Promise.all([
+                this.loadTrancheFieldRaw('trancheApy',{},protocol,token,tranche,tokenConfig,trancheConfig,account),
+                this.loadTrancheFieldRaw('trancheDeposited',{},protocol,token,tranche,tokenConfig,trancheConfig,account)
+              ]);
+
+              // console.log('trancheBalance',protocol,token,tranche,'trancheTokenBalance',trancheTokenBalance.toFixed(),'tranchePrice',tranchePrice.toFixed(),'tokenBalance',tokenBalance.toFixed(),'trancheApy',trancheApy.toFixed(),'amountDeposited',amountDeposited.toFixed());
+
+              portfolio.tranchesBalance.push({
+                token,
+                tranche,
+                protocol,
+                trancheApy,
+                tranchePrice,
+                tokenBalance,
+                amountDeposited, 
+                trancheTokenBalance
+              });
+
+              // Increment total balance
+              portfolio.totalBalance = portfolio.totalBalance.plus(tokenBalance);
+            }
+          }
+        });
+      });
+    });
+
+    let avgAPY = this.BNify(0);
+    let totalEarnings = this.BNify(0);
+    let totalAmountLent = this.BNify(0);
+    let totalEarningsPerc = this.BNify(0);
+
+    // Calculate aggregated data
+    portfolio.tranchesBalance.forEach( trancheInfo => {
+      const trancheApy = this.BNify(trancheInfo.trancheApy);
+      const trancheWeight = trancheInfo.tokenBalance.div(portfolio.totalBalance);
+      const tokenEarnings = trancheInfo.tokenBalance.minus(trancheInfo.amountDeposited);
+
+      trancheInfo.trancheWeight = trancheWeight;
+
+      if (tokenEarnings){
+        totalEarnings = totalEarnings.plus(tokenEarnings);
+      }
+
+      if (trancheApy){
+        avgAPY = avgAPY.plus(trancheApy.times(trancheWeight));
+      }
+
+      if (trancheInfo.amountDeposited){
+        totalAmountLent = totalAmountLent.plus(trancheInfo.amountDeposited);
+      }
+    });
+
+    if (totalAmountLent.gt(0)){
+      totalEarningsPerc = totalEarnings.div(totalAmountLent).times(100);
+    }
+
+    portfolio.avgAPY = avgAPY;
+    portfolio.totalEarnings = totalEarnings;
+    portfolio.totalAmountLent = totalAmountLent;
+    portfolio.totalEarningsPerc = totalEarningsPerc;
+
+    return portfolio;
+  }
   getAccountPortfolio = async (availableTokens=null,account=null) => {
     const portfolio = {
       tokensBalance:{},
@@ -3006,7 +3103,10 @@ class FunctionsUtil {
     }
     return this.BNify(0);
   }
-  loadTrancheField = async (field,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens=true) => {
+  loadTrancheFieldRaw = async (field,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens=true) => {
+    return await this.loadTrancheField(field,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens,false);
+  }
+  loadTrancheField = async (field,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens=true,formatValue=true) => {
     let output = null;
     const maxPrecision = (fieldProps && fieldProps.maxPrecision) || 5;
     const decimals = (fieldProps && fieldProps.decimals) || (this.props.isMobile ? 2 : 3);
@@ -3023,7 +3123,10 @@ class FunctionsUtil {
       case 'pool':
         let poolSize = await this.genericContractCallCached(tokenConfig.CDO.name,'getContractValue');
         if (poolSize){
-          output = this.formatMoney(this.fixTokenDecimals(poolSize,tokenConfig.CDO.decimals),decimals)+` ${tokenName}`;
+          output = this.fixTokenDecimals(poolSize,tokenConfig.CDO.decimals);
+          if (formatValue){
+            output = this.formatMoney(parseFloat(output),decimals)+` ${tokenName}`;
+          }
         }
       break;
       case 'seniorPool':
@@ -3042,7 +3145,10 @@ class FunctionsUtil {
         let tranchePool = await this.genericContractCallCached(tokenConfig.CDO.name,'virtualBalance',[trancheConfig.address]);
         // console.log('tranchePool',tokenConfig,trancheConfig,output);
         if (tranchePool){
-          output = this.formatMoney(this.fixTokenDecimals(tranchePool,tokenConfig.CDO.decimals),decimals)+` ${tokenName}`;
+          output = this.fixTokenDecimals(tranchePool,tokenConfig.CDO.decimals);
+          if (formatValue){
+            output = this.formatMoney(parseFloat(output),decimals)+` ${tokenName}`;
+          }
         }
       break;
       case 'trancheDeposited':
@@ -3059,7 +3165,9 @@ class FunctionsUtil {
 
         output = this.BNify(deposited).plus(staked);
         if (output.gt(0)){
-          output = this.formatMoney(output,decimals)+` ${tokenName}`;
+          if (formatValue){
+            output = this.formatMoney(parseFloat(output),decimals)+` ${tokenName}`;
+          }
         } else {
           output = '-';
         }
@@ -3081,7 +3189,10 @@ class FunctionsUtil {
 
         output = '-';
         if (staked1 && lastPrice1){
-          output = this.formatMoney(parseFloat(this.BNify(staked1).times(lastPrice1)),decimals)+` ${tokenName}`;
+          output = this.BNify(staked1).times(lastPrice1);
+          if (formatValue){
+            output = this.formatMoney(parseFloat(output),decimals)+` ${tokenName}`;
+          }
         }
       break;
       case 'trancheRedeemable':
@@ -3095,14 +3206,20 @@ class FunctionsUtil {
 
         output = '-';
         if (deposited1 && lastPrice){
-          output = this.formatMoney(parseFloat(this.BNify(deposited1).times(lastPrice)),decimals)+` ${tokenName}`;
+          output = this.BNify(deposited1).times(lastPrice);
+          if (formatValue){
+            output = this.formatMoney(parseFloat(output),decimals)+` ${tokenName}`;
+          }
         }
       break;
       case 'trancheApy':
         let trancheApy = await this.genericContractCallCached(tokenConfig.CDO.name,'getApr',[trancheConfig.address]);
         // console.log('trancheApy',tokenConfig,trancheConfig,output);
         if (trancheApy){
-          output = this.fixTokenDecimals(trancheApy,tokenConfig.CDO.decimals).toFixed(2)+'%';
+          output = this.fixTokenDecimals(trancheApy,tokenConfig.CDO.decimals);
+          if (formatValue){
+            output = output.toFixed(2)+'%';
+          }
         }
       break;
       case 'trancheIDLEDistribution':

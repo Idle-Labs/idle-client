@@ -59,6 +59,9 @@ class GenericChart extends Component {
         const chartHeight = parseFloat(chartContainerH.offsetWidth)>0 ? chartContainerH.offsetWidth : 0;
         if (chartHeight && chartHeight !== newState.height){
           newState.height = chartHeight;
+          if (!newState.width){
+            newState.width = chartHeight;
+          }
         }
       }
     }
@@ -66,6 +69,8 @@ class GenericChart extends Component {
     if (!newState.height && this.props.height && this.props.height !== newState.height) {
       newState.height = this.props.height;
     }
+
+    newState.height = newState.height || newState.width;
 
     if (Object.keys(newState).length>0){
       this.setState(newState);
