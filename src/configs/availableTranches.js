@@ -6,6 +6,7 @@ const availableTranches = {
     DAI:{
       token:'DAI',
       decimals:18,
+      protocol:'idle',
       address:'0x6b175474e89094c44da98b954eedeac495271d0f',
       CDO:{
         abi:IdleCDO,
@@ -29,6 +30,7 @@ const availableTranches = {
           address:'0xa8c7b9c4F18B227Abc4b099bA92d6a1CfEb9649C'
         },
         label:'idleDAI AA',
+        blockNumber:12875386,
         name:'IdleCDO_AA_idleDAIYield',
         token:'IdleCDO_AA_idleDAIYield',
         address:'0xe524EE80584b120c4df8c2f130AE571ed6C196DB'
@@ -49,6 +51,7 @@ const availableTranches = {
           address:'0x0962fB33A7E0172d0E413b0fab003bEe5142E6B6'
         },
         label:'idleDAI BB',
+        blockNumber:12875386,
         name:'IdleCDO_BB_idleDAIYield',
         token:'IdleCDO_BB_idleDAIYield',
         address:'0x95a2834AFDC65dd7f28585d2d992367600afb457'

@@ -129,6 +129,10 @@ class FunctionsUtil {
   }
   getTxAction = (tx,tokenConfig) => {
 
+    if (!tokenConfig.idle){
+      return null;
+    }
+
     const idleTokenAddress = tokenConfig.idle.address;
     const depositProxyContractInfo = this.getGlobalConfig(['contract','methods','deposit','proxyContract']);
     const migrationContractAddr = tokenConfig.migration && tokenConfig.migration.migrationContract ? tokenConfig.migration.migrationContract.address : null;
@@ -207,6 +211,7 @@ class FunctionsUtil {
   }
   getAccountPortfolioTranches = async (availableTranches=null,account=null) => {
     const portfolio = {
+      transactions:[],
       tranchesBalance:[],
       avgAPY:this.BNify(0),
       totalBalance:this.BNify(0),
@@ -237,14 +242,17 @@ class FunctionsUtil {
 
             if (!tranchePrice.isNaN() && !tokenBalance.isNaN()){
               const [
+                trancheUserInfo,
                 trancheApy,
                 amountDeposited
               ] = await Promise.all([
+                this.getTrancheUserInfo(tokenConfig,trancheConfig,account),
                 this.loadTrancheFieldRaw('trancheApy',{},protocol,token,tranche,tokenConfig,trancheConfig,account),
                 this.loadTrancheFieldRaw('trancheDeposited',{},protocol,token,tranche,tokenConfig,trancheConfig,account)
               ]);
 
               // console.log('trancheBalance',protocol,token,tranche,'trancheTokenBalance',trancheTokenBalance.toFixed(),'tranchePrice',tranchePrice.toFixed(),'tokenBalance',tokenBalance.toFixed(),'trancheApy',trancheApy.toFixed(),'amountDeposited',amountDeposited.toFixed());
+              portfolio.transactions = [...portfolio.transactions,...trancheUserInfo.transactions];
 
               portfolio.tranchesBalance.push({
                 token,
@@ -734,6 +742,109 @@ class FunctionsUtil {
       },{});
     }
 
+    return null;
+  }
+  getTrancheUserInfo = async (tokenConfig,trancheConfig,account) => {
+    account = account || this.props.account;
+    const cachedDataKey = `amountDepositedTranche_${tokenConfig.token}_${trancheConfig.token}_${account}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData && !this.BNify(cachedData).isNaN()){
+      return this.BNify(cachedData);
+    }
+
+    const defaultEventsConfig = {to:'to',from:'from',value:'value'};
+    const underlyingEventsConfig = this.getGlobalConfig(['events',tokenConfig.token,'fields']) || defaultEventsConfig;
+
+    const underlyingEventsFilters = {};
+    underlyingEventsFilters[underlyingEventsConfig.to] = [this.props.account,tokenConfig.CDO.address];
+    underlyingEventsFilters[underlyingEventsConfig.from] = [this.props.account,tokenConfig.CDO.address];
+
+    const [
+      underlying_transfers,
+      trancheToken_transfers
+    ] = await Promise.all([
+      this.getContractEvents(tokenConfig.token,'Transfer',{fromBlock: trancheConfig.blockNumber, toBlock:'latest',filter:underlyingEventsFilters}),
+      this.getContractEvents(trancheConfig.name,'Transfer',{fromBlock: trancheConfig.blockNumber, toBlock:'latest',filter:{from:['0x0000000000000000000000000000000000000000',this.props.account],to:['0x0000000000000000000000000000000000000000',this.props.account]}})
+    ]);
+
+    // console.log('getAmountDepositedTranche',trancheConfig.name,'underlying_transfers',underlying_transfers,'trancheToken_transfers',trancheToken_transfers);
+
+    const transactions = [];
+    let avgBuyPrice = this.BNify(0);
+    let amountDeposited = this.BNify(0);
+    let totalAmountDeposited = this.BNify(0);
+
+    await this.asyncForEach(trancheToken_transfers, async (trancheTokenTransferEvent) => {
+      const tokenTransferEvent = underlying_transfers.find( t => t.transactionHash.toLowerCase() === trancheTokenTransferEvent.transactionHash.toLowerCase() );
+
+      // Skip if no tranche token transfer event found
+      if (!tokenTransferEvent){
+        return;
+      }
+
+      const tokenAmount = this.fixTokenDecimals(tokenTransferEvent.returnValues[underlyingEventsConfig.value],tokenConfig.decimals);
+      const trancheTokenAmount = this.fixTokenDecimals(trancheTokenTransferEvent.returnValues.value,trancheConfig.decimals);
+
+      // console.log('tranchePrice',trancheConfig.token,tokenAmount.toFixed(),trancheTokenAmount.toFixed(),tranchePrice.toFixed());
+      const blockInfo = await this.getBlockInfo(tokenTransferEvent.blockNumber);
+      const hashKey = `${trancheConfig.token}_${tokenTransferEvent.transactionHash}`;
+      const protocolConfig = this.getGlobalConfig(['stats','protocols',tokenConfig.protocol]);
+      const protocolIcon = `images/protocols/${protocolConfig.icon || `${tokenConfig.protocol}.svg`}`;
+
+      const tx = {
+        hashKey,
+        action:null,
+        tokenAmount,
+        protocolIcon,
+        value:tokenAmount,
+        status:'Completed',
+        token:tokenConfig.token,
+        protocol:protocolConfig.label,
+        tokenSymbol:tokenConfig.token,
+        hash:tokenTransferEvent.transactionHash,
+        blockNumber:tokenTransferEvent.blockNumber,
+        timeStamp:blockInfo ? blockInfo.timestamp : null,
+      };
+
+      // Deposit
+      if (trancheTokenTransferEvent.returnValues.from.toLowerCase() === '0x0000000000000000000000000000000000000000'){
+        const tranchePrice = tokenAmount.div(trancheTokenAmount);
+        avgBuyPrice = avgBuyPrice.plus(tranchePrice.times(tokenAmount));
+        amountDeposited = amountDeposited.plus(tokenAmount);
+        totalAmountDeposited = totalAmountDeposited.plus(tokenAmount);
+
+        tx.action = 'Deposit';
+        // console.log('Deposit',trancheConfig.token,tokenAmount.toFixed(),amountDeposited.toFixed(),tranchePrice.toFixed(),avgBuyPrice.toFixed());
+      // Withdraw
+      } else if (trancheTokenTransferEvent.returnValues.to.toLowerCase() === '0x0000000000000000000000000000000000000000'){
+        tx.action = 'Withdraw';
+        amountDeposited = amountDeposited.minus(tokenAmount);
+        if (amountDeposited.lt(0)){
+          avgBuyPrice = this.BNify(0);
+          amountDeposited = this.BNify(0);
+          totalAmountDeposited = this.BNify(0);
+        }
+        // console.log('Redeem',trancheConfig.token,tokenAmount.toFixed(),amountDeposited.toFixed(),avgBuyPrice.toFixed());
+      }
+
+      transactions.push(tx);
+    });
+
+    avgBuyPrice = avgBuyPrice.div(totalAmountDeposited);
+
+    // console.log(trancheConfig.token,'amountDeposited',amountDeposited.toFixed(),'avgBuyPrice',avgBuyPrice.toFixed(),'transactions',transactions);
+
+    return {
+      avgBuyPrice,
+      transactions,
+      amountDeposited
+    }
+  }
+  getAmountDepositedTranche = async (tokenConfig,trancheConfig,account) => {
+    const trancheUserInfo = await this.getTrancheUserInfo(tokenConfig,trancheConfig,account);
+    if (trancheUserInfo){
+      return trancheUserInfo.amountDeposited;
+    }
     return null;
   }
   getAmountDeposited = async (tokenConfig,account) => {
@@ -1956,6 +2067,9 @@ class FunctionsUtil {
     return globalConfigs;
   }
   getArrayPath = (path,array) => {
+    if (!array){
+      return null;
+    }
     path = Object.assign([],path);
     if (path.length>0){
       const prop = path.shift();
@@ -3125,7 +3239,7 @@ class FunctionsUtil {
         if (poolSize){
           output = this.fixTokenDecimals(poolSize,tokenConfig.CDO.decimals);
           if (formatValue){
-            output = this.formatMoney(parseFloat(output),decimals)+` ${tokenName}`;
+            output = this.formatMoney(output,decimals)+` ${tokenName}`;
           }
         }
       break;
@@ -3147,29 +3261,29 @@ class FunctionsUtil {
         if (tranchePool){
           output = this.fixTokenDecimals(tranchePool,tokenConfig.CDO.decimals);
           if (formatValue){
-            output = this.formatMoney(parseFloat(output),decimals)+` ${tokenName}`;
+            output = this.formatMoney(output,decimals)+` ${tokenName}`;
           }
         }
       break;
       case 'trancheDeposited':
         let [
           deposited,
-          staked
+          // staked
         ] = await Promise.all([
-          this.getTokenBalance(trancheConfig.name,account),
-          this.getTrancheStakedBalance(trancheConfig.CDORewards.name,account,trancheConfig.CDORewards.decimals)
+          this.getAmountDepositedTranche(tokenConfig,trancheConfig,account),
+          // this.getTrancheStakedBalance(trancheConfig.CDORewards.name,account,trancheConfig.CDORewards.decimals)
         ]);
 
         output = output || this.BNify(0);
-        staked = staked || this.BNify(0);
+        // staked = staked || this.BNify(0);
 
-        output = this.BNify(deposited).plus(staked);
+        output = this.BNify(deposited);
         if (output.gt(0)){
           if (formatValue){
-            output = this.formatMoney(parseFloat(output),decimals)+` ${tokenName}`;
+            output = this.formatMoney(output,decimals)+` ${tokenName}`;
           }
         } else {
-          output = '-';
+          output = formatValue ? '-' : null;
         }
       break;
       case 'lastTranchePrice':
@@ -3187,11 +3301,11 @@ class FunctionsUtil {
           this.loadTrancheField(`lastTranchePrice`,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens)
         ]);
 
-        output = '-';
+        output = formatValue ? '-' : null;
         if (staked1 && lastPrice1){
           output = this.BNify(staked1).times(lastPrice1);
           if (formatValue){
-            output = this.formatMoney(parseFloat(output),decimals)+` ${tokenName}`;
+            output = this.formatMoney(output,decimals)+` ${tokenName}`;
           }
         }
       break;
@@ -3204,11 +3318,11 @@ class FunctionsUtil {
           this.loadTrancheField(`lastTranchePrice`,fieldProps,protocol,token,tranche,tokenConfig,tokenConfig.AA,account,addGovTokens)
         ]);
 
-        output = '-';
+        output = formatValue ? '-' : null;
         if (deposited1 && lastPrice){
           output = this.BNify(deposited1).times(lastPrice);
           if (formatValue){
-            output = this.formatMoney(parseFloat(output),decimals)+` ${tokenName}`;
+            output = this.formatMoney(output,decimals)+` ${tokenName}`;
           }
         }
       break;

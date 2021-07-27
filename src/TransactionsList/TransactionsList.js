@@ -153,7 +153,7 @@ class TransactionsList extends Component {
       assets[token] = token;
     });
 
-    let actions = {...this.state.filters.actions};
+    let actions = this.props.availableActions || {...this.state.filters.actions};
     
     const enabledActions = typeof this.props.enabledActions !== 'undefined' ? this.props.enabledActions : [];
 
@@ -164,7 +164,9 @@ class TransactionsList extends Component {
       });
     }
 
-    const etherscanTxs = await this.functionsUtil.getEtherscanTxs(this.props.account,lastBlockNumber,'latest',enabledTokens);
+    const etherscanTxs = this.props.transactionsList || await this.functionsUtil.getEtherscanTxs(this.props.account,lastBlockNumber,'latest',enabledTokens);
+
+    // console.log('TransactionsList',etherscanTxs);
 
     // Merge new txs with previous ones
     if (etherscanTxs && etherscanTxs.length){
@@ -224,7 +226,7 @@ class TransactionsList extends Component {
 
     txsIndexes.forEach((tx, i) => {
       const selectedToken = tx.token;
-      const tokenConfig = this.props.availableTokens[selectedToken];
+      const tokenConfig = this.props.availableTokens && this.props.availableTokens[selectedToken] ? this.props.availableTokens[selectedToken] : this.functionsUtil.getGlobalConfig(['stats','tokens',selectedToken]);
       const decimals = Math.min(tokenConfig.decimals,8);
       
       const date = new Date(tx.timeStamp*1000);
@@ -236,10 +238,10 @@ class TransactionsList extends Component {
       const momentDate = this.functionsUtil.strToMoment(date);
 
       // Save new params
-      tx.status = tx.status ? tx.status : 'Completed';
       tx.action = action;
-      tx.momentDate = momentDate;
       tx.amount = amount;
+      tx.momentDate = momentDate;
+      tx.status = tx.status ? tx.status : 'Completed';
 
       if (i>=((page-1)*this.state.txsPerPage) && i<((page-1)*this.state.txsPerPage)+this.state.txsPerPage) {
         processedTxs.push(tx);

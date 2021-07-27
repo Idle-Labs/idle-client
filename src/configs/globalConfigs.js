@@ -1174,6 +1174,15 @@ const globalConfigs = {
       }
     }
   },
+  events:{
+    DAI:{
+      fields:{
+        to:'dst',
+        from:'src',
+        value:'wad'
+      }
+    }
+  },
   notifications:[
     {
       enabled:false,

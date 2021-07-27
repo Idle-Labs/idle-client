@@ -6,6 +6,7 @@ import TranchesList from '../TranchesList/TranchesList';
 import DashboardCard from '../DashboardCard/DashboardCard';
 import GenericPieChart from '../GenericPieChart/GenericPieChart';
 import GenericSelector from '../GenericSelector/GenericSelector';
+import TransactionsList from '../TransactionsList/TransactionsList';
 import { Box, Flex, Heading, Loader, Text, Icon, Tooltip } from "rimble-ui";
 import TotalBalanceCounter from '../TotalBalanceCounter/TotalBalanceCounter';
 import TotalEarningsCounter from '../TotalEarningsCounter/TotalEarningsCounter';
@@ -14,8 +15,11 @@ class Tranches extends Component {
 
   state = {
     portfolio:null,
+    transactions:[],
     tokenConfig:null,
     selectedToken:null,
+    userHasFunds:false,
+    depositedTokens:[],
     portfolioLoaded:false,
     selectedProtocol:null,
     allocationChartData:null
@@ -55,8 +59,8 @@ class Tranches extends Component {
     this.loadUtils();
 
     const accountChanged = prevProps.account !== this.props.account;
-    const availableTokensChanged = JSON.stringify(prevProps.availableTranches) !== JSON.stringify(this.props.availableTranches);
-    if (accountChanged || availableTokensChanged){
+    const availableTranchesChanged = JSON.stringify(prevProps.availableTranches) !== JSON.stringify(this.props.availableTranches);
+    if (accountChanged || availableTranchesChanged){
       this.setState({
         portfolioLoaded:false
       },() => {
@@ -66,10 +70,16 @@ class Tranches extends Component {
   }
 
   async loadPortfolio(){
+    if (!this.props.account){
+      return false;
+    }
+
     const portfolio = await this.functionsUtil.getAccountPortfolioTranches(this.props.availableTranches,this.props.account);
+    // console.log('loadPortfolio',portfolio);
+
     if (portfolio){
       const portfolioLoaded = true;
-      console.log('loadPortfolio',portfolio);
+      // console.log('loadPortfolio',portfolio);
 
       const tranchesConfig = this.functionsUtil.getGlobalConfig(['tranches']);
 
@@ -89,8 +99,9 @@ class Tranches extends Component {
           tranchesTokens[trancheInfo.token] = this.functionsUtil.BNify(0);
         }
         tranchesTokens[trancheInfo.token] = tranchesTokens[trancheInfo.token].plus(trancheInfo.tokenBalance);
-
       });
+
+      const depositedTokens = Object.keys(tranchesTokens);
 
       const portfolioDonutData = Object.keys(tranchesTokens).map( token => {
         const balanceValue = parseFloat(tranchesTokens[token].toFixed(4));
@@ -120,11 +131,16 @@ class Tranches extends Component {
         };
       });
 
-      console.log('allocationChartData',allocationChartData,'portfolioDonutData',portfolioDonutData);
+      // console.log('allocationChartData',allocationChartData,'portfolioDonutData',portfolioDonutData);
+      const transactions = portfolio.transactions;
+      const userHasFunds = portfolio && this.functionsUtil.BNify(portfolio.totalBalance).gt(0);
 
       this.setState({
         portfolio,
+        userHasFunds,
+        transactions,
         portfolioLoaded,
+        depositedTokens,
         portfolioDonutData,
         allocationChartData
       });
@@ -141,6 +157,7 @@ class Tranches extends Component {
   }
 
   render() {
+
     return (
       <Box
         width={1}
@@ -164,7 +181,7 @@ class Tranches extends Component {
                 Tranches
               </Title>
               {
-                this.state.portfolioLoaded && (
+                this.state.portfolioLoaded && this.functionsUtil.BNify(this.state.portfolio.totalBalance).gt(0) && (
                   <Flex
                     width={1}
                     flexDirection={'column'}
@@ -698,6 +715,141 @@ class Tranches extends Component {
                   {...this.props}
                 />
               </Flex>
+              {
+                this.props.account && this.state.userHasFunds && 
+                  <Flex
+                    mb={[3,4]}
+                    width={1}
+                    id={'transactions'}
+                    flexDirection={'column'}
+                  >
+                    <Title mb={[3,4]}>Transactions</Title>
+                    <TransactionsList
+                      {...this.props}
+                      enabledTokens={this.state.depositedTokens}
+                      transactionsList={this.state.transactions}
+                      availableActions={this.state.transactions.reduce( (availableActions,t) => {
+                        availableActions[t.action.toLowerCase()] = t.action;
+                        return availableActions;
+                      },{})}
+                      cols={[
+                        {
+                          title: this.props.isMobile ? '' : 'HASH',
+                          props:{
+                            width:[0.15,0.24]
+                          },
+                          fields:[
+                            {
+                              name:'icon',
+                              props:{
+                                mr:[0,2]
+                              }
+                            },
+                            {
+                              name:'hash',
+                              mobile:false
+                            }
+                          ]
+                        },
+                        {
+                          title:'ACTION',
+                          mobile:false,
+                          props:{
+                            width:0.15,
+                          },
+                          fields:[
+                            {
+                              name:'action'
+                            }
+                          ]
+                        },
+                        {
+                          title:'DATE',
+                          props:{
+                            width:[0.32,0.23],
+                          },
+                          fields:[
+                            {
+                              name:'date'
+                            }
+                          ]
+                        },
+                        {
+                          title:'STATUS',
+                          props:{
+                            width:[0.18,0.22],
+                            justifyContent:['center','flex-start']
+                          },
+                          fields:[
+                            {
+                              name:'statusIcon',
+                              props:{
+                                mr:[0,2]
+                              }
+                            },
+                            {
+                              mobile:false,
+                              name:'status'
+                            }
+                          ]
+                        },
+                        {
+                          title:'AMOUNT',
+                          props:{
+                            width:0.19,
+                          },
+                          fields:[
+                            {
+                              name:'amount'
+                            },
+                          ]
+                        },
+                        {
+                          title:'PROTOCOL',
+                          props:{
+                            width:[0.33, 0.21],
+                          },
+                          fields:[
+                            {
+                              type:'image',
+                              name:'custom',
+                              path:['protocolIcon'],
+                              props:{
+                                mr:2,
+                                height:['1.4em','2em']
+                              }
+                            },
+                            {
+                              type:'text',
+                              name:'custom',
+                              path:['protocol']
+                            }
+                          ]
+                        },
+                        {
+                          title:'ASSET',
+                          props:{
+                            width:[0.15,0.20],
+                            justifyContent:['center','flex-start']
+                          },
+                          fields:[
+                            {
+                              name:'tokenIcon',
+                              props:{
+                                mr:[0,2],
+                                height:['1.4em','1.6em']
+                              }
+                            },
+                            {
+                              mobile:false,
+                              name:'tokenName'
+                            },
+                          ]
+                        },
+                      ]}
+                    />
+                  </Flex>
+              }
             </Box>
           )
         }
