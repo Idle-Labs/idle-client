@@ -10,6 +10,7 @@ import TransactionsList from '../TransactionsList/TransactionsList';
 import { Box, Flex, Heading, Loader, Text, Icon, Tooltip } from "rimble-ui";
 import TotalBalanceCounter from '../TotalBalanceCounter/TotalBalanceCounter';
 import TotalEarningsCounter from '../TotalEarningsCounter/TotalEarningsCounter';
+import PortfolioEquityTranches from '../PortfolioEquityTranches/PortfolioEquityTranches';
 
 class Tranches extends Component {
 
@@ -22,7 +23,8 @@ class Tranches extends Component {
     depositedTokens:[],
     portfolioLoaded:false,
     selectedProtocol:null,
-    allocationChartData:null
+    allocationChartData:null,
+    portfolioEquityQuickSelection:'week'
   };
 
   // Utils
@@ -41,6 +43,7 @@ class Tranches extends Component {
   }
 
   async componentDidMount(){
+    this.loadPortfolio();
     const selectedToken = this.props.urlParams.param2;
     const selectedProtocol = this.props.urlParams.param1;
     const tokenConfig = this.props.availableTranches[selectedProtocol] && this.props.availableTranches[selectedProtocol][selectedToken] ? this.props.availableTranches[selectedProtocol][selectedToken] : null;
@@ -50,8 +53,6 @@ class Tranches extends Component {
         selectedToken,
         selectedProtocol,
       });
-    } else {
-      await this.loadPortfolio();
     }
   }
 
@@ -79,8 +80,6 @@ class Tranches extends Component {
 
     if (portfolio){
       const portfolioLoaded = true;
-      // console.log('loadPortfolio',portfolio);
-
       const tranchesConfig = this.functionsUtil.getGlobalConfig(['tranches']);
 
       const tranchesTokens = [];
@@ -156,6 +155,12 @@ class Tranches extends Component {
     }
   }
 
+  setPortfolioEquityQuickSelection(portfolioEquityQuickSelection){
+    this.setState({
+      portfolioEquityQuickSelection
+    });
+  }
+
   render() {
 
     return (
@@ -166,6 +171,7 @@ class Tranches extends Component {
           this.state.tokenConfig ? (
             <TranchePage
               {...this.props}
+              portfolio={this.state.portfolio}
               tokenConfig={this.state.tokenConfig}
               selectedToken={this.state.selectedToken}
               selectedProtocol={this.state.selectedProtocol}
@@ -327,7 +333,7 @@ class Tranches extends Component {
                                       <TotalEarningsCounter
                                         {...this.props}
                                         unit={'+$'}
-                                        decimals={4}
+                                        decimals={5}
                                         counterStyle={{
                                           fontSize:14,
                                           fontWeight:600,
@@ -484,7 +490,7 @@ class Tranches extends Component {
                             defaultLabel={'Total Funds'}
                             parentId={'portfolio-composition'}
                             chartData={this.state.portfolioDonutData}
-                            defaultImage={`images/protocols/idle.svg`}
+                            defaultImage={this.props.selectedSection.image}
                             defaultValue={`$ ${this.functionsUtil.formatMoney(parseFloat(this.state.portfolio.totalBalance),4)}`}
                             margin={this.props.isMobile ? { top: 15, right: 25, bottom: 30, left: 25 } : { top: 30, right: 50, bottom: 60, left: 50 }}
                           />
@@ -536,7 +542,7 @@ class Tranches extends Component {
                                   {value:'month6',label:'6M'},
                                   {value:'all',label:'MAX'},
                                 ]}
-                                // onChange={ v => this.setPortfolioEquityQuickSelection(v) }
+                                onChange={ v => this.setPortfolioEquityQuickSelection(v) }
                               />
                             </Flex>
                           </Flex>
@@ -546,18 +552,15 @@ class Tranches extends Component {
                             justifyContent={'center'}
                             id={"portfolio-performance"}
                           >
-                            {
-                              /*
-                              <PortfolioEquity
-                                {...this.props}
-                                enabledTokens={[]}
-                                parentId={'portfolio-performance'}
-                                parentIdHeight={'portfolio-composition'}
-                                quickDateSelection={this.state.portfolioEquityQuickSelection}
-                                frequencySeconds={this.functionsUtil.getFrequencySeconds('day',1)}
-                              />
-                              */
-                            }
+                            <PortfolioEquityTranches
+                              {...this.props}
+                              enabledTokens={[]}
+                              parentId={'portfolio-performance'}
+                              parentIdHeight={'portfolio-composition'}
+                              transactionsList={this.state.transactions}
+                              quickDateSelection={this.state.portfolioEquityQuickSelection}
+                              frequencySeconds={this.functionsUtil.getFrequencySeconds('day',1)}
+                            />
                           </Flex>
                         </DashboardCard>
                       </Flex>
@@ -736,7 +739,7 @@ class Tranches extends Component {
                         {
                           title: this.props.isMobile ? '' : 'HASH',
                           props:{
-                            width:[0.15,0.24]
+                            width:[0.13,0.18]
                           },
                           fields:[
                             {
@@ -755,7 +758,7 @@ class Tranches extends Component {
                           title:'ACTION',
                           mobile:false,
                           props:{
-                            width:0.15,
+                            width:0.12,
                           },
                           fields:[
                             {
@@ -766,7 +769,7 @@ class Tranches extends Component {
                         {
                           title:'DATE',
                           props:{
-                            width:[0.32,0.23],
+                            width:[0.27,0.15],
                           },
                           fields:[
                             {
@@ -775,9 +778,10 @@ class Tranches extends Component {
                           ]
                         },
                         {
+                          mobile:false,
                           title:'STATUS',
                           props:{
-                            width:[0.18,0.22],
+                            width:[0.18,0.16],
                             justifyContent:['center','flex-start']
                           },
                           fields:[
@@ -796,7 +800,7 @@ class Tranches extends Component {
                         {
                           title:'AMOUNT',
                           props:{
-                            width:0.19,
+                            width:[0.23,0.11],
                           },
                           fields:[
                             {
@@ -807,7 +811,7 @@ class Tranches extends Component {
                         {
                           title:'PROTOCOL',
                           props:{
-                            width:[0.33, 0.21],
+                            width:[0.21, 0.14],
                           },
                           fields:[
                             {
@@ -821,6 +825,7 @@ class Tranches extends Component {
                             },
                             {
                               type:'text',
+                              mobile:false,
                               name:'custom',
                               path:['protocol']
                             }
@@ -829,7 +834,7 @@ class Tranches extends Component {
                         {
                           title:'ASSET',
                           props:{
-                            width:[0.15,0.20],
+                            width:[0.16,0.14],
                             justifyContent:['center','flex-start']
                           },
                           fields:[

@@ -61,10 +61,12 @@ class Dashboard extends Component {
       color:'#fff',
       selected:false,
       label:'Tranches',
-      icon:'DonutSmall',
       component:Tranches,
       route:baseRoute+'/tranches',
-      bgColor:this.props.theme.colors.primary
+      bgColor:this.props.theme.colors.primary,
+      image:'images/strategies/tranches-on.png',
+      imageInactive:'images/strategies/tranches-off.png',
+      imageInactiveDark:'images/strategies/tranches-white.png'
     });
 
     const strategies = this.functionsUtil.getGlobalConfig(['strategies']);
@@ -74,8 +76,8 @@ class Dashboard extends Component {
           color:'#fff',
           selected:false,
           route:baseRoute+'/'+strategy,
-          label:strategies[strategy].title,
           image:strategies[strategy].icon,
+          label:strategies[strategy].title,
           bgColor:strategies[strategy].color,
           component:strategies[strategy].component,
           imageInactive:strategies[strategy].iconInactive,

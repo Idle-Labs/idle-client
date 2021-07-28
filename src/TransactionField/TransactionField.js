@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import SmartNumber from '../SmartNumber/SmartNumber';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import ShortHash from "../utilities/components/ShortHash";
-import { Flex, Text, Icon, Link, Image, Loader } from "rimble-ui";
+import { Flex, Text, Icon, Link, Image } from "rimble-ui";
 
 class TransactionField extends Component {
 
@@ -40,7 +40,6 @@ class TransactionField extends Component {
   }
 
   async loadField(){
-    let output = null;
     const fieldInfo = this.props.fieldInfo;
     if (this.props.hash && this.props.account){
       switch (fieldInfo.name){
@@ -75,9 +74,6 @@ class TransactionField extends Component {
     const fieldInfo = this.props.fieldInfo;
     const transaction = this.props.transaction;
     let bgColor = theme.colors.transactions.actionBg.default;
-
-    const showLoader = fieldInfo.showLoader === undefined || fieldInfo.showLoader;
-    const loader = showLoader ? (<Loader size="20px" />) : null;
 
     const fieldProps = {
       fontWeight:3,

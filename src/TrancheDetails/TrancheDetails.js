@@ -481,7 +481,7 @@ class TrancheDetails extends Component {
                 props:{
                   decimals:4,
                   fontWeight:2,
-                  fontSize:[3,4],
+                  fontSize:[2,4],
                   color:'copyColor'
                 }
               }}
@@ -510,7 +510,7 @@ class TrancheDetails extends Component {
                 props:{
                   decimals:4,
                   fontWeight:2,
-                  fontSize:[3,4],
+                  fontSize:[2,4],
                   color:'copyColor'
                 }
               }}
@@ -539,7 +539,7 @@ class TrancheDetails extends Component {
                 props:{
                   decimals:4,
                   fontWeight:2,
-                  fontSize:[3,4],
+                  fontSize:[2,4],
                   color:'copyColor'
                 }
               }}

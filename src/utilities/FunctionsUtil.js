@@ -244,12 +244,13 @@ class FunctionsUtil {
               const [
                 trancheUserInfo,
                 trancheApy,
-                amountDeposited
               ] = await Promise.all([
                 this.getTrancheUserInfo(tokenConfig,trancheConfig,account),
                 this.loadTrancheFieldRaw('trancheApy',{},protocol,token,tranche,tokenConfig,trancheConfig,account),
-                this.loadTrancheFieldRaw('trancheDeposited',{},protocol,token,tranche,tokenConfig,trancheConfig,account)
               ]);
+
+              const amountDeposited = trancheUserInfo.amountDeposited;
+              const trancheEarnings = tokenBalance.minus(amountDeposited);
 
               // console.log('trancheBalance',protocol,token,tranche,'trancheTokenBalance',trancheTokenBalance.toFixed(),'tranchePrice',tranchePrice.toFixed(),'tokenBalance',tokenBalance.toFixed(),'trancheApy',trancheApy.toFixed(),'amountDeposited',amountDeposited.toFixed());
               portfolio.transactions = [...portfolio.transactions,...trancheUserInfo.transactions];
@@ -261,9 +262,12 @@ class FunctionsUtil {
                 trancheApy,
                 tranchePrice,
                 tokenBalance,
+                trancheEarnings,
                 amountDeposited, 
                 trancheTokenBalance
               });
+
+              // console.log(protocol,token,tranche,amountDeposited.toFixed(),tokenBalance.toFixed(),trancheEarnings.toFixed());
 
               // Increment total balance
               portfolio.totalBalance = portfolio.totalBalance.plus(tokenBalance);
@@ -282,12 +286,12 @@ class FunctionsUtil {
     portfolio.tranchesBalance.forEach( trancheInfo => {
       const trancheApy = this.BNify(trancheInfo.trancheApy);
       const trancheWeight = trancheInfo.tokenBalance.div(portfolio.totalBalance);
-      const tokenEarnings = trancheInfo.tokenBalance.minus(trancheInfo.amountDeposited);
 
+      // Add tranche weight
       trancheInfo.trancheWeight = trancheWeight;
 
-      if (tokenEarnings){
-        totalEarnings = totalEarnings.plus(tokenEarnings);
+      if (trancheInfo.trancheEarnings){
+        totalEarnings = totalEarnings.plus(trancheInfo.trancheEarnings);
       }
 
       if (trancheApy){
@@ -741,7 +745,6 @@ class FunctionsUtil {
         return acc;
       },{});
     }
-
     return null;
   }
   getTrancheUserInfo = async (tokenConfig,trancheConfig,account) => {
@@ -786,6 +789,7 @@ class FunctionsUtil {
       const trancheTokenAmount = this.fixTokenDecimals(trancheTokenTransferEvent.returnValues.value,trancheConfig.decimals);
 
       // console.log('tranchePrice',trancheConfig.token,tokenAmount.toFixed(),trancheTokenAmount.toFixed(),tranchePrice.toFixed());
+      const tranchePrice = tokenAmount.div(trancheTokenAmount);
       const blockInfo = await this.getBlockInfo(tokenTransferEvent.blockNumber);
       const hashKey = `${trancheConfig.token}_${tokenTransferEvent.transactionHash}`;
       const protocolConfig = this.getGlobalConfig(['stats','protocols',tokenConfig.protocol]);
@@ -795,12 +799,15 @@ class FunctionsUtil {
         hashKey,
         action:null,
         tokenAmount,
+        tranchePrice,
         protocolIcon,
         value:tokenAmount,
         status:'Completed',
         token:tokenConfig.token,
+        tranche:trancheConfig.token,
         protocol:protocolConfig.label,
         tokenSymbol:tokenConfig.token,
+        trancheTokens:trancheTokenAmount,
         hash:tokenTransferEvent.transactionHash,
         blockNumber:tokenTransferEvent.blockNumber,
         timeStamp:blockInfo ? blockInfo.timestamp : null,
@@ -808,7 +815,6 @@ class FunctionsUtil {
 
       // Deposit
       if (trancheTokenTransferEvent.returnValues.from.toLowerCase() === '0x0000000000000000000000000000000000000000'){
-        const tranchePrice = tokenAmount.div(trancheTokenAmount);
         avgBuyPrice = avgBuyPrice.plus(tranchePrice.times(tokenAmount));
         amountDeposited = amountDeposited.plus(tokenAmount);
         totalAmountDeposited = totalAmountDeposited.plus(tokenAmount);
@@ -839,6 +845,13 @@ class FunctionsUtil {
       transactions,
       amountDeposited
     }
+  }
+  getTrancheUserTransactions = async (tokenConfig,trancheConfig,account) => {
+    const trancheUserInfo = await this.getTrancheUserInfo(tokenConfig,trancheConfig,account);
+    if (trancheUserInfo){
+      return trancheUserInfo.transactions;
+    }
+    return null;
   }
   getAmountDepositedTranche = async (tokenConfig,trancheConfig,account) => {
     const trancheUserInfo = await this.getTrancheUserInfo(tokenConfig,trancheConfig,account);
@@ -3239,7 +3252,7 @@ class FunctionsUtil {
         if (poolSize){
           output = this.fixTokenDecimals(poolSize,tokenConfig.CDO.decimals);
           if (formatValue){
-            output = this.formatMoney(output,decimals)+` ${tokenName}`;
+            output = this.formatMoney(output,decimals);
           }
         }
       break;
@@ -3266,13 +3279,7 @@ class FunctionsUtil {
         }
       break;
       case 'trancheDeposited':
-        let [
-          deposited,
-          // staked
-        ] = await Promise.all([
-          this.getAmountDepositedTranche(tokenConfig,trancheConfig,account),
-          // this.getTrancheStakedBalance(trancheConfig.CDORewards.name,account,trancheConfig.CDORewards.decimals)
-        ]);
+        const deposited = await this.getAmountDepositedTranche(tokenConfig,trancheConfig,account);
 
         output = output || this.BNify(0);
         // staked = staked || this.BNify(0);
