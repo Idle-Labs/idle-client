@@ -2,8 +2,9 @@ import Title from '../Title/Title';
 import React, { Component } from 'react';
 import AssetField from '../AssetField/AssetField';
 import FunctionsUtil from '../utilities/FunctionsUtil';
-import { Flex, Text, Link, Icon, Tooltip, Image } from "rimble-ui";
+import TrancheField from '../TrancheField/TrancheField';
 import DashboardCard from '../DashboardCard/DashboardCard';
+import { Flex, Text, Link, Icon, Tooltip, Image } from "rimble-ui";
 
 class StrategyBox extends Component {
 
@@ -50,30 +51,39 @@ class StrategyBox extends Component {
     let selectedToken = null;
     let highestValue = null;
     const tokensAprs = {};
-    const availableTokens = this.props.availableStrategies[this.props.strategy];
-    await this.functionsUtil.asyncForEach(Object.keys(availableTokens),async (token) => {
-      const tokenConfig = availableTokens[token];
-      switch (this.props.strategy){
-        case 'best':
-        default:
-          const tokenAPR = await this.functionsUtil.getTokenAprs(tokenConfig);
-          if (tokenAPR && tokenAPR.avgApr !== null){
-            tokensAprs[token] = tokenAPR.avgApr;
-            if (!highestValue || highestValue.lt(tokenAPR.avgApr)){
-              highestValue = tokenAPR.avgApr;
-              selectedToken = token;
-            }
+    
+    switch (strategyInfo.type){
+      case 'tranche':
+        selectedToken = strategyInfo.token;
+      break;
+      default:
+      case 'strategy':
+        const availableTokens = this.props.availableStrategies[this.props.strategy];
+        await this.functionsUtil.asyncForEach(Object.keys(availableTokens),async (token) => {
+          const tokenConfig = availableTokens[token];
+          switch (this.props.strategy){
+            case 'best':
+            default:
+              const tokenAPR = await this.functionsUtil.getTokenAprs(tokenConfig);
+              if (tokenAPR && tokenAPR.avgApr !== null){
+                tokensAprs[token] = tokenAPR.avgApr;
+                if (!highestValue || highestValue.lt(tokenAPR.avgApr)){
+                  highestValue = tokenAPR.avgApr;
+                  selectedToken = token;
+                }
+              }
+            break;
+            case 'risk':
+            const tokenScore = await this.functionsUtil.getTokenScore(tokenConfig,true);
+              if (!highestValue || highestValue.lt(tokenScore)){
+                highestValue = tokenScore;
+                selectedToken = token;
+              }
+            break;
           }
-        break;
-        case 'risk':
-        const tokenScore = await this.functionsUtil.getTokenScore(tokenConfig,true);
-          if (!highestValue || highestValue.lt(tokenScore)){
-            highestValue = tokenScore;
-            selectedToken = token;
-          }
-        break;
-      }
-    });
+        });
+      break;
+    }
 
     this.setState({
       selectedToken
@@ -84,7 +94,16 @@ class StrategyBox extends Component {
     const strategyInfo = this.functionsUtil.getGlobalConfig(['strategies',this.props.strategy]);
     const strategyUrl = '/#'+this.functionsUtil.getGlobalConfig(['dashboard','baseRoute'])+'/'+this.props.strategy;
     // const chartColor = strategyInfo.chartColor ? strategyInfo.chartColor : null;
-    const tokenConfig = this.state.selectedToken ? this.props.availableStrategies[this.props.strategy][this.state.selectedToken] : null;
+    let tokenConfig = null;
+    switch (strategyInfo.type){
+      case 'tranche':
+        tokenConfig = this.props.availableTranches[strategyInfo.protocol][strategyInfo.token];
+      break;
+      default:
+      case 'strategy':
+        tokenConfig = this.state.selectedToken ? this.props.availableStrategies[this.props.strategy][this.state.selectedToken] : null;
+      break;
+    }
 
     return (
       <DashboardCard
@@ -152,7 +171,7 @@ class StrategyBox extends Component {
                 src={'/images/strategy-placeholder.jpg'}
               />
             </Flex>
-          ) : (
+          ) : strategyInfo.type === 'strategy' ? (
             <Flex
               mt={[0,3]}
               flexDirection={'row'}
@@ -281,6 +300,166 @@ class StrategyBox extends Component {
                   tokenConfig={ tokenConfig }
                   token={this.state.selectedToken}
                   selectedStrategy={this.props.strategy}
+                />
+              </Flex>
+            </Flex>
+          ) : strategyInfo.type === 'tranche' && (
+            <Flex
+              mt={[0,3]}
+              flexDirection={'row'}
+              alignItems={'flex-start'}
+              justifyContent={'center'}
+              minHeight={['69px','88px']}
+            >
+              <Flex
+                width={0.5}
+                alignItems={'center'}
+                flexDirection={'column'}
+                justifyContent={'center'}
+                borderRight={`1px solid ${this.props.theme.colors.divider}`}
+              >
+                <Flex
+                  width={1}
+                  alignItems={'center'}
+                  justifyContent={'center'}
+                >
+                  <Text
+                    fontSize={2}
+                    fontWeight={4}
+                    color={'cellText'}
+                    textAlign={'center'}
+                  >
+                    Senior APY
+                  </Text>
+                  <Tooltip
+                    placement={'bottom'}
+                    message={this.functionsUtil.getGlobalConfig(['tranches','AA','description','deposit'])}
+                  >
+                    <Icon
+                      ml={1}
+                      name={"Info"}
+                      size={'1em'}
+                      color={'cellTitle'}
+                    />
+                  </Tooltip>
+                </Flex>
+                <TrancheField
+                  fieldInfo={{
+                    name:'seniorApy',
+                    showTooltip:false,
+                    props:{
+                      decimals:2,
+                      fontWeight:4,
+                      color:'copyColor',
+                      textAlign:'center',
+                      fontSize:[3,'1.8em'],
+                      flexProps:{
+                        justifyContent:'center'
+                      }
+                    },
+                  }}
+                  {...this.props}
+                  tokenConfig={tokenConfig}
+                  token={strategyInfo.token}
+                  tranche={strategyInfo.tranche}
+                  protocol={strategyInfo.protocol}
+                />
+                <TrancheField
+                  fieldInfo={{
+                    showLoader:false,
+                    name:'trancheIDLEDistribution',
+                    props:{
+                      decimals:2,
+                      fontWeight:2,
+                      fontSize:[0,1],
+                      color:'cellText',
+                      textAlign:'center',
+                      flexProps:{
+                        justifyContent:'center'
+                      }
+                    },
+                  }}
+                  {...this.props}
+                  tokenConfig={tokenConfig}
+                  token={strategyInfo.token}
+                  trancheConfig={tokenConfig.AA}
+                  tranche={strategyInfo.tranche}
+                  protocol={strategyInfo.protocol}
+                />
+              </Flex>
+              <Flex
+                width={0.5}
+                alignItems={'center'}
+                flexDirection={'column'}
+                justifyContent={'center'}
+              >
+                <Flex
+                  width={1}
+                  alignItems={'center'}
+                  justifyContent={'center'}
+                >
+                  <Text
+                    fontSize={2}
+                    fontWeight={4}
+                    color={'cellText'}
+                    textAlign={'center'}
+                  >
+                    Junior APY
+                  </Text>
+                  <Tooltip
+                    placement={'bottom'}
+                    message={this.functionsUtil.getGlobalConfig(['tranches','BB','description','deposit'])}
+                  >
+                    <Icon
+                      ml={1}
+                      name={"Info"}
+                      size={'1em'}
+                      color={'cellTitle'}
+                    />
+                  </Tooltip>
+                </Flex>
+                <TrancheField
+                  fieldInfo={{
+                    name:'juniorApy',
+                    showTooltip:false,
+                    props:{
+                      decimals:2,
+                      fontWeight:4,
+                      color:'copyColor',
+                      textAlign:'center',
+                      fontSize:[3,'1.8em'],
+                      flexProps:{
+                        justifyContent:'center'
+                      }
+                    },
+                  }}
+                  {...this.props}
+                  tokenConfig={tokenConfig}
+                  token={strategyInfo.token}
+                  tranche={strategyInfo.tranche}
+                  protocol={strategyInfo.protocol}
+                />
+                <TrancheField
+                  fieldInfo={{
+                    showLoader:false,
+                    name:'trancheIDLEDistribution',
+                    props:{
+                      decimals:2,
+                      fontWeight:2,
+                      fontSize:[0,1],
+                      color:'cellText',
+                      textAlign:'center',
+                      flexProps:{
+                        justifyContent:'center'
+                      }
+                    },
+                  }}
+                  {...this.props}
+                  tokenConfig={tokenConfig}
+                  token={strategyInfo.token}
+                  trancheConfig={tokenConfig.BB}
+                  tranche={strategyInfo.tranche}
+                  protocol={strategyInfo.protocol}
                 />
               </Flex>
             </Flex>

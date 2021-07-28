@@ -26,6 +26,7 @@ class FlexCards extends Component {
 
   render() {
 
+    const maxItemPerc = this.props.maxItemPerc || 100;
     const itemPerc = this.props.itemsPerRow ? Math.floor(100/this.props.itemsPerRow)-2 : Math.floor(100/this.props.cards.length)-1;
     const justifyContent = this.props.justifyContent ? this.props.justifyContent : 'space-between';
 
@@ -55,7 +56,7 @@ class FlexCards extends Component {
                 mx: justifyContent !== 'space-between' ? [0,2] : 0,
                 style:{
                   textAlign:'center',
-                  flex:this.props.isMobile ? null : `0 ${itemPerc}%`,
+                  flex:this.props.isMobile ? null : `0 ${Math.min(maxItemPerc,itemPerc)}%`,
                 }
               }}
             >
@@ -80,6 +81,7 @@ class FlexCards extends Component {
                       width={'auto'}
                       height={'auto'}
                       maxHeight={'50px'}
+                      {...this.props.imageProps}
                     />
                   </Link>
                 ) : (

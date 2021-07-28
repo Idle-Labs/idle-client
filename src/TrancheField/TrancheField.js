@@ -52,7 +52,9 @@ class TrancheField extends Component {
   async componentDidUpdate(prevProps, prevState) {
     this.loadUtils();
 
+    const tokenChanged = prevProps.token !== this.props.token;
     const accountChanged = prevProps.account !== this.props.account;
+    const trancheChanged = prevProps.tranche !== this.props.tranche;
     const mobileChanged = prevProps.isMobile !== this.props.isMobile;
     const protocolChanged = prevProps.protocol !== this.props.protocol;
     const themeModeChanged = prevProps.themeMode !== this.props.themeMode;
@@ -60,7 +62,7 @@ class TrancheField extends Component {
     const contractInitialized = prevProps.contractsInitialized !== this.props.contractsInitialized && this.props.contractsInitialized;
     const transactionsChanged = prevProps.transactions && this.props.transactions && Object.values(prevProps.transactions).filter(tx => (tx.status==='success')).length !== Object.values(this.props.transactions).filter(tx => (tx.status==='success')).length;
 
-    if (fieldChanged || protocolChanged || accountChanged || transactionsChanged || (contractInitialized && !this.state.ready)){
+    if (fieldChanged || tokenChanged || protocolChanged || trancheChanged || accountChanged || transactionsChanged || (contractInitialized && !this.state.ready)){
       this.setStateSafe({
         ready:false
       },() => {
@@ -77,8 +79,9 @@ class TrancheField extends Component {
   }
 
   loadField = async(fieldName=null) => {
+    // console.log('TrancheField - loadField',fieldName,this.componentUnmounted,this.props.protocol,this.props.token,this.props.tokenConfig);
 
-    if (this.componentUnmounted || !this.props.protocol || !this.props.tokenConfig){
+    if (this.componentUnmounted || !this.props.protocol || !this.props.token || !this.props.tokenConfig){
       return false;
     }
 

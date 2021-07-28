@@ -2,6 +2,7 @@ import Staking from '../Staking/Staking';
 import IDLE from '../contracts/IDLE.json';
 import WETH from '../abis/tokens/WETH.json';
 import ERC20 from '../contracts/ERC20.json';
+import Tranches from '../Tranches/Tranches';
 import COMP from '../abis/compound/COMP.json';
 import aToken from '../abis/aave/AToken.json';
 import TokenSwap from '../TokenSwap/TokenSwap';
@@ -526,9 +527,9 @@ const globalConfigs = {
   tranches:{
     BB:{
       color:{
-        hex:'#e3660c',
-        rgb:[227, 102, 12],
-        hsl:['25', '90%', '47%']
+        hex:'#2196f3',
+        rgb:[33, 150, 243],
+        hsl:['207', '90%', '54%']
       },
       name:'Junior Tranche',
       description:{
@@ -542,9 +543,9 @@ const globalConfigs = {
     },
     AA:{
       color:{
-        hex:'#04AA6D',
-        rgb:[4, 170, 109],
-        hsl:['158', '95%', '34%']
+        hex:'#4caf50',
+        rgb:[76, 175, 80],
+        hsl:['122', '39%', '49%']
       },
       name:'Senior Tranche',
       description:{
@@ -558,9 +559,28 @@ const globalConfigs = {
     }
   },
   strategies:{
+    tranches:{
+      token:'DAI',
+      type:'tranche',
+      protocol:'idle',
+      color:'#f32121',
+      comingSoon:false,
+      addGovTokens:true,
+      titlePostfix:null,
+      title:'Tranches',
+      iconName:'Whatshot',
+      component: Tranches,
+      govTokensEnabled:true,
+      chartColor:'hsl(40,95%,59%)',
+      icon:'images/strategies/tranches-on.png',
+      iconInactive:'images/strategies/tranches-off.png',
+      iconInactiveDark:'images/strategies/tranches-white.png',
+      desc:'Diversify your risk profile with dynamic tranched yield derivatives',
+    },
     best:{
       token:'DAI',
       color:'#f32121',
+      type:'strategy',
       comingSoon:false,
       addGovTokens:true,
       titlePostfix:null,
@@ -579,6 +599,7 @@ const globalConfigs = {
     risk:{
       token:'DAI',
       color:'#2196F3',
+      type:'strategy',
       comingSoon:false,
       titlePostfix:null,
       addGovTokens:true,
@@ -594,6 +615,7 @@ const globalConfigs = {
       descLong:'The Risk-Adjusted allocation strategy provides a way to earn the best rate at the lowest risk-level. The risk-management algorithm takes account of the total assets within a pool, incorporates underlying protocol rate functions and levels of supply and demand, skimming protocols with a bad score/rate mix, and finally determining an allocation that achieves the highest risk-return score possible after the rebalance happens.',
       descShort:'The Risk-Adjusted allocation strategy provides a way to earn the best rate at the lowest risk-level.'
     },
+    /*
     new:{
       token:'DAI',
       color:'#2196F3',
@@ -608,6 +630,7 @@ const globalConfigs = {
       descLong:'The Risk-Adjusted allocation strategy provides a way to earn the best rate at the lowest risk-level. The risk-management algorithm takes account of the total assets within a pool, incorporates underlying protocol rate functions and levels of supply and demand, skimming protocols with a bad score/rate mix, and finally determining an allocation that achieves the highest risk-return score possible after the rebalance happens.',
       descShort:'The Risk-Adjusted allocation strategy provides a way to earn the best rate at the lowest risk-level.'
     }
+    */
   },
   stats:{
     enabled:true, // Enable endpoint

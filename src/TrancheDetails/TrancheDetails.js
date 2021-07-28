@@ -71,6 +71,7 @@ class TrancheDetails extends Component {
       cdoCoolingPeriod,
       latestHarvestBlock,
       stakeCoolingPeriod,
+      tokensDistribution,
       userStakeBlock,
       stakedBalance
     ] = await Promise.all([
@@ -80,6 +81,7 @@ class TrancheDetails extends Component {
       this.functionsUtil.genericContractCall(this.props.tokenConfig.CDO.name,'coolingPeriod'),
       this.functionsUtil.genericContractCall(this.props.tokenConfig.CDO.name,'latestHarvestBlock'),
       this.functionsUtil.genericContractCall(this.props.trancheConfig.CDORewards.name,'coolingPeriod'),
+      this.functionsUtil.getTrancheRewardTokensInfo(this.props.tokenConfig,this.props.trancheConfig),
       this.functionsUtil.genericContractCall(this.props.trancheConfig.CDORewards.name,'usersStakeBlock',[this.props.account]),
       this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals)
     ]);
@@ -215,7 +217,11 @@ class TrancheDetails extends Component {
       <DashboardCard
         cardProps={{
           py:3,
-          px:3
+          px:3,
+          border:null,
+          style:{
+            border:`3px solid ${trancheDetails.color.hex}`
+          }
         }}
         titleProps={{
           pb:2,
@@ -592,8 +598,8 @@ class TrancheDetails extends Component {
                         py:2,
                         width:0.32
                       }}
-                      icon={'Layers'}
                       text={'Unstake'}
+                      icon={'LayersClear'}
                       iconColor={'redeem'}
                       iconBgColor={'#ceeff6'}
                       isActive={ this.state.selectedAction === 'unstake' }
@@ -670,6 +676,9 @@ class TrancheDetails extends Component {
                 <SendTxWithBalance
                   error={null}
                   {...this.props}
+                  buttonProps={{
+                    width:[1,0.45]
+                  }}
                   permitEnabled={false}
                   tokenConfig={this.state.tokenConfig}
                   tokenBalance={this.state.balanceProp}

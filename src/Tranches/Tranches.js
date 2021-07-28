@@ -131,6 +131,7 @@ class Tranches extends Component {
       });
 
       // console.log('allocationChartData',allocationChartData,'portfolioDonutData',portfolioDonutData);
+      
       const transactions = portfolio.transactions;
       const userHasFunds = portfolio && this.functionsUtil.BNify(portfolio.totalBalance).gt(0);
 

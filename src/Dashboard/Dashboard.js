@@ -56,19 +56,6 @@ class Dashboard extends Component {
 
     const menu = [];
 
-    menu.push({
-      submenu:[],
-      color:'#fff',
-      selected:false,
-      label:'Tranches',
-      component:Tranches,
-      route:baseRoute+'/tranches',
-      bgColor:this.props.theme.colors.primary,
-      image:'images/strategies/tranches-on.png',
-      imageInactive:'images/strategies/tranches-off.png',
-      imageInactiveDark:'images/strategies/tranches-white.png'
-    });
-
     const strategies = this.functionsUtil.getGlobalConfig(['strategies']);
     Object.keys(strategies).filter( s => ( !strategies[s].comingSoon ) ).forEach(strategy => {
         menu.push({

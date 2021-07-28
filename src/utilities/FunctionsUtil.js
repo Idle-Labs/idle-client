@@ -747,6 +747,64 @@ class FunctionsUtil {
     }
     return null;
   }
+  getTrancheRewardTokensInfo = async (tokenConfig,trancheConfig) => {
+    const stakingRewards = await this.loadTrancheField('stakingRewards',{},tokenConfig.protocol,tokenConfig.token,trancheConfig.tranche,tokenConfig,trancheConfig);
+    // console.log('getTrancheTokensDistribution',stakingRewards);
+    const tokensDistribution = {};
+    await this.asyncForEach(Object.keys(stakingRewards),async (token) => {
+      const eventFilters = {
+        from:tokenConfig.CDO.address,
+        to:trancheConfig.CDORewards.address
+      }
+      const transfers = await this.getContractEvents(token,'Transfer',{fromBlock: tokenConfig.blockNumber,toBlock:'latest',filter:eventFilters});
+
+      if (transfers && transfers.length>0){
+        const previousHarvest = transfers.length>1 ? transfers[transfers.length-2] : null;
+        const latestHarvest = transfers[transfers.length-1];
+        const previousBlock = previousHarvest ? previousHarvest.blockNumber : tokenConfig.blockNumber;
+
+        const govTokenConfig = this.getGlobalConfig(['govTokens',token]);
+        const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
+        const [
+          prevBlockInfo,
+          lastBlockInfo,
+          conversionRate,
+          lastBlockPoolSize
+        ] = await Promise.all([
+          this.getBlockInfo(previousBlock),
+          this.getBlockInfo(latestHarvest.blockNumber),
+          this.getUniswapConversionRate(DAITokenConfig,govTokenConfig),
+          this.genericContractCallCached(tokenConfig.CDO.name,'getContractValue',[],{},latestHarvest.blockNumber)
+        ]);
+        if (prevBlockInfo && lastBlockInfo){
+          const poolSize = this.fixTokenDecimals(lastBlockPoolSize,tokenConfig.CDO.decimals);
+
+          const elapsedBlocks = latestHarvest.blockNumber-previousBlock;
+          const elapsedSeconds = lastBlockInfo.timestamp-prevBlockInfo.timestamp;
+          const transferAmount = this.fixTokenDecimals(latestHarvest.returnValues.value,govTokenConfig.decimals);
+          const tokensPerBlock = transferAmount.div(elapsedBlocks);
+          const tokensPerSecond = transferAmount.div(elapsedSeconds);
+          const tokensPerYear = tokensPerSecond.times(this.getGlobalConfig(['network','secondsPerYear']));
+          const convertedTokensPerYear = tokensPerYear.times(conversionRate);
+          const tokenApr = convertedTokensPerYear.div(poolSize);
+          const tokenApy = this.apr2apy(tokenApr);
+
+          tokensDistribution[token] = {
+            apr:tokenApr,
+            apy:tokenApy,
+            tokensPerYear,
+            tokensPerBlock,
+            tokensPerSecond,
+            convertedTokensPerYear
+          };
+        }
+      }
+    });
+
+    // console.log('tokensDistribution',tokensDistribution);
+
+    return tokensDistribution;
+  }
   getTrancheUserInfo = async (tokenConfig,trancheConfig,account) => {
     account = account || this.props.account;
     const cachedDataKey = `amountDepositedTranche_${tokenConfig.token}_${trancheConfig.token}_${account}`;
@@ -3233,7 +3291,7 @@ class FunctionsUtil {
   loadTrancheFieldRaw = async (field,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens=true) => {
     return await this.loadTrancheField(field,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens,false);
   }
-  loadTrancheField = async (field,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens=true,formatValue=true) => {
+  loadTrancheField = async (field,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account=null,addGovTokens=true,formatValue=true) => {
     let output = null;
     const maxPrecision = (fieldProps && fieldProps.maxPrecision) || 5;
     const decimals = (fieldProps && fieldProps.decimals) || (this.props.isMobile ? 2 : 3);
@@ -3344,13 +3402,14 @@ class FunctionsUtil {
         }
       break;
       case 'trancheIDLEDistribution':
-        switch (tranche){
-          case 'BB':
-          case 'AA':
-            // output = await this.loadTrancheField(`${tranche}IDLEDistribution`,fieldProps,protocol,token,tranche,tokenConfig,account,addGovTokens);
-          break;
-          default:
-          break;
+        const idleGovTokenConfig = this.getGlobalConfig(['govTokens','IDLE']);
+        const rewardsTokensInfo = await this.getTrancheRewardTokensInfo(tokenConfig,trancheConfig);
+        if (rewardsTokensInfo && rewardsTokensInfo.IDLE){
+          output = this.fixDistributionSpeed(rewardsTokensInfo.IDLE.tokensPerSecond,idleGovTokenConfig.distributionFrequency);
+          if (formatValue){
+            output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+` IDLE/${idleGovTokenConfig.distributionFrequency}`
+          }
+          // console.log('trancheIDLEDistribution',rewardsTokensInfo.IDLE,output);
         }
       break;
       case 'AAIDLEDistribution':
@@ -3373,17 +3432,23 @@ class FunctionsUtil {
 
         const govTokens = field === 'govTokens' ? rewardsTokens : (field === 'autoFarming' ? rewardsTokens.filter( rewardTokenAddr => !incentiveTokens.map( addr => addr.toLowerCase() ).includes(rewardTokenAddr.toLowerCase()) ) : incentiveTokens);
 
-        govTokens.forEach( govTokenAddress => {
-          const govTokenConfig = this.getGovTokenConfigByAddress(govTokenAddress);
-          if (govTokenConfig && !govTokenConfig.enabled){
-            return;
-          }
-          output[govTokenConfig.token] = govTokenConfig;
-        });
+        // console.log(field,tokenConfig,rewardsTokens,incentiveTokens,govTokens);
+
+        if (govTokens){
+          govTokens.forEach( govTokenAddress => {
+            const govTokenConfig = this.getGovTokenConfigByAddress(govTokenAddress);
+            if (govTokenConfig && !govTokenConfig.enabled){
+              return;
+            }
+            output[govTokenConfig.token] = govTokenConfig;
+          });
+        }
       break;
       default:
       break;
     }
+
+    // console.log('loadTrancheField',field,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens,formatValue);
 
     return output;
   }

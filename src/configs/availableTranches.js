@@ -7,6 +7,7 @@ const availableTranches = {
       token:'DAI',
       decimals:18,
       protocol:'idle',
+      blockNumber:12875386,
       address:'0x6b175474e89094c44da98b954eedeac495271d0f',
       CDO:{
         abi:IdleCDO,
@@ -17,6 +18,7 @@ const availableTranches = {
       AA:{
         abi:ERC20,
         decimals:18,
+        tranche:'AA',
         functions:{
           stake:'stake',
           unstake:'unstake',
@@ -38,6 +40,7 @@ const availableTranches = {
       BB:{
         abi:ERC20,
         decimals:18,
+        tranche:'BB',
         functions:{
           stake:'stake',
           unstake:'unstake',

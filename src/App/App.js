@@ -951,6 +951,7 @@ class App extends Component {
                                           tokenConfig={this.state.tokenConfig}
                                           accountBalanceLow={accountBalanceLow}
                                           getAccountBalance={getAccountBalance}
+                                          availableTranches={availableTranches}
                                           customAddress={this.state.customAddress}
                                           selectedToken={this.state.selectedToken}
                                           accountBalanceToken={accountBalanceToken}

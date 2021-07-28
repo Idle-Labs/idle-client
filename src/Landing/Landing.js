@@ -485,7 +485,7 @@ class Landing extends Component {
                   textOverflow: 'ellipsis',
                   fontFamily:this.props.theme.fonts.counter,
                   fontWeight:this.props.theme.fontWeights[5],
-                  fontSize: this.props.isMobile ? this.props.theme.fontSizes[5] : this.props.theme.fontSizes[8],
+                  fontSize: this.props.isMobile ? this.props.theme.fontSizes[5] : this.props.theme.fontSizes[9],
                 }}
                 subtitle={null}
                 subtitleProps={{
@@ -751,6 +751,7 @@ class Landing extends Component {
                   <iframe
                     height={"350"}
                     title={'integrate'}
+                    id={'carbon-iframe'}
                     style={{
                       border:'0',
                       width: '100%',
@@ -859,6 +860,7 @@ class Landing extends Component {
             </Title>
             <Text
               mb={3}
+              px={2}
               fontSize={[2,3]}
               fontWeight={500}
               color={'cellTitle'}
@@ -867,6 +869,11 @@ class Landing extends Component {
               Idle infrastructure rely on the most powerful DeFi protocols
             </Text>
             <FlexCards
+              imageProps={{
+                width:'80%'
+              }}
+              maxItemPerc={25}
+              justifyContent={'center'}
               cards={[
                 {
                   link:'https://app.compound.finance',
@@ -886,10 +893,12 @@ class Landing extends Component {
                   link:'https://dydx.exchange',
                   image:'images/partners/dydx.svg'
                 },
+                /*
                 {
-                  link:'https://oasis.app/',
-                  image:'images/partners/oasis.png'
+                  link:'https://cream.finance',
+                  image:'images/partners/cream.svg'
                 },
+                */
               ]}
               {...this.props}
             />
