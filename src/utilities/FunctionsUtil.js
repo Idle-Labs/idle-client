@@ -3310,7 +3310,7 @@ class FunctionsUtil {
         if (poolSize){
           output = this.fixTokenDecimals(poolSize,tokenConfig.CDO.decimals);
           if (formatValue){
-            output = this.formatMoney(output,decimals);
+            output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision);
           }
         }
       break;
@@ -3332,7 +3332,7 @@ class FunctionsUtil {
         if (tranchePool){
           output = this.fixTokenDecimals(tranchePool,tokenConfig.CDO.decimals);
           if (formatValue){
-            output = this.formatMoney(output,decimals)+` ${tokenName}`;
+            output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+` ${tokenName}`;
           }
         }
       break;
@@ -3345,7 +3345,7 @@ class FunctionsUtil {
         output = this.BNify(deposited);
         if (output.gt(0)){
           if (formatValue){
-            output = this.formatMoney(output,decimals)+` ${tokenName}`;
+            output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+` ${tokenName}`;
           }
         } else {
           output = formatValue ? '-' : null;
@@ -3370,7 +3370,7 @@ class FunctionsUtil {
         if (staked1 && lastPrice1){
           output = this.BNify(staked1).times(lastPrice1);
           if (formatValue){
-            output = this.formatMoney(output,decimals)+` ${tokenName}`;
+            output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+` ${tokenName}`;
           }
         }
       break;
@@ -3387,7 +3387,7 @@ class FunctionsUtil {
         if (deposited1 && lastPrice){
           output = this.BNify(deposited1).times(lastPrice);
           if (formatValue){
-            output = this.formatMoney(output,decimals)+` ${tokenName}`;
+            output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+` ${tokenName}`;
           }
         }
       break;

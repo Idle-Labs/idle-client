@@ -678,7 +678,7 @@ class Tranches extends Component {
                     },
                     {
                       mobile:false,
-                      title:'REWARD TOKENS',
+                      title:'GOVERNANCE TOKENS',
                       props:{
                         width:[0.25,0.15],
                       },

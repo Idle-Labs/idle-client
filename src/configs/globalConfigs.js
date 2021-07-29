@@ -561,13 +561,14 @@ const globalConfigs = {
   strategies:{
     tranches:{
       token:'DAI',
+      visible:false,
       type:'tranche',
       protocol:'idle',
       color:'#f32121',
       comingSoon:false,
+      title:'Tranches',
       addGovTokens:true,
       titlePostfix:null,
-      title:'Tranches',
       iconName:'Whatshot',
       component: Tranches,
       govTokensEnabled:true,
@@ -579,6 +580,7 @@ const globalConfigs = {
     },
     best:{
       token:'DAI',
+      visible:true,
       color:'#f32121',
       type:'strategy',
       comingSoon:false,
@@ -598,6 +600,7 @@ const globalConfigs = {
     },
     risk:{
       token:'DAI',
+      visible:true,
       color:'#2196F3',
       type:'strategy',
       comingSoon:false,

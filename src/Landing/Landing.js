@@ -403,7 +403,7 @@ class Landing extends Component {
                     }}
                   >
                     {
-                      Object.keys(globalConfigs.strategies).map((strategy,strategyIndex) => (
+                      Object.keys(globalConfigs.strategies).filter(s => globalConfigs.strategies[s].visible ).map((strategy,strategyIndex) => (
                         <StrategyBox
                           {...this.props}
                           strategy={strategy}

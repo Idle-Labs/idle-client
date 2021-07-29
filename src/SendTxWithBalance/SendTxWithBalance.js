@@ -20,6 +20,7 @@ class SendTxWithBalance extends Component {
     txSucceeded:false,
     permitEnabled:true,
     showPermitBox:false,
+    approveEnabled:true,
     buttonDisabled:true,
     contractApproved:false,
     fastBalanceSelector:null,
@@ -54,7 +55,7 @@ class SendTxWithBalance extends Component {
     const approveEnabledChanged = prevProps.approveEnabled !== this.props.approveEnabled;
     const contractChanged = JSON.stringify(prevProps.contractInfo) !== JSON.stringify(this.props.contractInfo);
     const tokenConfigChanged = JSON.stringify(prevProps.tokenConfig) !== JSON.stringify(this.props.tokenConfig);
-    if (actionChanged || accountChanged || tokenBalanceChanged || contractChanged || tokenConfigChanged || approveEnabledChanged || permitEnabledChanged){
+    if (actionChanged || accountChanged || tokenBalanceChanged || contractChanged || approveEnabledChanged || tokenConfigChanged || permitEnabledChanged){
       await this.loadData();
     }
 
@@ -292,7 +293,7 @@ class SendTxWithBalance extends Component {
         params = this.props.getPermitTransactionParams(_amount,signedParameters);
       }
     } else {
-      params = this.props.getTransactionParams(_amount);
+      params = this.props.getTransactionParams(_amount,this.state.fastBalanceSelector);
     }
 
     if (params){
@@ -303,7 +304,7 @@ class SendTxWithBalance extends Component {
 
       const value = params.value || null;
 
-      console.log('SendTxWithBalance',contractName, methodName, methodParams, value);
+      // console.log('SendTxWithBalance',contractName, methodName, methodParams, value);
 
       this.props.contractMethodSendWrapper(contractName, methodName, methodParams, value, callback, callbackReceipt);
 
@@ -355,8 +356,11 @@ class SendTxWithBalance extends Component {
     const inputValue = null;
     const fastBalanceSelector = null;
     const contractApproved = await this.checkContractApproved();
+    const approveEnabled = this.props.approveEnabled !== false;
+
     this.setState({
       inputValue,
+      approveEnabled,
       contractApproved,
       fastBalanceSelector
     });
@@ -537,7 +541,7 @@ class SendTxWithBalance extends Component {
                 }
               </Box>
               {
-                !this.state.contractApproved ?
+                this.state.approveEnabled && !this.state.contractApproved ?
                   this.state.processing.loading ? (
                     <Flex
                       mt={3}

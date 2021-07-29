@@ -40,8 +40,9 @@ class DashboardMenu extends Component {
     }
 
     const visibleLinks = this.props.menu.filter(menuLink => {
+      const isVisible = menuLink.visible === undefined || menuLink.visible;
       const showMobile = menuLink.mobile === undefined || menuLink.mobile;
-      return !this.props.isMobile || showMobile;
+      return isVisible && (!this.props.isMobile || showMobile);
     });
 
     if (!visibleLinks.length){

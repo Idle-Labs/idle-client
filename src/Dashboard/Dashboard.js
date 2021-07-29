@@ -7,7 +7,6 @@ import DashboardMenu from '../DashboardMenu/DashboardMenu';
 // Import page components
 import Stats from '../Stats/Stats';
 import Utils from '../Utils/Utils';
-import Tranches from '../Tranches/Tranches';
 import AssetPage from '../AssetPage/AssetPage';
 import RoundButton from '../RoundButton/RoundButton';
 import BetaModal from "../utilities/components/BetaModal";
@@ -58,20 +57,21 @@ class Dashboard extends Component {
 
     const strategies = this.functionsUtil.getGlobalConfig(['strategies']);
     Object.keys(strategies).filter( s => ( !strategies[s].comingSoon ) ).forEach(strategy => {
-        menu.push({
-          submenu:[],
-          color:'#fff',
-          selected:false,
-          route:baseRoute+'/'+strategy,
-          image:strategies[strategy].icon,
-          label:strategies[strategy].title,
-          bgColor:strategies[strategy].color,
-          component:strategies[strategy].component,
-          imageInactive:strategies[strategy].iconInactive,
-          imageInactiveDark:strategies[strategy].iconInactiveDark
-        });
-      }
-    );
+      const strategyInfo = strategies[strategy];
+      menu.push({
+        submenu:[],
+        color:'#fff',
+        selected:false,
+        image:strategyInfo.icon,
+        label:strategyInfo.title,
+        bgColor:strategyInfo.color,
+        route:baseRoute+'/'+strategy,
+        visible:strategyInfo.visible,
+        component:strategyInfo.component,
+        imageInactive:strategyInfo.iconInactive,
+        imageInactiveDark:strategyInfo.iconInactiveDark
+      });
+    });
 
     const curveConfig = this.functionsUtil.getGlobalConfig(['curve']);
 
