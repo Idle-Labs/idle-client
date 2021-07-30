@@ -807,6 +807,52 @@ const availableTokens = {
           }
         ]
       },
+      FEI:{
+        deposit:{},
+        token:'FEI',
+        decimals:18,
+        enabled:true,
+        abi:ERC20.abi,
+        enabledEnvs:[],
+        govTokensDisabled:false,
+        color:'hsl(158, 64%, 37%)',
+        address:'0x956f47f50a910163d8bf957cf5846d573e7f87ca',
+        idle:{
+          abi:IdleTokenV4,
+          token:'idleFEIYield',
+          address:'0xb2d5CB72A621493fe83C6885E4A776279be595bC',
+        },
+        protocols:[
+          {
+            abi:crToken,
+            decimals:28,
+            enabled:true,
+            name:'cream',
+            token:'crFEI',
+            functions:{
+              exchangeRate:{
+                name:'exchangeRateStored',
+                params:[]
+              }
+            },
+            address:'0x8C3B7a4320ba70f8239F83770c4015B5bc4e6F91',
+          },
+          {
+            abi:fToken,
+            decimals:28,
+            name:'fuse',
+            token:'fFEI',
+            enabled:true,
+            functions:{
+              exchangeRate:{
+                name:'exchangeRateStored',
+                params:[]
+              }
+            },
+            address:'0xd8553552f8868C1Ef160eEdf031cF0BCf9686945',
+          }
+        ]
+      },
     },
     risk:{
       DAI:{
@@ -1846,6 +1892,52 @@ const availableTokens = {
             functions:{
             },
             address:'0xc9bc48c72154ef3e5425641a3c747242112a46af',
+          }
+        ]
+      },
+      FEI:{
+        deposit:{},
+        token:'FEI',
+        decimals:18,
+        enabled:true,
+        abi:ERC20.abi,
+        enabledEnvs:[],
+        govTokensDisabled:false,
+        color:'hsl(158, 64%, 37%)',
+        address:'0x956f47f50a910163d8bf957cf5846d573e7f87ca',
+        idle:{
+          abi:IdleTokenV4,
+          token:'idleFEIYield',
+          address:'0xb2d5CB72A621493fe83C6885E4A776279be595bC',
+        },
+        protocols:[
+          {
+            abi:crToken,
+            decimals:28,
+            enabled:true,
+            name:'cream',
+            token:'crFEI',
+            functions:{
+              exchangeRate:{
+                name:'exchangeRateStored',
+                params:[]
+              }
+            },
+            address:'0x8C3B7a4320ba70f8239F83770c4015B5bc4e6F91',
+          },
+          {
+            abi:fToken,
+            decimals:28,
+            name:'fuse',
+            token:'fFEI',
+            enabled:true,
+            functions:{
+              exchangeRate:{
+                name:'exchangeRateStored',
+                params:[]
+              }
+            },
+            address:'0xd8553552f8868C1Ef160eEdf031cF0BCf9686945',
           }
         ]
       },

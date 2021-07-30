@@ -394,7 +394,7 @@ const globalConfigs = {
       distributionFrequency:'day', // Multiply distribution per block
       color:'hsl(162, 100%, 41%)',
       icon:'images/tokens/IDLE.png',
-      disabledTokens:['idleRAIYield'], // Disable IDLE distribution for idleToken
+      disabledTokens:['idleRAIYield','idleFEIYield'], // Disable IDLE distribution for idleToken
       address:'0x875773784Af8135eA0ef43b5a374AaD105c5D39e' // MAIN
       // address:'0xAB6Bdb5CCF38ECDa7A92d04E86f7c53Eb72833dF', // KOVAN
       // address:'0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f' // Fork
@@ -891,6 +891,22 @@ const globalConfigs = {
           labelTextColorModifiers:['darker', 4]
         },
         address:'0x03ab458634910aad20ef5f1c8ee96f1d6ac54919',
+      },
+      FEI:{
+        decimals:18,
+        enabled:true,
+        color:{
+          hex:'#229b6e',
+          rgb:[34, 155, 110],
+          hsl:['158', '64%', '37%']
+        },
+        disabledCharts:['score'],
+        startTimestamp:'2021-07-30',
+        conversionRateField:'feiDAIPrice',
+        chart:{
+          labelTextColorModifiers:['darker', 4]
+        },
+        address:'0x956f47f50a910163d8bf957cf5846d573e7f87ca',
       },
       'idleDAI+idleUSDC+idleUSDT':{
         decimals:18,
