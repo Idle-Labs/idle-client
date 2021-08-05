@@ -97,6 +97,20 @@ class MenuAccount extends Component {
             width={[1,'fit-content']}
             justifyContent={'space-between'}
           >
+            {
+              this.props.isMobile && (
+                <Flex
+                  mr={2}
+                >
+                  <Icon
+                    size={'2.4em'}
+                    color={'copyColor'}
+                    onClick={this.props.toggleMenu}
+                    name={ this.props.menuOpened ? 'Close' : 'Menu'}
+                  />
+                </Flex>
+              )
+            }
             <DashboardCard
               {...this.props}
               cardProps={{
@@ -284,8 +298,23 @@ class MenuAccount extends Component {
       ) : (
         <Flex
           width={1}
+          alignItems={'center'}
           justifyContent={'flex-start'}
         >
+          {
+            this.props.isMobile && (
+              <Flex
+                mr={2}
+              >
+                <Icon
+                  size={'2.4em'}
+                  color={'copyColor'}
+                  onClick={this.props.toggleMenu}
+                  name={ this.props.menuOpened ? 'Close' : 'Menu'}
+                />
+              </Flex>
+            )
+          }
           <CardIconButton
             icon={'Power'}
             {...this.props}

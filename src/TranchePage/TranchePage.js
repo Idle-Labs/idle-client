@@ -89,6 +89,7 @@ class TranchePage extends Component {
           justifyContent={'space-between'}
         >
           <Flex
+            mb={[2,0]}
             width={[1,0.47]}
             flexDirection={'column'}
           >

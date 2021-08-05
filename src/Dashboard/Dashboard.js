@@ -9,6 +9,7 @@ import Stats from '../Stats/Stats';
 import Utils from '../Utils/Utils';
 import AssetPage from '../AssetPage/AssetPage';
 import RoundButton from '../RoundButton/RoundButton';
+import Swipeable from '../utilities/components/Swipeable';
 import BetaModal from "../utilities/components/BetaModal";
 import DashboardCard from '../DashboardCard/DashboardCard';
 import CurveStrategy from '../CurveStrategy/CurveStrategy';
@@ -24,6 +25,7 @@ class Dashboard extends Component {
     baseRoute:null,
     clickEvent:null,
     activeModal:null,
+    menuOpened:false,
     currentRoute:null,
     pageComponent:null,
     currentSection:null,
@@ -363,6 +365,13 @@ class Dashboard extends Component {
     const prevParams = prevProps.match.params;
     const params = this.props.match.params;
 
+    const isMobileChanged = prevProps.isMobile !== this.props.isMobile;
+    if (isMobileChanged){
+      this.setState({
+        menuOpened:false
+      });
+    }
+
     if (JSON.stringify(prevParams) !== JSON.stringify(params)){
       await this.setState({
         pageComponent:null
@@ -566,209 +575,241 @@ class Dashboard extends Component {
     });
   }
 
+  setMenu(menuOpened){
+    this.setState({
+      menuOpened
+    });
+  }
+
+  toggleMenu(){
+    const menuOpened = !this.state.menuOpened;
+    this.setMenu(menuOpened);
+  }
+
+  swipeCallback(eventData){
+    // console.log('swipeCallback',eventData);
+    if (eventData.dir === 'Right'){
+      this.setMenu(true);
+    } else if (eventData.dir === 'Left'){
+      this.setMenu(false);
+    }
+  }
+
   render() {
+
     const PageComponent = this.state.pageComponent ? this.state.pageComponent : null;
     return (
-      <Flex
-        width={'100%'}
-        position={'fixed'}
-        flexDirection={'row'}
-        className={this.props.themeMode}
-        backgroundColor={['dashboardBg','white']}
-        /*onClick={ e => this.propagateClickEvent(e) }*/
-        height={[(window.innerHeight-61)+'px','100vh']}
+      <Swipeable
+        callback={this.swipeCallback.bind(this)}
       >
         <Flex
-          bottom={0}
-          zIndex={99999}
-          width={[1,1/6]}
-          flexDirection={'column'}
-          position={['fixed','relative']}
-        >
-          <Card
-            p={[0,3]}
-            border={0}
-            width={['100vw','auto']}
-            height={['auto','100vh']}
-            backgroundColor={'menuBg'}
-            borderColor={this.props.theme.colors.menuRightBorder}
-            borderRight={`1px solid ${this.props.theme.colors.menuRightBorder}`}
-            >
-            <DashboardMenu
-              {...this.props}
-              menu={this.state.menu}
-            />
-          </Card>
-        </Flex>
-        <Flex
-          py={3}
-          mb={0}
-          px={[3,5]}
-          width={[1,5/6]}
-          style={{
-            overflowY:'scroll',
-            overflowX:'hidden'
-          }}
-          height={['92vh','auto']}
-          flexDirection={'columns'}
-          backgroundColor={'dashboardBg'}
+          height={'100vh'}
+          position={'fixed'}
+          flexDirection={'row'}
+          className={this.props.themeMode}
+          backgroundColor={['dashboardBg','white']}
+          width={this.props.isMobile && this.state.menuOpened ? '180vw' : '100vw'}
+          /*onClick={ e => this.propagateClickEvent(e) }*/
         >
           {
-            !this.props.accountInizialized || !this.props.contractsInitialized || !PageComponent ? (
+            (!this.props.isMobile || this.state.menuOpened) && (
               <Flex
-                width={1}
-                minHeight={'50vg'}
-                alignItems={'center'}
-                flexDirection={'column'}
-                justifyContent={'center'}
-              >
-                {
-                  !this.props.network.isCorrectNetwork ? (
-                    <DashboardCard
-                      cardProps={{
-                        p:3,
-                        mt:3,
-                        width:[1,0.35]
-                      }}
-                    >
-                      <Flex
-                        alignItems={'center'}
-                        flexDirection={'column'}
-                      >
-                        <Icon
-                          size={'2.3em'}
-                          name={'Warning'}
-                          color={'cellText'}
-                        />
-                        <Text
-                          mt={2}
-                          fontSize={2}
-                          color={'cellText'}
-                          textAlign={'center'}
-                        >
-                          The <strong>{this.functionsUtil.capitalize(this.props.network.current.name)} Network</strong> is not supported, please switch to the correct network.
-                        </Text>
-                      </Flex>
-                    </DashboardCard>
-                  ) : !this.state.showResetButton ? (
-                    <FlexLoader
-                      textProps={{
-                        textSize:4,
-                        fontWeight:2
-                      }}
-                      loaderProps={{
-                        mb:3,
-                        size:'40px'
-                      }}
-                      flexProps={{
-                        my:3,
-                        flexDirection:'column'
-                      }}
-                      text={ !this.props.accountInizialized ? 'Loading account...' : ( !this.props.contractsInitialized ? 'Loading contracts...' : 'Loading assets...' )}
-                    />
-                  ) : (
-                    <DashboardCard
-                      cardProps={{
-                        p:3,
-                        mt:3,
-                        width:[1,0.35]
-                      }}
-                    >
-                      <Flex
-                        alignItems={'center'}
-                        flexDirection={'column'}
-                      >
-                        <Icon
-                          size={'2.3em'}
-                          name={'Warning'}
-                          color={'cellText'}
-                        />
-                        <Text
-                          mt={2}
-                          fontSize={2}
-                          color={'cellText'}
-                          textAlign={'center'}
-                        >
-                          Idle can't connect to your wallet!<br />Make sure that your wallet is unlocked and try again.
-                        </Text>
-                        <RoundButton
-                          buttonProps={{
-                            mt:3,
-                            width:[1,1/2]
-                          }}
-                          handleClick={this.logout.bind(this)}
-                        >
-                          Logout
-                        </RoundButton>
-                      </Flex>
-                    </DashboardCard>
-                  )
-                }
-              </Flex>
-            ) : (
-              <Flex
-                width={1}
+                bottom={0}
+                zIndex={99999}
+                width={['80vw',1/6]}
+                position={'relative'}
                 flexDirection={'column'}
               >
-                <DashboardHeader
-                  clickEvent={this.state.clickEvent}
-                  goToSection={this.goToSection.bind(this)}
-                  {...this.props}
-                />
-                {
-                  PageComponent &&
-                    <PageComponent
-                      {...this.props}
-                      match={{ params:{} }}
-                      urlParams={this.state.params}
-                      changeToken={this.changeToken.bind(this)}
-                      goToSection={this.goToSection.bind(this)}
-                      selectedSection={this.state.selectedSection}
-                      selectedSubsection={this.state.selectedSubsection}
-                      openTooltipModal={this.openTooltipModal.bind(this)}
-                      {...this.state.pageComponentProps}
-                      />
-                }
+                <Card
+                  p={3}
+                  border={0}
+                  width={'auto'}
+                  height={'100vh'}
+                  backgroundColor={'menuBg'}
+                  borderColor={this.props.theme.colors.menuRightBorder}
+                  borderRight={`1px solid ${this.props.theme.colors.menuRightBorder}`}
+                  >
+                  <DashboardMenu
+                    {...this.props}
+                    menu={this.state.menu}
+                    closeMenu={e => this.setMenu(false)}
+                  />
+                </Card>
               </Flex>
             )
           }
+          <Flex
+            py={3}
+            mb={0}
+            px={[3,5]}
+            width={['100vw',5/6]}
+            style={{
+              overflowY:'scroll',
+              overflowX:'hidden'
+            }}
+            height={['100vh','auto']}
+            flexDirection={'columns'}
+            backgroundColor={'dashboardBg'}
+          >
+            {
+              !this.props.accountInizialized || !this.props.contractsInitialized || !PageComponent ? (
+                <Flex
+                  width={1}
+                  minHeight={'50vg'}
+                  alignItems={'center'}
+                  flexDirection={'column'}
+                  justifyContent={'center'}
+                >
+                  {
+                    !this.props.network.isCorrectNetwork ? (
+                      <DashboardCard
+                        cardProps={{
+                          p:3,
+                          mt:3,
+                          width:[1,0.35]
+                        }}
+                      >
+                        <Flex
+                          alignItems={'center'}
+                          flexDirection={'column'}
+                        >
+                          <Icon
+                            size={'2.3em'}
+                            name={'Warning'}
+                            color={'cellText'}
+                          />
+                          <Text
+                            mt={2}
+                            fontSize={2}
+                            color={'cellText'}
+                            textAlign={'center'}
+                          >
+                            The <strong>{this.functionsUtil.capitalize(this.props.network.current.name)} Network</strong> is not supported, please switch to the correct network.
+                          </Text>
+                        </Flex>
+                      </DashboardCard>
+                    ) : !this.state.showResetButton ? (
+                      <FlexLoader
+                        textProps={{
+                          textSize:4,
+                          fontWeight:2
+                        }}
+                        loaderProps={{
+                          mb:3,
+                          size:'40px'
+                        }}
+                        flexProps={{
+                          my:3,
+                          flexDirection:'column'
+                        }}
+                        text={ !this.props.accountInizialized ? 'Loading account...' : ( !this.props.contractsInitialized ? 'Loading contracts...' : 'Loading assets...' )}
+                      />
+                    ) : (
+                      <DashboardCard
+                        cardProps={{
+                          p:3,
+                          mt:3,
+                          width:[1,0.35]
+                        }}
+                      >
+                        <Flex
+                          alignItems={'center'}
+                          flexDirection={'column'}
+                        >
+                          <Icon
+                            size={'2.3em'}
+                            name={'Warning'}
+                            color={'cellText'}
+                          />
+                          <Text
+                            mt={2}
+                            fontSize={2}
+                            color={'cellText'}
+                            textAlign={'center'}
+                          >
+                            Idle can't connect to your wallet!<br />Make sure that your wallet is unlocked and try again.
+                          </Text>
+                          <RoundButton
+                            buttonProps={{
+                              mt:3,
+                              width:[1,1/2]
+                            }}
+                            handleClick={this.logout.bind(this)}
+                          >
+                            Logout
+                          </RoundButton>
+                        </Flex>
+                      </DashboardCard>
+                    )
+                  }
+                </Flex>
+              ) : (
+                <Flex
+                  width={1}
+                  flexDirection={'column'}
+                >
+                  <DashboardHeader
+                    menuOpened={this.state.menuOpened}
+                    clickEvent={this.state.clickEvent}
+                    toggleMenu={this.toggleMenu.bind(this)}
+                    goToSection={this.goToSection.bind(this)}
+                    {...this.props}
+                  />
+                  {
+                    PageComponent &&
+                      <PageComponent
+                        {...this.props}
+                        match={{ params:{} }}
+                        urlParams={this.state.params}
+                        changeToken={this.changeToken.bind(this)}
+                        goToSection={this.goToSection.bind(this)}
+                        selectedSection={this.state.selectedSection}
+                        selectedSubsection={this.state.selectedSubsection}
+                        openTooltipModal={this.openTooltipModal.bind(this)}
+                        {...this.state.pageComponentProps}
+                        />
+                  }
+                </Flex>
+              )
+            }
+          </Flex>
+          <BetaModal
+            closeModal={this.resetModal}
+            isOpen={this.state.activeModal === 'beta'}
+          />
+          <UpgradeModal
+            {...this.props}
+            closeModal={this.resetModal}
+            goToSection={this.goToSection.bind(this)}
+            tokensToMigrate={this.state.tokensToMigrate}
+            isOpen={this.state.activeModal === 'upgrade'}
+            oldIdleTokensToMigrate={this.state.oldIdleTokensToMigrate}
+          />
+          <MigrateModal
+            {...this.props}
+            closeModal={this.resetModal}
+            goToSection={this.goToSection.bind(this)}
+            isOpen={this.state.activeModal === 'migrate'}
+            protocolsTokensBalances={this.state.protocolsTokensBalances}
+          />
+          <TooltipModal
+            closeModal={this.resetModal}
+            title={this.state.modalTitle}
+            content={this.state.modalContent}
+            isOpen={this.state.activeModal === 'tooltip'}
+          />
+          <WelcomeModal
+            closeModal={this.resetModal}
+            account={this.props.account}
+            simpleID={this.props.simpleID}
+            network={this.props.network.current}
+            tokenName={this.props.selectedToken}
+            initSimpleID={this.props.initSimpleID}
+            baseTokenName={this.props.selectedToken}
+            isOpen={this.state.activeModal === 'welcome'}
+          />
         </Flex>
-        <BetaModal
-          closeModal={this.resetModal}
-          isOpen={this.state.activeModal === 'beta'}
-        />
-        <UpgradeModal
-          {...this.props}
-          closeModal={this.resetModal}
-          goToSection={this.goToSection.bind(this)}
-          tokensToMigrate={this.state.tokensToMigrate}
-          isOpen={this.state.activeModal === 'upgrade'}
-          oldIdleTokensToMigrate={this.state.oldIdleTokensToMigrate}
-        />
-        <MigrateModal
-          {...this.props}
-          closeModal={this.resetModal}
-          goToSection={this.goToSection.bind(this)}
-          isOpen={this.state.activeModal === 'migrate'}
-          protocolsTokensBalances={this.state.protocolsTokensBalances}
-        />
-        <TooltipModal
-          closeModal={this.resetModal}
-          title={this.state.modalTitle}
-          content={this.state.modalContent}
-          isOpen={this.state.activeModal === 'tooltip'}
-        />
-        <WelcomeModal
-          closeModal={this.resetModal}
-          account={this.props.account}
-          simpleID={this.props.simpleID}
-          network={this.props.network.current}
-          tokenName={this.props.selectedToken}
-          initSimpleID={this.props.initSimpleID}
-          baseTokenName={this.props.selectedToken}
-          isOpen={this.state.activeModal === 'welcome'}
-        />
-      </Flex>
+      </Swipeable>
     );
   }
 }

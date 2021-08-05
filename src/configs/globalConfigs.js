@@ -561,7 +561,7 @@ const globalConfigs = {
   strategies:{
     tranches:{
       token:'DAI',
-      visible:false,
+      visible:true,
       type:'tranche',
       protocol:'idle',
       color:'#f32121',

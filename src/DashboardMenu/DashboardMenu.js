@@ -57,26 +57,23 @@ class DashboardMenu extends Component {
       <Flex
         p={0}
         height={'100%'}
-        flexDirection={['row','column']}
+        flexDirection={'column'}
       >
-        {
-          !this.props.isMobile &&
-            <Flex
-              p={3}
-              mb={3}
-              flexDirection={'row'}
-              alignItems={'center'}
-              justifyContent={'center'}
-            >
-              <RouterLink to="/">
-                <Image
-                  position={'relative'}
-                  height={['35px','42px']}
-                  src={ isOriginUrl ? (!isDarkTheme ? 'images/logo-gradient.svg' : 'images/logo-white.svg') : (!isDarkTheme ? 'images/logo-gradient-beta.png' : 'images/logo-white-beta.png')}
-                />
-              </RouterLink>
-            </Flex>
-        }
+        <Flex
+          p={3}
+          mb={3}
+          flexDirection={'row'}
+          alignItems={'center'}
+          justifyContent={'center'}
+        >
+          <RouterLink to="/">
+            <Image
+              height={'42px'}
+              position={'relative'}
+              src={ isOriginUrl ? (!isDarkTheme ? 'images/logo-gradient.svg' : 'images/logo-white.svg') : (!isDarkTheme ? 'images/logo-gradient-beta.png' : 'images/logo-white-beta.png')}
+            />
+          </RouterLink>
+        </Flex>
         {
           visibleLinks.map((menuLink,menuIndex) => {
             const isExternalLink = menuLink.isExternalLink;
@@ -84,19 +81,20 @@ class DashboardMenu extends Component {
             const inactiveImage = isDarkTheme && menuLink.imageInactiveDark ? menuLink.imageInactiveDark : menuLink.imageInactive;
             return (
               <Box
-                my={[0,3]}
+                my={[2,3]}
+                width={'auto'}
                 key={`menu-${menuIndex}`}
-                width={[1/visibleLinks.length,'auto']}
               >
                 <LinkComponent
                   to={menuLink.route}
                   href={menuLink.route}
+                  onClick={this.props.closeMenu}
                   style={{textDecoration:'none'}}
                 >
                   <Flex
-                    py={[2,3]}
-                    px={[2,3]}
-                    borderRadius={[0,2]}
+                    py={3}
+                    px={3}
+                    borderRadius={2}
                     flexDirection={'row'}
                     alignItems={'center'}
                     border={menuLink.selected ? 2 : null}
@@ -105,24 +103,24 @@ class DashboardMenu extends Component {
                     <Flex
                       width={1}
                       alignItems={'center'}
-                      flexDirection={['column','row']}
-                      justifyContent={['center','flex-start']}
+                      flexDirection={'row'}
+                      justifyContent={'flex-start'}
                     >
                       {menuLink.image &&
                         <Image
-                          mr={[0,3]}
-                          ml={[0,2]}
-                          mb={[1,0]}
+                          mr={3}
+                          ml={2}
+                          mb={0}
                           align={'center'}
-                          height={['1.2em','1.6em']}
+                          height={'1.6em'}
                           src={ menuLink.selected ? menuLink.image : inactiveImage}
                         />
                       }
                       {menuLink.icon &&
                         <Icon
-                          mr={[0,3]}
-                          ml={[0,2]}
-                          mb={[1,0]}
+                          mr={3}
+                          ml={2}
+                          mb={0}
                           align={'center'}
                           name={menuLink.icon}
                           size={ this.props.isMobile ? '1.4em' : '1.6em' }
@@ -130,10 +128,10 @@ class DashboardMenu extends Component {
                         />
                       }
                       <Text
+                        fontSize={2}
                         fontWeight={3}
                         color={'copyColor'}
                         textAlign={'center'}
-                        fontSize={['11px',2]}
                         style={{
                           whiteSpace:'nowrap'
                         }}
@@ -148,13 +146,13 @@ class DashboardMenu extends Component {
           })
         }
         {
-          darkModeEnabled && !this.props.isMobile && (
+          darkModeEnabled && (
             <Flex
-              my={[0,2]}
+              my={2}
+              width={'auto'}
               height={'100%'}
               flexDirection={'column'}
               justifyContent={'flex-end'}
-              width={[1/visibleLinks.length,'auto']}
             >
               <Link
                 style={{textDecoration:'none'}}
@@ -167,8 +165,8 @@ class DashboardMenu extends Component {
                   justifyContent={'flex-end'}
                 >
                   <Icon
-                    mr={[0,2]}
-                    ml={[0,2]}
+                    mr={2}
+                    ml={2}
                     size={'1.4em'}
                     align={'center'}
                     color={'copyColor'}
@@ -192,7 +190,7 @@ class DashboardMenu extends Component {
                     </Box>
                   </Flex>
                   <Icon
-                    ml={[0,2]}
+                    ml={2}
                     size={'1.4em'}
                     align={'center'}
                     name={'WbSunny'}
