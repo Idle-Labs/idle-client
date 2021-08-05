@@ -82,6 +82,7 @@
     "react-dom": "^16.8.6",
     "react-router-dom": "^5.1.2",
     "react-select": "^3.0.8",
+    "react-swipeable": "^6.1.2",
     "resolve": "1.8.1",
     "rimble-ui": "^0.10.0",
     "sass-loader": "7.1.0",
