@@ -894,7 +894,7 @@ const globalConfigs = {
       },
       FEI:{
         decimals:18,
-        enabled:true,
+        enabled:false,
         color:{
           hex:'#229b6e',
           rgb:[34, 155, 110],
@@ -2869,7 +2869,7 @@ const globalConfigs = {
         captionPos: 'top',
         subcaption: '~ 0.25% fee ~',
         supportedMethods:['wallet'],
-        supportedTokens:['WETH','USDC','DAI','USDT','TUSD','SUSD','WBTC','RAI'],
+        supportedTokens:['WETH','USDC','DAI','USDT','TUSD','SUSD','WBTC','RAI','FEI'],
         web3Subscription:{ // Data for web3 subscription
           enabled: true,
           contractAddress: '0x818e6fecd516ecc3849daf6845e3ec868087b755',
