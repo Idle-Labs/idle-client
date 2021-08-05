@@ -2,6 +2,7 @@ import { Flex, Text } from "rimble-ui";
 import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
+import ConnectBox from '../ConnectBox/ConnectBox';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import BuyModal from '../utilities/components/BuyModal';
 import TrancheField from '../TrancheField/TrancheField';
@@ -252,7 +253,7 @@ class TrancheDetails extends Component {
             px:3,
             border:null,
             style:{
-              border:`3px solid ${trancheDetails.color.hex}`
+              border:`2px solid ${trancheDetails.color.hex}`
             }
           }}
           titleProps={{
@@ -490,105 +491,109 @@ class TrancheDetails extends Component {
               />
             </Flex>
           </Flex>
-          <Flex
-            py={2}
-            style={{
-              flexBasis:'0',
-              flex:'1 1 0px',
-              flexWrap:'wrap',
-              borderBottom:`1px solid ${this.props.theme.colors.divider}`
-            }}
-            alignItems={'flex-start'}
-            justifyContent={'flex-start'}
-          >
-            <Flex
-              width={0.33}
-              flexDirection={'column'}
-            >
-              <Text
-                fontWeight={3}
-                fontSize={[1,2]}
-                color={'cellText'}
-              >
-                Deposited
-              </Text>
-              <TrancheField
-                {...this.props}
-                fieldInfo={{
-                  name:'trancheDeposited',
-                  props:{
-                    decimals:4,
-                    fontWeight:2,
-                    fontSize:[2,4],
-                    color:'copyColor'
-                  }
+          {
+            (this.functionsUtil.BNify(this.state.stakedBalance).gt(0) || this.functionsUtil.BNify(this.state.trancheBalance).gt(0)) && (
+              <Flex
+                py={2}
+                style={{
+                  flexBasis:'0',
+                  flex:'1 1 0px',
+                  flexWrap:'wrap',
+                  borderBottom:`1px solid ${this.props.theme.colors.divider}`
                 }}
-                token={this.props.selectedToken}
-                tranche={this.props.selectedTranche}
-                tokenConfig={this.props.tokenConfig}
-                protocol={this.props.selectedProtocol}
-                trancheConfig={this.props.trancheConfig}
-              />
-            </Flex>
-            <Flex
-              width={0.33}
-              flexDirection={'column'}
-            >
-              <Text
-                fontWeight={3}
-                fontSize={[1,2]}
-                color={'cellText'}
+                alignItems={'flex-start'}
+                justifyContent={'flex-start'}
               >
-                Staked
-              </Text>
-              <TrancheField
-                {...this.props}
-                fieldInfo={{
-                  name:'trancheStaked',
-                  props:{
-                    decimals:4,
-                    fontWeight:2,
-                    fontSize:[2,4],
-                    color:'copyColor'
-                  }
-                }}
-                token={this.props.selectedToken}
-                tranche={this.props.selectedTranche}
-                tokenConfig={this.props.tokenConfig}
-                protocol={this.props.selectedProtocol}
-                trancheConfig={this.props.trancheConfig}
-              />
-            </Flex>
-            <Flex
-              width={0.33}
-              flexDirection={'column'}
-            >
-              <Text
-                fontWeight={3}
-                fontSize={[1,2]}
-                color={'cellText'}
-              >
-                Redeemable
-              </Text>
-              <TrancheField
-                {...this.props}
-                fieldInfo={{
-                  name:'trancheRedeemable',
-                  props:{
-                    decimals:4,
-                    fontWeight:2,
-                    fontSize:[2,4],
-                    color:'copyColor'
-                  }
-                }}
-                token={this.props.selectedToken}
-                tranche={this.props.selectedTranche}
-                tokenConfig={this.props.tokenConfig}
-                protocol={this.props.selectedProtocol}
-                trancheConfig={this.props.trancheConfig}
-              />
-            </Flex>
-          </Flex>
+                <Flex
+                  width={0.33}
+                  flexDirection={'column'}
+                >
+                  <Text
+                    fontWeight={3}
+                    fontSize={[1,2]}
+                    color={'cellText'}
+                  >
+                    Deposited
+                  </Text>
+                  <TrancheField
+                    {...this.props}
+                    fieldInfo={{
+                      name:'trancheDeposited',
+                      props:{
+                        decimals:4,
+                        fontWeight:2,
+                        fontSize:[2,4],
+                        color:'copyColor'
+                      }
+                    }}
+                    token={this.props.selectedToken}
+                    tranche={this.props.selectedTranche}
+                    tokenConfig={this.props.tokenConfig}
+                    protocol={this.props.selectedProtocol}
+                    trancheConfig={this.props.trancheConfig}
+                  />
+                </Flex>
+                <Flex
+                  width={0.33}
+                  flexDirection={'column'}
+                >
+                  <Text
+                    fontWeight={3}
+                    fontSize={[1,2]}
+                    color={'cellText'}
+                  >
+                    Staked
+                  </Text>
+                  <TrancheField
+                    {...this.props}
+                    fieldInfo={{
+                      name:'trancheStaked',
+                      props:{
+                        decimals:4,
+                        fontWeight:2,
+                        fontSize:[2,4],
+                        color:'copyColor'
+                      }
+                    }}
+                    token={this.props.selectedToken}
+                    tranche={this.props.selectedTranche}
+                    tokenConfig={this.props.tokenConfig}
+                    protocol={this.props.selectedProtocol}
+                    trancheConfig={this.props.trancheConfig}
+                  />
+                </Flex>
+                <Flex
+                  width={0.33}
+                  flexDirection={'column'}
+                >
+                  <Text
+                    fontWeight={3}
+                    fontSize={[1,2]}
+                    color={'cellText'}
+                  >
+                    Redeemable
+                  </Text>
+                  <TrancheField
+                    {...this.props}
+                    fieldInfo={{
+                      name:'trancheRedeemable',
+                      props:{
+                        decimals:4,
+                        fontWeight:2,
+                        fontSize:[2,4],
+                        color:'copyColor'
+                      }
+                    }}
+                    token={this.props.selectedToken}
+                    tranche={this.props.selectedTranche}
+                    tokenConfig={this.props.tokenConfig}
+                    protocol={this.props.selectedProtocol}
+                    trancheConfig={this.props.trancheConfig}
+                  />
+                </Flex>
+              </Flex>
+            )
+          }
           {
             this.state.balanceProp && this.state.tokenConfig ? (
               <Flex
@@ -740,6 +745,10 @@ class TrancheDetails extends Component {
                   </SendTxWithBalance>
                 </Flex>
               </Flex>
+            ) : !this.props.account ? (
+              <ConnectBox
+                {...this.props}
+              />
             ) : (
               <FlexLoader
                 flexProps={{
