@@ -1901,7 +1901,7 @@ const availableTokens = {
         decimals:18,
         enabled:true,
         abi:ERC20.abi,
-        enabledEnvs:[],
+        enabledEnvs:['beta'],
         govTokensDisabled:false,
         color:'hsl(158, 64%, 37%)',
         address:'0x956f47f50a910163d8bf957cf5846d573e7f87ca',
