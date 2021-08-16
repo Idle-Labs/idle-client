@@ -291,7 +291,7 @@ class IdleStaking extends Component {
     const claimedRewards = [];
     let totalClaimedUser = this.functionsUtil.BNify(0);
     await this.functionsUtil.asyncForEach(claimEvents, async (e) => {
-      if (this.props.account && e.returnValues.recipient.toLowerCase() === this.props.account.toLowerCase()){
+      if (this.props.account && e.returnValues && e.returnValues.recipient && e.returnValues.recipient.toLowerCase() === this.props.account.toLowerCase()){
         const blockInfo = await this.functionsUtil.getBlockInfo(e.blockNumber);
         if (blockInfo){
           const claimedAmount = this.functionsUtil.fixTokenDecimals(e.returnValues.amount,rewardTokenConfig.decimals);
