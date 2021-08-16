@@ -123,6 +123,7 @@ export default function Web3ConnectionButtons(props) {
                 style={{
                   flex:'0 100%',
                 }}
+                flexDirection={['column','row']}
               >
                 <ImageButton
                   buttonProps={{

@@ -23,7 +23,7 @@ let scrolling = false;
 class Landing extends Component {
   state = {
     avgApr:null,
-    carouselMax:2,
+    carouselMax:0,
     carouselIndex:0,
     activeCarousel:1,
     runConfetti:false,
@@ -31,6 +31,7 @@ class Landing extends Component {
     protocolsAprs:null,
     testPerformed:false,
     totalAllocation:null,
+    visibleStrategies:[],
     carouselOffsetLeft:0,
     setActiveCarousel:null,
     carouselIntervalID:null,
@@ -57,6 +58,12 @@ class Landing extends Component {
   componentWillMount(){
     this.loadUtils();
     this.props.setCurrentSection('landing');
+    const visibleStrategies = Object.keys(globalConfigs.strategies).filter(s => globalConfigs.strategies[s].visible );
+    const carouselMax = visibleStrategies.length-1;
+    this.setState({
+      carouselMax,
+      visibleStrategies
+    });
   }
 
   setActiveCarousel = (activeCarousel) => {
@@ -396,7 +403,6 @@ class Landing extends Component {
                     flexDirection={'row'}
                     position={'absolute'}
                     id={'carousel-cursor'}
-                    width={[Object.keys(globalConfigs.strategies).length*100+'%','140%']}
                     height={['auto','400px']}
                     bottom={['5px','initial']}
                     justifyContent={'flex-start'}
@@ -405,9 +411,10 @@ class Landing extends Component {
                       overflowY:'visible',
                       transition:'left 0.3s ease-in-out'
                     }}
+                    width={[this.state.visibleStrategies.length*100+'%','140%']}
                   >
                     {
-                      Object.keys(globalConfigs.strategies).filter(s => globalConfigs.strategies[s].visible ).map((strategy,strategyIndex) => (
+                      this.state.visibleStrategies.map((strategy,strategyIndex) => (
                         <StrategyBox
                           {...this.props}
                           strategy={strategy}
