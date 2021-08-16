@@ -3298,6 +3298,12 @@ class FunctionsUtil {
     const minPrecision = (fieldProps && fieldProps.minPrecision) || (this.props.isMobile ? 3 : 4);
     const tokenName = this.getGlobalConfig(['stats','tokens',token,'label']) || this.capitalize(token);
 
+    const strategyConfig = tokenConfig.Strategy;
+    const idleStrategyAddress = await this.genericContractCallCached(tokenConfig.CDO.name,'strategy'); 
+    if (idleStrategyAddress){
+      await this.props.initContract(strategyConfig.name,idleStrategyAddress,strategyConfig.abi);
+    }
+
     switch (field){
       case 'protocolName':
         output = (this.getGlobalConfig(['stats','protocols',protocol,'label']) || this.capitalize(protocol)).toUpperCase();
@@ -3340,7 +3346,6 @@ class FunctionsUtil {
         const deposited = await this.getAmountDepositedTranche(tokenConfig,trancheConfig,account);
 
         output = output || this.BNify(0);
-        // staked = staked || this.BNify(0);
 
         output = this.BNify(deposited);
         if (output.gt(0)){
@@ -3426,7 +3431,7 @@ class FunctionsUtil {
           rewardsTokens,
           incentiveTokens
         ] = await Promise.all([
-          this.genericContractCall(tokenConfig.CDO.name,'getRewards'),
+          this.genericContractCall(strategyConfig.name,'getRewardTokens'),
           this.genericContractCall(tokenConfig.CDO.name,'getIncentiveTokens')
         ]);
 

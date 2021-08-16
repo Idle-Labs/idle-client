@@ -1,5 +1,6 @@
 import ERC20 from '../contracts/ERC20.json';
 import IdleCDO from '../contracts/IdleCDO.json';
+import IdleStrategy from '../contracts/IdleStrategy.json';
 import IdleCDOTrancheRewards from '../contracts/IdleCDOTrancheRewards.json';
 const availableTranches = {
   idle:{
@@ -14,6 +15,10 @@ const availableTranches = {
         decimals:18,
         name:'IdleCDO_idleDAIYield',
         address:'0x675a1378777cc2d25dbf430a28738cb6b7a3f8c2'
+      },
+      Strategy:{
+        abi:IdleStrategy,
+        name:'IdleStrategy_idleDAIYield'
       },
       AA:{
         abi:ERC20,
