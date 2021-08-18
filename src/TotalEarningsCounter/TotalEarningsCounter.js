@@ -58,7 +58,7 @@ class TotalEarningsCounter extends Component {
     const portfolio = this.props.portfolio || await this.functionsUtil.getAccountPortfolio(availableTokens,this.props.account);
 
     const earningsStart = portfolio.totalEarnings;
-    const earningsEnd = portfolio.totalAmountLent.times(portfolio.avgAPY.div(100));
+    const earningsEnd = earningsStart.plus(portfolio.totalAmountLent.times(portfolio.avgAPY.div(100)));
 
     this.setState({
       earningsEnd,
