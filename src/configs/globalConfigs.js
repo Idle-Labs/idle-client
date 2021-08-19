@@ -988,8 +988,8 @@ const globalConfigs = {
       },
       aave:{
         label:'Aave V1',
-        legend:true,
-        enabled:true,
+        legend:false,
+        enabled:false,
         color:{
           rgb:[230, 131, 206],
           hsl:['315', '66%', '71%']
