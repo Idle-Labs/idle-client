@@ -16,6 +16,7 @@ class IdleStaking extends Component {
   state = {
     stats:[],
     steps:null,
+    maxApr:null,
     infoBox:null,
     globalStats:[],
     lockPeriods:[
@@ -195,7 +196,7 @@ class IdleStaking extends Component {
 
           // console.log(this.state.inputValue.toString(),endDate.format('YYYY-MM-DD HH:mm:ss'),maxDate.format('YYYY-MM-DD HH:mm:ss'),endDateTime,maxDateTime,stkIDLEAmount.toFixed());
 
-          let text = `By staking <strong>${this.state.inputValue.toFixed(4)} ${this.props.selectedToken}</strong> until <strong>${endDate.utc().format('YYYY-MM-DD HH:mm')} UTC</strong> you will get back <strong>${stkIDLEAmount.toFixed(4)} ${this.props.tokenConfig.contract.name}</strong> (${Math.ceil(percentage)}%).`;
+          let text = `By staking <strong>${this.state.inputValue.toFixed(4)} ${this.props.selectedToken}</strong> until <strong>${endDate.utc().format('YYYY-MM-DD HH:mm')} UTC</strong> you will get back <strong>${stkIDLEAmount.toFixed(4)} ${this.props.tokenConfig.contract.name}</strong> (${Math.ceil(percentage)}% of staking power).`;
           if (Math.ceil(percentage)<100){
             text += `<br />Stake your tokens for <strong>4 years</strong> to reach the maximum staking power.`;
           }
@@ -277,16 +278,28 @@ class IdleStaking extends Component {
       this.props.account ? this.functionsUtil.getContractEvents(this.props.contractInfo.name,'Deposit',{fromBlock: this.props.contractInfo.fromBlock, toBlock:'latest',filter:{provider:this.props.account}}) : []
     ]);
 
+    // console.log('etherscanRewardsTxs',etherscanRewardsTxs);
+
     const rewardTokenConfig = this.functionsUtil.getGlobalConfig(['govTokens',this.props.contractInfo.rewardToken]);
 
-    const distributedRewards = etherscanRewardsTxs.map( tx => (
-      {
-        hash:tx.hash,
-        tokenName:tx.tokenSymbol,
-        amount:this.functionsUtil.fixTokenDecimals(tx.value,rewardTokenConfig.decimals),
-        date:this.functionsUtil.strToMoment(parseInt(tx.timeStamp)*1000).utc().format('YYYY-MM-DD HH:mm')+' UTC'
-      }
-    ));
+    let distributedRewards = [];
+    let totalRewards = this.functionsUtil.BNify(0);
+    let totalRewardsDays = this.functionsUtil.BNify(0);
+
+    if (etherscanRewardsTxs && etherscanRewardsTxs.length){
+      totalRewardsDays = Math.abs(etherscanRewardsTxs[0].timeStamp-etherscanRewardsTxs[etherscanRewardsTxs.length-1].timeStamp)/86400;
+      distributedRewards = etherscanRewardsTxs.map( tx => {
+        const amount = this.functionsUtil.fixTokenDecimals(tx.value,rewardTokenConfig.decimals);
+        totalRewards = totalRewards.plus(amount);
+        return {
+          amount,
+          hash:tx.hash,
+          timeStamp:tx.timeStamp,
+          tokenName:tx.tokenSymbol,
+          date:this.functionsUtil.strToMoment(parseInt(tx.timeStamp)*1000).utc().format('YYYY-MM-DD HH:mm')+' UTC'
+        };
+      });
+    }
 
     const claimedRewards = [];
     let totalClaimedUser = this.functionsUtil.BNify(0);
@@ -334,11 +347,20 @@ class IdleStaking extends Component {
       return totalClaimed;
     },this.functionsUtil.BNify(0));
 
-    const totalRewards = claimableRewards ? totalClaimed.plus(claimableRewards) : this.functionsUtil.BNify(0);
-    const totalRewardsFormatted = claimableRewards ? this.functionsUtil.formatMoney(totalRewards,4)+' '+this.props.contractInfo.rewardToken : (this.state.stats.length ? this.state.stats[3] : this.functionsUtil.formatMoney(totalRewards,4)+' '+this.props.contractInfo.rewardToken);
+    const totalRewardsFormatted = this.functionsUtil.formatMoney(totalRewards,4)+' '+this.props.contractInfo.rewardToken;
     stats.push({
       title:'Total Rewards',
       value:totalRewardsFormatted
+    });
+
+    const maxApr = totalRewards.div(tokenTotalSupply).times(365.2425).div(totalRewardsDays);
+    stats.push({
+      title:'APR (1 year staking)',
+      value:maxApr.div(4).times(100).toFixed(2)+'%'
+    });
+    stats.push({
+      title:'APR (4 years staking)',
+      value:maxApr.times(100).toFixed(2)+'%'
     });
 
     const stakedBalance = lockedInfo && lockedInfo.amount ? this.functionsUtil.fixTokenDecimals(lockedInfo.amount,this.props.tokenConfig.decimals) : this.functionsUtil.BNify(0);
@@ -413,6 +435,7 @@ class IdleStaking extends Component {
 
     this.setState({
       stats,
+      maxApr,
       claimable,
       globalStats,
       statsLoaded,
