@@ -237,10 +237,10 @@ class FunctionsUtil {
           const trancheConfig = tokenConfig[tranche];
           const trancheTokenBalance = await this.loadTrancheFieldRaw('trancheDeposited',{},protocol,token,tranche,tokenConfig,trancheConfig,account);
           if (trancheTokenBalance){
-            const tranchePrice = await this.loadTrancheFieldRaw('lastTranchePrice',{},protocol,token,tranche,tokenConfig,trancheConfig,account);
+            const tranchePrice = await this.loadTrancheFieldRaw('tranchePrice',{},protocol,token,tranche,tokenConfig,trancheConfig,account);
             const tokenBalance = trancheTokenBalance.times(tranchePrice);
 
-            if (!tranchePrice.isNaN() && !tokenBalance.isNaN()){
+            if (!this.BNify(tranchePrice).isNaN() && !this.BNify(tokenBalance).isNaN()){
               const [
                 trancheUserInfo,
                 trancheApy,
@@ -3313,7 +3313,7 @@ class FunctionsUtil {
       break;
       case 'pool':
         let poolSize = await this.genericContractCallCached(tokenConfig.CDO.name,'getContractValue');
-        if (poolSize){
+        if (!this.BNify(poolSize).isNaN()){
           output = this.fixTokenDecimals(poolSize,tokenConfig.CDO.decimals);
           if (formatValue){
             output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision);
@@ -3333,14 +3333,23 @@ class FunctionsUtil {
         output = await this.loadTrancheField(`trancheApy`,fieldProps,protocol,token,tranche,tokenConfig,tokenConfig.BB,account,addGovTokens);
       break;
       case 'tranchePool':
-        let tranchePool = await this.genericContractCallCached(tokenConfig.CDO.name,'virtualBalance',[trancheConfig.address]);
-        // console.log('tranchePool',tokenConfig,trancheConfig,output);
-        if (tranchePool){
-          output = this.fixTokenDecimals(tranchePool,tokenConfig.CDO.decimals);
-          if (formatValue){
-            output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+` ${tokenName}`;
-          }
+        let [
+          totalSupply,
+          virtualPrice
+        ] = await Promise.all([
+          this.getTokenTotalSupply(trancheConfig.name,'latest',180),
+          this.loadTrancheField('tranchePrice',fieldProps,protocol,token,tranche,tokenConfig,tokenConfig.BB,account,addGovTokens)
+        ]);
+
+
+        output = this.BNify(0);
+        if (!this.BNify(virtualPrice).isNaN() && !this.BNify(totalSupply).isNaN()){
+          output = this.fixTokenDecimals(totalSupply,tokenConfig.CDO.decimals).times(virtualPrice);
         }
+        if (formatValue){
+          output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+` ${tokenName}`;
+        }
+        // console.log('tranchePool',tokenConfig.CDO.name,totalSupply,virtualPrice,output);
       break;
       case 'trancheDeposited':
         const deposited = await this.getAmountDepositedTranche(tokenConfig,trancheConfig,account);
@@ -3356,8 +3365,8 @@ class FunctionsUtil {
           output = formatValue ? '-' : null;
         }
       break;
-      case 'lastTranchePrice':
-        output = await this.genericContractCall(tokenConfig.CDO.name,'lastTranchePrice',[trancheConfig.address]);
+      case 'tranchePrice':
+        output = await this.genericContractCall(tokenConfig.CDO.name,'virtualPrice',[trancheConfig.address]);
         if (output){
           output = this.fixTokenDecimals(output,trancheConfig.decimals);
         }
@@ -3368,7 +3377,7 @@ class FunctionsUtil {
           lastPrice1
         ] = await Promise.all([
           this.getTrancheStakedBalance(trancheConfig.CDORewards.name,account,trancheConfig.CDORewards.decimals),
-          this.loadTrancheField(`lastTranchePrice`,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens)
+          this.loadTrancheField(`tranchePrice`,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens)
         ]);
 
         output = formatValue ? '-' : null;
@@ -3385,7 +3394,7 @@ class FunctionsUtil {
           lastPrice
         ] = await Promise.all([
           this.getTokenBalance(trancheConfig.name,account),
-          this.loadTrancheField(`lastTranchePrice`,fieldProps,protocol,token,tranche,tokenConfig,tokenConfig.AA,account,addGovTokens)
+          this.loadTrancheField(`tranchePrice`,fieldProps,protocol,token,tranche,tokenConfig,tokenConfig.AA,account,addGovTokens)
         ]);
 
         output = formatValue ? '-' : null;
@@ -4470,7 +4479,7 @@ class FunctionsUtil {
   checkAddress = (address) => {
     return address ? address.match(/^0x[a-fA-F0-9]{40}$/) !== null : false;
   }
-  getTokenTotalSupply = async (contractName,blockNumber='latest') => {
+  getTokenTotalSupply = async (contractName,blockNumber='latest',TTL=null) => {
     const cachedDataKey = `totalSupply_${contractName}_${blockNumber}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData && !this.BNify(cachedData).isNaN()){
@@ -4478,7 +4487,7 @@ class FunctionsUtil {
     }
 
     const totalSupply = await this.genericContractCall(contractName, 'totalSupply', [], {}, blockNumber);
-    return this.setCachedDataWithLocalStorage(cachedDataKey,totalSupply,null);
+    return this.setCachedDataWithLocalStorage(cachedDataKey,totalSupply,TTL);
   }
   getTokenPrice = async (contractName,blockNumber='latest') => {
     const cachedDataKey = `tokenPrice_${contractName}`;

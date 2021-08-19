@@ -74,9 +74,9 @@ class TrancheDetails extends Component {
       trancheBalance,
       cdoCoolingPeriod,
       latestHarvestBlock,
-      stakeCoolingPeriod,
+      // stakeCoolingPeriod,
       // rewardsTokensInfo,
-      userStakeBlock,
+      // userStakeBlock,
       stakedBalance,
       trancheAPY,
       tranchePrice
@@ -86,9 +86,9 @@ class TrancheDetails extends Component {
       this.functionsUtil.getTokenBalance(this.props.trancheConfig.name,this.props.account),
       this.functionsUtil.genericContractCall(this.props.tokenConfig.CDO.name,'coolingPeriod'),
       this.functionsUtil.genericContractCall(this.props.tokenConfig.CDO.name,'latestHarvestBlock'),
-      this.functionsUtil.genericContractCall(this.props.trancheConfig.CDORewards.name,'coolingPeriod'),
+      // this.functionsUtil.genericContractCall(this.props.trancheConfig.CDORewards.name,'coolingPeriod'),
       // this.functionsUtil.getTrancheRewardTokensInfo(this.props.tokenConfig,this.props.trancheConfig),
-      this.functionsUtil.genericContractCall(this.props.trancheConfig.CDORewards.name,'usersStakeBlock',[this.props.account]),
+      // this.functionsUtil.genericContractCall(this.props.trancheConfig.CDORewards.name,'usersStakeBlock',[this.props.account]),
       this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals),
       this.functionsUtil.loadTrancheFieldRaw('trancheApy',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
       this.functionsUtil.loadTrancheFieldRaw('lastTranchePrice',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account)
@@ -96,10 +96,11 @@ class TrancheDetails extends Component {
 
     const userHasAvailableFunds = trancheBalance && trancheBalance.gt(0);
 
-    // console.log('loadData',cdoCoolingPeriod,latestHarvestBlock,stakeCoolingPeriod,userStakeBlock);
 
-    const canUnstake = this.functionsUtil.BNify(userStakeBlock).plus(stakeCoolingPeriod).lt(blockNumber);
-    const canWithdraw = this.functionsUtil.BNify(latestHarvestBlock).plus(cdoCoolingPeriod).lt(blockNumber);
+    const canUnstake = true; // !stakeCoolingPeriod || this.functionsUtil.BNify(userStakeBlock).plus(stakeCoolingPeriod).lt(blockNumber);
+    const canWithdraw = true; // !cdoCoolingPeriod || !latestHarvestBlock || this.functionsUtil.BNify(latestHarvestBlock).plus(cdoCoolingPeriod).lt(blockNumber);
+    
+    // console.log('loadData',this.props.trancheConfig.tranche,blockNumber,cdoCoolingPeriod,latestHarvestBlock,stakeCoolingPeriod,userStakeBlock,canUnstake,canWithdraw);
 
     this.setState({
       trancheAPY,
@@ -221,9 +222,16 @@ class TrancheDetails extends Component {
 
   transactionSucceeded(){
     this.loadData();
-    this.setState({
-      activeModal:'share'
-    })
+    switch (this.state.selectedAction){
+      case 'stake':
+      case 'deposit':
+        this.setState({
+          activeModal:'share'
+        })
+      break;
+      default:
+      break;
+    }
   }
 
   resetModal = () => {

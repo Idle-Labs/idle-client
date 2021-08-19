@@ -8,13 +8,13 @@ const availableTranches = {
       token:'DAI',
       decimals:18,
       protocol:'idle',
-      blockNumber:12875386,
+      blockNumber:13054628,
       address:'0x6b175474e89094c44da98b954eedeac495271d0f',
       CDO:{
         abi:IdleCDO,
         decimals:18,
         name:'IdleCDO_idleDAIYield',
-        address:'0x675a1378777cc2d25dbf430a28738cb6b7a3f8c2'
+        address:'0xd0DbcD556cA22d3f3c142e9a3220053FD7a247BC'
       },
       Strategy:{
         abi:IdleStrategy,
@@ -34,13 +34,13 @@ const availableTranches = {
           decimals:18,
           abi:IdleCDOTrancheRewards,
           name:'IdleCDOTrancheRewards_idleDAIYield_AA',
-          address:'0xa8c7b9c4F18B227Abc4b099bA92d6a1CfEb9649C'
+          address:'0x9c3bC87693c65E740d8B2d5F0820E04A61D8375B'
         },
         label:'idleDAI AA',
-        blockNumber:12875386,
+        blockNumber:13054628,
         name:'IdleCDO_AA_idleDAIYield',
         token:'IdleCDO_AA_idleDAIYield',
-        address:'0xe524EE80584b120c4df8c2f130AE571ed6C196DB'
+        address:'0xE9ada97bDB86d827ecbaACCa63eBcD8201D8b12E'
       },
       BB:{
         abi:ERC20,
@@ -56,13 +56,13 @@ const availableTranches = {
           decimals:18,
           abi:IdleCDOTrancheRewards,
           name:'IdleCDOTrancheRewards_idleDAIYield_BB',
-          address:'0x0962fB33A7E0172d0E413b0fab003bEe5142E6B6'
+          address:'0x4473bc90118b18be890af42d793b5252c4dc382d'
         },
         label:'idleDAI BB',
-        blockNumber:12875386,
+        blockNumber:13054628,
         name:'IdleCDO_BB_idleDAIYield',
         token:'IdleCDO_BB_idleDAIYield',
-        address:'0x95a2834AFDC65dd7f28585d2d992367600afb457'
+        address:'0x730348a54bA58F64295154F0662A08Cbde1225c2'
       }
     }
   }
