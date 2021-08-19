@@ -21,9 +21,9 @@ class StrategyPage extends Component {
 
   state = {
     portfolio:null,
+    depositedTokens:[],
     tokensToMigrate:{},
     aggregatedValues:[],
-    depositedTokens:null,
     remainingTokens:null,
     batchedDeposits:null,
     portfolioLoaded:false,
@@ -654,7 +654,7 @@ class StrategyPage extends Component {
                 )
               }
               {
-                !viewOnly && this.props.account && nexusMutualConfig.enabled && (
+                !viewOnly && this.state.depositedTokens.length>0 && this.props.account && nexusMutualConfig.enabled && (
                   <Flex
                     mt={3}
                     width={1}

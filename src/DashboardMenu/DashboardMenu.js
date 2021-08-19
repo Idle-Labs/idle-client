@@ -81,8 +81,8 @@ class DashboardMenu extends Component {
             const inactiveImage = isDarkTheme && menuLink.imageInactiveDark ? menuLink.imageInactiveDark : menuLink.imageInactive;
             return (
               <Box
-                my={[2,3]}
                 width={'auto'}
+                my={[2,'12px']}
                 key={`menu-${menuIndex}`}
               >
                 <LinkComponent
