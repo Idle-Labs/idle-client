@@ -1,6 +1,6 @@
-import { Flex, Text } from "rimble-ui";
 import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
+import { Flex, Text, Icon } from "rimble-ui";
 import FlexLoader from '../FlexLoader/FlexLoader';
 import ConnectBox from '../ConnectBox/ConnectBox';
 import FunctionsUtil from '../utilities/FunctionsUtil';
@@ -264,20 +264,28 @@ class TrancheDetails extends Component {
               border:`1px solid ${trancheDetails.color.hex}`
             }
           }}
-          titleProps={{
-            pb:2,
-            fontSize:[3,4]
-          }}
-          titleParentProps={{
-            ml:0,
-            mt:0,
-            mb:3,
-            style:{
-              borderBottom:`1px solid ${this.props.theme.colors.divider}`
-            }
-          }}
-          title={trancheDetails.name}
         >
+          <Flex
+            pb={2}
+            mb={2}
+            alignItems={'center'}
+            flexDirection={'row'}
+            borderBottom={`1px solid ${trancheDetails.color.hex}`}
+          >
+            <Icon
+              mr={2}
+              name={trancheDetails.icon}
+              color={trancheDetails.color.hex}
+              size={this.props.isMobile ? '1.6em' : '1.8em'}
+            />
+            <Text
+              fontWeight={4}
+              fontSize={[3,4]}
+              color={'copyColor'}
+            >
+              {trancheDetails.name}
+            </Text>
+          </Flex>
           <Flex
             style={{
               flexBasis:'0',
