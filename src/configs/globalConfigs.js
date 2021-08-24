@@ -525,15 +525,27 @@ const globalConfigs = {
     },
   },
   tranches:{
-    BB:{
+    AA:{
       color:{
-        hex:'#2196f3',
-        rgb:[33, 150, 243],
-        hsl:['207', '90%', '54%']
+        // hex:'#00ff06',
+        hex:'#00a9fe',
+        rgb:[0, 169, 254],
+        hsl:['200', '100%', '50%']
       },
-      name:'Junior Tranche',
+      type:'AA',
+      route:'senior',
+      icon:'Security',
+      baseName:'senior',
+      name:'Senior Tranche',
+      features:[
+        'Funds covered by Junior tranches TVL',
+        'Minimized risk exposure',
+        'Withdraw your funds at any time',
+        'Auto-Reinvest accrued tokens',
+      ],
       description:{
-        deposit:'By depositing in the Junior Tranche in case of Smart-Contract breach your funds will be used to cover eventual losses on the Senior Tranche.',
+        long:'The Senior Tranche offers the safest way to access the lending market and enjoy its returns thanks to the built-in funds coverage.',
+        deposit:'By depositing in the Senior Tranche in case of Smart-Contract breach your funds are covered by the funds deposited in the Junior Tranche.',
         stake:'Stake your tranche tokens to earn additional rewards and boost the APY.',
         unstake:'By unstaking your tranche tokens you will no more get additional rewards.',
         withdraw:'You can withdraw your funds at any time from the tranche.',
@@ -541,15 +553,26 @@ const globalConfigs = {
         cantWithdraw:'To withdraw your funds you just need to wait at least 1 block from the latest harvest transaction.'
       }
     },
-    AA:{
+    BB:{
       color:{
-        hex:'#4caf50',
-        rgb:[76, 175, 80],
-        hsl:['122', '39%', '49%']
+        hex:'#ff9900',
+        rgb:[255, 153, 0],
+        hsl:['36', '100%', '50%']
       },
-      name:'Senior Tranche',
+      type:'BB',
+      route:'junior',
+      icon:'TrendingUp',
+      baseName:'junior',
+      name:'Junior Tranche',
+      features:[
+        'Leverage yield using Senior tranches TVL',
+        'Higher risk exposure by protecting senior tranches',
+        'Withdraw your funds at any time',
+        'Auto-Reinvest accrued tokens',
+      ],
       description:{
-        deposit:'By depositing in the Senior Tranche in case of Smart-Contract breach your funds are covered by the funds deposited in the Junior Tranche.',
+        long:'The Junior Tranche offers the maximum performance in terms of interests for your assets but expose your funds to an higher risk.',
+        deposit:'By depositing in the Junior Tranche in case of Smart-Contract breach your funds will be used to cover eventual losses on the Senior Tranche.',
         stake:'Stake your tranche tokens to earn additional rewards and boost the APY.',
         unstake:'By unstaking your tranche tokens you will no more get additional rewards.',
         withdraw:'You can withdraw your funds at any time from the tranche.',

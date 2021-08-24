@@ -305,7 +305,7 @@ class LpStaking extends Component {
       description:'Your share of the total unlocked reward pool. Larger your deposit and for longer, higher your share'
     });
 
-    console.log('loadStats',stats,globalStats);
+    // console.log('loadStats',stats,globalStats);
 
     const statsLoaded = true;
 
@@ -453,7 +453,7 @@ class LpStaking extends Component {
       newState.transactionSucceeded = false;
     }
 
-    console.log('updateData',this.state.selectedAction,newState);
+    // console.log('updateData',this.state.selectedAction,newState);
 
     this.setState(newState,() => {
       this.loadStats();

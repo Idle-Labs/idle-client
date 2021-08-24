@@ -3,6 +3,7 @@ import { Box, Flex } from "rimble-ui";
 import React, { Component } from 'react';
 import Breadcrumb from '../Breadcrumb/Breadcrumb';
 import FunctionsUtil from '../utilities/FunctionsUtil';
+import TrancheWelcome from '../TrancheWelcome/TrancheWelcome';
 import TrancheDetails from '../TrancheDetails/TrancheDetails';
 import TransactionsList from '../TransactionsList/TransactionsList';
 
@@ -48,6 +49,12 @@ class TranchePage extends Component {
   }
 
   render() {
+    const tranchesDetails = this.functionsUtil.getGlobalConfig(['tranches']);
+    const filteredTranchesTypes = Object.keys(tranchesDetails).filter( trancheType => !this.props.trancheType || this.props.trancheType === trancheType );
+    const breadcrumbPath = [this.functionsUtil.capitalize(this.props.selectedProtocol),this.props.selectedToken];
+    if (this.props.trancheType){
+      breadcrumbPath.push(this.functionsUtil.capitalize(this.props.trancheDetails.baseName));
+    }
     return (
       <Box
         mb={4}
@@ -66,8 +73,8 @@ class TranchePage extends Component {
             <Breadcrumb
               {...this.props}
               text={'Tranches'}
+              path={breadcrumbPath}
               isMobile={this.props.isMobile}
-              path={[this.functionsUtil.capitalize(this.props.selectedProtocol),this.props.selectedToken]}
               handleClick={ e => this.props.goToSection(this.props.selectedSection.route) }
             />
           </Flex>
@@ -81,37 +88,41 @@ class TranchePage extends Component {
         <Title
           mb={3}
         >
-          {this.functionsUtil.capitalize(this.props.selectedProtocol)} - {this.props.selectedToken} - Tranche
+          {this.functionsUtil.capitalize(this.props.selectedProtocol)} - {this.props.selectedToken} - {this.props.trancheDetails ? this.props.trancheDetails.name : 'Tranches'} 
         </Title>
-        <Flex
-          width={1}
-          flexDirection={['column','row']}
-          justifyContent={'space-between'}
-        >
-          <Flex
-            mb={[3,0]}
-            width={[1,0.47]}
-            flexDirection={'column'}
-          >
-            <TrancheDetails
+        {
+          !this.props.trancheType ? (
+            <TrancheWelcome
               {...this.props}
-              selectedTranche={'AA'}
-              cdoConfig={this.props.tokenConfig.CDO}
-              trancheConfig={this.props.tokenConfig['AA']}
+              tokenConfig={this.props.tokenConfig}
+              selectTrancheType={this.props.selectTrancheType}
             />
-          </Flex>
-          <Flex
-            width={[1,0.47]}
-            flexDirection={'column'}
-          >
-            <TrancheDetails
-              {...this.props}
-              selectedTranche={'BB'}
-              cdoConfig={this.props.tokenConfig.CDO}
-              trancheConfig={this.props.tokenConfig['BB']}
-            />
-          </Flex>
-        </Flex>
+          ) : (
+            <Flex
+              width={1}
+              flexDirection={['column','row']}
+              justifyContent={this.props.trancheType ? 'center' : 'space-between'}
+            >
+              {
+                filteredTranchesTypes.map( trancheType => (
+                  <Flex
+                    mb={[3,0]}
+                    flexDirection={'column'}
+                    key={`tranche_${trancheType}`}
+                    width={[1,Math.min(0.5,(1/filteredTranchesTypes.length)-0.02)]}
+                  >
+                    <TrancheDetails
+                      {...this.props}
+                      selectedTranche={trancheType}
+                      cdoConfig={this.props.tokenConfig.CDO}
+                      trancheConfig={this.props.tokenConfig[trancheType]}
+                    />
+                  </Flex>
+                ))
+              }
+            </Flex>
+          )
+        }
         {
           this.props.account && this.state.transactions && this.state.transactions.length>0 && 
             <Flex

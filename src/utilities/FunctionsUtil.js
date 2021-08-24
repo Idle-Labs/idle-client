@@ -3311,6 +3311,10 @@ class FunctionsUtil {
       case 'tokenName':
         output = tokenName;
       break;
+      case 'trancheType':
+        output = (this.getGlobalConfig(['tranches',tranche,'baseName']) || '').toUpperCase();
+        // console.log('trancheType',tranche,trancheConfig,output);
+      break;
       case 'pool':
         let poolSize = await this.genericContractCallCached(tokenConfig.CDO.name,'getContractValue');
         if (!this.BNify(poolSize).isNaN()){
@@ -3321,16 +3325,16 @@ class FunctionsUtil {
         }
       break;
       case 'seniorPool':
-        output = await this.loadTrancheField(`tranchePool`,fieldProps,protocol,token,tranche,tokenConfig,tokenConfig.AA,account,addGovTokens);
+        output = await this.loadTrancheField('tranchePool',fieldProps,protocol,token,tranche,tokenConfig,tokenConfig.AA,account,addGovTokens);
       break;
       case 'juniorPool':
-        output = await this.loadTrancheField(`tranchePool`,fieldProps,protocol,token,tranche,tokenConfig,tokenConfig.BB,account,addGovTokens);
+        output = await this.loadTrancheField('tranchePool',fieldProps,protocol,token,tranche,tokenConfig,tokenConfig.BB,account,addGovTokens);
       break;
       case 'seniorApy':
-        output = await this.loadTrancheField(`trancheApy`,fieldProps,protocol,token,tranche,tokenConfig,tokenConfig.AA,account,addGovTokens);
+        output = await this.loadTrancheField('trancheApy',fieldProps,protocol,token,tranche,tokenConfig,tokenConfig.AA,account,addGovTokens);
       break;
       case 'juniorApy':
-        output = await this.loadTrancheField(`trancheApy`,fieldProps,protocol,token,tranche,tokenConfig,tokenConfig.BB,account,addGovTokens);
+        output = await this.loadTrancheField('trancheApy',fieldProps,protocol,token,tranche,tokenConfig,tokenConfig.BB,account,addGovTokens);
       break;
       case 'tranchePool':
         let [

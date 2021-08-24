@@ -69,11 +69,11 @@ class TrancheDetails extends Component {
     }
 
     const [
-      blockNumber,
+      // blockNumber,
       tokenBalance,
       trancheBalance,
-      cdoCoolingPeriod,
-      latestHarvestBlock,
+      // cdoCoolingPeriod,
+      // latestHarvestBlock,
       // stakeCoolingPeriod,
       // rewardsTokensInfo,
       // userStakeBlock,
@@ -81,11 +81,11 @@ class TrancheDetails extends Component {
       trancheAPY,
       tranchePrice
     ] = await Promise.all([
-      this.functionsUtil.getBlockNumber(),
+      // this.functionsUtil.getBlockNumber(),
       this.functionsUtil.getTokenBalance(this.props.selectedToken,this.props.account),
       this.functionsUtil.getTokenBalance(this.props.trancheConfig.name,this.props.account),
-      this.functionsUtil.genericContractCall(this.props.tokenConfig.CDO.name,'coolingPeriod'),
-      this.functionsUtil.genericContractCall(this.props.tokenConfig.CDO.name,'latestHarvestBlock'),
+      // this.functionsUtil.genericContractCall(this.props.tokenConfig.CDO.name,'coolingPeriod'),
+      // this.functionsUtil.genericContractCall(this.props.tokenConfig.CDO.name,'latestHarvestBlock'),
       // this.functionsUtil.genericContractCall(this.props.trancheConfig.CDORewards.name,'coolingPeriod'),
       // this.functionsUtil.getTrancheRewardTokensInfo(this.props.tokenConfig,this.props.trancheConfig),
       // this.functionsUtil.genericContractCall(this.props.trancheConfig.CDORewards.name,'usersStakeBlock',[this.props.account]),
@@ -261,7 +261,7 @@ class TrancheDetails extends Component {
             px:3,
             border:null,
             style:{
-              border:`2px solid ${trancheDetails.color.hex}`
+              border:`1px solid ${trancheDetails.color.hex}`
             }
           }}
           titleProps={{

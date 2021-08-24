@@ -1,9 +1,11 @@
 import Title from '../Title/Title';
 import React, { Component } from 'react';
+import FlexLoader from '../FlexLoader/FlexLoader';
 import TranchePage from '../TranchePage/TranchePage';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import TranchesList from '../TranchesList/TranchesList';
 import DashboardCard from '../DashboardCard/DashboardCard';
+import TrancheWelcome from '../TrancheWelcome/TrancheWelcome';
 import GenericPieChart from '../GenericPieChart/GenericPieChart';
 import GenericSelector from '../GenericSelector/GenericSelector';
 import TransactionsList from '../TransactionsList/TransactionsList';
@@ -18,9 +20,12 @@ class Tranches extends Component {
     portfolio:null,
     transactions:[],
     tokenConfig:null,
+    trancheType:null,
+    trancheRoute:null,
     selectedToken:null,
     userHasFunds:false,
     depositedTokens:[],
+    trancheDetails:null,
     portfolioLoaded:false,
     selectedProtocol:null,
     allocationChartData:null,
@@ -43,17 +48,37 @@ class Tranches extends Component {
   }
 
   async componentDidMount(){
-    this.loadPortfolio();
-    const selectedToken = this.props.urlParams.param2;
-    const selectedProtocol = this.props.urlParams.param1;
-    const tokenConfig = this.props.availableTranches[selectedProtocol] && this.props.availableTranches[selectedProtocol][selectedToken] ? this.props.availableTranches[selectedProtocol][selectedToken] : null;
-    if (tokenConfig){
-      this.setState({
-        tokenConfig,
-        selectedToken,
-        selectedProtocol,
-      });
-    }
+    this.loadPortfolio().then( () => {
+      const trancheRoute = this.props.urlParams.param1;
+      const tranchesDetails = this.functionsUtil.getGlobalConfig(['tranches']);
+      const trancheDetails = Object.values(tranchesDetails).find( t => t.route === trancheRoute );
+
+      if (trancheDetails !== undefined){
+        const trancheType = trancheDetails.type;
+        const selectedToken = this.props.urlParams.param3;
+        const selectedProtocol = this.props.urlParams.param2;
+        const tokenConfig = selectedProtocol ? (this.props.availableTranches[selectedProtocol] && this.props.availableTranches[selectedProtocol][selectedToken] ? this.props.availableTranches[selectedProtocol][selectedToken] : null) : null;
+        this.setState({
+          trancheType,
+          tokenConfig,
+          trancheRoute,
+          selectedToken,
+          trancheDetails,
+          selectedProtocol
+        });
+      } else {
+        const selectedToken = this.props.urlParams.param2;
+        const selectedProtocol = this.props.urlParams.param1;
+        const tokenConfig = this.props.availableTranches[selectedProtocol] && this.props.availableTranches[selectedProtocol][selectedToken] ? this.props.availableTranches[selectedProtocol][selectedToken] : null;
+        if (tokenConfig){
+          this.setState({
+            tokenConfig,
+            selectedToken,
+            selectedProtocol,
+          });
+        }
+      }
+    });
   }
 
   async componentDidUpdate(prevProps, prevState) {
@@ -147,11 +172,24 @@ class Tranches extends Component {
     }
   }
 
+  selectTrancheType(trancheRoute){
+    let route = `${this.props.selectedSection.route}/${trancheRoute}`;
+    const tokenConfig = this.props.availableTranches[this.state.selectedProtocol] && this.props.availableTranches[this.state.selectedProtocol][this.state.selectedToken] ? this.props.availableTranches[this.state.selectedProtocol][this.state.selectedToken] : null;
+    if (tokenConfig){
+      route += `/${this.state.selectedProtocol}/${this.state.selectedToken}`;
+    }
+    this.props.goToSection(route);
+  }
+
   selectTranche(protocol,token){
     const tokenConfig = this.props.availableTranches[protocol] && this.props.availableTranches[protocol][token] ? this.props.availableTranches[protocol][token] : null;
     if (tokenConfig){
-      const route = `${this.props.selectedSection.route}/${protocol}/${token}`;
-      // console.log('selectTranche',route);
+      let route = `${this.props.selectedSection.route}`;
+      if (this.state.trancheRoute){
+        route += `/${this.state.trancheRoute}`;
+      }
+      route += `/${protocol}/${token}`;
+
       this.props.goToSection(route);
     }
   }
@@ -163,20 +201,44 @@ class Tranches extends Component {
   }
 
   render() {
-
     return (
       <Box
         width={1}
       >
         {
-          this.state.tokenConfig ? (
+          !this.state.portfolioLoaded ? (
+            <FlexLoader
+              textProps={{
+                textSize:4,
+                fontWeight:2
+              }}
+              loaderProps={{
+                mb:3,
+                size:'40px'
+              }}
+              flexProps={{
+                my:3,
+                minHeight:'50vh',
+                flexDirection:'column'
+              }}
+              text={'Loading Portfolio...'}
+            />
+          ) : this.state.tokenConfig ? (
             <TranchePage
               {...this.props}
               portfolio={this.state.portfolio}
+              trancheType={this.state.trancheType}
               tokenConfig={this.state.tokenConfig}
               selectedToken={this.state.selectedToken}
+              trancheDetails={this.state.trancheDetails}
               selectedProtocol={this.state.selectedProtocol}
               availableTranches={this.props.availableTranches}
+              selectTrancheType={this.selectTrancheType.bind(this)}
+            />
+          ) : !this.state.trancheType && !this.state.userHasFunds ? (
+            <TrancheWelcome
+              {...this.props}
+              selectTrancheType={this.selectTrancheType.bind(this)}
             />
           ) : (
             <Box
@@ -185,10 +247,10 @@ class Tranches extends Component {
               <Title
                 mb={3}
               >
-                Tranches
+                {this.state.trancheDetails ? this.functionsUtil.capitalize(this.state.trancheDetails.baseName) : null} Tranches
               </Title>
               {
-                this.state.portfolioLoaded && this.functionsUtil.BNify(this.state.portfolio.totalBalance).gt(0) && (
+                this.state.portfolioLoaded && this.state.userHasFunds && (
                   <Flex
                     width={1}
                     flexDirection={'column'}
@@ -591,6 +653,7 @@ class Tranches extends Component {
                 </Flex>
                 <TranchesList
                   enabledProtocols={[]}
+                  trancheType={this.state.trancheType}
                   availableTranches={this.props.availableTranches}
                   handleClick={(props) => this.selectTranche(props.protocol,props.token)}
                   cols={[
@@ -631,13 +694,34 @@ class Tranches extends Component {
                       ]
                     },
                     {
-                      title:'POOL',
+                      title:'TYPE',
                       props:{
-                        width:[0.21, 0.12],
+                        width:[0.29,0.13],
                       },
                       fields:[
                         {
-                          name:'pool',
+                          name:'trancheTypeIcon',
+                          props:{
+                            flexProps:{
+                              mr:2
+                            },
+                            size:'1.4em'
+                          }
+                        },
+                        {
+                          name:'trancheType'
+                        }
+                      ],
+                      visible:!!this.state.trancheType
+                    },
+                    {
+                      title:'POOL',
+                      props:{
+                        width:[0.21, 0.14],
+                      },
+                      fields:[
+                        {
+                          name:this.state.trancheType ? `${this.state.trancheDetails.baseName}Pool` : 'pool',
                           props:{
                             decimals:2
                           }
@@ -645,9 +729,9 @@ class Tranches extends Component {
                       ]
                     },
                     {
-                      title:'SENIOR APY',
+                      title:this.state.trancheType ? 'APY' : 'SENIOR APY',
                       props:{
-                        width:[0.29,0.15],
+                        width:[0.29,this.state.trancheType ? 0.12 : 0.15],
                       },
                       parentProps:{
                         flexDirection:'column',
@@ -658,12 +742,13 @@ class Tranches extends Component {
                           name:'seniorApy',
                           showTooltip:true
                         },
-                      ]
+                      ],
+                      visible:!this.state.trancheType || this.state.trancheType === 'BB'
                     },
                     {
-                      title:'JUNIOR APY',
+                      title:this.state.trancheType ? 'APY' : 'JUNIOR APY',
                       props:{
-                        width:[0.29,0.15],
+                        width:[0.29,this.state.trancheType ? 0.12 : 0.15],
                       },
                       parentProps:{
                         flexDirection:'column',
@@ -674,13 +759,14 @@ class Tranches extends Component {
                           name:'juniorApy',
                           showTooltip:true
                         },
-                      ]
+                      ],
+                      visible:!this.state.trancheType || this.state.trancheType === 'AA'
                     },
                     {
                       mobile:false,
                       title:'GOVERNANCE TOKENS',
                       props:{
-                        width:[0.25,0.15],
+                        width:[0.25,this.state.trancheType ? 0.18 : 0.15],
                       },
                       fields:[
                         {

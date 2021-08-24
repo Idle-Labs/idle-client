@@ -7,7 +7,7 @@ import CustomField from '../CustomField/CustomField';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 // import GenericChart from '../GenericChart/GenericChart';
 // import CustomTooltip from '../CustomTooltip/CustomTooltip';
-import { Image, Text, Loader, Button, Flex } from "rimble-ui";
+import { Image, Text, Loader, Button, Flex, Icon } from "rimble-ui";
 // import VariationNumber from '../VariationNumber/VariationNumber';
 // import AllocationChart from '../AllocationChart/AllocationChart';
 // import CustomTooltipRow from '../CustomTooltip/CustomTooltipRow';
@@ -63,12 +63,14 @@ class TrancheField extends Component {
     const transactionsChanged = prevProps.transactions && this.props.transactions && Object.values(prevProps.transactions).filter(tx => (tx.status==='success')).length !== Object.values(this.props.transactions).filter(tx => (tx.status==='success')).length;
 
     if (fieldChanged || tokenChanged || protocolChanged || trancheChanged || accountChanged || transactionsChanged || (contractInitialized && !this.state.ready)){
+      // console.log('componentDidUpdate-1',fieldChanged,tokenChanged,protocolChanged,trancheChanged,accountChanged,transactionsChanged,(contractInitialized && !this.state.ready));
       this.setStateSafe({
         ready:false
       },() => {
         this.loadField();
       });
     } else if (mobileChanged || themeModeChanged){
+      // console.log('componentDidUpdate-2',mobileChanged,themeModeChanged);
       const oldState = Object.assign({},this.state);
       this.setStateSafe({
         ready:false
@@ -79,7 +81,6 @@ class TrancheField extends Component {
   }
 
   loadField = async(fieldName=null) => {
-    // console.log('TrancheField - loadField',fieldName,this.componentUnmounted,this.props.protocol,this.props.token,this.props.tokenConfig);
 
     if (this.componentUnmounted || !this.props.protocol || !this.props.token || !this.props.tokenConfig){
       return false;
@@ -90,6 +91,8 @@ class TrancheField extends Component {
     if (!fieldName){
       fieldName = fieldInfo.name;
     }
+
+    // console.log('TrancheField - loadField',fieldName,this.componentUnmounted,this.props.protocol,this.props.token,this.props.tokenConfig);
 
     const fieldProps = fieldInfo.props;
     // const decimals = fieldProps && fieldProps.decimals ? fieldProps.decimals : ( this.props.isMobile ? 2 : 3 );
@@ -151,10 +154,34 @@ class TrancheField extends Component {
     const decimals = fieldProps && fieldProps.decimals ? fieldProps.decimals : ( this.props.isMobile ? 2 : 3 );
     // const minPrecision = fieldProps && fieldProps.minPrecision ? fieldProps.minPrecision : ( this.props.isMobile ? 3 : 4 );
 
+    // console.log('TrancheField',fieldInfo.name,fieldProps);
+    const flexProps = fieldProps.flexProps;
+    delete fieldProps.flexProps;
+
     switch (fieldInfo.name){
       case 'protocolIcon':
         output = (
           <Image src={`images/protocols/${this.props.protocol}.svg`} {...fieldProps} />
+        );
+      break;
+      case 'trancheTypeIcon':
+        const trancheDetails = this.functionsUtil.getGlobalConfig(['tranches',this.props.tranche]);
+        output = (
+          <Flex
+            p={'6px'}
+            borderRadius={'50%'}
+            alignItems={'center'}
+            justifyContent={'center'}
+            backgroundColor={`rgba(${trancheDetails.color.rgb.join(',')},0.2)`}
+            {...flexProps}
+          >
+            <Icon
+              {...fieldProps}
+              align={'center'}
+              name={trancheDetails.icon}
+              color={trancheDetails.color.hex}
+            />
+          </Flex>
         );
       break;
       case 'tokenIcon':

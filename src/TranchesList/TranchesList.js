@@ -49,10 +49,12 @@ class TranchesList extends Component {
               if (!protocolConfig){
                 return null;
               }
+              const tranche = this.props.trancheType || null;
               return Object.keys(protocolConfig).map( token => (
                 <TableRow
                   {...this.props}
                   token={token}
+                  tranche={tranche}
                   protocol={protocol}
                   key={`tranche-${protocol}`}
                   rowId={`tranche-col-${protocol}`}

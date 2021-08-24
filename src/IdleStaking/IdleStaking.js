@@ -341,11 +341,11 @@ class IdleStaking extends Component {
       value:claimableRewardsFormatted
     });
 
-    const totalClaimed = claimEvents.reduce( (totalClaimed,event) => {
-      const claimedAmount = this.functionsUtil.fixTokenDecimals(event.returnValues.amount,rewardTokenConfig.decimals);
-      totalClaimed = totalClaimed.plus(claimedAmount);
-      return totalClaimed;
-    },this.functionsUtil.BNify(0));
+    // const totalClaimed = claimEvents.reduce( (totalClaimed,event) => {
+    //   const claimedAmount = this.functionsUtil.fixTokenDecimals(event.returnValues.amount,rewardTokenConfig.decimals);
+    //   totalClaimed = totalClaimed.plus(claimedAmount);
+    //   return totalClaimed;
+    // },this.functionsUtil.BNify(0));
 
     const totalRewardsFormatted = this.functionsUtil.formatMoney(totalRewards,4)+' '+this.props.contractInfo.rewardToken;
     stats.push({
