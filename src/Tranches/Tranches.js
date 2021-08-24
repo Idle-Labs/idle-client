@@ -743,7 +743,7 @@ class Tranches extends Component {
                           showTooltip:true
                         },
                       ],
-                      visible:!this.state.trancheType || this.state.trancheType === 'BB'
+                      visible:!this.state.trancheType || this.state.trancheType === 'AA'
                     },
                     {
                       title:this.state.trancheType ? 'APY' : 'JUNIOR APY',
@@ -760,7 +760,7 @@ class Tranches extends Component {
                           showTooltip:true
                         },
                       ],
-                      visible:!this.state.trancheType || this.state.trancheType === 'AA'
+                      visible:!this.state.trancheType || this.state.trancheType === 'BB'
                     },
                     {
                       mobile:false,
