@@ -260,9 +260,9 @@ class TrancheDetails extends Component {
             py:3,
             px:3,
             border:null,
-            style:{
-              border:`1px solid ${trancheDetails.color.hex}`
-            }
+            // style:{
+            //   border:`1px solid ${trancheDetails.color.hex}`
+            // }
           }}
         >
           <Flex

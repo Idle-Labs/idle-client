@@ -1,7 +1,6 @@
 import Title from '../Title/Title';
 import { Box, Flex } from "rimble-ui";
 import React, { Component } from 'react';
-import Breadcrumb from '../Breadcrumb/Breadcrumb';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import TrancheWelcome from '../TrancheWelcome/TrancheWelcome';
 import TrancheDetails from '../TrancheDetails/TrancheDetails';
@@ -51,40 +50,11 @@ class TranchePage extends Component {
   render() {
     const tranchesDetails = this.functionsUtil.getGlobalConfig(['tranches']);
     const filteredTranchesTypes = Object.keys(tranchesDetails).filter( trancheType => !this.props.trancheType || this.props.trancheType === trancheType );
-    const breadcrumbPath = [this.functionsUtil.capitalize(this.props.selectedProtocol),this.props.selectedToken];
-    if (this.props.trancheType){
-      breadcrumbPath.push(this.functionsUtil.capitalize(this.props.trancheDetails.baseName));
-    }
     return (
       <Box
         mb={4}
         width={1}
       >
-        <Flex
-          width={1}
-          mb={[2,0]}
-          alignItems={'center'}
-          flexDirection={'row'}
-          justifyContent={'flex-start'}
-        >
-          <Flex
-            width={0.5}
-          >
-            <Breadcrumb
-              {...this.props}
-              text={'Tranches'}
-              path={breadcrumbPath}
-              isMobile={this.props.isMobile}
-              handleClick={ e => this.props.goToSection(this.props.selectedSection.route) }
-            />
-          </Flex>
-          <Flex
-            width={0.5}
-            justifyContent={'flex-end'}
-          >
-            
-          </Flex>
-        </Flex>
         <Title
           mb={3}
         >

@@ -1,5 +1,6 @@
 import Title from '../Title/Title';
 import React, { Component } from 'react';
+import Breadcrumb from '../Breadcrumb/Breadcrumb';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import TranchePage from '../TranchePage/TranchePage';
 import FunctionsUtil from '../utilities/FunctionsUtil';
@@ -26,6 +27,7 @@ class Tranches extends Component {
     userHasFunds:false,
     depositedTokens:[],
     trancheDetails:null,
+    useTrancheType:false,
     portfolioLoaded:false,
     selectedProtocol:null,
     allocationChartData:null,
@@ -55,15 +57,22 @@ class Tranches extends Component {
 
       if (trancheDetails !== undefined){
         const trancheType = trancheDetails.type;
+        const useTrancheType = !this.state.userHasFunds;
         const selectedToken = this.props.urlParams.param3;
         const selectedProtocol = this.props.urlParams.param2;
         const tokenConfig = selectedProtocol ? (this.props.availableTranches[selectedProtocol] && this.props.availableTranches[selectedProtocol][selectedToken] ? this.props.availableTranches[selectedProtocol][selectedToken] : null) : null;
+
+        if (this.state.userHasFunds && !tokenConfig){
+          return this.props.goToSection(this.props.selectedSection.route);
+        }
+
         this.setState({
           trancheType,
           tokenConfig,
           trancheRoute,
           selectedToken,
           trancheDetails,
+          useTrancheType,
           selectedProtocol
         });
       } else {
@@ -206,11 +215,62 @@ class Tranches extends Component {
     });
   }
 
+  goBack(){
+    if (this.state.tokenConfig && !this.state.userHasFunds){
+      this.props.goToSection(this.props.selectedSection.route+'/'+this.state.trancheDetails.route);
+    }/* else if (this.state.trancheType){
+      this.props.goToSection(this.props.selectedSection.route);
+    } */else {
+      this.props.goToSection(this.props.selectedSection.route);
+    }
+  }
+
   render() {
+
+    const breadcrumbPath = [];
+    if (this.state.trancheType){
+      breadcrumbPath.push(this.functionsUtil.capitalize(this.state.trancheDetails.baseName));
+    }
+    if (this.state.selectedProtocol){
+      breadcrumbPath.push(this.functionsUtil.getGlobalConfig(['stats','protocols',this.state.selectedProtocol,'label']));
+    }
+    if (this.state.selectedToken){
+      breadcrumbPath.push(this.state.selectedToken);
+    }
+
     return (
       <Box
         width={1}
       >
+        {
+          breadcrumbPath.length>0 && (
+            <Flex
+              width={1}
+              mb={[2,0]}
+              alignItems={'center'}
+              flexDirection={'row'}
+              justifyContent={'flex-start'}
+            >
+              <Flex
+                width={0.5}
+              >
+                <Breadcrumb
+                  {...this.props}
+                  text={'Tranches'}
+                  path={breadcrumbPath}
+                  isMobile={this.props.isMobile}
+                  handleClick={this.goBack.bind(this)}
+                />
+              </Flex>
+              <Flex
+                width={0.5}
+                justifyContent={'flex-end'}
+              >
+                
+              </Flex>
+            </Flex>
+          )
+        }
         {
           !this.state.portfolioLoaded ? (
             <FlexLoader
@@ -253,7 +313,7 @@ class Tranches extends Component {
               <Title
                 mb={3}
               >
-                {this.state.trancheDetails ? this.functionsUtil.capitalize(this.state.trancheDetails.baseName) : null} Tranches
+                {this.state.useTrancheType ? this.functionsUtil.capitalize(this.state.trancheDetails.baseName) : null} Tranches
               </Title>
               {
                 this.state.portfolioLoaded && this.state.userHasFunds && (
@@ -718,7 +778,7 @@ class Tranches extends Component {
                           name:'trancheType'
                         }
                       ],
-                      visible:!!this.state.trancheType
+                      visible:!!this.state.useTrancheType
                     },
                     {
                       title:'POOL',
@@ -727,7 +787,7 @@ class Tranches extends Component {
                       },
                       fields:[
                         {
-                          name:this.state.trancheType ? `${this.state.trancheDetails.baseName}Pool` : 'pool',
+                          name:this.state.useTrancheType ? `${this.state.trancheDetails.baseName}Pool` : 'pool',
                           props:{
                             decimals:2
                           }
@@ -735,9 +795,9 @@ class Tranches extends Component {
                       ]
                     },
                     {
-                      title:this.state.trancheType ? 'APY' : 'SENIOR APY',
+                      title:this.state.useTrancheType ? 'APY' : 'SENIOR APY',
                       props:{
-                        width:[0.29,this.state.trancheType ? 0.12 : 0.15],
+                        width:[0.29,this.state.useTrancheType ? 0.12 : 0.15],
                       },
                       parentProps:{
                         flexDirection:'column',
@@ -749,12 +809,12 @@ class Tranches extends Component {
                           showTooltip:true
                         },
                       ],
-                      visible:!this.state.trancheType || this.state.trancheType === 'AA'
+                      visible:!this.state.useTrancheType || this.state.useTrancheType === 'AA'
                     },
                     {
-                      title:this.state.trancheType ? 'APY' : 'JUNIOR APY',
+                      title:this.state.useTrancheType ? 'APY' : 'JUNIOR APY',
                       props:{
-                        width:[0.29,this.state.trancheType ? 0.12 : 0.15],
+                        width:[0.29,this.state.useTrancheType ? 0.12 : 0.15],
                       },
                       parentProps:{
                         flexDirection:'column',
@@ -766,13 +826,13 @@ class Tranches extends Component {
                           showTooltip:true
                         },
                       ],
-                      visible:!this.state.trancheType || this.state.trancheType === 'BB'
+                      visible:!this.state.useTrancheType || this.state.useTrancheType === 'BB'
                     },
                     {
                       mobile:false,
                       title:'GOVERNANCE TOKENS',
                       props:{
-                        width:[0.25,this.state.trancheType ? 0.18 : 0.15],
+                        width:[0.25,this.state.useTrancheType ? 0.18 : 0.15],
                       },
                       fields:[
                         {
