@@ -97,6 +97,12 @@ class Tranches extends Component {
 
   async loadPortfolio(){
     if (!this.props.account){
+      const userHasFunds = false;
+      const portfolioLoaded = true;
+      this.setState({
+        userHasFunds,
+        portfolioLoaded
+      });
       return false;
     }
 
@@ -218,7 +224,7 @@ class Tranches extends Component {
               }}
               flexProps={{
                 my:3,
-                minHeight:'50vh',
+                minHeight:'60vh',
                 flexDirection:'column'
               }}
               text={'Loading Portfolio...'}
