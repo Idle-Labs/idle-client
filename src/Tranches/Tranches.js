@@ -216,8 +216,12 @@ class Tranches extends Component {
   }
 
   goBack(){
-    if (this.state.tokenConfig && !this.state.userHasFunds){
-      this.props.goToSection(this.props.selectedSection.route+'/'+this.state.trancheDetails.route);
+    if (this.state.tokenConfig && this.state.trancheType){
+      if (!this.state.userHasFunds){
+        this.props.goToSection(this.props.selectedSection.route+'/'+this.state.trancheDetails.route);
+      } else {
+        this.props.goToSection(this.props.selectedSection.route+'/'+this.state.selectedProtocol+'/'+this.state.selectedToken);
+      }
     }/* else if (this.state.trancheType){
       this.props.goToSection(this.props.selectedSection.route);
     } */else {
@@ -227,9 +231,17 @@ class Tranches extends Component {
 
   render() {
 
+    const pathLink = [];
     const breadcrumbPath = [];
     if (this.state.trancheType){
       breadcrumbPath.push(this.functionsUtil.capitalize(this.state.trancheDetails.baseName));
+      if (this.state.tokenConfig){
+        if (!this.state.userHasFunds){
+          pathLink.push(this.props.selectedSection.route+'/'+this.state.trancheDetails.route);
+        } else if (this.state.tokenConfig){
+          pathLink.push(this.props.selectedSection.route+'/'+this.state.selectedProtocol+'/'+this.state.selectedToken);
+        }
+      }
     }
     if (this.state.selectedProtocol){
       breadcrumbPath.push(this.functionsUtil.getGlobalConfig(['stats','protocols',this.state.selectedProtocol,'label']));
@@ -257,6 +269,7 @@ class Tranches extends Component {
                 <Breadcrumb
                   {...this.props}
                   text={'Tranches'}
+                  pathLink={pathLink}
                   path={breadcrumbPath}
                   isMobile={this.props.isMobile}
                   handleClick={this.goBack.bind(this)}
@@ -778,7 +791,7 @@ class Tranches extends Component {
                           name:'trancheType'
                         }
                       ],
-                      visible:!!this.state.useTrancheType
+                      visible:this.state.useTrancheType
                     },
                     {
                       title:'POOL',
@@ -809,7 +822,7 @@ class Tranches extends Component {
                           showTooltip:true
                         },
                       ],
-                      visible:!this.state.useTrancheType || this.state.useTrancheType === 'AA'
+                      visible:!this.state.useTrancheType || this.state.trancheType === 'AA'
                     },
                     {
                       title:this.state.useTrancheType ? 'APY' : 'JUNIOR APY',
@@ -826,7 +839,7 @@ class Tranches extends Component {
                           showTooltip:true
                         },
                       ],
-                      visible:!this.state.useTrancheType || this.state.useTrancheType === 'BB'
+                      visible:!this.state.useTrancheType || this.state.trancheType === 'BB'
                     },
                     {
                       mobile:false,
