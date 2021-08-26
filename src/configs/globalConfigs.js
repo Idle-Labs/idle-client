@@ -1418,7 +1418,7 @@ const globalConfigs = {
         baseToken:'MATIC',
         explorer:'polygon',
         provider:'polygon',
-        chainName:'Matic Mainnet',
+        chainName:'Matic(Polygon) Mainnet',
       },
       5:{
         name:'Görli',
