@@ -4675,7 +4675,7 @@ class FunctionsUtil {
     }
   }
   apr2apy = (apr) => {
-    return (this.BNify(1).plus(this.BNify(apr).div(12))).pow(12).minus(1);
+    return (this.BNify(1).plus(this.BNify(apr).div(365))).pow(365).minus(1);
   }
   getUnlentBalance = async (tokenConfig) => {
     let unlentBalance = await this.getProtocolBalance(tokenConfig.token,tokenConfig.idle.address);
@@ -6855,14 +6855,12 @@ class FunctionsUtil {
 
     if (tokenAllocation){
       tokenAprs.avgApr = this.getAvgApr(protocolsAprs,tokenAllocation.protocolsAllocations,tokenAllocation.totalAllocation);
-      tokenAprs.avgApy = this.getAvgApr(protocolsApys,tokenAllocation.protocolsAllocations,tokenAllocation.totalAllocation);
+      tokenAprs.avgApy = this.apr2apy(tokenAprs.avgApr.div(100)).times(100);
 
       Object.values(govTokensAprs).forEach( govTokenAPR => {
         tokenAprs.avgApr = tokenAprs.avgApr.plus(govTokenAPR);
         tokenAprs.avgApy = tokenAprs.avgApy.plus(govTokenAPR);
       });
-
-      // console.log('getTokenAprs',tokenConfig.idle.token,tokenConfig,aprs,protocolsAprs,tokenAllocation,tokenAprs,govTokensAprs);
 
       // Add $IDLE token APR
       const idleGovTokenShowAPR = this.getGlobalConfig(['govTokens','IDLE','showAPR']);
