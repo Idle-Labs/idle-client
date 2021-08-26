@@ -1,7 +1,6 @@
-import Title from '../Title/Title';
 import React, { Component } from 'react';
+import { Box, Flex, Text } from 'rimble-ui'
 import Faquestion from '../Faquestion/Faquestion';
-import { Box, Flex, Text, Heading } from 'rimble-ui'
 
 class GenericFaqs extends Component {
   state = {
