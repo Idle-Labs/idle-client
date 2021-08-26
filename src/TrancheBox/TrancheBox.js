@@ -131,30 +131,36 @@ class Base extends Component {
           >
             {trancheDetails.description.long}
           </Text>
-          {
-            trancheDetails.features.map( (feature,index) => (
-              <Flex
-                mb={2}
-                width={1}
-                alignItems={'center'}
-                flexDirection={'row'}
-                key={`feature_${index}`}
-              >
-                <Icon
-                  mr={2}
-                  name={'Done'}
-                  color={trancheDetails.color.hex}
-                />
-                <Text
-                  fontSize={3}
-                  fontWeight={3}
-                  color={trancheDetails.color.hex}
+          <Flex
+            width={1}
+            my={3}
+            flexDirection={'column'}
+          >
+            {
+              trancheDetails.features.map( (feature,index) => (
+                <Flex
+                  mb={2}
+                  width={1}
+                  alignItems={'center'}
+                  flexDirection={'row'}
+                  key={`feature_${index}`}
                 >
-                  {feature}
-                </Text>
-              </Flex>
-            ))
-          }
+                  <Icon
+                    mr={2}
+                    name={'Done'}
+                    color={trancheDetails.color.hex}
+                  />
+                  <Text
+                    fontSize={3}
+                    fontWeight={3}
+                    color={trancheDetails.color.hex}
+                  >
+                    {feature}
+                  </Text>
+                </Flex>
+              ))
+            }
+          </Flex>
           <Button
             mt={3}
             width={1}

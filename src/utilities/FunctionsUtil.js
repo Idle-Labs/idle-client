@@ -3448,7 +3448,7 @@ class FunctionsUtil {
           this.genericContractCall(tokenConfig.CDO.name,'getIncentiveTokens')
         ]);
 
-        const govTokens = field === 'govTokens' ? rewardsTokens : (field === 'autoFarming' ? rewardsTokens.filter( rewardTokenAddr => !incentiveTokens.map( addr => addr.toLowerCase() ).includes(rewardTokenAddr.toLowerCase()) ) : incentiveTokens);
+        const govTokens = field === 'govTokens' ? rewardsTokens : (field === 'autoFarming' && rewardsTokens ? rewardsTokens.filter( rewardTokenAddr => !incentiveTokens.map( addr => addr.toLowerCase() ).includes(rewardTokenAddr.toLowerCase()) ) : incentiveTokens);
 
         // console.log(field,tokenConfig,rewardsTokens,incentiveTokens,govTokens);
 

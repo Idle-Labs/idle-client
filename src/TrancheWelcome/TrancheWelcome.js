@@ -41,6 +41,15 @@ class Base extends Component {
             </Title>
           )
         }
+        <Title
+          mb={3}
+          fontWeight={2}
+          fontSize={[3,4]}
+          color={'copyColor'}
+          textAlign={'center'}
+        >
+          Select your preferred Tranche
+        </Title>
         <Flex
           width={1}
           flexDirection={['column','row']}

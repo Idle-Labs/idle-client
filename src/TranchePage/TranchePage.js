@@ -1,6 +1,7 @@
 import Title from '../Title/Title';
 import { Box, Flex } from "rimble-ui";
 import React, { Component } from 'react';
+import GenericFaqs from '../GenericFaqs/GenericFaqs';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import TrancheWelcome from '../TrancheWelcome/TrancheWelcome';
 import TrancheDetails from '../TrancheDetails/TrancheDetails';
@@ -69,6 +70,7 @@ class TranchePage extends Component {
             />
           ) : (
             <Flex
+              mt={2}
               width={1}
               flexDirection={['column','row']}
               justifyContent={this.props.trancheType ? 'center' : 'space-between'}
@@ -85,11 +87,56 @@ class TranchePage extends Component {
                       {...this.props}
                       selectedTranche={trancheType}
                       cdoConfig={this.props.tokenConfig.CDO}
+                      selectTrancheType={this.props.selectTrancheType}
                       trancheConfig={this.props.tokenConfig[trancheType]}
                     />
                   </Flex>
                 ))
               }
+            </Flex>
+          )
+        }
+        {
+          this.props.trancheType && (
+            <Flex
+              width={1}
+              id={'faqs'}
+              alignItems={'center'}
+              flexDirection={'column'}
+              justifyContent={'center'}
+            >
+              <Title
+                mb={3}
+                mt={[3,4]}
+              >
+                Frequently asked questions
+              </Title>
+              <Flex
+                width={[1,0.5]}
+                alignItems={'center'}
+                flexDirection={'column'}
+                justifyContent={'center'}
+              >
+                <GenericFaqs
+                  showSections={false}
+                  questions={{
+                    '':[
+                      {
+                        q: 'Lorem ipsum dolor sit amet',
+                        a: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.`
+                      },
+                      {
+                        q: 'Lorem ipsum dolor sit amet',
+                        a: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.`
+                      },
+                      {
+                        q: 'Lorem ipsum dolor sit amet',
+                        a: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.`
+                      }
+                    ]
+                  }}
+                />
+              </Flex>
             </Flex>
           )
         }

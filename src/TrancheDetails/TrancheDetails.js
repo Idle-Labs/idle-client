@@ -1,8 +1,8 @@
 import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
-import { Flex, Text, Icon } from "rimble-ui";
 import FlexLoader from '../FlexLoader/FlexLoader';
 import ConnectBox from '../ConnectBox/ConnectBox';
+import { Flex, Text, Icon, Button } from "rimble-ui";
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import BuyModal from '../utilities/components/BuyModal';
 import TrancheField from '../TrancheField/TrancheField';
@@ -248,6 +248,8 @@ class TrancheDetails extends Component {
 
   render() {
     const trancheDetails = this.functionsUtil.getGlobalConfig(['tranches',this.props.selectedTranche]);
+    const otherTrancheType = this.props.selectedTranche === 'AA' ? 'BB' : 'AA';
+    const otherTrancheDetails = this.functionsUtil.getGlobalConfig(['tranches',otherTrancheType]);
     return (
       <Flex
         width={1}
@@ -255,6 +257,23 @@ class TrancheDetails extends Component {
         flexDirection={'column'}
         justifyContent={'center'}
       >
+        <Flex
+          width={1}
+          alignItems={'center'}
+          justifyContent={'flex-end'}
+        >
+          <Button
+            mb={2}
+            size={'small'}
+            width={'auto'}
+            contrastColor={'cardBg'}
+            icon={otherTrancheDetails.icon}
+            mainColor={otherTrancheDetails.color.hex}
+            onClick={e => this.props.selectTrancheType(otherTrancheDetails.route)}
+          >
+            Switch to {otherTrancheDetails.name}
+          </Button>
+        </Flex>
         <DashboardCard
           cardProps={{
             py:3,
