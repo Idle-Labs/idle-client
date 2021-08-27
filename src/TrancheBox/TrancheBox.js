@@ -44,8 +44,8 @@ class Base extends Component {
           pb={2}
           mb={3}
           width={1}
-          alignItems={'center'}
           flexDirection={'row'}
+          alignItems={'baseline'}
           justifyContent={'space-between'}
           borderBottom={`1px solid ${this.props.theme.colors.divider}`}
         >
@@ -62,6 +62,7 @@ class Base extends Component {
             <Text
               fontWeight={4}
               fontSize={[3,6]}
+              lineHeight={'1'}
               color={trancheDetails.color.hex}
             >
               {trancheDetails.name}
@@ -79,6 +80,7 @@ class Base extends Component {
                   decimals:2,
                   fontWeight:4,
                   fontSize:[3,6],
+                  lineHeight:'1',
                   textAlign:'center',
                   flexProps:{
                     justifyContent:'center'
@@ -92,6 +94,13 @@ class Base extends Component {
               tranche={strategyInfo.tranche}
               protocol={strategyInfo.protocol}
             />
+            <Text
+              fontSize={0}
+              color={'cellText'}
+              textAlign={'right'}
+            >
+              Current APY (variable)
+            </Text>
             {
               /*
               <TrancheField
@@ -139,6 +148,7 @@ class Base extends Component {
             {
               trancheDetails.features.map( (feature,index) => (
                 <Flex
+                  mt={1}
                   mb={2}
                   width={1}
                   alignItems={'center'}

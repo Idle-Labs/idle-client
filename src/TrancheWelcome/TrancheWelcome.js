@@ -1,6 +1,6 @@
 import Title from '../Title/Title';
-import { Box, Flex } from "rimble-ui";
 import React, { Component } from 'react';
+import { Box, Flex, Text } from "rimble-ui";
 import TrancheBox from '../TrancheBox/TrancheBox';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 
@@ -34,11 +34,36 @@ class Base extends Component {
       >
         {
           !this.props.tokenConfig && (
-            <Title
-              mb={3}
+            <Flex
+              width={1}
+              flexDirection={'column'}
             >
-              Welcome to Tranches
-            </Title>
+              <Title
+                mb={3}
+              >
+                Perpetual Tranches
+              </Title>
+              <Flex
+                mb={3}
+                mx={'auto'}
+                width={[1,0.8]}
+                aligItems={'center'}
+                justifyContent={'center'}
+              >
+                <Text
+                  fontWeight={2}
+                  fontSize={[1,2]}
+                  textAlign={'center'}
+                >
+                  {
+                    this.props.isMobile ?
+                      this.functionsUtil.getGlobalConfig(['strategies','tranches','descShort'])
+                    :
+                      this.functionsUtil.getGlobalConfig(['strategies','tranches','descLong'])
+                  }
+                </Text>
+              </Flex>
+            </Flex>
           )
         }
         <Title
@@ -61,7 +86,7 @@ class Base extends Component {
                 mb={[3,0]}
                 flexDirection={'column'}
                 key={`tranche_${trancheType}`}
-                width={[1,(1/Object.keys(tranchesDetails).length)-0.02]}
+                width={[1,(1/Object.keys(tranchesDetails).length)-0.04]}
               >
                 <Flex
                   width={1}

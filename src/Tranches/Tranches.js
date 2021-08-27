@@ -323,11 +323,51 @@ class Tranches extends Component {
             <Box
               width={1}
             >
-              <Title
-                mb={3}
-              >
-                {this.state.useTrancheType ? this.functionsUtil.capitalize(this.state.trancheDetails.baseName) : null} Tranches
-              </Title>
+              {this.state.useTrancheType ? (
+                <Box
+                  width={1}
+                >
+                  <Flex
+                    mb={3}
+                    width={1}
+                    alignItems={'center'}
+                    flexDirection={'row'}
+                    justifyContent={'center'}
+                  >
+                    <Icon
+                      mr={2}
+                      name={this.state.trancheDetails.icon}
+                      color={this.state.trancheDetails.color.hex}
+                      size={this.props.isMobile ? '1.8em' : '2.2em'}
+                    />
+                    <Title
+                    >
+                      {this.functionsUtil.capitalize(this.state.trancheDetails.baseName)} Tranches
+                    </Title>
+                  </Flex>
+                  <Flex
+                    mb={3}
+                    mx={'auto'}
+                    width={[1,0.8]}
+                    aligItems={'center'}
+                    justifyContent={'center'}
+                  >
+                    <Text
+                      fontWeight={2}
+                      fontSize={[1,2]}
+                      textAlign={'center'}
+                    >
+                      {this.functionsUtil.getGlobalConfig(['tranches',this.state.trancheType,'description','long'])}
+                    </Text>
+                  </Flex>
+                </Box>
+              ) : (
+                <Title
+                  mb={3}
+                >
+                  Tranches
+                </Title>
+              )}
               {
                 this.state.portfolioLoaded && this.state.userHasFunds && (
                   <Flex
@@ -739,7 +779,7 @@ class Tranches extends Component {
                     {
                       title:'PROTOCOL',
                       props:{
-                        width:[0.27,0.15]
+                        width:[0.25,0.15]
                       },
                       fields:[
                         {
@@ -772,6 +812,7 @@ class Tranches extends Component {
                         }
                       ]
                     },
+                    /*
                     {
                       title:'TYPE',
                       props:{
@@ -793,6 +834,7 @@ class Tranches extends Component {
                       ],
                       visible:this.state.useTrancheType
                     },
+                    */
                     {
                       title:'POOL',
                       props:{
@@ -809,8 +851,9 @@ class Tranches extends Component {
                     },
                     {
                       title:this.state.useTrancheType ? 'APY' : 'SENIOR APY',
+                      visible:!this.state.useTrancheType || this.state.trancheType === 'AA',
                       props:{
-                        width:[0.29,this.state.useTrancheType ? 0.12 : 0.15],
+                        width:[this.state.useTrancheType ? 0.16 : 0.29,this.state.useTrancheType ? 0.12 : 0.15],
                       },
                       parentProps:{
                         flexDirection:'column',
@@ -822,12 +865,12 @@ class Tranches extends Component {
                           showTooltip:true
                         },
                       ],
-                      visible:!this.state.useTrancheType || this.state.trancheType === 'AA'
                     },
                     {
                       title:this.state.useTrancheType ? 'APY' : 'JUNIOR APY',
+                      visible:!this.state.useTrancheType || this.state.trancheType === 'BB',
                       props:{
-                        width:[0.29,this.state.useTrancheType ? 0.12 : 0.15],
+                        width:[this.state.useTrancheType ? 0.16 : 0.29,this.state.useTrancheType ? 0.12 : 0.15],
                       },
                       parentProps:{
                         flexDirection:'column',
@@ -839,13 +882,36 @@ class Tranches extends Component {
                           showTooltip:true
                         },
                       ],
-                      visible:!this.state.useTrancheType || this.state.trancheType === 'BB'
                     },
                     {
                       mobile:false,
-                      title:'GOVERNANCE TOKENS',
+                      title:'AUTO-FARMING',
                       props:{
                         width:[0.25,this.state.useTrancheType ? 0.18 : 0.15],
+                      },
+                      fields:[
+                        {
+                          name:'autoFarming'
+                        }
+                      ]
+                    },
+                    {
+                      mobile:false,
+                      title:'STAKING REWARDS',
+                      props:{
+                        width:[0.25,this.state.useTrancheType ? 0.18 : 0.13],
+                      },
+                      fields:[
+                        {
+                          name:'stakingRewards'
+                        }
+                      ]
+                    },
+                    {
+                      mobile:true,
+                      title:'TOKENS',
+                      props:{
+                        width:[0.17],
                       },
                       fields:[
                         {

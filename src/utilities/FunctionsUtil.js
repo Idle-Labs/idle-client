@@ -3414,6 +3414,7 @@ class FunctionsUtil {
         // console.log('trancheApy',tokenConfig,trancheConfig,output);
         if (trancheApy){
           output = this.fixTokenDecimals(trancheApy,tokenConfig.CDO.decimals);
+          output = this.apr2apy(output.div(100)).times(100);
           if (formatValue){
             output = output.toFixed(2)+'%';
           }

@@ -26,7 +26,7 @@ class TableRow extends Component {
         >
           {
             this.props.cols.map((colInfo,colIndex) => {
-              if (colInfo.visible === false || (colInfo.mobile === false && this.props.isMobile)){
+              if (colInfo.visible === false || (colInfo.mobile === false && this.props.isMobile) || (colInfo.mobile === true && !this.props.isMobile)){
                 return null;
               }
               return (

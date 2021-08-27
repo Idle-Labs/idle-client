@@ -97,50 +97,6 @@ class TranchePage extends Component {
           )
         }
         {
-          this.props.trancheType && (
-            <Flex
-              width={1}
-              id={'faqs'}
-              alignItems={'center'}
-              flexDirection={'column'}
-              justifyContent={'center'}
-            >
-              <Title
-                mb={3}
-                mt={[3,4]}
-              >
-                Frequently asked questions
-              </Title>
-              <Flex
-                width={[1,0.5]}
-                alignItems={'center'}
-                flexDirection={'column'}
-                justifyContent={'center'}
-              >
-                <GenericFaqs
-                  showSections={false}
-                  questions={{
-                    '':[
-                      {
-                        q: 'Lorem ipsum dolor sit amet',
-                        a: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.`
-                      },
-                      {
-                        q: 'Lorem ipsum dolor sit amet',
-                        a: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.`
-                      },
-                      {
-                        q: 'Lorem ipsum dolor sit amet',
-                        a: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.`
-                      }
-                    ]
-                  }}
-                />
-              </Flex>
-            </Flex>
-          )
-        }
-        {
           this.props.account && this.state.transactions && this.state.transactions.length>0 && 
             <Flex
               mb={[3,4]}
@@ -276,6 +232,58 @@ class TranchePage extends Component {
                 ]}
               />
             </Flex>
+        }
+        {
+          this.props.trancheType && (
+            <Flex
+              width={1}
+              id={'faqs'}
+              alignItems={'center'}
+              flexDirection={'column'}
+              justifyContent={'center'}
+            >
+              <Title
+                mb={3}
+                mt={[3,4]}
+              >
+                Frequently asked questions
+              </Title>
+              <Flex
+                width={[1,0.5]}
+                alignItems={'center'}
+                flexDirection={'column'}
+                justifyContent={'center'}
+              >
+                <GenericFaqs
+                  showSections={false}
+                  questions={{
+                    '':[
+                      {
+                        q: 'Is there a locking period?',
+                        a: `There are no locking period or epochs and users are free to enter and exit at any time, the interest earned (and governance tokens, after being partially sold in the market) will be split between the two classes according to a predefined ratio called trancheAPRSplitRatio (eg 20% interest to Senior tranche holders and 80% to Junior tranche) so the rate is variable for both classes of tranches.`
+                      },
+                      {
+                        q: 'How the APR is determined?',
+                        a: `To determine the actual APR for each tranche class, we also need to know the ratio between the current underlying value of Senior and Junior tranches (ie SeniorRatio = Senior Value / (Senior Value + Junior Value)), for more info <a href="https://github.com/Idle-Labs/idle-tranches#idle-dynamic-tranches" target="_blank" rel="nofollow noopener noreferrer" style="color:${this.props.theme.colors.link}">view the readme</a>`
+                      },
+                      {
+                        q: 'What happens in case of hack?',
+                        a: `In case of hack, an emergency shutdown can be triggered (by both the guardian, which would be a multi-sig wallet, and the owner which will be the Idle governance) in order to pause both deposits and redeems, the redistribution of remaining funds can happens selectively, by allowing only Senior tranche holders to withdraw first directly in the main contract, or through a separate contract for more complex cases and resolutions (managed by the Idle governance).`
+                      },
+                      {
+                        q: 'How are fees collected?',
+                        a: `A Fee is collected on harvests in the form Senior tranche or Junior tranche supply diluition (based on the current Senior tranche ratio in value) and it's basically a performance fee, currently set at 10% of the interest generated and it will be redirected to the Idle fee collector address.`
+                      },
+                      {
+                        q: 'What are staking rewards?',
+                        a: `To keep a good ratio between Senior and Junior tranches and an healthy APR part of farmed governance tokens (eg stkAAVE or IDLE) are redistributed to users who stakes their tranche tokens in specific tranche rewards contracts.`
+                      } 
+                    ]
+                  }}
+                />
+              </Flex>
+            </Flex>
+          )
         }
       </Box>
     );

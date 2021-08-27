@@ -538,10 +538,11 @@ const globalConfigs = {
       baseName:'senior',
       name:'Senior Tranche',
       features:[
-        'Funds covered by Junior tranches TVL',
+        'Covered by Junior tranches funds',
         'Minimized risk exposure',
-        'Withdraw your funds at any time',
+        'No locking period or epochs',
         'Auto-Reinvest accrued tokens',
+        'Staking for additional rewards'
       ],
       description:{
         long:'The Senior Tranche offers the safest way to access the lending market and enjoy its returns thanks to the built-in funds coverage.',
@@ -565,10 +566,11 @@ const globalConfigs = {
       baseName:'junior',
       name:'Junior Tranche',
       features:[
-        'Leverage yield using Senior tranches TVL',
+        'Leverage yield using Senior tranches funds',
         'Higher risk exposure by protecting senior tranches',
-        'Withdraw your funds at any time',
+        'No locking period or epochs',
         'Auto-Reinvest accrued tokens',
+        'Staking for additional rewards'
       ],
       description:{
         long:'The Junior Tranche offers the maximum performance in terms of interests for your assets but expose your funds to an higher risk.',
@@ -600,6 +602,8 @@ const globalConfigs = {
       iconInactive:'images/strategies/tranches-off.png',
       iconInactiveDark:'images/strategies/tranches-white.png',
       desc:'Diversify your risk profile with dynamic tranched yield derivatives',
+      descShort:'The aim of Idle Dynamic Tranches is to pool capital of users (eg DAI), deposit it into a lending provider (eg Idle Finance) and split the interest received between 2 classes of users with different risk profiles.',
+      descLong:'The aim of Idle Dynamic Tranches is to pool capital of users (eg DAI), deposit it into a lending provider (eg Idle Finance) and split the interest received between 2 classes of users with different risk profiles. One will gain more interest and will be more risky (Junior tranche) and the other will have a lower APR but more safety (Senior tranche). In the case of an hack or a loss of funds of the lending provider integrated (or any other protocol integrated by this provider), all funds still available will be used to refund Senior tranche holders first with the aim of making them whole, and with remaining funds, if any, Junior holders after.',
     },
     best:{
       token:'DAI',
