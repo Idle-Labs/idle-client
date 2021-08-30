@@ -45,6 +45,7 @@ class TableRow extends Component {
                         if (fieldInfo.visible === false || (fieldInfo.mobile === false && this.props.isMobile)){
                           return null;
                         }
+                        const CustomComponent = fieldInfo.fieldComponent;
                         return (
                           <Flex
                             height={'100%'}
@@ -59,12 +60,21 @@ class TableRow extends Component {
                             id={`field-${colIndex}-${fieldIndex}-${fieldInfo.name}`}
                             key={`field-${colIndex}-${fieldIndex}-${fieldInfo.name}`}
                           >
-                            <FieldComponent
-                              {...this.props}
-                              fieldInfo={fieldInfo}
-                              colProps={colInfo.props}
-                              parentId={`field-${colIndex}-${fieldIndex}-${fieldInfo.name}`}
-                            />
+                            {
+                              CustomComponent ? (
+                                <CustomComponent
+                                  {...this.props}
+                                  {...fieldInfo.props}
+                                />
+                              ) : (
+                                <FieldComponent
+                                  {...this.props}
+                                  fieldInfo={fieldInfo}
+                                  colProps={colInfo.props}
+                                  parentId={`field-${colIndex}-${fieldIndex}-${fieldInfo.name}`}
+                                />
+                              )
+                            }
                           </Flex>
                         );
                       })

@@ -52,8 +52,8 @@ class PortfolioEquityTranches extends Component {
   }
 
   async loadChartData() {
-
     let enabledTokens = this.props.enabledTokens;
+
     if (!enabledTokens || !enabledTokens.length){
       enabledTokens = Object.keys(this.props.availableTranches).reduce( (enabledTokens,protocol) => {
         const tokens = Object.keys(this.props.availableTranches[protocol]);
@@ -171,11 +171,18 @@ class PortfolioEquityTranches extends Component {
 
     const trancheTokenBalance = {};
 
+    if (!firstTxTimestamp){
+      firstTxTimestamp = currTimestamp;
+    }
+
     for (let timeStamp=firstTxTimestamp;timeStamp<=currTimestamp;timeStamp+=this.props.frequencySeconds){
 
       const foundBalances = {};
       const tokensBalances = {};
-      timeStamp = Math.min(currTimestamp,timeStamp);
+      if (timeStamp > currTimestamp){
+        timeStamp = currTimestamp;
+      }
+      // timeStamp = Math.min(currTimestamp,timeStamp);
       aggregatedBalance = this.functionsUtil.BNify(0);
 
       // await this.functionsUtil.asyncForEach(Object.keys(tokensBalance),async (token) => {
@@ -258,8 +265,6 @@ class PortfolioEquityTranches extends Component {
         }
 
         foundBalances[token] = filteredBalances;
-
-        // console.log(timeStamp,token,filteredBalances,foundBalances);
       });
 
       let momentDate = this.functionsUtil.strToMoment(timeStamp*1000);
@@ -281,7 +286,7 @@ class PortfolioEquityTranches extends Component {
         tokensBalancesPerDate[formattedDate] = tokensBalances;
         aggregatedBalancesKeys[formattedDate] = aggregatedBalance;
 
-        // console.log(formattedDate,tokensBalances);
+        // console.log(timeStamp,formattedDate,tokensBalances);
 
         minChartValue = minChartValue === null ? aggregatedBalance : Math.min(minChartValue,aggregatedBalance);
         maxChartValue = maxChartValue === null ? aggregatedBalance : Math.max(maxChartValue,aggregatedBalance);
@@ -333,6 +338,8 @@ class PortfolioEquityTranches extends Component {
       color: 'hsl('+ this.functionsUtil.getGlobalConfig(['stats','tokens',chartToken,'color','hsl']).join(',')+')',
       data:aggregatedBalances
     });
+
+    // console.log('PortfolioEquityTranches',chartData);
 
     let yFormatDecimals = 2;
     if (maxChartValue-minChartValue<1){

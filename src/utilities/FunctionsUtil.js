@@ -748,7 +748,7 @@ class FunctionsUtil {
     return null;
   }
   getTrancheRewardTokensInfo = async (tokenConfig,trancheConfig) => {
-    const stakingRewards = await this.loadTrancheField('stakingRewards',{},tokenConfig.protocol,tokenConfig.token,trancheConfig.tranche,tokenConfig,trancheConfig);
+    const stakingRewards = await this.loadTrancheFieldRaw('stakingRewards',{},tokenConfig.protocol,tokenConfig.token,trancheConfig.tranche,tokenConfig,trancheConfig);
     // console.log('getTrancheTokensDistribution',stakingRewards);
     const tokensDistribution = {};
     await this.asyncForEach(Object.keys(stakingRewards),async (token) => {
@@ -784,6 +784,7 @@ class FunctionsUtil {
           const transferAmount = this.fixTokenDecimals(latestHarvest.returnValues.value,govTokenConfig.decimals);
           const tokensPerBlock = transferAmount.div(elapsedBlocks);
           const tokensPerSecond = transferAmount.div(elapsedSeconds);
+          const tokensPerDay = tokensPerSecond.times(86400);
           const tokensPerYear = tokensPerSecond.times(this.getGlobalConfig(['network','secondsPerYear']));
           const convertedTokensPerYear = tokensPerYear.times(conversionRate);
           const tokenApr = convertedTokensPerYear.div(poolSize);
@@ -792,6 +793,7 @@ class FunctionsUtil {
           tokensDistribution[token] = {
             apr:tokenApr,
             apy:tokenApy,
+            tokensPerDay,
             tokensPerYear,
             tokensPerBlock,
             tokensPerSecond,
@@ -831,6 +833,7 @@ class FunctionsUtil {
     // console.log('getAmountDepositedTranche',trancheConfig.name,'underlying_transfers',underlying_transfers,'trancheToken_transfers',trancheToken_transfers);
 
     const transactions = [];
+    let firstDepositTx = null;
     let avgBuyPrice = this.BNify(0);
     let amountDeposited = this.BNify(0);
     let totalAmountDeposited = this.BNify(0);
@@ -862,7 +865,7 @@ class FunctionsUtil {
         value:tokenAmount,
         status:'Completed',
         token:tokenConfig.token,
-        tranche:trancheConfig.token,
+        tranche:trancheConfig.tranche,
         protocol:protocolConfig.label,
         tokenSymbol:tokenConfig.token,
         trancheTokens:trancheTokenAmount,
@@ -873,6 +876,10 @@ class FunctionsUtil {
 
       // Deposit
       if (trancheTokenTransferEvent.returnValues.from.toLowerCase() === '0x0000000000000000000000000000000000000000'){
+        // Set first deposit tx
+        if (!firstDepositTx){
+          firstDepositTx = tx;
+        }
         avgBuyPrice = avgBuyPrice.plus(tranchePrice.times(tokenAmount));
         amountDeposited = amountDeposited.plus(tokenAmount);
         totalAmountDeposited = totalAmountDeposited.plus(tokenAmount);
@@ -884,6 +891,7 @@ class FunctionsUtil {
         tx.action = 'Withdraw';
         amountDeposited = amountDeposited.minus(tokenAmount);
         if (amountDeposited.lt(0)){
+          firstDepositTx = null;
           avgBuyPrice = this.BNify(0);
           amountDeposited = this.BNify(0);
           totalAmountDeposited = this.BNify(0);
@@ -901,6 +909,7 @@ class FunctionsUtil {
     return {
       avgBuyPrice,
       transactions,
+      firstDepositTx,
       amountDeposited
     }
   }
@@ -910,6 +919,13 @@ class FunctionsUtil {
       return trancheUserInfo.transactions;
     }
     return null;
+  }
+  getTrancheFirstDepositTx = async (tokenConfig,trancheConfig,account) => {
+      const trancheUserInfo = await this.getTrancheUserInfo(tokenConfig,trancheConfig,account);
+      if (trancheUserInfo){
+        return trancheUserInfo.firstDepositTx;
+      }
+      return null;
   }
   getAmountDepositedTranche = async (tokenConfig,trancheConfig,account) => {
     const trancheUserInfo = await this.getTrancheUserInfo(tokenConfig,trancheConfig,account);
@@ -3288,10 +3304,24 @@ class FunctionsUtil {
     }
     return this.BNify(0);
   }
+  getTrancheStakingRewards = async (account,trancheConfig) => {
+    const stakingRewards = {};
+    await this.asyncForEach(trancheConfig.CDORewards.stakingRewards, async (tokenConfig) => {
+      const tokenGlobalConfig = this.getGlobalConfig(['stats','tokens',tokenConfig.token]);
+      tokenConfig = {...tokenConfig,...tokenGlobalConfig};
+      const tokenAmount = await this.genericContractCallCached(trancheConfig.CDORewards.name,'expectedUserReward',[account,tokenConfig.address]);
+      stakingRewards[tokenConfig.token] = this.fixTokenDecimals(tokenAmount,tokenConfig.decimals);
+      // debugger;
+    });
+
+    console.log('getTrancheStakingRewards',stakingRewards);
+
+    return stakingRewards;
+  }
   loadTrancheFieldRaw = async (field,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens=true) => {
     return await this.loadTrancheField(field,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens,false);
   }
-  loadTrancheField = async (field,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account=null,addGovTokens=true,formatValue=true) => {
+  loadTrancheField = async (field,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account=null,addGovTokens=true,formatValue=true,addTokenName=true) => {
     let output = null;
     const maxPrecision = (fieldProps && fieldProps.maxPrecision) || 5;
     const decimals = (fieldProps && fieldProps.decimals) || (this.props.isMobile ? 2 : 3);
@@ -3351,7 +3381,7 @@ class FunctionsUtil {
           output = this.fixTokenDecimals(totalSupply,tokenConfig.CDO.decimals).times(virtualPrice);
         }
         if (formatValue){
-          output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+` ${tokenName}`;
+          output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+(addTokenName ? ` ${tokenName}` : '');
         }
         // console.log('tranchePool',tokenConfig.CDO.name,totalSupply,virtualPrice,output);
       break;
@@ -3363,10 +3393,16 @@ class FunctionsUtil {
         output = this.BNify(deposited);
         if (output.gt(0)){
           if (formatValue){
-            output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+` ${tokenName}`;
+            output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+(addTokenName ? ` ${tokenName}` : '');
           }
         } else {
           output = formatValue ? '-' : null;
+        }
+      break;
+      case 'trancheFee':
+        output = await this.genericContractCallCached(tokenConfig.CDO.name,'fee');
+        if (output){
+          output = this.BNify(output).div(this.BNify(100000));
         }
       break;
       case 'tranchePrice':
@@ -3384,11 +3420,13 @@ class FunctionsUtil {
           this.loadTrancheField(`tranchePrice`,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens)
         ]);
 
+
         output = formatValue ? '-' : null;
         if (staked1 && lastPrice1){
           output = this.BNify(staked1).times(lastPrice1);
+          // console.log('trancheStaked',staked1.toString(),lastPrice1.toString(),output.toString());
           if (formatValue){
-            output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+` ${tokenName}`;
+            output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+(addTokenName ? ` ${tokenName}` : '');
           }
         }
       break;
@@ -3398,15 +3436,103 @@ class FunctionsUtil {
           lastPrice
         ] = await Promise.all([
           this.getTokenBalance(trancheConfig.name,account),
-          this.loadTrancheField(`tranchePrice`,fieldProps,protocol,token,tranche,tokenConfig,tokenConfig.AA,account,addGovTokens)
+          this.loadTrancheFieldRaw(`tranchePrice`,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens)
         ]);
 
         output = formatValue ? '-' : null;
         if (deposited1 && lastPrice){
           output = this.BNify(deposited1).times(lastPrice);
           if (formatValue){
-            output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+` ${tokenName}`;
+            output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+(addTokenName ? ` ${tokenName}` : '');
           }
+        }
+      break;
+      case 'trancheRedeemableWithStaked':
+        let [
+          redeemable1,
+          staked2
+        ] = await Promise.all([
+          this.loadTrancheFieldRaw(`trancheRedeemable`,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens),
+          this.loadTrancheFieldRaw(`trancheStaked`,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens)
+        ]);
+
+        output = formatValue ? '-' : null;
+        if (redeemable1 && staked2){
+          output = this.BNify(redeemable1).plus(staked2);
+          if (formatValue){
+            output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+(addTokenName ? ` ${tokenName}` : '');
+          }
+        }
+      break;
+      case 'earningsCounter':
+        let [
+          earningsStart,
+          trancheApy2,
+          deposited3
+        ] = await Promise.all([
+          this.loadTrancheFieldRaw(`earnings`,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens),
+          this.loadTrancheFieldRaw(`trancheApy`,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens),
+          this.loadTrancheFieldRaw(`trancheDeposited`,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens),
+        ]);
+
+
+        if (deposited3 && earningsStart && trancheApy2){
+          const earningsEnd = deposited3.gt(0) ? deposited3.times(trancheApy2.div(100)).plus(earningsStart) : 0;
+
+          output = {
+            earningsEnd,
+            earningsStart
+          };
+        }
+      break;
+      case 'feesCounter':
+        let [
+          trancheFee,
+          earningsCounter
+        ] = await Promise.all([
+          this.loadTrancheFieldRaw(`trancheFee`,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens),
+          this.loadTrancheFieldRaw(`earningsCounter`,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens),
+        ]);
+
+        if (trancheFee && earningsCounter){
+          const feesStart = earningsCounter.earningsStart.times(trancheFee);
+          const feesEnd =  earningsCounter.earningsEnd.times(trancheFee);
+
+          // console.log('feesCounter',feesStart.toString(),feesEnd.toString());
+
+          output = {
+            feesEnd,
+            feesStart
+          };
+        }
+      break;
+      case 'earnings':
+        const [
+          deposited4,
+          redeemable3
+        ] = await Promise.all([
+          this.loadTrancheFieldRaw(`trancheDeposited`,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens),
+          this.loadTrancheFieldRaw(`trancheRedeemableWithStaked`,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens)
+        ]);
+
+        if (deposited4 && redeemable3){
+          output = this.BNify(redeemable3).minus(deposited4);
+          if (formatValue){
+            output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+(addTokenName ? ` ${tokenName}` : '');
+          }
+        }
+      break;
+      case 'earningsPerc':
+        const [
+          deposited2,
+          redeemable2
+        ] = await Promise.all([
+          this.loadTrancheFieldRaw(`trancheDeposited`,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens),
+          this.loadTrancheFieldRaw(`trancheRedeemableWithStaked`,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens)
+        ]);
+        output = redeemable2.div(deposited2).minus(1).times(100);
+        if (formatValue){
+          output = output.toFixed(decimals)+'%';
         }
       break;
       case 'trancheApy':
@@ -3415,6 +3541,28 @@ class FunctionsUtil {
         if (trancheApy){
           output = this.fixTokenDecimals(trancheApy,tokenConfig.CDO.decimals);
           output = this.apr2apy(output.div(100)).times(100);
+          if (formatValue){
+            output = output.toFixed(2)+'%';
+          }
+        }
+      break;
+      case 'realizedApy':
+        const [
+          firstDepositTx,
+          earningsPerc
+        ] = await Promise.all([
+          this.getTrancheFirstDepositTx(tokenConfig,trancheConfig,account),
+          this.loadTrancheFieldRaw(`earningsPerc`,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens)
+        ]);
+
+        // console.log('realizedApy',earningsPerc.toString(),firstDepositTx);
+
+        if (earningsPerc && firstDepositTx){
+          const secondsFromFirstTx = parseInt(Date.now()/1000)-parseInt(firstDepositTx.timeStamp);
+          output = this.BNify(earningsPerc).times(31536000).div(secondsFromFirstTx);
+
+          // console.log('realizedApy2',output.toString());
+
           if (formatValue){
             output = output.toFixed(2)+'%';
           }

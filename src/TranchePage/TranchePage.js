@@ -6,11 +6,14 @@ import FunctionsUtil from '../utilities/FunctionsUtil';
 import TrancheWelcome from '../TrancheWelcome/TrancheWelcome';
 import TrancheDetails from '../TrancheDetails/TrancheDetails';
 import TransactionsList from '../TransactionsList/TransactionsList';
+import FundsOverviewTranche from '../FundsOverviewTranche/FundsOverviewTranche';
+import StakingRewardsTranche from '../StakingRewardsTranche/StakingRewardsTranche';
 
 class TranchePage extends Component {
 
   state = {
-    transactions:[]
+    transactions:[],
+    componentLoaded:false
   }
 
   // Utils
@@ -26,10 +29,10 @@ class TranchePage extends Component {
 
   async componentWillMount(){
     this.loadUtils();
+    this.loadTransactions();
   }
 
   async componentDidMount(){
-    this.loadTransactions();
   }
 
   async componentDidUpdate(prevProps,prevState){
@@ -42,9 +45,14 @@ class TranchePage extends Component {
   }
 
   loadTransactions(){
-    const transactions = this.props.portfolio ? this.props.portfolio.transactions.filter( t => t.protocol.toLowerCase() === this.props.selectedProtocol.toLowerCase() && t.token.toLowerCase() === this.props.selectedToken.toLowerCase() ) : [];
+    const transactions = this.props.portfolio ? this.props.portfolio.transactions.filter( t => t.protocol.toLowerCase() === this.props.selectedProtocol.toLowerCase() && t.token.toLowerCase() === this.props.selectedToken.toLowerCase() && (!this.props.trancheType || t.tranche === this.props.trancheType) ) : [];
+
+    // console.log('loadTransactions',this.props.selectedProtocol,this.props.selectedToken,this.props.trancheType,transactions);
+    const componentLoaded = true;
+
     this.setState({
-      transactions
+      transactions,
+      componentLoaded
     });
   }
 
@@ -95,6 +103,46 @@ class TranchePage extends Component {
               }
             </Flex>
           )
+        }
+        {
+          this.state.componentLoaded && this.props.account && this.props.userHasFunds && this.props.trancheType &&
+            <Flex
+              mb={[0,4]}
+              width={1}
+              flexDirection={'column'}
+              id={'funds-overview-container'}
+            >
+              <Title my={[3,4]}>Staking Rewards</Title>
+              <StakingRewardsTranche
+                {...this.props}
+                token={this.props.selectedToken}
+                tranche={this.props.trancheType}
+                tokenConfig={this.props.tokenConfig}
+                protocol={this.props.selectedProtocol}
+                transactionsList={this.state.transactions}
+                trancheConfig={this.props.tokenConfig[this.props.trancheType]}
+              />
+            </Flex>
+        }
+        {
+          this.state.componentLoaded && this.props.account && this.props.userHasFunds && this.props.trancheType &&
+            <Flex
+              mb={[0,4]}
+              width={1}
+              flexDirection={'column'}
+              id={'funds-overview-container'}
+            >
+              <Title my={[3,4]}>Funds Overview</Title>
+              <FundsOverviewTranche
+                {...this.props}
+                token={this.props.selectedToken}
+                tranche={this.props.trancheType}
+                tokenConfig={this.props.tokenConfig}
+                protocol={this.props.selectedProtocol}
+                transactionsList={this.state.transactions}
+                trancheConfig={this.props.tokenConfig[this.props.trancheType]}
+              />
+            </Flex>
         }
         {
           this.props.account && this.state.transactions && this.state.transactions.length>0 && 
@@ -243,8 +291,7 @@ class TranchePage extends Component {
               justifyContent={'center'}
             >
               <Title
-                mb={3}
-                mt={[3,4]}
+                my={3}
               >
                 Frequently asked questions
               </Title>

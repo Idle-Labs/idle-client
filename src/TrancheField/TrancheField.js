@@ -1,5 +1,5 @@
 // import { Line } from '@nivo/line';
-// import CountUp from 'react-countup';
+import CountUp from 'react-countup';
 import React, { Component } from 'react';
 import AssetField from '../AssetField/AssetField';
 import CustomField from '../CustomField/CustomField';
@@ -92,18 +92,16 @@ class TrancheField extends Component {
       fieldName = fieldInfo.name;
     }
 
-    // console.log('TrancheField - loadField',fieldName,this.componentUnmounted,this.props.protocol,this.props.token,this.props.tokenConfig);
-
     const fieldProps = fieldInfo.props;
-    // const decimals = fieldProps && fieldProps.decimals ? fieldProps.decimals : ( this.props.isMobile ? 2 : 3 );
-    // const addCurveApy = typeof this.props.addCurveApy !== 'undefined' ? this.props.addCurveApy : false;
     const addGovTokens = typeof this.props.addGovTokens !== 'undefined' ? this.props.addGovTokens : true;
+    const formatValue = typeof this.props.formatValue !== 'undefined' ? this.props.formatValue : true;
+    const addTokenName = typeof this.props.addTokenName !== 'undefined' ? this.props.addTokenName : true;
 
     let output = null;
     if (this.props.token){
       switch (fieldName){
         default:
-          output = await this.functionsUtil.loadTrancheField(fieldName,fieldProps,this.props.protocol,this.props.token,this.props.tranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account,addGovTokens);
+          output = await this.functionsUtil.loadTrancheField(fieldName,fieldProps,this.props.protocol,this.props.token,this.props.tranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account,addGovTokens,formatValue,addTokenName);
           if (output && setState){
             this.setStateSafe({
               ready:true,
@@ -149,10 +147,12 @@ class TrancheField extends Component {
       });
     }
 
+    const tokenName = this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token,'label']) || this.functionsUtil.capitalize(this.props.token);
+
     // const tokenConfig = this.props.tokenConfig;// || this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token]);
-    // const maxPrecision = fieldProps && fieldProps.maxPrecision ? fieldProps.maxPrecision : 5;
+    const maxPrecision = fieldProps && fieldProps.maxPrecision ? fieldProps.maxPrecision : 5;
     const decimals = fieldProps && fieldProps.decimals ? fieldProps.decimals : ( this.props.isMobile ? 2 : 3 );
-    // const minPrecision = fieldProps && fieldProps.minPrecision ? fieldProps.minPrecision : ( this.props.isMobile ? 3 : 4 );
+    const minPrecision = fieldProps && fieldProps.minPrecision ? fieldProps.minPrecision : ( this.props.isMobile ? 3 : 4 );
 
     // console.log('TrancheField',fieldInfo.name,fieldProps);
     const flexProps = fieldProps.flexProps;
@@ -202,6 +202,44 @@ class TrancheField extends Component {
             fieldInfo={fieldInfo}
           />
         );
+      break;
+      case 'feesCounter':
+        output = this.state.ready && this.state.feesCounter.feesStart && this.state.feesCounter.feesEnd ? (
+          <CountUp
+            delay={0}
+            decimal={'.'}
+            separator={''}
+            useEasing={false}
+            duration={31536000}
+            decimals={decimals}
+            end={parseFloat(this.state.feesCounter.feesEnd)}
+            start={parseFloat(this.state.feesCounter.feesStart)}
+            formattingFn={ n => this.functionsUtil.abbreviateNumber(n,decimals,maxPrecision,minPrecision) }
+          >
+            {({ countUpRef, start }) => (
+              <span style={fieldProps.style} ref={countUpRef} />
+            )}
+          </CountUp>
+        ) : loader
+      break;
+      case 'earningsCounter':
+        output = this.state.ready && this.state.earningsCounter && this.state.earningsCounter.earningsStart && this.state.earningsCounter.earningsEnd ? (
+          <CountUp
+            delay={0}
+            decimal={'.'}
+            separator={''}
+            useEasing={false}
+            duration={31536000}
+            decimals={decimals}
+            end={parseFloat(this.state.earningsCounter.earningsEnd)}
+            start={parseFloat(this.state.earningsCounter.earningsStart)}
+            formattingFn={ n => this.functionsUtil.abbreviateNumber(n,decimals,maxPrecision,minPrecision)+` ${tokenName}` }
+          >
+            {({ countUpRef, start }) => (
+              <span style={fieldProps.style} ref={countUpRef} />
+            )}
+          </CountUp>
+        ) : loader
       break;
       case 'govTokens':
       case 'autoFarming':

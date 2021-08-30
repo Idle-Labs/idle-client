@@ -883,14 +883,29 @@ class StatsChart extends Component {
 
         maxChartValue = 0;
 
-        this.props.tokenConfig.protocols.forEach((p,j) => {
-          const protocolInfo = globalConfigs.stats.protocols[p.name];
+        // Add Additional protocols
+        if (versionInfo.additionalProtocols && versionInfo.additionalProtocols.length>0){
+          versionInfo.additionalProtocols.forEach( additionalProtocol => {
+            const protocolInfo = this.props.tokenConfig.protocols.find( p => (p.name === additionalProtocol.protocol));
+            if (protocolInfo && additionalProtocol.enabledTokens.includes(this.props.selectedToken)){
+              additionalProtocol.enabled = true;
+              additionalProtocol.address = protocolInfo.address;
+              protocols.unshift(additionalProtocol);
+            }
+          });
+        }
+
+        protocols.forEach((p,j) => {
+          const protocolInfo = {...globalConfigs.stats.protocols[p.name]};
           if (!protocolInfo.enabled){
             return;
           }
           if (chartData.filter(d => { return d.name === p.name; }).length){
             return;
           }
+
+          const rateField = protocolInfo.rateField ? protocolInfo.rateField : 'rate';
+          
           chartData.push({
             id:protocolInfo.label,
             color:'hsl('+globalConfigs.stats.protocols[p.name].color.hsl.join(',')+')',
@@ -899,7 +914,15 @@ class StatsChart extends Component {
                   return protocolAllocation.protocolAddr.toLowerCase() === p.address.toLowerCase()
               })
               .map((protocolAllocation,z) => {
-                let protocolRate = this.functionsUtil.BNify(protocolAllocation.rate);
+                // let protocolRate = this.functionsUtil.BNify(protocolAllocation.rate);
+
+                let protocolRate = typeof rateField === 'object' && rateField.length ? rateField.reduce((acc,field) => {
+                  if (protocolAllocation[field]){
+                    return this.functionsUtil.BNify(acc).plus(this.functionsUtil.BNify(protocolAllocation[field]));
+                  }
+                  return this.functionsUtil.BNify(acc);
+                },0) : this.functionsUtil.BNify(protocolAllocation[rateField]);
+
                 const protocolPaused = protocolRate.eq(0);
                 if (!protocolPaused){
 
@@ -933,6 +956,50 @@ class StatsChart extends Component {
             return { x, y };
           })
         });
+
+        /*
+        const csv = {};
+        chartData.forEach( protocolData => {
+          protocolData.data.forEach( d => {
+            if (!csv[d.x]){
+              csv[d.x] = {};
+            }
+            csv[d.x][protocolData.id] = d.y;
+          });
+        });
+
+        const csv_ordered = Object.keys(csv).sort().reduce(
+          (obj, key) => { 
+            obj[key] = csv[key]; 
+            return obj;
+          }, 
+          {}
+        );
+
+        const csv_array = [];
+        const csv_header = [];
+        csv_header.push('Date');
+        chartData.forEach( pData => csv_header.push(pData.id) );
+        csv_array.push(csv_header.join(','));
+
+        Object.keys(csv_ordered).forEach( date => {
+          const csv_row = [date];
+          chartData.forEach( cData => {
+            if (csv_ordered[date][cData.id]){
+              csv_row.push(parseFloat(csv_ordered[date][cData.id]).toFixed(4));
+            } else {
+              csv_row.push('0.0000');
+            }
+          });
+          csv_array.push(csv_row.join(','));
+        });
+
+        console.log('-------DEBUG-------');
+        console.log(csv_ordered);
+        console.log('-------START-------');
+        console.log(csv_array.join('\n'));
+        console.log('-------END-------');
+        */
 
         // Set chart type
         chartType = Line;
@@ -1335,6 +1402,7 @@ class StatsChart extends Component {
 
           const protocolInfo = {...globalConfigs.stats.protocols[p.name]};
 
+          // Add custom protocol info
           if (protocolInfo.tokensProps && protocolInfo.tokensProps[this.props.selectedToken]){
             const tokenProps = protocolInfo.tokensProps[this.props.selectedToken];
             Object.keys(tokenProps).forEach(p => {

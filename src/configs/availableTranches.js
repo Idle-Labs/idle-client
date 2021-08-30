@@ -34,7 +34,13 @@ const availableTranches = {
           decimals:18,
           abi:IdleCDOTrancheRewards,
           name:'IdleCDOTrancheRewards_idleDAIYield_AA',
-          address:'0x9c3bC87693c65E740d8B2d5F0820E04A61D8375B'
+          address:'0x9c3bC87693c65E740d8B2d5F0820E04A61D8375B',
+          stakingRewards:[
+            {
+              token:'IDLE',
+              address:'0x875773784Af8135eA0ef43b5a374AaD105c5D39e'
+            }
+          ]
         },
         label:'idleDAI AA',
         blockNumber:13054628,
@@ -56,7 +62,13 @@ const availableTranches = {
           decimals:18,
           abi:IdleCDOTrancheRewards,
           name:'IdleCDOTrancheRewards_idleDAIYield_BB',
-          address:'0x4473bc90118b18be890af42d793b5252c4dc382d'
+          address:'0x4473bc90118b18be890af42d793b5252c4dc382d',
+          stakingRewards:[
+            {
+              token:'IDLE',
+              address:'0x875773784Af8135eA0ef43b5a374AaD105c5D39e'
+            }
+          ]
         },
         label:'idleDAI BB',
         blockNumber:13054628,

@@ -527,6 +527,7 @@ class TrancheDetails extends Component {
             </Flex>
           </Flex>
           {
+            /*
             (this.functionsUtil.BNify(this.state.stakedBalance).gt(0) || this.functionsUtil.BNify(this.state.trancheBalance).gt(0)) && (
               <Flex
                 py={2}
@@ -628,6 +629,7 @@ class TrancheDetails extends Component {
                 </Flex>
               </Flex>
             )
+            */
           }
           {
             this.state.balanceProp && this.state.tokenConfig ? (

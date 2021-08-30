@@ -29,6 +29,7 @@ class Tranches extends Component {
     trancheDetails:null,
     useTrancheType:false,
     portfolioLoaded:false,
+    componentLoaded:false,
     selectedProtocol:null,
     allocationChartData:null,
     portfolioEquityQuickSelection:'week'
@@ -47,10 +48,9 @@ class Tranches extends Component {
 
   async componentWillMount(){
     this.loadUtils();
-  }
 
-  async componentDidMount(){
     this.loadPortfolio().then( () => {
+      const componentLoaded = true;
       const trancheRoute = this.props.urlParams.param1;
       const tranchesDetails = this.functionsUtil.getGlobalConfig(['tranches']);
       const trancheDetails = Object.values(tranchesDetails).find( t => t.route === trancheRoute );
@@ -83,11 +83,18 @@ class Tranches extends Component {
           this.setState({
             tokenConfig,
             selectedToken,
-            selectedProtocol,
+            selectedProtocol
           });
         }
       }
+
+      this.setState({
+        componentLoaded
+      });
     });
+  }
+
+  async componentDidMount(){
   }
 
   async componentDidUpdate(prevProps, prevState) {
@@ -285,7 +292,7 @@ class Tranches extends Component {
           )
         }
         {
-          !this.state.portfolioLoaded ? (
+          !this.state.componentLoaded ? (
             <FlexLoader
               textProps={{
                 textSize:4,
@@ -308,6 +315,7 @@ class Tranches extends Component {
               portfolio={this.state.portfolio}
               trancheType={this.state.trancheType}
               tokenConfig={this.state.tokenConfig}
+              userHasFunds={this.state.userHasFunds}
               selectedToken={this.state.selectedToken}
               trancheDetails={this.state.trancheDetails}
               selectedProtocol={this.state.selectedProtocol}
