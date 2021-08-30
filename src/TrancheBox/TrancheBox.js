@@ -45,8 +45,8 @@ class Base extends Component {
           mb={3}
           width={1}
           flexDirection={'row'}
-          alignItems={'baseline'}
           justifyContent={'space-between'}
+          alignItems={['flex-start','baseline']}
           borderBottom={`1px solid ${this.props.theme.colors.divider}`}
         >
           <Flex
@@ -55,13 +55,13 @@ class Base extends Component {
           >
             <Icon
               mr={2}
-              size={'2.2em'}
               name={trancheDetails.icon}
               color={trancheDetails.color.hex}
+              size={this.props.isMobile ? '1.8em' : '2.2em'}
             />
             <Text
               fontWeight={4}
-              fontSize={[3,6]}
+              fontSize={[4,6]}
               lineHeight={'1'}
               color={trancheDetails.color.hex}
             >
@@ -79,7 +79,7 @@ class Base extends Component {
                 props:{
                   decimals:2,
                   fontWeight:4,
-                  fontSize:[3,6],
+                  fontSize:[4,6],
                   lineHeight:'1',
                   textAlign:'center',
                   flexProps:{
@@ -148,9 +148,9 @@ class Base extends Component {
             {
               trancheDetails.features.map( (feature,index) => (
                 <Flex
-                  mt={1}
                   mb={2}
                   width={1}
+                  mt={[0,1]}
                   alignItems={'center'}
                   flexDirection={'row'}
                   key={`feature_${index}`}
@@ -161,8 +161,8 @@ class Base extends Component {
                     color={trancheDetails.color.hex}
                   />
                   <Text
-                    fontSize={3}
                     fontWeight={3}
+                    fontSize={[2,3]}
                     color={trancheDetails.color.hex}
                   >
                     {feature}

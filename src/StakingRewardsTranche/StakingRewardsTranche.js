@@ -49,18 +49,21 @@ class StakingRewardsTranche extends Component {
       this.functionsUtil.getTrancheRewardTokensInfo(this.props.tokenConfig,this.props.trancheConfig)
     ]);
 
-    console.log('stakingRewards',stakingRewards,rewardTokensInfo);
+    // console.log('stakingRewards',stakingRewards,rewardTokensInfo);
 
-    const stakingRewardsRows = Object.keys(stakingRewards).map( rewardToken => {
+    const stakingRewardsRows = [];
+    await this.functionsUtil.asyncForEach(Object.keys(stakingRewards), async (rewardToken) => {
       const tokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',rewardToken]);
       const tokenAmount = this.functionsUtil.BNify(stakingRewards[rewardToken]);
       const rewardTokenInfo = rewardTokensInfo[rewardToken];
-      return {
+      const tokenBalance = await this.functionsUtil.getTokenBalance(rewardToken,this.props.account);
+      stakingRewardsRows.push({
         token:rewardToken,
+        balance:tokenBalance.toFixed(8),
         reedemable:tokenAmount.toFixed(8),
         tokenIcon:tokenConfig.icon || `images/tokens/${rewardToken}.svg`,
-        distributionSpeed:rewardTokenInfo.tokensPerDay.toFixed(8)+` ${rewardToken}/day`
-      };
+        distributionSpeed:rewardTokenInfo ? rewardTokenInfo.tokensPerDay.toFixed(8)+` ${rewardToken}/day` : '-'
+      });
     });
 
     this.setState({
@@ -81,13 +84,13 @@ class StakingRewardsTranche extends Component {
             {
               title:'TOKEN',
               props:{
-                width:[0.33,0.28]
+                width:[0.18,0.16]
               },
               fields:[
                 {
                   type:'image',
                   props:{
-                    mr:[1,2],
+                    mr:2,
                     size:this.props.isMobile ? '1.2em' : '1.8em'
                   },
                   path:['tokenIcon']
@@ -99,10 +102,27 @@ class StakingRewardsTranche extends Component {
               ]
             },
             {
+              mobile:false,
+              title:'BALANCE',
+              props:{
+                width:[0.27,0.24],
+                justifyContent:['center','flex-start']
+              },
+              fields:[
+                {
+                  type:'text',
+                  path:['balance'],
+                  props:{
+                    decimals: this.props.isMobile ? 4 : 8
+                  }
+                },
+              ]
+            },
+            {
               title:'REDEEMABLE',
               desc:this.functionsUtil.getGlobalConfig(['messages','govTokenRedeemableBalance']),
               props:{
-                width:[0.35,0.28],
+                width:[0.29,0.24],
                 justifyContent:['center','flex-start']
               },
               fields:[
@@ -110,7 +130,7 @@ class StakingRewardsTranche extends Component {
                   type:'text',
                   path:['reedemable'],
                   props:{
-                    decimals: this.props.isMobile ? 6 : 8
+                    decimals: this.props.isMobile ? 4 : 8
                   }
                 },
               ]
@@ -119,23 +139,22 @@ class StakingRewardsTranche extends Component {
               title:'DISTRIBUTION',
               desc:this.functionsUtil.getGlobalConfig(['messages','userDistributionSpeed']),
               props:{
-                width:[0.35,0.28],
+                width:[0.29,0.24],
               },
               fields:[
                 {
                   type:'text',
                   path:['distributionSpeed'],
                   props:{
-                    decimals: this.props.isMobile ? 6 : 8
+                    decimals: this.props.isMobile ? 4 : 8
                   }
                 }
               ]
             },
             {
               title:'',
-              mobile:false,
               props:{
-                width:0.17,
+                width:[0.26,0.16],
               },
               parentProps:{
                 width:1
@@ -156,10 +175,10 @@ class StakingRewardsTranche extends Component {
                       style:{
                         width:'100%'
                       },
-                      size:'medium',
                       value:'Claim',
                       borderRadius:4,
-                      mainColor:'redeem'
+                      mainColor:'redeem',
+                      size:this.props.isMobile ? 'small' : 'medium'
                     },
                     action:'Claim',
                     methodName:'claim',

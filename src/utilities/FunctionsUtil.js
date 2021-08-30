@@ -237,7 +237,13 @@ class FunctionsUtil {
           const trancheConfig = tokenConfig[tranche];
           const trancheTokenBalance = await this.loadTrancheFieldRaw('trancheDeposited',{},protocol,token,tranche,tokenConfig,trancheConfig,account);
           if (trancheTokenBalance){
-            const tranchePrice = await this.loadTrancheFieldRaw('tranchePrice',{},protocol,token,tranche,tokenConfig,trancheConfig,account);
+            const [
+              tranchePool,
+              tranchePrice
+            ] = await Promise.all([
+              this.loadTrancheFieldRaw('tranchePool',{},protocol,token,tranche,tokenConfig,trancheConfig,account),
+              this.loadTrancheFieldRaw('tranchePrice',{},protocol,token,tranche,tokenConfig,trancheConfig,account)
+            ]);
             const tokenBalance = trancheTokenBalance.times(tranchePrice);
 
             if (!this.BNify(tranchePrice).isNaN() && !this.BNify(tokenBalance).isNaN()){
@@ -249,6 +255,7 @@ class FunctionsUtil {
                 this.loadTrancheFieldRaw('trancheApy',{},protocol,token,tranche,tokenConfig,trancheConfig,account),
               ]);
 
+              const poolShare = tokenBalance.div(tranchePool);
               const amountDeposited = trancheUserInfo.amountDeposited;
               const trancheEarnings = tokenBalance.minus(amountDeposited);
 
@@ -259,6 +266,7 @@ class FunctionsUtil {
                 token,
                 tranche,
                 protocol,
+                poolShare,
                 trancheApy,
                 tranchePrice,
                 tokenBalance,
@@ -3311,10 +3319,9 @@ class FunctionsUtil {
       tokenConfig = {...tokenConfig,...tokenGlobalConfig};
       const tokenAmount = await this.genericContractCallCached(trancheConfig.CDORewards.name,'expectedUserReward',[account,tokenConfig.address]);
       stakingRewards[tokenConfig.token] = this.fixTokenDecimals(tokenAmount,tokenConfig.decimals);
-      // debugger;
     });
 
-    console.log('getTrancheStakingRewards',stakingRewards);
+    // console.log('getTrancheStakingRewards',stakingRewards);
 
     return stakingRewards;
   }

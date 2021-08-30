@@ -798,6 +798,7 @@ class Tranches extends Component {
                           }
                         },
                         {
+                          mobile:false,
                           name:'protocolName'
                         }
                       ]
@@ -816,6 +817,7 @@ class Tranches extends Component {
                           }
                         },
                         {
+                          mobile:false,
                           name:'tokenName'
                         }
                       ]

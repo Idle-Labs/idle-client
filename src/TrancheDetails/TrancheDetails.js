@@ -729,17 +729,17 @@ class TrancheDetails extends Component {
                       }}
                       isActive={true}
                       isInteractive={false}
-                      icon={'LightbulbOutline'}
                       iconProps={{
                         size:'1.2em',
                         color:'flashColor'
                       }}
                       textProps={{
                         fontWeight:500,
-                        fontSize:'15px',
+                        color:'flashColor',
                         textAlign:'center',
-                        color:'flashColor'
+                        fontSize:['13px','15px']
                       }}
+                      icon={'LightbulbOutline'}
                       text={this.state.infoText}
                     />
                   )
