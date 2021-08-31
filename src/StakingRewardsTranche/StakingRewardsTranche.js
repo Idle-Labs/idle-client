@@ -31,14 +31,15 @@ class StakingRewardsTranche extends Component {
     this.loadUtils();
 
     const accountChanged = prevProps.account !== this.props.account;
+    const portfolioChanged = JSON.stringify(prevProps.portfolio) !== JSON.stringify(this.props.portfolio);
     const trancheConfigChanged = JSON.stringify(prevProps.trancheConfig) !== JSON.stringify(this.props.trancheConfig);
-    if (accountChanged || trancheConfigChanged){
+    if (accountChanged || trancheConfigChanged || portfolioChanged){
       this.loadUserRewards();
     }
   }
 
   async loadUserRewards(){
-    if (!this.props.account || !this.props.trancheConfig){
+    if (!this.props.account || !this.props.trancheConfig || !this.props.portfolio){
       return false;
     }
     const [
@@ -49,7 +50,9 @@ class StakingRewardsTranche extends Component {
       this.functionsUtil.getTrancheRewardTokensInfo(this.props.tokenConfig,this.props.trancheConfig)
     ]);
 
-    // console.log('stakingRewards',stakingRewards,rewardTokensInfo);
+    const trancheBalanceInfo = this.props.portfolio.tranchesBalance.find( p => p.token === this.props.token && p.protocol === this.props.protocol && p.tranche === this.props.tranche );
+    
+    // console.log('stakingRewards',stakingRewards,rewardTokensInfo,trancheBalanceInfo);
 
     const stakingRewardsRows = [];
     await this.functionsUtil.asyncForEach(Object.keys(stakingRewards), async (rewardToken) => {
@@ -57,12 +60,16 @@ class StakingRewardsTranche extends Component {
       const tokenAmount = this.functionsUtil.BNify(stakingRewards[rewardToken]);
       const rewardTokenInfo = rewardTokensInfo[rewardToken];
       const tokenBalance = await this.functionsUtil.getTokenBalance(rewardToken,this.props.account);
+      let distributionSpeed = rewardTokenInfo ? rewardTokenInfo.tokensPerDay : null;
+      if (trancheBalanceInfo){
+        distributionSpeed = distributionSpeed.times(trancheBalanceInfo.poolShare);
+      }
       stakingRewardsRows.push({
         token:rewardToken,
         balance:tokenBalance.toFixed(8),
         reedemable:tokenAmount.toFixed(8),
         tokenIcon:tokenConfig.icon || `images/tokens/${rewardToken}.svg`,
-        distributionSpeed:rewardTokenInfo ? rewardTokenInfo.tokensPerDay.toFixed(8)+` ${rewardToken}/day` : '-'
+        distributionSpeed:distributionSpeed ? distributionSpeed.toFixed(8)+` ${rewardToken}/day` : '-'
       });
     });
 
