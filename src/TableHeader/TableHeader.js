@@ -14,7 +14,8 @@ class TableHeader extends Component {
         {
           this.props.cols.map((colInfo,colIndex) => {
             // Skip non-mobile columns
-            if (colInfo.visible === false || (colInfo.mobile === false && this.props.isMobile) || (colInfo.mobile === true && !this.props.isMobile)){
+            const visibleOnDesktop = colInfo.visibleOnDesktop || false;
+            if (colInfo.visible === false || (colInfo.mobile === false && this.props.isMobile) || (colInfo.mobile === true && !visibleOnDesktop && !this.props.isMobile)){
               return null;
             }
 

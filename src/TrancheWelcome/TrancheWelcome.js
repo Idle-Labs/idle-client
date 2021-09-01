@@ -33,7 +33,7 @@ class Base extends Component {
         width={1}
       >
         {
-          !this.props.tokenConfig && (
+          !this.props.tokenConfig ? (
             <Flex
               width={1}
               flexDirection={'column'}
@@ -64,17 +64,18 @@ class Base extends Component {
                 </Text>
               </Flex>
             </Flex>
+          ) : (
+            <Title
+              mb={3}
+              fontWeight={2}
+              fontSize={[3,4]}
+              color={'copyColor'}
+              textAlign={'center'}
+            >
+              Select your preferred Tranche
+            </Title>
           )
         }
-        <Title
-          mb={3}
-          fontWeight={2}
-          fontSize={[3,4]}
-          color={'copyColor'}
-          textAlign={'center'}
-        >
-          Select your preferred Tranche
-        </Title>
         <Flex
           width={1}
           flexDirection={['column','row']}

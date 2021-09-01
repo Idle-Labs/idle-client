@@ -26,7 +26,8 @@ class TableRow extends Component {
         >
           {
             this.props.cols.map((colInfo,colIndex) => {
-              if (colInfo.visible === false || (colInfo.mobile === false && this.props.isMobile) || (colInfo.mobile === true && !this.props.isMobile)){
+              const visibleOnDesktop = colInfo.visibleOnDesktop || false;
+              if (colInfo.visible === false || (colInfo.mobile === false && this.props.isMobile) || (colInfo.mobile === true && !visibleOnDesktop && !this.props.isMobile)){
                 return null;
               }
               return (

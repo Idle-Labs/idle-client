@@ -833,6 +833,7 @@ class StrategyPage extends Component {
                           },
                           {
                             title:'',
+                            visibleOnDesktop:true,
                             mobile:this.props.account === null,
                             props:{
                               width:[0.35,0.17],
@@ -926,6 +927,7 @@ class StrategyPage extends Component {
                           },
                           {
                             title:'POOL',
+                            visibleOnDesktop:true,
                             mobile:this.props.account !== null,
                             props:{
                               width:[0.21, 0.12],
@@ -1008,6 +1010,7 @@ class StrategyPage extends Component {
                           },
                           {
                             title:'',
+                            visibleOnDesktop:true,
                             mobile:this.props.account === null,
                             props:{
                               width:[ this.props.account === null ? 0.29 : 0 ,0.17],
@@ -1281,6 +1284,7 @@ class StrategyPage extends Component {
                           },
                           {
                             title:'POOL',
+                            visibleOnDesktop:true,
                             mobile:this.props.account !== null,
                             props:{
                               width:[0.21, 0.10],
@@ -1369,6 +1373,7 @@ class StrategyPage extends Component {
                           },
                           {
                             title:'',
+                            visibleOnDesktop:true,
                             mobile:this.props.account === null,
                             props:{
                               width:[ this.props.account === null ? 0.26 : 0 , 0.17],

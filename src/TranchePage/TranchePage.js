@@ -311,7 +311,7 @@ class TranchePage extends Component {
                       },
                       {
                         q: 'How the APR is determined?',
-                        a: `To determine the actual APR for each tranche class, we also need to know the ratio between the current underlying value of Senior and Junior tranches (ie SeniorRatio = Senior Value / (Senior Value + Junior Value)), for more info <a href="https://github.com/Idle-Labs/idle-tranches#idle-dynamic-tranches" target="_blank" rel="nofollow noopener noreferrer" style="color:${this.props.theme.colors.link}">view the readme</a>`
+                        a: `The base APR, before being splitted between tranches, is provided by the underlying strategy that takes into account the reinvestment of the accrued governance tokens (except for eventual IDLE rewards). To determine the actual APR for each tranche class, we also need to know the ratio between the current underlying value of Senior and Junior tranches (ie SeniorRatio = Senior Value / (Senior Value + Junior Value)). The APY has to be considered net of fees. For more info <a href="https://github.com/Idle-Labs/idle-tranches#idle-dynamic-tranches" target="_blank" rel="nofollow noopener noreferrer" style="color:${this.props.theme.colors.link}">view the readme</a>`
                       },
                       {
                         q: 'What happens in case of hack?',
@@ -323,7 +323,7 @@ class TranchePage extends Component {
                       },
                       {
                         q: 'What are staking rewards?',
-                        a: `To keep a good ratio between Senior and Junior tranches and an healthy APR part of farmed governance tokens (eg stkAAVE or IDLE) are redistributed to users who stakes their tranche tokens in specific tranche rewards contracts.`
+                        a: `To keep a good ratio between Senior and Junior tranches and an healthy APR part of farmed governance tokens (eg IDLE) are redistributed to users who stakes their tranche tokens in specific tranche rewards contracts.`
                       } 
                     ]
                   }}
