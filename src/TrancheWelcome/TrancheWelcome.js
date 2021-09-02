@@ -44,9 +44,9 @@ class Base extends Component {
                 Perpetual Yield Tranches
               </Title>
               <Flex
+                width={1}
                 mb={[3,4]}
                 mx={'auto'}
-                width={[1,0.8]}
                 aligItems={'center'}
                 justifyContent={'center'}
               >
