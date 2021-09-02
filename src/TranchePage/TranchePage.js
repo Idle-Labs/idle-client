@@ -3,8 +3,8 @@ import { Box, Flex } from "rimble-ui";
 import React, { Component } from 'react';
 import GenericFaqs from '../GenericFaqs/GenericFaqs';
 import FunctionsUtil from '../utilities/FunctionsUtil';
-import TrancheWelcome from '../TrancheWelcome/TrancheWelcome';
 import TrancheDetails from '../TrancheDetails/TrancheDetails';
+// import TrancheWelcome from '../TrancheWelcome/TrancheWelcome';
 import TransactionsList from '../TransactionsList/TransactionsList';
 import FundsOverviewTranche from '../FundsOverviewTranche/FundsOverviewTranche';
 import StakingRewardsTranche from '../StakingRewardsTranche/StakingRewardsTranche';
@@ -70,6 +70,7 @@ class TranchePage extends Component {
           {this.functionsUtil.capitalize(this.props.selectedProtocol)} - {this.props.selectedToken} - {this.props.trancheDetails ? this.props.trancheDetails.name : 'Tranches'} 
         </Title>
         {
+          /*
           !this.props.trancheType ? (
             <TrancheWelcome
               {...this.props}
@@ -77,6 +78,7 @@ class TranchePage extends Component {
               selectTrancheType={this.props.selectTrancheType}
             />
           ) : (
+          */
             <Flex
               mt={2}
               width={1}
@@ -95,6 +97,7 @@ class TranchePage extends Component {
                       {...this.props}
                       selectedTranche={trancheType}
                       cdoConfig={this.props.tokenConfig.CDO}
+                      showSelectButton={!this.props.trancheType}
                       selectTrancheType={this.props.selectTrancheType}
                       trancheConfig={this.props.tokenConfig[trancheType]}
                     />
@@ -102,7 +105,9 @@ class TranchePage extends Component {
                 ))
               }
             </Flex>
+            /*
           )
+        */
         }
         {
           this.state.componentLoaded && this.props.account && this.props.userHasFunds && this.props.trancheType &&

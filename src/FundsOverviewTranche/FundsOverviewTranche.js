@@ -315,9 +315,9 @@ class FundsOverviewTranche extends Component {
                 fieldInfo={{
                   name:'trancheDeposited',
                   props:{
-                    decimals:4,
-                    maxPrecision:8,
+                    decimals:7,
                     fontWeight:300,
+                    maxPrecision:8,
                     fontSize:['1.8em','1.9em'],
                     color:this.props.theme.colors.counter,
                     flexProps:{
@@ -347,9 +347,9 @@ class FundsOverviewTranche extends Component {
                 fieldInfo={{
                   name:'trancheStaked',
                   props:{
-                    decimals:4,
-                    maxPrecision:8,
+                    decimals:7,
                     fontWeight:300,
+                    maxPrecision:8,
                     fontSize:['1.8em','1.9em'],
                     color:this.props.theme.colors.counter,
                     flexProps:{

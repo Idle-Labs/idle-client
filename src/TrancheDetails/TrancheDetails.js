@@ -257,23 +257,27 @@ class TrancheDetails extends Component {
         flexDirection={'column'}
         justifyContent={'center'}
       >
-        <Flex
-          width={1}
-          alignItems={'center'}
-          justifyContent={'flex-end'}
-        >
-          <Button
-            mb={2}
-            size={'small'}
-            width={'auto'}
-            contrastColor={'cardBg'}
-            icon={otherTrancheDetails.icon}
-            mainColor={otherTrancheDetails.color.hex}
-            onClick={e => this.props.selectTrancheType(otherTrancheDetails.route)}
-          >
-            Switch to {otherTrancheDetails.name}
-          </Button>
-        </Flex>
+        {
+          !this.props.showSelectButton && (
+            <Flex
+              width={1}
+              alignItems={'center'}
+              justifyContent={'flex-end'}
+            >
+              <Button
+                mb={2}
+                size={'small'}
+                width={'auto'}
+                contrastColor={'cardBg'}
+                icon={otherTrancheDetails.icon}
+                mainColor={otherTrancheDetails.color.hex}
+                onClick={e => this.props.selectTrancheType(otherTrancheDetails.route)}
+              >
+                Switch to {otherTrancheDetails.name}
+              </Button>
+            </Flex>
+          )
+        }
         <DashboardCard
           cardProps={{
             py:3,
@@ -664,7 +668,20 @@ class TrancheDetails extends Component {
             */
           }
           {
-            this.state.balanceProp && this.state.tokenConfig ? (
+            this.props.showSelectButton ? (
+                <Button
+                  mt={3}
+                  width={1}
+                  contrastColor={'cardBg'}
+                  icon={trancheDetails.icon}
+                  mainColor={trancheDetails.color.hex}
+                  onClick={e => this.props.selectTrancheType(trancheDetails.route)}
+                >
+                  {
+                    this.props.tokenConfig ? `Go to ${trancheDetails.name}` : `Start with ${trancheDetails.name}`
+                  }
+                </Button>
+            ) : this.state.balanceProp && this.state.tokenConfig ? (
               <Flex
                 width={1}
                 flexDirection={'column'}
