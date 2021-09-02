@@ -312,11 +312,11 @@ class TranchePage extends Component {
                     '':[
                       {
                         q: 'Is there a locking period?',
-                        a: `There are no locking period or epochs and users are free to enter and exit at any time. The interest earned (and governance tokens, after being partially sold in the market) will be split between the two classes according to a predefined ratio called trancheAPRSplitRatio (eg 20% interest to Senior tranche holders and 80% to Junior tranche) so the rate is variable for both classes of tranches.`
+                        a: `There are no locking period or epochs and users are free to enter and exit at any time. The interest earned (and governance tokens, after being partially sold in the market) will be split between the two classes according to a predefined ratio called trancheAPRSplitRatio (eg 20% interest to Senior tranche holders and 80% to Junior tranche). Hence, the rate is variable for both classes of tranches.`
                       },
                       {
-                        q: 'How the APR is determined?',
-                        a: `The base APR, before being splitted between tranches, is provided by the underlying strategy that takes into account the reinvestment of the accrued governance tokens (except for eventual IDLE rewards). The actual APR of each tranche class is determined by the ratio between the current underlying TVL of Senior and Junior tranches (ie SeniorRatio = Senior TVL / (Senior TVL + Junior TVL)). The APY has to be considered net of fees. For more info <a href="https://github.com/Idle-Labs/idle-tranches#idle-dynamic-tranches" target="_blank" rel="nofollow noopener noreferrer" style="color:${this.props.theme.colors.link}">view the readme</a>`
+                        q: 'How the APY is determined?',
+                        a: `The base APY, before being splitted between tranches, is provided by the underlying strategy that takes into account the reinvestment of the accrued governance tokens (except for eventual IDLE rewards). The actual APY of each tranche class is determined by the ratio between the current underlying TVL of Senior and Junior tranches (ie APY = share of yield allocated to senior tranches / Senior TVL). The APY has to be considered net of fees. For more info <a href="https://github.com/Idle-Labs/idle-tranches#idle-dynamic-tranches" target="_blank" rel="nofollow noopener noreferrer" style="color:${this.props.theme.colors.link}">view the readme</a>`
                       },
                       {
                         q: 'What happens in case of hack?',
@@ -324,11 +324,11 @@ class TranchePage extends Component {
                       },
                       {
                         q: 'How are fees collected?',
-                        a: `Fees are collected on profit harvests. When the strategy auto-reinvest accrued tokens, Idle protocol charges a 10% performance fee. Renevues go into FeeCollector address.`
+                        a: `Fees collected at each harvest event. When the strategy auto-reinvest accrued tokens, Idle protocol charges a 10% performance fee. Renevues get routed to FeeCollector address.`
                       },
                       {
                         q: 'What are staking rewards?',
-                        a: `To keep a good ratio between Senior and Junior tranches and an healthy APR part of farmed governance tokens (eg IDLE) are redistributed to users who stakes their tranche tokens in specific tranche rewards contracts.`
+                        a: `To keep a good ratio between Senior and Junior tranches and an healthy APY part of farmed governance tokens (eg IDLE) are redistributed to users who stakes their tranche tokens in specific tranche rewards contracts.`
                       } 
                     ]
                   }}

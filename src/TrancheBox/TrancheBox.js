@@ -180,7 +180,7 @@ class Base extends Component {
             onClick={e => this.props.selectTrancheType(trancheDetails.route)}
           >
             {
-              this.props.tokenConfig ? `Go to ${trancheDetails.name}` : `Start with ${trancheDetails.name}`
+              this.props.tokenConfig ? `Go to ${trancheDetails.name}` : `Enter the ${trancheDetails.name}`
             }
           </Button>
         </Flex>
