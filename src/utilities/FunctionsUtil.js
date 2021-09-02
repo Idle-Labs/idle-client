@@ -3568,7 +3568,7 @@ class FunctionsUtil {
           const secondsFromFirstTx = parseInt(Date.now()/1000)-parseInt(firstDepositTx.timeStamp);
           output = this.BNify(earningsPerc).times(31536000).div(secondsFromFirstTx);
 
-          // console.log('realizedApy2',output.toString());
+          // console.log('realizedApy2',firstDepositTx,earningsPerc.toString(),output.toString());
 
           if (formatValue){
             output = output.toFixed(2)+'%';
@@ -3604,7 +3604,7 @@ class FunctionsUtil {
           this.genericContractCall(tokenConfig.CDO.name,'getIncentiveTokens')
         ]);
 
-        const govTokens = field === 'govTokens' ? rewardsTokens : (field === 'autoFarming' && rewardsTokens ? rewardsTokens.filter( rewardTokenAddr => !incentiveTokens.map( addr => addr.toLowerCase() ).includes(rewardTokenAddr.toLowerCase()) ) : incentiveTokens);
+        const govTokens = field === 'govTokens' ? rewardsTokens : (field === 'autoFarming' && rewardsTokens ? rewardsTokens.filter( rewardTokenAddr => incentiveTokens && !incentiveTokens.map( addr => addr.toLowerCase() ).includes(rewardTokenAddr.toLowerCase()) ) : incentiveTokens);
 
         // console.log(field,tokenConfig,rewardsTokens,incentiveTokens,govTokens);
 

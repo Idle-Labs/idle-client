@@ -602,8 +602,8 @@ const globalConfigs = {
       iconInactive:'images/strategies/tranches-off.png',
       iconInactiveDark:'images/strategies/tranches-white.png',
       desc:'Diversify your risk profile with dynamic tranched yield derivatives',
-      descShort:'The aim of Idle Perpetual Tranches is to pool capital of users (eg DAI), deposit it into a lending provider (eg Idle Finance) and split the interest received between 2 classes of users with different risk profiles.',
-      descLong:'The aim of Idle Perpetual Tranches is to pool capital of users (eg DAI), deposit it into a lending provider (eg Idle Finance) and split the interest received between 2 classes of users with different risk profiles. One will gain more interest and will be more risky (Junior tranche) and the other will have a lower APR but more safety (Senior tranche). In the case of an hack or a loss of funds of the lending provider integrated (or any other protocol integrated by this provider), all funds still available will be used to refund Senior tranche holders first with the aim of making them whole, and with remaining funds, if any, Junior holders after.',
+      descShort:'The aim of Idle Perpetual Yield Tranches is to pool capital of users (eg DAI), deposit it into a lending provider (eg Idle Finance) and split the interest received between 2 classes of users with different risk profiles.',
+      descLong:'The aim of Idle Perpetual Yield Tranches is to pool capital of users (eg DAI), deposit it into a lending provider (eg Idle Finance) and split the interest received between 2 classes of users with different risk profiles. One will gain more interest and will be more risky (Junior tranche) and the other will have a lower APR but more safety (Senior tranche). In the case of an hack or a loss of funds of the lending provider integrated (or any other protocol integrated by this provider), all funds still available will be used to refund Senior tranche holders first with the aim of making them whole, and with remaining funds, if any, Junior holders after.',
     },
     best:{
       token:'DAI',

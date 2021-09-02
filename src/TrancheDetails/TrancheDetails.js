@@ -524,6 +524,38 @@ class TrancheDetails extends Component {
                 protocol={this.props.selectedProtocol}
                 trancheConfig={this.props.trancheConfig}
               />
+              <Flex
+                width={1}
+                alignItems={'center'}
+                flexDirection={'row'}
+              >
+                <Text
+                  fontSize={1}
+                  fontWeight={2}
+                  lineHeight={'1'}
+                  color={'cellText'}
+                >
+                  +
+                </Text>
+                <TrancheField
+                  {...this.props}
+                  fieldInfo={{
+                    name:'trancheIDLEDistribution',
+                    props:{
+                      decimals:4,
+                      fontSize:1,
+                      fontWeight:2,
+                      lineHeight:'1',
+                      color:'cellText'
+                    }
+                  }}
+                  token={this.props.selectedToken}
+                  tranche={this.props.selectedTranche}
+                  tokenConfig={this.props.tokenConfig}
+                  protocol={this.props.selectedProtocol}
+                  trancheConfig={this.props.trancheConfig}
+                />
+              </Flex>
             </Flex>
           </Flex>
           {

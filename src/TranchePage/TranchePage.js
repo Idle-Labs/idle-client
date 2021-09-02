@@ -307,19 +307,19 @@ class TranchePage extends Component {
                     '':[
                       {
                         q: 'Is there a locking period?',
-                        a: `There are no locking period or epochs and users are free to enter and exit at any time, the interest earned (and governance tokens, after being partially sold in the market) will be split between the two classes according to a predefined ratio called trancheAPRSplitRatio (eg 20% interest to Senior tranche holders and 80% to Junior tranche) so the rate is variable for both classes of tranches.`
+                        a: `There are no locking period or epochs and users are free to enter and exit at any time. The interest earned (and governance tokens, after being partially sold in the market) will be split between the two classes according to a predefined ratio called trancheAPRSplitRatio (eg 20% interest to Senior tranche holders and 80% to Junior tranche) so the rate is variable for both classes of tranches.`
                       },
                       {
                         q: 'How the APR is determined?',
-                        a: `The base APR, before being splitted between tranches, is provided by the underlying strategy that takes into account the reinvestment of the accrued governance tokens (except for eventual IDLE rewards). To determine the actual APR for each tranche class, we also need to know the ratio between the current underlying value of Senior and Junior tranches (ie SeniorRatio = Senior Value / (Senior Value + Junior Value)). The APY has to be considered net of fees. For more info <a href="https://github.com/Idle-Labs/idle-tranches#idle-dynamic-tranches" target="_blank" rel="nofollow noopener noreferrer" style="color:${this.props.theme.colors.link}">view the readme</a>`
+                        a: `The base APR, before being splitted between tranches, is provided by the underlying strategy that takes into account the reinvestment of the accrued governance tokens (except for eventual IDLE rewards). The actual APR of each tranche class is determined by the ratio between the current underlying TVL of Senior and Junior tranches (ie SeniorRatio = Senior TVL / (Senior TVL + Junior TVL)). The APY has to be considered net of fees. For more info <a href="https://github.com/Idle-Labs/idle-tranches#idle-dynamic-tranches" target="_blank" rel="nofollow noopener noreferrer" style="color:${this.props.theme.colors.link}">view the readme</a>`
                       },
                       {
                         q: 'What happens in case of hack?',
-                        a: `In case of hack, an emergency shutdown can be triggered (by both the guardian, which would be a multi-sig wallet, and the owner which will be the Idle governance) in order to pause both deposits and redeems, the redistribution of remaining funds can happens selectively, by allowing only Senior tranche holders to withdraw first directly in the main contract, or through a separate contract for more complex cases and resolutions (managed by the Idle governance).`
+                        a: `In case of hack, an emergency shutdown can be triggered (by both the guardian, which would be a multi-sig wallet, and the owner which will be the Idle governance) in order to pause both deposits and redeems.<br />The redistribution of remaining funds can happens selectively, by allowing only Senior tranche holders to withdraw first directly in the main contract, or through a separate contract for more complex cases and resolutions (managed by the Idle governance).`
                       },
                       {
                         q: 'How are fees collected?',
-                        a: `A Fee is collected on harvests in the form Senior tranche or Junior tranche supply diluition (based on the current Senior tranche ratio in value) and it's basically a performance fee, currently set at 10% of the interest generated and it will be redirected to the Idle fee collector address.`
+                        a: `Fees are collected on profit harvests. When the strategy auto-reinvest accrued tokens, Idle protocol charges a 10% performance fee. Renevues go into FeeCollector address.`
                       },
                       {
                         q: 'What are staking rewards?',

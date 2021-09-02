@@ -41,10 +41,10 @@ class Base extends Component {
               <Title
                 mb={3}
               >
-                Perpetual Tranches
+                Perpetual Yield Tranches
               </Title>
               <Flex
-                mb={3}
+                mb={[3,4]}
                 mx={'auto'}
                 width={[1,0.8]}
                 aligItems={'center'}

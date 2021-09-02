@@ -373,7 +373,7 @@ class Tranches extends Component {
                 <Title
                   mb={3}
                 >
-                  Tranches
+                  Perpetual Yield Tranches
                 </Title>
               )}
               {
