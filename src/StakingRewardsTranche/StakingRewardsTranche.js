@@ -1,4 +1,5 @@
-import { Button } from "rimble-ui";
+import Title from '../Title/Title';
+import { Button, Flex } from "rimble-ui";
 import React, { Component } from 'react';
 import CustomList from '../CustomList/CustomList';
 import FunctionsUtil from '../utilities/FunctionsUtil';
@@ -8,7 +9,7 @@ class StakingRewardsTranche extends Component {
 
   state = {
     stakingRewards:null,
-    stakingRewardsRows:[]
+    stakingRewardsRows:null
   };
 
   // Utils
@@ -33,7 +34,9 @@ class StakingRewardsTranche extends Component {
     const accountChanged = prevProps.account !== this.props.account;
     const portfolioChanged = JSON.stringify(prevProps.portfolio) !== JSON.stringify(this.props.portfolio);
     const trancheConfigChanged = JSON.stringify(prevProps.trancheConfig) !== JSON.stringify(this.props.trancheConfig);
-    if (accountChanged || trancheConfigChanged || portfolioChanged){
+    const transactionsChanged = prevProps.transactions && this.props.transactions && Object.values(prevProps.transactions).filter(tx => (tx.status==='success')).length !== Object.values(this.props.transactions).filter(tx => (tx.status==='success')).length;
+
+    if (accountChanged || trancheConfigChanged || portfolioChanged || transactionsChanged){
       this.loadUserRewards();
     }
   }
@@ -85,120 +88,128 @@ class StakingRewardsTranche extends Component {
   render() {
     return (
       this.state.stakingRewardsRows ?
-        <CustomList
-          rows={this.state.stakingRewardsRows}
-          cols={[
-            {
-              title:'TOKEN',
-              props:{
-                width:[0.18,0.16]
-              },
-              fields:[
-                {
-                  type:'image',
-                  props:{
-                    mr:2,
-                    size:this.props.isMobile ? '1.2em' : '1.8em'
-                  },
-                  path:['tokenIcon']
+        <Flex
+          mb={[0,4]}
+          width={1}
+          flexDirection={'column'}
+          id={'funds-overview-container'}
+        >
+          <Title my={[3,4]}>Staking Rewards</Title>
+          <CustomList
+            rows={this.state.stakingRewardsRows}
+            cols={[
+              {
+                title:'TOKEN',
+                props:{
+                  width:[0.18,0.16]
                 },
-                {
-                  type:'text',
-                  path:['token'],
-                }
-              ]
-            },
-            {
-              mobile:false,
-              title:'BALANCE',
-              props:{
-                width:[0.27,0.24],
-                justifyContent:['center','flex-start']
-              },
-              fields:[
-                {
-                  type:'text',
-                  path:['balance'],
-                  props:{
-                    decimals: this.props.isMobile ? 4 : 8
-                  }
-                },
-              ]
-            },
-            {
-              title:'REDEEMABLE',
-              desc:this.functionsUtil.getGlobalConfig(['messages','govTokenRedeemableBalance']),
-              props:{
-                width:[0.29,0.24],
-                justifyContent:['center','flex-start']
-              },
-              fields:[
-                {
-                  type:'text',
-                  path:['reedemable'],
-                  props:{
-                    decimals: this.props.isMobile ? 4 : 8
-                  }
-                },
-              ]
-            },
-            {
-              title:'DISTRIBUTION',
-              desc:this.functionsUtil.getGlobalConfig(['messages','userDistributionSpeed']),
-              props:{
-                width:[0.29,0.24],
-              },
-              fields:[
-                {
-                  type:'text',
-                  path:['distributionSpeed'],
-                  props:{
-                    decimals: this.props.isMobile ? 4 : 8
-                  }
-                }
-              ]
-            },
-            {
-              title:'',
-              props:{
-                width:[0.26,0.16],
-              },
-              parentProps:{
-                width:1
-              },
-              fields:[
-                {
-                  funcProps:{
-                    disabled:(props) => (this.functionsUtil.BNify(props.row.reedemable).lte(0))
-                  },
-                  fieldComponent:ExecuteTransaction,
-                  props:{
-                    params:[],
-                    parentProps:{
-                      width:1
+                fields:[
+                  {
+                    type:'image',
+                    props:{
+                      mr:2,
+                      size:this.props.isMobile ? '1.2em' : '1.8em'
                     },
-                    Component:Button,
-                    componentProps:{
-                      style:{
-                        width:'100%'
+                    path:['tokenIcon']
+                  },
+                  {
+                    type:'text',
+                    path:['token'],
+                  }
+                ]
+              },
+              {
+                mobile:false,
+                title:'BALANCE',
+                props:{
+                  width:[0.27,0.24],
+                  justifyContent:['center','flex-start']
+                },
+                fields:[
+                  {
+                    type:'text',
+                    path:['balance'],
+                    props:{
+                      decimals: this.props.isMobile ? 4 : 8
+                    }
+                  },
+                ]
+              },
+              {
+                title:'REDEEMABLE',
+                desc:this.functionsUtil.getGlobalConfig(['messages','govTokenRedeemableBalance']),
+                props:{
+                  width:[0.29,0.24],
+                  justifyContent:['center','flex-start']
+                },
+                fields:[
+                  {
+                    type:'text',
+                    path:['reedemable'],
+                    props:{
+                      decimals: this.props.isMobile ? 4 : 8
+                    }
+                  },
+                ]
+              },
+              {
+                title:'DISTRIBUTION',
+                desc:this.functionsUtil.getGlobalConfig(['messages','userDistributionSpeed']),
+                props:{
+                  width:[0.29,0.24],
+                },
+                fields:[
+                  {
+                    type:'text',
+                    path:['distributionSpeed'],
+                    props:{
+                      decimals: this.props.isMobile ? 4 : 8
+                    }
+                  }
+                ]
+              },
+              {
+                title:'',
+                props:{
+                  width:[0.26,0.16],
+                },
+                parentProps:{
+                  width:1
+                },
+                fields:[
+                  {
+                    funcProps:{
+                      disabled:(props) => (this.functionsUtil.BNify(props.row.reedemable).lte(0))
+                    },
+                    fieldComponent:ExecuteTransaction,
+                    props:{
+                      params:[],
+                      parentProps:{
+                        width:1
                       },
-                      value:'Claim',
-                      borderRadius:4,
-                      mainColor:'redeem',
-                      size:this.props.isMobile ? 'small' : 'medium'
-                    },
-                    action:'Claim',
-                    methodName:'claim',
-                    callback:this.claimCallback.bind(this),
-                    contractName:this.props.trancheConfig.CDORewards.name
+                      Component:Button,
+                      componentProps:{
+                        style:{
+                          width:'100%'
+                        },
+                        value:'Claim',
+                        borderRadius:4,
+                        mainColor:'redeem',
+                        size:this.props.isMobile ? 'small' : 'medium'
+                      },
+                      action:'Claim',
+                      methodName:'claim',
+                      callback:this.claimCallback.bind(this),
+                      contractName:this.props.trancheConfig.CDORewards.name
+                    }
                   }
-                }
-              ]
-            }
-          ]}
-          {...this.props}
-        />
-      : this.props.children
+                ]
+              }
+            ]}
+            {...this.props}
+          />
+        </Flex>
+      : this.props.children || null
     );
   }
 }

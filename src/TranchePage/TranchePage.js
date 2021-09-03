@@ -111,23 +111,15 @@ class TranchePage extends Component {
         }
         {
           this.state.componentLoaded && this.props.account && this.props.userHasFunds && this.props.trancheType &&
-            <Flex
-              mb={[0,4]}
-              width={1}
-              flexDirection={'column'}
-              id={'funds-overview-container'}
-            >
-              <Title my={[3,4]}>Staking Rewards</Title>
-              <StakingRewardsTranche
-                {...this.props}
-                token={this.props.selectedToken}
-                tranche={this.props.trancheType}
-                tokenConfig={this.props.tokenConfig}
-                protocol={this.props.selectedProtocol}
-                transactionsList={this.state.transactions}
-                trancheConfig={this.props.tokenConfig[this.props.trancheType]}
-              />
-            </Flex>
+            <StakingRewardsTranche
+              {...this.props}
+              token={this.props.selectedToken}
+              tranche={this.props.trancheType}
+              tokenConfig={this.props.tokenConfig}
+              protocol={this.props.selectedProtocol}
+              transactionsList={this.state.transactions}
+              trancheConfig={this.props.tokenConfig[this.props.trancheType]}
+            />
         }
         {
           this.state.componentLoaded && this.props.account && this.props.userHasFunds && this.props.trancheType &&
