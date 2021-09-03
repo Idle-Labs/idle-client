@@ -467,8 +467,8 @@ class DeployB2BVesting extends Component {
 
   render() {
 
-    const depositContracts = this.state.deployedContracts.filter( c => c.owner.toLowerCase() === this.props.account.toLowerCase() );
-    const claimContracts = this.state.deployedContracts.filter( c => c.recipient.toLowerCase() === this.props.account.toLowerCase() );
+    const depositContracts = this.props.account ? this.state.deployedContracts.filter( c => c.owner.toLowerCase() === this.props.account.toLowerCase() ) : [];
+    const claimContracts = this.props.account ? this.state.deployedContracts.filter( c => c.recipient.toLowerCase() === this.props.account.toLowerCase() ) : [];
 
     return (
       <Flex
