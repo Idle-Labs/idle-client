@@ -545,7 +545,7 @@ const globalConfigs = {
         'Stake to receive $IDLE tokens'
       ],
       description:{
-        long:'The Senior Tranche offers the safest way to access the lending market and enjoy its returns thanks to the built-in funds coverage.',
+        long:'Senior Tranches provide a shielded access to optimized DeFi yields, thanks to an integrated funds\' coverage given by Junior Tranches',
         deposit:'By depositing in the Senior Tranche in case of Smart-Contract breach your funds are covered by the funds deposited in the Junior Tranche.',
         stake:'Stake your tranche tokens to earn additional rewards and boost the APY.',
         unstake:'By unstaking your tranche tokens you will no more get additional rewards.',
@@ -573,7 +573,7 @@ const globalConfigs = {
         'Stake to receive $IDLE tokens'
       ],
       description:{
-        long:'The Junior Tranche get an amplified yield in exchange of an higher risk profile.',
+        long:'The Junior Tranches provide amplified optimized DeFi yields by carrying a higher grade of risks and protecting Senior Tranches',
         deposit:'By depositing in the Junior Tranche in case of Smart-Contract breach your funds will be used to cover eventual losses on the Senior Tranche.',
         stake:'Stake your tranche tokens to earn additional rewards and boost the APY.',
         unstake:'By unstaking your tranche tokens you will no more get additional rewards.',

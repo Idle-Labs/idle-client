@@ -91,6 +91,7 @@ class Base extends Component {
               >
                 <Flex
                   width={1}
+                  height={'100%'}
                   alignItems={'center'}
                   flexDirection={'column'}
                   justifyContent={'center'}

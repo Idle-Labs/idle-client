@@ -35,9 +35,9 @@ class Base extends Component {
           py:3,
           px:3,
           border:null,
-          style:{
-            // border:`1px solid ${trancheDetails.color.hex}`
-          }
+          height:'100%',
+          display:'flex',
+          flexDirection:'column'
         }}
       >
         <Flex
@@ -131,6 +131,7 @@ class Base extends Component {
         </Flex>
         <Flex
           width={1}
+          height={'100%'}
           flexDirection={'column'}
         >
           <Text
@@ -171,18 +172,23 @@ class Base extends Component {
               ))
             }
           </Flex>
-          <Button
-            mt={3}
-            width={1}
-            contrastColor={'cardBg'}
-            icon={trancheDetails.icon}
-            mainColor={trancheDetails.color.hex}
-            onClick={e => this.props.selectTrancheType(trancheDetails.route)}
+          <Flex
+            height={'100%'}
+            alignItems={'flex-end'}
           >
-            {
-              this.props.tokenConfig ? `Go to ${trancheDetails.name}` : `Enter the ${trancheDetails.name}`
-            }
-          </Button>
+            <Button
+              mt={3}
+              width={1}
+              contrastColor={'cardBg'}
+              icon={trancheDetails.icon}
+              mainColor={trancheDetails.color.hex}
+              onClick={e => this.props.selectTrancheType(trancheDetails.route)}
+            >
+              {
+                this.props.tokenConfig ? `Go to ${trancheDetails.name}` : `Enter the ${trancheDetails.name}`
+              }
+            </Button>
+          </Flex>
         </Flex>
       </DashboardCard>
     );

@@ -805,7 +805,7 @@ class Tranches extends Component {
                     {
                       title:'TOKEN',
                       props:{
-                        width:[0.21, 0.12],
+                        width:[0.16, 0.12],
                       },
                       fields:[
                         {
@@ -930,9 +930,9 @@ class Tranches extends Component {
                     },
                     {
                       title:'',
-                      mobile:this.props.account === null,
+                      mobile:false,
                       props:{
-                        width:[ this.props.account === null ? 0.29 : 0 ,0.16],
+                        width:[0.29, 0.16],
                       },
                       parentProps:{
                         width:1
