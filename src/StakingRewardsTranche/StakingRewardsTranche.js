@@ -63,7 +63,7 @@ class StakingRewardsTranche extends Component {
       const tokenAmount = this.functionsUtil.BNify(stakingRewards[rewardToken]);
       const rewardTokenInfo = rewardTokensInfo[rewardToken];
       const tokenBalance = await this.functionsUtil.getTokenBalance(rewardToken,this.props.account);
-      let distributionSpeed = rewardTokenInfo ? rewardTokenInfo.tokensPerDay : null;
+      let distributionSpeed = rewardTokenInfo ? rewardTokenInfo.lastAmount : null;
       if (trancheBalanceInfo){
         distributionSpeed = distributionSpeed.times(trancheBalanceInfo.poolShare);
       }
@@ -72,7 +72,7 @@ class StakingRewardsTranche extends Component {
         balance:tokenBalance.toFixed(8),
         reedemable:tokenAmount.toFixed(8),
         tokenIcon:tokenConfig.icon || `images/tokens/${rewardToken}.svg`,
-        distributionSpeed:distributionSpeed ? distributionSpeed.toFixed(8)+` ${rewardToken}/day` : '-'
+        distributionSpeed:distributionSpeed ? distributionSpeed.toFixed(8)+` ${rewardToken} (last harvest)` : '-'
       });
     });
 

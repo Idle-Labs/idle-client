@@ -767,9 +767,9 @@ class FunctionsUtil {
       const transfers = await this.getContractEvents(token,'Transfer',{fromBlock: tokenConfig.blockNumber,toBlock:'latest',filter:eventFilters});
 
       if (transfers && transfers.length>0){
-        const previousHarvest = transfers.length>1 ? transfers[transfers.length-2] : null;
+        const firstHarvest = transfers.length ? transfers[0] : null;
         const latestHarvest = transfers[transfers.length-1];
-        const previousBlock = previousHarvest ? previousHarvest.blockNumber : tokenConfig.blockNumber;
+        const firstBlock = firstHarvest ? firstHarvest.blockNumber : tokenConfig.blockNumber;
 
         const govTokenConfig = this.getGlobalConfig(['govTokens',token]);
         const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
@@ -779,19 +779,24 @@ class FunctionsUtil {
           conversionRate,
           lastBlockPoolSize
         ] = await Promise.all([
-          this.getBlockInfo(previousBlock),
+          this.getBlockInfo(firstBlock),
           this.getBlockInfo(latestHarvest.blockNumber),
           this.getUniswapConversionRate(DAITokenConfig,govTokenConfig),
           this.genericContractCallCached(tokenConfig.CDO.name,'getContractValue',[],{},latestHarvest.blockNumber)
         ]);
         if (prevBlockInfo && lastBlockInfo){
           const poolSize = this.fixTokenDecimals(lastBlockPoolSize,tokenConfig.CDO.decimals);
-
-          const elapsedBlocks = latestHarvest.blockNumber-previousBlock;
+          const elapsedBlocks = latestHarvest.blockNumber-firstBlock;
           const elapsedSeconds = lastBlockInfo.timestamp-prevBlockInfo.timestamp;
-          const transferAmount = this.fixTokenDecimals(latestHarvest.returnValues.value,govTokenConfig.decimals);
-          const tokensPerBlock = transferAmount.div(elapsedBlocks);
-          const tokensPerSecond = transferAmount.div(elapsedSeconds);
+
+          const lastAmount = this.fixTokenDecimals(latestHarvest.returnValues.value,govTokenConfig.decimals);
+          const totalAmount = transfers.reduce( (total,t) => {
+            total = total.plus(this.fixTokenDecimals(t.returnValues.value,govTokenConfig.decimals));
+            return total;
+          },this.BNify(0));
+
+          const tokensPerBlock = totalAmount.div(elapsedBlocks);
+          const tokensPerSecond = totalAmount.div(elapsedSeconds);
           const tokensPerDay = tokensPerSecond.times(86400);
           const tokensPerYear = tokensPerSecond.times(this.getGlobalConfig(['network','secondsPerYear']));
           const convertedTokensPerYear = tokensPerYear.times(conversionRate);
@@ -799,6 +804,8 @@ class FunctionsUtil {
           const tokenApy = this.apr2apy(tokenApr);
 
           tokensDistribution[token] = {
+            lastAmount,
+            totalAmount,
             apr:tokenApr,
             apy:tokenApy,
             tokensPerDay,
@@ -3341,6 +3348,7 @@ class FunctionsUtil {
       await this.props.initContract(strategyConfig.name,idleStrategyAddress,strategyConfig.abi);
     }
 
+    const idleGovTokenConfig = this.getGlobalConfig(['govTokens','IDLE']);
     switch (field){
       case 'protocolName':
         output = (this.getGlobalConfig(['stats','protocols',protocol,'label']) || this.capitalize(protocol)).toUpperCase();
@@ -3575,15 +3583,21 @@ class FunctionsUtil {
           }
         }
       break;
+      case 'trancheIDLELastHarvest':
       case 'trancheIDLEDistribution':
-        const idleGovTokenConfig = this.getGlobalConfig(['govTokens','IDLE']);
         const rewardsTokensInfo = await this.getTrancheRewardTokensInfo(tokenConfig,trancheConfig);
         if (rewardsTokensInfo && rewardsTokensInfo.IDLE){
-          output = this.fixDistributionSpeed(rewardsTokensInfo.IDLE.tokensPerSecond,idleGovTokenConfig.distributionFrequency);
-          if (formatValue){
-            output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+` IDLE/${idleGovTokenConfig.distributionFrequency}`
+          if (field === 'trancheIDLEDistribution'){
+            output = this.fixDistributionSpeed(rewardsTokensInfo.IDLE.tokensPerSecond,idleGovTokenConfig.distributionFrequency);
+            if (formatValue){
+              output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+` IDLE/${idleGovTokenConfig.distributionFrequency}`
+            }
+          } else {
+            output = rewardsTokensInfo.IDLE.lastAmount;
+            if (formatValue){
+              output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+` IDLE (last harvest)`
+            }
           }
-          // console.log('trancheIDLEDistribution',rewardsTokensInfo.IDLE,output);
         }
       break;
       case 'AAIDLEDistribution':

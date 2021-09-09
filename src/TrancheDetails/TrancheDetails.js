@@ -10,6 +10,7 @@ import DashboardCard from '../DashboardCard/DashboardCard';
 import ShareModal from '../utilities/components/ShareModal';
 import CardIconButton from '../CardIconButton/CardIconButton';
 import SendTxWithBalance from '../SendTxWithBalance/SendTxWithBalance';
+import LimitReachedModal from '../utilities/components/LimitReachedModal';
 
 class TrancheDetails extends Component {
 
@@ -220,6 +221,18 @@ class TrancheDetails extends Component {
     };
   }
 
+  async checkLimit(amount){
+    const trancheLimit = this.functionsUtil.BNify(this.props.tokenConfig.limit);
+    const poolSize = await this.functionsUtil.loadTrancheFieldRaw(`pool`,{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account);
+    if (poolSize.plus(amount).gt(trancheLimit)){
+      this.setState({
+        activeModal:'limit'
+      })
+      return false;
+    }
+    return true;
+  }
+
   transactionSucceeded(){
     this.loadData();
     switch (this.state.selectedAction){
@@ -250,6 +263,7 @@ class TrancheDetails extends Component {
     const trancheDetails = this.functionsUtil.getGlobalConfig(['tranches',this.props.selectedTranche]);
     const otherTrancheType = this.props.selectedTranche === 'AA' ? 'BB' : 'AA';
     const otherTrancheDetails = this.functionsUtil.getGlobalConfig(['tranches',otherTrancheType]);
+    const trancheLimit = this.functionsUtil.formatMoney(this.functionsUtil.BNify(this.props.tokenConfig.limit),0)+' '+this.props.selectedToken;
     return (
       <Flex
         width={1}
@@ -544,7 +558,7 @@ class TrancheDetails extends Component {
                 <TrancheField
                   {...this.props}
                   fieldInfo={{
-                    name:'trancheIDLEDistribution',
+                    name:'trancheIDLELastHarvest',
                     props:{
                       decimals:4,
                       fontSize:1,
@@ -806,6 +820,7 @@ class TrancheDetails extends Component {
                     tokenConfig={this.state.tokenConfig}
                     tokenBalance={this.state.balanceProp}
                     contractInfo={this.state.contractInfo}
+                    checkLimit={this.checkLimit.bind(this)}
                     approveEnabled={this.state.approveEnabled}
                     buttonDisabled={this.state.buttonDisabled}
                     callback={this.transactionSucceeded.bind(this)}
@@ -852,6 +867,12 @@ class TrancheDetails extends Component {
             )
           }
         </DashboardCard>
+        <LimitReachedModal
+          {...this.props}
+          limit={trancheLimit}
+          closeModal={this.resetModal}
+          isOpen={this.state.activeModal === 'limit'}
+        />
         <ShareModal
           confettiEnabled={true}
           icon={`images/medal.svg`}

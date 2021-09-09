@@ -219,6 +219,13 @@ class SendTxWithBalance extends Component {
       return false;
     }
 
+    if (typeof this.props.checkLimit === 'function'){
+      const limitCheck = await this.props.checkLimit(inputValue);
+      if (!limitCheck){
+        return false;
+      }
+    }
+
     const _amount = this.functionsUtil.normalizeTokenAmount(inputValue,this.props.tokenConfig.decimals);
 
     // console.log('executeTx',params);
