@@ -10,7 +10,8 @@ import ENS, { getEnsAddress } from '@ensdomains/ensjs';
 
 const ethereumjsABI = require('ethereumjs-abi');
 const env = process.env;
-
+const INFURA_KEY=env["REACT_APP_INFURA_KEY"];
+const BatchProvider = new ethers.providers.JsonRpcBatchProvider(globalConfigs.network.providers.infura[1]+INFURA_KEY);
 window.profiler = {};
 
 class FunctionsUtil {
@@ -4802,37 +4803,112 @@ class FunctionsUtil {
 
     return this.setCachedDataWithLocalStorage(cachedDataKey,result,TTL);
   }
-  genericContractCall = async (contractName, methodName, params = [], callParams = {}, blockNumber = 'latest') => {
-
-    if (!contractName){
+  genericContractCall = async (
+    contractName,
+    methodName,
+    params = [],
+    callParams = {},
+    blockNumber = "latest"
+  ) => {
+    //console.log("calling");
+    if (!contractName) {
       return null;
     }
-
+    //console.log("Provider",BatchProvider)
+    //const contractsearch = contractName.concat("_call");
+  contractName = contractName + "_call";
     const contract = this.getContractByName(contractName);
 
     if (!contract) {
-      this.customLog('Wrong contract name', contractName);
+      this.customLog("Wrong contract name", contractName);
+
+      console.log("Contract", contract);
       return null;
     }
+    console.log("Contract", contract);
+    const ethersContract= new ethers.Contract(contract.options.address,contract.options.jsonInterface,BatchProvider)
 
-    if (!contract.methods[methodName]) {
+    /*if (!contract.methods[methodName]) {
       this.customLog('Wrong method name', methodName);
       return null;
     }
+      */
+    //const method = contract.interface.getFunction(methodName);
+    //if(method.name!==methodName){
+    //this.customLog('Wrong method name', methodName);
+    //return null;
+    //}
+    //console.log("Contract", ethersContract);
+    blockNumber =
+      blockNumber !== "latest" && blockNumber && !isNaN(blockNumber)
+        ? parseInt(blockNumber)
+        : blockNumber;
 
-    blockNumber = blockNumber !== 'latest' && blockNumber && !isNaN(blockNumber) ? parseInt(blockNumber) : blockNumber;
+    try {
+      //console.log("helo");
 
-    try{
       // this.customLog(`genericContractCall - ${contractName} - ${methodName}`);
-      const value = await contract.methods[methodName](...params).call(callParams,blockNumber).catch(error => {
+
+      /*const value = await contract.methods[methodName](...params).call(callParams,blockNumber).catch(error => {
         this.customLog(`${contractName} contract method ${methodName} error: `, error);
       });
-      // console.log(`${moment().format('HH:mm:ss')} - genericContractCall (${blockNumber}) - ${contractName} - ${methodName} (${JSON.stringify(params)}) : ${value}`);
+       console.log(`${moment().format('HH:mm:ss')} - genericContractCall (${blockNumber}) - ${contractName} - ${methodName} (${JSON.stringify(params)}) : ${value}`);
+      return value;
+
+      */
+  
+      //if (blockNumber)
+     
+      let a = await ethersContract[methodName](...params, callParams);
+      //console.log("Results",methodName, a);
+
+      console.log(
+        `${moment().format(
+          "HH:mm:ss"
+        )} - genericContractCall (${blockNumber}) - ${contractName} - ${methodName} (${JSON.stringify(
+          params
+        )}) : ${a}`
+      );
+
+      let BN = Web3.utils.BN;
+      let x
+      let b;
+      const value = [];
+      //console.log("working before");
+
+      if (Array.isArray(a)) {
+        for (let i = 0; i < a.length; i++) {
+          // console.log("A[i]",a[i]);
+          b = a[i];
+          if (Array.isArray(a[i])) {
+            x = value.push([]);
+            for (let j = 0; j < a[i].length; j++) {
+              //  console.log("Bef",a[i])
+              //console.log("B[j]",b[j]);
+              if (ethers.BigNumber.isBigNumber(b[j])) {
+                x = value[i].push(new BN(b[j].toString()));
+              } else x = value[i].push(b[j]);
+              // console.log("Aft",value[i]);
+              //console.log("Array",value[i]);
+            }
+          } else if (ethers.BigNumber.isBigNumber(b)) {
+            a[i] = BN(b.toNumber());
+            x = value.push(new BN(b.toString()));
+          } else x = value.push(b);
+          //console.log(value)
+        }
+      } else if (ethers.BigNumber.isBigNumber(a))
+        x = value.push(new BN(a.toString()));
+      else x = value.push(a);
+      // console.log("Value",value)
+
+      //console.log("working after");
+      // console.log("Value is", a);
       return value;
     } catch (error) {
       this.customLog("genericContractCall error", error);
     }
-  }
+  };
   asyncForEach = async (array, callback, async=true) => {
     if (async){
       await Promise.all(array.map( (c,index) => {
