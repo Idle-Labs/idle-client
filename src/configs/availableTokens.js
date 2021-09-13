@@ -1251,6 +1251,7 @@ const availableTokens = {
         },
         protocols:[
           {
+            defiScore:7.9,
             enabled:true,
             abi:cToken.abi,
             name:'compound',
@@ -1279,6 +1280,7 @@ const availableTokens = {
             },
           },
           {
+            defiScore:7.4,
             abi:aToken,
             name:'aave',
             enabled:true,
@@ -1290,6 +1292,7 @@ const availableTokens = {
             }
           },
           {
+            defiScore:7.4,
             abi:aToken,
             name:'aavev2',
             enabled:true,
@@ -1312,6 +1315,7 @@ const availableTokens = {
             }
           },
           {
+            defiScore:7.7,
             abi:yToken,
             name:'dydx',
             enabled:true,
@@ -1390,9 +1394,10 @@ const availableTokens = {
         },
         protocols:[
           {
-            name:'compound',
+            defiScore:8.0,
             enabled:true,
             abi:cToken.abi,
+            name:'compound',
             address:'0x39aa39c021dfbae8fac545936693ac917d5e7563',
             token:'cUSDC',
             decimals:16,
@@ -1418,6 +1423,7 @@ const availableTokens = {
             },
           },
           {
+            defiScore:7.4,
             name:'aave',
             enabled:true,
             abi:aToken,
@@ -1429,6 +1435,7 @@ const availableTokens = {
             }
           },
           {
+            defiScore:7.4,
             abi:aToken,
             decimals:18,
             enabled:true,
@@ -1440,6 +1447,7 @@ const availableTokens = {
             }
           },
           {
+            defiScore:7.8,
             name:'dydx',
             enabled:true,
             abi:yToken,
@@ -1499,6 +1507,7 @@ const availableTokens = {
         },
         protocols:[
           {
+            defiScore:7.9,
             name:'compound',
             enabled:true,
             abi:cToken.abi,
@@ -1527,6 +1536,7 @@ const availableTokens = {
             },
           },
           {
+            defiScore:7.2,
             name:'aave',
             enabled:true,
             abi:aToken,
@@ -1538,6 +1548,7 @@ const availableTokens = {
             }
           },
           {
+            defiScore:7.2,
             abi:aToken,
             decimals:18,
             name:'aavev2',
@@ -1596,6 +1607,7 @@ const availableTokens = {
         },
         protocols:[
           {
+            defiScore:7.2,
             name:'aave',
             enabled:true,
             abi:aToken,
@@ -1607,6 +1619,7 @@ const availableTokens = {
             }
           },
           {
+            defiScore:7.2,
             name:'aavev2',
             enabled:true,
             abi:aToken,
@@ -1664,6 +1677,7 @@ const availableTokens = {
         },
         protocols:[
           {
+            defiScore:7.8,
             name:'aave',
             enabled:true,
             abi:aToken,
@@ -1675,6 +1689,7 @@ const availableTokens = {
             }
           },
           {
+            defiScore:7.8,
             abi:aToken,
             enabled:true,
             name:'aavev2',
@@ -1714,6 +1729,7 @@ const availableTokens = {
         },
         protocols:[
           {
+            defiScore:8.8,
             enabled:true,
             abi:cToken.abi,
             name:'compound',
@@ -1728,6 +1744,7 @@ const availableTokens = {
             },
           },
           {
+            defiScore:8.3,
             abi:aToken,
             name:'aavev2',
             enabled:true,
@@ -1787,6 +1804,7 @@ const availableTokens = {
         },
         protocols:[
           {
+            defiScore:8.9,
             enabled:true,
             token:'cWBTC',
             abi:cToken.abi,
@@ -1815,6 +1833,7 @@ const availableTokens = {
             },
           },
           {
+            defiScore:8.3,
             abi:aToken,
             name:'aave',
             enabled:true,
@@ -1826,6 +1845,7 @@ const availableTokens = {
             }
           },
           {
+            defiScore:8.3,
             abi:aToken,
             enabled:true,
             name:'aavev2',
@@ -1845,6 +1865,7 @@ const availableTokens = {
         enabled:true,
         abi:ERC20.abi,
         enabledEnvs:[],
+        defiScoreDisabled:true,
         govTokensDisabled:false,
         color:'hsl(169,42%,37%)',
         icon:'images/tokens/RAI.png',
@@ -1902,6 +1923,7 @@ const availableTokens = {
         enabled:true,
         abi:ERC20.abi,
         enabledEnvs:['beta'],
+        defiScoreDisabled:true,
         govTokensDisabled:false,
         color:'hsl(158, 64%, 37%)',
         address:'0x956f47f50a910163d8bf957cf5846d573e7f87ca',
@@ -2005,9 +2027,10 @@ const availableTokens = {
         },
         protocols:[
           {
-            name:'compound',
+            defiScore:7.9,
             enabled:true,
             abi:cToken.abi,
+            name:'compound',
             address:'0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643',
             token:'cDAI',
             decimals:28,
@@ -2033,6 +2056,7 @@ const availableTokens = {
             },
           },
           {
+            defiScore:7.4,
             name:'aave',
             enabled:true,
             abi:aToken,
@@ -2055,6 +2079,7 @@ const availableTokens = {
             }
           },
           {
+            defiScore:7.7,
             name:'dydx',
             enabled:true,
             abi:yToken,
@@ -2132,6 +2157,7 @@ const availableTokens = {
         },
         protocols:[
           {
+            defiScore:8.0,
             name:'compound',
             enabled:true,
             abi:cToken.abi,
@@ -2160,6 +2186,7 @@ const availableTokens = {
             },
           },
           {
+            defiScore:7.4,
             name:'aave',
             enabled:true,
             abi:aToken,
@@ -2171,6 +2198,7 @@ const availableTokens = {
             }
           },
           {
+            defiScore:7.8,
             name:'dydx',
             enabled:true,
             abi:yToken,
@@ -2229,6 +2257,7 @@ const availableTokens = {
         },
         protocols:[
           {
+            defiScore:7.9,
             name:'compound',
             enabled:true,
             abi:cToken.abi,
@@ -2257,6 +2286,7 @@ const availableTokens = {
             },
           },
           {
+            defiScore:7.2,
             name:'aave',
             enabled:true,
             abi:aToken,

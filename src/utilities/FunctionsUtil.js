@@ -6876,16 +6876,27 @@ class FunctionsUtil {
 
     let tokenScore = this.BNify(0);
 
-    if (tokenData && tokenAllocation){
+    if (tokenAllocation){
       Object.keys(tokenAllocation.protocolsAllocationsPerc).forEach( protocolAddr => {
         const protocolAllocationPerc = this.BNify(tokenAllocation.protocolsAllocationsPerc[protocolAddr]);
-        if (protocolAllocationPerc.gt(0.001) && tokenData.length>0){
-          const protocolInfo = tokenData[0].protocolsData.find( p => (p.protocolAddr.toLowerCase() === protocolAddr.toLowerCase()) );
+        if (protocolAllocationPerc.gt(0.001)){
+          let protocolScore = null;
+
+          const protocolInfo = tokenData && tokenData.length>0 ? tokenData[0].protocolsData.find( p => (p.protocolAddr.toLowerCase() === protocolAddr.toLowerCase()) ) : null;
           if (protocolInfo){
-            const protocolScore = this.BNify(protocolInfo.defiScore);
-            if (!protocolScore.isNaN()){
-              tokenScore = tokenScore.plus(protocolScore.times(protocolAllocationPerc));
+            protocolScore = this.BNify(protocolInfo.defiScore);
+          }
+
+          // Take protocol score from tokenConfig
+          if (!protocolScore || this.BNify(protocolScore).isNaN() || this.BNify(protocolScore).lte(0)){
+            const protocolConfig = tokenConfig.protocols.find(p => p.address.toLowerCase() === protocolAddr.toLowerCase());
+            if (protocolConfig){
+              protocolScore = this.BNify(protocolConfig.defiScore);
             }
+          }
+
+          if (!protocolScore.isNaN()){
+            tokenScore = tokenScore.plus(protocolScore.times(protocolAllocationPerc));
           }
         }
       });
