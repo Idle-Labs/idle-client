@@ -2,7 +2,7 @@ import Staking from '../Staking/Staking';
 import IDLE from '../contracts/IDLE.json';
 import WETH from '../abis/tokens/WETH.json';
 import ERC20 from '../contracts/ERC20.json';
-import Tranches from '../Tranches/Tranches';
+// import Tranches from '../Tranches/Tranches';
 import COMP from '../abis/compound/COMP.json';
 import aToken from '../abis/aave/AToken.json';
 import TokenSwap from '../TokenSwap/TokenSwap';
