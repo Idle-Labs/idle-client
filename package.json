@@ -52,6 +52,7 @@
     "ethereumjs-abi": "^0.6.8",
     "ethereumjs-tx": "^2.1.2",
     "ethereumjs-util": "^7.0.4",
+    "ethers": "^5.4.6",
     "file-loader": "2.0.0",
     "fork-ts-checker-webpack-plugin-alt": "0.4.14",
     "fortmatic": "^0.7",
