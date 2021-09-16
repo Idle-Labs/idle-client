@@ -239,6 +239,9 @@ const globalConfigs = {
       }
     },
     proposals:{
+      12:{
+        description:'Details in the gov forum post: <a class="link" href="https://gov.idle.finance/t/iip-12-enable-idle-lm-on-idlerai-and-fund-leagues-mandate/620">https://gov.idle.finance/t/iip-12-enable-idle-lm-on-idlerai-and-fund-leagues-mandate/620</a>'
+      },
       7:{
         description:`Upgrade of IdleTokenGovernance contract to include the following changes:<br />
         <ul>
