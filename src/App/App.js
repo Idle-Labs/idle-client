@@ -682,6 +682,7 @@ class App extends Component {
                         transaction,
                         initAccount,
                         initContract,
+                        ethersInfura,
                         transactions,
                         initSimpleID,
                         permitClient,
@@ -732,6 +733,7 @@ class App extends Component {
                                       initAccount={initAccount}
                                       permitClient={permitClient}
                                       initSimpleID={initSimpleID}
+                                      ethersInfura={ethersInfura}
                                       initContract={initContract}
                                       transactions={transactions}
                                       buyToken={this.state.buyToken}

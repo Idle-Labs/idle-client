@@ -1,5 +1,6 @@
 import Web3 from "web3";
 import React from 'react';
+import { ethers } from 'ethers';
 import BigNumber from 'bignumber.js';
 import SimpleID from 'simpleid-js-sdk';
 import NetworkUtil from "./NetworkUtil";
@@ -23,8 +24,8 @@ const RimbleTransactionContext = React.createContext({
   simpleID: {},
   contracts: [],
   web3Infura: {},
-  ethersInfura:{},
   tokenConfig: {},
+  ethersInfura: {},
   transactions: {},
   permitClient: {},
   accountBalance: {},
@@ -297,11 +298,10 @@ class RimbleTransaction extends React.Component {
 
     // console.log('initWeb3',this.state.network.current.id,this.state.network.required.id,networkId);
 
-    const web3Infura = new Web3(new Web3.providers.HttpProvider(globalConfigs.network.providers.infura[networkId]+INFURA_KEY));
-    const BatchProvider = new ethers.providers.JsonRpcBatchProvider(
-      globalConfigs.network.providers.infura[networkId]+INFURA_KEY
-    );
-    this.setState({ethersInfura:BatchProvider});
+    const infuraDefaultRpc = globalConfigs.network.providers.infura[networkId]+INFURA_KEY;
+    const web3Infura = new Web3(new Web3.providers.HttpProvider(infuraDefaultRpc));
+    const ethersInfura = new ethers.providers.JsonRpcBatchProvider(infuraDefaultRpc);
+
     let web3 = context.library;
 
     // 0x Instant Wallet Provider Injection
@@ -488,6 +488,7 @@ class RimbleTransaction extends React.Component {
               web3,
               biconomy,
               web3Infura,
+              ethersInfura,
               permitClient,
               erc20ForwarderClient
             };
@@ -504,6 +505,7 @@ class RimbleTransaction extends React.Component {
               this.setState({
                 web3,
                 web3Infura,
+                ethersInfura,
                 biconomy:false
               }, web3Callback);
             }
@@ -512,6 +514,7 @@ class RimbleTransaction extends React.Component {
           this.setState({
             web3,
             web3Infura,
+            ethersInfura,
             biconomy:false
           }, web3Callback);
         }
@@ -521,6 +524,7 @@ class RimbleTransaction extends React.Component {
         this.setState({
           web3,
           web3Infura,
+          ethersInfura
         }, web3Callback);
       } else if (context.account || forceCallback){
         web3Callback();
@@ -532,18 +536,21 @@ class RimbleTransaction extends React.Component {
 
   initContract = async (name, address, abi, useInfuraProvider = false) => {
     this.functionsUtil.customLog(`Init contract: ${name}`);
-    await this.create2(name, address, abi, this.state.ethersInfura);
-    return await this.createContract(name, address, abi, useInfuraProvider);
+    const result = await this.createContract(name, address, abi, useInfuraProvider);
+    if (result && result.contract){
+      // await this.createContractCustomProvider(name+'_call', address, result.contract.options.jsonInterface, this.state.ethersInfura);
+    }
+    return result;
   };
 
-  create2 = async (name, address, abi, provider) => {
+  createContractCustomProvider = async (name, address, abi, provider) => {
     const contract = new ethers.Contract(address, abi, provider);
-    const name_call = name + "_call";
+    // console.log('createContractCustomProvider',name);
     this.setState(state => ({
       ...state,
-      contracts: [...state.contracts, { name:name_call, contract }]
+      contracts: [...state.contracts, { name, contract }]
     }));
-    return { name:name_call, contract };
+    return { name, contract };
   };
 
   createContract = async (name, address, abi, useInfuraProvider=false) => {
@@ -1580,8 +1587,8 @@ class RimbleTransaction extends React.Component {
     biconomy: null,
     simpleID: null,
     web3Infura:null,
-    ethersInfura:null,
     transactions: {},
+    ethersInfura:null,
     CrispClient: null,
     permitClient:null,
     tokenDecimals:null,
