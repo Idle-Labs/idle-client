@@ -2,7 +2,8 @@ import React, { Component } from "react";
 import { Flex, Icon, Text, Button, Image } from "rimble-ui";
 import FunctionsUtil from "../utilities/FunctionsUtil";
 import TrancheField from "../TrancheField/TrancheField";
-import DashboardCard from "../DashboardCard/DashboardCard";
+
+//import DashboardCard from "../DashboardCard/DashboardCard";
 
 class Base extends Component {
   // Utils
@@ -34,70 +35,86 @@ class Base extends Component {
       this.props.tokenConfig ||
       this.props.availableTranches[strategyInfo.protocol][strategyInfo.token];
     return (
-      <DashboardCard
+      <>
+        {/*<DashboardCard
         cardProps={{
-          py: 3,
-          px: 3,
+          p: 0,
           border: null,
           height: "100%",
           display: "flex",
           flexDirection: "column"
         }}
-      >
+      >*/}
         <Flex
-          pb={2}
-          mb={3}
-          width={1}
-          flexDirection={"column"}
-          justifyContent={"space-between"}
-          alignItems={["flex-start", "baseline"]}
-          borderBottom={`1px solid ${this.props.theme.colors.divider}`}
+          p={0}
+          mx={0}
+          justifyContent={trancheDetails.type === "AA" ? "left" : "right"}
         >
-          <Flex alignItems={"center"} flexDirection={"row"}>
-            <Image
-              mr={2}
-              width={this.props.isMobile ? "1.8em" : "2.2em"}
-              alt="random unsplash image"
-              borderRadius={8}
-              src={trancheDetails.image}
-            />
-
-            <Text fontWeight={4} fontSize={[4, 6]} lineHeight={"1"}>
-              {trancheDetails.name}
-            </Text>
-          </Flex>
           <Flex
-            ml={this.props.isMobile ? "2.2em" : "2.6em"}
-            mr={2}
-            alignItems={"flex-end"}
-            flexDirection={"row"}
+            p={0}
+            width={0.92}
+            height={"100%"}
+            flexDirection={"column"}
+            border={1}
           >
-            <TrancheField
-              fieldInfo={{
-                name: `${trancheDetails.baseName}Apy`,
-                showTooltip: false,
-                props: {
-                  decimals: 2,
-                  fontWeight: 4,
-                  fontSize: [2, 4],
-                  lineHeight: "1",
-                  textAlign: "center",
-                  flexProps: {
-                    justifyContent: "center"
-                  },
-                  color: this.props.trancheDetails.color.hex
-                }
-              }}
-              {...this.props}
-              tokenConfig={tokenConfig}
-              token={strategyInfo.token}
-              tranche={strategyInfo.tranche}
-              protocol={strategyInfo.protocol}
-            />
-            <Text fontSize={0} color={"cellText"} textAlign={"left"}>
-              Current APY (variable)
-            </Text>
-            {/*
+            <Flex
+              width={1}
+              borderBottom={`1px solid ${this.props.theme.colors.divider2}`}
+            >
+              <Flex
+                pb={2}
+                mx={2}
+                my={3}
+                flexDirection={"row"}
+                justifyContent={"space-between"}
+                alignItems={["flex-start", "baseline"]}
+              >
+                <Image
+                  mx={2}
+                  mr={1}
+                  width={this.props.isMobile ? "1.8em" : "2.2em"}
+                  alt="random unsplash image"
+                  borderRadius={8}
+                  src={trancheDetails.image}
+                />
+
+                <Flex alignItems={"flex-start"} flexDirection={"column"}>
+                  <Text textfontWeight={4} fontSize={[4, 6]} lineHeight={"2"}>
+                    {trancheDetails.name}
+                  </Text>
+                  <Flex alignItems={"flex-start"} flexDirection={"row"}>
+                    <TrancheField
+                      fieldInfo={{
+                        name: `${trancheDetails.baseName}Apy`,
+                        showTooltip: false,
+                        props: {
+                          decimals: 2,
+                          fontWeight: 4,
+                          fontSize: [2, 4],
+                          lineHeight: "2",
+                          textAlign: "center",
+                          flexProps: {
+                            justifyContent: "center"
+                          },
+                          color: this.props.trancheDetails.color.hex
+                        }
+                      }}
+                      {...this.props}
+                      tokenConfig={tokenConfig}
+                      token={strategyInfo.token}
+                      tranche={strategyInfo.tranche}
+                      protocol={strategyInfo.protocol}
+                    />
+                    <Text
+                      fontSize={0}
+                      color={"cellText"}
+                      textAlign={"left"}
+                      lineHeight={"4"}
+                    >
+                      Current APY (variable)
+                    </Text>
+
+                    {/*
               <TrancheField
                 fieldInfo={{
                   showLoader:false,
@@ -121,46 +138,71 @@ class Base extends Component {
                 protocol={strategyInfo.protocol}
               />
               */}
-          </Flex>
-        </Flex>
-        <Flex width={1} height={"100%"} flexDirection={"column"}>
-          <Text mb={3} fontWeight={3} color={"copyColor"}>
-            {trancheDetails.description.long}
-          </Text>
-          <Flex width={1} my={3} flexDirection={"column"}>
-            {trancheDetails.features.map((feature, index) => (
-              <Flex
-                mb={2}
-                width={1}
-                mt={[0, 1]}
-                alignItems={"center"}
-                flexDirection={"row"}
-                key={`feature_${index}`}
-              >
-                <Icon mr={2} name={"Done"} color={"tick"} />
-                <Text fontWeight={3} fontSize={[2, 3]}>
-                  {feature}
-                </Text>
+                  </Flex>
+                  <Text
+                    mr={3}
+                    mb={3}
+                    fontWeight={2}
+                    textAlign={"justify"}
+                    color={"copyColor"}
+                    lineHeight={"2"}
+                  >
+                    {trancheDetails.description.long}
+                  </Text>
+                </Flex>
               </Flex>
-            ))}
-          </Flex>
-          <Flex height={"100%"} alignItems={"flex-end"}>
-            <Button
-              mt={3}
-              width={1}
-              contrastColor={"cardBg"}
-              icon={trancheDetails.icon}
-              mainColor={trancheDetails.color.hex}
-              borderRadius={40}
-              onClick={e => this.props.selectTrancheType(trancheDetails.route)}
-            >
-              {this.props.tokenConfig
-                ? `Go to ${trancheDetails.name}`
-                : `Enter the ${trancheDetails.name}`}
-            </Button>
+            </Flex>
+            <Flex bg={"near-white2"}>
+              <Flex
+                width={1}
+                height={this.props.isMobile ? "100%" : "400px"}
+                flexDirection={"column"}
+                mx={3}
+              >
+                <Flex width={1} my={3} flexDirection={"column"}>
+                  {trancheDetails.features.map((feature, index) => (
+                    <Flex
+                      mb={2}
+                      width={1}
+                      mt={[0, 1]}
+                      alignItems={"center"}
+                      flexDirection={"row"}
+                      key={`feature_${index}`}
+                    >
+                      <Icon mx={2} mr={3} name={"Done"} color={"tick"} my={2} />
+                      <Text
+                        fontWeight={3}
+                        fontSize={[2, 3]}
+                        my={2}
+                        lineHeight={1}
+                      >
+                        {feature}
+                      </Text>
+                    </Flex>
+                  ))}
+                </Flex>
+                <Flex height={"100%"} alignItems={"flex-end"}>
+                  <Button
+                    my={3}
+                    width={1}
+                    contrastColor={"cardBg"}
+                    mainColor={trancheDetails.color.hex}
+                    borderRadius={40}
+                    onClick={e =>
+                      this.props.selectTrancheType(trancheDetails.route)
+                    }
+                  >
+                    {this.props.tokenConfig
+                      ? `Go to ${trancheDetails.name}`
+                      : `Enter the ${trancheDetails.name}`}
+                  </Button>
+                </Flex>
+              </Flex>
+            </Flex>
+            {/*[</DashboardCard>]*/}
           </Flex>
         </Flex>
-      </DashboardCard>
+      </>
     );
   }
 }

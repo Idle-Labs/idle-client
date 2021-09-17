@@ -75,6 +75,9 @@ const globalConfigs = {
   theme:{
     darkModeEnabled:true
   },
+  extraimages: {
+    bgimage: "images/bgImage.svg"
+  },
   betaURL: "https://beta.idle.finance",
   countries: {
     USA: "United States of America",
@@ -287,6 +290,7 @@ const globalConfigs = {
       path: ["apy", "day", "idle"],
       endpoint: "https://www.curve.fi/raw-stats/apys.json"
     },
+
     poolContract: {
       decimals: 18,
       abi: CurvePool,
@@ -545,6 +549,10 @@ const globalConfigs = {
       }
     }
   },
+  tranchflash:{
+  title:"Make yield your own."
+
+  },
   tranches: {
     AA: {
       color: {
@@ -557,6 +565,7 @@ const globalConfigs = {
       route: "senior",
       icon: "Security",
       image: "images/SeniorTranche.svg",
+
       baseName: "senior",
       name: "Senior Tranche",
       features: [
