@@ -45,7 +45,7 @@ class Base extends Component {
             <Flex justifyContent={"left"} my={4} width={0.8}>
               <Text
                 color={"white"}
-                textAlign={"justify"}
+                textAlign={"left"}
                 fontWeight={2}
                 fontSize={3}
               >
