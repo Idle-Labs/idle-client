@@ -20,7 +20,7 @@ export default {
   },
   space: [0, 4, 8, 16, 32, 64, 128, 256],
   radii: ["0", "4px", "8px", "16px", "2rem"],
-  width: [0, 16, 32, 64, 128, 256],
+  widths: [0, 16, 32, 64, 128, 256, 550],
   minWidths: [0, 16, 32, 64, 128, 256],
   maxWidths: [0, 16, 32, 64, 128, 256, 512, 768, 1024, 1536],
   heights: [0, 16, 32, 64, 128, 256],
@@ -62,11 +62,13 @@ export default {
     "moon-gray": "#ccc",
     "light-gray": "#eee",
     "near-white": "#f4f4f4",
+
     white: "#fff",
     transparent: "transparent",
     /*
     NEW COLORS
     */
+    newblue: "#2B65D9",
     alert: "#ff9900",
     arrowActive: "#4f4f4f",
     arrowInactive: "#d8d8d8",
@@ -81,6 +83,7 @@ export default {
     cellTitle: "#a3a4a5",
     cellText: "#a6a6a6",
     divider: "#d8d8d8",
+    divider2: "#EBEBEB",
     counter: "#5d5d5d",
     redeem: "#00a9fe",
     link: "#0036ff",
@@ -90,6 +93,7 @@ export default {
     menuBg: "#fff",
     menuHover: "#f3f6ff",
     cardBg: "#fff",
+    "near-white2": "#FAFAFA",
     flashColor: "#3f4e9a",
     menuRightBorder: "#eee",
     cardHoverShadow: "0px 0px 0px 1px rgba(0, 54, 255, 0.3)",

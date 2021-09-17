@@ -3,7 +3,7 @@ import React, { Component } from "react";
 import { Box, Flex, Text } from "rimble-ui";
 import TrancheBox from "../TrancheBox/TrancheBox";
 import FunctionsUtil from "../utilities/FunctionsUtil";
-
+import TrancheFlash from "../TrancheFlash/TrancheFlash";
 class Base extends Component {
   // Utils
   functionsUtil = null;
@@ -27,75 +27,66 @@ class Base extends Component {
   render() {
     const tranchesDetails = this.functionsUtil.getGlobalConfig(["tranches"]);
     return (
-      <Box mb={3} width={1}>
-        {!this.props.tokenConfig ? (
-          <Flex width={1} flexDirection={"column"}>
-            <Title mb={3}>Perpetual Yield Tranches</Title>
-            <Flex
-              width={1}
-              mb={[3, 4]}
-              mx={"auto"}
-              aligItems={"center"}
-              justifyContent={"center"}
-            >
-              <Text
-                fontWeight={2}
-                fontSize={[1, 2]}
-                textAlign={"center"}
-                style={{ "white-space": "pre-wrap" }}
-              >
-                {this.props.isMobile
-                  ? this.functionsUtil.getGlobalConfig([
-                      "strategies",
-                      "tranches",
-                      "descShort"
-                    ])
-                  : this.functionsUtil.getGlobalConfig([
-                      "strategies",
-                      "tranches",
-                      "descLong"
-                    ])}
-              </Text>
-            </Flex>
-          </Flex>
-        ) : (
-          <Title
-            mb={3}
-            fontWeight={2}
-            fontSize={[3, 4]}
-            color={"copyColor"}
-            textAlign={"center"}
-          >
-            Select your preferred Tranche
-          </Title>
-        )}
+      <Box mx={5} mb={3} width={1} maxWidth={8} aligItems={"center"}>
         <Flex
           width={1}
-          flexDirection={["column", "row"]}
+          flexDirection={"column"}
           justifyContent={"space-between"}
         >
-          {Object.keys(tranchesDetails).map(trancheType => (
-            <Flex
-              mb={[3, 0]}
-              flexDirection={"column"}
-              key={`tranche_${trancheType}`}
-              width={[1, 1 / Object.keys(tranchesDetails).length - 0.04]}
-            >
+          {!this.props.tokenConfig ? (
+            <>
+              <Title mb={3}>Perpetual Yield Tranches</Title>
               <Flex
                 width={1}
-                height={"100%"}
-                alignItems={"center"}
-                flexDirection={"column"}
+                mb={[3, 4]}
+                mx={"auto"}
+                aligItems={"center"}
                 justifyContent={"center"}
               >
+                <Text fontWeight={2} fontSize={[1, 2]} textAlign={"center"}>
+                  {this.props.isMobile
+                    ? this.functionsUtil.getGlobalConfig([
+                        "strategies",
+                        "tranches",
+                        "descShort"
+                      ])
+                    : this.functionsUtil.getGlobalConfig([
+                        "strategies",
+                        "tranches",
+                        "descLong"
+                      ])}
+                </Text>
+              </Flex>
+              <Flex bg={"newblue"}>
+                <TrancheFlash {...this.props}></TrancheFlash>
+              </Flex>
+            </>
+          ) : (
+            <Title
+              mb={3}
+              fontWeight={2}
+              fontSize={[3, 4]}
+              color={"copyColor"}
+              textAlign={"center"}
+            >
+              Select your preferred Tranche
+            </Title>
+          )}
+          <Flex my={3} mx={0} justifyContent={"center"}>
+            <Flex
+              width={1}
+              flexDirection={["column", "row"]}
+              justifyContent={"space-between"}
+            >
+              {Object.keys(tranchesDetails).map(trancheType => (
                 <TrancheBox
                   {...this.props}
                   tokenConfig={this.props.tokenConfig}
                   trancheDetails={tranchesDetails[trancheType]}
                 />
-              </Flex>
+              ))}
             </Flex>
-          ))}
+          </Flex>
         </Flex>
       </Box>
     );
