@@ -546,9 +546,13 @@ const globalConfigs = {
       }
     }
   },
-  tranchflash:{
-  title:"Make yield your own."
-
+  tranchflash: {
+    name: "perpetual yield tranches",
+    subtitle: "Make yield your own.",
+    desc: "Choose the benefits of high-yield or low-risk, while enjoying the flexibility of Tranches. This comes with auto-compounding for accrued governance tokens and no locking period.",
+    arrows: "images/idlearrows.svg",
+    juniorinfo:"Junior Tranches Higher risk, levered variable rate rewards",
+    seniorinfo:"Senior Tranches Lower risk, built-in coverage for variable rate rewards"
   },
   tranches: {
     AA: {
@@ -562,6 +566,7 @@ const globalConfigs = {
       route: "senior",
       icon: "Security",
       image: "images/SeniorTranche.svg",
+      bubble:"images/SeniorBubble.svg",
 
       baseName: "senior",
       name: "Senior Tranche",
@@ -598,6 +603,7 @@ const globalConfigs = {
       route: "junior",
       icon: "TrendingUp",
       image: "images/JuniorTranche.svg",
+      bubble:"images/JuniorBubble.svg",
       baseName: "junior",
       name: "Junior Tranche",
       features: [

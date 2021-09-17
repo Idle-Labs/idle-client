@@ -72,7 +72,7 @@ class Base extends Component {
                 <Image
                   mx={2}
                   mr={1}
-                  width={this.props.isMobile ? "1.8em" : "2.2em"}
+                  width={["2em", "2.4em"]}
                   alt="random unsplash image"
                   borderRadius={8}
                   src={trancheDetails.image}
@@ -155,7 +155,7 @@ class Base extends Component {
             <Flex bg={"near-white2"}>
               <Flex
                 width={1}
-                height={this.props.isMobile ? "100%" : "400px"}
+                height={["100%", "20em"]}
                 flexDirection={"column"}
                 mx={3}
               >
@@ -169,7 +169,14 @@ class Base extends Component {
                       flexDirection={"row"}
                       key={`feature_${index}`}
                     >
-                      <Icon mx={2} mr={3} name={"Done"} color={"tick"} my={2} />
+                      <Icon
+                        mx={2}
+                        mr={3}
+                        name={"Done"}
+                        color={"tick"}
+                        my={2}
+                        size={this.props.isMobile ? "2em" : "2.4em"}
+                      />
                       <Text
                         fontWeight={3}
                         fontSize={[2, 3]}
