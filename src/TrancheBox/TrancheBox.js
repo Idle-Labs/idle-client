@@ -79,7 +79,7 @@ class Base extends Component {
                   src={trancheDetails.image}
                 />
 
-                <Flex alignItems={"flex-start"} flexDirection={"column"}>
+                <Flex ml={2} alignItems={"flex-start"} flexDirection={"column"}>
                   <Text textfontWeight={4} fontSize={[4, 6]} lineHeight={"2"}>
                     {trancheDetails.name}
                   </Text>
