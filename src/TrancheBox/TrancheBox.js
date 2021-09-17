@@ -56,6 +56,7 @@ class Base extends Component {
             height={"100%"}
             flexDirection={"column"}
             border={1}
+            my={3}
           >
             <Flex
               width={1}
@@ -154,6 +155,7 @@ class Base extends Component {
             </Flex>
             <Flex bg={"near-white2"}>
               <Flex
+                my={2}
                 width={1}
                 height={["100%", "20em"]}
                 flexDirection={"column"}
