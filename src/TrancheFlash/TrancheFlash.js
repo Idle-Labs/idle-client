@@ -28,15 +28,78 @@ class Base extends Component {
     const flashData = this.functionsUtil.getGlobalConfig(["tranchflash"]);
     return (
       <>
-        <Flex width={1} flexDirection={"row"}>
-          <Flex width={0.5} flexDirection={"column"}>
-            <Flex width={0.9}>
-              <Text bold={"true"} color={"white"} fontWeight={4} fontSize={7}>
-                {flashData.title}
+        <Flex width={1} mx={4} flexDirection={"row"} justifyContent={"center"}>
+          <Flex mx={2} my={4} width={0.4} flexDirection={"column"}>
+            <Flex justifyContent={"left"} my={4} width={0.8}>
+              <Text
+                bold={"true"}
+                color={"white"}
+                textAlign={"left"}
+                fontWeight={4}
+                fontSize={7}
+                lineHeight={1}
+              >
+                {flashData.subtitle}
+              </Text>
+            </Flex>
+            <Flex justifyContent={"left"} my={4} width={0.8}>
+              <Text
+                color={"white"}
+                textAlign={"justify"}
+                fontWeight={2}
+                fontSize={3}
+              >
+                {flashData.desc}
               </Text>
             </Flex>
           </Flex>
-          <Flex></Flex>
+          <Flex width={0.2} mb={5}>
+            <Image src={flashData.arrows} />
+          </Flex>
+          <Flex my={5} width={0.4} flexDirection={"column"}>
+            <Flex flexDirection={"row"}>
+              <Image
+                my={2}
+                width={0.2}
+                src={this.functionsUtil.getGlobalConfig([
+                  "tranches",
+                  "AA",
+                  "bubble"
+                ])}
+              />
+              <Text
+                color={"white"}
+                textAlign={"justify"}
+                fontWeight={2}
+                fontSize={3}
+              >
+                {flashData.juniorinfo}
+              </Text>
+            </Flex>
+            <Flex>
+              <Image
+                my={2}
+                ml={4}
+                width={0.2}
+                src={this.functionsUtil.getGlobalConfig([
+                  "tranches",
+                  "BB",
+                  "bubble"
+                ])}
+              />
+              <Text
+                color={"white"}
+                textAlign={"justify"}
+                fontWeight={2}
+                fontSize={3}
+              >
+                {flashData.seniorinfo}
+              </Text>
+            </Flex>
+          </Flex>
+          {/*<Flex width={0.3}>
+            <Text>ABC</Text>
+          </Flex>*/}
         </Flex>
       </>
     );
