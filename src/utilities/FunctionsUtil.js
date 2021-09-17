@@ -88,6 +88,20 @@ class FunctionsUtil {
 
     return arr1;
   }
+  replaceArrayPropsRecursive = (arr1,arr2,props=null) => {
+    if (arr2 && Object.keys(arr2).length){
+      Object.keys(arr2).forEach(p => {
+        if (typeof arr2[p]==='function'){
+          arr1[p] = arr2[p](props);
+        } else if (typeof arr2[p]==='object'){
+          arr1[p] = {...arr1[p],...this.replaceArrayPropsRecursive(arr1,arr2[p],props)};
+        } else {
+          arr1[p] = arr2[p];
+        }
+      });
+    }
+    return arr1;
+  }
   stripHtml = (html) => {
      var tmp = document.createElement("DIV");
      tmp.innerHTML = html;
@@ -239,7 +253,7 @@ class FunctionsUtil {
           if (trancheTokenBalance){
             const [
               tranchePool,
-              tranchePrice
+              tranchePrice,
             ] = await Promise.all([
               this.loadTrancheFieldRaw('tranchePool',{},protocol,token,tranche,tokenConfig,trancheConfig,account),
               this.loadTrancheFieldRaw('tranchePrice',{},protocol,token,tranche,tokenConfig,trancheConfig,account)

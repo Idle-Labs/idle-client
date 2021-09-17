@@ -45,18 +45,21 @@ class StakingRewardsTranche extends Component {
     if (!this.props.account || !this.props.trancheConfig || !this.props.portfolio){
       return false;
     }
+
     const [
       stakingRewards,
-      rewardTokensInfo
+      trancheBalance,
+      rewardTokensInfo,
+      trancheStakedAmount
     ] = await Promise.all([
       this.functionsUtil.getTrancheStakingRewards(this.props.account,this.props.trancheConfig),
-      this.functionsUtil.getTrancheRewardTokensInfo(this.props.tokenConfig,this.props.trancheConfig)
+      this.functionsUtil.getTokenBalance(this.props.trancheConfig.name,this.props.account,false),
+      this.functionsUtil.getTrancheRewardTokensInfo(this.props.tokenConfig,this.props.trancheConfig),
+      this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals)
     ]);
 
     const trancheBalanceInfo = this.props.portfolio.tranchesBalance.find( p => p.token === this.props.token && p.protocol === this.props.protocol && p.tranche === this.props.tranche );
     
-    // console.log('stakingRewards',stakingRewards,rewardTokensInfo,trancheBalanceInfo);
-
     const stakingRewardsRows = [];
     await this.functionsUtil.asyncForEach(Object.keys(stakingRewards), async (rewardToken) => {
       const tokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',rewardToken]);
@@ -69,12 +72,16 @@ class StakingRewardsTranche extends Component {
       }
       stakingRewardsRows.push({
         token:rewardToken,
+        staked:trancheStakedAmount,
         balance:tokenBalance.toFixed(8),
         reedemable:tokenAmount.toFixed(8),
+        trancheBalance:this.functionsUtil.integerValue(trancheBalance),
         tokenIcon:tokenConfig.icon || `images/tokens/${rewardToken}.svg`,
         distributionSpeed:distributionSpeed ? distributionSpeed.toFixed(8)+` ${rewardToken} (last harvest)` : '-'
       });
     });
+
+    // console.log('stakingRewardsRows',stakingRewardsRows);
 
     this.setState({
       stakingRewardsRows
@@ -82,6 +89,10 @@ class StakingRewardsTranche extends Component {
   }
 
   claimCallback(tx){
+    this.loadUserRewards();
+  }
+
+  stakeCallback(tx){
     this.loadUserRewards();
   }
 
@@ -179,7 +190,14 @@ class StakingRewardsTranche extends Component {
                 fields:[
                   {
                     funcProps:{
-                      disabled:(props) => (this.functionsUtil.BNify(props.row.reedemable).lte(0))
+                      componentProps:{
+                        disabled:(props) => (this.functionsUtil.BNify(props.row.reedemable).lte(0) ? true : false ),
+                      },
+                      // value:(props) => (this.functionsUtil.BNify(props.row.reedemable).lte(0) ? (props.row.staked.lte(0) ? 'stake' : 'claim') : 'claim'),
+                      // action:(props) => (this.functionsUtil.BNify(props.row.reedemable).lte(0) ? (props.row.staked.lte(0) ? 'Stake' : 'Claim') : 'Claim'),
+                      // methodName:(props) => (this.functionsUtil.BNify(props.row.reedemable).lte(0) ? (props.row.staked.lte(0) ? 'stake' : 'claim') : 'claim'),
+                      // transactionParams:(props) => (this.functionsUtil.BNify(props.row.reedemable).lte(0) ? (props.row.staked.lte(0) ? [this.functionsUtil.BNify(props.row.trancheBalance).toFixed()] : []) : []),
+                      // callback:(props) => (this.functionsUtil.BNify(props.row.reedemable).lte(0) ? (props.row.staked.lte(0) ? this.stakeCallback.bind(this) : this.claimCallback.bind(this)) : this.claimCallback.bind(this))
                     },
                     fieldComponent:ExecuteTransaction,
                     props:{
@@ -197,7 +215,8 @@ class StakingRewardsTranche extends Component {
                         mainColor:'redeem',
                         size:this.props.isMobile ? 'small' : 'medium'
                       },
-                      action:'Claim',
+                      value:'Claim',
+                      action:'claim',
                       methodName:'claim',
                       callback:this.claimCallback.bind(this),
                       contractName:this.props.trancheConfig.CDORewards.name

@@ -1,8 +1,29 @@
 import { Flex } from "rimble-ui";
 import React, { Component } from 'react';
+import FunctionsUtil from '../utilities/FunctionsUtil';
 import DashboardCard from '../DashboardCard/DashboardCard';
 
 class TableRow extends Component {
+
+  // Utils
+  functionsUtil = null;
+
+  loadUtils(){
+    if (this.functionsUtil){
+      this.functionsUtil.setProps(this.props);
+    } else {
+      this.functionsUtil = new FunctionsUtil(this.props);
+    }
+  }
+
+  async componentWillMount(){
+    this.loadUtils();
+  }
+
+  async componentDidUpdate(prevProps, prevState) {
+    this.loadUtils();
+  }
+
   render() {
     const FieldComponent = this.props.fieldComponent;
     const isInteractive = typeof this.props.handleClick === 'function';
@@ -47,6 +68,14 @@ class TableRow extends Component {
                           return null;
                         }
                         const CustomComponent = fieldInfo.fieldComponent;
+
+                        let fieldProps = fieldInfo.props;
+
+                        // Merge with funcProps
+                        if (fieldInfo.funcProps && Object.keys(fieldInfo.funcProps).length>0){
+                          fieldProps = this.functionsUtil.replaceArrayPropsRecursive(fieldProps,fieldInfo.funcProps,this.props);
+                        }
+
                         return (
                           <Flex
                             height={'100%'}
@@ -65,7 +94,7 @@ class TableRow extends Component {
                               CustomComponent ? (
                                 <CustomComponent
                                   {...this.props}
-                                  {...fieldInfo.props}
+                                  {...fieldProps}
                                 />
                               ) : (
                                 <FieldComponent
