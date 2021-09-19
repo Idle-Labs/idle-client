@@ -74,6 +74,7 @@ class Base extends Component {
                 alignItems={["flex-start", "baseline"]}
               >
                 <Image
+                  mt={[3, 1]}
                   mx={2}
                   mr={1}
                   size={this.props.isMobile ? "5em" : "7em"}
@@ -166,7 +167,7 @@ class Base extends Component {
                 {trancheDetails.features.map((feature, index) => (
                   <Flex
                     mb={2}
-                    mt={[0, 1]}
+                    mt={[2, 1]}
                     alignItems={"center"}
                     flexDirection={"row"}
                     key={`feature_${index}`}
