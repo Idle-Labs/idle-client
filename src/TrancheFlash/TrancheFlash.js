@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Flex, Icon, Text, Button, Image } from "rimble-ui";
 import FunctionsUtil from "../utilities/FunctionsUtil";
+import TrancheDetails from "../TrancheDetails/TrancheDetails";
 
 //import DashboardCard from "../DashboardCard/DashboardCard";
 
@@ -53,8 +54,11 @@ class Base extends Component {
               </Text>
             </Flex>
           </Flex>
-          <Flex width={0.2} mb={5}>
-            <Image src={flashData.arrows} />
+          <Flex hidden={this.props.isMobile ? 1 : 0} width={0.2} mb={5}>
+            <Image
+              hidden={this.props.isMobile ? 1 : 0}
+              src={flashData.arrows}
+            />
           </Flex>
           <Flex my={5} width={0.4} flexDirection={"column"}>
             <Flex flexDirection={"row"}>
@@ -79,7 +83,7 @@ class Base extends Component {
             <Flex>
               <Image
                 my={2}
-                ml={4}
+                ml={[0, 4]}
                 width={0.2}
                 src={this.functionsUtil.getGlobalConfig([
                   "tranches",
