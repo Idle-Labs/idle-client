@@ -29,8 +29,13 @@ class Base extends Component {
     const flashData = this.functionsUtil.getGlobalConfig(["tranchflash"]);
     return (
       <>
-        <Flex width={1} mx={4} flexDirection={"row"} justifyContent={"center"}>
-          <Flex mx={2} my={4} width={0.4} flexDirection={"column"}>
+        <Flex
+          width={1}
+          mx={4}
+          flexDirection={["column", "row"]}
+          justifyContent={"center"}
+        >
+          <Flex mx={2} my={4} width={[1, 0.4]} flexDirection={"column"}>
             <Flex justifyContent={"left"} my={4} width={0.8}>
               <Text
                 bold={"true"}
@@ -43,7 +48,7 @@ class Base extends Component {
                 {flashData.subtitle}
               </Text>
             </Flex>
-            <Flex justifyContent={"left"} my={4} width={0.8}>
+            <Flex justifyContent={"left"} my={4} width={[1, 0.8]}>
               <Text
                 color={"white"}
                 textAlign={"left"}
@@ -60,11 +65,11 @@ class Base extends Component {
               src={flashData.arrows}
             />
           </Flex>
-          <Flex my={5} width={0.4} flexDirection={"column"}>
+          <Flex my={5} width={[1, 0.4]} flexDirection={"column"}>
             <Flex flexDirection={"row"}>
               <Image
-                my={2}
-                width={0.2}
+                my={[0, 2]}
+                width={[0.1, 0.2]}
                 src={this.functionsUtil.getGlobalConfig([
                   "tranches",
                   "AA",
@@ -72,6 +77,7 @@ class Base extends Component {
                 ])}
               />
               <Text
+                my={[2, 1]}
                 color={"white"}
                 textAlign={"justify"}
                 fontWeight={2}
@@ -82,9 +88,9 @@ class Base extends Component {
             </Flex>
             <Flex>
               <Image
-                my={2}
+                my={[0, 2]}
                 ml={[0, 4]}
-                width={0.2}
+                width={[0.1, 0.2]}
                 src={this.functionsUtil.getGlobalConfig([
                   "tranches",
                   "BB",
@@ -92,6 +98,7 @@ class Base extends Component {
                 ])}
               />
               <Text
+                my={[3, 1]}
                 color={"white"}
                 textAlign={"justify"}
                 fontWeight={2}
