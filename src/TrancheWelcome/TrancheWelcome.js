@@ -27,7 +27,7 @@ class Base extends Component {
   render() {
     const tranchesDetails = this.functionsUtil.getGlobalConfig(["tranches"]);
     return (
-      <Box mx={5} mb={3} width={1} maxWidth={8} aligItems={"center"}>
+      <Box mx={[2, 5]} mb={3} width={1} maxWidth={8} aligItems={"center"}>
         <Flex
           width={1}
           flexDirection={"column"}
@@ -57,7 +57,7 @@ class Base extends Component {
                       ])}
                 </Text>
               </Flex>
-              <Flex bg={"newblue"}>
+              <Flex border={1} borderRadius={5} bg={"newblue"}>
                 <TrancheFlash {...this.props}></TrancheFlash>
               </Flex>
             </>
