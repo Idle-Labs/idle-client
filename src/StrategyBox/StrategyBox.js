@@ -58,6 +58,7 @@ class StrategyBox extends Component {
       break;
       default:
       case 'strategy':
+
         const availableTokens = this.props.availableStrategies[this.props.strategy];
         await this.functionsUtil.asyncForEach(Object.keys(availableTokens),async (token) => {
           const tokenConfig = availableTokens[token];

@@ -108,7 +108,7 @@ class App extends Component {
     */
   }
 
-  clearCachedData = async (callback=null) => {
+  clearCachedData = async (callback=null,clear_all=false) => {
 
     const cachedData = {...this.state.cachedData};
     Object.keys(cachedData).forEach( key => {
@@ -118,8 +118,7 @@ class App extends Component {
       }
     });
 
-
-    let storedCachedData = this.functionsUtil.getStoredItem('cachedData');
+    const storedCachedData = clear_all ? {} : this.functionsUtil.getStoredItem('cachedData');
     Object.keys(storedCachedData).forEach( key => {
       const storedData = storedCachedData[key];
       if (storedData.expirationDate !== null){
@@ -327,8 +326,6 @@ class App extends Component {
 
   async componentWillMount() {
 
-    window.clearCachedData = this.clearCachedData;
-
     this.loadUtils();
 
     window.BNify = this.functionsUtil.BNify;
@@ -348,8 +345,12 @@ class App extends Component {
       // Clear all localStorage data except walletProvider and connectorName if version has changed
       const version = this.functionsUtil.getStoredItem('version',false);
       if (version !== globalConfigs.version){
-        this.functionsUtil.clearStoredData(['walletProvider','connectorName','themeMode']);
-        this.functionsUtil.setLocalStorage('version',globalConfigs.version);
+        // Clear cached data
+        this.clearCachedData(()=>{
+          // Reset Localstorage
+          this.functionsUtil.clearStoredData(['walletProvider','connectorName','themeMode']);
+          this.functionsUtil.setLocalStorage('version',globalConfigs.version);
+        },true);
       }
     }
 

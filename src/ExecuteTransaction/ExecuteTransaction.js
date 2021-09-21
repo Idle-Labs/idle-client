@@ -103,6 +103,8 @@ class ExecuteTransaction extends Component {
       params = this.props.getTransactionParams();
     } else if (typeof this.props.getTransactionParamsAsync === 'function'){
       params = await this.props.getTransactionParamsAsync();
+    } else if (typeof this.props.transactionParams === 'object'){
+      params = this.props.transactionParams;
     }
 
     if (!params){
@@ -116,7 +118,7 @@ class ExecuteTransaction extends Component {
       return false;
     }
 
-    // console.log('ExecuteTransaction',this.props.contractName,this.props.methodName,params);
+    // console.log('ExecuteTransaction',this.props.contractName,this.props.methodName,this.props.getTransactionParams,params);
 
     if (this.props.sendRawTransaction){
       this.functionsUtil.contractMethodSendWrapper(this.props.contractName,this.props.methodName,params,callback,callbackReceipt,null,true,params);

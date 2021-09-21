@@ -88,6 +88,20 @@ class FunctionsUtil {
 
     return arr1;
   }
+  replaceArrayPropsRecursive = (arr1,arr2,props=null) => {
+    if (arr2 && Object.keys(arr2).length){
+      Object.keys(arr2).forEach(p => {
+        if (typeof arr2[p]==='function'){
+          arr1[p] = arr2[p](props);
+        } else if (typeof arr2[p]==='object'){
+          arr1[p] = {...arr1[p],...this.replaceArrayPropsRecursive(arr1,arr2[p],props)};
+        } else {
+          arr1[p] = arr2[p];
+        }
+      });
+    }
+    return arr1;
+  }
   stripHtml = (html) => {
      var tmp = document.createElement("DIV");
      tmp.innerHTML = html;
@@ -239,7 +253,7 @@ class FunctionsUtil {
           if (trancheTokenBalance){
             const [
               tranchePool,
-              tranchePrice
+              tranchePrice,
             ] = await Promise.all([
               this.loadTrancheFieldRaw('tranchePool',{},protocol,token,tranche,tokenConfig,trancheConfig,account),
               this.loadTrancheFieldRaw('tranchePrice',{},protocol,token,tranche,tokenConfig,trancheConfig,account)
@@ -390,13 +404,7 @@ class FunctionsUtil {
       // console.log(token,'amountDeposited',amountDeposited.toString(),'amountLent',amountLents[token].toString());
 
       const tokenBalanceConverted = portfolio.tokensBalance[token].tokenBalanceConverted;
-      const [
-        tokenAprs
-        // tokenEarnings
-      ] = await Promise.all([
-        this.getTokenAprs(tokenConfig)
-        // this.loadAssetField('earnings',token,tokenConfig,this.props.account,false),
-      ]);
+      const tokenAprs = await this.getTokenAprs(tokenConfig);
 
       const tokenAPY = this.BNify(tokenAprs.avgApy);
       const tokenWeight = tokenBalanceConverted.div(portfolio.totalBalanceConverted);
@@ -4057,8 +4065,7 @@ class FunctionsUtil {
 
     let idleTokenSupply = await this.getTokenTotalSupply(idleToken,blockNumber);
     if (idleTokenSupply){
-      idleTokenSupply = this.BNify(idleTokenSupply);
-      return this.setCachedDataWithLocalStorage(cachedDataKey,idleTokenSupply);
+      return this.BNify(idleTokenSupply);
     }
 
     return null;
@@ -4166,10 +4173,10 @@ class FunctionsUtil {
 
     return tokenPrice;
   }
-  clearCachedData = () => {
+  clearCachedData = (clear_all=false) => {
     if (this.props.clearCachedData && typeof this.props.clearCachedData === 'function'){
       // this.customLog('clearCachedData',this.props.clearCachedData,typeof this.props.clearCachedData === 'function');
-      this.props.clearCachedData();
+      this.props.clearCachedData(null,clear_all);
     } else {
       // this.customLog('clearCachedData - Function not found!');
     }
@@ -4384,7 +4391,7 @@ class FunctionsUtil {
       const expiryDate = this.strToMoment(coverDetails.validUntil*1000).format('YYYY-MM-DD');
 
       const claimId = claimSubmittedEvent ? claimSubmittedEvent.returnValues.claimId : null;
-      const payoutOutcome = await this.genericContractCall(feeDistributorConfig.name,'getPayoutOutcome',[claimId]);
+      const payoutOutcome = claimId ? await this.genericContractCall(feeDistributorConfig.name,'getPayoutOutcome',[claimId]) : null;
       const label = `${yieldTokenConfig.name} - ${sumAssured.toFixed(4)} ${coverAssetConfig.token} - Exp. ${expiryDate}`;
       const value = coverId;
 
@@ -4653,7 +4660,7 @@ class FunctionsUtil {
   checkAddress = (address) => {
     return address ? address.match(/^0x[a-fA-F0-9]{40}$/) !== null : false;
   }
-  getTokenTotalSupply = async (contractName,blockNumber='latest',TTL=null) => {
+  getTokenTotalSupply = async (contractName,blockNumber='latest') => {
     const cachedDataKey = `totalSupply_${contractName}_${blockNumber}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData && !this.BNify(cachedData).isNaN()){
@@ -4661,7 +4668,7 @@ class FunctionsUtil {
     }
 
     const totalSupply = await this.genericContractCall(contractName, 'totalSupply', [], {}, blockNumber);
-    return this.setCachedDataWithLocalStorage(cachedDataKey,totalSupply,TTL);
+    return this.setCachedDataWithLocalStorage(cachedDataKey,totalSupply);
   }
   getTokenPrice = async (contractName,blockNumber='latest') => {
     const cachedDataKey = `tokenPrice_${contractName}`;
@@ -4827,9 +4834,13 @@ class FunctionsUtil {
       const value = await contract.methods[methodName](...params).call(callParams,blockNumber).catch(error => {
         this.customLog(`${contractName} contract method ${methodName} error: `, error);
       });
+      // if (!value){
+      //   console.log('genericContractCall - NULL - ',contractName,methodName,params);
+      // }
       // console.log(`${moment().format('HH:mm:ss')} - genericContractCall (${blockNumber}) - ${contractName} - ${methodName} (${JSON.stringify(params)}) : ${value}`);
       return value;
     } catch (error) {
+      // console.log('genericContractCall ERROR - ',contractName,methodName,params);
       this.customLog("genericContractCall error", error);
     }
   }
@@ -4872,11 +4883,8 @@ class FunctionsUtil {
 
     return null;
   }
-  /*
-  Get idleToken allocation between protocols
-  */
   getTokenAllocation = async (tokenConfig,protocolsAprs=false,addGovTokens=true) => {
-
+    
     if (!tokenConfig.idle){
       return false;
     }
@@ -4888,13 +4896,10 @@ class FunctionsUtil {
       return cachedData;
     }
 
-    let totalAllocation = this.BNify(0);
-
     const tokenAllocation = {
       avgApr: null,
       unlentBalance:null,
       totalAllocation:null,
-      protocolsBalances:{},
       protocolsAllocations:null,
       protocolsAllocationsPerc:null,
       totalAllocationConverted:null,
@@ -4902,102 +4907,78 @@ class FunctionsUtil {
       totalAllocationWithUnlentConverted:null,
     };
 
-    const exchangeRates = {};
-    const protocolsBalances = {};
     const protocolsAllocations = {};
     const protocolsAllocationsPerc = {};
 
-    await this.asyncForEach(tokenConfig.protocols,async (protocolInfo,i) => {
+    const [
+      unlentBalance,
+      tokenPrice,
+      tokenUsdConversionRate,
+      totalSupply,
+      tokenAllocations,
+      govTokensBalances,
+      allAvailableTokens
+    ] = await Promise.all([
+      this.getUnlentBalance(tokenConfig),
+      this.getIdleTokenPrice(tokenConfig),
+      this.getTokenConversionRate(tokenConfig,false),
+      this.getIdleTokenSupply(tokenConfig.idle.token),
+      this.genericContractCallCached(tokenConfig.idle.token,'getAllocations'),
+      addGovTokens ? this.getGovTokensBalances(tokenConfig.idle.address) : null,
+      this.genericContractCallCached(tokenConfig.idle.token,'getAllAvailableTokens')
+    ]);
 
-      if (!protocolInfo.enabled){
-        return;
-      }
+    const totalAllocation = this.fixTokenDecimals(totalSupply,18).times(tokenPrice).minus(unlentBalance);
 
-      const contractName = protocolInfo.token;
-      const protocolAddr = protocolInfo.address.toLowerCase();
-
-      let [
-        tokenDecimals,
-        protocolBalance,
-        exchangeRate
-      ] = await Promise.all([
-        this.getTokenDecimals(contractName),
-        this.getProtocolBalance(contractName,tokenConfig.idle.address),
-        ( protocolInfo.functions.exchangeRate ? this.getTokenExchangeRate(contractName,protocolInfo.functions.exchangeRate) : null )
-      ]);
-
-      if (!protocolBalance){
-        return;
-      }
-
-      if (exchangeRate && protocolInfo.decimals){
-        exchangeRates[protocolAddr] = exchangeRate;
-        exchangeRate = this.fixTokenDecimals(exchangeRate,protocolInfo.decimals);
-      }
-
-      let protocolAllocation = this.fixTokenDecimals(protocolBalance,tokenDecimals,exchangeRate);
-
-      if (protocolAllocation.lt(this.BNify(0.00000001))){
-        protocolBalance = this.BNify(0);
-        protocolAllocation = this.BNify(0);
-      }
-
-      protocolsBalances[protocolAddr] = protocolBalance;
-      protocolsAllocations[protocolAddr] = protocolAllocation;
-      totalAllocation = totalAllocation.plus(protocolAllocation);
-
-      // console.log('getTokenAllocation',contractName,protocolAddr,protocolAllocation.toFixed(5),exchangeRate ? exchangeRate.toFixed(5) : null,totalAllocation.toFixed(5));
-    });
+    if (allAvailableTokens && tokenAllocations && allAvailableTokens.length === tokenAllocations.length){
+      allAvailableTokens.forEach( (protocolAddr,index) => {
+        const protocolInfo = tokenConfig.protocols.find( p => p.address.toLowerCase() === protocolAddr.toLowerCase() );
+        if (protocolInfo && protocolInfo.enabled){
+          const protocolAllocationPerc = this.BNify(tokenAllocations[index]).div(100000);
+          const protocolAllocation = totalAllocation.times(protocolAllocationPerc);
+          protocolsAllocations[protocolAddr.toLowerCase()] = protocolAllocation;
+          protocolsAllocationsPerc[protocolAddr.toLowerCase()] = protocolAllocationPerc;
+        }
+      });
+    }
 
     tokenAllocation.unlentBalance = this.BNify(0);
-    tokenAllocation.totalAllocationWithUnlent = this.BNify(totalAllocation);
+    tokenAllocation.totalAllocationWithUnlent = totalAllocation;
 
-    // Add unlent balance to the pool
-    let unlentBalance = await this.getUnlentBalance(tokenConfig);
     if (unlentBalance){
       tokenAllocation.unlentBalance = unlentBalance;
       tokenAllocation.totalAllocationWithUnlent = tokenAllocation.totalAllocationWithUnlent.plus(unlentBalance);
     }
 
-    // console.log('totalAllocationWithUnlent 1',addGovTokens,tokenAllocation.totalAllocationWithUnlent.toFixed(5));
-
-    Object.keys(protocolsAllocations).forEach((protocolAddr,i) => {
-      const protocolAllocation = protocolsAllocations[protocolAddr];
-      const protocolAllocationPerc = protocolAllocation.div(totalAllocation);
-      protocolsAllocationsPerc[protocolAddr] = protocolAllocationPerc;
-    });
-
     tokenAllocation.totalAllocation = totalAllocation;
     tokenAllocation.protocolsAllocations = protocolsAllocations;
     tokenAllocation.protocolsAllocationsPerc = protocolsAllocationsPerc;
 
-    if (addGovTokens){
-      const govTokensBalances = await this.getGovTokensBalances(tokenConfig.idle.address);
-
-      // Sum gov tokens balances
-      if (govTokensBalances.total){
-        const tokenUsdConversionRate = await this.getTokenConversionRate(tokenConfig,false);
-        if (tokenUsdConversionRate){
-          govTokensBalances.total = govTokensBalances.total.div(tokenUsdConversionRate);
-        }
-
-        tokenAllocation.totalAllocationWithUnlent = tokenAllocation.totalAllocationWithUnlent.plus(govTokensBalances.total);
-
-        // console.log('totalAllocationWithUnlent 2',govTokensBalances.total.toFixed(5),tokenAllocation.totalAllocationWithUnlent.toFixed(5));
+    // Sum gov tokens balances
+    if (govTokensBalances && govTokensBalances.total){
+      if (tokenUsdConversionRate){
+        govTokensBalances.total = govTokensBalances.total.div(tokenUsdConversionRate);
       }
+
+      // add gov token balance to total allocation
+      tokenAllocation.totalAllocationWithUnlent = tokenAllocation.totalAllocationWithUnlent.plus(govTokensBalances.total);
     }
 
-    [
-      tokenAllocation.totalAllocationConverted,
-      tokenAllocation.totalAllocationWithUnlentConverted
-    ] = await Promise.all([
-      this.convertTokenBalance(tokenAllocation.totalAllocation,tokenConfig.token,tokenConfig),
-      this.convertTokenBalance(tokenAllocation.totalAllocationWithUnlent,tokenConfig.token,tokenConfig)
-    ]);
+    tokenAllocation.totalAllocationConverted = tokenAllocation.totalAllocation;
+    tokenAllocation.totalAllocationWithUnlentConverted = tokenAllocation.totalAllocationWithUnlent;
+
+    if (tokenUsdConversionRate){
+      tokenAllocation.totalAllocationConverted = tokenAllocation.totalAllocationConverted.times(tokenUsdConversionRate);
+      tokenAllocation.totalAllocationWithUnlentConverted = tokenAllocation.totalAllocationWithUnlentConverted.times(tokenUsdConversionRate);
+    }
 
     if (protocolsAprs){
       tokenAllocation.avgApr = this.getAvgApr(protocolsAprs,protocolsAllocations,totalAllocation);
     }
+
+    // console.log('getTokenAllocation',tokenConfig.idle.token,totalSupply ? totalSupply.toFixed(8) : null,tokenPrice ? tokenPrice.toFixed(8) : null,unlentBalance ? unlentBalance.toFixed(8) : null,tokenAllocation);
+
+    // console.log('Allocations for '+tokenConfig.idle.token+' loaded in '+((Date.now()-start)/1000).toFixed(2)+'s');
 
     return this.setCachedData(cachedDataKey,tokenAllocation);
   }
@@ -5111,9 +5092,10 @@ class FunctionsUtil {
 
       const unires = await this.genericContractCall('UniswapRouter','getAmountsIn',[one.toFixed(),path]);
 
+      // console.log('getUniswapConversionRate',path,unires);
+      
       if (unires){
         const price = this.BNify(unires[0]).div(one);
-        // console.log('getUniswapConversionRate',path,price.toFixed());
         return this.setCachedDataWithLocalStorage(cachedDataKey,price);
       }
       return null;
@@ -5678,7 +5660,7 @@ class FunctionsUtil {
       if (tokenAllocation){
         stkAaveAPR = stkAaveValue.div(tokenAllocation.totalAllocationConverted).times(100);
 
-        // console.log('getStkAaveApr',tokenConfig.idle.token,aaveDistribution.toFixed(),this.BNify(aaveConversionRate).toFixed(),stkAaveValue.toFixed(),tokenAllocation.totalAllocationConverted.toFixed(),stkAaveAPR.toFixed());
+        console.log('getStkAaveApr',tokenConfig.idle.token,aaveDistribution.toFixed(),this.BNify(aaveConversionRate).toFixed(),stkAaveValue.toFixed(),tokenAllocation.totalAllocationConverted.toFixed(),stkAaveAPR.toFixed());
 
         if (!this.BNify(stkAaveAPR).isNaN()){
           this.setCachedDataWithLocalStorage(cachedDataKey,stkAaveAPR);
@@ -5722,6 +5704,8 @@ class FunctionsUtil {
       const compValue = this.BNify(compConversionRate).times(compDistribution);
 
       const tokenAllocation = await this.getTokenAllocation(tokenConfig,false,false);
+
+      console.log('getCompAPR',tokenConfig.idle.token,compConversionRate.toFixed(5),compDistribution.toFixed(5),compValue.toFixed(5),tokenAllocation.totalAllocationConverted.toFixed(5));
 
       if (tokenAllocation){
         compAPR = compValue.div(tokenAllocation.totalAllocationConverted).times(100);
@@ -5784,7 +5768,7 @@ class FunctionsUtil {
             let compDistribution = this.BNify(compSpeed).times(compoundPoolShare);
 
             if (annualize){
-              compDistribution = compDistribution.div(1e18).times(this.BNify(blocksPerYear));
+              compDistribution = this.fixTokenDecimals(compDistribution,18).times(blocksPerYear);
             }
 
             if (!this.BNify(compDistribution).isNaN()){
@@ -6501,7 +6485,7 @@ class FunctionsUtil {
           totalSupply
         ] = await Promise.all([
           this.getIdleTokenPrice(tokenConfig),
-          this.getIdleTokenSupply(tokenConfig)
+          this.getIdleTokenSupply(idleTokenName)
         ]);
 
         tokenTVL = this.fixTokenDecimals(totalSupply,18).times(tokenPrice);
@@ -6831,7 +6815,6 @@ class FunctionsUtil {
     }
 
     let tokenData = await this.getTokenApiData(tokenConfig.address,isRisk,null,null,false,null,'desc',1);
-
     if (tokenData && tokenData.length){
       tokenData = tokenData.pop();
       if (tokenData && !this.BNify(tokenData[conversionRateField]).isNaN()){
@@ -6863,7 +6846,7 @@ class FunctionsUtil {
       return this.BNify(cachedData);
     }
 
-    const apiInfo = globalConfigs.stats.rates;
+    const apiInfo = this.getGlobalConfig(['stats','rates']);
     const config = this.getGlobalConfig(['stats','config']);
     const endpoint = `${apiInfo.endpoint}${tokenConfig.address}?isRisk=${isRisk}&limit=1&order=DESC`;
     const [
@@ -6963,7 +6946,6 @@ class FunctionsUtil {
     };
 
     if (!tokenConfig.idle){
-      // console.log('getTokenAprs - !tokenConfig.idle',tokenConfig);
       return tokenAprs;
     }
 
@@ -6978,70 +6960,17 @@ class FunctionsUtil {
       };
     }
 
-    const Aprs = await this.getAprs(tokenConfig.idle.token);
-
-    if (!Aprs){
-      // console.log('getTokenAprs - !Aprs',Aprs);
-      return tokenAprs;
+    tokenAprs.avgApr = await this.genericContractCallCached(tokenConfig.idle.token,'getAvgAPR');
+    if (tokenAprs.avgApr){
+      tokenAprs.avgApr = this.fixTokenDecimals(tokenAprs.avgApr,18);
     }
 
-    if (!tokenAllocation){
-      tokenAllocation = await this.getTokenAllocation(tokenConfig);
-    }
+    if (tokenAprs.avgApr){
 
-    if (!tokenAllocation){
-      // console.log('getTokenAprs - !tokenAllocation',tokenAllocation);
-      return tokenAprs;
-    }
-
-    const addresses = Aprs.addresses.map((addr,i) => { return addr.toString().toLowerCase() });
-    const aprs = Aprs.aprs;
-
-    const govTokensAprs = {};
-    const protocolsAprs = {};
-    const protocolsApys = {};
-
-    await this.asyncForEach(tokenConfig.protocols,async (protocolInfo,i) => {
-      const protocolAddr = protocolInfo.address.toString().toLowerCase();
-      const addrIndex = addresses.indexOf(protocolAddr);
-      if ( addrIndex !== -1 ) {
-        let protocolApr = this.BNify(+this.toEth(aprs[addrIndex]));
-        let protocolApy = this.apr2apy(protocolApr.div(100)).times(100);
-
-        if (addGovTokens){
-          let govTokenAPR = null;
-          const tokenGovTokens = this.getTokenGovTokens(tokenConfig);
-          await this.asyncForEach(Object.keys(tokenGovTokens), async (govToken) => {
-            switch (govToken){
-              case 'COMP':
-                govTokenAPR = await this.getCompAPR(tokenConfig.token,tokenConfig);
-              break;
-              case 'stkAAVE':
-                govTokenAPR = await this.getStkAaveApr(tokenConfig.token,tokenConfig);
-              break;
-              default:
-              break;
-            }
-            if (govTokenAPR){
-              govTokensAprs[govToken] = govTokenAPR;
-            }
-          });
-          
-        }
-
-        protocolsApys[protocolAddr] = protocolApy;
-        protocolsAprs[protocolAddr] = protocolApr;
-      }
-    });
-
-    if (tokenAllocation){
-      tokenAprs.avgApr = this.getAvgApr(protocolsAprs,tokenAllocation.protocolsAllocations,tokenAllocation.totalAllocation);
       tokenAprs.avgApy = this.apr2apy(tokenAprs.avgApr.div(100)).times(100);
 
-      Object.values(govTokensAprs).forEach( govTokenAPR => {
-        tokenAprs.avgApr = tokenAprs.avgApr.plus(govTokenAPR);
-        tokenAprs.avgApy = tokenAprs.avgApy.plus(govTokenAPR);
-      });
+      // tokenAprs.avgApr = tokenAprs.avgApr.plus(govTokensApr);
+      // tokenAprs.avgApy = tokenAprs.avgApy.plus(govTokensApr);
 
       // Add $IDLE token APR
       const idleGovTokenShowAPR = this.getGlobalConfig(['govTokens','IDLE','showAPR']);
@@ -7055,12 +6984,16 @@ class FunctionsUtil {
         }
       }
 
+      // console.log('getTokenAprs',tokenConfig.idle.token,govTokensApr.toFixed(8),tokenAprs.avgApr.toFixed(8),tokenAprs.avgApy.toFixed(8));
+
       if (this.BNify(tokenAprs.avgApy).isNaN()){
         tokenAprs.avgApy = this.BNify(0);
       }
       if (this.BNify(tokenAprs.avgApr).isNaN()){
         tokenAprs.avgApr = this.BNify(0);
       }
+
+      // console.log('Aprs for '+tokenConfig.idle.token+' loaded in '+((Date.now()-start)/1000).toFixed(2)+'s');
 
       return this.setCachedDataWithLocalStorage(cachedDataKey,tokenAprs);
     }

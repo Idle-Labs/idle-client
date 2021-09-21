@@ -68,7 +68,7 @@ const env = process.env;
 
 const globalConfigs = {
   appName: 'Idle',
-  version: 'v5.9',
+  version: 'v6.0',
   baseToken: 'ETH',
   baseURL: 'https://idle.finance',
   forumURL:'https://gov.idle.finance',
@@ -434,9 +434,9 @@ const globalConfigs = {
       distributionMode:'second',
       color:'hsl(314, 41%, 51%)',
       distributionFrequency:'day',
+      disabledTokens:['idleTUSDYield','idleSUSDYield'],
       address:'0x4da27a545c0c5b758a6ba100e3a049001de870f5', // MAIN
       addressForPrice:'0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9', // MAIN
-      disabledTokens:['idleTUSDYield','idleSUSDYield','idleRAIYield']
     }
   },
   contracts:{
@@ -598,8 +598,8 @@ const globalConfigs = {
       title:'Tranches',
       addGovTokens:true,
       titlePostfix:null,
+      component:Tranches,
       iconName:'Whatshot',
-      component: Tranches,
       govTokensEnabled:true,
       chartColor:'hsl(40,95%,59%)',
       icon:'images/strategies/tranches-on.png',

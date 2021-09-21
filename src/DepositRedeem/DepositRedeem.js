@@ -1383,7 +1383,7 @@ class DepositRedeem extends Component {
 
     const showRedeemFlow = this.state.canRedeem && (!this.state.redeemCurveEnabled || this.state.showRedeemFlow) && this.state.action==='redeem';
 
-    const redeemGovTokenEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','redeemGovTokens','enabled']) && govTokensEnabled && showRedeemFlow && this.props.govTokensBalance.gt(0);
+    const redeemGovTokenEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','redeemGovTokens','enabled']) && govTokensEnabled && showRedeemFlow;// && this.props.govTokensBalance.gt(0);
     const redeemGovTokens = redeemGovTokenEnabled && this.state.redeemGovTokens;
 
     const redeemSkipGovConfig = this.functionsUtil.getGlobalConfig(['contract','methods','redeemSkipGov']);
