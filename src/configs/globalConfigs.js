@@ -557,12 +557,14 @@ const globalConfigs = {
     seniorinfo:
       "<b>Senior Tranches</b><br>Lower risk, built-in coverage for variable rate rewards",
     helpcircle: "images/help-circle.svg",
-    work: {
-      desc: "How it Works?",
-      msg:
-        "This product aggregates user deposits into underlying markets and allocates the accrued yield on the sum between two different risk profile subsets. You get to choose the strategy according to your risk tolerance. Users are able to deposit funds into either the Junior or Senior Tranches in exchange for a token indicating their claim on their principal and whatever yield is allocated for them. These aggregated holdings are then deposited into the specified originating lending market, in this current version Idle Best-Yield strategy."
-    },
-    default: { desc: "What happens in a case of a default?", msg: "aabas" }
+    questions: [
+      {
+        desc: "How it Works?",
+        msg:
+          "This product aggregates user deposits into underlying markets and allocates the accrued yield on the sum between two different risk profile subsets. You get to choose the strategy according to your risk tolerance. Users are able to deposit funds into either the Junior or Senior Tranches in exchange for a token indicating their claim on their principal and whatever yield is allocated for them. These aggregated holdings are then deposited into the specified originating lending market, in this current version Idle Best-Yield strategy."
+      },
+      { desc: "What happens in a case of a default?", msg: "aabas" }
+    ]
   },
   tranches: {
     AA: {

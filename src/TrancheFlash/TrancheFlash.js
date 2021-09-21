@@ -58,45 +58,25 @@ class Base extends Component {
               </Text>
             </Flex>
             <Flex mt={3} mb={2} flexDirection={"column"} width={1}>
-              <Flex my={2} alignItems={"flex-start"}>
-                <Image src={flashData.helpcircle} />
-                <Link
-                  ml={2}
-                  opacity={"50%"}
-                  color={"near-white"}
-                  textAlign={"left"}
-                  fontWeight={2}
-                  fontSize={2}
-                  onClick={e =>
-                    this.props.openTooltipModal(
-                      flashData.work.desc,
-                      flashData.work.msg
-                    )
-                  }
-                >
-                  {flashData.work.desc}
-                </Link>
-              </Flex>
-              <Flex my={2} alignItems={"flex-start"}>
-                <Image src={flashData.helpcircle} />
+              {flashData.questions.map(question => (
+                <Flex my={2} alignItems={"flex-start"}>
+                  <Image src={flashData.helpcircle} />
 
-                <Link
-                  ml={2}
-                  opacity={"50%"}
-                  color={"near-white"}
-                  textAlign={"left"}
-                  fontWeight={2}
-                  fontSize={2}
-                  onClick={e =>
-                    this.props.openTooltipModal(
-                      flashData.default.desc,
-                      flashData.default.msg
-                    )
-                  }
-                >
-                  {flashData.default.desc}
-                </Link>
-              </Flex>
+                  <Link
+                    ml={2}
+                    opacity={"50%"}
+                    color={"near-white"}
+                    textAlign={"left"}
+                    fontWeight={2}
+                    fontSize={2}
+                    onClick={e =>
+                      this.props.openTooltipModal(question.desc, question.msg)
+                    }
+                  >
+                    {question.desc}
+                  </Link>
+                </Flex>
+              ))}
             </Flex>
           </Flex>
 
