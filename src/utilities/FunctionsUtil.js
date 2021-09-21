@@ -6822,7 +6822,6 @@ class FunctionsUtil {
 
     const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
     const conversionRate = await this.getUniswapConversionRate(DAITokenConfig,tokenConfig);
-
     if (!this.BNify(conversionRate).isNaN()){
       return this.setCachedDataWithLocalStorage(cachedDataKey,conversionRate);
     }
