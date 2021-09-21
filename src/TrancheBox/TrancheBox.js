@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import RoundButton from "../RoundButton/RoundButton";
 import FunctionsUtil from "../utilities/FunctionsUtil";
 import TrancheField from "../TrancheField/TrancheField";
 import { Box, Flex, Icon, Text, Button, Image } from "rimble-ui";
@@ -67,9 +68,9 @@ class Base extends Component {
                 <Image
                   ml={3}
                   mr={1}
-                  size={this.props.isMobile ? "2em" : "2.4em"}
-                  alt="random unsplash image"
                   src={trancheDetails.image}
+                  alt={"random unsplash image"}
+                  size={this.props.isMobile ? "2em" : "2.4em"}
                 />
                 <Flex mx={2}>
                   <Text
@@ -166,7 +167,7 @@ class Base extends Component {
             </Flex>
           </Flex>
           <Flex
-            bg={"near-white2"}
+            bg={"cardBgContrast"}
             flexDirection={"column"}
           >
             <Flex
@@ -207,20 +208,22 @@ class Base extends Component {
               width={1}
               justifyContent={"center"}
             >
-              <Button
-                my={3}
-                width={0.85}
-                borderRadius={40}
-                contrastColor={"cardBg"}
-                mainColor={trancheDetails.color.hex}
-                onClick={e =>
+              <RoundButton
+                buttonProps={{
+                  my:3,
+                  width:0.85,
+                  fontSize:2,
+                  contrastColor:"white",
+                  mainColor:trancheDetails.color.hex
+                }}
+                handleClick={e =>
                   this.props.selectTrancheType(trancheDetails.route)
                 }
               >
                 {this.props.tokenConfig
                   ? `Go to ${trancheDetails.name}`
                   : `Enter the ${trancheDetails.name}`}
-              </Button>
+              </RoundButton>
             </Flex>
           </Flex>
         </Flex>

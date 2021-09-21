@@ -93,7 +93,7 @@ export default {
     menuBg: "#fff",
     menuHover: "#f3f6ff",
     cardBg: "#fff",
-    "near-white2": "#FAFAFA",
+    cardBgContrast:"#fafafa",
     flashColor: "#3f4e9a",
     menuRightBorder: "#eee",
     cardHoverShadow: "0px 0px 0px 1px rgba(0, 54, 255, 0.3)",

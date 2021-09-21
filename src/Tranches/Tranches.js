@@ -10,9 +10,9 @@ import TrancheWelcome from '../TrancheWelcome/TrancheWelcome';
 import GenericPieChart from '../GenericPieChart/GenericPieChart';
 import GenericSelector from '../GenericSelector/GenericSelector';
 import TransactionsList from '../TransactionsList/TransactionsList';
-import { Box, Flex, Heading, Loader, Text, Icon, Tooltip } from "rimble-ui";
 import TotalBalanceCounter from '../TotalBalanceCounter/TotalBalanceCounter';
 import TotalEarningsCounter from '../TotalEarningsCounter/TotalEarningsCounter';
+import { Box, Flex, Heading, Loader, Text, Icon, Tooltip, Image } from "rimble-ui";
 import PortfolioEquityTranches from '../PortfolioEquityTranches/PortfolioEquityTranches';
 
 class Tranches extends Component {
@@ -341,11 +341,20 @@ class Tranches extends Component {
                     alignItems={'center'}
                     flexDirection={'row'}
                     justifyContent={'center'}
-                  >
-                    <Icon
+                  > 
+                    {
+                    /*
+                      <Icon
+                        mr={2}
+                        name={this.state.trancheDetails.icon}
+                        color={this.state.trancheDetails.color.hex}
+                        size={this.props.isMobile ? '1.8em' : '2.2em'}
+                      />
+                    */
+                    }
+                    <Image
                       mr={2}
-                      name={this.state.trancheDetails.icon}
-                      color={this.state.trancheDetails.color.hex}
+                      src={this.state.trancheDetails.image}
                       size={this.props.isMobile ? '1.8em' : '2.2em'}
                     />
                     <Title
