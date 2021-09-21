@@ -582,7 +582,6 @@ const globalConfigs = {
       icon: "Security",
       image: "images/SeniorTranche.svg",
       bubble: "images/SeniorBubble.svg",
-
       baseName: "senior",
       name: "Senior Tranche",
       features: [

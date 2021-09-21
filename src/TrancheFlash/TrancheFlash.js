@@ -69,11 +69,11 @@ class Base extends Component {
 
                   <Link
                     ml={2}
-                    opacity={"50%"}
-                    color={"near-white"}
-                    textAlign={"left"}
-                    fontWeight={2}
                     fontSize={2}
+                    fontWeight={2}
+                    opacity={"50%"}
+                    color={"white"}
+                    textAlign={"left"}
                     onClick={e =>
                       this.props.openTooltipModal(question.desc, question.msg)
                     }
