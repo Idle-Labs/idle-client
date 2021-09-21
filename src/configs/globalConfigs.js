@@ -75,9 +75,6 @@ const globalConfigs = {
   theme:{
     darkModeEnabled:true
   },
-  extraimages: {
-    bgimage: "images/bgImage.svg"
-  },
   betaURL: "https://beta.idle.finance",
   countries: {
     USA: "United States of America",
