@@ -404,13 +404,7 @@ class FunctionsUtil {
       // console.log(token,'amountDeposited',amountDeposited.toString(),'amountLent',amountLents[token].toString());
 
       const tokenBalanceConverted = portfolio.tokensBalance[token].tokenBalanceConverted;
-      const [
-        tokenAprs
-        // tokenEarnings
-      ] = await Promise.all([
-        this.getTokenAprs(tokenConfig)
-        // this.loadAssetField('earnings',token,tokenConfig,this.props.account,false),
-      ]);
+      const tokenAprs = await this.getTokenAprs(tokenConfig);
 
       const tokenAPY = this.BNify(tokenAprs.avgApy);
       const tokenWeight = tokenBalanceConverted.div(portfolio.totalBalanceConverted);
@@ -4397,7 +4391,7 @@ class FunctionsUtil {
       const expiryDate = this.strToMoment(coverDetails.validUntil*1000).format('YYYY-MM-DD');
 
       const claimId = claimSubmittedEvent ? claimSubmittedEvent.returnValues.claimId : null;
-      const payoutOutcome = await this.genericContractCall(feeDistributorConfig.name,'getPayoutOutcome',[claimId]);
+      const payoutOutcome = claimId ? await this.genericContractCall(feeDistributorConfig.name,'getPayoutOutcome',[claimId]) : null;
       const label = `${yieldTokenConfig.name} - ${sumAssured.toFixed(4)} ${coverAssetConfig.token} - Exp. ${expiryDate}`;
       const value = coverId;
 
@@ -4840,9 +4834,13 @@ class FunctionsUtil {
       const value = await contract.methods[methodName](...params).call(callParams,blockNumber).catch(error => {
         this.customLog(`${contractName} contract method ${methodName} error: `, error);
       });
+      // if (!value){
+      //   console.log('genericContractCall - NULL - ',contractName,methodName,params);
+      // }
       // console.log(`${moment().format('HH:mm:ss')} - genericContractCall (${blockNumber}) - ${contractName} - ${methodName} (${JSON.stringify(params)}) : ${value}`);
       return value;
     } catch (error) {
+      // console.log('genericContractCall ERROR - ',contractName,methodName,params);
       this.customLog("genericContractCall error", error);
     }
   }
@@ -4891,8 +4889,6 @@ class FunctionsUtil {
       return false;
     }
 
-    const start = Date.now();
-
     // Check for cached data
     const cachedDataKey = `tokenAllocation_${tokenConfig.idle.address}_${addGovTokens}`;
     const cachedData = this.getCachedData(cachedDataKey);
@@ -4904,7 +4900,6 @@ class FunctionsUtil {
       avgApr: null,
       unlentBalance:null,
       totalAllocation:null,
-      protocolsBalances:{},
       protocolsAllocations:null,
       protocolsAllocationsPerc:null,
       totalAllocationConverted:null,
@@ -4912,8 +4907,6 @@ class FunctionsUtil {
       totalAllocationWithUnlentConverted:null,
     };
 
-    const exchangeRates = {};
-    const protocolsBalances = {};
     const protocolsAllocations = {};
     const protocolsAllocationsPerc = {};
 
@@ -5099,9 +5092,10 @@ class FunctionsUtil {
 
       const unires = await this.genericContractCall('UniswapRouter','getAmountsIn',[one.toFixed(),path]);
 
+      // console.log('getUniswapConversionRate',path,unires);
+      
       if (unires){
         const price = this.BNify(unires[0]).div(one);
-        // console.log('getUniswapConversionRate',path,price.toFixed());
         return this.setCachedDataWithLocalStorage(cachedDataKey,price);
       }
       return null;
@@ -6820,12 +6814,6 @@ class FunctionsUtil {
       return this.BNify(cachedData);
     }
 
-    const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
-    const conversionRate = await this.getUniswapConversionRate(DAITokenConfig,tokenConfig);
-    if (!this.BNify(conversionRate).isNaN()){
-      return this.setCachedDataWithLocalStorage(cachedDataKey,conversionRate);
-    }
-
     let tokenData = await this.getTokenApiData(tokenConfig.address,isRisk,null,null,false,null,'desc',1);
     if (tokenData && tokenData.length){
       tokenData = tokenData.pop();
@@ -6837,9 +6825,15 @@ class FunctionsUtil {
       }
     }
 
-    // if (count<3){
-    //   return await this.getTokenConversionRate(tokenConfig,isRisk,conversionRateField,count+1); 
-    // }
+    const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
+    const conversionRate = await this.getUniswapConversionRate(DAITokenConfig,tokenConfig);
+    if (!this.BNify(conversionRate).isNaN()){
+      return this.setCachedDataWithLocalStorage(cachedDataKey,conversionRate);
+    }
+
+    if (count<3){
+      return await this.getTokenConversionRate(tokenConfig,isRisk,conversionRateField,count+1); 
+    }
 
     return null;
   }
@@ -6954,8 +6948,6 @@ class FunctionsUtil {
     if (!tokenConfig.idle){
       return tokenAprs;
     }
-
-    const start = Date.now();
 
     // Check for cached data
     const cachedDataKey = `tokenAprs_${tokenConfig.idle.address}_${addGovTokens}`;
