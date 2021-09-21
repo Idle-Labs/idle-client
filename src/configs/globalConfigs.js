@@ -560,7 +560,7 @@ const globalConfigs = {
         msg:
           "This product aggregates user deposits into underlying markets and allocates the accrued yield on the sum between two different risk profile subsets. You get to choose the strategy according to your risk tolerance. Users are able to deposit funds into either the Junior or Senior Tranches in exchange for a token indicating their claim on their principal and whatever yield is allocated for them. These aggregated holdings are then deposited into the specified originating lending market, in this current version Idle Best-Yield strategy."
       },
-      { desc: "What happens in a case of a default?", msg: "aabas" }
+      { desc: "What happens in a case of a default?", msg: "In case of hack, an emergency shutdown can be triggered (by both the guardian, which would be a multi-sig wallet, and the owner which will be the Idle governance) in order to pause both deposits and redeems.<br />The redistribution of remaining funds can happens selectively, by allowing only Senior tranche holders to withdraw first directly in the main contract, or through a separate contract for more complex cases and resolutions (managed by the Idle governance)." }
     ]
   },
   tranches: {
