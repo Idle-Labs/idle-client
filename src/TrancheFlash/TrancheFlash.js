@@ -69,8 +69,8 @@ class Base extends Component {
                   fontSize={2}
                   onClick={e =>
                     this.props.openTooltipModal(
-                      "What Haappens",
-                      flashData.workmsg
+                      flashData.work.desc,
+                      flashData.work.msg
                     )
                   }
                 >
@@ -89,8 +89,8 @@ class Base extends Component {
                   fontSize={2}
                   onClick={e =>
                     this.props.openTooltipModal(
-                      "What Haappens",
-                      flashData.defaultmsg
+                      flashData.default.desc,
+                      flashData.default.msg
                     )
                   }
                 >
