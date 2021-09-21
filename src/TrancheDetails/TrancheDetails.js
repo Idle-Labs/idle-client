@@ -2,11 +2,11 @@ import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import ConnectBox from '../ConnectBox/ConnectBox';
+import { Flex, Text, Image, Button } from "rimble-ui";
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import BuyModal from '../utilities/components/BuyModal';
 import TrancheField from '../TrancheField/TrancheField';
 import DashboardCard from '../DashboardCard/DashboardCard';
-import { Flex, Text, Icon, Image, Button } from "rimble-ui";
 import ShareModal from '../utilities/components/ShareModal';
 import CardIconButton from '../CardIconButton/CardIconButton';
 import SendTxWithBalance from '../SendTxWithBalance/SendTxWithBalance';
@@ -309,16 +309,6 @@ class TrancheDetails extends Component {
             flexDirection={'row'}
             borderBottom={`1px solid ${trancheDetails.color.hex}`}
           > 
-            {
-              /*
-              <Icon
-                mr={2}
-                name={trancheDetails.icon}
-                color={trancheDetails.color.hex}
-                size={this.props.isMobile ? '1.6em' : '1.8em'}
-              />
-              */
-            }
             <Image
               mr={2}
               src={trancheDetails.image}

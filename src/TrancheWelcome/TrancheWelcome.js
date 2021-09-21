@@ -1,5 +1,5 @@
+import { Flex } from "rimble-ui";
 import Title from "../Title/Title";
-import { Box, Flex } from "rimble-ui";
 import React, { Component } from "react";
 import styles from './TrancheWelcome.module.scss';
 import TrancheBox from "../TrancheBox/TrancheBox";

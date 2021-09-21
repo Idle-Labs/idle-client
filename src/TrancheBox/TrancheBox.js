@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import RoundButton from "../RoundButton/RoundButton";
 import FunctionsUtil from "../utilities/FunctionsUtil";
 import TrancheField from "../TrancheField/TrancheField";
-import { Box, Flex, Icon, Text, Button, Image } from "rimble-ui";
+import { Box, Flex, Icon, Text, Image } from "rimble-ui";
 
 //import DashboardCard from "../DashboardCard/DashboardCard";
 
