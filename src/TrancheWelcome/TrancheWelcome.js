@@ -1,10 +1,12 @@
 import Title from "../Title/Title";
-import React, { Component } from "react";
 import { Box, Flex } from "rimble-ui";
+import React, { Component } from "react";
+import styles from './TrancheWelcome.module.scss';
 import TrancheBox from "../TrancheBox/TrancheBox";
 import FunctionsUtil from "../utilities/FunctionsUtil";
 import TrancheFlash from "../TrancheFlash/TrancheFlash";
-class Base extends Component {
+
+class TrancheWelcome extends Component {
   // Utils
   functionsUtil = null;
 
@@ -56,8 +58,9 @@ class Base extends Component {
               ></Flex>
               <Flex
                 border={1}
-                bg={"newblue"}
                 borderRadius={2}
+                backgroundColor={"newblue"}
+                className={[styles.trancheFlash,this.props.isMobile ? styles.mobile : null]}
               >
                 <TrancheFlash {...this.props}></TrancheFlash>
               </Flex>
@@ -95,4 +98,4 @@ class Base extends Component {
   }
 }
 
-export default Base;
+export default TrancheWelcome;

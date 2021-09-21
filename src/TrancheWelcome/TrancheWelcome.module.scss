@@ -1,0 +1,10 @@
+.trancheFlash{
+	background-size:auto 65%;
+	background-repeat:no-repeat;
+	background-position:78% 100%;
+	background-image:url(/images/trancheFlashBg.svg);
+	&.mobile{
+		background-size:auto 50%;
+		background-position:100% 100%;
+	}
+}
