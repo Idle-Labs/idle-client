@@ -61,7 +61,7 @@ class TrancheFlash extends Component {
               {flashData.desc}
             </Text>
           </Flex>
-          <Flex mt={3} mb={2} flexDirection={"column"} width={1}>
+          <Flex mt={[2,3]} mb={2} flexDirection={"column"} width={1}>
             {flashData.questions.map(question => (
               <Flex my={2} alignItems={"flex-start"}>
                 <Image src={flashData.helpcircle} />
@@ -114,7 +114,7 @@ class TrancheFlash extends Component {
               fontWeight={2}
               fontSize={2}
               dangerouslySetInnerHTML={{
-                __html: flashData.juniorinfo
+                __html: flashData.seniorinfo
               }}
             ></Text>
           </Flex>
@@ -138,7 +138,7 @@ class TrancheFlash extends Component {
               fontWeight={2}
               fontSize={2}
               dangerouslySetInnerHTML={{
-                __html: flashData.seniorinfo
+                __html: flashData.juniorinfo
               }}
             ></Text>
           </Flex>

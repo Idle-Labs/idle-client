@@ -550,7 +550,7 @@ const globalConfigs = {
       "Choose the benefits of high-yield or low-risk, while enjoying the flexibility of Tranches. This comes with auto-compounding for accrued governance tokens and no locking period.",
     arrows: "images/idlearrows.svg",
     juniorinfo:
-      "<b>Junior Tranches</b><br>Higher risk, levered variable rate rewards",
+      "<b>Junior Tranches</b><br>Higher risk, leveraged for variable rate rewards",
     seniorinfo:
       "<b>Senior Tranches</b><br>Lower risk, built-in coverage for variable rate rewards",
     helpcircle: "images/help-circle.svg",
