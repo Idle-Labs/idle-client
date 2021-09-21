@@ -40,6 +40,7 @@ class Base extends Component {
     return (
       <Box
         my={[3, 0]}
+        boxShadow={1}
         width={[1,0.49]}
       >
         <Flex
@@ -47,6 +48,7 @@ class Base extends Component {
           mx={0}
           border={1}
           borderRadius={2}
+          overflow={'hidden'}
           flexDirection={'column'}
           backgroundColor={'cardBg'}
           justifyContent={[
