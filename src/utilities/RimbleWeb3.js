@@ -538,7 +538,7 @@ class RimbleTransaction extends React.Component {
     this.functionsUtil.customLog(`Init contract: ${name}`);
     const result = await this.createContract(name, address, abi, useInfuraProvider);
     if (result && result.contract){
-      // await this.createContractCustomProvider(name+'_call', address, result.contract.options.jsonInterface, this.state.ethersInfura);
+      await this.createContractCustomProvider(name+'_call', address, result.contract.options.jsonInterface, this.state.ethersInfura);
     }
     return result;
   };
