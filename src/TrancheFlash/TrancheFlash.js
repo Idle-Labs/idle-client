@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Flex, Text, Image, Tooltip } from "rimble-ui";
+import { Link, Flex, Text, Image } from "rimble-ui";
 import FunctionsUtil from "../utilities/FunctionsUtil";
 
 //import DashboardCard from "../DashboardCard/DashboardCard";
@@ -35,19 +35,19 @@ class Base extends Component {
           justifyContent={"center"}
         >
           <Flex mx={2} my={4} width={[1, 0.4]} flexDirection={"column"}>
-            <Flex justifyContent={"left"} my={4} width={[1, 0.8]}>
+            <Flex justifyContent={"left"} my={3} width={[1, 0.7]}>
               <Text
                 bold={"true"}
                 color={"white"}
                 textAlign={"left"}
                 fontWeight={4}
-                fontSize={7}
+                fontSize={[5, 6]}
                 lineHeight={1}
               >
                 {flashData.subtitle}
               </Text>
             </Flex>
-            <Flex justifyContent={"left"} my={4} width={[1, 0.8]}>
+            <Flex justifyContent={"left"} mt={2} mb={4} width={1}>
               <Text
                 color={"white"}
                 textAlign={"left"}
@@ -57,48 +57,45 @@ class Base extends Component {
                 {flashData.desc}
               </Text>
             </Flex>
-            <Flex flexDirection={"column"} width={[1, 0.8]}>
-              <Flex my={2}>
-                <Tooltip
-                  placement={"top"}
-                  message={this.functionsUtil.getGlobalConfig([
-                    "tranchflash",
-                    "workmsg"
-                  ])}
-                >
-                  <Image src={flashData.helpcircle} />
-                </Tooltip>
-                <Text
-                  ml={3}
+            <Flex mt={3} mb={2} flexDirection={"column"} width={1}>
+              <Flex my={2} alignItems={"flex-start"}>
+                <Image src={flashData.helpcircle} />
+                <Link
+                  ml={2}
                   opacity={"50%"}
-                  color={"white"}
+                  color={"near-white"}
                   textAlign={"left"}
                   fontWeight={2}
                   fontSize={2}
+                  onClick={e =>
+                    this.props.openTooltipModal(
+                      "What Haappens",
+                      flashData.workmsg
+                    )
+                  }
                 >
-                  How it Works?
-                </Text>
+                  {flashData.work.desc}
+                </Link>
               </Flex>
-              <Flex my={2}>
-                <Tooltip
-                  placement={"left"}
-                  message={this.functionsUtil.getGlobalConfig([
-                    "tranchflash",
-                    "defaultmsg"
-                  ])}
-                >
-                  <Image src={flashData.helpcircle} />
-                </Tooltip>
-                <Text
-                  ml={3}
+              <Flex my={2} alignItems={"flex-start"}>
+                <Image src={flashData.helpcircle} />
+
+                <Link
+                  ml={2}
                   opacity={"50%"}
-                  color={"white"}
+                  color={"near-white"}
                   textAlign={"left"}
                   fontWeight={2}
                   fontSize={2}
+                  onClick={e =>
+                    this.props.openTooltipModal(
+                      "What Haappens",
+                      flashData.defaultmsg
+                    )
+                  }
                 >
-                  What happens in a case of a default?
-                </Text>
+                  {flashData.default.desc}
+                </Link>
               </Flex>
             </Flex>
           </Flex>
@@ -115,9 +112,9 @@ class Base extends Component {
             />
           </Flex>
           <Flex ml={2} my={[3, 5]} width={[1, 0.4]} flexDirection={"column"}>
-            <Flex flexDirection={"row"} alignItems={"flex-start"}>
+            <Flex my={[1, 0]} flexDirection={"row"} alignItems={"flex-start"}>
               <Image
-                my={[1, 2]}
+                my={[0, 2]}
                 width={[0.1, 0.2]}
                 src={this.functionsUtil.getGlobalConfig([
                   "tranches",
@@ -126,19 +123,21 @@ class Base extends Component {
                 ])}
               />
               <Text
+                mt={[0, 2]}
                 mx={2}
                 mb={[2, 1]}
                 color={"white"}
-                textAlign={"justify"}
+                textAlign={"left"}
                 fontWeight={2}
                 fontSize={2}
-              >
-                {flashData.juniorinfo}
-              </Text>
+                dangerouslySetInnerHTML={{
+                  __html: flashData.juniorinfo
+                }}
+              ></Text>
             </Flex>
-            <Flex flexDirection={"row"} alignItems={"flex-start"}>
+            <Flex my={[1, 0]} flexDirection={"row"} alignItems={"flex-start"}>
               <Image
-                my={[1, 2]}
+                my={[0, 2]}
                 ml={[0, 4]}
                 width={[0.1, 0.2]}
                 src={this.functionsUtil.getGlobalConfig([
@@ -148,15 +147,17 @@ class Base extends Component {
                 ])}
               />
               <Text
+                mt={[0, 2]}
                 mx={2}
                 mb={[2, 1]}
                 color={"white"}
-                textAlign={"justify"}
+                textAlign={"left"}
                 fontWeight={2}
                 fontSize={2}
-              >
-                {flashData.seniorinfo}
-              </Text>
+                dangerouslySetInnerHTML={{
+                  __html: flashData.seniorinfo
+                }}
+              ></Text>
             </Flex>
           </Flex>
           {/*<Flex width={0.3}>

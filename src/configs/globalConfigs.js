@@ -555,13 +555,17 @@ const globalConfigs = {
     desc:
       "Choose the benefits of high-yield or low-risk, while enjoying the flexibility of Tranches. This comes with auto-compounding for accrued governance tokens and no locking period.",
     arrows: "images/idlearrows.svg",
-    juniorinfo: "Junior Tranches Higher risk, levered variable rate rewards",
+    juniorinfo:
+      "<b>Junior Tranches</b><br>Higher risk, levered variable rate rewards",
     seniorinfo:
-      "Senior Tranches Lower risk, built-in coverage for variable rate rewards",
+      "<b>Senior Tranches</b><br>Lower risk, built-in coverage for variable rate rewards",
     helpcircle: "images/help-circle.svg",
-    workmsg:
-      "This product aggregates user deposits into underlying markets and allocates the accrued yield on the sum between two different risk profile subsets. You get to choose the strategy according to your risk tolerance. Users are able to deposit funds into either the Junior or Senior Tranches in exchange for a token indicating their claim on their principal and whatever yield is allocated for them. These aggregated holdings are then deposited into the specified originating lending market, in this current version Idle Best-Yield strategy.",
-    defaultmsg: "aabas"
+    work: {
+      desc: "How it Works?",
+      msg:
+        "This product aggregates user deposits into underlying markets and allocates the accrued yield on the sum between two different risk profile subsets. You get to choose the strategy according to your risk tolerance. Users are able to deposit funds into either the Junior or Senior Tranches in exchange for a token indicating their claim on their principal and whatever yield is allocated for them. These aggregated holdings are then deposited into the specified originating lending market, in this current version Idle Best-Yield strategy."
+    },
+    default: { desc: "What happens in a case of a default?", msg: "aabas" }
   },
   tranches: {
     AA: {

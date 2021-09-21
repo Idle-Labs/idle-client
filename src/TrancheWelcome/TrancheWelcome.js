@@ -1,6 +1,6 @@
 import Title from "../Title/Title";
 import React, { Component } from "react";
-import { Box, Flex, Text } from "rimble-ui";
+import { Box, Flex } from "rimble-ui";
 import TrancheBox from "../TrancheBox/TrancheBox";
 import FunctionsUtil from "../utilities/FunctionsUtil";
 import TrancheFlash from "../TrancheFlash/TrancheFlash";
@@ -27,7 +27,7 @@ class Base extends Component {
   render() {
     const tranchesDetails = this.functionsUtil.getGlobalConfig(["tranches"]);
     return (
-      <Box mx={[2, 5]} mb={3} width={1} maxWidth={8} aligItems={"center"}>
+      <Box mx={[0, 5]} mb={3} width={1} maxWidth={8} aligItems={"center"}>
         <Flex
           width={1}
           flexDirection={"column"}
@@ -35,28 +35,16 @@ class Base extends Component {
         >
           {!this.props.tokenConfig ? (
             <>
-              <Title mb={3}>Perpetual Yield Tranches</Title>
+              <Title fontSize={[5, 6]} mb={3}>
+                Perpetual Yield Tranches
+              </Title>
               <Flex
                 width={1}
                 mb={[3, 4]}
                 mx={"auto"}
                 aligItems={"center"}
                 justifyContent={"center"}
-              >
-                <Text fontWeight={2} fontSize={[1, 2]} textAlign={"center"}>
-                  {this.props.isMobile
-                    ? this.functionsUtil.getGlobalConfig([
-                        "strategies",
-                        "tranches",
-                        "descShort"
-                      ])
-                    : this.functionsUtil.getGlobalConfig([
-                        "strategies",
-                        "tranches",
-                        "descLong"
-                      ])}
-                </Text>
-              </Flex>
+              ></Flex>
               <Flex border={1} borderRadius={5} bg={"newblue"}>
                 <TrancheFlash {...this.props}></TrancheFlash>
               </Flex>
