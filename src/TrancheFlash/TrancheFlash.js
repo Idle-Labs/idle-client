@@ -34,7 +34,12 @@ class Base extends Component {
           flexDirection={["column", "row"]}
           justifyContent={"center"}
         >
-          <Flex mx={2} my={4} width={[1, 0.4]} flexDirection={"column"}>
+          <Flex
+            mx={2}
+            my={[2,4]}
+            width={[1, 0.4]}
+            flexDirection={"column"}
+          >
             <Flex justifyContent={"left"} my={3} width={[1, 0.7]}>
               <Text
                 bold={"true"}
@@ -47,7 +52,7 @@ class Base extends Component {
                 {flashData.subtitle}
               </Text>
             </Flex>
-            <Flex justifyContent={"left"} mt={2} mb={4} width={1}>
+            <Flex justifyContent={"left"} mt={2} mb={[2,4]} width={1}>
               <Text
                 color={"white"}
                 textAlign={"left"}

@@ -45,6 +45,7 @@ export default {
     'primary-dark': blue.dark[1],
     bgBlue: '#0030e0',
     blue: '#0036ff',
+    tick: "#00b84a",
     'dark-blue': '#00219a',
     skyBlue: '#00abfe',
     lightBlue: '#79f4e1',
@@ -66,6 +67,7 @@ export default {
     /*
     NEW COLORS
     */
+    newblue: "#2B65D9",
     alert:'#ff9900',
     arrowActive:'#d8d8d8',
     arrowInactive:'#4f4f4f',
@@ -94,6 +96,7 @@ export default {
     cardBorder:'#0d2034',
     pageActive:'#d8d8d8',
     pageInactive:'#4f4f4f',
+    "near-white2": "#FAFAFA",
     menuRightBorder:'#0d2034',
     cardHoverShadow:'0px 0px 0px 1px rgb(45 74 114)',
     transactions:{

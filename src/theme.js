@@ -45,7 +45,7 @@ export default {
     "primary-dark": blue.dark[1],
     bgBlue: "#0030e0",
     blue: "#0036ff",
-    tick: "#5ABA4A",
+    tick: "#00b84a",
     "dark-blue": "#00219a",
     skyBlue: "#00abfe",
     lightBlue: "#79f4e1",
