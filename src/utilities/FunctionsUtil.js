@@ -4910,7 +4910,7 @@ class FunctionsUtil {
     const protocolsAllocations = {};
     const protocolsAllocationsPerc = {};
 
-    const [
+    let [
       unlentBalance,
       tokenPrice,
       tokenUsdConversionRate,
@@ -4927,6 +4927,11 @@ class FunctionsUtil {
       addGovTokens ? this.getGovTokensBalances(tokenConfig.idle.address) : null,
       this.genericContractCallCached(tokenConfig.idle.token,'getAllAvailableTokens')
     ]);
+
+    if (!allAvailableTokens){
+      const promises = tokenAllocations.map( (p,index) => this.genericContractCall(tokenConfig.idle.token,'allAvailableTokens',[index]) );
+      allAvailableTokens = await Promise.all(promises);
+    }
 
     const totalAllocation = this.fixTokenDecimals(totalSupply,18).times(tokenPrice).minus(unlentBalance);
 
