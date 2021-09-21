@@ -4913,25 +4913,22 @@ class FunctionsUtil {
     let [
       unlentBalance,
       tokenPrice,
+      aprs,
       tokenUsdConversionRate,
       totalSupply,
       tokenAllocations,
       govTokensBalances,
-      allAvailableTokens
     ] = await Promise.all([
       this.getUnlentBalance(tokenConfig),
       this.getIdleTokenPrice(tokenConfig),
+      this.getAprs(tokenConfig.idle.token),
       this.getTokenConversionRate(tokenConfig,false),
       this.getIdleTokenSupply(tokenConfig.idle.token),
       this.genericContractCallCached(tokenConfig.idle.token,'getAllocations'),
       addGovTokens ? this.getGovTokensBalances(tokenConfig.idle.address) : null,
-      this.genericContractCallCached(tokenConfig.idle.token,'getAllAvailableTokens')
     ]);
 
-    if (!allAvailableTokens){
-      const promises = tokenAllocations.map( (p,index) => this.genericContractCall(tokenConfig.idle.token,'allAvailableTokens',[index]) );
-      allAvailableTokens = await Promise.all(promises);
-    }
+    const allAvailableTokens = aprs ? aprs.addresses : null;
 
     const totalAllocation = this.fixTokenDecimals(totalSupply,18).times(tokenPrice).minus(unlentBalance);
 
