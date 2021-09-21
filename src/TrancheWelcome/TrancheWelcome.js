@@ -27,15 +27,24 @@ class Base extends Component {
   render() {
     const tranchesDetails = this.functionsUtil.getGlobalConfig(["tranches"]);
     return (
-      <Box mx={[0, 5]} mb={3} width={1} maxWidth={8} aligItems={"center"}>
+      <Flex
+        width={1}
+        aligItems={'center'}
+        justifyContent={'center'}
+      >
         <Flex
+          mb={3}
           width={1}
+          maxWidth={8}
+          aligItems={"center"}
           flexDirection={"column"}
           justifyContent={"space-between"}
         >
           {!this.props.tokenConfig ? (
             <>
-              <Title fontSize={[5, 6]} mb={3}>
+              <Title
+                fontSize={[5, 6]}
+              >
                 Perpetual Yield Tranches
               </Title>
               <Flex
@@ -45,7 +54,11 @@ class Base extends Component {
                 aligItems={"center"}
                 justifyContent={"center"}
               ></Flex>
-              <Flex border={1} borderRadius={5} bg={"newblue"}>
+              <Flex
+                border={1}
+                bg={"newblue"}
+                borderRadius={2}
+              >
                 <TrancheFlash {...this.props}></TrancheFlash>
               </Flex>
             </>
@@ -66,9 +79,10 @@ class Base extends Component {
               flexDirection={["column", "row"]}
               justifyContent={"space-between"}
             >
-              {Object.keys(tranchesDetails).map(trancheType => (
+              {Object.keys(tranchesDetails).map((trancheType,index) => (
                 <TrancheBox
                   {...this.props}
+                  key={`tranche_${index}`}
                   tokenConfig={this.props.tokenConfig}
                   trancheDetails={tranchesDetails[trancheType]}
                 />
@@ -76,7 +90,7 @@ class Base extends Component {
             </Flex>
           </Flex>
         </Flex>
-      </Box>
+      </Flex>
     );
   }
 }
