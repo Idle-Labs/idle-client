@@ -80,7 +80,7 @@ class Base extends Component {
                     <Text
                       ml={[2, 0]}
                       fontWeight={4}
-                      fontSize={[4, 6]}
+                      fontSize={[4, 5]}
                       lineHeight={1}
                     >
                       {trancheDetails.name}
