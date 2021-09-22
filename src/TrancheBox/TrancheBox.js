@@ -32,25 +32,23 @@ class Base extends Component {
       "strategies",
       "tranches"
     ]);
-    
+
     const tokenConfig =
       this.props.tokenConfig ||
       this.props.availableTranches[strategyInfo.protocol][strategyInfo.token];
 
     return (
-      <Box
-        my={[3, 0]}
-        boxShadow={1}
-        width={[1,0.49]}
-      >
+      <Box my={[3, 0]} boxShadow={1} width={[1, 0.49]} borderRadius={2}>
         <Flex
+          height={"100%"}
           p={0}
           mx={0}
-          border={1}
+          borderColor={"transparent"}
+          border={"0"}
           borderRadius={2}
-          overflow={'hidden'}
-          flexDirection={'column'}
-          backgroundColor={'cardBg'}
+          overflow={"hidden"}
+          flexDirection={"column"}
+          backgroundColor={"cardBg"}
           justifyContent={[
             "center",
             trancheDetails.type === "AA" ? "left" : "right"
@@ -60,12 +58,7 @@ class Base extends Component {
             width={1}
             borderBottom={`1px solid ${this.props.theme.colors.divider2}`}
           >
-            <Flex
-              pb={2}
-              mx={2}
-              my={3}
-              flexDirection={"column"}
-            >
+            <Flex pb={2} mx={2} my={3} flexDirection={"column"}>
               <Flex mt={3} alignItems={"center"}>
                 <Image
                   ml={3}
@@ -74,7 +67,7 @@ class Base extends Component {
                   alt={"random unsplash image"}
                   size={this.props.isMobile ? "2em" : "2.4em"}
                 />
-                <Flex mx={2}>
+                <Flex mx={1}>
                   <Text
                     ml={[2, 0]}
                     fontWeight={4}
@@ -92,11 +85,7 @@ class Base extends Component {
                 alignItems={"flex-start"}
                 flexDirection={"column"}
               >
-                <Flex
-                  mx={1}
-                  flexDirection={"row"}
-                  alignItems={"baseline"}
-                >
+                <Flex mr={1} flexDirection={"row"} alignItems={"baseline"}>
                   <TrancheField
                     fieldInfo={{
                       name: `${trancheDetails.baseName}Apy`,
@@ -156,9 +145,8 @@ class Base extends Component {
                 */}
                 <Text
                   mt={3}
-                  ml={1}
                   fontWeight={2}
-                  fontSize={[1,2]}
+                  fontSize={[1, 2]}
                   textAlign={"left"}
                   lineHeight={"1.5"}
                   color={"copyColor"}
@@ -168,17 +156,8 @@ class Base extends Component {
               </Flex>
             </Flex>
           </Flex>
-          <Flex
-            bg={"cardBgContrast"}
-            flexDirection={"column"}
-          >
-            <Flex
-              mt={3}
-              my={3}
-              pl={2}
-              width={1}
-              flexDirection={"column"}
-            >
+          <Flex bg={"cardBgContrast"} height={"100%"} flexDirection={"column"}>
+            <Flex mt={3} my={3} pl={2} width={1} flexDirection={"column"}>
               {trancheDetails.features.map((feature, index) => (
                 <Flex
                   mb={2}
@@ -196,27 +175,25 @@ class Base extends Component {
                     color={"tick"}
                     size={this.props.isMobile ? "1.6em" : "1.8em"}
                   />
-                  <Text
-                    ml={[2,1]}
-                    fontSize={[1,2]}
-                    fontWeight={"500"}
-                  >
+                  <Text ml={[2, 1]} fontSize={[1, 2]} fontWeight={"500"}>
                     {feature}
                   </Text>
                 </Flex>
               ))}
             </Flex>
             <Flex
+              height={"100%"}
+              alignItems={"flex-end"}
               width={1}
               justifyContent={"center"}
             >
               <RoundButton
                 buttonProps={{
-                  my:3,
-                  width:0.85,
-                  fontSize:2,
-                  contrastColor:"white",
-                  mainColor:trancheDetails.color.hex
+                  my: 3,
+                  width: 0.85,
+                  fontSize: 2,
+                  contrastColor: "white",
+                  mainColor: trancheDetails.color.hex
                 }}
                 handleClick={e =>
                   this.props.selectTrancheType(trancheDetails.route)
