@@ -33,12 +33,7 @@ class TrancheFlash extends Component {
         flexDirection={["column", "row"]}
         justifyContent={"center"}
       >
-        <Flex
-          mx={2}
-          my={[2,4]}
-          width={[1, 0.4]}
-          flexDirection={"column"}
-        >
+        <Flex mx={2} my={[2, 4]} width={[1, 0.4]} flexDirection={"column"}>
           <Flex justifyContent={"left"} my={3} width={[1, 0.7]}>
             <Text
               bold={"true"}
@@ -51,7 +46,7 @@ class TrancheFlash extends Component {
               {flashData.subtitle}
             </Text>
           </Flex>
-          <Flex justifyContent={"left"} mt={2} mb={[2,4]} width={1}>
+          <Flex justifyContent={"left"} mt={2} mb={[2, 4]} width={1}>
             <Text
               color={"white"}
               textAlign={"left"}
@@ -61,7 +56,7 @@ class TrancheFlash extends Component {
               {flashData.desc}
             </Text>
           </Flex>
-          <Flex mt={[2,3]} mb={2} flexDirection={"column"} width={1}>
+          <Flex mt={[2, 3]} mb={2} flexDirection={"column"} width={1}>
             {flashData.questions.map(question => (
               <Flex my={2} alignItems={"flex-start"}>
                 <Image src={flashData.helpcircle} />
@@ -89,16 +84,13 @@ class TrancheFlash extends Component {
           width={0.2}
           mt={6}
         >
-          <Image
-            hidden={this.props.isMobile ? 1 : 0}
-            src={flashData.arrows}
-          />
+          <Image hidden={this.props.isMobile ? 1 : 0} src={flashData.arrows} />
         </Flex>
         <Flex ml={2} my={[3, 5]} width={[1, 0.4]} flexDirection={"column"}>
           <Flex my={[1, 0]} flexDirection={"row"} alignItems={"flex-start"}>
             <Image
               my={[0, 2]}
-              width={['2.4em', '4.7em']}
+              width={["2.4em", "4.7em"]}
               src={this.functionsUtil.getGlobalConfig([
                 "tranches",
                 "AA",
@@ -122,7 +114,7 @@ class TrancheFlash extends Component {
             <Image
               my={[0, 2]}
               ml={[0, 4]}
-              width={['2.4em', '4.7em']}
+              width={["2.4em", "4.7em"]}
               src={this.functionsUtil.getGlobalConfig([
                 "tranches",
                 "BB",

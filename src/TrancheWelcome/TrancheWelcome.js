@@ -1,7 +1,7 @@
-import { Flex } from "rimble-ui";
+import { Flex, Text } from "rimble-ui";
 import Title from "../Title/Title";
 import React, { Component } from "react";
-import styles from './TrancheWelcome.module.scss';
+import styles from "./TrancheWelcome.module.scss";
 import TrancheBox from "../TrancheBox/TrancheBox";
 import FunctionsUtil from "../utilities/FunctionsUtil";
 import TrancheFlash from "../TrancheFlash/TrancheFlash";
@@ -29,11 +29,7 @@ class TrancheWelcome extends Component {
   render() {
     const tranchesDetails = this.functionsUtil.getGlobalConfig(["tranches"]);
     return (
-      <Flex
-        width={1}
-        aligItems={'center'}
-        justifyContent={'center'}
-      >
+      <Flex width={1} aligItems={"center"} justifyContent={"center"}>
         <Flex
           mb={3}
           width={1}
@@ -44,11 +40,7 @@ class TrancheWelcome extends Component {
         >
           {!this.props.tokenConfig ? (
             <>
-              <Title
-                fontSize={[5, 6]}
-              >
-                Perpetual Yield Tranches
-              </Title>
+              <Title fontSize={[5, 6]}>Perpetual Yield Tranches</Title>
               <Flex
                 width={1}
                 mb={[3, 4]}
@@ -59,8 +51,12 @@ class TrancheWelcome extends Component {
               <Flex
                 border={1}
                 borderRadius={2}
+                borderColor={"transparent"}
                 backgroundColor={"newblue"}
-                className={[styles.trancheFlash,this.props.isMobile ? styles.mobile : null]}
+                className={[
+                  styles.trancheFlash,
+                  this.props.isMobile ? styles.mobile : null
+                ]}
               >
                 <TrancheFlash {...this.props}></TrancheFlash>
               </Flex>
@@ -82,7 +78,7 @@ class TrancheWelcome extends Component {
               flexDirection={["column", "row"]}
               justifyContent={"space-between"}
             >
-              {Object.keys(tranchesDetails).map((trancheType,index) => (
+              {Object.keys(tranchesDetails).map((trancheType, index) => (
                 <TrancheBox
                   {...this.props}
                   key={`tranche_${index}`}
@@ -91,6 +87,13 @@ class TrancheWelcome extends Component {
                 />
               ))}
             </Flex>
+          </Flex>
+          <Flex justifyContent={"center"}>
+            <Text width={0.7} textAlign={"center"}>
+              If you're still unsure in which Tranche to pick, reach out to us
+              on our Forum, Discord, Telegram or Twitter. The team and the
+              community would be happy to help!
+            </Text>
           </Flex>
         </Flex>
       </Flex>
