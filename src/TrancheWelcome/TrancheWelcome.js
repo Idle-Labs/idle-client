@@ -97,7 +97,7 @@ class TrancheWelcome extends Component {
           >
             <Text
               fontSize={[0,1]}
-              color={'cellText'}
+              color={'statValue'}
               textAlign={"center"}
             >
               If you're still unsure in which Tranche to pick, reach out to us on our <ExtLink fontSize={[0,1]} href={this.functionsUtil.getGlobalConfig(['forumURL'])}>Forum</ExtLink>, <ExtLink fontSize={[0,1]} href={this.functionsUtil.getGlobalConfig(['discordURL'])}>Discord</ExtLink>, <ExtLink fontSize={[0,1]} href={this.functionsUtil.getGlobalConfig(['telegramURL'])}>Telegram</ExtLink> or <ExtLink fontSize={[0,1]} href={this.functionsUtil.getGlobalConfig(['twitterURL'])}>Twitter</ExtLink>.<br />The team and the community would be happy to help!
