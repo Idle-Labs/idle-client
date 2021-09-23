@@ -65,6 +65,7 @@ class Dashboard extends Component {
         color:'#fff',
         selected:false,
         image:strategyInfo.icon,
+        imageDark:strategyInfo.iconDark,
         label:strategyInfo.title,
         bgColor:strategyInfo.color,
         route:baseRoute+'/'+strategy,
@@ -74,6 +75,7 @@ class Dashboard extends Component {
         imageInactiveDark:strategyInfo.iconInactiveDark
       });
     });
+    const extraicons=this.functionsUtil.getGlobalConfig(['extraicons']);
 
     const curveConfig = this.functionsUtil.getGlobalConfig(['curve']);
 
@@ -97,7 +99,10 @@ class Dashboard extends Component {
           label:'Stake',
           selected:false,
           color:'dark-gray',
-          icon:stakeConfig.icon,
+          image:extraicons['Stake'].icon,
+          imageDark:extraicons['Stake'].iconDark,
+          imageInactive:extraicons['Stake'].iconInactive,
+          imageInactiveDark:extraicons['Stake'].iconInactiveDark,
           route:'/dashboard/stake',
           component:Utils,
           componentProps:{
@@ -113,7 +118,10 @@ class Dashboard extends Component {
     // Add tools
     menu.push(
       {
-        icon:'Build',
+        image:extraicons['Tools'].icon,
+        imageDark:extraicons['Tools'].iconDark,
+        imageInactive:extraicons['Tools'].iconInactive,
+        imageInactiveDark:extraicons['Tools'].iconInactiveDark,
         label:'Tools',
         color:'dark-gray',
         component:Utils,
@@ -127,7 +135,10 @@ class Dashboard extends Component {
     // Add Stats
     menu.push(
       {
-        icon:'Equalizer',
+        image:extraicons['Stats'].icon,
+          imageDark:extraicons['Stats'].iconDark,
+          imageInactive:extraicons['Stats'].iconInactive,
+          imageInactiveDark:extraicons['Stats'].iconInactiveDark,
         label:'Stats',
         bgColor:'#21f36b',
         color:'dark-gray',
@@ -142,7 +153,10 @@ class Dashboard extends Component {
     menu.push(
       {
         submenu:[],
-        icon:'Forum',
+        image:extraicons['Forum'].icon,
+          imageDark:extraicons['Forum'].iconDark,
+          imageInactive:extraicons['Forum'].iconInactive,
+          imageInactiveDark:extraicons['Forum'].iconInactiveDark,
         mobile:false,
         label:'Forum',
         selected:false,
