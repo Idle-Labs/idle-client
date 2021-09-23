@@ -1403,7 +1403,7 @@ class StatsChart extends Component {
             y = parseFloat(earning);
 
             // apy = earning.times(365).div(totDays).toFixed(2);
-            const daysSinceBeginning = idleChartData.length>0 ? moment(d.timestamp*1000).diff(moment(idleChartData[0].x,"YYYY/MM/DD HH:mm"),'days') : 1;
+            const daysSinceBeginning = idleChartData.length>0 ? Math.max(1,moment(d.timestamp*1000).diff(moment(idleChartData[0].x,"YYYY/MM/DD HH:mm"),'days')) : 1;
             apy = parseFloat(y*365/daysSinceBeginning).toFixed(2);
           }
 
