@@ -7,11 +7,11 @@ import {
   Select
 } from "rimble-ui";
 import moment from 'moment';
+import './DateRangeModal.css';
 import ModalCard from './ModalCard';
 import 'react-date-range/dist/styles.css';
 import { DateRange } from 'react-date-range';
 import 'react-date-range/dist/theme/default.css';
-import './DateRangeModal.css';
 
 class DateRangeModal extends React.Component {
 
@@ -21,7 +21,8 @@ class DateRangeModal extends React.Component {
       startDate: this.props.startDate ? this.props.startDate : new Date(),
       endDate: this.props.endDate ? this.props.endDate : new Date(),
       key: 'selection'
-    }
+    },
+    options:Object.keys(this.props.quickSelections).map( value => ({ value,label:this.props.quickSelections[value].label }) )
   }
 
   handleSelect(ranges){
@@ -36,23 +37,12 @@ class DateRangeModal extends React.Component {
     let endDate = moment(new Date());
     const quickSelection = e.target.value;
 
-    switch (quickSelection){
-      case 'day':
-        startDate = endDate.clone().subtract(1,'day');
-      break;
-      case 'week':
-        startDate = endDate.clone().subtract(1,'week');
-      break;
-      case 'weeks':
-        startDate = endDate.clone().subtract(2,'week');
-      break;
-      case 'month':
-        startDate = endDate.clone().subtract(1,'month');
-      break;
-      default:
-        startDate = null;
-        endDate = null;
-      break;
+    if (quickSelection && this.props.quickSelections[quickSelection]){
+      const quickSelectionParams = this.props.quickSelections[quickSelection];
+      startDate = endDate.clone().subtract(quickSelectionParams.value,quickSelectionParams.type);
+    } else {
+      startDate = null;
+      endDate = null;
     }
 
     if (startDate && endDate){
@@ -118,15 +108,9 @@ class DateRangeModal extends React.Component {
                   }}
                   width={'100%'}
                   required={true}
-                  onChange={this.handleQuickSelect.bind(this)}
+                  options={this.state.options}
                   value={this.state.quickSelection}
-                  options={[
-                    { value: '', label: "Select an option" },
-                    { value: "day", label: "Last day" },
-                    { value: "week", label: "Last week" },
-                    { value: "weeks", label: "Last 2 weeks" },
-                    { value: "month", label: "Last month" }
-                  ]}
+                  onChange={this.handleQuickSelect.bind(this)}
                 />
               </Field>
               <DateRange

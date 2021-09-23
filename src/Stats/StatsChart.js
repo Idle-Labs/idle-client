@@ -69,14 +69,17 @@ class StatsChart extends Component {
     let tempData = {};
     let gridYStep = 0;
     let itemIndex = 0;
+    let daysCount = 0;
     let chartData = [];
     let chartProps = {};
     let chartType = Line;
     let gridYValues = [];
     let maxChartValue = 0;
     let axisBottomIndex = 0;
+    let daysFrequency = null;
     let idleChartData = null;
     let firstIdleBlock = null;
+    let axisBottomMaxValues = 12;
 
     switch (this.props.chartMode){
       case 'VOL':
@@ -135,22 +138,25 @@ class StatsChart extends Component {
 
         chartData = Object.values(divergingData).filter(v => {
           return (!this.props.startTimestamp || v.timestamp>=this.props.startTimestamp) && (!this.props.endTimestamp || v.timestamp<=this.props.endTimestamp);
-        });
+        }).sort((a,b) => (a.timestamp < b.timestamp ? -1 : 1));
 
         let maxRange = 0;
         chartData.forEach(v => {
           maxRange = Math.max(maxRange,Math.abs(v.deposits),Math.abs(v.redeems));
-        })
+        });
 
         chartType = Bar;
-
-        axisBottomIndex = 0;
 
         gridYStep = parseFloat(maxChartValue/maxGridLines);
         gridYValues = [0];
         for (let i=1;i<=5;i++){
           gridYValues.push(i*gridYStep);
         }
+
+        axisBottomIndex = 0;
+        axisBottomMaxValues = 6;
+        daysCount = moment(chartData[chartData.length-1].date,"YYYY/MM/DD").diff(moment(chartData[0].date,"YYYY/MM/DD"),'days');
+        daysFrequency = Math.max(1,Math.ceil(daysCount/axisBottomMaxValues));
 
         chartProps = {
           indexBy: 'date',
@@ -163,16 +169,16 @@ class StatsChart extends Component {
           axisBottom: this.props.isMobile ? null : {
             tickSize: 0,
             legend: '',
-            format: (value) => {
-              if (axisBottomIndex++ % 3 === 0){
-                return moment(value,'YYYY/MM/DD HH:mm').format('MMM DD')
-              }
-            },
             tickPadding: 15,
             orient: 'bottom',
             legendOffset: 0,
+            tickValues: 'every day',
+            format: (value) => {
+              if (axisBottomIndex++ % daysFrequency === 0){
+                return moment(value,'YYYY/MM/DD').format('MMM DD')
+              }
+            },
             legendPosition: 'middle',
-            tickValues: 'every 3 days',
           },
           axisLeft: null,
           axisRight: {
@@ -285,7 +291,7 @@ class StatsChart extends Component {
           pointColor:{ from: 'color', modifiers: []},
           margin: this.props.isMobile ? { top: 20, right: 50, bottom: 45, left: 50 } : { top: 20, right: 70, bottom: 70, left: 50 },
           tooltip:(data) => {
-            const xFormatted = this.functionsUtil.strToMoment(data.indexValue).format('MMM DD');
+            const xFormatted = this.functionsUtil.strToMoment(data.data.timestamp*1000).format('MMM DD HH:ss');
             const point = {
               id:data.id,
               data:{
@@ -442,6 +448,11 @@ class StatsChart extends Component {
           gridYValues.push(i*gridYStep);
         }
 
+        axisBottomIndex = 0;
+        axisBottomMaxValues = 6;
+        daysCount = moment(chartData[0].data[chartData[0].data.length-1].x,"YYYY/MM/DD HH:mm").diff(moment(chartData[0].data[0].x,"YYYY/MM/DD HH:mm"),'days');
+        daysFrequency = Math.max(1,Math.ceil(daysCount/axisBottomMaxValues));
+
         chartProps = {
           xScale:{
             type: 'time',
@@ -466,13 +477,17 @@ class StatsChart extends Component {
             format: v => this.functionsUtil.abbreviateNumber(v,v<1 ? 3 :0),
           },
           axisBottom: this.props.isMobile ? null : {
-            tickSize: 0,
-            format: '%b %d',
-            tickPadding: 15,
-            tickValues: this.props.isMobile ? 'every 4 days' : ( this.props.showAdvanced ? 'every 3 days' : 'every 2 days'),
-            orient: 'bottom',
             legend: '',
+            tickSize: 0,
+            format: (value) => {
+              if (axisBottomIndex++ % daysFrequency === 0){
+                return moment(value,'YYYY/MM/DD HH:mm').format('MMM DD')
+              }
+            },
+            tickPadding: 15,
+            orient: 'bottom',
             legendOffset: 0,
+            tickValues: 'every day',
             legendPosition: 'middle'
           },
           gridYValues,
@@ -655,18 +670,22 @@ class StatsChart extends Component {
           tempData[date] = row;
         });
 
+        const dates = Object.keys(tempData);
         chartData = Object.values(tempData);
 
         // Set chart type
         chartType = Bar;
-
-        axisBottomIndex = 0;
 
         gridYStep = parseFloat(maxChartValue/maxGridLines);
         gridYValues = [0];
         for (let i=1;i<=5;i++){
           gridYValues.push(i*gridYStep);
         }
+
+        axisBottomIndex = 0;
+        axisBottomMaxValues = 12;
+        daysCount = moment(dates[dates.length-1],"YYYY/MM/DD").diff(moment(dates[0],"YYYY/MM/DD"),'days');
+        daysFrequency = Math.max(1,Math.ceil(daysCount/axisBottomMaxValues));
 
         chartProps = {
           padding: 0.2,
@@ -693,16 +712,16 @@ class StatsChart extends Component {
           axisBottom: this.props.isMobile ? null : {
             legend: '',
             format: (value) => {
-              if (axisBottomIndex++ % 3 === 0){
+              if (axisBottomIndex++ % daysFrequency === 0){
                 return moment(value,'YYYY/MM/DD HH:mm').format('MMM DD')
               }
             },
             tickSize: 0,
             tickPadding: 10,
-            orient: 'bottom-left',
             legendOffset: 36,
-            legendPosition: 'middle',
-            tickValues: 'every 3 days'
+            orient: 'bottom-left',
+            tickValues: 'every day',
+            legendPosition: 'middle'
           },
           legends:[
             {
@@ -1010,6 +1029,14 @@ class StatsChart extends Component {
           gridYValues.push(i*gridYStep);
         }
 
+        axisBottomIndex = 0;
+        axisBottomMaxValues = 6;
+        const chartValues = chartData[chartData.length-1].data.sort((a,b) => (moment(a.x,"YYYY/MM/DD HH:mm").isBefore(moment(b.x,"YYYY/MM/DD HH:mm")) ? -1 : 1));
+        daysCount = moment(chartValues[chartValues.length-1].x,"YYYY/MM/DD HH:mm").diff(moment(chartValues[0].x,"YYYY/MM/DD HH:mm"),'days');
+        daysFrequency = Math.max(1,Math.ceil(daysCount/axisBottomMaxValues));
+
+        // console.log('APR',chartValues,chartValues[0].x,chartValues[chartValues.length-1].x,daysCount,daysFrequency);
+
         chartProps = {
           xScale:{
             type: 'time',
@@ -1036,12 +1063,16 @@ class StatsChart extends Component {
           axisBottom: this.props.isMobile ? null : {
             legend: '',
             tickSize: 0,
-            format: '%b %d',
             tickPadding: 15,
             legendOffset: 0,
             orient: 'bottom',
-            legendPosition: 'middle',
-            tickValues: this.props.isMobile ? 'every 4 days' : ( this.props.showAdvanced ? 'every 3 days' : 'every 2 days'),
+            format: (value) => {
+              if (axisBottomIndex++ % daysFrequency === 0){
+                return moment(value,'YYYY/MM/DD HH:mm').format('MMM DD')
+              }
+            },
+            tickValues: 'every day',
+            legendPosition: 'middle'
           },
           gridYValues,
           pointSize:0,
@@ -1193,6 +1224,11 @@ class StatsChart extends Component {
           gridYValues.push(i*gridYStep);
         }
 
+        axisBottomIndex = 0;
+        axisBottomMaxValues = 6;
+        daysCount = moment(chartData[0].data[chartData[0].data.length-1].x,"YYYY/MM/DD").diff(moment(chartData[0].data[0].x,"YYYY/MM/DD"),'days');
+        daysFrequency = Math.max(1,Math.ceil(daysCount/axisBottomMaxValues));
+
         chartProps = {
           xScale:{
             type: 'time',
@@ -1217,13 +1253,17 @@ class StatsChart extends Component {
             format:value => parseFloat(value).toFixed(1),
           },
           axisBottom: this.props.isMobile ? null : {
-            tickSize: 0,
-            format: '%b %d',
-            tickPadding: 15,
-            tickValues: this.props.isMobile ? 'every 4 days' : ( this.props.showAdvanced ? 'every 3 days' : 'every 2 days'),
-            orient: 'bottom',
             legend: '',
+            tickSize: 0,
+            tickPadding: 15,
+            orient: 'bottom',
             legendOffset: 0,
+            tickValues: 'every day',
+            format: (value) => {
+              if (axisBottomIndex++ % daysFrequency === 0){
+                return moment(value,'YYYY/MM/DD HH:mm').format('MMM DD')
+              }
+            },
             legendPosition: 'middle'
           },
           gridYValues,
@@ -1363,7 +1403,8 @@ class StatsChart extends Component {
             y = parseFloat(earning);
 
             // apy = earning.times(365).div(totDays).toFixed(2);
-            apy = avgApy.div(i+1).toFixed(2);
+            const daysSinceBeginning = idleChartData.length>0 ? moment(d.timestamp*1000).diff(moment(idleChartData[0].x,"YYYY/MM/DD HH:mm"),'days') : 1;
+            apy = parseFloat(y*365/daysSinceBeginning).toFixed(2);
           }
 
           prevData = d;
@@ -1484,6 +1525,8 @@ class StatsChart extends Component {
                   }
                 }
 
+                itemIndex++;
+
                 if (prevData) {
                   const days = (d.timestamp-prevData.timestamp)/86400;
                   // const totDays = (d.timestamp-apiResults[0].timestamp)/86400;
@@ -1494,7 +1537,21 @@ class StatsChart extends Component {
                   const earning = currentBalance.div(startBalance).minus(1).times(100);
                   y = parseFloat(earning)+baseProfit;
 
-                  apy = avgApy.div(i+1).toFixed(2);
+                  const daysSinceBeginning = Math.max(1,moment(d.timestamp*1000).diff(moment(idleChartData[0].x,"YYYY/MM/DD HH:mm"),'days'));
+                  apy = parseFloat(y*365/daysSinceBeginning).toFixed(2);
+                  // debugger;
+
+                  // apy = avgApy.div(itemIndex+1).toFixed(2);
+                  const itemPos = Math.floor(itemIndex/totalItems*100);
+                  rowData = {
+                    x,
+                    y,
+                    apy,
+                    itemPos
+                  };
+
+                  itemIndex++;
+                  chartRow.data.push(rowData);
                 }
 
                 prevData = d;
@@ -1506,22 +1563,8 @@ class StatsChart extends Component {
 
                 maxChartValue = Math.max(maxChartValue,y);
 
-                const itemPos = Math.floor(itemIndex/totalItems*100);
                 // const blocknumber = d.blocknumber;
 
-                itemIndex++;
-
-                if (apy>0){
-                  rowData = {
-                    x,
-                    y,
-                    apy,
-                    itemPos
-                  };
-
-                  itemIndex++;
-                  chartRow.data.push(rowData);
-                }
               }
             }
           });
@@ -1543,6 +1586,11 @@ class StatsChart extends Component {
 
         // Set chart type
         chartType = Line;
+
+        axisBottomIndex = 0;
+        axisBottomMaxValues = 12;
+        daysCount = moment(idleChartData[idleChartData.length-1].x,"YYYY/MM/DD HH:mm").diff(moment(idleChartData[0].x,"YYYY/MM/DD HH:mm"),'days');
+        daysFrequency = Math.max(1,Math.ceil(daysCount/axisBottomMaxValues));
 
         chartProps = {
           xScale:{
@@ -1571,12 +1619,16 @@ class StatsChart extends Component {
           axisBottom: this.props.isMobile ? null : {
             legend: '',
             tickSize: 0,
-            format: '%b %d',
+            format: (value) => {
+              if (axisBottomIndex++ % daysFrequency === 0){
+                return moment(value,'YYYY/MM/DD HH:mm').format('MMM DD')
+              }
+            },
             tickPadding: 10,
             legendOffset: 0,
             orient: 'bottom',
+            tickValues:`every day`,
             legendPosition: 'middle',
-            tickValues: this.props.isMobile ? 'every 4 days' : ( this.props.showAdvanced ? 'every 3 days' : 'every 2 days'),
           },
           gridYValues,
           pointSize:0,

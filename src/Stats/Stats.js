@@ -54,10 +54,31 @@ class Stats extends Component {
   };
 
   quickSelections = {
-    day:'Last day',
-    week:'Last week',
-    weeks:'Last 2 weeks',
-    month:'Last month'
+    day:{
+      value:1,
+      type:'day',
+      label:'Last day',
+    },
+    week:{
+      value:1,
+      type:'week',
+      label:'Last week',
+    },
+    weeks:{
+      value:2,
+      type:'week',
+      label:'Last 2 weeks',
+    },
+    month:{
+      value:1,
+      type:'month',
+      label:'Last month',
+    },
+    ytd:{
+      type:'day',
+      label:'Year to date',
+      value:moment().diff(moment('01/01/YYYY','DD/MM/YYYY'),'days'),
+    },
   };
 
   // Utils
@@ -1038,7 +1059,7 @@ class Stats extends Component {
                     {
                       this.state.quickSelection
                       ?
-                        this.quickSelections[this.state.quickSelection]
+                        this.quickSelections[this.state.quickSelection].label
                       : this.state.startTimestampObj && this.state.endTimestampObj &&
                         `${this.state.startTimestampObj.format('DD/MM/YY')} - ${this.state.endTimestampObj.format('DD/MM/YY')}`
                     }
@@ -1611,6 +1632,7 @@ class Stats extends Component {
             minDate={this.state.minDate}
             maxDate={this.state.maxDate}
             handleSelect={this.setDateRange}
+            quickSelections={this.quickSelections}
             isOpen={this.state.dateRangeModalOpened}
             closeModal={e => this.setDateRangeModal(false)}
             startDate={this.state.startTimestampObj ? this.state.startTimestampObj._d : null}
