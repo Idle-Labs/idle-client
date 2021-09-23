@@ -1,5 +1,6 @@
 import { Flex, Text } from "rimble-ui";
 import Title from "../Title/Title";
+import ExtLink from "../ExtLink/ExtLink";
 import React, { Component } from "react";
 import styles from "./TrancheWelcome.module.scss";
 import TrancheBox from "../TrancheBox/TrancheBox";
@@ -88,11 +89,18 @@ class TrancheWelcome extends Component {
               ))}
             </Flex>
           </Flex>
-          <Flex justifyContent={"center"}>
-            <Text width={0.7} textAlign={"center"}>
-              If you're still unsure in which Tranche to pick, reach out to us
-              on our Forum, Discord, Telegram or Twitter. The team and the
-              community would be happy to help!
+          <Flex
+            mt={3}
+            width={1}
+            px={[0,5]}
+            justifyContent={"center"}
+          >
+            <Text
+              fontSize={[0,1]}
+              color={'cellText'}
+              textAlign={"center"}
+            >
+              If you're still unsure in which Tranche to pick, reach out to us on our <ExtLink fontSize={[0,1]} href={this.functionsUtil.getGlobalConfig(['forumURL'])}>Forum</ExtLink>, <ExtLink fontSize={[0,1]} href={this.functionsUtil.getGlobalConfig(['discordURL'])}>Discord</ExtLink>, <ExtLink fontSize={[0,1]} href={this.functionsUtil.getGlobalConfig(['telegramURL'])}>Telegram</ExtLink> or <ExtLink fontSize={[0,1]} href={this.functionsUtil.getGlobalConfig(['twitterURL'])}>Twitter</ExtLink>.<br />The team and the community would be happy to help!
             </Text>
           </Flex>
         </Flex>
