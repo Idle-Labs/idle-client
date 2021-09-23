@@ -311,7 +311,11 @@ class MenuAccount extends Component {
           </Flex>
         )}
         <CardIconButton
-          icon={"Power"}
+          image={this.functionsUtil.getGlobalConfig([
+            "extraicons",
+            "power",
+            "icon"
+          ])}
           {...this.props}
           text={"Connect"}
           handleClick={this.props.connectAndValidateAccount}

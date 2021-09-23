@@ -53,6 +53,7 @@ class Dashboard extends Component {
   }
 
   async loadMenu() {
+    const extraicons=this.functionsUtil.getGlobalConfig(['extraicons']);
     const baseRoute = this.functionsUtil.getGlobalConfig(['dashboard','baseRoute']);
 
     const menu = [];
@@ -60,22 +61,23 @@ class Dashboard extends Component {
     const strategies = this.functionsUtil.getGlobalConfig(['strategies']);
     Object.keys(strategies).filter( s => ( !strategies[s].comingSoon ) ).forEach(strategy => {
       const strategyInfo = strategies[strategy];
+      const imageInfo=extraicons[strategy];
       menu.push({
         submenu:[],
         color:'#fff',
         selected:false,
-        image:strategyInfo.icon,
-        imageDark:strategyInfo.iconDark,
+        image:imageInfo.icon,
+        imageDark:imageInfo.iconDark,
         label:strategyInfo.title,
         bgColor:strategyInfo.color,
         route:baseRoute+'/'+strategy,
         visible:strategyInfo.visible,
         component:strategyInfo.component,
-        imageInactive:strategyInfo.iconInactive,
-        imageInactiveDark:strategyInfo.iconInactiveDark
+        imageInactive:imageInfo.iconInactive,
+        imageInactiveDark:imageInfo.iconInactiveDark
       });
     });
-    const extraicons=this.functionsUtil.getGlobalConfig(['extraicons']);
+    
 
     const curveConfig = this.functionsUtil.getGlobalConfig(['curve']);
 
@@ -99,10 +101,10 @@ class Dashboard extends Component {
           label:'Stake',
           selected:false,
           color:'dark-gray',
-          image:extraicons['Stake'].icon,
-          imageDark:extraicons['Stake'].iconDark,
-          imageInactive:extraicons['Stake'].iconInactive,
-          imageInactiveDark:extraicons['Stake'].iconInactiveDark,
+          image:extraicons['stake'].icon,
+          imageDark:extraicons['stake'].iconDark,
+          imageInactive:extraicons['stake'].iconInactive,
+          imageInactiveDark:extraicons['stake'].iconInactiveDark,
           route:'/dashboard/stake',
           component:Utils,
           componentProps:{
@@ -118,10 +120,10 @@ class Dashboard extends Component {
     // Add tools
     menu.push(
       {
-        image:extraicons['Tools'].icon,
-        imageDark:extraicons['Tools'].iconDark,
-        imageInactive:extraicons['Tools'].iconInactive,
-        imageInactiveDark:extraicons['Tools'].iconInactiveDark,
+        image:extraicons['tools'].icon,
+        imageDark:extraicons['tools'].iconDark,
+        imageInactive:extraicons['tools'].iconInactive,
+        imageInactiveDark:extraicons['tools'].iconInactiveDark,
         label:'Tools',
         color:'dark-gray',
         component:Utils,
@@ -135,10 +137,10 @@ class Dashboard extends Component {
     // Add Stats
     menu.push(
       {
-        image:extraicons['Stats'].icon,
-          imageDark:extraicons['Stats'].iconDark,
-          imageInactive:extraicons['Stats'].iconInactive,
-          imageInactiveDark:extraicons['Stats'].iconInactiveDark,
+        image:extraicons['stats'].icon,
+          imageDark:extraicons['stats'].iconDark,
+          imageInactive:extraicons['stats'].iconInactive,
+          imageInactiveDark:extraicons['stats'].iconInactiveDark,
         label:'Stats',
         bgColor:'#21f36b',
         color:'dark-gray',
@@ -153,10 +155,10 @@ class Dashboard extends Component {
     menu.push(
       {
         submenu:[],
-        image:extraicons['Forum'].icon,
-          imageDark:extraicons['Forum'].iconDark,
-          imageInactive:extraicons['Forum'].iconInactive,
-          imageInactiveDark:extraicons['Forum'].iconInactiveDark,
+        image:extraicons['forum'].icon,
+          imageDark:extraicons['forum'].iconDark,
+          imageInactive:extraicons['forum'].iconInactive,
+          imageInactiveDark:extraicons['forum'].iconInactiveDark,
         mobile:false,
         label:'Forum',
         selected:false,

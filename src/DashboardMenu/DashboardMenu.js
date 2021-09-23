@@ -78,12 +78,13 @@ class DashboardMenu extends Component {
               src={
                 !isDarkTheme
                   ? "images/logo-gradient.svg"
-                  : "images/logo-white.svg"
+                  : "images/logo-dark.svg"
               }
             />
           </RouterLink>
         </Flex>
         <MenuAccount
+          width={1}
           {...this.props}
           setGovModal={this.setGovModal.bind(this)}
         />

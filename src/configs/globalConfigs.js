@@ -642,32 +642,54 @@ const globalConfigs = {
       }
     }
   },
-  extraicons: {
-    Stats: {
-      icon: "images/strategies/stats-on.svg",
-      iconDark: "images/strategies/stats-on-dark.svg",
-      iconInactive: "images/strategies/stats-off.svg",
-      iconInactiveDark: "images/strategies/statss-off-dark.svg"
+  extraicons:{
+    power:{
+      icon:"images/sidebar/plug.svg"
     },
-    Tools: {
-      icon: "images/strategies/tools-on.svg",
-      iconDark: "images/strategies/tools-on-dark.svg",
-      iconInactive: "images/strategies/tools-off.svg",
-      iconInactiveDark: "images/strategies/tools-off-dark.svg"
-    },
-    Forum: {
-      icon: "images/strategies/forum-on.svg",
-      iconDark: "images/strategies/forum-on-dark.svg",
-      iconInactive: "images/strategies/forum-off.svg",
-      iconInactiveDark: "images/strategies/forum-off-dark.svg"
-    },
-    Stake: {
-      icon: "images/strategies/stake-on.svg",
-      iconDark: "images/strategies/stake-on-dark.svg",
-      iconInactive: "images/strategies/stake-off.svg",
-      iconInactiveDark: "images/strategies/stake-off-dark.svg"
-    }
+    best:{
+    icon: "images/sidebar/best-on.svg",
+    iconDark:"images/sidebar/best-on-dark.svg",
+    iconInactive: "images/sidebar/best-off.svg",
+    iconInactiveDark: "images/sidebar/best-off-dark.svg",},
+  
+    tranches:{
+    icon: "images/sidebar/tranches-on.svg",
+    iconDark:"images/sidebar/tranches-on-dark.svg",
+    iconInactive: "images/strategies/tranches-off.svg",
+    iconInactiveDark: "images/strategies/tranches-off-dark.svg"
   },
+    risk:{
+      icon: "images/sidebar/risk-on.svg",
+    iconDark:"images/sidebar/risk-on-dark.svg",
+    iconInactive: "images/sidebar/risk-off.svg",
+    iconInactiveDark: "images/sidebar/risk-off-dark.svg"
+  },
+    stats:{
+      icon: "images/sidebar/stats-on.svg",
+      iconDark:"images/sidebar/stats-on-dark.svg",
+      iconInactive: "images/sidebar/stats-off.svg",
+      iconInactiveDark: "images/sidebar/stats-off-dark.svg"
+
+
+    },
+    tools:{
+      icon: "images/sidebar/tools-on.svg",
+      iconDark:"images/sidebar/tools-on-dark.svg",
+      iconInactive: "images/sidebar/tools-off.svg",
+      iconInactiveDark: "images/sidebar/tools-off-dark.svg"},
+    forum:{
+      icon: "images/sidebar/forum-on.svg",
+      iconDark:"images/sidebar/forum-on-dark.svg",
+      iconInactive: "images/sidebar/forum-off.svg",
+      iconInactiveDark: "images/sidebar/forum-off-dark.svg"},
+    stake:{
+      icon: "images/sidebar/stake-on.svg",
+      iconDark:"images/sidebar/stake-on-dark.svg",
+      iconInactive: "images/sidebar/stake-off.svg",
+      iconInactiveDark: "images/sidebar/stake-off-dark.svg"
+
+  }
+},
   strategies: {
     tranches: {
       token: "DAI",
@@ -683,10 +705,9 @@ const globalConfigs = {
       component: Tranches,
       govTokensEnabled: true,
       chartColor: "hsl(40,95%,59%)",
-      icon: "images/strategies/tranches-on.svg",
-      iconDark: "images/strategies/tranches-on-dark.svg",
-      iconInactive: "images/strategies/tranches-off.svg",
-      iconInactiveDark: "images/strategies/tranches-off-dark.svg",
+      icon: "images/strategies/tranches-on.png",
+      iconInactive: "images/strategies/tranches-off.png",
+      iconInactiveDark: "images/strategies/tranches-white.png",
       desc:
         "Diversify your risk profile with dynamic tranched yield derivatives",
       descShort:
@@ -708,9 +729,8 @@ const globalConfigs = {
       component: StrategyPage,
       chartColor: "hsl(40,95%,59%)",
       icon: "images/strategies/best-on.svg",
-      iconDark: "images/strategies/best-on-dark.svg",
       iconInactive: "images/strategies/best-off.svg",
-      iconInactiveDark: "images/strategies/best-off-dark.svg",
+      iconInactiveDark: "images/strategies/best-white.svg",
       desc: "Maximize your returns across DeFi protocols",
       descLong:
         "The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols. Idle’s monitoring system automatically triggers a rebalance if it spots a better-performing allocation: this includes taking account of the total liquidity within the pool, incorporating underlying protocol rate functions and levels of supply and demand. As a user, you will end up with an higher return without constantly checking rates and burning gas on every transfer. Unlock your funds from a single protocol performance with this strategy.",
@@ -731,9 +751,8 @@ const globalConfigs = {
       component: StrategyPage,
       chartColor: "hsl(211,67%,47%)",
       icon: "images/strategies/risk-on.svg",
-      iconDark: "images/strategies/risk-on-dark.svg",
       iconInactive: "images/strategies/risk-off.svg",
-      iconInactiveDark: "images/strategies/risk-off-dark.svg",
+      iconInactiveDark: "images/strategies/risk-white.svg",
       desc: "Optimize your risk exposure across DeFi protocols",
       descLong:
         "The Risk-Adjusted allocation strategy provides a way to earn the best rate at the lowest risk-level. The risk-management algorithm takes account of the total assets within a pool, incorporates underlying protocol rate functions and levels of supply and demand, skimming protocols with a bad score/rate mix, and finally determining an allocation that achieves the highest risk-return score possible after the rebalance happens.",
