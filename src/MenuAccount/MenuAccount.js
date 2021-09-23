@@ -33,6 +33,7 @@ class MenuAccount extends Component {
     this.loadUtils();
     this.loadIdleTokenBalance();
   }
+  editCardProp() {}
 
   async componentDidUpdate(prevProps, prevState) {
     this.loadUtils();
@@ -81,6 +82,7 @@ class MenuAccount extends Component {
   };
 
   render() {
+    const isDarkTheme = this.props.themeMode === "dark";
     const walletProvider = this.functionsUtil.getStoredItem(
       "walletProvider",
       false,
@@ -311,6 +313,16 @@ class MenuAccount extends Component {
           </Flex>
         )}
         <CardIconButton
+          textProps={{ ml: 3, color: "black" }}
+          cardProps={{
+            mx: 2,
+            alignContent: "left",
+            justifyContent: "left",
+            backgroundColor: !isDarkTheme ? "blue" : "lightblue",
+            borderRadius: 4,
+            width: "100%"
+          }}
+          align={"left"}
           image={this.functionsUtil.getGlobalConfig([
             "extraicons",
             "power",
