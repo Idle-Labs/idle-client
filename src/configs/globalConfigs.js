@@ -933,7 +933,7 @@ const globalConfigs = {
           hsl:['158', '64%', '37%']
         },
         disabledCharts:['score'],
-        startTimestamp:'2021-07-30',
+        startTimestamp:'2021-09-24',
         conversionRateField:'feiDAIPrice',
         chart:{
           labelTextColorModifiers:['darker', 4]
