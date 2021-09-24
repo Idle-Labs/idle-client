@@ -577,9 +577,9 @@ const globalConfigs = {
     AA: {
       color: {
         // hex:'#00ff06',
-        hex: "#0042F5",
-        rgb: [0, 66, 245],
-        hsl: ["224", "100%", "48%"]
+        hex: "#337de5",
+        rgb: [51, 125, 229],
+        hsl: ["215", "77%", "55%"]
       },
       type: "AA",
       route: "senior",
