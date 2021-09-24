@@ -58,23 +58,25 @@ class TrancheFlash extends Component {
           </Flex>
           <Flex mt={[2, 3]} mb={2} flexDirection={"column"} width={1}>
             {flashData.questions.map(question => (
-              <Link
-                ml={0}
-                fontSize={2}
-                fontWeight={2}
-                opacity={"50%"}
-                color={"white"}
-                textAlign={"left"}
-                onClick={e =>
-                  this.props.openTooltipModal(question.desc, question.msg)
-                }
-              >
-                <Flex my={2} alignItems={"flex-start"}>
-                  <Image src={flashData.helpcircle} mr={2} />
+              <Flex>
+                <Link
+                  ml={0}
+                  fontSize={2}
+                  fontWeight={2}
+                  opacity={"50%"}
+                  color={"white"}
+                  textAlign={"left"}
+                  onClick={e =>
+                    this.props.openTooltipModal(question.desc, question.msg)
+                  }
+                >
+                  <Flex my={2} alignItems={"flex-start"}>
+                    <Image src={flashData.helpcircle} mr={2} />
 
-                  {question.desc}
-                </Flex>
-              </Link>
+                    {question.desc}
+                  </Flex>
+                </Link>
+              </Flex>
             ))}
           </Flex>
         </Flex>
