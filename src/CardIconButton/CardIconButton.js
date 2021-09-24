@@ -23,6 +23,7 @@ class CardIconButton extends Component {
         backgroundColor={"blue"}
       >
         <Flex
+          mx={this.props.margin ? this.props.margin : 0}
           my={1}
           alignItems={"center"}
           flexDirection={"row"}

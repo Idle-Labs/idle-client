@@ -4,8 +4,6 @@ import { Link as RouterLink } from "react-router-dom";
 import CardIconButton from "../CardIconButton/CardIconButton";
 import FunctionsUtil from "../utilities/FunctionsUtil";
 import { Flex, Box, Icon, Text, Image, Link } from "rimble-ui";
-import ButtonLoader from "../ButtonLoader/ButtonLoader.js";
-import styles from "../CryptoInput/CryptoInput.module.scss";
 class DashboardMenu extends Component {
   state = {
     logout: false,
@@ -110,26 +108,10 @@ class DashboardMenu extends Component {
         {!this.props.isMobile && (
           <Flex>
             {this.props.account ? (
-              <ButtonLoader
-                buttonText={"Logout wallet"}
-                isLoading={this.state.logout}
-                handleClick={async () => {
-                  await this.logout();
-                }}
-                buttonProps={{
-                  bg: !isDarkTheme ? "blue" : "lightblue",
-                  ml: 4,
-                  width: 1,
-
-                  borderRadius: "2rem",
-                  mt: [4, 8]
-                }}
-              ></ButtonLoader>
-            ) : (
               <CardIconButton
-                textProps={{ ml: 3, color: "black" }}
+                textProps={{ color: !isDarkTheme ? "white" : "black" }}
                 cardProps={{
-                  mx: 2,
+                  mb: 2,
                   alignContent: "left",
                   justifyContent: "left",
                   backgroundColor: !isDarkTheme ? "blue" : "lightblue",
@@ -137,6 +119,35 @@ class DashboardMenu extends Component {
                   width: "100%"
                 }}
                 align={"left"}
+                iconProps={{ height: "1.6em", width: "1.6em", ml: 1 }}
+                icon={"ExitToApp"}
+                iconColor={"black"}
+                iconBgColor={!isDarkTheme ? "blue" : "lightblue"}
+                {...this.props}
+                text={"Logout"}
+                handleClick={async () => {
+                  await this.logout();
+                }}
+              />
+            ) : (
+              <CardIconButton
+                textProps={{
+                  alignContent: "center",
+                  justifyContent: "center",
+
+                  ml: 1,
+                  color: !isDarkTheme ? "white" : "black"
+                }}
+                cardProps={{
+                  mb: 2,
+                  alignContent: "center",
+                  justifyContent: "center",
+                  backgroundColor: !isDarkTheme ? "blue" : "lightblue",
+                  borderRadius: 4,
+                  width: "100%"
+                }}
+                align={"left"}
+                imageProps={{ height: "1.6em", width: "1.6em", mx: 2 }}
                 image={this.functionsUtil.getGlobalConfig([
                   "extraicons",
                   "power",
