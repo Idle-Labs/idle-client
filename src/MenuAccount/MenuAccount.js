@@ -6,7 +6,6 @@ import ShortHash from "../utilities/components/ShortHash";
 import { Flex, Icon, Image, Link, Text } from "rimble-ui";
 import DashboardCard from "../DashboardCard/DashboardCard";
 import Notifications from "../Notifications/Notifications";
-import CardIconButton from "../CardIconButton/CardIconButton";
 import AccountModal from "../utilities/components/AccountModal";
 
 class MenuAccount extends Component {
@@ -82,7 +81,6 @@ class MenuAccount extends Component {
   };
 
   render() {
-    const isDarkTheme = this.props.themeMode === "dark";
     const walletProvider = this.functionsUtil.getStoredItem(
       "walletProvider",
       false,
@@ -312,26 +310,6 @@ class MenuAccount extends Component {
             />
           </Flex>
         )}
-        <CardIconButton
-          textProps={{ ml: 3, color: "black" }}
-          cardProps={{
-            mx: 2,
-            alignContent: "left",
-            justifyContent: "left",
-            backgroundColor: !isDarkTheme ? "blue" : "lightblue",
-            borderRadius: 4,
-            width: "100%"
-          }}
-          align={"left"}
-          image={this.functionsUtil.getGlobalConfig([
-            "extraicons",
-            "power",
-            "icon"
-          ])}
-          {...this.props}
-          text={"Connect"}
-          handleClick={this.props.connectAndValidateAccount}
-        />
       </Flex>
     );
   }

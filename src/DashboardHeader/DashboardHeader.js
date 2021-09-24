@@ -1,6 +1,6 @@
 import ExtLink from "../ExtLink/ExtLink";
 import React, { Component } from "react";
-
+import MenuAccount from "../MenuAccount/MenuAccount";
 import GovModal from "../utilities/components/GovModal";
 import GovernanceUtil from "../utilities/GovernanceUtil";
 import { Box, Flex, Text, Icon, Button } from "rimble-ui";
@@ -149,7 +149,13 @@ class DashboardHeader extends Component {
           justifyContent={"space-between"}
           alignItems={["flex-end", "center"]}
           borderBottom={`1px solid ${this.props.theme.colors.divider}`}
-        ></Flex>
+        >
+          <MenuAccount
+            width={1}
+            {...this.props}
+            setGovModal={this.setGovModal.bind(this)}
+          />
+        </Flex>
         {this.state.unclaimed && this.state.unclaimed.gt(0) ? (
           <DashboardCard
             cardProps={{

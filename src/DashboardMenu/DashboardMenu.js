@@ -1,18 +1,42 @@
 import ExtLink from "../ExtLink/ExtLink";
 import React, { Component } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import MenuAccount from "../MenuAccount/MenuAccount";
+import  nButton from "../CardIconButton/CardIconButton";
 import FunctionsUtil from "../utilities/FunctionsUtil";
 import { Flex, Box, Icon, Text, Image, Link } from "rimble-ui";
-
+import ButtonLoader from "../ButtonLoader/ButtonLoader.js";
+import styles from "../CryptoInput/CryptoInput.module.scss";
 class DashboardMenu extends Component {
   state = {
+    logout: false,
     buyModalOpened: false
   };
 
   // Utils
   functionsUtil = null;
+  setConnector = async connectorName => {
+    // Send Google Analytics event
+    this.functionsUtil.sendGoogleAnalyticsEvent({
+      eventCategory: "Connect",
+      eventAction: "logout"
+    });
 
+    if (typeof this.props.setConnector === "function") {
+      this.props.setConnector(connectorName);
+    }
+
+    return await this.props.context.setConnector(connectorName);
+  };
+
+  async logout() {
+    this.setState({
+      logout: true
+    });
+
+    this.props.logout();
+    await this.setConnector("Infura");
+    // this.props.closeModal();
+  }
   loadUtils() {
     if (this.functionsUtil) {
       this.functionsUtil.setProps(this.props);
@@ -83,11 +107,48 @@ class DashboardMenu extends Component {
             />
           </RouterLink>
         </Flex>
-        <MenuAccount
-          width={1}
-          {...this.props}
-          setGovModal={this.setGovModal.bind(this)}
-        />
+        {!this.props.isMobile && (
+          <Flex>
+            {this.props.account ? (
+              <ButtonLoader
+                buttonText={"Logout wallet"}
+                isLoading={this.state.logout}22cdew  
+                handleClick={async () => {
+                  await this.logout();
+                }}
+                buttonProps={{
+                  bg: !isDarkTheme ? "blue" : "lightblue",
+                  ml: 4,
+                  width: 1,
+
+                  borderRadius: "2rem",
+                  mt: [4, 8]
+                }}
+              ></ButtonLoader>
+            ) : (
+              <CardIconButton
+                textProps={{ ml: 3, color: "black" }}
+                cardProps={{
+                  mx: 2,
+                  alignContent: "left",
+                  justifyContent: "left",
+                  backgroundColor: !isDarkTheme ? "blue" : "lightblue",
+                  borderRadius: 4,
+                  width: "100%"
+                }}
+                align={"left"}
+                image={this.functionsUtil.getGlobalConfig([
+                  "extraicons",
+                  "power",
+                  "icon"
+                ])}
+                {...this.props}
+                text={"Connect"}
+                handleClick={this.props.connectAndValidateAccount}
+              />
+            )}
+          </Flex>
+        )}
         {visibleLinks.map((menuLink, menuIndex) => {
           const isExternalLink = menuLink.isExternalLink;
           const LinkComponent = isExternalLink ? ExtLink : RouterLink;
