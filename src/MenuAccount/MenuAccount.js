@@ -7,6 +7,7 @@ import { Flex, Icon, Image, Link, Text } from "rimble-ui";
 import DashboardCard from "../DashboardCard/DashboardCard";
 import Notifications from "../Notifications/Notifications";
 import AccountModal from "../utilities/components/AccountModal";
+import CardIconButton from "../CardIconButton/CardIconButton";
 
 class MenuAccount extends Component {
   state = {
@@ -309,6 +310,14 @@ class MenuAccount extends Component {
               name={this.props.menuOpened ? "Close" : "Menu"}
             />
           </Flex>
+        )}
+        {this.props.isMobile && (
+          <CardIconButton
+            icon={"Power"}
+            {...this.props}
+            text={"Connect"}
+            handleClick={this.props.connectAndValidateAccount}
+          />
         )}
       </Flex>
     );
