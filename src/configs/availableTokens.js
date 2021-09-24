@@ -1960,6 +1960,15 @@ const availableTokens = {
               }
             },
             address:'0xd8553552f8868C1Ef160eEdf031cF0BCf9686945',
+          },
+          {
+            abi:aToken,
+            decimals:18,
+            token:'aFEI',
+            enabled:true,
+            functions:{},
+            name:'aavev2',
+            address:'0x683923dB55Fead99A79Fa01A27EeC3cB19679cC3',
           }
         ]
       },

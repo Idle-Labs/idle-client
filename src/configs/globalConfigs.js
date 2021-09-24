@@ -725,7 +725,7 @@ const globalConfigs = {
             startTimestamp:1599183170,
           }
         },
-        enabledTokens:['DAI','USDC','USDT','TUSD','SUSD','WBTC','WETH','RAI'],
+        enabledTokens:['DAI','USDC','USDT','TUSD','SUSD','WBTC','WETH','RAI','FEI'],
         additionalProtocols:[
           {
             decimals:16,
@@ -926,7 +926,7 @@ const globalConfigs = {
       },
       FEI:{
         decimals:18,
-        enabled:false,
+        enabled:true,
         color:{
           hex:'#229b6e',
           rgb:[34, 155, 110],

@@ -355,6 +355,7 @@ class PortfolioEquity extends Component {
       gridYValues.push(gridYValue);
     }
     
+    let axisBottomIndex = 0;
     const axisBottomMaxValues = 10;
     const daysCount = Object.values(days).length;    
     const daysFrequency = Math.max(1,Math.ceil(daysCount/axisBottomMaxValues));
@@ -375,12 +376,16 @@ class PortfolioEquity extends Component {
       axisBottom: this.props.isMobile ? null : {
         legend: '',
         tickSize:0,
-        format: '%b %d',
         tickPadding: 15,
         orient: 'bottom',
         legendOffset: 36,
+        tickValues:'every day',
         legendPosition: 'middle',
-        tickValues:'every '+daysFrequency+' days'
+        format: (value) => {
+          if (axisBottomIndex++ % daysFrequency === 0){
+            return this.functionsUtil.strToMoment(value,'YYYY/MM/DD HH:mm').format('MMM DD')
+          }
+        },
       },
       gridYValues,
       pointSize:0,
