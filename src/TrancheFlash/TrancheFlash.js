@@ -57,8 +57,10 @@ class TrancheFlash extends Component {
             </Text>
           </Flex>
           <Flex mt={[2, 3]} mb={2} flexDirection={"column"} width={1}>
-            {flashData.questions.map(question => (
-              <Flex>
+            {flashData.questions.map( (question,index) => (
+              <Flex
+                key={`question_${index}`}
+              >
                 <Link
                   ml={0}
                   fontSize={2}
