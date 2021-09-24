@@ -1,7 +1,7 @@
 import ExtLink from "../ExtLink/ExtLink";
 import React, { Component } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import  nButton from "../CardIconButton/CardIconButton";
+import CardIconButton from "../CardIconButton/CardIconButton";
 import FunctionsUtil from "../utilities/FunctionsUtil";
 import { Flex, Box, Icon, Text, Image, Link } from "rimble-ui";
 import ButtonLoader from "../ButtonLoader/ButtonLoader.js";
@@ -112,7 +112,7 @@ class DashboardMenu extends Component {
             {this.props.account ? (
               <ButtonLoader
                 buttonText={"Logout wallet"}
-                isLoading={this.state.logout}22cdew  
+                isLoading={this.state.logout}
                 handleClick={async () => {
                   await this.logout();
                 }}
