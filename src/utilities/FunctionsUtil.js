@@ -4845,15 +4845,17 @@ class FunctionsUtil {
     }
   }
   asyncForEach = async (array, callback, async=true) => {
+    let output = [];
     if (async){
-      await Promise.all(array.map( (c,index) => {
+      output = await Promise.all(array.map( (c,index) => {
         return callback(c, index, array);
       }));
     } else {
       for (let index = 0; index < array.length; index++) {
-        await callback(array[index], index, array);
+        output.push(await callback(array[index], index, array));
       }
     }
+    return output;
   }
   apr2apy = (apr) => {
     return (this.BNify(1).plus(this.BNify(apr).div(365))).pow(365).minus(1);
@@ -4882,6 +4884,21 @@ class FunctionsUtil {
     }
 
     return null;
+  }
+  getLastAllocations = async (tokenConfig) => {
+    if (!tokenConfig.idle){
+      return false;
+    }
+
+    const aprs = await this.getAprs(tokenConfig.idle.token);
+    const allAvailableTokens = aprs ? aprs.addresses : null;
+    const tokenAllocations = await this.asyncForEach(allAvailableTokens, async (protocolAddr,index) => {
+      return await this.genericContractCall(tokenConfig.idle.token, 'lastAllocations',[index]);
+    });
+    return allAvailableTokens.reduce( (lastAllocations,protocolAddr,index) => {
+      lastAllocations[protocolAddr.toLowerCase()] = tokenAllocations[index];
+      return lastAllocations;
+    },{});
   }
   getTokenAllocation = async (tokenConfig,protocolsAprs=false,addGovTokens=true) => {
     
@@ -4913,30 +4930,26 @@ class FunctionsUtil {
     let [
       unlentBalance,
       tokenPrice,
-      aprs,
+      lastAllocations,
       tokenUsdConversionRate,
       totalSupply,
-      tokenAllocations,
       govTokensBalances,
     ] = await Promise.all([
       this.getUnlentBalance(tokenConfig),
       this.getIdleTokenPrice(tokenConfig),
-      this.getAprs(tokenConfig.idle.token),
+      this.getLastAllocations(tokenConfig),
       this.getTokenConversionRate(tokenConfig,false),
       this.getIdleTokenSupply(tokenConfig.idle.token),
-      this.genericContractCallCached(tokenConfig.idle.token,'getAllocations'),
       addGovTokens ? this.getGovTokensBalances(tokenConfig.idle.address) : null,
     ]);
 
-    const allAvailableTokens = aprs ? aprs.addresses : null;
-
     const totalAllocation = this.fixTokenDecimals(totalSupply,18).times(tokenPrice).minus(unlentBalance);
 
-    if (allAvailableTokens && tokenAllocations && allAvailableTokens.length === tokenAllocations.length){
-      allAvailableTokens.forEach( (protocolAddr,index) => {
+    if (lastAllocations){
+      Object.keys(lastAllocations).forEach( (protocolAddr) => {
         const protocolInfo = tokenConfig.protocols.find( p => p.address.toLowerCase() === protocolAddr.toLowerCase() );
         if (protocolInfo && protocolInfo.enabled){
-          const protocolAllocationPerc = this.BNify(tokenAllocations[index]).div(100000);
+          const protocolAllocationPerc = this.BNify(lastAllocations[protocolAddr]).div(100000);
           const protocolAllocation = totalAllocation.times(protocolAllocationPerc);
           protocolsAllocations[protocolAddr.toLowerCase()] = protocolAllocation;
           protocolsAllocationsPerc[protocolAddr.toLowerCase()] = protocolAllocationPerc;
