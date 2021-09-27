@@ -47,8 +47,8 @@ class CardIconButton extends Component {
             />
           ) : (
             <Flex
-              mr={2}
-              p={["4px", "7px"]}
+              mr={this.props.isSidebar ? 0 : 2}
+              p={this.props.isSidebar ? 0 : ["4px", "7px"]}
               borderRadius={"50%"}
               alignItems={"center"}
               justifyContent={"center"}

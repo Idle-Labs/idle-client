@@ -109,7 +109,7 @@ class DashboardMenu extends Component {
           <Flex>
             {this.props.account ? (
               <CardIconButton
-                textProps={{ color: !isDarkTheme ? "white" : "black" }}
+                textProps={{ color: !isDarkTheme ? "white" : "black", ml: 1 }}
                 cardProps={{
                   mb: 2,
                   alignContent: "left",
@@ -118,8 +118,9 @@ class DashboardMenu extends Component {
                   borderRadius: 4,
                   width: "100%"
                 }}
+                isSidebar="true"
                 align={"left"}
-                iconProps={{ height: "1.6em", width: "1.6em", ml: 1 }}
+                iconProps={{ height: "1.6em", width: "1.6em", mx: 2 }}
                 icon={"ExitToApp"}
                 iconColor={"black"}
                 iconBgColor={!isDarkTheme ? "blue" : "lightblue"}
