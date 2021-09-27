@@ -98,9 +98,13 @@ class DashboardMenu extends Component {
               height={"42px"}
               position={"relative"}
               src={
-                !isDarkTheme
-                  ? "images/logo-gradient.svg"
-                  : "images/logo-dark.svg"
+                this.functionsUtil.checkUrlOrigin()
+                  ? !isDarkTheme
+                    ? "images/logo-gradient.svg"
+                    : "images/logo-dark.svg"
+                  : !isDarkTheme
+                  ? "images/logo-gradient-beta.png"
+                  : "images/logo-white-beta.png"
               }
             />
           </RouterLink>
@@ -109,12 +113,12 @@ class DashboardMenu extends Component {
           <Flex>
             {this.props.account ? (
               <CardIconButton
-                textProps={{ color: !isDarkTheme ? "white" : "black", ml: 1 }}
+                textProps={{ color: !isDarkTheme ? "white" : "black", ml: 2 }}
                 cardProps={{
                   mb: 2,
                   alignContent: "left",
                   justifyContent: "left",
-                  backgroundColor: !isDarkTheme ? "blue" : "lightblue",
+                  backgroundColor: "deposit",
                   borderRadius: 4,
                   width: "100%"
                 }}
@@ -122,8 +126,8 @@ class DashboardMenu extends Component {
                 align={"left"}
                 iconProps={{ height: "1.6em", width: "1.6em", mx: 2 }}
                 icon={"ExitToApp"}
-                iconColor={"black"}
-                iconBgColor={!isDarkTheme ? "blue" : "lightblue"}
+                iconColor={!isDarkTheme ? "white" : "black"}
+                iconBgColor={"deposit"}
                 {...this.props}
                 text={"Logout"}
                 handleClick={async () => {
@@ -143,17 +147,17 @@ class DashboardMenu extends Component {
                   mb: 2,
                   alignContent: "center",
                   justifyContent: "center",
-                  backgroundColor: !isDarkTheme ? "blue" : "lightblue",
+                  backgroundColor: "deposit",
                   borderRadius: 4,
                   width: "100%"
                 }}
                 align={"left"}
                 imageProps={{ height: "1.6em", width: "1.6em", mx: 2 }}
-                image={this.functionsUtil.getGlobalConfig([
-                  "extraicons",
-                  "power",
-                  "icon"
-                ])}
+                image={
+                  isDarkTheme
+                    ? "images/sidebar/plug.svg"
+                    : "images/sidebar/plug_white.svg"
+                }
                 {...this.props}
                 text={"Connect"}
                 handleClick={this.props.connectAndValidateAccount}

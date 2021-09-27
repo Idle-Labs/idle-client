@@ -643,9 +643,7 @@ const globalConfigs = {
     }
   },
   extraicons:{
-    power:{
-      icon:"images/sidebar/plug.svg"
-    },
+    
     best:{
     icon: "images/sidebar/best-on.svg",
     iconDark:"images/sidebar/best-on-dark.svg",
