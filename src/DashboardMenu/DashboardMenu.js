@@ -1,7 +1,7 @@
 import ExtLink from "../ExtLink/ExtLink";
 import React, { Component } from "react";
+import RoundButton from "../RoundButton/RoundButton";
 import { Link as RouterLink } from "react-router-dom";
-import CardIconButton from "../CardIconButton/CardIconButton";
 import FunctionsUtil from "../utilities/FunctionsUtil";
 import { Flex, Box, Icon, Text, Image, Link } from "rimble-ui";
 class DashboardMenu extends Component {
@@ -109,58 +109,63 @@ class DashboardMenu extends Component {
             />
           </RouterLink>
         </Flex>
-        {!this.props.isMobile && (
-          <Flex>
-            {this.props.account ? (
-              <CardIconButton
-                textProps={{ color: "white", ml: 2 }}
-                cardProps={{
-                  mb: 2,
-                  alignContent: "left",
-                  justifyContent: "left",
-                  backgroundColor: "deposit",
-                  borderRadius: 4,
-                  width: "100%"
-                }}
-                isSidebar="true"
-                align={"left"}
-                iconProps={{ height: "1.6em", width: "1.6em", mx: 2 }}
-                icon={"ExitToApp"}
-                iconColor={"white"}
-                iconBgColor={"deposit"}
+        {
+          !this.props.isMobile && (
+            <Flex
+              width={1}
+            >
+              <RoundButton
                 {...this.props}
-                text={"Logout"}
-                handleClick={async () => {
-                  await this.logout();
+                buttonProps={{
+                  mb:3,
+                  style:{
+                    display:'flex',
+                    paddingLeft:16,
+                    justifyContent:'flex-start'
+                  }
                 }}
-              />
-            ) : (
-              <CardIconButton
-                textProps={{
-                  alignContent: "center",
-                  justifyContent: "center",
-
-                  ml: 1,
-                  color: "white"
-                }}
-                cardProps={{
-                  mb: 2,
-                  alignContent: "center",
-                  justifyContent: "center",
-                  backgroundColor: "deposit",
-                  borderRadius: 4,
-                  width: "100%"
-                }}
-                align={"left"}
-                imageProps={{ height: "1.6em", width: "1.6em", mx: 2 }}
-                image={"images/sidebar/plug_white.svg"}
-                {...this.props}
-                text={"Connect"}
-                handleClick={this.props.connectAndValidateAccount}
-              />
-            )}
-          </Flex>
-        )}
+                handleClick={this.props.account ? e => this.logout() : this.props.connectAndValidateAccount}
+              >
+                <Flex
+                  width={1}
+                  alignItems={'center'}
+                  justifyContent={'flex-start'}
+                >
+                  {
+                    this.props.account ? (
+                      <Icon
+                        mx={2}
+                        size={"1.4em"}
+                        color={"white"}
+                        align={"center"}
+                        name={"ExitToApp"}
+                      />
+                    ) : (
+                      <Image
+                        mx={2}
+                        align={"center"}
+                        height={"1.6em"}
+                        src={"images/sidebar/plug_white.svg"}
+                      />
+                    )
+                  }
+                  <Text
+                    ml={1}
+                    fontWeight={3}
+                    color={"white"}
+                    fontSize={[1,2]}
+                    alignContent={"center"}
+                    justifyContent={"center"}
+                  >
+                    {
+                      this.props.account ? 'Logout' : 'Connect'
+                    }
+                  </Text>
+                </Flex>
+              </RoundButton>
+            </Flex>
+          )
+        }
         {visibleLinks.map((menuLink, menuIndex) => {
           const isExternalLink = menuLink.isExternalLink;
           const LinkComponent = isExternalLink ? ExtLink : RouterLink;
@@ -173,7 +178,7 @@ class DashboardMenu extends Component {
               ? menuLink.imageInactiveDark
               : menuLink.imageInactive;
           return (
-            <Box width={"auto"} my={[2, "12px"]} key={`menu-${menuIndex}`}>
+            <Box width={"auto"} my={[2, "8px"]} key={`menu-${menuIndex}`}>
               <LinkComponent
                 to={menuLink.route}
                 href={menuLink.route}
@@ -181,7 +186,7 @@ class DashboardMenu extends Component {
                 style={{ textDecoration: "none" }}
               >
                 <Flex
-                  py={3}
+                  py={2}
                   px={3}
                   borderRadius={2}
                   flexDirection={"row"}
@@ -192,6 +197,7 @@ class DashboardMenu extends Component {
                   }
                 >
                   <Flex
+                    py={1}
                     width={1}
                     alignItems={"center"}
                     flexDirection={"row"}
@@ -282,116 +288,8 @@ class DashboardMenu extends Component {
                 />
               </Flex>
             </Link>
-            {/*
-                  <Link
-                    style={{textDecoration:'none'}}
-                    onClick={ e => this.props.setThemeMode(this.props.themeMode === 'light' ? 'dark' : 'light') }
-                  >
-                    <Flex
-                      py={[2,3]}
-                      px={[2,3]}
-                      borderRadius={[0,2]}
-                      flexDirection={'row'}
-                      alignItems={'center'}
-                      backgroundColor={'transparent'}
-                    >
-                      <Flex
-                        width={1}
-                        alignItems={'center'}
-                        flexDirection={['column','row']}
-                        justifyContent={['center','flex-start']}
-                      >
-                        {
-                          this.props.themeMode === 'light' ? (
-                            <Icon
-                              mr={[0,3]}
-                              ml={[0,2]}
-                              mb={[1,0]}
-                              size={'1.6em'}
-                              align={'center'}
-                              color={'copyColor'}
-                              name={'Brightness2'}
-                            />
-                          ) : (
-                            <Icon
-                              mr={[0,3]}
-                              ml={[0,2]}
-                              mb={[1,0]}
-                              size={'1.6em'}
-                              name={'WbSunny'}
-                              align={'center'}
-                              color={'copyColor'}
-                            />
-                          )
-                        }
-                        <Text
-                          fontWeight={3}
-                          color={'copyColor'}
-                          textAlign={'center'}
-                          fontSize={['11px',2]}
-                          style={{
-                            whiteSpace:'nowrap'
-                          }}
-                        >
-                          {this.props.themeMode === 'light' ? 'Dark Mode' : 'Back to Light'}
-                        </Text>
-                      </Flex>
-                    </Flex>
-                  </Link>
-                */}
           </Flex>
         )}
-        {/*
-        !this.props.isMobile  &&
-          <Box
-            width={'auto'}
-            borderTop={`1px solid ${theme.colors.divider}`}
-          >
-            <Flex
-              p={[2,3]}
-              style={{
-                cursor:'pointer'
-              }}
-              borderRadius={[0,2]}
-              flexDirection={'row'}
-              alignItems={'center'}
-              onClick={ e => this.setBuyModalOpened(true) }
-            >
-              <Flex
-                width={1}
-                alignItems={'center'}
-                flexDirection={['column','row']}
-                justifyContent={['center','flex-start']}
-              >
-                <Icon
-                  mr={[0,3]}
-                  ml={[0,2]}
-                  mb={[1,0]}
-                  size={'1.6em'}
-                  align={'center'}
-                  color={'copyColor'}
-                  name={'AddCircleOutline'}
-                />
-                <Text
-                  fontWeight={3}
-                  fontSize={[0,2]}
-                  color={'copyColor'}
-                  textAlign={'center'}
-                  style={{
-                    whiteSpace:'nowrap'
-                  }}
-                >
-                  Add Funds
-                </Text>
-              </Flex>
-            </Flex>
-          </Box>
-        <BuyModal
-          {...this.props}
-          isOpen={this.state.buyModalOpened}
-          closeModal={ e => this.setBuyModalOpened(false) }
-        />
-        */}
       </Flex>
     );
   }
