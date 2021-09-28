@@ -53,6 +53,7 @@ class Dashboard extends Component {
   }
 
   async loadMenu() {
+    const extraicons=this.functionsUtil.getGlobalConfig(['extraicons']);
     const baseRoute = this.functionsUtil.getGlobalConfig(['dashboard','baseRoute']);
 
     const menu = [];
@@ -60,20 +61,23 @@ class Dashboard extends Component {
     const strategies = this.functionsUtil.getGlobalConfig(['strategies']);
     Object.keys(strategies).filter( s => ( !strategies[s].comingSoon ) ).forEach(strategy => {
       const strategyInfo = strategies[strategy];
+      const imageInfo=extraicons[strategy];
       menu.push({
         submenu:[],
         color:'#fff',
         selected:false,
-        image:strategyInfo.icon,
+        image:imageInfo.icon,
         label:strategyInfo.title,
         bgColor:strategyInfo.color,
         route:baseRoute+'/'+strategy,
         visible:strategyInfo.visible,
+        imageDark:imageInfo.iconDark,
         component:strategyInfo.component,
-        imageInactive:strategyInfo.iconInactive,
-        imageInactiveDark:strategyInfo.iconInactiveDark
+        imageInactive:imageInfo.iconInactive,
+        imageInactiveDark:imageInfo.iconInactiveDark
       });
     });
+    
 
     const curveConfig = this.functionsUtil.getGlobalConfig(['curve']);
 
@@ -97,44 +101,53 @@ class Dashboard extends Component {
           label:'Stake',
           selected:false,
           color:'dark-gray',
-          icon:stakeConfig.icon,
           route:'/dashboard/stake',
+          image:extraicons['stake'].icon,
+          imageDark:extraicons['stake'].iconDark,
+          bgColor:this.props.theme.colors.primary,
+          imageInactive:extraicons['stake'].iconInactive,
+          imageInactiveDark:extraicons['stake'].iconInactiveDark,
           component:Utils,
           componentProps:{
             showBreadCrumb:false,
             toolProps:stakeConfig.props,
             selectedSubsection:stakeConfig
           },
-          bgColor:this.props.theme.colors.primary,
         }
       );
     }
 
-    // Add tools
-    menu.push(
-      {
-        icon:'Build',
-        label:'Tools',
-        color:'dark-gray',
-        component:Utils,
-        selected:false,
-        route:'/dashboard/tools',
-        bgColor:this.props.theme.colors.primary,
-        submenu:Object.values(this.functionsUtil.getGlobalConfig(['tools'])).filter( u => (u.enabled) )
-      }
-    );
-
     // Add Stats
     menu.push(
       {
-        icon:'Equalizer',
+        submenu:[],
         label:'Stats',
+        selected:false,
+        component:Stats,
         bgColor:'#21f36b',
         color:'dark-gray',
-        component:Stats,
-        selected:false,
         route:'/dashboard/stats',
-        submenu:[]
+        image:extraicons['stats'].icon,
+        imageDark:extraicons['stats'].iconDark,
+        imageInactive:extraicons['stats'].iconInactive,
+        imageInactiveDark:extraicons['stats'].iconInactiveDark,
+      }
+    );
+
+    // Add tools
+    menu.push(
+      {
+        label:'Tools',
+        selected:false,
+        component:Utils,
+        color:'dark-gray',
+        route:'/dashboard/tools',
+        image:extraicons['tools'].icon,
+        imageDark:extraicons['tools'].iconDark,
+        bgColor:this.props.theme.colors.primary,
+        imageInactive:extraicons['tools'].iconInactive,
+        imageInactiveDark:extraicons['tools'].iconInactiveDark,
+        submenu:Object.values(this.functionsUtil.getGlobalConfig(['tools'])).filter( u => (u.enabled) )
       }
     );
 
@@ -142,7 +155,6 @@ class Dashboard extends Component {
     menu.push(
       {
         submenu:[],
-        icon:'Forum',
         mobile:false,
         label:'Forum',
         selected:false,
@@ -150,6 +162,10 @@ class Dashboard extends Component {
         color:'dark-gray',
         bgColor:'#ff0000',
         isExternalLink:true,
+        image:extraicons['forum'].icon,
+        imageDark:extraicons['forum'].iconDark,
+        imageInactive:extraicons['forum'].iconInactive,
+        imageInactiveDark:extraicons['forum'].iconInactiveDark,
         route:this.functionsUtil.getGlobalConfig(['forumURL'])
       }
     );

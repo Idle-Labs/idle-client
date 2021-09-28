@@ -68,6 +68,7 @@ export default {
     /*
     NEW COLORS
     */
+    connect: "#0042F5",
     newblue: "#2B65D9",
     alert: "#ff9900",
     arrowActive: "#4f4f4f",
@@ -93,7 +94,7 @@ export default {
     menuBg: "#fff",
     menuHover: "#f3f6ff",
     cardBg: "#fff",
-    cardBgContrast:"#fafafa",
+    cardBgContrast: "#fafafa",
     flashColor: "#3f4e9a",
     menuRightBorder: "#eee",
     cardHoverShadow: "0px 0px 0px 1px rgba(0, 54, 255, 0.3)",

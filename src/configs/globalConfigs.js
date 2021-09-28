@@ -454,9 +454,9 @@ const globalConfigs = {
       distributionMode: "second",
       color: "hsl(314, 41%, 51%)",
       distributionFrequency: "day",
+      disabledTokens: ["idleTUSDYield", "idleSUSDYield"],
       address: "0x4da27a545c0c5b758a6ba100e3a049001de870f5", // MAIN
-      addressForPrice: "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9", // MAIN
-      disabledTokens: ["idleTUSDYield", "idleSUSDYield", "idleFEIYield"],
+      addressForPrice: "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9" // MAIN
     }
   },
   contracts: {
@@ -576,7 +576,6 @@ const globalConfigs = {
   tranches: {
     AA: {
       color: {
-        // hex:'#00ff06',
         hex: "#337de5",
         rgb: [51, 125, 229],
         hsl: ["215", "77%", "55%"]
@@ -646,6 +645,50 @@ const globalConfigs = {
         cantWithdraw:
           "To withdraw your funds you just need to wait at least 1 block from the latest harvest transaction."
       }
+    }
+  },
+  extraicons:{
+    best:{
+      icon: "images/sidebar/best-on.svg",
+      iconDark:"images/sidebar/best-on-dark.svg",
+      iconInactive: "images/sidebar/best-off.svg",
+      iconInactiveDark: "images/sidebar/best-off-dark.svg",
+    },
+    tranches:{
+      icon: "images/sidebar/tranches-on.svg",
+      iconDark:"images/sidebar/tranches-on-dark.svg",
+      iconInactive: "images/strategies/tranches-off.svg",
+      iconInactiveDark: "images/strategies/tranches-off-dark.svg"
+    },
+    risk:{
+      icon: "images/sidebar/risk-on.svg",
+      iconDark:"images/sidebar/risk-on-dark.svg",
+      iconInactive: "images/sidebar/risk-off.svg",
+      iconInactiveDark: "images/sidebar/risk-off-dark.svg"
+    },
+    stats:{
+      icon: "images/sidebar/stats-on.svg",
+      iconDark:"images/sidebar/stats-on-dark.svg",
+      iconInactive: "images/sidebar/stats-off.svg",
+      iconInactiveDark: "images/sidebar/stats-off-dark.svg"
+    },
+    tools:{
+      icon: "images/sidebar/tools-on.svg",
+      iconDark:"images/sidebar/tools-on-dark.svg",
+      iconInactive: "images/sidebar/tools-off.svg",
+      iconInactiveDark: "images/sidebar/tools-off-dark.svg"
+    },
+    forum:{
+      icon: "images/sidebar/forum-on.svg",
+      iconDark:"images/sidebar/forum-on-dark.svg",
+      iconInactive: "images/sidebar/forum-off.svg",
+      iconInactiveDark: "images/sidebar/forum-off-dark.svg"
+    },
+    stake:{
+      icon: "images/sidebar/stake-on.svg",
+      iconDark:"images/sidebar/stake-on-dark.svg",
+      iconInactive: "images/sidebar/stake-off.svg",
+      iconInactiveDark: "images/sidebar/stake-off-dark.svg"
     }
   },
   strategies: {
@@ -1030,6 +1073,7 @@ const globalConfigs = {
         },
         address:'0x956f47f50a910163d8bf957cf5846d573e7f87ca',
       },
+
       "idleDAI+idleUSDC+idleUSDT": {
         decimals: 18,
         enabled: false,

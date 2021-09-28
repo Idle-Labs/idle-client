@@ -1,5 +1,5 @@
-import { Flex, Text } from "rimble-ui";
 import Title from "../Title/Title";
+import { Flex, Text } from "rimble-ui";
 import ExtLink from "../ExtLink/ExtLink";
 import React, { Component } from "react";
 import styles from "./TrancheWelcome.module.scss";
