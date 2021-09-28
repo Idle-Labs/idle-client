@@ -113,7 +113,7 @@ class DashboardMenu extends Component {
           <Flex>
             {this.props.account ? (
               <CardIconButton
-                textProps={{ color: isDarkTheme ? "white" : "black", ml: 2 }}
+                textProps={{ color: "white", ml: 2 }}
                 cardProps={{
                   mb: 2,
                   alignContent: "left",
@@ -126,7 +126,7 @@ class DashboardMenu extends Component {
                 align={"left"}
                 iconProps={{ height: "1.6em", width: "1.6em", mx: 2 }}
                 icon={"ExitToApp"}
-                iconColor={isDarkTheme ? "white" : "black"}
+                iconColor={"white"}
                 iconBgColor={"deposit"}
                 {...this.props}
                 text={"Logout"}
@@ -141,7 +141,7 @@ class DashboardMenu extends Component {
                   justifyContent: "center",
 
                   ml: 1,
-                  color: isDarkTheme ? "white" : "black"
+                  color: "white"
                 }}
                 cardProps={{
                   mb: 2,
@@ -153,11 +153,7 @@ class DashboardMenu extends Component {
                 }}
                 align={"left"}
                 imageProps={{ height: "1.6em", width: "1.6em", mx: 2 }}
-                image={
-                  !isDarkTheme
-                    ? "images/sidebar/plug.svg"
-                    : "images/sidebar/plug_white.svg"
-                }
+                image={"images/sidebar/plug_white.svg"}
                 {...this.props}
                 text={"Connect"}
                 handleClick={this.props.connectAndValidateAccount}
