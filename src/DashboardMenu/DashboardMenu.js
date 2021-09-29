@@ -109,74 +109,72 @@ class DashboardMenu extends Component {
             />
           </RouterLink>
         </Flex>
-        {
-          !this.props.isMobile && (
-            <Flex
-              width={1}
+        {!this.props.isMobile && (
+          <Flex width={1}>
+            <RoundButton
+              {...this.props}
+              buttonProps={{
+                mb: 3,
+                style: {
+                  display: "flex",
+                  paddingLeft: 16,
+                  justifyContent: "flex-start"
+                }
+              }}
+              handleClick={
+                this.props.account
+                  ? e => this.logout()
+                  : this.props.connectAndValidateAccount
+              }
             >
-              <RoundButton
-                {...this.props}
-                buttonProps={{
-                  mb:3,
-                  style:{
-                    display:'flex',
-                    paddingLeft:16,
-                    justifyContent:'flex-start'
-                  }
-                }}
-                handleClick={this.props.account ? e => this.logout() : this.props.connectAndValidateAccount}
+              <Flex
+                width={1}
+                alignItems={"center"}
+                justifyContent={"flex-start"}
               >
-                <Flex
-                  width={1}
-                  alignItems={'center'}
-                  justifyContent={'flex-start'}
-                >
-                  {
-                    this.props.account ? (
-                      <Icon
-                        mx={2}
-                        size={"1.4em"}
-                        color={"white"}
-                        align={"center"}
-                        name={"ExitToApp"}
-                      />
-                    ) : (
-                      <Image
-                        mx={2}
-                        align={"center"}
-                        height={"1.6em"}
-                        src={"images/sidebar/plug_white.svg"}
-                      />
-                    )
-                  }
-                  <Text
-                    ml={1}
-                    fontWeight={3}
+                {this.props.account ? (
+                  <Icon
+                    mx={2}
+                    size={"1.4em"}
                     color={"white"}
-                    fontSize={[1,2]}
-                    alignContent={"center"}
-                    justifyContent={"center"}
-                  >
-                    {
-                      this.props.account ? 'Logout' : 'Connect'
-                    }
-                  </Text>
-                </Flex>
-              </RoundButton>
-            </Flex>
-          )
-        }
+                    align={"center"}
+                    name={"ExitToApp"}
+                  />
+                ) : (
+                  <Image
+                    mx={2}
+                    align={"center"}
+                    height={"1.6em"}
+                    src={"images/sidebar/plug_white.svg"}
+                  />
+                )}
+                <Text
+                  ml={1}
+                  fontWeight={3}
+                  color={"white"}
+                  fontSize={[1, 2]}
+                  alignContent={"center"}
+                  justifyContent={"center"}
+                >
+                  {this.props.account ? "Logout" : "Connect"}
+                </Text>
+              </Flex>
+            </RoundButton>
+          </Flex>
+        )}
         {visibleLinks.map((menuLink, menuIndex) => {
           const isExternalLink = menuLink.isExternalLink;
           const LinkComponent = isExternalLink ? ExtLink : RouterLink;
-          const activeImage = isDarkTheme && menuLink.imageDark ? menuLink.imageDark : menuLink.image;
-          const inactiveImage = isDarkTheme && menuLink.imageInactiveDark ? menuLink.imageInactiveDark : menuLink.imageInactive;
+          const activeImage =
+            isDarkTheme && menuLink.imageDark
+              ? menuLink.imageDark
+              : menuLink.image;
+          const inactiveImage =
+            isDarkTheme && menuLink.imageInactiveDark
+              ? menuLink.imageInactiveDark
+              : menuLink.imageInactive;
           return (
-            <Box
-              width={"auto"}
-              my={[2, "8px"]}
-              key={`menu-${menuIndex}`}
-            >
+            <Box width={"auto"} my={[2, "8px"]} key={`menu-${menuIndex}`}>
               <LinkComponent
                 to={menuLink.route}
                 href={menuLink.route}
@@ -209,6 +207,22 @@ class DashboardMenu extends Component {
                         align={"center"}
                         height={"1.6em"}
                         src={menuLink.selected ? activeImage : inactiveImage}
+                      />
+                    )}
+                    {menuLink.icon && (
+                      <Icon
+                        name={menuLink.icon}
+                        color={
+                          menuLink.selected
+                            ? "deposit"
+                            : isDarkTheme
+                            ? "white"
+                            : "dark-gray"
+                        }
+                        mr={3}
+                        ml={2}
+                        mb={0}
+                        size={"1.6em"}
                       />
                     )}
 
