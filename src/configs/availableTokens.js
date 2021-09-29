@@ -1876,12 +1876,13 @@ const availableTokens = {
           address:'0x5C960a3DCC01BE8a0f49c02A8ceBCAcf5D07fABe',
         },
         protocols:[
+          /*
           {
             abi:crToken,
             decimals:28,
-            enabled:true,
             name:'cream',
             token:'crRAI',
+            enabled:false,
             functions:{
               exchangeRate:{
                 name:'exchangeRateStored',
@@ -1890,6 +1891,7 @@ const availableTokens = {
             },
             address:'0xf8445c529d363ce114148662387eba5e62016e20',
           },
+          */
           {
             abi:fToken,
             decimals:28,
