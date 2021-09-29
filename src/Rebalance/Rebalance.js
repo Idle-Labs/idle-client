@@ -74,42 +74,43 @@ class Rebalance extends Component {
 
     const callback = (tx,error) => {
 
-      // Send Google Analytics event
-      const eventData = {
-        eventLabel: tx.status,
-        eventCategory: 'Rebalance',
-        eventAction: this.props.selectedToken,
-      };
+      if (tx){
+        // Send Google Analytics event
+        const eventData = {
+          eventLabel: tx.status,
+          eventCategory: 'Rebalance',
+          eventAction: this.props.selectedToken,
+        };
 
-      let txDenied = false;
+        let txDenied = false;
 
-      if (error){
-        eventData.eventLabel = this.functionsUtil.getTransactionError(error);
-      }
+        if (error){
+          eventData.eventLabel = this.functionsUtil.getTransactionError(error);
+        }
 
-      // Send Google Analytics event
-      if (error || eventData.status !== 'error'){
-        this.functionsUtil.sendGoogleAnalyticsEvent(eventData);
-      }
+        // Send Google Analytics event
+        if (error || eventData.status !== 'error'){
+          this.functionsUtil.sendGoogleAnalyticsEvent(eventData);
+        }
 
-      if (tx.status === 'success'){
-        // Toast message
-        window.toastProvider.addMessage(`Rebalance completed`, {
-          secondaryMessage: `Now the pool is balanced!`,
-          colorTheme: 'light',
-          actionHref: "",
-          actionText: "",
-          variant: "success",
-        });
-
-      } else if (!txDenied){
-        window.toastProvider.addMessage(`Rebalance error`, {
-          secondaryMessage: `The rebalance has failed, try again...`,
-          colorTheme: 'light',
-          actionHref: "",
-          actionText: "",
-          variant: "failure",
-        });
+        if (tx.status === 'success'){
+          // Toast message
+          window.toastProvider.addMessage(`Rebalance completed`, {
+            secondaryMessage: `Now the pool is balanced!`,
+            colorTheme: 'light',
+            actionHref: "",
+            actionText: "",
+            variant: "success",
+          });
+        } else if (!txDenied){
+          window.toastProvider.addMessage(`Rebalance error`, {
+            secondaryMessage: `The rebalance has failed, try again...`,
+            colorTheme: 'light',
+            actionHref: "",
+            actionText: "",
+            variant: "failure",
+          });
+        }
       }
 
       this.setStateSafe((prevState) => ({
@@ -139,9 +140,7 @@ class Rebalance extends Component {
       );
     };
 
-    this.props.contractMethodSendWrapper(this.props.tokenConfig.idle.token, 'rebalance', [], null , callback, callback_receipt);
-
-    this.setStateSafe({
+    await this.setStateSafe({
       processing:{
         rebalance:{
           txHash:null,
@@ -149,6 +148,8 @@ class Rebalance extends Component {
         }
       }
     });
+
+    this.props.contractMethodSendWrapper(this.props.tokenConfig.idle.token, 'rebalance', [], null , callback, callback_receipt);
   }
 
   render() {

@@ -37,16 +37,21 @@ class TrancheFlash extends Component {
           <Flex justifyContent={"left"} my={3} width={[1, 0.7]}>
             <Text
               bold={"true"}
-              color={"white"}
-              textAlign={"left"}
               fontWeight={4}
-              fontSize={[5, 6]}
               lineHeight={1}
+              color={"white"}
+              fontSize={[5, 6]}
+              textAlign={"left"}
             >
               {flashData.subtitle}
             </Text>
           </Flex>
-          <Flex justifyContent={"left"} mt={2} mb={[2, 4]} width={1}>
+          <Flex
+            mt={2}
+            width={1}
+            mb={[2, 3]}
+            justifyContent={"left"}
+          >
             <Text
               color={"white"}
               textAlign={"left"}
@@ -56,7 +61,12 @@ class TrancheFlash extends Component {
               {flashData.desc}
             </Text>
           </Flex>
-          <Flex mt={[2, 3]} mb={2} flexDirection={"column"} width={1}>
+          <Flex
+            mt={2}
+            mb={2}
+            width={1}
+            flexDirection={"column"}
+          >
             {
               flashData.questions.map( (question,index) => (
                 <Flex
@@ -65,7 +75,6 @@ class TrancheFlash extends Component {
                   alignItems={"flex-start"}
                 >
                   <Link
-                    ml={2}
                     fontSize={2}
                     fontWeight={2}
                     opacity={"50%"}
@@ -76,7 +85,7 @@ class TrancheFlash extends Component {
                     }
                   >
                     <Flex
-                      my={2}
+                      flexDirection={'row'}
                       alignItems={"flex-start"}
                     >
                       <Image
@@ -91,12 +100,11 @@ class TrancheFlash extends Component {
             }
           </Flex>
         </Flex>
-
         <Flex
+          mt={6}
+          width={0.2}
           hidden={this.props.isMobile ? 1 : 0}
           alignItems={"flex-start"}
-          width={0.2}
-          mt={6}
         >
           <Image hidden={this.props.isMobile ? 1 : 0} src={flashData.arrows} />
         </Flex>

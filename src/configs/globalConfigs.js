@@ -417,7 +417,7 @@ const globalConfigs = {
       distributionFrequency: "day", // Multiply distribution per block
       color: "hsl(162, 100%, 41%)",
       icon: "images/tokens/IDLE.png",
-      disabledTokens: ["idleRAIYield", "idleFEIYield"], // Disable IDLE distribution for idleToken
+      disabledTokens: ["idleFEIYield"], // Disable IDLE distribution for idleToken
       address: "0x875773784Af8135eA0ef43b5a374AaD105c5D39e" // MAIN
       // address:'0xAB6Bdb5CCF38ECDa7A92d04E86f7c53Eb72833dF', // KOVAN
       // address:'0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f' // Fork
@@ -454,9 +454,9 @@ const globalConfigs = {
       distributionMode: "second",
       color: "hsl(314, 41%, 51%)",
       distributionFrequency: "day",
-      disabledTokens: ["idleTUSDYield", "idleSUSDYield"],
       address: "0x4da27a545c0c5b758a6ba100e3a049001de870f5", // MAIN
-      addressForPrice: "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9" // MAIN
+      addressForPrice: "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9", // MAIN
+      disabledTokens: ["idleTUSDYield", "idleSUSDYield", "idleFEIYield"],
     }
   },
   contracts: {
