@@ -58,7 +58,7 @@ class Landing extends Component {
   componentWillMount(){
     this.loadUtils();
     this.props.setCurrentSection('landing');
-    const visibleStrategies = Object.keys(globalConfigs.strategies).filter(s => globalConfigs.strategies[s].visible );
+    const visibleStrategies = Object.keys(globalConfigs.strategies).filter(s => globalConfigs.strategies[s].visible && (!globalConfigs.strategies[s].enabledEnvs.length || globalConfigs.strategies[s].enabledEnvs.includes(this.props.currentEnv)) );
     const carouselMax = visibleStrategies.length-1;
     this.setState({
       carouselMax,

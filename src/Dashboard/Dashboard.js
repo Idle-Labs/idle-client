@@ -59,7 +59,7 @@ class Dashboard extends Component {
     const menu = [];
 
     const strategies = this.functionsUtil.getGlobalConfig(['strategies']);
-    Object.keys(strategies).filter( s => ( !strategies[s].comingSoon ) ).forEach(strategy => {
+    Object.keys(strategies).filter( s => ( !strategies[s].comingSoon && (!strategies[s].enabledEnvs.length || strategies[s].enabledEnvs.includes(this.props.currentEnv)) ) ).forEach(strategy => {
       const strategyInfo = strategies[strategy];
       const imageInfo=extraicons[strategy];
       menu.push({

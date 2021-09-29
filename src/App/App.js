@@ -741,6 +741,7 @@ class App extends Component {
                                       themeMode={this.state.themeMode}
                                       theme={this.state.selectedTheme}
                                       validateAccount={validateAccount}
+                                      currentEnv={this.state.currentEnv}
                                       connecting={this.state.connecting}
                                       cachedData={this.state.cachedData}
                                       setToken={this.setToken.bind(this)}
@@ -818,6 +819,7 @@ class App extends Component {
                                           themeMode={this.state.themeMode}
                                           theme={this.state.selectedTheme}
                                           validateAccount={validateAccount}
+                                          currentEnv={this.state.currentEnv}
                                           connecting={this.state.connecting}
                                           cachedData={this.state.cachedData}
                                           setToken={this.setToken.bind(this)}
@@ -947,6 +949,7 @@ class App extends Component {
                                           themeMode={this.state.themeMode}
                                           theme={this.state.selectedTheme}
                                           cachedData={this.state.cachedData}
+                                          currentEnv={this.state.currentEnv}
                                           connecting={this.state.connecting}
                                           selectedTab={this.state.selectedTab}
                                           tokenConfig={this.state.tokenConfig}

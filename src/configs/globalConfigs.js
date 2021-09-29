@@ -691,8 +691,7 @@ const globalConfigs = {
       iconInactiveDark: "images/sidebar/stake-off-dark.svg"
     }
   },
-  strategies: {
-    /*
+  strategies:{
     tranches: {
       token: "DAI",
       visible: true,
@@ -703,8 +702,9 @@ const globalConfigs = {
       title: "Tranches",
       addGovTokens: true,
       titlePostfix: null,
-      iconName: "Whatshot",
       component: Tranches,
+      iconName: "Whatshot",
+      enabledEnvs: ['beta'],
       govTokensEnabled: true,
       chartColor: "hsl(40,95%,59%)",
       icon: "images/strategies/tranches-on.png",
@@ -717,10 +717,10 @@ const globalConfigs = {
       descLong:
         "Choose the benefits of high-yield or low-risk, while enjoying the flexibility of Tranches. This comes with auto-compounding for accrued governance tokens and no locking period."
     },
-    */
     best: {
       token: "DAI",
       visible: true,
+      enabledEnvs:[],
       color: "#f32121",
       type: "strategy",
       comingSoon: false,
@@ -743,6 +743,7 @@ const globalConfigs = {
     risk: {
       token: "DAI",
       visible: true,
+      enabledEnvs:[],
       color: "#2196F3",
       type: "strategy",
       comingSoon: false,
