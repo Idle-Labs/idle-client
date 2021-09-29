@@ -147,7 +147,7 @@ class TrancheField extends Component {
       });
     }
 
-    const tokenName = this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token,'label']) || this.functionsUtil.capitalize(this.props.token);
+    // const tokenName = this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token,'label']) || this.functionsUtil.capitalize(this.props.token);
 
     // const tokenConfig = this.props.tokenConfig;// || this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token]);
     const maxPrecision = fieldProps && fieldProps.maxPrecision ? fieldProps.maxPrecision : 5;
@@ -233,7 +233,7 @@ class TrancheField extends Component {
             decimals={decimals}
             end={parseFloat(this.state.earningsCounter.earningsEnd)}
             start={parseFloat(this.state.earningsCounter.earningsStart)}
-            formattingFn={ n => this.functionsUtil.abbreviateNumber(n,decimals,maxPrecision,minPrecision)+` ${tokenName}` }
+            formattingFn={ n => this.functionsUtil.abbreviateNumber(n,decimals,maxPrecision,minPrecision) }
           >
             {({ countUpRef, start }) => (
               <span style={fieldProps.style} ref={countUpRef} />

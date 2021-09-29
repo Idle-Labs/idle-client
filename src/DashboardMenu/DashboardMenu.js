@@ -169,16 +169,14 @@ class DashboardMenu extends Component {
         {visibleLinks.map((menuLink, menuIndex) => {
           const isExternalLink = menuLink.isExternalLink;
           const LinkComponent = isExternalLink ? ExtLink : RouterLink;
-          const activeImage =
-            isDarkTheme && menuLink.imageDark
-              ? menuLink.imageDark
-              : menuLink.image;
-          const inactiveImage =
-            isDarkTheme && menuLink.imageInactiveDark
-              ? menuLink.imageInactiveDark
-              : menuLink.imageInactive;
+          const activeImage = isDarkTheme && menuLink.imageDark ? menuLink.imageDark : menuLink.image;
+          const inactiveImage = isDarkTheme && menuLink.imageInactiveDark ? menuLink.imageInactiveDark : menuLink.imageInactive;
           return (
-            <Box width={"auto"} my={[2, "8px"]} key={`menu-${menuIndex}`}>
+            <Box
+              width={"auto"}
+              my={[2, "8px"]}
+              key={`menu-${menuIndex}`}
+            >
               <LinkComponent
                 to={menuLink.route}
                 href={menuLink.route}

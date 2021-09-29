@@ -692,6 +692,7 @@ const globalConfigs = {
     }
   },
   strategies: {
+    /*
     tranches: {
       token: "DAI",
       visible: true,
@@ -716,6 +717,7 @@ const globalConfigs = {
       descLong:
         "Choose the benefits of high-yield or low-risk, while enjoying the flexibility of Tranches. This comes with auto-compounding for accrued governance tokens and no locking period."
     },
+    */
     best: {
       token: "DAI",
       visible: true,
