@@ -285,9 +285,6 @@ class Landing extends Component {
       });
     });
 
-    const strategies = this.functionsUtil.getGlobalConfig(['strategies']);
-    const availableStrategies = Object.keys(strategies).filter( s => ( strategies[s].visible ) );
-
     return (
       <Box
         height={'100vh'}
@@ -369,7 +366,7 @@ class Landing extends Component {
                       >
                         <RoundButton
                           handleClick={ (e) => {
-                            window.location.hash = this.functionsUtil.getGlobalConfig(['dashboard','baseRoute'])+'/'+availableStrategies[0];
+                            window.location.hash = this.functionsUtil.getGlobalConfig(['dashboard','baseRoute'])+'/'+this.state.visibleStrategies[0];
                           }}
                         >
                           Go to Dashboard
