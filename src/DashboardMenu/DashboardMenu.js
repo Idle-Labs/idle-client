@@ -199,33 +199,33 @@ class DashboardMenu extends Component {
                     flexDirection={"row"}
                     justifyContent={"flex-start"}
                   >
-                    {menuLink.image && (
-                      <Image
-                        mr={3}
-                        ml={2}
-                        mb={0}
-                        align={"center"}
-                        height={"1.6em"}
-                        src={menuLink.selected ? activeImage : inactiveImage}
-                      />
-                    )}
-                    {menuLink.icon && (
-                      <Icon
-                        name={menuLink.icon}
-                        color={
-                          menuLink.selected
-                            ? "deposit"
-                            : isDarkTheme
-                            ? "white"
-                            : "dark-gray"
-                        }
-                        mr={3}
-                        ml={2}
-                        mb={0}
-                        size={"1.6em"}
-                      />
-                    )}
-
+                    {
+                      menuLink.image ? (
+                        <Image
+                          mr={3}
+                          ml={2}
+                          mb={0}
+                          align={"center"}
+                          height={"1.6em"}
+                          src={menuLink.selected ? activeImage : inactiveImage}
+                        />
+                      ) : menuLink.icon && (
+                        <Icon
+                          name={menuLink.icon}
+                          color={
+                            menuLink.selected
+                              ? "menuIconActive"
+                              : isDarkTheme
+                              ? "white"
+                              : "dark-gray"
+                          }
+                          mr={3}
+                          ml={2}
+                          mb={0}
+                          size={"1.6em"}
+                        />
+                      )
+                    }
                     <Text
                       fontSize={2}
                       fontWeight={3}
