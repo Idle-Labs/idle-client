@@ -89,9 +89,10 @@ class TranchePage extends Component {
                 filteredTranchesTypes.map( trancheType => (
                   <Flex
                     mb={[3,0]}
+                    alignItems={'center'}
                     flexDirection={'column'}
                     key={`tranche_${trancheType}`}
-                    width={[1,Math.min(0.5,(1/filteredTranchesTypes.length)-0.02)]}
+                    width={[1,(1/filteredTranchesTypes.length)-0.02]}
                   >
                     <TrancheDetails
                       {...this.props}

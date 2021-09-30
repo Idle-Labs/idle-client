@@ -270,6 +270,7 @@ class TrancheDetails extends Component {
         alignItems={'center'}
         flexDirection={'column'}
         justifyContent={'center'}
+        maxWidth={['100%','45em']}
       >
         {
           !this.props.showSelectButton && (
