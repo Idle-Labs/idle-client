@@ -10,6 +10,7 @@ import Delegate from './Delegate';
 import Proposals from './Proposals';
 import Leaderboard from './Leaderboard';
 import RoundButton from '../RoundButton/RoundButton';
+import Swipeable from '../utilities/components/Swipeable';
 import DashboardCard from '../DashboardCard/DashboardCard';
 import TooltipModal from "../utilities/components/TooltipModal";
 import DashboardHeader from '../DashboardHeader/DashboardHeader';
@@ -21,7 +22,9 @@ class Dashboard extends Component {
     balance:null,
     baseRoute:null,
     modalTitle:null,
+    clickEvent:null,
     activeModal:null,
+    menuOpened:false,
     blockNumber:null,
     currentRoute:null,
     votingPeriod:null,
@@ -375,51 +378,81 @@ class Dashboard extends Component {
     await this.props.initWeb3('Infura');
   }
 
+  setMenu(menuOpened){
+    this.setState({
+      menuOpened
+    });
+  }
+
+  toggleMenu(){
+    const menuOpened = !this.state.menuOpened;
+    this.setMenu(menuOpened);
+  }
+
+  swipeCallback(eventData){
+    // console.log('swipeCallback',eventData);
+    if (eventData.dir === 'Right'){
+      this.setMenu(true);
+    } else if (eventData.dir === 'Left'){
+      this.setMenu(false);
+    }
+  }
+
   render() {
     const PageComponent = this.state.pageComponent ? this.state.pageComponent : null;
     return (
-      <Flex
-        width={'100%'}
-        position={'fixed'}
-        flexDirection={'row'}
-        className={this.props.themeMode}
-        backgroundColor={['dashboardBg','white']}
-        height={[(window.innerHeight-61)+'px','100vh']}
+      <Swipeable
+        callback={this.swipeCallback.bind(this)}
       >
         <Flex
-          bottom={0}
-          zIndex={1}
-          width={[1,1/6]}
-          flexDirection={'column'}
-          position={['fixed','relative']}
+          height={'100vh'}
+          position={'fixed'}
+          flexDirection={'row'}
+          className={this.props.themeMode}
+          backgroundColor={['dashboardBg','white']}
+          width={this.props.isMobile && this.state.menuOpened ? '180vw' : '100vw'}
+          /*onClick={ e => this.propagateClickEvent(e) }*/
         >
-          <Card
-            p={[0,3]}
-            border={0}
-            width={['100vw','auto']}
-            height={['auto','100vh']}
-            backgroundColor={'menuBg'}
-            borderColor={this.props.theme.colors.menuRightBorder}
-            borderRight={`1px solid ${this.props.theme.colors.menuRightBorder}`}
-            >
-            <DashboardMenu
-              {...this.props}
-              menu={this.state.menu}
-            />
-          </Card>
-        </Flex>
-        <Flex
-          py={3}
-          px={[3,5]}
-          mb={0}
-          width={[1,5/6]}
-          style={{
-            overflowY:'scroll',
-            overflowX:'hidden'
-          }}
-          flexDirection={'columns'}
-          backgroundColor={'dashboardBg'}
-        >
+          {
+            (!this.props.isMobile || this.state.menuOpened) && (
+              <Flex
+                bottom={0}
+                zIndex={99999}
+                width={['80vw',1/6]}
+                position={'relative'}
+                flexDirection={'column'}
+              >
+                <Card
+                  p={3}
+                  border={0}
+                  width={'auto'}
+                  height={'100vh'}
+                  backgroundColor={'menuBg'}
+                  borderColor={this.props.theme.colors.menuRightBorder}
+                  borderRight={`1px solid ${this.props.theme.colors.menuRightBorder}`}
+                  >
+                  <DashboardMenu
+                    {...this.props}
+                    menu={this.state.menu}
+                    closeMenu={e => this.setMenu(false)}
+                  />
+                </Card>
+              </Flex>
+            )
+          }
+          <Flex
+            py={3}
+            mb={0}
+            px={[3,5]}
+            width={['100vw',5/6]}
+            style={{
+              overflowY:'scroll',
+              overflowX:'hidden'
+            }}
+            height={['100vh','auto']}
+            flexDirection={'columns'}
+            backgroundColor={'dashboardBg'}
+          >
           {
             !this.props.accountInizialized || !this.props.contractsInitialized || !PageComponent ? (
               <Flex
@@ -518,6 +551,9 @@ class Dashboard extends Component {
                 flexDirection={'column'}
               >
                 <DashboardHeader
+                  menuOpened={this.state.menuOpened}
+                  clickEvent={this.state.clickEvent}
+                  toggleMenu={this.toggleMenu.bind(this)}
                   goToSection={this.goToSection.bind(this)}
                   {...this.props}
                 />
@@ -544,15 +580,16 @@ class Dashboard extends Component {
               </Flex>
             )
           }
+          </Flex>
+          <TooltipModal
+            closeModal={this.resetModal}
+            title={this.state.modalTitle}
+            content={this.state.modalContent}
+            isOpen={this.state.activeModal === 'tooltip'}
+          >
+          </TooltipModal>
         </Flex>
-        <TooltipModal
-          closeModal={this.resetModal}
-          title={this.state.modalTitle}
-          content={this.state.modalContent}
-          isOpen={this.state.activeModal === 'tooltip'}
-        >
-        </TooltipModal>
-      </Flex>
+      </Swipeable>
     );
   }
 }
