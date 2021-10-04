@@ -1,19 +1,19 @@
-import React, { Component } from 'react';
-import FlexLoader from '../FlexLoader/FlexLoader';
-import { Flex, Card, Icon, Text } from 'rimble-ui';
-import GovernanceUtil from '../utilities/GovernanceUtil';
-import DashboardMenu from '../DashboardMenu/DashboardMenu';
+import React, { Component } from "react";
+import FlexLoader from "../FlexLoader/FlexLoader";
+import { Flex, Card, Icon, Text } from "rimble-ui";
+import GovernanceUtil from "../utilities/GovernanceUtil";
+import DashboardMenu from "../DashboardMenu/DashboardMenu";
 
 // Import page components
-import Overview from './Overview';
-import Delegate from './Delegate';
-import Proposals from './Proposals';
-import Leaderboard from './Leaderboard';
-import RoundButton from '../RoundButton/RoundButton';
+import Overview from "./Overview";
+import Delegate from "./Delegate";
+import Proposals from "./Proposals";
+import Leaderboard from "./Leaderboard";
+import RoundButton from "../RoundButton/RoundButton";
 import Swipeable from '../utilities/components/Swipeable';
-import DashboardCard from '../DashboardCard/DashboardCard';
+import DashboardCard from "../DashboardCard/DashboardCard";
 import TooltipModal from "../utilities/components/TooltipModal";
-import DashboardHeader from '../DashboardHeader/DashboardHeader';
+import DashboardHeader from "../DashboardHeader/DashboardHeader";
 
 class Dashboard extends Component {
   state = {
@@ -45,8 +45,8 @@ class Dashboard extends Component {
   functionsUtil = null;
   governanceUtil = null;
 
-  loadUtils(){
-    if (this.governanceUtil){
+  loadUtils() {
+    if (this.governanceUtil) {
       this.governanceUtil.setProps(this.props);
     } else {
       this.governanceUtil = new GovernanceUtil(this.props);
@@ -58,79 +58,92 @@ class Dashboard extends Component {
 
   async loadMenu() {
     const menu = [];
-    const baseRoute = this.functionsUtil.getGlobalConfig(['governance','baseRoute']);
+    const baseRoute = this.functionsUtil.getGlobalConfig([
+      "governance",
+      "baseRoute"
+    ]);
+    const extraicons = this.functionsUtil.getGlobalConfig(["extraicons"]);
 
     // Add Proposals
-    menu.push(
-      {
-        submenu:[],
-        selected:true,
-        route:baseRoute,
-        icon:'Dashboard',
-        label:'Overview',
-        color:'dark-gray',
-        component:Overview,
-        bgColor:this.props.theme.colors.primary,
-      }
-    );
+    menu.push({
+      submenu: [],
+      selected: true,
+      route: baseRoute,
+
+      label: "Overview",
+      color: "dark-gray",
+      component: Overview,
+      bgColor: this.props.theme.colors.primary,
+      image: extraicons["overview"].icon,
+      imageDark: extraicons["overview"].iconDark,
+      imageInactive: extraicons["overview"].iconInactive,
+      imageInactiveDark: extraicons["overview"].iconInactiveDark
+    });
 
     // Add Proposals
-    menu.push(
-      {
-        submenu:[],
-        selected:false,
-        label:'Proposals',
-        bgColor:'#00acff',
-        color:'dark-gray',
-        icon:'LightbulbOutline',
-        component:Proposals,
-        route:`${baseRoute}/proposals`,
-      }
-    );
+    menu.push({
+      submenu: [],
+      selected: false,
+      label: "Proposals",
+      bgColor: "#00acff",
+      color: "dark-gray",
+      component: Proposals,
+      route: `${baseRoute}/proposals`,
+      image: extraicons["proposals"].icon,
+      imageDark: extraicons["proposals"].iconDark,
+      imageInactive: extraicons["proposals"].iconInactive,
+      imageInactiveDark: extraicons["proposals"].iconInactiveDark
+    });
+
+    // Add Leaderboard
+    menu.push({
+      submenu: [],
+      selected: false,
+      bgColor: "#ff0000",
+      color: "dark-gray",
+      label: "Leaderboard",
+      component: Leaderboard,
+
+      route: `${baseRoute}/leaderboard`,
+      image: extraicons["leaderboard"].icon,
+      imageDark: extraicons["leaderboard"].iconDark,
+      imageInactive: extraicons["leaderboard"].iconInactive,
+      imageInactiveDark: extraicons["leaderboard"].iconInactiveDark
+    });
 
     // Add tools
-    menu.push(
-      {
-        submenu:[],
-        selected:false,
-        bgColor:'#ff0000',
-        color:'dark-gray',
-        label:'Leaderboard',
-        component:Leaderboard,
-        icon:'FormatListNumbered',
-        route:`${baseRoute}/leaderboard`,
-      }
-    );
+    menu.push({
+      submenu: [],
+      selected: false,
+      label: "Delegate",
+      color: "dark-gray",
+      bgColor: "#ff0000",
+      component: Delegate,
 
-    // Add tools
-    menu.push(
-      {
-        submenu:[],
-        selected:false,
-        label:'Delegate',
-        color:'dark-gray',
-        bgColor:'#ff0000',
-        component:Delegate,
-        icon:'CompareArrows',
-        route:`${baseRoute}/delegate`,
-      }
-    );
+      route: `${baseRoute}/delegate`,
+      image: extraicons["delegate"].icon,
+      imageDark: extraicons["delegate"].iconDark,
+      imageInactive: extraicons["delegate"].iconInactive,
+      imageInactiveDark: extraicons["delegate"].iconInactiveDark
+    });
 
     // Add Forum
-    menu.push(
-      {
-        submenu:[],
-        icon:'Forum',
-        mobile:false,
-        label:'Forum',
-        selected:false,
-        component:null,
-        color:'dark-gray',
-        bgColor:'#ff0000',
-        isExternalLink:true,
-        route:this.functionsUtil.getGlobalConfig(['forumURL'])
-      }
-    );
+    menu.push({
+      submenu: [],
+
+      mobile: false,
+      label: "Forum",
+      selected: false,
+      component: null,
+      color: "dark-gray",
+      bgColor: "#ff0000",
+      isExternalLink: true,
+      route: this.functionsUtil.getGlobalConfig(["forumURL"]),
+      image: extraicons["forum"].icon,
+      imageDark: extraicons["forum"].iconDark,
+      imageInactive: extraicons["forum"].iconInactive,
+      imageInactiveDark: extraicons["forum"].iconInactiveDark
+    });
 
     await this.setState({
       menu,
@@ -142,31 +155,36 @@ class Dashboard extends Component {
     this.setState({
       activeModal: null
     });
-  }
+  };
 
-  openTooltipModal = (modalTitle,modalContent) => {
+  openTooltipModal = (modalTitle, modalContent) => {
     this.functionsUtil.sendGoogleAnalyticsEvent({
-      eventCategory: 'UI',
+      eventCategory: "UI",
       eventAction: modalTitle,
-      eventLabel: 'TooltipModal'
+      eventLabel: "TooltipModal"
     });
 
-    this.setState({
-      modalTitle,
-      modalContent
-    },() => {
-      this.setActiveModal('tooltip');
-    })
-  }
+    this.setState(
+      {
+        modalTitle,
+        modalContent
+      },
+      () => {
+        this.setActiveModal("tooltip");
+      }
+    );
+  };
 
-  setActiveModal = (activeModal) => {
+  setActiveModal = activeModal => {
     this.setState({
       activeModal
     });
-  }
+  };
 
   async loadParams() {
-    const { match: { params } } = this.props;
+    const {
+      match: { params }
+    } = this.props;
 
     const baseRoute = this.state.baseRoute;
     const currentRoute = window.location.hash.substr(1);
@@ -179,25 +197,29 @@ class Dashboard extends Component {
     let selectedSection = null;
     let selectedSubsection = null;
 
-    menu.forEach( m => {
+    menu.forEach(m => {
       m.selected = false;
-      const sectionRoute = baseRoute+'/'+params.section;
-      if (currentRoute.toLowerCase() === m.route.toLowerCase() || ( !m.submenu.length && m.route.toLowerCase() === sectionRoute.toLowerCase() )){
+      const sectionRoute = baseRoute + "/" + params.section;
+      if (
+        currentRoute.toLowerCase() === m.route.toLowerCase() ||
+        (!m.submenu.length &&
+          m.route.toLowerCase() === sectionRoute.toLowerCase())
+      ) {
         m.selected = true;
-        if (pageComponent === null){
+        if (pageComponent === null) {
           pageComponent = m.component;
         }
       } else if (m.submenu.length) {
         m.submenu.forEach(subm => {
           subm.selected = false;
-          const submRoute = m.route+'/'+subm.route;
-          if (submRoute.toLowerCase() === currentRoute.toLowerCase()){
+          const submRoute = m.route + "/" + subm.route;
+          if (submRoute.toLowerCase() === currentRoute.toLowerCase()) {
             m.selected = true;
             subm.selected = true;
 
             // Set component, if null use parent
-            if (pageComponent === null){
-              if (subm.component){
+            if (pageComponent === null) {
+              if (subm.component) {
                 pageComponent = subm.component;
               } else {
                 pageComponent = m.component;
@@ -206,22 +228,21 @@ class Dashboard extends Component {
           }
 
           // Set selected subsection
-          if (subm.selected){
+          if (subm.selected) {
             selectedSubsection = subm;
           }
-
         });
       }
 
       // Set selected section
-      if (m.selected){
+      if (m.selected) {
         selectedSection = m;
       }
     });
 
     // Exit if no strategy and token selected
-    if (!pageComponent){
-      return this.goToSection('/',false);
+    if (!pageComponent) {
+      return this.goToSection("/", false);
     }
 
     // Send GA pageview
@@ -239,14 +260,14 @@ class Dashboard extends Component {
     });
   }
 
-  componentWillUnmount(){
-    if (this.timeoutId){
+  componentWillUnmount() {
+    if (this.timeoutId) {
       window.clearTimeout(this.timeoutId);
     }
   }
 
   async componentWillMount() {
-    this.props.setCurrentSection('governance');
+    this.props.setCurrentSection("governance");
     this.loadUtils();
 
     // const governanceEnabled = this.functionsUtil.getGlobalConfig(['governance','enabled']);
@@ -260,12 +281,12 @@ class Dashboard extends Component {
 
   async componentDidMount() {
     this.timeoutId = window.setTimeout(() => {
-      if (!this.props.accountInizialized || !this.props.contractsInitialized){
+      if (!this.props.accountInizialized || !this.props.contractsInitialized) {
         this.setState({
-          showResetButton:true
+          showResetButton: true
         });
       }
-    },20000);
+    }, 20000);
 
     /*
     if (!this.props.web3){
@@ -283,53 +304,60 @@ class Dashboard extends Component {
     this.loadData();
   }
 
-  async componentDidUpdate(prevProps,prevState) {
-
+  async componentDidUpdate(prevProps, prevState) {
     this.loadUtils();
 
     const prevParams = prevProps.match.params;
     const params = this.props.match.params;
 
-    if (JSON.stringify(prevParams) !== JSON.stringify(params)){
-      await this.setState({
-        pageComponent:null
-      }, () => {
-        this.loadParams();
-      });
+    if (JSON.stringify(prevParams) !== JSON.stringify(params)) {
+      await this.setState(
+        {
+          pageComponent: null
+        },
+        () => {
+          this.loadParams();
+        }
+      );
     }
 
     const accountChanged = prevProps.account !== this.props.account;
-    const accountInizialized = this.props.accountInizialized && prevProps.accountInizialized !== this.props.accountInizialized;
-    const contractsInitialized = this.props.contractsInitialized && prevProps.contractsInitialized !== this.props.contractsInitialized;
+    const accountInizialized =
+      this.props.accountInizialized &&
+      prevProps.accountInizialized !== this.props.accountInizialized;
+    const contractsInitialized =
+      this.props.contractsInitialized &&
+      prevProps.contractsInitialized !== this.props.contractsInitialized;
 
-    if (accountChanged || accountInizialized || contractsInitialized){
+    if (accountChanged || accountInizialized || contractsInitialized) {
       this.loadData();
     }
   }
 
-  goToSection(section,isGovernance=true){
-
+  goToSection(section, isGovernance = true) {
     // Remove dashboard route
-    if (isGovernance){
-      section = section.replace(this.state.baseRoute+'/','');
+    if (isGovernance) {
+      section = section.replace(this.state.baseRoute + "/", "");
     }
 
-    const newRoute = (isGovernance ? this.state.baseRoute+(section.length>0 ? '/'+section : '') : section).replace(/[/]+$/,'');
+    const newRoute = (isGovernance
+      ? this.state.baseRoute + (section.length > 0 ? "/" + section : "")
+      : section
+    ).replace(/[/]+$/, "");
     window.location.hash = newRoute;
 
     // Send GA event
     this.functionsUtil.sendGoogleAnalyticsEvent({
-      eventCategory: 'UI',
+      eventCategory: "UI",
       eventLabel: newRoute,
-      eventAction: 'goToSection'
+      eventAction: "goToSection"
     });
 
     window.scrollTo(0, 0);
   }
 
-  async loadData(){
-
-    if (!this.props.web3 || !this.props.contractsInitialized){
+  async loadData() {
+    if (!this.props.web3 || !this.props.contractsInitialized) {
       return false;
     }
 
@@ -338,14 +366,12 @@ class Dashboard extends Component {
       blockNumber,
       votingPeriod,
       timelockDelay,
-      {
-        proposalThreshold, proposalMaxOperations
-      }
+      { proposalThreshold, proposalMaxOperations }
     ] = await Promise.all([
       this.functionsUtil.getBlockNumber(),
       this.governanceUtil.getVotingPeriod(),
       this.governanceUtil.getTimelockDelay(),
-      this.governanceUtil.getProposalParams(),
+      this.governanceUtil.getProposalParams()
     ]);
 
     newState.blockNumber = blockNumber;
@@ -354,12 +380,8 @@ class Dashboard extends Component {
     newState.proposalThreshold = proposalThreshold;
     newState.proposalMaxOperations = proposalMaxOperations;
 
-    if (this.props.account){
-      const [
-        votes,
-        balance,
-        currentDelegate
-      ] = await Promise.all([
+    if (this.props.account) {
+      const [votes, balance, currentDelegate] = await Promise.all([
         this.governanceUtil.getCurrentVotes(this.props.account),
         this.governanceUtil.getTokensBalance(this.props.account),
         this.governanceUtil.getCurrentDelegate(this.props.account)
@@ -374,9 +396,9 @@ class Dashboard extends Component {
   }
 
   logout = async () => {
-    this.props.setConnector('Infura','Infura');
-    await this.props.initWeb3('Infura');
-  }
+    this.props.setConnector("Infura", "Infura");
+    await this.props.initWeb3("Infura");
+  };
 
   setMenu(menuOpened){
     this.setState({
@@ -399,7 +421,9 @@ class Dashboard extends Component {
   }
 
   render() {
-    const PageComponent = this.state.pageComponent ? this.state.pageComponent : null;
+    const PageComponent = this.state.pageComponent
+      ? this.state.pageComponent
+      : null;
     return (
       <Swipeable
         callback={this.swipeCallback.bind(this)}
@@ -457,99 +481,95 @@ class Dashboard extends Component {
             !this.props.accountInizialized || !this.props.contractsInitialized || !PageComponent ? (
               <Flex
                 width={1}
-                minHeight={'50vg'}
-                alignItems={'center'}
-                flexDirection={'column'}
-                justifyContent={'center'}
+                minHeight={"50vg"}
+                alignItems={"center"}
+                flexDirection={"column"}
+                justifyContent={"center"}
               >
-                {
-                  !this.props.network.isCorrectNetwork ? (
-                    <DashboardCard
-                      cardProps={{
-                        p:3,
-                        mt:3,
-                        width:[1,0.35]
-                      }}
-                    >
-                      <Flex
-                        alignItems={'center'}
-                        flexDirection={'column'}
+                {!this.props.network.isCorrectNetwork ? (
+                  <DashboardCard
+                    cardProps={{
+                      p: 3,
+                      mt: 3,
+                      width: [1, 0.35]
+                    }}
+                  >
+                    <Flex alignItems={"center"} flexDirection={"column"}>
+                      <Icon size={"2.3em"} name={"Warning"} color={"cellText"} />
+                      <Text
+                        mt={2}
+                        fontSize={2}
+                        color={"cellText"}
+                        textAlign={"center"}
                       >
-                        <Icon
-                          size={'2.3em'}
-                          name={'Warning'}
-                          color={'cellText'}
-                        />
-                        <Text
-                          mt={2}
-                          fontSize={2}
-                          color={'cellText'}
-                          textAlign={'center'}
-                        >
-                          The <strong>{this.functionsUtil.capitalize(this.props.network.current.name)} Network</strong> is not supported, please switch to the correct network.
-                        </Text>
-                      </Flex>
-                    </DashboardCard>
-                  ) : !this.state.showResetButton ? (
-                    <FlexLoader
-                      textProps={{
-                        textSize:4,
-                        fontWeight:2
-                      }}
-                      loaderProps={{
-                        mb:3,
-                        size:'40px'
-                      }}
-                      flexProps={{
-                        my:3,
-                        flexDirection:'column'
-                      }}
-                      text={ !this.props.accountInizialized ? 'Loading account...' : ( !this.props.contractsInitialized ? 'Loading contracts...' : 'Loading assets...' )}
-                    />
-                  ) : (
-                    <DashboardCard
-                      cardProps={{
-                        p:3,
-                        mt:3,
-                        width:[1,0.35]
-                      }}
-                    >
-                      <Flex
-                        alignItems={'center'}
-                        flexDirection={'column'}
+                        The{" "}
+                        <strong>
+                          {this.functionsUtil.capitalize(
+                            this.props.network.current.name
+                          )}{" "}
+                          Network
+                      </strong>{" "}
+                        is not supported, please switch to the correct network.
+                    </Text>
+                    </Flex>
+                  </DashboardCard>
+                ) : !this.state.showResetButton ? (
+                  <FlexLoader
+                    textProps={{
+                      textSize: 4,
+                      fontWeight: 2
+                    }}
+                    loaderProps={{
+                      mb: 3,
+                      size: "40px"
+                    }}
+                    flexProps={{
+                      my: 3,
+                      flexDirection: "column"
+                    }}
+                    text={
+                      !this.props.accountInizialized
+                        ? "Loading account..."
+                        : !this.props.contractsInitialized
+                          ? "Loading contracts..."
+                          : "Loading assets..."
+                    }
+                  />
+                ) : (
+                      <DashboardCard
+                        cardProps={{
+                          p: 3,
+                          mt: 3,
+                          width: [1, 0.35]
+                        }}
                       >
-                        <Icon
-                          size={'2.3em'}
-                          name={'Warning'}
-                          color={'cellText'}
-                        />
-                        <Text
-                          mt={2}
-                          fontSize={2}
-                          color={'cellText'}
-                          textAlign={'center'}
-                        >
-                          Idle can't connect to your wallet!<br />Make sure that your wallet is unlocked and try again.
-                        </Text>
-                        <RoundButton
-                          buttonProps={{
-                            mt:3,
-                            width:[1,1/2]
-                          }}
-                          handleClick={this.logout.bind(this)}
-                        >
-                          Logout
-                        </RoundButton>
-                      </Flex>
-                    </DashboardCard>
-                  )
-                }
+                        <Flex alignItems={"center"} flexDirection={"column"}>
+                          <Icon size={"2.3em"} name={"Warning"} color={"cellText"} />
+                          <Text
+                            mt={2}
+                            fontSize={2}
+                            color={"cellText"}
+                            textAlign={"center"}
+                          >
+                            Idle can't connect to your wallet!
+                      <br />
+                            Make sure that your wallet is unlocked and try again.
+                    </Text>
+                          <RoundButton
+                            buttonProps={{
+                              mt: 3,
+                              width: [1, 1 / 2]
+                            }}
+                            handleClick={this.logout.bind(this)}
+                          >
+                            Logout
+                    </RoundButton>
+                        </Flex>
+                      </DashboardCard>
+                    )}
               </Flex>
             ) : (
-              <Flex
-                width={1}
-                flexDirection={'column'}
-              >
+              <Flex width={1} flexDirection={"column"}>
                 <DashboardHeader
                   menuOpened={this.state.menuOpened}
                   clickEvent={this.state.clickEvent}
@@ -557,26 +577,25 @@ class Dashboard extends Component {
                   goToSection={this.goToSection.bind(this)}
                   {...this.props}
                 />
-                {
-                  PageComponent &&
-                    <PageComponent
-                      {...this.props}
-                      votes={this.state.votes}
-                      balance={this.state.balance}
-                      urlParams={this.state.params}
-                      blockNumber={this.state.blockNumber}
-                      votingPeriod={this.state.votingPeriod}
-                      loadUserData={this.loadData.bind(this)}
-                      timelockDelay={this.state.timelockDelay}
-                      goToSection={this.goToSection.bind(this)}
-                      currentDelegate={this.state.currentDelegate}
-                      selectedSection={this.state.selectedSection}
-                      proposalThreshold={this.state.proposalThreshold}
-                      selectedSubsection={this.state.selectedSubsection}
-                      openTooltipModal={this.openTooltipModal.bind(this)}
-                      proposalMaxOperations={this.state.proposalMaxOperations}
-                      />
-                }
+                {PageComponent && (
+                  <PageComponent
+                    {...this.props}
+                    votes={this.state.votes}
+                    balance={this.state.balance}
+                    urlParams={this.state.params}
+                    blockNumber={this.state.blockNumber}
+                    votingPeriod={this.state.votingPeriod}
+                    loadUserData={this.loadData.bind(this)}
+                    timelockDelay={this.state.timelockDelay}
+                    goToSection={this.goToSection.bind(this)}
+                    currentDelegate={this.state.currentDelegate}
+                    selectedSection={this.state.selectedSection}
+                    proposalThreshold={this.state.proposalThreshold}
+                    selectedSubsection={this.state.selectedSubsection}
+                    openTooltipModal={this.openTooltipModal.bind(this)}
+                    proposalMaxOperations={this.state.proposalMaxOperations}
+                  />
+                )}
               </Flex>
             )
           }
