@@ -511,6 +511,10 @@ const globalConfigs = {
         // address:'0xBbD7cBFA79faee899Eaf900F13C9065bF03B1A74' // Goerli
         address:'0xA0c68C638235ee32657e8f720a23ceC1bFc77C77' // Mainnet
       },
+      ProxyFactory: {
+        abi: MinimalInitializableProxyFactory,
+        address: "0x91baced76e3e327ba7850ef82a7a8251f6e43fb8"
+      },
       LockedIDLE:{
         abi:LockedIDLE,
         address:'0xF241a0151841AE2E6ea750D50C5794b5EDC31D99'
@@ -955,21 +959,6 @@ const globalConfigs = {
         decimals:18,
         enabled:true,
         address:'0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0'
-      },
-      USD:{
-        enabled:true,
-        color:{
-          hex:'#85bb65',
-          rgb:[133, 187, 101],
-          hsl:['98', '39%', '56%']
-        },
-        chart: {
-          labelTextColorModifiers: ["darker", 2]
-        },
-        startTimestamp: "2020-02-11",
-        address: "0x6b175474e89094c44da98b954eedeac495271d0f",
-        performanceTooltip:
-          "APR is calculated proportionally to historical allocations of each lending protocol in the selected time period. This pool has 1% unlent reserve to help reduce gas costs."
       },
       USD: {
         enabled: true,
@@ -1618,6 +1607,7 @@ const globalConfigs = {
       label: "Staking",
       route: "staking",
       subComponent: Staking,
+      availableNetworks:[1],
       desc: "Stake your IDLE / Sushi Swap LP tokens and earn $IDLE rewards",
       props: {
         availableTokens: {
@@ -1750,6 +1740,7 @@ const globalConfigs = {
       visible: true,
       icon: "CloudUpload",
       label: "B2B Vesting",
+      availableNetworks:[1],
       route: "b2b-vesting-contract",
       subComponent: DeployB2BVesting,
       desc:'Deploy/Deposit/Claim for B2B Vesting Contracts<br /><small style="color:#ff9900">(only for partners that joined the B2B Affiliate program)</small>',
@@ -1924,84 +1915,6 @@ const globalConfigs = {
             }
           }
           */
-        }
-      }
-    },
-    stake:{
-      enabled:true,
-      icon:'Layers',
-      label:'Staking',
-      route:'staking',
-      subComponent:Staking,
-      availableNetworks:[1],
-      desc:'Stake your IDLE / Sushi Swap LP tokens and earn $IDLE rewards',
-      props:{
-        availableTokens:{
-          IDLE:{
-            component:IdleStaking,
-            contract:{
-              abi:stkIDLE,
-              decimals:18,
-              name:'stkIDLE',
-              fromBlock:12561464,
-              rewardToken:'IDLE',
-              address:'0xaac13a116ea7016689993193fce4badc8038136f' // Mainnet
-            },
-            feeDistributor:{
-              fromBlock:12649361,
-              abi:StakingFeeDistributor,
-              name:'StakingFeeDistributor',
-              address:'0xbabb82456c013fd7e3f25857e0729de8207f80e2' // Mainnet
-            },
-            abi:IDLE,
-            name:'IDLE',
-            token:'IDLE',
-            decimals:18,
-            enabled:true,
-            label:'IDLE Token',
-            icon:'images/tokens/IDLE.png',
-            address:'0x875773784Af8135eA0ef43b5a374AaD105c5D39e', // Mainnet
-            poolLink:'https://etherscan.com/address/0x875773784Af8135eA0ef43b5a374AaD105c5D39e',
-          },
-          SLP:{
-            component:LpStaking,
-            contract:{
-              decimals:24,
-              name:'LpStaking',
-              maxMultiplier:3,
-              abi:LpStakingAbi,
-              maxBonusDays:120,
-              rewardToken:'IDLE',
-              address:'0xcc0b9f7ed0e6bc7c2e69dbd247e8420f29aeb48d' // Mainnet
-            },
-            name:'SLP',
-            token:'SLP',
-            decimals:18,
-            enabled:true,
-            abi:SushiLiquidityPool,
-            label:'SushiSwap IDLE/ETH LP Token',
-            icon:'images/protocols/sushiswap.png',
-            address:'0xa7f11e026a0af768d285360a855f2bded3047530', // Mainnet
-            poolLink:'https://analytics.sushi.com/pairs/0xa7f11e026a0af768d285360a855f2bded3047530',
-          }
-        }
-      }
-    },
-    b2bVesting:{
-      enabled:true,
-      visible:true,
-      icon:'CloudUpload',
-      label:'B2B Vesting',
-      availableNetworks:[1],
-      route:'b2b-vesting-contract',
-      subComponent:DeployB2BVesting,
-      desc:'Deploy/Deposit/Claim for B2B Vesting Contracts<br /><small style="color:#ff9900">(only for partners that joined the B2B Affiliate program)</small>',
-      props:{
-        contracts:{
-          vesterImplementation:{
-            abi:B2BVester,
-            address:'0x3024656ae91d7bf724f613c314bc56030ba2344c'
-          }
         }
       }
     },

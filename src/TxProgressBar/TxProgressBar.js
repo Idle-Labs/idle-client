@@ -439,7 +439,7 @@ class TxProgressBar extends Component {
                   textAlign={'center'}
                   color={this.props.textColor ? this.props.textColor : 'cellText'}
                 >
-                  View in Etherscan
+                  View in {this.functionsUtil.capitalize(currentNetwork.explorer)}
                 </Text>
                 <Icon
                   ml={1}

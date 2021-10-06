@@ -287,8 +287,6 @@ class StrategyPage extends Component {
   render(){
     const viewOnly = this.props.connectorName === 'custom';
     const currentNetwork = this.functionsUtil.getRequiredNetwork();
-    const currentNetworkId = currentNetwork.id;
-
     const govTokens = this.functionsUtil.getGlobalConfig(['govTokens']);
     const apyLong = this.functionsUtil.getGlobalConfig(['messages','apyLong']);
     const yieldFarming = this.functionsUtil.getGlobalConfig(['messages','yieldFarming']);
@@ -753,7 +751,7 @@ class StrategyPage extends Component {
                 )
               }
               {
-                nexusMutualConfig.enabled && this.state.portfolio && this.state.portfolio.totalBalance.gt(0) && (
+                nexusMutualConfig.enabled && nexusMutualConfig.availableNetworks.includes(currentNetwork.id) && this.state.portfolio && this.state.portfolio.totalBalance.gt(0) && (
                   <Flex
                     width={1}
                     id={'active-coverages'}

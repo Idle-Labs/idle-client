@@ -163,7 +163,6 @@ class AccountModal extends React.Component {
       });
 
       const showTools = ['addFunds','tokenSwap'];
-      const currentNetworkId = this.functionsUtil.getRequiredNetworkId();
 
       return (
         <Modal isOpen={this.props.isOpen}>

@@ -11,7 +11,6 @@ import ENS, { getEnsAddress } from '@ensdomains/ensjs';
 import IAaveIncentivesController from '../abis/aave/IAaveIncentivesController.json';
 
 const ethereumjsABI = require('ethereumjs-abi');
-const env = process.env;
 
 window.profiler = {};
 
@@ -1349,7 +1348,7 @@ class FunctionsUtil {
               });
 
               // Save covalent txs
-              this.saveFetchedTxs(baseEndpoint,baseTxs.data.data.items);
+              this.saveFetchedTransactions(baseEndpoint,baseTxs.data.data.items);
             }
           }
         }
@@ -1420,29 +1419,30 @@ class FunctionsUtil {
     // Check if firstBlockNumber is less that firstIdleBlockNumber
     const firstIdleBlockNumber = this.getGlobalConfig(['network','firstBlockNumber']);
     firstBlockNumber = Math.max(firstIdleBlockNumber,firstBlockNumber);
+
     const requiredNetwork = this.getRequiredNetworkId();
     const etherscanInfo = this.getGlobalConfig(['network','providers','etherscan']);
 
     let results = [];
-    let etherscanBaseTxs = null;
-    let etherscanBaseEndpoint = null;
+    let baseTxs = null;
+    let baseEndpoint = null;
 
     // Check if etherscan is enabled for the required network
     if (etherscanInfo.enabled && etherscanInfo.endpoints[requiredNetwork]){
       const etherscanApiUrl = etherscanInfo.endpoints[requiredNetwork];
 
       // Get base endpoint cached transactions
-      etherscanBaseEndpoint = `${etherscanApiUrl}?strategy=${selectedStrategy}&apikey=${env.REACT_APP_ETHERSCAN_KEY}&module=account&action=tokentx&address=${account}&startblock=${firstIdleBlockNumber}&endblock=${endBlockNumber}&sort=asc`;
-      etherscanBaseTxs = this.getCachedRequest(etherscanBaseEndpoint);
+      baseEndpoint = `${etherscanApiUrl}?strategy=${selectedStrategy}&apikey=${etherscanInfo.key}&module=account&action=tokentx&address=${account}&startblock=${firstIdleBlockNumber}&endblock=${endBlockNumber}&sort=asc`;
+      baseTxs = this.getCachedRequest(baseEndpoint);
 
       if (debug){
-        console.log('DEBUG - CACHED - etherscanBaseTxs',etherscanBaseTxs);
+        console.log('DEBUG - CACHED - baseTxs',baseTxs);
       }
 
       // Check if the latest blockNumber is actually the latest one
-      if (etherscanBaseTxs && etherscanBaseTxs.data.result && Object.values(etherscanBaseTxs.data.result).length){
+      if (baseTxs && baseTxs.data.result && Object.values(baseTxs.data.result).length){
 
-        const lastCachedTx = Object.values(etherscanBaseTxs.data.result).pop();
+        const lastCachedTx = Object.values(baseTxs.data.result).pop();
         const lastCachedBlockNumber = lastCachedTx && lastCachedTx.blockNumber ? parseInt(lastCachedTx.blockNumber)+1 : firstBlockNumber;
 
         const etherscanEndpointLastBlock = `${etherscanApiUrl}?strategy=${selectedStrategy}&module=account&action=tokentx&address=${account}&startblock=${lastCachedBlockNumber}&endblock=${endBlockNumber}&sort=asc`;
@@ -1451,7 +1451,7 @@ class FunctionsUtil {
 
         if (latestTxs && latestTxs.data.result && latestTxs.data.result.length){
           
-          latestTxs = await this.filterEtherscanTxs(latestTxs.data.result,enabledTokens,true,false);
+          latestTxs = await this.filterEthereumTxs(latestTxs.data.result,enabledTokens,true,false);
 
           if (latestTxs && Object.values(latestTxs).length){
 
@@ -1460,24 +1460,24 @@ class FunctionsUtil {
 
             // If real tx blockNumber differs from last blockNumber
             if (lastRealBlockNumber>=lastCachedBlockNumber){
-              // Merge latest Txs with etherscanBaseTxs
+              // Merge latest Txs with baseTxs
               Object.values(latestTxs).forEach((tx) => {
-                const txFound = Object.keys(etherscanBaseTxs.data.result).includes(tx.hashKey);
+                const txFound = Object.keys(baseTxs.data.result).includes(tx.hashKey);
                 if (!txFound){
-                  etherscanBaseTxs.data.result[tx.hashKey] = tx;
+                  baseTxs.data.result[tx.hashKey] = tx;
                 }
               });
 
               // Save etherscan txs
-              this.saveEtherscanTxs(etherscanBaseEndpoint,etherscanBaseTxs.data.result);
+              this.saveFetchedTransactions(baseEndpoint,baseTxs.data.result);
             }
           }
         }
       } else {
-        etherscanBaseTxs = null;
+        baseTxs = null;
       }
 
-      let txs = etherscanBaseTxs;
+      let txs = baseTxs;
 
       if (debug){
         console.log('DEBUG - txs',txs);
@@ -1485,19 +1485,19 @@ class FunctionsUtil {
 
       if (!txs){
         // Make request
-        txs = await this.makeRequest(etherscanBaseEndpoint);
+        txs = await this.makeRequest(baseEndpoint);
 
-        // console.log('makeRequest 1',account,etherscanBaseEndpoint,txs,txs.data.message,txs.data.status,parseInt(txs.data.status));
+        // console.log('makeRequest 1',account,baseEndpoint,txs,txs.data.message,txs.data.status,parseInt(txs.data.status));
 
         if (!txs || !txs.data || parseInt(txs.data.status)===0){
           let requestCount = 0;
           let requestStatus = false;
           do {
             await this.asyncTimeout(500);
-            txs = await this.makeRequest(etherscanBaseEndpoint);
+            txs = await this.makeRequest(baseEndpoint);
             requestCount++;
             requestStatus = txs && txs.data ? parseInt(txs.data.status) : false;
-            // console.log('makeRequest '+(requestCount+1),account,etherscanBaseEndpoint,txs,txs.data.message,txs.data.status,parseInt(txs.data.status));
+            // console.log('makeRequest '+(requestCount+1),account,baseEndpoint,txs,txs.data.message,txs.data.status,parseInt(txs.data.status));
           } while (requestCount<5 && !requestStatus);
         }
 
@@ -1505,7 +1505,7 @@ class FunctionsUtil {
         if (txs && txs.data && parseInt(txs.data.status)>0){
           const timestamp = parseInt(Date.now()/1000);
           const cachedRequests = this.getCachedDataWithLocalStorage('cachedRequests',{});
-          cachedRequests[etherscanBaseEndpoint] = {
+          cachedRequests[baseEndpoint] = {
             data:txs,
             timestamp
           };
@@ -1522,8 +1522,8 @@ class FunctionsUtil {
 
     return {
       results,
-      etherscanBaseTxs,
-      etherscanBaseEndpoint
+      baseTxs,
+      baseEndpoint
     };
   }
   getCurveTxs = async (account=false,firstBlockNumber=0,endBlockNumber='latest',enabledTokens=[]) => {
@@ -1531,7 +1531,7 @@ class FunctionsUtil {
     // results = results ? Object.values(results) : [];
     return this.filterCurveTxs(results,enabledTokens);
   }
-  saveEtherscanTxs = (endpoint,txs) => {
+  saveFetchedTransactions = (endpoint,txs) => {
     const txsToStore = {};
     Object.keys(txs).forEach(txHash => {
       const tx = txs[txHash];
@@ -1549,34 +1549,58 @@ class FunctionsUtil {
     this.saveCachedRequest(endpoint,false,cachedRequest);
   }
   getEtherscanTxs = async (account=false,firstBlockNumber=0,endBlockNumber='latest',enabledTokens=[],debug=false) => {
-    const {
-      results,
-      etherscanBaseTxs,
-      etherscanBaseEndpoint
-    } = await this.getEtherscanBaseTxs(account,firstBlockNumber,endBlockNumber,enabledTokens,debug);
+
+    let resultData = null;
+    const currentNetwork = this.getCurrentNetwork();
+
+    switch (currentNetwork.explorer){
+      case 'polygon':
+        resultData = await this.getPolygonBaseTxs(account,enabledTokens,debug);
+      break;
+      case 'etherscan':
+      default:
+        resultData = await this.getEtherscanBaseTxs(account,firstBlockNumber,endBlockNumber,enabledTokens,debug);
+      break;
+    }
 
     // Initialize prevTxs
-    let etherscanTxs = {};
-    if (etherscanBaseTxs){
-      // Filter txs for token
-      etherscanTxs = await this.processStoredTxs(results,enabledTokens);
-    } else {
-      const allAvailableTokens = Object.keys(this.props.availableTokens);
-      // Save base endpoint with all available tokens
-      etherscanTxs = await this.filterEtherscanTxs(results,allAvailableTokens);
+    let txs = {};
 
-      // Store filtered txs
-      if (etherscanTxs && Object.keys(etherscanTxs).length){
-        this.saveEtherscanTxs(etherscanBaseEndpoint,etherscanTxs);
+    if (resultData){
+      let {
+        results,
+        baseTxs,
+        baseEndpoint
+      } = resultData;
+
+      if (baseTxs){
+        // Filter txs for token
+        txs = await this.processStoredTxs(results,enabledTokens);
+      } else {
+        const allAvailableTokens = Object.keys(this.props.availableTokens);
+        // Save base endpoint with all available tokens
+        switch (currentNetwork.explorer){
+          case 'polygon':
+            txs = await this.filterPolygonTxs(results,allAvailableTokens);
+            // console.log('polygon txs',results,allAvailableTokens,txs);
+          break;
+          case 'etherscan':
+          default:
+            txs = await this.filterEthereumTxs(results,allAvailableTokens);
+          break;
+        }
+
+        // Store filtered txs
+        if (txs && Object.keys(txs).length){
+          this.saveFetchedTransactions(baseEndpoint,txs);
+        }
       }
     }
 
-    if (debug){
-      console.log('DEBUG - getEtherscanTxs -',etherscanTxs);
-    }
+    // console.log('DEBUG - TXS -',txs);
 
     return Object
-            .values(etherscanTxs)
+            .values(txs)
             .filter(tx => (tx.token && enabledTokens.includes(tx.token.toUpperCase())))
             .sort((a,b) => (a.timeStamp < b.timeStamp ? -1 : 1));
   }
@@ -1909,7 +1933,7 @@ class FunctionsUtil {
     });
   
     if (processTxs){
-      etherscanTxs = await this.processEtherscanTransactions(etherscanTxs,enabledTokens,processStoredTxs);
+      etherscanTxs = await this.processTransactions(etherscanTxs,enabledTokens,processStoredTxs);
     }
 
     // console.log('etherscanTxs',etherscanTxs);
@@ -1973,7 +1997,7 @@ class FunctionsUtil {
 
     return output;
   }
-  processEtherscanTransactions = async (etherscanTxs,enabledTokens=[],processStoredTxs=true) => {
+  processTransactions = async (etherscanTxs,enabledTokens=[],processStoredTxs=true) => {
 
     if (!enabledTokens || !enabledTokens.length){
       enabledTokens = Object.keys(this.props.availableTokens);

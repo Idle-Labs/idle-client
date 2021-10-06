@@ -6,7 +6,6 @@ import ShortHash from "../utilities/components/ShortHash";
 import { Flex, Icon, Image, Link, Text } from "rimble-ui";
 import DashboardCard from "../DashboardCard/DashboardCard";
 import Notifications from "../Notifications/Notifications";
-import CardIconButton from "../CardIconButton/CardIconButton";
 import AccountModal from "../utilities/components/AccountModal";
 import NetworkIndicator from "../NetworkIndicator/NetworkIndicator";
 
