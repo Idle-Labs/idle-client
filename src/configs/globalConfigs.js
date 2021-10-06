@@ -401,7 +401,7 @@ const globalConfigs = {
       ]
     }
   },
-  govTokens: {
+  govTokens:{
     IDLE: {
       abi: IDLE,
       decimals: 18,
@@ -413,6 +413,7 @@ const globalConfigs = {
       showPrice: false, // Show price in Yield Farming section
       showBalance: false, // Include IDLE balance in Portfolio Donut
       aprTooltipMode: false,
+      availableNetworks:[1],
       distributionMode: "block",
       distributionFrequency: "day", // Multiply distribution per block
       color: "hsl(162, 100%, 41%)",
@@ -434,6 +435,7 @@ const globalConfigs = {
       disabledTokens: [],
       protocol: "compound",
       aprTooltipMode: false,
+      availableNetworks:[1],
       distributionMode: "block",
       distributionFrequency: "day",
       color: "hsl(162, 100%, 41%)",
@@ -451,10 +453,10 @@ const globalConfigs = {
       showBalance:true, // Include stkAAVE balance in Portfolio Donut
       protocol:'aavev2',
       aprTooltipMode:false,
+      availableNetworks:[1],
       distributionMode:'second',
       color:'hsl(314, 41%, 51%)',
       distributionFrequency:'day',
-      availableNetworks:[1,42,1337],
       address:'0x4da27a545c0c5b758a6ba100e3a049001de870f5', // MAIN
       addressForPrice:'0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9', // MAIN
       disabledTokens: ["idleTUSDYield", "idleSUSDYield", "idleFEIYield"],
@@ -483,11 +485,13 @@ const globalConfigs = {
   contracts:{
     137:{
       ProtocolDataProvider:{
+        useInfuraProvider:false,
         abi:ProtocolDataProvider,
         address:'0x7551b5D2763519d4e37e8B81929D336De671d46d'
       },
       ChildChainManager:{
         abi:ChildChainManager,
+        useInfuraProvider:false,
         // address:'0x2e5e27d50EFa501D90Ad3638ff8441a0C0C0d75e' // Mumbai
         address:'0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa' // Matic
       },
@@ -596,8 +600,7 @@ const globalConfigs = {
   tranchflash: {
     name: "perpetual yield tranches",
     subtitle: "Make yield your own.",
-    desc:
-      "Choose the benefits of high-yield or low-risk, while enjoying the flexibility of Tranches. This comes with auto-compounding for accrued governance tokens and no locking period.",
+    desc:"Choose the benefits of high-yield or low-risk, while enjoying the flexibility of Tranches. This comes with auto-compounding for accrued governance tokens and no locking period.",
     arrows: "images/idlearrows.svg",
     juniorinfo:
       "<b>Junior Tranches</b><br>Higher risk, leveraged for variable rate rewards",
@@ -607,13 +610,11 @@ const globalConfigs = {
     questions: [
       {
         desc: "How it Works?",
-        msg:
-          "This product aggregates user deposits into underlying markets and allocates the accrued yield on the sum between two different risk profile subsets. You get to choose the strategy according to your risk tolerance. Users are able to deposit funds into either the Junior or Senior Tranches in exchange for a token indicating their claim on their principal and whatever yield is allocated for them. These aggregated holdings are then deposited into the specified originating lending market, in this current version Idle Best-Yield strategy."
+        msg:"This product aggregates user deposits into underlying markets and allocates the accrued yield on the sum between two different risk profile subsets. You get to choose the strategy according to your risk tolerance. Users are able to deposit funds into either the Junior or Senior Tranches in exchange for a token indicating their claim on their principal and whatever yield is allocated for them. These aggregated holdings are then deposited into the specified originating lending market, in this current version Idle Best-Yield strategy."
       },
       {
         desc: "What happens in a case of a default?",
-        msg:
-          "In case of hack, an emergency shutdown can be triggered (by both the guardian, which would be a multi-sig wallet, and the owner which will be the Idle governance) in order to pause both deposits and redeems.<br />The redistribution of remaining funds can happens selectively, by allowing only Senior tranche holders to withdraw first directly in the main contract, or through a separate contract for more complex cases and resolutions (managed by the Idle governance)."
+        msg:"In case of hack, an emergency shutdown can be triggered (by both the guardian, which would be a multi-sig wallet, and the owner which will be the Idle governance) in order to pause both deposits and redeems.<br />The redistribution of remaining funds can happens selectively, by allowing only Senior tranche holders to withdraw first directly in the main contract, or through a separate contract for more complex cases and resolutions (managed by the Idle governance)."
       }
     ]
   },
@@ -770,17 +771,15 @@ const globalConfigs = {
       component: Tranches,
       iconName: "Whatshot",
       enabledEnvs: ['beta'],
+      availableNetworks:[1],
       govTokensEnabled: true,
       chartColor: "hsl(40,95%,59%)",
       icon: "images/strategies/tranches-on.png",
       iconInactive: "images/strategies/tranches-off.png",
       iconInactiveDark: "images/strategies/tranches-white.png",
-      desc:
-        "Diversify your risk profile with dynamic tranched yield derivatives",
-      descShort:
-        "Tranches deposit assets (eg DAI) into yield sources (eg Idle Finance) and split the accrued interest between 2 classes of products with different risk profiles.",
-      descLong:
-        "Choose the benefits of high-yield or low-risk, while enjoying the flexibility of Tranches. This comes with auto-compounding for accrued governance tokens and no locking period."
+      desc:"Diversify your risk profile with dynamic tranched yield derivatives",
+      descShort:"Tranches deposit assets (eg DAI) into yield sources (eg Idle Finance) and split the accrued interest between 2 classes of products with different risk profiles.",
+      descLong:"Choose the benefits of high-yield or low-risk, while enjoying the flexibility of Tranches. This comes with auto-compounding for accrued governance tokens and no locking period."
     },
     best: {
       token: "DAI",
@@ -795,15 +794,14 @@ const globalConfigs = {
       iconName: "Whatshot",
       govTokensEnabled: true,
       component: StrategyPage,
+      availableNetworks:[1,137],
       chartColor: "hsl(40,95%,59%)",
       icon: "images/strategies/best-on.svg",
       iconInactive: "images/strategies/best-off.svg",
       iconInactiveDark: "images/strategies/best-white.svg",
       desc: "Maximize your returns across DeFi protocols",
-      descLong:
-        "The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols. Idle’s monitoring system automatically triggers a rebalance if it spots a better-performing allocation: this includes taking account of the total liquidity within the pool, incorporating underlying protocol rate functions and levels of supply and demand. As a user, you will end up with an higher return without constantly checking rates and burning gas on every transfer. Unlock your funds from a single protocol performance with this strategy.",
-      descShort:
-        "The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols."
+      descLong:"The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols. Idle’s monitoring system automatically triggers a rebalance if it spots a better-performing allocation: this includes taking account of the total liquidity within the pool, incorporating underlying protocol rate functions and levels of supply and demand. As a user, you will end up with an higher return without constantly checking rates and burning gas on every transfer. Unlock your funds from a single protocol performance with this strategy.",
+      descShort:"The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols."
     },
     risk: {
       token: "DAI",
@@ -815,6 +813,7 @@ const globalConfigs = {
       titlePostfix: null,
       addGovTokens: true,
       iconName: "Security",
+      availableNetworks:[1],
       title: "Risk-Adjusted",
       govTokensEnabled: true,
       component: StrategyPage,
@@ -823,10 +822,8 @@ const globalConfigs = {
       iconInactive: "images/strategies/risk-off.svg",
       iconInactiveDark: "images/strategies/risk-white.svg",
       desc: "Optimize your risk exposure across DeFi protocols",
-      descLong:
-        "The Risk-Adjusted allocation strategy provides a way to earn the best rate at the lowest risk-level. The risk-management algorithm takes account of the total assets within a pool, incorporates underlying protocol rate functions and levels of supply and demand, skimming protocols with a bad score/rate mix, and finally determining an allocation that achieves the highest risk-return score possible after the rebalance happens.",
-      descShort:
-        "The Risk-Adjusted allocation strategy provides a way to earn the best rate at the lowest risk-level."
+      descLong:"The Risk-Adjusted allocation strategy provides a way to earn the best rate at the lowest risk-level. The risk-management algorithm takes account of the total assets within a pool, incorporates underlying protocol rate functions and levels of supply and demand, skimming protocols with a bad score/rate mix, and finally determining an allocation that achieves the highest risk-return score possible after the rebalance happens.",
+      descShort:"The Risk-Adjusted allocation strategy provides a way to earn the best rate at the lowest risk-level."
     }
     /*
     new:{
@@ -847,6 +844,7 @@ const globalConfigs = {
   },
   stats: {
     enabled: true, // Enable endpoint
+    availableNetworks:[1],
     rates: {
       TTL: 300, // 5 minutes
       endpoint: "https://api.idle.finance/rates/"
@@ -864,9 +862,7 @@ const globalConfigs = {
       endpoint: "https://api.idle.finance/scores/"
     },
     config: {
-      headers: env.REACT_APP_IDLE_KEY
-        ? { Authorization: `Bearer ${env.REACT_APP_IDLE_KEY}` }
-        : {}
+      headers: env.REACT_APP_IDLE_KEY ? { Authorization: `Bearer ${env.REACT_APP_IDLE_KEY}` } : {}
     },
     versions: {
       /*
@@ -1450,9 +1446,9 @@ const globalConfigs = {
     requiredNetwork: 1, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
     blocksPerYear: 2371428,
     secondsPerYear: 31536000,
-    firstBlockNumber: 8119247,
     requiredConfirmations: 1,
-    enabledNetworks: [1, 42, 1337],
+    firstBlockNumber: 8119247,
+    enabledNetworks: [1, 137],
     accountBalanceMinimum: 0, // in ETH for gas fees
     providers:{
       infura:{
@@ -1505,6 +1501,10 @@ const globalConfigs = {
           1: "https://api.nexusmutual.io/v1/",
           42: "https://api.staging.nexusmutual.io/v1/"
         }
+      },
+      ens:{
+        enabled:true,
+        supportedNetworks:[1]
       },
       covalent:{
         enabled:true,
@@ -1678,6 +1678,7 @@ const globalConfigs = {
       icon: "Security",
       route: "coverage",
       label: "Coverage",
+      availableNetworks:[1],
       desc: "Buy Nexus Mutual coverage without KYC for your deposits",
       subComponent: NexusMutual,
       props: {
@@ -1751,8 +1752,7 @@ const globalConfigs = {
       label: "B2B Vesting",
       route: "b2b-vesting-contract",
       subComponent: DeployB2BVesting,
-      desc:
-        'Deploy/Deposit/Claim for B2B Vesting Contracts<br /><small style="color:#ff9900">(only for partners that joined the B2B Affiliate program)</small>',
+      desc:'Deploy/Deposit/Claim for B2B Vesting Contracts<br /><small style="color:#ff9900">(only for partners that joined the B2B Affiliate program)</small>',
       props: {
         contracts: {
           vesterImplementation: {
@@ -2078,16 +2078,16 @@ const globalConfigs = {
         ]
       }
     },
-    batchDeposit: {
+    batchDeposit:{
       enabled: true,
       icon: "Storage",
       claimEnabled: true,
       depositEnabled: true,
+      availableNetworks:[1],
       route: "batch-deposit",
       label: "Batch Deposit",
       subComponent: BatchDeposit,
-      desc:
-        "Deposit your tokens in the batch and wait until its execution to claim your Idle Tokens V4",
+      desc:"Deposit your tokens in the batch and wait until its execution to claim your Idle Tokens V4",
       props: {
         availableTokens: {
           idleDAIYield: {
@@ -2130,143 +2130,19 @@ const globalConfigs = {
               ]
             }
           }
-          /*
-          idleUSDTYield:{
-            decimals:18,
-            abi:IdleTokenV3,
-            strategy:'best',
-            baseToken:'USDT',
-            migrationContract:{
-              abi:IdleBatchedMint,
-              name:'IdleBatchedMintUSDT',
-              address:'0xee5c50c7c49dec47dde2f9b0233b9e14a8f00cf2',
-              functions:[
-                {
-                  label:'Deposit',
-                  name:'deposit'
-                },
-              ]
-            },
-          },
-          idleSUSDYield:{
-            decimals:18,
-            abi:IdleTokenV3,
-            strategy:'best',
-            baseToken:'SUSD',
-            migrationContract:{
-              abi:IdleBatchedMint,
-              name:'IdleBatchedMintSUSD',
-              address:'0xE2eE519399a49f1A2004a25DA61e82867A69b9b1',
-              functions:[
-                {
-                  label:'Deposit',
-                  name:'deposit'
-                },
-              ]
-            },
-          },
-          idleTUSDYield:{
-            decimals:18,
-            abi:IdleTokenV3,
-            strategy:'best',
-            baseToken:'TUSD',
-            migrationContract:{
-              abi:IdleBatchedMint,
-              name:'IdleBatchedMintTUSD',
-              address:'0x174a273f0ea28e55b6dd13259aa43d262b863a86',
-              functions:[
-                {
-                  usePermit:true,
-                  label:'Deposit',
-                  name:'deposit'
-                },
-              ]
-            },
-          },
-          idleWBTCYield:{
-            decimals:18,
-            abi:IdleTokenV3,
-            strategy:'best',
-            baseToken:'WBTC',
-            migrationContract:{
-              abi:IdleBatchedMint,
-              name:'IdleBatchedMintWBTC',
-              address:'0xbfDC7d97559173B52EF2A2f1bC9BeCf97B0D401D',
-              functions:[
-                {
-                  label:'Deposit',
-                  name:'deposit'
-                },
-              ]
-            },
-          },
-          idleDAISafe:{
-            decimals:18,
-            abi:IdleTokenV3,
-            strategy:'risk',
-            baseToken:'DAI',
-            migrationContract:{
-              abi:IdleBatchedMint,
-              name:'IdleBatchedMintDAISafe',
-              address:'0x08db226d63cE724A6091Ba82D28dFc76ceCa23d8',
-              functions:[
-                {
-                  name:'deposit',
-                  label:'Deposit',
-                  usePermit:true,
-                },
-              ]
-            },
-          },
-          idleUSDCSafe:{
-            decimals:18,
-            abi:IdleTokenV3,
-            strategy:'risk',
-            baseToken:'USDC',
-            migrationContract:{
-              abi:IdleBatchedMint,
-              name:'IdleBatchedMintUSDCSafe',
-              address:'0xA6C89A31D59f9C68D9Cba28d690C5E52058fb472',
-              functions:[
-                {
-                  name:'deposit',
-                  label:'Deposit',
-                  usePermit:true,
-                },
-              ]
-            },
-          },
-          idleUSDTSafe:{
-            decimals:18,
-            abi:IdleTokenV3,
-            strategy:'risk',
-            baseToken:'USDT',
-            migrationContract:{
-              abi:IdleBatchedMint,
-              name:'IdleBatchedMintUSDTSafe',
-              address:'0xd47B96Fb33b79a4Dd81a2bfa676eBB669166f619',
-              functions:[
-                {
-                  label:'Deposit',
-                  name:'deposit'
-                },
-              ]
-            },
-          }
-          */
         }
       }
     },
     batchMigration: {
       enabled: true,
       claimEnabled: true,
-      depositEnabled: false,
       icon: "FileDownload",
+      depositEnabled:false,
+      availableNetworks:[1],
       route: "batch-migration",
       label: "Batch Migration",
       subComponent: BatchMigration,
-      desc:
-        "Deposit your Idle Tokens V3 into a batch and wait until its conversion to the Idle Token V4",
+      desc:"Deposit your Idle Tokens V3 into a batch and wait until its conversion to the Idle Token V4",
       props: {
         availableTokens: {
           idleDAIYield: {
@@ -2456,9 +2332,9 @@ const globalConfigs = {
       enabled: true,
       icon: "SwapHoriz",
       route: "convert",
+      availableNetworks:[1],
       label: "Token Migration",
-      desc:
-        "Easily convert your Compound, Fulcrum, Aave and iEarn tokens into Idle",
+      desc:"Easily convert your Compound, Fulcrum, Aave and iEarn tokens into Idle",
       subComponent: TokenMigration,
       props: {
         migrationContract: {
@@ -2757,6 +2633,7 @@ const globalConfigs = {
       icon: "Sync",
       route: "token-swap",
       label: "Token Swap",
+      availableNetworks:[1],
       desc: "Easily swap your tokens using Kyber Swap widget",
       subComponent: TokenSwap,
       props: {

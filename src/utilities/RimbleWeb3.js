@@ -895,28 +895,35 @@ class RimbleTransaction extends React.Component {
   initializeContracts = async () => {
 
     const contracts = this.functionsUtil.getGlobalConfig(['contracts',this.state.network.required.id]);
-    await this.functionsUtil.asyncForEach(Object.keys(contracts),async (contractName) => {
-      const contractInfo = contracts[contractName];
-      if (contractInfo.address !== null && contractInfo.abi !== null){
-        const useInfuraProvider = !!contractInfo.useInfuraProvider;
-        this.functionsUtil.customLog('initializeContracts, init contract', contractName, contractInfo.address);
-        await this.initContract(contractName, contractInfo.address, contractInfo.abi, useInfuraProvider);
-      }
-    });
+
+    // console.log('initializeContracts',contracts,this.props.availableStrategies);
+
+    if (contracts){
+      await this.functionsUtil.asyncForEach(Object.keys(contracts),async (contractName) => {
+        const contractInfo = contracts[contractName];
+        if (contractInfo.address !== null && contractInfo.abi !== null){
+          const useInfuraProvider = !!contractInfo.useInfuraProvider;
+          this.functionsUtil.customLog('initializeContracts, init contract', contractName, contractInfo.address);
+          await this.initContract(contractName, contractInfo.address, contractInfo.abi, useInfuraProvider);
+        }
+      });
+    }
 
     const govTokens = this.functionsUtil.getGlobalConfig(['govTokens']);
-    await this.functionsUtil.asyncForEach(Object.keys(govTokens),async (token) => {
-      const govTokenConfig = govTokens[token];
-      if (!govTokenConfig.enabled){
-        return;
-      }
-      // Initialize govToken contracts
-      let foundGovTokenContract = this.state.contracts.find(c => c.name === token);
-      if (!foundGovTokenContract) {
-        this.functionsUtil.customLog('initializeContracts, init contract', token, govTokenConfig.address);
-        await this.initContract(token, govTokenConfig.address, govTokenConfig.abi);
-      }
-    });
+    if (govTokens){
+      await this.functionsUtil.asyncForEach(Object.keys(govTokens),async (token) => {
+        const govTokenConfig = govTokens[token];
+        if (!govTokenConfig.enabled){
+          return;
+        }
+        // Initialize govToken contracts
+        let foundGovTokenContract = this.state.contracts.find(c => c.name === token);
+        if (!foundGovTokenContract) {
+          this.functionsUtil.customLog('initializeContracts, init contract', token, govTokenConfig.address);
+          await this.initContract(token, govTokenConfig.address, govTokenConfig.abi);
+        }
+      });
+    }
 
     if (this.props.availableStrategies){
       // Initialize Tokens Contracts
@@ -979,20 +986,22 @@ class RimbleTransaction extends React.Component {
       });
     }
 
-    await this.functionsUtil.asyncForEach(Object.keys(this.props.availableTranches),async (protocol) => {
-      const tokens = this.props.availableTranches[protocol];
-      await this.functionsUtil.asyncForEach(Object.keys(tokens),async (token) => {
-        const tokenConfig = tokens[token];
-        await Promise.all([
-          this.initContract(tokenConfig.name,tokenConfig.address,tokenConfig.abi),
-          this.initContract(tokenConfig.AA.name,tokenConfig.AA.address,tokenConfig.AA.abi),
-          this.initContract(tokenConfig.BB.name,tokenConfig.BB.address,tokenConfig.BB.abi),
-          this.initContract(tokenConfig.CDO.name,tokenConfig.CDO.address,tokenConfig.CDO.abi),
-          this.initContract(tokenConfig.AA.CDORewards.name,tokenConfig.AA.CDORewards.address,tokenConfig.AA.CDORewards.abi),
-          this.initContract(tokenConfig.BB.CDORewards.name,tokenConfig.BB.CDORewards.address,tokenConfig.BB.CDORewards.abi)
-        ]);
+    if (this.props.availableTranches){
+      await this.functionsUtil.asyncForEach(Object.keys(this.props.availableTranches),async (protocol) => {
+        const tokens = this.props.availableTranches[protocol];
+        await this.functionsUtil.asyncForEach(Object.keys(tokens),async (token) => {
+          const tokenConfig = tokens[token];
+          await Promise.all([
+            this.initContract(tokenConfig.name,tokenConfig.address,tokenConfig.abi),
+            this.initContract(tokenConfig.AA.name,tokenConfig.AA.address,tokenConfig.AA.abi),
+            this.initContract(tokenConfig.BB.name,tokenConfig.BB.address,tokenConfig.BB.abi),
+            this.initContract(tokenConfig.CDO.name,tokenConfig.CDO.address,tokenConfig.CDO.abi),
+            this.initContract(tokenConfig.AA.CDORewards.name,tokenConfig.AA.CDORewards.address,tokenConfig.AA.CDORewards.abi),
+            this.initContract(tokenConfig.BB.CDORewards.name,tokenConfig.BB.CDORewards.address,tokenConfig.BB.CDORewards.abi)
+          ]);
+        });
       });
-    });
+    }
 
     return this.setState({
       contractsInitialized:true
@@ -1131,8 +1140,6 @@ class RimbleTransaction extends React.Component {
 
     const currentNetworkChanged = network.current.id && network.current.id !== this.state.network.current.id;
     const requiredNetworkChanged = network.required.id && network.required.id !== this.state.network.required.id;
-    
-    // console.log('checkNetwork',this.state.networkInitialized,currentNetworkChanged,requiredNetworkChanged,network,this.state.network);
 
     if (!this.state.network.current.id || currentNetworkChanged || requiredNetworkChanged || !this.state.networkInitialized){
       this.setState({

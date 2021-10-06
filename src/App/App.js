@@ -120,12 +120,14 @@ class App extends Component {
     });
 
     const storedCachedData = clear_all ? {} : this.functionsUtil.getStoredItem('cachedData');
-    Object.keys(storedCachedData).forEach(key => {
-      const storedData = storedCachedData[key];
-      if (storedData.expirationDate !== null) {
-        delete storedCachedData[key];
-      }
-    });
+    if (storedCachedData){
+      Object.keys(storedCachedData).forEach( key => {
+        const storedData = storedCachedData[key];
+        if (storedData.expirationDate !== null){
+          delete storedCachedData[key];
+        }
+      });
+    }
 
     this.functionsUtil.setLocalStorage('cachedData', storedCachedData, true);
 
@@ -220,7 +222,7 @@ class App extends Component {
     const availableStrategies = {};
     const requiredNetwork = this.state.network && this.state.network.isCorrectNetwork ? (this.state.network.current.id || this.state.network.required.id) : this.state.config.requiredNetwork;
 
-    // console.log('loadAvailableTokens',this.state.network,requiredNetwork,availableTokens);
+    // console.log('loadAvailableTokens_1',this.state.network,requiredNetwork,availableTokens);
 
     // Load available strategies
     Object.keys(availableTokens[requiredNetwork]).forEach((strategy) => {
@@ -248,7 +250,7 @@ class App extends Component {
       }
     }
 
-    // console.log('loadAvailableTokens',newState);
+    // console.log('loadAvailableTokens_2',newState);
 
     await this.setState(newState);
   }
@@ -281,7 +283,7 @@ class App extends Component {
       }
     }
 
-    // console.log('setStrategyToken',newState);
+    // console.log('setStrategyToken',selectedStrategy,selectedToken,newState);
 
     await this.setState(newState, callback);
   }
@@ -777,6 +779,7 @@ class App extends Component {
                                         getAccountBalance={getAccountBalance}
                                         accountBalanceLow={accountBalanceLow}
                                         accountInizialized={accountInizialized}
+                                        networkInitialized={networkInitialized}
                                         selectedToken={this.state.selectedToken}
                                         connectorName={this.state.connectorName}
                                         setStrategy={this.setStrategy.bind(this)}

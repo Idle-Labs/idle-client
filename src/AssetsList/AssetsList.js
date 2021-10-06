@@ -45,7 +45,7 @@ class AssetsList extends Component {
         <Flex id="assets-list" flexDirection={'column'}>
           {
             enabledTokens.map(token => {
-              const tokenConfig = this.props.availableTokens[token];
+              const tokenConfig = this.props.availableTokens ? this.props.availableTokens[token] : null;
               if (!tokenConfig){
                 return null;
               }

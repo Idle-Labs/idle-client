@@ -63,7 +63,7 @@ class Dashboard extends Component {
     const currentNetwork = this.functionsUtil.getRequiredNetwork();
 
     const strategies = this.functionsUtil.getGlobalConfig(['strategies']);
-    Object.keys(strategies).filter( s => ( !strategies[s].comingSoon && (!strategies[s].enabledEnvs.length || strategies[s].enabledEnvs.includes(this.props.currentEnv)) ) ).forEach(strategy => {
+    Object.keys(strategies).filter( s => ( !strategies[s].comingSoon && (!strategies[s].availableNetworks || strategies[s].availableNetworks.includes(currentNetwork.id)) && (!strategies[s].enabledEnvs.length || strategies[s].enabledEnvs.includes(this.props.currentEnv)) ) ).forEach(strategy => {
       const strategyInfo = strategies[strategy];
       const imageInfo=extraicons[strategy];
       menu.push({
@@ -718,14 +718,21 @@ class Dashboard extends Component {
               overflowX:'hidden'
             }}
             height={['100vh','auto']}
-            flexDirection={'columns'}
+            flexDirection={'column'}
             backgroundColor={'dashboardBg'}
           >
+            <DashboardHeader
+              menuOpened={this.state.menuOpened}
+              clickEvent={this.state.clickEvent}
+              toggleMenu={this.toggleMenu.bind(this)}
+              goToSection={this.goToSection.bind(this)}
+              {...this.props}
+            />
             {
               !networkInitialized || !this.props.accountInizialized || !this.props.contractsInitialized || !PageComponent || !networkCorrect || !networkSupported ? (
                 <Flex
                   width={1}
-                  minHeight={'50vg'}
+                  minHeight={'50vh'}
                   alignItems={'center'}
                   flexDirection={'column'}
                   justifyContent={'center'}
@@ -878,13 +885,6 @@ class Dashboard extends Component {
                   width={1}
                   flexDirection={'column'}
                 >
-                  <DashboardHeader
-                    menuOpened={this.state.menuOpened}
-                    clickEvent={this.state.clickEvent}
-                    toggleMenu={this.toggleMenu.bind(this)}
-                    goToSection={this.goToSection.bind(this)}
-                    {...this.props}
-                  />
                   {
                     PageComponent &&
                       <PageComponent

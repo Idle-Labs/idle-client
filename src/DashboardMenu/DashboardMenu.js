@@ -4,6 +4,8 @@ import RoundButton from "../RoundButton/RoundButton";
 import { Link as RouterLink } from "react-router-dom";
 import FunctionsUtil from "../utilities/FunctionsUtil";
 import { Flex, Box, Icon, Text, Image, Link } from "rimble-ui";
+import NetworkIndicator from "../NetworkIndicator/NetworkIndicator";
+
 class DashboardMenu extends Component {
   state = {
     logout: false,
@@ -93,88 +95,91 @@ class DashboardMenu extends Component {
           alignItems={"center"}
           justifyContent={"flex-start"}
         >
-          <RouterLink to="/">
+          <RouterLink
+            to={"/"}
+          >
             <Image
               height={"42px"}
               position={"relative"}
-              src={
-                this.functionsUtil.checkUrlOrigin()
-                  ? !isDarkTheme
-                    ? "images/logo-gradient.svg"
-                    : "images/logo-dark.svg"
-                  : !isDarkTheme
-                  ? "images/logo-gradient-beta.png"
-                  : "images/logo-white-beta.png"
-              }
+              src={this.functionsUtil.checkUrlOrigin() ? !isDarkTheme ? "images/logo-gradient.svg" : "images/logo-dark.svg" : !isDarkTheme ? "images/logo-gradient-beta.png" : "images/logo-white-beta.png"}
             />
           </RouterLink>
         </Flex>
-        {!this.props.isMobile && (
-          <Flex width={1}>
-            <RoundButton
-              {...this.props}
-              buttonProps={{
-                mb: 3,
-                style: {
-                  display: "flex",
-                  paddingLeft: 16,
-                  justifyContent: "flex-start"
-                }
-              }}
-              handleClick={
-                this.props.account
-                  ? e => this.logout()
-                  : this.props.connectAndValidateAccount
+        <Flex
+          width={1}
+        >
+          <RoundButton
+            {...this.props}
+            buttonProps={{
+              mb: 3,
+              style: {
+                display: "flex",
+                paddingLeft: 16,
+                justifyContent: "flex-start"
               }
+            }}
+            handleClick={this.props.account ? e => this.logout() : this.props.connectAndValidateAccount}
+          >
+            <Flex
+              width={1}
+              alignItems={"center"}
+              justifyContent={"flex-start"}
             >
-              <Flex
-                width={1}
-                alignItems={"center"}
-                justifyContent={"flex-start"}
-              >
-                {this.props.account ? (
-                  <Icon
-                    mx={2}
-                    size={"1.4em"}
-                    color={"white"}
-                    align={"center"}
-                    name={"ExitToApp"}
-                  />
-                ) : (
-                  <Image
-                    mx={2}
-                    align={"center"}
-                    height={"1.6em"}
-                    src={"images/sidebar/plug_white.svg"}
-                  />
-                )}
-                <Text
-                  ml={1}
-                  fontWeight={3}
+              {this.props.account ? (
+                <Icon
+                  mx={2}
+                  size={"1.4em"}
                   color={"white"}
-                  fontSize={[1, 2]}
-                  alignContent={"center"}
-                  justifyContent={"center"}
-                >
-                  {this.props.account ? "Logout" : "Connect"}
-                </Text>
-              </Flex>
-            </RoundButton>
-          </Flex>
-        )}
+                  align={"center"}
+                  name={"ExitToApp"}
+                />
+              ) : (
+                <Image
+                  mx={2}
+                  align={"center"}
+                  height={"1.6em"}
+                  src={"images/sidebar/plug_white.svg"}
+                />
+              )}
+              <Text
+                ml={1}
+                fontWeight={3}
+                color={"white"}
+                fontSize={[1, 2]}
+                alignContent={"center"}
+                justifyContent={"center"}
+              >
+                {this.props.account ? "Logout" : "Connect"}
+              </Text>
+            </Flex>
+          </RoundButton>
+        </Flex>
+        {
+          this.props.isMobile && (
+            <Flex
+              mb={3}
+              width={'100%'}
+              alignItems={'stretch'}
+              flexDirection={'column'}
+              justifyContent={'space-between'}
+            >
+              <NetworkIndicator
+                {...this.props}
+              />
+            </Flex>
+          )
+        }
         {visibleLinks.map((menuLink, menuIndex) => {
           const isExternalLink = menuLink.isExternalLink;
           const LinkComponent = isExternalLink ? ExtLink : RouterLink;
-          const activeImage =
-            isDarkTheme && menuLink.imageDark
-              ? menuLink.imageDark
-              : menuLink.image;
-          const inactiveImage =
-            isDarkTheme && menuLink.imageInactiveDark
-              ? menuLink.imageInactiveDark
-              : menuLink.imageInactive;
+          const activeImage = isDarkTheme && menuLink.imageDark ? menuLink.imageDark : menuLink.image;
+          const inactiveImage = isDarkTheme && menuLink.imageInactiveDark ? menuLink.imageInactiveDark : menuLink.imageInactive;
           return (
-            <Box width={"auto"} my={[2, "8px"]} key={`menu-${menuIndex}`}>
+            <Box
+              width={"auto"}
+              my={[2, "8px"]}
+              key={`menu-${menuIndex}`}
+            >
               <LinkComponent
                 to={menuLink.route}
                 href={menuLink.route}

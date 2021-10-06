@@ -4257,6 +4257,7 @@ class FunctionsUtil {
           case 'COMP':
             output = await this.getCompUserDistribution(account,govTokenAvailableTokens);
           break;
+          case 'WMATIC':
           case 'stkAAVE':
             output = await this.getStkAaveUserDistribution(account,govTokenAvailableTokens);
           break;
@@ -4312,6 +4313,7 @@ class FunctionsUtil {
           case 'COMP':
             output = await this.getCompDistribution(selectedTokenConfig);
           break;
+          case 'WMATIC':
           case 'stkAAVE':
             output = await this.getStkAaveDistribution(selectedTokenConfig);
           break;
@@ -5273,6 +5275,9 @@ class FunctionsUtil {
     return this.BNify(blocks).div(blocksPerSeconds);
   }
   getBlockNumber = async () => {
+    if (!this.props.web3){
+      return false;
+    }
     return await this.props.web3.eth.getBlockNumber();
   }
   getBlockInfo = async (blockNumber) => {
@@ -5409,13 +5414,17 @@ class FunctionsUtil {
 
     const aprs = await this.getAprs(tokenConfig.idle.token);
     const allAvailableTokens = aprs ? aprs.addresses : null;
-    const tokenAllocations = await this.asyncForEach(allAvailableTokens, async (protocolAddr,index) => {
-      return await this.genericContractCall(tokenConfig.idle.token, 'lastAllocations',[index]);
-    });
-    return allAvailableTokens.reduce( (lastAllocations,protocolAddr,index) => {
-      lastAllocations[protocolAddr.toLowerCase()] = tokenAllocations[index];
-      return lastAllocations;
-    },{});
+    if (allAvailableTokens){
+      const tokenAllocations = await this.asyncForEach(allAvailableTokens, async (protocolAddr,index) => {
+        return await this.genericContractCall(tokenConfig.idle.token, 'lastAllocations',[index]);
+      });
+      return allAvailableTokens.reduce( (lastAllocations,protocolAddr,index) => {
+        lastAllocations[protocolAddr.toLowerCase()] = tokenAllocations[index];
+        return lastAllocations;
+      },{});
+    }
+
+    return {};
   }
   getTokenAllocation = async (tokenConfig,protocolsAprs=false,addGovTokens=true) => {
     
@@ -6581,9 +6590,10 @@ class FunctionsUtil {
     const govTokens = this.getGlobalConfig(['govTokens']);
     Object.keys(govTokens).forEach( govToken => {
       const govTokenConfig = govTokens[govToken];
-      if (!govTokenConfig.enabled || govTokenConfig.disabledTokens.includes(tokenConfig.idle.token)){
-        return;
-      }
+      if (!govTokenConfig.enabled || govTokenConfig.disabledTokens.includes(tokenConfig.idle.token) || (govTokenConfig.availableNetworks && !govTokenConfig.availableNetworks.includes(currentNetworkId))){
+              return;
+            }
+
       if (govTokenConfig.protocol === 'idle'){
         output[govToken] = govTokenConfig;
       } else {
@@ -6676,6 +6686,7 @@ class FunctionsUtil {
         case 'COMP':
           govSpeed = await this.getCompDistribution(tokenConfig,null,false);
         break;
+        case 'WMATIC':
         case 'stkAAVE':
           govSpeed = await this.getStkAaveDistribution(tokenConfig,null,false);
         break;
@@ -6718,6 +6729,7 @@ class FunctionsUtil {
       let tokenAllocation = null;
 
       switch (govToken){
+        case 'WMATIC':
         case 'stkAAVE':
           switch (govTokenConfig.aprTooltipMode){
             default:

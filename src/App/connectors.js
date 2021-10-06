@@ -82,7 +82,7 @@ const Portis = new PortisConnector({
 
 const Authereum = new AuthereumConnector({
   api: AuthereumApi,
-  network: globalConfigs.network.availableNetworks[defaultNetwork].toLowerCase()
+  network: globalConfigs.network.availableNetworks[defaultNetwork].name.toLowerCase()
 });
 
 const walletLink = new WalletLinkConnector({
@@ -100,9 +100,9 @@ const Torus = new TorusConnector({
     buildEnv: 'production', // default: production
     enableLogging: false, // default: false
     network: {
-      host: globalConfigs.network.availableNetworks[defaultNetwork].toLowerCase(), // default: mainnet
+      host: globalConfigs.network.availableNetworks[defaultNetwork].name.toLowerCase(), // default: mainnet
       chainId: defaultNetwork, // default: 1
-      networkName: globalConfigs.network.availableNetworks[defaultNetwork].toLowerCase() // default: Main Ethereum Network
+      networkName: globalConfigs.network.availableNetworks[defaultNetwork].name.toLowerCase() // default: Main Ethereum Network
     },
     showTorusButton: false // default: true
   }

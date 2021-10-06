@@ -130,6 +130,21 @@ class MenuAccount extends Component {
               />
             </Flex>
           )}
+          {
+            !this.props.isMobile && (
+              <Flex
+                mr={2}
+                width={'fit-content'}
+                alignItems={'center'}
+                flexDirection={'row'}
+                justifyContent={'space-between'}
+              >
+                <NetworkIndicator
+                  {...this.props}
+                />
+              </Flex>
+            )
+          }
           <DashboardCard
             {...this.props}
             cardProps={{
@@ -166,13 +181,30 @@ class MenuAccount extends Component {
                   name={"AccountCircle"}
                 />
               )}
-              <ShortHash
-                fontSize={2}
-                fontWeight={3}
-                {...this.props}
-                color={"copyColor"}
-                hash={this.props.account}
-              />
+              {
+                this.props.isMobile ? (
+                  <Text
+                    fontSize={2}
+                    fontWeight={3}
+                    color={"copyColor"}
+                    style={{
+                      flex:'1',
+                      overflow:'hidden',
+                      textOverflow:'ellipsis'
+                    }}
+                  >
+                    {this.props.account}
+                  </Text>
+                ) : (
+                  <ShortHash
+                    fontSize={2}
+                    fontWeight={3}
+                    {...this.props}
+                    color={"copyColor"}
+                    hash={this.props.account}
+                  />
+                )
+              }
             </Flex>
           </DashboardCard>
           {this.props.isMobile && <Notifications {...this.props} />}
@@ -309,30 +341,24 @@ class MenuAccount extends Component {
             />
           </Flex>
         )}
-        <Flex
-          width={1}
-          justifyContent={['space-between','flex-start']}
-        >
-          <NetworkIndicator
-            innerProps={{
-              px:1,
-              py:0,
-              width:['100%','auto'],
-              height:['45px','54px']
-            }}
-            {...this.props}
-          />
-          <CardIconButton
-            icon={"Power"}
-            {...this.props}
-            text={'Connect'}
-            cardProps={{
-              ml:[0,2],
-              width:['49%','auto'],
-            }}
-            handleClick={this.props.connectAndValidateAccount}
-          />
-        </Flex>
+        {
+          !this.props.isMobile && (
+            <Flex
+              width={1}
+              justifyContent={['space-between','flex-start']}
+            >
+              <NetworkIndicator
+                innerProps={{
+                  px:1,
+                  py:0,
+                  width:['100%','auto'],
+                  height:['45px','54px']
+                }}
+                {...this.props}
+              />
+            </Flex>
+          )
+        }
         {!this.props.isMobile && (
           <Flex
             width={"auto"}

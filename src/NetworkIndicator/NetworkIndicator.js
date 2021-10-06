@@ -92,8 +92,8 @@ class NetworkIndicator extends Component {
               height={'1.3em'}
             />
             <Text
-              fontSize={[1,2]}
-              fontWeight={500}
+              fontSize={2}
+              fontWeight={3}
               color={'copyColor'}
             >
               {props.label}
@@ -132,8 +132,8 @@ class NetworkIndicator extends Component {
               height={'1.3em'}
             />
             <Text
-              fontSize={[1,2]}
-              fontWeight={500}
+              fontSize={2}
+              fontWeight={3}
               color={'copyColor'}
             >
               {label}
@@ -159,7 +159,7 @@ class NetworkIndicator extends Component {
         innerProps={Object.assign({
           px:1,
           py:0,
-          height:['38px','42px']
+          height:'42px'
         },this.props.innerProps)}
         customOptionProps={{
           px:0,
@@ -181,7 +181,7 @@ class NetworkIndicator extends Component {
           width:[1,'auto'],
           alignItems:'center',
           justifyContent:'center',
-          height:(this.props.innerProps && this.props.innerProps.height) || ['38px','42px'],
+          height:(this.props.innerProps && this.props.innerProps.height) || '42px',
         }}
         isInteractive={false}
       >
