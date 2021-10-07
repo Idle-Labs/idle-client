@@ -2,7 +2,7 @@ import React from "react";
 import styles from './ModalCard.module.scss';
 import { Box, Flex, Card, Button, Heading, Image } from "rimble-ui";
 
-const ModalCard = ({children, closeFunc, ...props}) => (
+const ModalCard = ({ children, closeFunc, ...props }) => (
   <Card
     p={0}
     border={0}
@@ -11,35 +11,39 @@ const ModalCard = ({children, closeFunc, ...props}) => (
     height={'auto'}
     borderRadius={2}
     overflow={'auto'}
-    width={ props.width ? props.width : 'auto' }
-    minWidth={ props.minWidth ? props.minWidth : 'auto' }
-    maxWidth={ props.maxWidth ? props.maxWidth : '960px'}
+    width={props.width ? props.width : 'auto'}
+    minWidth={props.minWidth ? props.minWidth : 'auto'}
+    maxWidth={props.maxWidth ? props.maxWidth : '960px'}
   >
     <Box
       top={'0'}
       zIndex={1}
       right={'0'}
       position={"absolute"}
+      pt={props.ptBox ? props.ptBox : 0}
+      pr={props.prBox ? props.prBox : 0}
+      mt={props.ptInner ? props.ptInner : 0}
     >
       <Button.Text
         icononly
+
         icon={"Close"}
         size={'2.5em'}
         onClick={closeFunc}
-        mainColor={ props.mainColor ? props.mainColor :  'copyColor' }
+        mainColor={props.mainColor ? props.mainColor : 'copyColor'}
       />
     </Box>
     <Flex
       height={'100%'}
       flex={'1 1 auto'}
       flexDirection={'column'}
-      className={[ props.bgLayer ? styles.bg : null]}
+      className={[props.bgLayer ? styles.bg : null]}
       style={{
         overflow: 'auto',
-        backgroundRepeat:'no-repeat',
-        backgroundPosition:'bottom right',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'bottom right',
         backgroundSize: !props.background ? '65%' : null,
-        backgroundImage:'url(/images/bg-bottom-right.png)',
+        backgroundImage: 'url(/images/bg-bottom-right.png)',
         background: props.background ? props.background : null,
       }}
       backgroundColor={'cardBg'}
@@ -52,21 +56,23 @@ const ModalCard = ({children, closeFunc, ...props}) => (
 ModalCard.Header = (props) => (
   <Box
     width={1}
-    mb={[2,3]}
-    pb={[2,2]}
-    pt={ props.pt ? props.pt : (props.icon ? 3 : [5,3]) }
-    borderBottom={ props.borderBottom ? props.borderBottom : '1px solid #eee' }
+    mb={[2, props.nomb ? 0 : 3]}
+    pb={[2, props.nopb ? 0 : 2]}
+
+    pt={props.pt ? props.pt : (props.icon ? 3 : [5, 3])}
+    borderBottom={props.borderBottom ? props.borderBottom : '1px solid #eee'}
   >
     <Flex
-      px={[1,2]}
-      alignItems={'center'}
+      px={[1, props.px ? props.px : 2]}
+      py={[1, props.py ? props.py : 2]}
+      alignItems={props.alignItems ? props.alignItems : 'center'}
       flexDirection={'column'}
     >
-      { props.icon && <Image width={ props.iconHeight ? props.iconHeight : '50px' } src={props.icon} /> }
+      {props.icon && <Image width={props.iconHeight ? props.iconHeight : '50px'} src={props.icon} />}
       <Heading.h3
         mb={0}
-        fontSize={[3,3]}
-        color={'copyColor'}
+        fontSize={[3, props.fontSize ? props.fontSize : 3]}
+        color={props.fontColor ? props.fontColor : 'copyColor'}
         textAlign={'center'}
         mt={props.icon ? 2 : 0}
         fontFamily={'sansSerif'}
@@ -77,9 +83,9 @@ ModalCard.Header = (props) => (
       {
         props.subtitle &&
         <Heading.h4
-          pt={[1,2]}
+          pt={[1, 2]}
           fontWeight={2}
-          fontSize={[2,2]}
+          fontSize={[2, 2]}
           lineHeight={1.5}
           color={'dark-gray'}
           textAlign={'center'}
@@ -90,7 +96,7 @@ ModalCard.Header = (props) => (
       }
       {
         props.subtitle2 &&
-        <Heading.h4 pt={0} fontSize={[2,2]} textAlign={'center'} fontWeight={2} lineHeight={1.5} color={'dark-gray'}>
+        <Heading.h4 pt={0} fontSize={[2, 2]} textAlign={'center'} fontWeight={2} lineHeight={1.5} color={'dark-gray'}>
           {props.subtitle2}
         </Heading.h4>
       }
@@ -98,10 +104,10 @@ ModalCard.Header = (props) => (
   </Box>
 );
 
-ModalCard.Body = ({children, ...props}) => (
+ModalCard.Body = ({ children, ...props }) => (
   <Box
     width={1}
-    px={[3,5]}
+    px={[3, 5]}
     {...props}
   >
     {children}
@@ -117,13 +123,13 @@ ModalCard.Body = ({children, ...props}) => (
 );
 */
 
-ModalCard.Footer = ({children, ...props}) => (
+ModalCard.Footer = ({ children, ...props }) => (
   <Flex
     flex={'1 0 auto'}
     justifyContent={'center'}
     borderTop={1}
     borderColor={'light-gray'}
-    px={[0,3]}
+    px={[0, 3]}
     py={3}
   >
     {children}
@@ -131,7 +137,7 @@ ModalCard.Footer = ({children, ...props}) => (
 );
 
 
-ModalCard.BackButton = ({onClick, ...props}) => (
+ModalCard.BackButton = ({ onClick, ...props }) => (
   <Box
     position={'absolute'}
     top={'0'}

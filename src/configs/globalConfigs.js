@@ -257,12 +257,12 @@ const globalConfigs = {
         IdleController
       }
     },
-    proposals:{
-      12:{
-        description:'Details in the gov forum post: <a class="link" href="https://gov.idle.finance/t/iip-12-enable-idle-lm-on-idlerai-and-fund-leagues-mandate/620">https://gov.idle.finance/t/iip-12-enable-idle-lm-on-idlerai-and-fund-leagues-mandate/620</a>'
+    proposals: {
+      12: {
+        description: 'Details in the gov forum post: <a class="link" href="https://gov.idle.finance/t/iip-12-enable-idle-lm-on-idlerai-and-fund-leagues-mandate/620">https://gov.idle.finance/t/iip-12-enable-idle-lm-on-idlerai-and-fund-leagues-mandate/620</a>'
       },
-      7:{
-        description:`Upgrade of IdleTokenGovernance contract to include the following changes:<br />
+      7: {
+        description: `Upgrade of IdleTokenGovernance contract to include the following changes:<br />
         <ul>
           <li>support for EIP 3165 flashLoans (fee is set to 0.08% of the flash loaned amount redistributed to LP)</li>
           <li>support for stkAAVE distribution</li>
@@ -564,7 +564,7 @@ const globalConfigs = {
       {
         desc: "How it Works?",
         msg:
-          "This product aggregates user deposits into underlying markets and allocates the accrued yield on the sum between two different risk profile subsets. You get to choose the strategy according to your risk tolerance. Users are able to deposit funds into either the Junior or Senior Tranches in exchange for a token indicating their claim on their principal and whatever yield is allocated for them. These aggregated holdings are then deposited into the specified originating lending market, in this current version Idle Best-Yield strategy."
+          "This product aggregates user deposits into underlying markets and allocates the accrued yield on the sum between two different risk profile subsets. You get to choose the strategy according to your risk tolerance.<br/><br/> Users are able to deposit funds into either the Junior or Senior Tranches in exchange for a token indicating their claim on their principal and whatever yield is allocated for them. These aggregated holdings are then deposited into the specified originating lending market, in this current version Idle Best-Yield strategy."
       },
       {
         desc: "What happens in a case of a default?",
@@ -647,51 +647,51 @@ const globalConfigs = {
       }
     }
   },
-  extraicons:{
-    best:{
+  extraicons: {
+    best: {
       icon: "images/sidebar/best-on.svg",
-      iconDark:"images/sidebar/best-on-dark.svg",
+      iconDark: "images/sidebar/best-on-dark.svg",
       iconInactive: "images/sidebar/best-off.svg",
       iconInactiveDark: "images/sidebar/best-off-dark.svg",
     },
-    tranches:{
+    tranches: {
       icon: "images/sidebar/tranches-on.svg",
-      iconDark:"images/sidebar/tranches-on-dark.svg",
+      iconDark: "images/sidebar/tranches-on-dark.svg",
       iconInactive: "images/strategies/tranches-off.svg",
       iconInactiveDark: "images/strategies/tranches-off-dark.svg"
     },
-    risk:{
+    risk: {
       icon: "images/sidebar/risk-on.svg",
-      iconDark:"images/sidebar/risk-on-dark.svg",
+      iconDark: "images/sidebar/risk-on-dark.svg",
       iconInactive: "images/sidebar/risk-off.svg",
       iconInactiveDark: "images/sidebar/risk-off-dark.svg"
     },
-    stats:{
+    stats: {
       icon: "images/sidebar/stats-on.svg",
-      iconDark:"images/sidebar/stats-on-dark.svg",
+      iconDark: "images/sidebar/stats-on-dark.svg",
       iconInactive: "images/sidebar/stats-off.svg",
       iconInactiveDark: "images/sidebar/stats-off-dark.svg"
     },
-    tools:{
+    tools: {
       icon: "images/sidebar/tools-on.svg",
-      iconDark:"images/sidebar/tools-on-dark.svg",
+      iconDark: "images/sidebar/tools-on-dark.svg",
       iconInactive: "images/sidebar/tools-off.svg",
       iconInactiveDark: "images/sidebar/tools-off-dark.svg"
     },
-    forum:{
+    forum: {
       icon: "images/sidebar/forum-on.svg",
-      iconDark:"images/sidebar/forum-on-dark.svg",
+      iconDark: "images/sidebar/forum-on-dark.svg",
       iconInactive: "images/sidebar/forum-off.svg",
       iconInactiveDark: "images/sidebar/forum-off-dark.svg"
     },
-    stake:{
+    stake: {
       icon: "images/sidebar/stake-on.svg",
-      iconDark:"images/sidebar/stake-on-dark.svg",
+      iconDark: "images/sidebar/stake-on-dark.svg",
       iconInactive: "images/sidebar/stake-off.svg",
       iconInactiveDark: "images/sidebar/stake-off-dark.svg"
     }
   },
-  strategies:{
+  strategies: {
     tranches: {
       token: "DAI",
       visible: true,
@@ -720,7 +720,7 @@ const globalConfigs = {
     best: {
       token: "DAI",
       visible: true,
-      enabledEnvs:[],
+      enabledEnvs: [],
       color: "#f32121",
       type: "strategy",
       comingSoon: false,
@@ -743,7 +743,7 @@ const globalConfigs = {
     risk: {
       token: "DAI",
       visible: true,
-      enabledEnvs:[],
+      enabledEnvs: [],
       color: "#2196F3",
       type: "strategy",
       comingSoon: false,
@@ -840,8 +840,8 @@ const globalConfigs = {
             startTimestamp: 1599183170
           }
         },
-        enabledTokens:['DAI','USDC','USDT','TUSD','SUSD','WBTC','WETH','RAI','FEI'],
-        additionalProtocols:[
+        enabledTokens: ['DAI', 'USDC', 'USDT', 'TUSD', 'SUSD', 'WBTC', 'WETH', 'RAI', 'FEI'],
+        additionalProtocols: [
           {
             decimals: 16,
             protocol: "compound",
@@ -1060,21 +1060,21 @@ const globalConfigs = {
         },
         address: "0x03ab458634910aad20ef5f1c8ee96f1d6ac54919"
       },
-      FEI:{
-        decimals:18,
-        enabled:true,
-        color:{
-          hex:'#229b6e',
-          rgb:[34, 155, 110],
-          hsl:['158', '64%', '37%']
+      FEI: {
+        decimals: 18,
+        enabled: true,
+        color: {
+          hex: '#229b6e',
+          rgb: [34, 155, 110],
+          hsl: ['158', '64%', '37%']
         },
-        disabledCharts:['score'],
-        startTimestamp:'2021-09-24',
-        conversionRateField:'feiDAIPrice',
-        chart:{
-          labelTextColorModifiers:['darker', 4]
+        disabledCharts: ['score'],
+        startTimestamp: '2021-09-24',
+        conversionRateField: 'feiDAIPrice',
+        chart: {
+          labelTextColorModifiers: ['darker', 4]
         },
-        address:'0x956f47f50a910163d8bf957cf5846d573e7f87ca',
+        address: '0x956f47f50a910163d8bf957cf5846d573e7f87ca',
       },
 
       "idleDAI+idleUSDC+idleUSDT": {
@@ -2498,8 +2498,8 @@ const globalConfigs = {
             destCurrency: buyParams.selectedToken
               ? buyParams.selectedToken
               : props.tokenConfig.wyre && props.tokenConfig.wyre.destCurrency
-              ? props.tokenConfig.wyre.destCurrency
-              : props.selectedToken,
+                ? props.tokenConfig.wyre.destCurrency
+                : props.selectedToken,
             referrerAccountId,
             redirectUrl: globalConfigs.baseURL
             // failureRedirectUrl:globalConfigs.baseURL
@@ -2636,8 +2636,8 @@ const globalConfigs = {
             swapAsset: buyParams.selectedToken
               ? buyParams.selectedToken
               : props.tokenConfig.ramp && props.tokenConfig.ramp.swapAsset
-              ? props.tokenConfig.ramp.swapAsset
-              : props.selectedToken
+                ? props.tokenConfig.ramp.swapAsset
+                : props.selectedToken
           };
         },
         render: (initParams, amount, props, globalConfigs) => {
@@ -2795,8 +2795,8 @@ const globalConfigs = {
             ? buyParams.selectedToken.toLowerCase()
             : props.tokenConfig.transak &&
               props.tokenConfig.transak.currencyCode
-            ? props.tokenConfig.transak.currencyCode
-            : props.selectedToken;
+              ? props.tokenConfig.transak.currencyCode
+              : props.selectedToken;
           cryptoCurrencyCode = cryptoCurrencyCode.toUpperCase();
 
           const apiKey = envParams.apiKey;
@@ -2949,8 +2949,8 @@ const globalConfigs = {
               ? buyParams.selectedToken.toLowerCase()
               : props.tokenConfig.moonpay &&
                 props.tokenConfig.moonpay.currencyCode
-              ? props.tokenConfig.moonpay.currencyCode
-              : props.selectedToken.toLowerCase(),
+                ? props.tokenConfig.moonpay.currencyCode
+                : props.selectedToken.toLowerCase(),
             walletAddress: props.account,
             baseCurrencyCode: "USD",
             showWalletAddressForm: true
@@ -3123,19 +3123,19 @@ const globalConfigs = {
             chainId: globalConfigs.network.requiredNetwork,
             provider:
               connectorName &&
-              connectorName !== "Injected" &&
-              window.RimbleWeb3_context.connector[connectorName.toLowerCase()]
+                connectorName !== "Injected" &&
+                window.RimbleWeb3_context.connector[connectorName.toLowerCase()]
                 ? window.RimbleWeb3_context.connector[
-                    window.RimbleWeb3_context.connectorName.toLowerCase()
-                  ].provider
+                  window.RimbleWeb3_context.connectorName.toLowerCase()
+                ].provider
                 : window.ethereum,
             orderSource: tokenParams.zeroExInstant.orderSource,
             affiliateInfo: tokenParams.zeroExInstant.affiliateInfo,
             defaultSelectedAssetData: tokenParams.zeroExInstant.assetData,
             availableAssetDatas: [tokenParams.zeroExInstant.assetData],
             shouldDisableAnalyticsTracking: true,
-            onSuccess: onSuccess ? onSuccess : () => {},
-            onClose: onClose ? onClose : () => {}
+            onSuccess: onSuccess ? onSuccess : () => { },
+            onClose: onClose ? onClose : () => { }
           };
         },
         render: (initParams, amount) => {
@@ -3330,8 +3330,8 @@ const globalConfigs = {
             mode: "buy",
             token: props.tokenConfig.address,
             baseToken: "ETH",
-            onComplete: onComplete ? onComplete : () => {},
-            onClose: onClose ? onClose : () => {}
+            onComplete: onComplete ? onComplete : () => { },
+            onClose: onClose ? onClose : () => { }
           };
         },
         render: (initParams, amount, props) => {
