@@ -1377,7 +1377,7 @@ class DepositRedeem extends Component {
     const viewOnly = this.props.connectorName === 'custom';
     const isDepositDisabled = this.props.tokenConfig.canDeposit && !this.props.tokenConfig.canDeposit.enabled;
     const depositDisabledMessage1 = isDepositDisabled && this.props.tokenConfig.canDeposit.disabledMessageKey ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageKey]) : null;
-    const depositDisabledMessage2 = isDepositDisabled && this.props.tokenConfig.canDeposit.disabledMessageKey && this.props.canRedeem ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageKey]) : null
+    const depositDisabledMessage2 = isDepositDisabled && this.props.tokenConfig.canDeposit.disabledMessageKey && this.props.canRedeem ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageKey]) : ""
     const depositDisabledMessage = depositDisabledMessage1 + depositDisabledMessage2;
     const govTokensDisabled = this.props.tokenConfig.govTokensDisabled;
     const govTokensEnabled = !govTokensDisabled && this.functionsUtil.getGlobalConfig(['strategies', this.props.selectedStrategy, 'govTokensEnabled']) && Object.keys(this.state.tokenGovTokens).length > 0;
@@ -1503,13 +1503,15 @@ class DepositRedeem extends Component {
                             <Text mb={2}>
                               Choose the action:
                           </Text>
-                            {isDepositDisabled && (<IconBox
-                              cardProps={{
-                                mt: 3
-                              }}
-                              icon={'Warning'}
-                              text={depositDisabledMessage}
-                            />)}
+                            {isDepositDisabled && (
+                              <IconBox
+                                cardProps={{
+                                  mt: 1,
+                                  mb: 3
+                                }}
+                                icon={'Warning'}
+                                text={depositDisabledMessage}
+                              />)}
                             <Flex
                               alignItems={'center'}
                               flexDirection={'row'}
@@ -1525,6 +1527,7 @@ class DepositRedeem extends Component {
                                 }}
                                 isInteractive={true}
                                 isActive={this.state.action === 'deposit'}
+                                isDisabled={isDepositDisabled}
                               >
                                 <Flex
                                   my={1}

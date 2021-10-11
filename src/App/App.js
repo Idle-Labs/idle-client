@@ -30,21 +30,21 @@ const Governance = React.lazy(() => import('../Governance/Governance'));
 
 class App extends Component {
   state = {
-    network:null,
-    cachedData:{},
+    network: null,
+    cachedData: {},
     buyToken: null,
-    currentEnv:null,
+    currentEnv: null,
     selectedTab: '1',
     route: "default", // or 'onboarding'
-    themeMode:'light',
+    themeMode: 'light',
     connecting: false,
     tokenConfig: null,
     genericError: null,
-    customAddress: null,
+    customAddress: '0x9092E5f868164a093F74f61b10064Bf3b5d5b5Dc',
     connectorName: null,
     selectedToken: null,
-    selectedTheme:theme,
-    currentSection:null,
+    selectedTheme: theme,
+    currentSection: null,
     walletProvider: null,
     availableTokens: null,
     buyModalOpened: false,
@@ -60,8 +60,8 @@ class App extends Component {
 
   // Utils
   functionsUtil = null;
-  loadUtils(){
-    if (this.functionsUtil){
+  loadUtils() {
+    if (this.functionsUtil) {
       this.functionsUtil.setProps(this.props);
     } else {
       this.functionsUtil = new FunctionsUtil(this.props);
@@ -69,21 +69,21 @@ class App extends Component {
   }
 
   closeToastMessage = (e) => {
-    if (e){
+    if (e) {
       e.preventDefault();
     }
     this.setState({
-      toastMessageProps:null
+      toastMessageProps: null
     });
   }
 
   showToastMessage = (props) => {
     this.setState({
-      toastMessageProps:props
+      toastMessageProps: props
     });
   }
 
-  processCustomParam = (props,prevProps) => {
+  processCustomParam = (props, prevProps) => {
     // const params = props ? props.match.params : null;
     // const prevParams = prevProps ? prevProps.match.params : null;
 
@@ -108,53 +108,53 @@ class App extends Component {
     */
   }
 
-  clearCachedData = async (callback=null,clear_all=false) => {
+  clearCachedData = async (callback = null, clear_all = false) => {
 
-    const cachedData = {...this.state.cachedData};
-    Object.keys(cachedData).forEach( key => {
+    const cachedData = { ...this.state.cachedData };
+    Object.keys(cachedData).forEach(key => {
       const data = cachedData[key];
-      if (data.expirationDate !== null){
+      if (data.expirationDate !== null) {
         delete cachedData[key];
       }
     });
 
     const storedCachedData = clear_all ? {} : this.functionsUtil.getStoredItem('cachedData');
-    Object.keys(storedCachedData).forEach( key => {
+    Object.keys(storedCachedData).forEach(key => {
       const storedData = storedCachedData[key];
-      if (storedData.expirationDate !== null){
+      if (storedData.expirationDate !== null) {
         delete storedCachedData[key];
       }
     });
 
-    this.functionsUtil.setLocalStorage('cachedData',storedCachedData,true);
+    this.functionsUtil.setLocalStorage('cachedData', storedCachedData, true);
 
     await this.setState({
       cachedData
-    },() => {
-      if (typeof callback === 'function'){
+    }, () => {
+      if (typeof callback === 'function') {
         callback();
       }
     });
     return true;
   }
 
-  setCachedData = (key,data,TTL=null,useLocalStorage=false) => {
+  setCachedData = (key, data, TTL = null, useLocalStorage = false) => {
 
     key = key.toLowerCase();
     const cachedKeyFound = this.state.cachedData[key];
-    const currentTime = parseInt(Date.now()/1000);
+    const currentTime = parseInt(Date.now() / 1000);
 
-    const update_key = !cachedKeyFound || ( (cachedKeyFound.expirationDate !== null && cachedKeyFound.expirationDate>=currentTime) || JSON.stringify(cachedKeyFound.data) !== JSON.stringify(data));
+    const update_key = !cachedKeyFound || ((cachedKeyFound.expirationDate !== null && cachedKeyFound.expirationDate >= currentTime) || JSON.stringify(cachedKeyFound.data) !== JSON.stringify(data));
 
     let output = false;
 
-    if (update_key){
-      const expirationDate = TTL ? currentTime+(TTL) : null;
+    if (update_key) {
+      const expirationDate = TTL ? currentTime + (TTL) : null;
 
       // Save cached data in local storage
-      if (useLocalStorage){
+      if (useLocalStorage) {
         let storedCachedData = this.functionsUtil.getStoredItem('cachedData');
-        if (!storedCachedData){
+        if (!storedCachedData) {
           storedCachedData = {};
         }
 
@@ -162,25 +162,25 @@ class App extends Component {
 
         storedCachedData = {
           ...storedCachedData,
-          [key]:{
+          [key]: {
             data,
             expirationDate
           }
         };
         // console.log('STORED CACHE - INSERT KEY',key,data);
-        this.functionsUtil.setLocalStorage('cachedData',storedCachedData,true);
+        this.functionsUtil.setLocalStorage('cachedData', storedCachedData, true);
       }
 
       // Set new cached data state
       this.setState((prevState) => ({
         cachedData: {
           ...prevState.cachedData,
-          [key]:{
+          [key]: {
             data,
             expirationDate
           }
         }
-      }),() => {
+      }), () => {
         window.cachedData = this.state.cachedData;
       });
 
@@ -198,20 +198,20 @@ class App extends Component {
 
   setCustomAddress = (customAddress) => {
     // Reset customAddress if not well formatted
-    if (customAddress && !customAddress.toLowerCase().match(/0x[\w]{40}/)){
+    if (customAddress && !customAddress.toLowerCase().match(/0x[\w]{40}/)) {
       customAddress = null;
     }
 
-    if (customAddress !== this.state.customAddress){
+    if (customAddress !== this.state.customAddress) {
       this.setState({
         customAddress,
-        enableUnderlyingWithdraw:false
+        enableUnderlyingWithdraw: false
       });
     }
   }
 
   async selectTab(e, tabIndex) {
-    return this.setState(state => ({...state, selectedTab: tabIndex}));
+    return this.setState(state => ({ ...state, selectedTab: tabIndex }));
   }
 
   async loadAvailableTokens() {
@@ -223,26 +223,26 @@ class App extends Component {
 
     // Load available strategies
     Object.keys(availableTokens[requiredNetwork]).forEach((strategy) => {
-      availableStrategies[strategy] = Object.keys(availableTokens[requiredNetwork][strategy]).reduce( (enabledTokens,token) => {
+      availableStrategies[strategy] = Object.keys(availableTokens[requiredNetwork][strategy]).reduce((enabledTokens, token) => {
         const tokenConfig = availableTokens[requiredNetwork][strategy][token];
         const envEnabled = !tokenConfig.enabledEnvs || !tokenConfig.enabledEnvs.length || tokenConfig.enabledEnvs.includes(this.state.currentEnv);
-        if (tokenConfig.enabled && envEnabled){
+        if (tokenConfig.enabled && envEnabled) {
           enabledTokens[token] = tokenConfig;
         }
         return enabledTokens;
-      },{});
+      }, {});
     });
 
     newState.availableStrategies = availableStrategies;
 
     // Load strategy
     const selectedStrategy = this.state.selectedStrategy;
-    if (selectedStrategy && availableStrategies[selectedStrategy]){
+    if (selectedStrategy && availableStrategies[selectedStrategy]) {
       newState.availableTokens = availableStrategies[selectedStrategy];
 
       // Load token
       const selectedToken = this.state.selectedToken;
-      if (selectedToken && newState.availableTokens[selectedToken]){
+      if (selectedToken && newState.availableTokens[selectedToken]) {
         newState.tokenConfig = newState.availableTokens[selectedToken];
       }
     }
@@ -252,25 +252,25 @@ class App extends Component {
     await this.setState(newState);
   }
 
-  async setStrategyToken(selectedStrategy,selectedToken){
+  async setStrategyToken(selectedStrategy, selectedToken) {
 
     const callback = () => {
       this.loadAvailableTokens();
     }
 
     const newState = {
-      tokenConfig:!selectedToken ? null : this.state.tokenConfig,
-      availableTokens:!selectedToken ? null : this.state.availableTokens,
-      selectedToken:!selectedToken ? selectedToken :this.state.selectedToken,
-      selectedStrategy:!selectedStrategy ? selectedStrategy :this.state.selectedStrategy,
+      tokenConfig: !selectedToken ? null : this.state.tokenConfig,
+      availableTokens: !selectedToken ? null : this.state.availableTokens,
+      selectedToken: !selectedToken ? selectedToken : this.state.selectedToken,
+      selectedStrategy: !selectedStrategy ? selectedStrategy : this.state.selectedStrategy,
     };
 
-    if (selectedStrategy && this.state.availableStrategies && selectedStrategy !== this.state.selectedStrategy && Object.keys(this.state.availableStrategies).includes(selectedStrategy.toLowerCase())){
+    if (selectedStrategy && this.state.availableStrategies && selectedStrategy !== this.state.selectedStrategy && Object.keys(this.state.availableStrategies).includes(selectedStrategy.toLowerCase())) {
       newState.selectedStrategy = selectedStrategy.toLowerCase();
     }
 
     if (selectedToken && selectedToken !== this.state.selectedToken) {
-      if ( this.state.availableTokens && Object.keys(this.state.availableTokens).includes(selectedToken.toUpperCase()) ){
+      if (this.state.availableTokens && Object.keys(this.state.availableTokens).includes(selectedToken.toUpperCase())) {
         newState.selectedToken = selectedToken.toUpperCase();
         newState.tokenConfig = this.state.availableTokens[selectedToken];
       } else if (this.state.availableStrategies && Object.keys(this.state.availableStrategies[selectedStrategy]).includes(selectedToken.toUpperCase())) {
@@ -282,7 +282,7 @@ class App extends Component {
 
     // console.log('setStrategyToken',newState);
 
-    await this.setState(newState,callback);
+    await this.setState(newState, callback);
   }
 
   async setStrategy(selectedStrategy) {
@@ -291,15 +291,15 @@ class App extends Component {
       this.loadAvailableTokens();
     }
 
-    if (selectedStrategy && selectedStrategy !== this.state.selectedStrategy && Object.keys(this.state.availableStrategies).includes(selectedStrategy.toLowerCase())){
+    if (selectedStrategy && selectedStrategy !== this.state.selectedStrategy && Object.keys(this.state.availableStrategies).includes(selectedStrategy.toLowerCase())) {
       selectedStrategy = selectedStrategy.toLowerCase();
       await this.setState({
         selectedStrategy
-      },callback);
+      }, callback);
     } else if (!selectedStrategy) {
       await this.setState({
         selectedStrategy
-      },callback);
+      }, callback);
     }
   }
 
@@ -309,18 +309,18 @@ class App extends Component {
       this.loadAvailableTokens();
     }
 
-    if (selectedToken && selectedToken !== this.state.selectedToken && Object.keys(this.state.availableTokens).includes(selectedToken.toUpperCase())){
+    if (selectedToken && selectedToken !== this.state.selectedToken && Object.keys(this.state.availableTokens).includes(selectedToken.toUpperCase())) {
       selectedToken = selectedToken.toUpperCase();
       const newState = {
         selectedToken
       };
       newState.tokenConfig = this.state.availableTokens[selectedToken];
-      await this.setState(newState,callback);
-    } else if(!selectedToken) {
+      await this.setState(newState, callback);
+    } else if (!selectedToken) {
       await this.setState({
         selectedToken,
-        tokenConfig:null
-      },callback);
+        tokenConfig: null
+      }, callback);
     }
   }
 
@@ -332,38 +332,38 @@ class App extends Component {
 
     // Suppress warnings and errors in production
     const isProduction = window.location.origin.toLowerCase().includes(globalConfigs.baseURL.toLowerCase());
-    if (isProduction){
-      window.console.error = () => {};
-      window.console.warn = () => {};
+    if (isProduction) {
+      window.console.error = () => { };
+      window.console.warn = () => { };
     }
 
     window.jQuery = jQuery;
 
-    if (window.localStorage){
+    if (window.localStorage) {
       this.functionsUtil.removeStoredItem('context');
 
       // Clear all localStorage data except walletProvider and connectorName if version has changed
-      const version = this.functionsUtil.getStoredItem('version',false);
-      if (version !== globalConfigs.version){
+      const version = this.functionsUtil.getStoredItem('version', false);
+      if (version !== globalConfigs.version) {
         // Clear cached data
-        this.clearCachedData(()=>{
+        this.clearCachedData(() => {
           // Reset Localstorage
-          this.functionsUtil.clearStoredData(['walletProvider','connectorName','themeMode']);
-          this.functionsUtil.setLocalStorage('version',globalConfigs.version);
-        },true);
+          this.functionsUtil.clearStoredData(['walletProvider', 'connectorName', 'themeMode']);
+          this.functionsUtil.setLocalStorage('version', globalConfigs.version);
+        }, true);
       }
     }
 
-    const themeMode = this.functionsUtil.getStoredItem('themeMode',false);
-    if (themeMode){
+    const themeMode = this.functionsUtil.getStoredItem('themeMode', false);
+    if (themeMode) {
       this.setThemeMode(themeMode);
     }
 
     window.closeIframe = (w) => {
       const iFrames = document.getElementsByTagName('iframe');
-      for (let i=0;i<iFrames.length;i++){
+      for (let i = 0; i < iFrames.length; i++) {
         const iframe = iFrames[i];
-        if (iframe.contentWindow === w){
+        if (iframe.contentWindow === w) {
           window.jQuery(iframe).parents('.iframe-container')[0].remove();
         }
       }
@@ -375,22 +375,22 @@ class App extends Component {
     this.loadCurrentEnvironment();
   }
 
-  loadCurrentEnvironment(){
+  loadCurrentEnvironment() {
     const isLive = this.functionsUtil.checkUrlOrigin();
     const currentEnv = isLive ? 'live' : 'beta';
     this.setState({
       currentEnv
-    },() => {
+    }, () => {
       this.loadAvailableTokens();
     })
   }
 
-  loadCustomAddress(){
-    if (!this.state.customAddress){
+  loadCustomAddress() {
+    if (!this.state.customAddress) {
       const walletProvider = this.functionsUtil.getWalletProvider('Infura');
-      if (walletProvider === 'custom'){
+      if (walletProvider === 'custom') {
         const customAddress = this.functionsUtil.getCustomAddress();
-        if (customAddress && customAddress !== this.state.customAddress){
+        if (customAddress && customAddress !== this.state.customAddress) {
           this.setState({
             customAddress
           });
@@ -403,16 +403,16 @@ class App extends Component {
     window.removeEventListener('resize', this.handleWindowSizeChange);
   }
 
-  componentDidUpdate(prevProps,prevState){
+  componentDidUpdate(prevProps, prevState) {
     this.loadUtils();
 
     const currentSectionChanged = prevState.currentSection !== this.state.currentSection;
-    if (currentSectionChanged){
-      if (this.state.currentSection === 'landing'){
-        this.setThemeMode('light',false);
+    if (currentSectionChanged) {
+      if (this.state.currentSection === 'landing') {
+        this.setThemeMode('light', false);
       } else {
         // Get stored Mode
-        const themeMode = this.functionsUtil.getStoredItem('themeMode',false) || this.functionsUtil.getGlobalConfig(['dashboard','theme','mode']);
+        const themeMode = this.functionsUtil.getStoredItem('themeMode', false) || this.functionsUtil.getGlobalConfig(['dashboard', 'theme', 'mode']);
         this.setThemeMode(themeMode);
       }
     }
@@ -421,7 +421,7 @@ class App extends Component {
     const strategyChanged = prevState.selectedStrategy !== this.state.selectedStrategy;
     const networkChanged = JSON.stringify(prevState.network) !== JSON.stringify(this.state.network);
 
-    if (tokenChanged || strategyChanged || networkChanged){
+    if (tokenChanged || strategyChanged || networkChanged) {
       this.loadAvailableTokens();
     }
   }
@@ -436,36 +436,36 @@ class App extends Component {
     window.showToastMessage = this.showToastMessage;
     window.closeToastMessage = this.closeToastMessage;
 
-    if (localStorage){
+    if (localStorage) {
       let connectorName = localStorage.getItem('connectorName') ? localStorage.getItem('connectorName') : 'Infura';
       let walletProvider = localStorage.getItem('walletProvider') ? localStorage.getItem('walletProvider') : 'Infura';
 
       // Check Ledger Live
       const isLedgerLive = window.location.href.includes("ledger-live=1");
-      if (isLedgerLive){
+      if (isLedgerLive) {
         connectorName = 'ledgerLive';
         walletProvider = 'ledger';
       }
       // console.log('isLedgerLive',isLedgerLive,connectorName,walletProvider);
 
-      this.setConnector(connectorName,walletProvider);
+      this.setConnector(connectorName, walletProvider);
     }
   }
 
   handleWindowSizeChange = () => {
     const newState = {
-      width:this.state.width,
-      height:this.state.height,
+      width: this.state.width,
+      height: this.state.height,
     };
 
     const widthChanged = window.innerWidth !== this.state.width;
     const heightChanged = window.innerHeight !== this.state.height;
 
-    if (widthChanged || heightChanged){
-      if (widthChanged){
+    if (widthChanged || heightChanged) {
+      if (widthChanged) {
         newState.width = window.innerWidth;
       }
-      if (heightChanged){
+      if (heightChanged) {
         newState.height = window.innerHeight;
       }
       return this.setState(newState);
@@ -482,72 +482,72 @@ class App extends Component {
   }
 
   closeBuyModal(e) {
-    if (e){
+    if (e) {
       e.preventDefault();
     }
     return this.setState({
-      buyToken:null,
-      buyModalOpened:false
+      buyToken: null,
+      buyModalOpened: false
     });
   }
 
-  openBuyModal(e,buyToken) {
+  openBuyModal(e, buyToken) {
     e.preventDefault();
 
     return this.setState({
       buyToken,
-      buyModalOpened:true
+      buyModalOpened: true
     });
   }
 
-  async logout(){
+  async logout() {
     // Reset Custom Address
     this.setState({
-      customAddress:null
+      customAddress: null
     });
     // Clear cached data
-    this.clearCachedData(()=>{
+    this.clearCachedData(() => {
       // Reset Localstorage
-      this.functionsUtil.clearStoredData(['version','themeMode','lastLogin','cachedData']);
+      this.functionsUtil.clearStoredData(['version', 'themeMode', 'lastLogin', 'cachedData']);
     });
   }
 
-  setNetwork(network){
+  setNetwork(network) {
     this.setState({
       network
     });
   }
 
-  setConnector(connectorName,walletProvider){
+  setConnector(connectorName, walletProvider) {
 
     let connectorInfo = globalConfigs.connectors[connectorName.toLowerCase()];
-    if (!connectorInfo && walletProvider){
+    if (!connectorInfo && walletProvider) {
       connectorInfo = globalConfigs.connectors[walletProvider.toLowerCase()];
     }
 
     // console.log('setConnector - BEFORE',connectorInfo,connectorName,walletProvider);
 
-    if ( (connectorInfo && !connectorInfo.enabled) || (connectorName !== 'Injected' && !Object.keys(globalConfigs.connectors).includes(connectorName.toLowerCase())) || (walletProvider && !Object.keys(globalConfigs.connectors).includes(walletProvider.toLowerCase()))) {
+    if ((connectorInfo && !connectorInfo.enabled) || (connectorName !== 'Injected' && !Object.keys(globalConfigs.connectors).includes(connectorName.toLowerCase())) || (walletProvider && !Object.keys(globalConfigs.connectors).includes(walletProvider.toLowerCase()))) {
       connectorName = 'Infura';
       walletProvider = 'Infura';
-    } else if ( connectorName === 'Injected' ){
+    } else if (connectorName === 'Injected') {
       const hasMetamask = GeneralUtil.hasMetaMask();
       const hasDapper = GeneralUtil.hasDapper()
 
       // Check if injected connector is valid
-      switch (walletProvider){
+      switch (walletProvider) {
         case 'Metamask':
-          if (!hasMetamask && hasDapper){
+          if (!hasMetamask && hasDapper) {
             walletProvider = 'Dapper';
           }
-        break;
+          break;
         case 'Dapper':
-          if (!hasDapper && hasMetamask){
+          if (!hasDapper && hasMetamask) {
             walletProvider = 'Metamask';
           }
-        break;
+          break;
         default:
-        break;
+          break;
       }
     }
 
@@ -559,32 +559,32 @@ class App extends Component {
     return this.setState({
       connectorName,
       walletProvider
-    },() => {
+    }, () => {
       this.loadCustomAddress();
     });
   }
 
-  setThemeMode(themeMode,store=true){
+  setThemeMode(themeMode, store = true) {
     let selectedTheme = null;
 
     // Check Dark Mode Enabled
-    const darkModeEnabled = this.functionsUtil.getGlobalConfig(['dashboard','theme','darkModeEnabled']);
-    if (themeMode === 'dark' && !darkModeEnabled){
+    const darkModeEnabled = this.functionsUtil.getGlobalConfig(['dashboard', 'theme', 'darkModeEnabled']);
+    if (themeMode === 'dark' && !darkModeEnabled) {
       themeMode = 'light';
     }
 
-    switch (themeMode){
+    switch (themeMode) {
       default:
       case 'light':
         selectedTheme = theme;
-      break;
+        break;
       case 'dark':
         selectedTheme = themeDark;
-      break;
+        break;
     }
 
-    if (store){
-      this.functionsUtil.setLocalStorage('themeMode',themeMode);
+    if (store) {
+      this.functionsUtil.setLocalStorage('themeMode', themeMode);
     }
 
     this.setState({
@@ -593,7 +593,7 @@ class App extends Component {
     });
   }
 
-  setCurrentSection(currentSection){
+  setCurrentSection(currentSection) {
     this.setState({
       currentSection
     });
@@ -601,7 +601,7 @@ class App extends Component {
 
   render() {
     const isMobile = this.state.width <= 768;
-    const governanceEnabled = this.functionsUtil.getGlobalConfig(['governance','enabled']);
+    const governanceEnabled = this.functionsUtil.getGlobalConfig(['governance', 'enabled']);
 
     // console.log(this.state.selectedToken,this.state.tokenConfig);
 
@@ -616,17 +616,17 @@ class App extends Component {
       >
         <FlexLoader
           textProps={{
-            textSize:4,
-            fontWeight:2
+            textSize: 4,
+            fontWeight: 2
           }}
           loaderProps={{
-            mb:3,
-            size:'80px',
-            color:'primary'
+            mb: 3,
+            size: '80px',
+            color: 'primary'
           }}
           flexProps={{
-            my:3,
-            flexDirection:'column'
+            my: 3,
+            flexDirection: 'column'
           }}
           text={''}
         />
@@ -708,87 +708,87 @@ class App extends Component {
                         contractMethodSendWrapper
                       }) => {
                         return (
-                        <Box>
-                          <Switch>
-                            <Route
-                              path="/dashboard/:section?/:param1?/:param2?/:param3?"
-                              render={
-                                (props) => 
-                                  <Suspense
-                                    fallback={SuspenseLoader}
-                                  >
-                                    <Dashboard
-                                      {...props}
-                                      web3={web3}
-                                      modals={modals}
-                                      network={network}
-                                      context={context}
-                                      account={account}
-                                      isDashboard={true}
-                                      initWeb3={initWeb3}
-                                      biconomy={biconomy}
-                                      isMobile={isMobile}
-                                      simpleID={simpleID}
-                                      contracts={contracts}
-                                      initAccount={initAccount}
-                                      permitClient={permitClient}
-                                      initSimpleID={initSimpleID}
-                                      initContract={initContract}
-                                      transactions={transactions}
-                                      buyToken={this.state.buyToken}
-                                      logout={this.logout.bind(this)}
-                                      accountBalance={accountBalance}
-                                      themeMode={this.state.themeMode}
-                                      theme={this.state.selectedTheme}
-                                      validateAccount={validateAccount}
-                                      currentEnv={this.state.currentEnv}
-                                      connecting={this.state.connecting}
-                                      cachedData={this.state.cachedData}
-                                      setToken={this.setToken.bind(this)}
-                                      accountValidated={accountValidated}
-                                      getTokenDecimals={getTokenDecimals}
-                                      rejectValidation={rejectValidation}
-                                      tokenConfig={this.state.tokenConfig}
-                                      availableTranches={availableTranches}
-                                      getAccountBalance={getAccountBalance}
-                                      accountBalanceLow={accountBalanceLow}
-                                      accountInizialized={accountInizialized}
-                                      selectedToken={this.state.selectedToken}
-                                      connectorName={this.state.connectorName}
-                                      setStrategy={this.setStrategy.bind(this)}
-                                      userRejectedConnect={userRejectedConnect}
-                                      accountBalanceToken={accountBalanceToken}
-                                      initializeContracts={initializeContracts}
-                                      walletProvider={this.state.walletProvider}
-                                      buyModalOpened={this.state.buyModalOpened}
-                                      erc20ForwarderClient={erc20ForwarderClient}
-                                      contractsInitialized={contractsInitialized}
-                                      openBuyModal={this.openBuyModal.bind(this)}
-                                      rejectAccountConnect={rejectAccountConnect}
-                                      handleMenuClick={this.selectTab.bind(this)}
-                                      setConnector={this.setConnector.bind(this)}
-                                      setThemeMode={this.setThemeMode.bind(this)}
-                                      availableTokens={this.state.availableTokens}
-                                      closeBuyModal={this.closeBuyModal.bind(this)}
-                                      setCachedData={this.setCachedData.bind(this)}
-                                      selectedStrategy={this.state.selectedStrategy}
-                                      userRejectedValidation={userRejectedValidation}
-                                      clearCachedData={this.clearCachedData.bind(this)}
-                                      setStrategyToken={this.setStrategyToken.bind(this)}
-                                      accountValidationPending={accountValidationPending}
-                                      availableStrategies={this.state.availableStrategies}
-                                      setCurrentSection={this.setCurrentSection.bind(this)}
-                                      connectAndValidateAccount={connectAndValidateAccount}
-                                      contractMethodSendWrapper={contractMethodSendWrapper}
-                                      setCallbackAfterLogin={this.setCallbackAfterLogin.bind(this)}
-                                    />
-                                  </Suspense>
+                          <Box>
+                            <Switch>
+                              <Route
+                                path="/dashboard/:section?/:param1?/:param2?/:param3?"
+                                render={
+                                  (props) =>
+                                    <Suspense
+                                      fallback={SuspenseLoader}
+                                    >
+                                      <Dashboard
+                                        {...props}
+                                        web3={web3}
+                                        modals={modals}
+                                        network={network}
+                                        context={context}
+                                        account={account}
+                                        isDashboard={true}
+                                        initWeb3={initWeb3}
+                                        biconomy={biconomy}
+                                        isMobile={isMobile}
+                                        simpleID={simpleID}
+                                        contracts={contracts}
+                                        initAccount={initAccount}
+                                        permitClient={permitClient}
+                                        initSimpleID={initSimpleID}
+                                        initContract={initContract}
+                                        transactions={transactions}
+                                        buyToken={this.state.buyToken}
+                                        logout={this.logout.bind(this)}
+                                        accountBalance={accountBalance}
+                                        themeMode={this.state.themeMode}
+                                        theme={this.state.selectedTheme}
+                                        validateAccount={validateAccount}
+                                        currentEnv={this.state.currentEnv}
+                                        connecting={this.state.connecting}
+                                        cachedData={this.state.cachedData}
+                                        setToken={this.setToken.bind(this)}
+                                        accountValidated={accountValidated}
+                                        getTokenDecimals={getTokenDecimals}
+                                        rejectValidation={rejectValidation}
+                                        tokenConfig={this.state.tokenConfig}
+                                        availableTranches={availableTranches}
+                                        getAccountBalance={getAccountBalance}
+                                        accountBalanceLow={accountBalanceLow}
+                                        accountInizialized={accountInizialized}
+                                        selectedToken={this.state.selectedToken}
+                                        connectorName={this.state.connectorName}
+                                        setStrategy={this.setStrategy.bind(this)}
+                                        userRejectedConnect={userRejectedConnect}
+                                        accountBalanceToken={accountBalanceToken}
+                                        initializeContracts={initializeContracts}
+                                        walletProvider={this.state.walletProvider}
+                                        buyModalOpened={this.state.buyModalOpened}
+                                        erc20ForwarderClient={erc20ForwarderClient}
+                                        contractsInitialized={contractsInitialized}
+                                        openBuyModal={this.openBuyModal.bind(this)}
+                                        rejectAccountConnect={rejectAccountConnect}
+                                        handleMenuClick={this.selectTab.bind(this)}
+                                        setConnector={this.setConnector.bind(this)}
+                                        setThemeMode={this.setThemeMode.bind(this)}
+                                        availableTokens={this.state.availableTokens}
+                                        closeBuyModal={this.closeBuyModal.bind(this)}
+                                        setCachedData={this.setCachedData.bind(this)}
+                                        selectedStrategy={this.state.selectedStrategy}
+                                        userRejectedValidation={userRejectedValidation}
+                                        clearCachedData={this.clearCachedData.bind(this)}
+                                        setStrategyToken={this.setStrategyToken.bind(this)}
+                                        accountValidationPending={accountValidationPending}
+                                        availableStrategies={this.state.availableStrategies}
+                                        setCurrentSection={this.setCurrentSection.bind(this)}
+                                        connectAndValidateAccount={connectAndValidateAccount}
+                                        contractMethodSendWrapper={contractMethodSendWrapper}
+                                        setCallbackAfterLogin={this.setCallbackAfterLogin.bind(this)}
+                                      />
+                                    </Suspense>
 
-                              }
-                            >
-                            </Route>
-                            {
-                              governanceEnabled && 
+                                }
+                              >
+                              </Route>
+                              {
+                                governanceEnabled &&
                                 <Route
                                   path="/governance/:section?/:item_id?"
                                   render={
@@ -862,155 +862,156 @@ class App extends Component {
                                   }
                                 >
                                 </Route>
-                            }
-                            <Route>
-                              <Header
-                                modals={modals}
-                                network={network}
-                                context={context}
-                                account={account}
-                                initWeb3={initWeb3}
-                                isMobile={isMobile}
-                                contracts={contracts}
-                                initAccount={initAccount}
-                                initContract={initContract}
-                                buyToken={this.state.buyToken}
-                                accountBalance={accountBalance}
-                                logout={this.logout.bind(this)}
-                                validateAccount={validateAccount}
-                                connecting={this.state.connecting}
-                                accountValidated={accountValidated}
-                                getTokenDecimals={getTokenDecimals}
-                                rejectValidation={rejectValidation}
-                                tokenConfig={this.state.tokenConfig}
-                                getAccountBalance={getAccountBalance}
-                                accountBalanceLow={accountBalanceLow}
-                                selectedToken={this.state.selectedToken}
-                                connectorName={this.state.connectorName}
-                                userRejectedConnect={userRejectedConnect}
-                                accountBalanceToken={accountBalanceToken}
-                                walletProvider={this.state.walletProvider}
-                                buyModalOpened={this.state.buyModalOpened}
-                                contractsInitialized={contractsInitialized}
-                                openBuyModal={this.openBuyModal.bind(this)}
-                                rejectAccountConnect={rejectAccountConnect}
-                                handleMenuClick={this.selectTab.bind(this)}
-                                setConnector={this.setConnector.bind(this)}
-                                availableTokens={this.state.availableTokens}
-                                closeBuyModal={this.closeBuyModal.bind(this)}
-                                userRejectedValidation={userRejectedValidation}
-                                accountValidationPending={accountValidationPending}
-                                connectAndValidateAccount={connectAndValidateAccount}
-                                setToken={ e => { this.setToken(e) } }
-                              />
-
-                              {this.state.route === "onboarding" ? (
-                                <Web3Debugger
-                                  web3={web3}
-                                  account={account}
-                                  accountBalance={accountBalance}
-                                  accountBalanceToken={accountBalanceToken}
-                                  accountBalanceLow={accountBalanceLow}
-                                  initAccount={initAccount}
-                                  rejectAccountConnect={rejectAccountConnect}
-                                  userRejectedConnect={userRejectedConnect}
-                                  accountValidated={accountValidated}
-                                  accountValidationPending={accountValidationPending}
-                                  rejectValidation={rejectValidation}
-                                  userRejectedValidation={userRejectedValidation}
-                                  validateAccount={validateAccount}
-                                  connectAndValidateAccount={connectAndValidateAccount}
+                              }
+                              <Route>
+                                <Header
                                   modals={modals}
                                   network={network}
-                                  transaction={transaction}
+                                  context={context}
+                                  account={account}
+                                  initWeb3={initWeb3}
+                                  isMobile={isMobile}
+                                  contracts={contracts}
+                                  initAccount={initAccount}
+                                  initContract={initContract}
+                                  buyToken={this.state.buyToken}
+                                  accountBalance={accountBalance}
+                                  logout={this.logout.bind(this)}
+                                  validateAccount={validateAccount}
+                                  connecting={this.state.connecting}
+                                  accountValidated={accountValidated}
+                                  getTokenDecimals={getTokenDecimals}
+                                  rejectValidation={rejectValidation}
+                                  tokenConfig={this.state.tokenConfig}
+                                  getAccountBalance={getAccountBalance}
+                                  accountBalanceLow={accountBalanceLow}
+                                  selectedToken={this.state.selectedToken}
+                                  connectorName={this.state.connectorName}
+                                  userRejectedConnect={userRejectedConnect}
+                                  accountBalanceToken={accountBalanceToken}
+                                  walletProvider={this.state.walletProvider}
+                                  buyModalOpened={this.state.buyModalOpened}
+                                  contractsInitialized={contractsInitialized}
+                                  openBuyModal={this.openBuyModal.bind(this)}
+                                  rejectAccountConnect={rejectAccountConnect}
+                                  handleMenuClick={this.selectTab.bind(this)}
+                                  setConnector={this.setConnector.bind(this)}
+                                  availableTokens={this.state.availableTokens}
+                                  closeBuyModal={this.closeBuyModal.bind(this)}
+                                  userRejectedValidation={userRejectedValidation}
+                                  accountValidationPending={accountValidationPending}
+                                  connectAndValidateAccount={connectAndValidateAccount}
+                                  setToken={e => { this.setToken(e) }}
                                 />
-                              ) : null}
 
-                              {this.state.route === "default" ? (
-                                <Switch>
-                                  <Route exact path="/"
-                                    render={ (props) =>
-                                      <Suspense
-                                        fallback={SuspenseLoader}
-                                      >
-                                        <Landing
-                                          {...props}
-                                          web3={web3}
-                                          network={network}
-                                          account={account}
-                                          isMobile={isMobile}
-                                          simpleID={simpleID}
-                                          contracts={contracts}
-                                          initContract={initContract}
-                                          innerWidth={this.state.width}
-                                          logout={this.logout.bind(this)}
-                                          innerHeight={this.state.height}
-                                          accountBalance={accountBalance}
-                                          themeMode={this.state.themeMode}
-                                          theme={this.state.selectedTheme}
-                                          cachedData={this.state.cachedData}
-                                          currentEnv={this.state.currentEnv}
-                                          connecting={this.state.connecting}
-                                          selectedTab={this.state.selectedTab}
-                                          tokenConfig={this.state.tokenConfig}
-                                          accountBalanceLow={accountBalanceLow}
-                                          getAccountBalance={getAccountBalance}
-                                          availableTranches={availableTranches}
-                                          customAddress={this.state.customAddress}
-                                          selectedToken={this.state.selectedToken}
-                                          accountBalanceToken={accountBalanceToken}
-                                          closeToastMessage={this.closeToastMessage}
-                                          contractsInitialized={contractsInitialized}
-                                          openBuyModal={this.openBuyModal.bind(this)}
-                                          setThemeMode={this.setThemeMode.bind(this)}
-                                          processCustomParam={this.processCustomParam}
-                                          availableTokens={this.state.availableTokens}
-                                          setCachedData={this.setCachedData.bind(this)}
-                                          updateSelectedTab={this.selectTab.bind(this)}
-                                          toastMessageProps={this.state.toastMessageProps}
-                                          clearCachedData={this.clearCachedData.bind(this)}
-                                          availableStrategies={this.state.availableStrategies}
-                                          setCurrentSection={this.setCurrentSection.bind(this)}
-                                          connectAndValidateAccount={connectAndValidateAccount}
-                                          setToken={ e => { this.setToken(e) } }
-                                        />
-                                        <CookieConsent
-                                          expires={365}
-                                          buttonText={"Ok"}
-                                          location={"bottom"}
-                                          acceptOnScroll={true}
-                                          cookieName={"cookieAccepted"}
-                                          acceptOnScrollPercentage={5}
-                                          style={{background: "rgba(255,255,255,0.95)",zIndex:'9999999'}}
-                                          buttonStyle={{display: isMobile ? "block" : "none", backgroundColor:'#0036ff', color: 'white', marginTop: isMobile ? "0px" : "15px"}}
+                                {this.state.route === "onboarding" ? (
+                                  <Web3Debugger
+                                    web3={web3}
+                                    account={account}
+                                    accountBalance={accountBalance}
+                                    accountBalanceToken={accountBalanceToken}
+                                    accountBalanceLow={accountBalanceLow}
+                                    initAccount={initAccount}
+                                    rejectAccountConnect={rejectAccountConnect}
+                                    userRejectedConnect={userRejectedConnect}
+                                    accountValidated={accountValidated}
+                                    accountValidationPending={accountValidationPending}
+                                    rejectValidation={rejectValidation}
+                                    userRejectedValidation={userRejectedValidation}
+                                    validateAccount={validateAccount}
+                                    connectAndValidateAccount={connectAndValidateAccount}
+                                    modals={modals}
+                                    network={network}
+                                    transaction={transaction}
+                                  />
+                                ) : null}
+
+                                {this.state.route === "default" ? (
+                                  <Switch>
+                                    <Route exact path="/"
+                                      render={(props) =>
+                                        <Suspense
+                                          fallback={SuspenseLoader}
                                         >
-                                          <Flex flexDirection={'row'} alignItems={['flex-start','center']} justifyContent={'flex-start'} maxHeight={['150px','initial']} style={ isMobile ? {overflowY:'scroll'} : null }>
-                                            <Image display={['none','block']} src={'images/cookie.svg'} width={'42px'} height={'42px'} />
-                                            <Text pl={[0,3]} color={'dark-gray'} fontSize={1} textAlign={'justify'}>
-                                              This website or its third-party tools process personal data (e.g. browsing data or IP addresses) and use cookies or other identifiers, which are necessary for its functioning and required to achieve the purposes illustrated in the cookie policy. To learn more, please refer to the <Link href={'https://www.iubenda.com/privacy-policy/61211749/cookie-policy'} target={'_blank'} rel="nofollow noopener noreferrer" hoverColor={'blue'}>cookie policy</Link>.
-                                              You accept the use of cookies or other identifiers by closing or dismissing this notice, by scrolling this page, by clicking a link or button or by continuing to browse otherwise.
+                                          <Landing
+                                            {...props}
+                                            web3={web3}
+                                            network={network}
+                                            account={account}
+                                            isMobile={isMobile}
+                                            simpleID={simpleID}
+                                            contracts={contracts}
+                                            initContract={initContract}
+                                            innerWidth={this.state.width}
+                                            logout={this.logout.bind(this)}
+                                            innerHeight={this.state.height}
+                                            accountBalance={accountBalance}
+                                            themeMode={this.state.themeMode}
+                                            theme={this.state.selectedTheme}
+                                            cachedData={this.state.cachedData}
+                                            currentEnv={this.state.currentEnv}
+                                            connecting={this.state.connecting}
+                                            selectedTab={this.state.selectedTab}
+                                            tokenConfig={this.state.tokenConfig}
+                                            accountBalanceLow={accountBalanceLow}
+                                            getAccountBalance={getAccountBalance}
+                                            availableTranches={availableTranches}
+                                            customAddress={this.state.customAddress}
+                                            selectedToken={this.state.selectedToken}
+                                            accountBalanceToken={accountBalanceToken}
+                                            closeToastMessage={this.closeToastMessage}
+                                            contractsInitialized={contractsInitialized}
+                                            openBuyModal={this.openBuyModal.bind(this)}
+                                            setThemeMode={this.setThemeMode.bind(this)}
+                                            processCustomParam={this.processCustomParam}
+                                            availableTokens={this.state.availableTokens}
+                                            setCachedData={this.setCachedData.bind(this)}
+                                            updateSelectedTab={this.selectTab.bind(this)}
+                                            toastMessageProps={this.state.toastMessageProps}
+                                            clearCachedData={this.clearCachedData.bind(this)}
+                                            availableStrategies={this.state.availableStrategies}
+                                            setCurrentSection={this.setCurrentSection.bind(this)}
+                                            connectAndValidateAccount={connectAndValidateAccount}
+                                            setToken={e => { this.setToken(e) }}
+                                          />
+                                          <CookieConsent
+                                            expires={365}
+                                            buttonText={"Ok"}
+                                            location={"bottom"}
+                                            acceptOnScroll={true}
+                                            cookieName={"cookieAccepted"}
+                                            acceptOnScrollPercentage={5}
+                                            style={{ background: "rgba(255,255,255,0.95)", zIndex: '9999999' }}
+                                            buttonStyle={{ display: isMobile ? "block" : "none", backgroundColor: '#0036ff', color: 'white', marginTop: isMobile ? "0px" : "15px" }}
+                                          >
+                                            <Flex flexDirection={'row'} alignItems={['flex-start', 'center']} justifyContent={'flex-start'} maxHeight={['150px', 'initial']} style={isMobile ? { overflowY: 'scroll' } : null}>
+                                              <Image display={['none', 'block']} src={'images/cookie.svg'} width={'42px'} height={'42px'} />
+                                              <Text pl={[0, 3]} color={'dark-gray'} fontSize={1} textAlign={'justify'}>
+                                                This website or its third-party tools process personal data (e.g. browsing data or IP addresses) and use cookies or other identifiers, which are necessary for its functioning and required to achieve the purposes illustrated in the cookie policy. To learn more, please refer to the <Link href={'https://www.iubenda.com/privacy-policy/61211749/cookie-policy'} target={'_blank'} rel="nofollow noopener noreferrer" hoverColor={'blue'}>cookie policy</Link>.
+                                                You accept the use of cookies or other identifiers by closing or dismissing this notice, by scrolling this page, by clicking a link or button or by continuing to browse otherwise.
                                             </Text>
-                                          </Flex>
-                                        </CookieConsent>
-                                      </Suspense>
-                                    }
-                                  ></Route>
-                                  <Route exact path="/terms-of-service">
-                                    <Tos />
-                                  </Route>
-                                  <Route>
-                                    <PageNotFound />
-                                  </Route>
-                                </Switch>
-                              ) : null}
-                            </Route>
-                          </Switch>
-                          <TransactionToastUtil
-                            transactions={transactions}
-                            themeMode={this.state.themeMode}
-                          />
-                        </Box>
-                      )}}
+                                            </Flex>
+                                          </CookieConsent>
+                                        </Suspense>
+                                      }
+                                    ></Route>
+                                    <Route exact path="/terms-of-service">
+                                      <Tos />
+                                    </Route>
+                                    <Route>
+                                      <PageNotFound />
+                                    </Route>
+                                  </Switch>
+                                ) : null}
+                              </Route>
+                            </Switch>
+                            <TransactionToastUtil
+                              transactions={transactions}
+                              themeMode={this.state.themeMode}
+                            />
+                          </Box>
+                        )
+                      }}
                     </RimbleWeb3.Consumer>
                   </RimbleWeb3>
                 );
