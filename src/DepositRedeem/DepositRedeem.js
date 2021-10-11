@@ -1442,7 +1442,7 @@ class DepositRedeem extends Component {
     const canPerformAction = /*!depositCurve && !this.state.redeemCurveEnabled && */((this.state.action === 'deposit' && this.state.canDeposit && !isDepositDisabled) || (this.state.action === 'redeem' && this.state.canRedeem) || redeemGovTokens) && (!this.state.showETHWrapperEnabled || this.state.action === 'redeem');
     const showActionFlow = !redeemGovTokens && canPerformAction;
 
-    const showBuyFlow = this.state.componentMounted && (!showDepositCurve || this.state.showBuyFlow) && !this.state.depositCurveEnabled && this.state.tokenApproved && !this.state.contractPaused && (!this.state.migrationEnabled || this.state.skipMigration) && this.state.action === 'deposit' && !this.state.canDeposit && !this.state.showETHWrapperEnabled;
+    const showBuyFlow = this.state.componentMounted && (!showDepositCurve || this.state.showBuyFlow) && !this.state.depositCurveEnabled && this.state.tokenApproved && !this.state.contractPaused && (!this.state.migrationEnabled || this.state.skipMigration) && this.state.action === 'deposit' && !this.isDepositDisabled && !this.state.canDeposit && !this.state.showETHWrapperEnabled;
 
     const _referral = this.getReferralAddress();
     const showReferral = _referral && this.state.action === 'deposit' && showActionFlow && !showBuyFlow;
