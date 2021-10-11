@@ -2599,7 +2599,8 @@ class DepositRedeem extends Component {
                                 </Flex>
                               </DashboardCard>
                             ) : (!this.state.tokenApproved && this.state.action === 'deposit' && !this.state.showETHWrapperEnabled) ? (
-                              <DashboardCard
+                              !isDepositDisabled && (<DashboardCard
+                                isDisabled={isDepositDisabled}
                                 cardProps={{
                                   p: 3,
                                   mt: 3
@@ -2655,7 +2656,7 @@ class DepositRedeem extends Component {
                                       </Flex>
                                     )
                                 }
-                              </DashboardCard>
+                              </DashboardCard>)
                             ) : (!showBuyFlow && canPerformAction) && (
                               !this.state.processing[this.state.action].loading ? (
                                 <Flex
