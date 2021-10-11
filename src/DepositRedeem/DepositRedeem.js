@@ -22,75 +22,75 @@ import { Flex, Text, Input, Box, Icon, Link, Checkbox, Tooltip, Image } from "ri
 class DepositRedeem extends Component {
 
   state = {
-    txError:{},
-    tokenAPY:'-',
-    inputValue:{},
-    processing:{},
-    curveAPY:null,
-    totalAUM:null,
-    canRedeem:false,
-    maxSlippage:0.2,
-    canDeposit:false,
-    action:'deposit',
-    directMint:false,
-    activeModal:null,
-    tokenGovTokens:{},
-    showBuyFlow:false,
-    maxUnlentPerc:null,
-    unlentBalance:null,
-    tokenApproved:false,
-    skipMigration:false,
-    redeemSkipGov:false,
-    showRedeemFlow:false,
-    contractPaused:false,
-    buttonDisabled:false,
-    canRedeemCurve:false,
-    erc20ForwarderTx:null,
-    signedParameters:null,
-    minAmountForMint:null,
-    showMaxSlippage:false,
-    redeemGovTokens:false,
-    canDepositCurve:false,
-    redeemSkipGovTokens:[],
-    fastBalanceSelector:{},
-    actionProxyContract:{},
-    migrationEnabled:false,
-    componentMounted:false,
-    curveTokenBalance:null,
-    agreeSkipGovTokens:false,
-    redeemCurveEnabled:false,
-    depositCurveBalance:null,
-    depositCurveEnabled:true,
-    showAdvancedOptions:false,
-    skipGovTokensGasSave:null,
-    depositCurveSlippage:null,
-    erc20ForwarderContract:{},
-    erc20ForwarderEnabled:false,
-    showETHWrapperEnabled:false,
-    skipGovTokensGasSaveUSD:null,
-    metaTransactionsEnabled:true,
-    skippedGovTokensBalance:null,
-    minAmountForMintReached:false,
-    loadingErc20ForwarderTx:false
+    txError: {},
+    tokenAPY: '-',
+    inputValue: {},
+    processing: {},
+    curveAPY: null,
+    totalAUM: null,
+    canRedeem: false,
+    maxSlippage: 0.2,
+    canDeposit: false,
+    action: 'deposit',
+    directMint: false,
+    activeModal: null,
+    tokenGovTokens: {},
+    showBuyFlow: false,
+    maxUnlentPerc: null,
+    unlentBalance: null,
+    tokenApproved: false,
+    skipMigration: false,
+    redeemSkipGov: false,
+    showRedeemFlow: false,
+    contractPaused: false,
+    buttonDisabled: false,
+    canRedeemCurve: false,
+    erc20ForwarderTx: null,
+    signedParameters: null,
+    minAmountForMint: null,
+    showMaxSlippage: false,
+    redeemGovTokens: false,
+    canDepositCurve: false,
+    redeemSkipGovTokens: [],
+    fastBalanceSelector: {},
+    actionProxyContract: {},
+    migrationEnabled: false,
+    componentMounted: false,
+    curveTokenBalance: null,
+    agreeSkipGovTokens: false,
+    redeemCurveEnabled: false,
+    depositCurveBalance: null,
+    depositCurveEnabled: true,
+    showAdvancedOptions: false,
+    skipGovTokensGasSave: null,
+    depositCurveSlippage: null,
+    erc20ForwarderContract: {},
+    erc20ForwarderEnabled: false,
+    showETHWrapperEnabled: false,
+    skipGovTokensGasSaveUSD: null,
+    metaTransactionsEnabled: true,
+    skippedGovTokensBalance: null,
+    minAmountForMintReached: false,
+    loadingErc20ForwarderTx: false
   };
 
   // Utils
   functionsUtil = null;
 
-  loadUtils(){
-    if (this.functionsUtil){
+  loadUtils() {
+    if (this.functionsUtil) {
       this.functionsUtil.setProps(this.props);
     } else {
       this.functionsUtil = new FunctionsUtil(this.props);
     }
   }
 
-  async componentWillMount(){
+  async componentWillMount() {
     this.loadUtils();
     await this.loadProxyContracts();
   }
 
-  async componentDidMount(){
+  async componentDidMount() {
 
   }
 
@@ -108,7 +108,7 @@ class DepositRedeem extends Component {
 
   toggleShowAdvancedOptions = showAdvancedOptions => {
     this.setState((prevState) => ({
-      showAdvancedOptions:!prevState.showAdvancedOptions
+      showAdvancedOptions: !prevState.showAdvancedOptions
     }));
   }
 
@@ -151,26 +151,26 @@ class DepositRedeem extends Component {
   toggleRedeemGovTokens = (redeemGovTokens) => {
     this.setState({
       redeemGovTokens,
-      redeemSkipGovTokens:[],
-      agreeSkipGovTokens:false,
-      skippedGovTokensBalance:this.functionsUtil.BNify(0),
-      redeemSkipGov:redeemGovTokens?false:this.state.redeemSkipGov
+      redeemSkipGovTokens: [],
+      agreeSkipGovTokens: false,
+      skippedGovTokensBalance: this.functionsUtil.BNify(0),
+      redeemSkipGov: redeemGovTokens ? false : this.state.redeemSkipGov
     });
   }
 
   toggleRedeemSkipGov = (redeemSkipGov) => {
     this.setState({
       redeemSkipGov,
-      redeemSkipGovTokens:[],
-      agreeSkipGovTokens:false,
-      skippedGovTokensBalance:this.functionsUtil.BNify(0),
-      redeemGovTokens:redeemSkipGov?false:this.state.redeemGovTokens
+      redeemSkipGovTokens: [],
+      agreeSkipGovTokens: false,
+      skippedGovTokensBalance: this.functionsUtil.BNify(0),
+      redeemGovTokens: redeemSkipGov ? false : this.state.redeemGovTokens
     });
   }
 
   getSkippedGovTokensFlags = async () => {
-    const govTokensIndexes = await this.functionsUtil.getGovTokensIndexes(this.props.account,this.props.tokenConfig);
-    const govTokensFlags = Object.keys(govTokensIndexes).map( token => {
+    const govTokensIndexes = await this.functionsUtil.getGovTokensIndexes(this.props.account, this.props.tokenConfig);
+    const govTokensFlags = Object.keys(govTokensIndexes).map(token => {
       return this.state.redeemSkipGovTokens.includes(token);
     });
     // console.log('getSkippedGovTokensFlags',govTokensIndexes,govTokensFlags);
@@ -179,26 +179,26 @@ class DepositRedeem extends Component {
 
   calculateSkippedGovTokens = async () => {
     let skippedGovTokensBalance = this.functionsUtil.BNify(0);
-    const DAITokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens','DAI']);
+    const DAITokenConfig = this.functionsUtil.getGlobalConfig(['stats', 'tokens', 'DAI']);
 
     await this.functionsUtil.asyncForEach(this.state.redeemSkipGovTokens, async (govToken) => {
-      const govTokenConfig = this.functionsUtil.getGlobalConfig(['govTokens',govToken]);
-      const govTokenPrice = await this.functionsUtil.getUniswapConversionRate(DAITokenConfig,govTokenConfig);
+      const govTokenConfig = this.functionsUtil.getGlobalConfig(['govTokens', govToken]);
+      const govTokenPrice = await this.functionsUtil.getUniswapConversionRate(DAITokenConfig, govTokenConfig);
       const skippedAmount = this.props.govTokensUserBalances[govToken].times(govTokenPrice);
       skippedGovTokensBalance = skippedGovTokensBalance.plus(skippedAmount);
     });
 
     const _skipGovTokenRedeem = await this.getSkippedGovTokensFlags();
-    const WETHTokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens','WETH']);
+    const WETHTokenConfig = this.functionsUtil.getGlobalConfig(['stats', 'tokens', 'WETH']);
 
     const [
       wethPrice,
       redeemGasUsage,
       skipGovRedeemGasUsage
     ] = await Promise.all([
-      this.functionsUtil.getUniswapConversionRate(DAITokenConfig,WETHTokenConfig),
-      this.functionsUtil.estimateMethodGasUsage(this.props.tokenConfig.idle.token, 'redeemIdleToken', [this.functionsUtil.normalizeTokenAmount(this.props.idleTokenBalance,this.props.tokenConfig.decimals)], this.props.account),
-      this.functionsUtil.estimateMethodGasUsage(this.props.tokenConfig.idle.token, 'redeemIdleTokenSkipGov', [this.functionsUtil.normalizeTokenAmount(this.props.idleTokenBalance,this.props.tokenConfig.decimals),_skipGovTokenRedeem], this.props.account)
+      this.functionsUtil.getUniswapConversionRate(DAITokenConfig, WETHTokenConfig),
+      this.functionsUtil.estimateMethodGasUsage(this.props.tokenConfig.idle.token, 'redeemIdleToken', [this.functionsUtil.normalizeTokenAmount(this.props.idleTokenBalance, this.props.tokenConfig.decimals)], this.props.account),
+      this.functionsUtil.estimateMethodGasUsage(this.props.tokenConfig.idle.token, 'redeemIdleTokenSkipGov', [this.functionsUtil.normalizeTokenAmount(this.props.idleTokenBalance, this.props.tokenConfig.decimals), _skipGovTokenRedeem], this.props.account)
     ]);
 
     const skipGovTokensGasSave = redeemGasUsage && skipGovRedeemGasUsage ? redeemGasUsage.minus(skipGovRedeemGasUsage) : this.functionsUtil.BNify(0);
@@ -212,18 +212,18 @@ class DepositRedeem extends Component {
     return skippedGovTokensBalance;
   }
 
-  setRedeemSkipGovTokens = (token,checked) => {
+  setRedeemSkipGovTokens = (token, checked) => {
     this.setState((prevState) => {
-      const redeemSkipGovTokens = Object.assign([],prevState.redeemSkipGovTokens);
-      if (!checked && redeemSkipGovTokens.includes(token)){
-        redeemSkipGovTokens.splice(redeemSkipGovTokens.indexOf(token),1);
+      const redeemSkipGovTokens = Object.assign([], prevState.redeemSkipGovTokens);
+      if (!checked && redeemSkipGovTokens.includes(token)) {
+        redeemSkipGovTokens.splice(redeemSkipGovTokens.indexOf(token), 1);
       } else if (checked && !redeemSkipGovTokens.includes(token)) {
         redeemSkipGovTokens.push(token);
       }
       return {
         redeemSkipGovTokens
       };
-    },() => {
+    }, () => {
       this.calculateSkippedGovTokens();
     });
   }
@@ -244,42 +244,42 @@ class DepositRedeem extends Component {
     });
   }
 
-  async loadProxyContracts(){
-    const actions = ['deposit','redeem'];
+  async loadProxyContracts() {
+    const actions = ['deposit', 'redeem'];
     const newState = {
-      actionProxyContract:{},
-      erc20ForwarderContract:{}
+      actionProxyContract: {},
+      erc20ForwarderContract: {}
     };
 
-    await this.functionsUtil.asyncForEach(actions,async (action) => {
+    await this.functionsUtil.asyncForEach(actions, async (action) => {
       let mintProxyContractInfo = null;
-      const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract','methods',action,'erc20ForwarderEnabled']);
+      const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract', 'methods', action, 'erc20ForwarderEnabled']);
 
-      if (depositErc20ForwarderEnabled){
-        mintProxyContractInfo = this.functionsUtil.getGlobalConfig(['contract','methods',action,'erc20ForwarderProxyContract','forwarder']);
+      if (depositErc20ForwarderEnabled) {
+        mintProxyContractInfo = this.functionsUtil.getGlobalConfig(['contract', 'methods', action, 'erc20ForwarderProxyContract', 'forwarder']);
 
-        await this.props.initContract(mintProxyContractInfo.name,mintProxyContractInfo.address,mintProxyContractInfo.abi);
+        await this.props.initContract(mintProxyContractInfo.name, mintProxyContractInfo.address, mintProxyContractInfo.abi);
 
         // Init contract for erc20 forwarder
-        const erc20ForwarderContractInfo = this.functionsUtil.getGlobalConfig(['contract','methods',action,'erc20ForwarderProxyContract','tokens',this.props.selectedToken]);
-        if (erc20ForwarderContractInfo){
+        const erc20ForwarderContractInfo = this.functionsUtil.getGlobalConfig(['contract', 'methods', action, 'erc20ForwarderProxyContract', 'tokens', this.props.selectedToken]);
+        if (erc20ForwarderContractInfo) {
           mintProxyContractInfo = erc20ForwarderContractInfo;
-          const erc20ForwarderContract = await this.props.initContract(erc20ForwarderContractInfo.name,erc20ForwarderContractInfo.address,erc20ForwarderContractInfo.abi);
+          const erc20ForwarderContract = await this.props.initContract(erc20ForwarderContractInfo.name, erc20ForwarderContractInfo.address, erc20ForwarderContractInfo.abi);
           newState.erc20ForwarderContract[action] = erc20ForwarderContractInfo;
           newState.erc20ForwarderContract[action].contract = erc20ForwarderContract.contract;
         }
       }
 
-      if (!mintProxyContractInfo){
-        mintProxyContractInfo = this.functionsUtil.getGlobalConfig(['contract','methods',action,'proxyContract']);
+      if (!mintProxyContractInfo) {
+        mintProxyContractInfo = this.functionsUtil.getGlobalConfig(['contract', 'methods', action, 'proxyContract']);
       }
 
       const hasProxyContract = mintProxyContractInfo && mintProxyContractInfo.enabled;
       newState.actionProxyContract[action] = hasProxyContract ? mintProxyContractInfo : null;
-      if (hasProxyContract){
-        const proxyContract = await this.props.initContract(mintProxyContractInfo.name,mintProxyContractInfo.address,mintProxyContractInfo.abi);
+      if (hasProxyContract) {
+        const proxyContract = await this.props.initContract(mintProxyContractInfo.name, mintProxyContractInfo.address, mintProxyContractInfo.abi);
         newState.actionProxyContract[action].contract = proxyContract.contract;
-        newState.actionProxyContract[action].approved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken,mintProxyContractInfo.address,this.props.account);
+        newState.actionProxyContract[action].approved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken, mintProxyContractInfo.address, this.props.account);
       }
     });
 
@@ -298,16 +298,16 @@ class DepositRedeem extends Component {
     });
   }
 
-  async loadAPY(){
+  async loadAPY() {
     const tokenAprs = await this.functionsUtil.getTokenAprs(this.props.tokenConfig);
-    if (tokenAprs && tokenAprs.avgApy !== null){
+    if (tokenAprs && tokenAprs.avgApy !== null) {
       const tokenAPY = this.functionsUtil.BNify(tokenAprs.avgApy).toFixed(2);
 
       let curveAPY = null;
-      if (this.state.canDepositCurve){
+      if (this.state.canDepositCurve) {
         curveAPY = await this.functionsUtil.getCurveAPY();
         // console.log('curveAPY',curveAPY);
-        if (curveAPY){
+        if (curveAPY) {
           curveAPY = curveAPY.plus(tokenAPY);
         }
       }
@@ -318,28 +318,28 @@ class DepositRedeem extends Component {
     }
   }
 
-  getReferralAddress(){
+  getReferralAddress() {
     let _referral = this.functionsUtil.getQueryStringParameterByName('_referral');
-    if (!this.functionsUtil.checkAddress(_referral)){
+    if (!this.functionsUtil.checkAddress(_referral)) {
       _referral = null;
     }
     return _referral;
   }
 
-  async componentDidUpdate(prevProps,prevState){
+  async componentDidUpdate(prevProps, prevState) {
     this.loadUtils();
 
     // console.log('componentDidUpdate',this.props.tokenBalance);
 
-    if (this.props.tokenBalance === null){
+    if (this.props.tokenBalance === null) {
       return false;
     }
 
     const tokenChanged = prevProps.selectedToken !== this.props.selectedToken;
-    const erc20ForwarderEnabledChanged = prevState.erc20ForwarderEnabled !==  this.state.erc20ForwarderEnabled;
+    const erc20ForwarderEnabledChanged = prevState.erc20ForwarderEnabled !== this.state.erc20ForwarderEnabled;
     const tokenBalanceChanged = prevProps.tokenBalance !== this.props.tokenBalance && this.props.tokenBalance !== null;
 
-    if (tokenChanged || tokenBalanceChanged || erc20ForwarderEnabledChanged){
+    if (tokenChanged || tokenBalanceChanged || erc20ForwarderEnabledChanged) {
       await this.loadProxyContracts();
       this.loadTokenInfo();
       return false;
@@ -348,12 +348,12 @@ class DepositRedeem extends Component {
     const actionChanged = this.state.action !== prevState.action;
     const fastBalanceSelectorChanged = this.state.fastBalanceSelector[this.state.action] !== prevState.fastBalanceSelector[this.state.action];
 
-    if (actionChanged || fastBalanceSelectorChanged){
+    if (actionChanged || fastBalanceSelectorChanged) {
       this.setInputValue();
     }
 
     const inputValueChanged = prevState.inputValue[this.state.action] !== this.state.inputValue[this.state.action];
-    if (inputValueChanged){
+    if (inputValueChanged) {
       // this.checkMinAmountForMint();
     }
 
@@ -362,13 +362,13 @@ class DepositRedeem extends Component {
     const agreeSkipGovTokensChanged = prevState.agreeSkipGovTokens !== this.state.agreeSkipGovTokens;
     const redeemSkipGovTokensChanged = JSON.stringify(prevState.redeemSkipGovTokens) !== JSON.stringify(this.state.redeemSkipGovTokens);
 
-    if (redeemGovTokensChanged || actionChanged || redeemSkipGovTokensChanged || redeemSkipGovChanged || agreeSkipGovTokensChanged){
+    if (redeemGovTokensChanged || actionChanged || redeemSkipGovTokensChanged || redeemSkipGovChanged || agreeSkipGovTokensChanged) {
       this.checkButtonDisabled();
     }
 
     const depositCurveChanged = prevState.depositCurveEnabled !== this.state.depositCurveEnabled;
     const metaTransactionsChanged = prevState.metaTransactionsEnabled !== this.state.metaTransactionsEnabled;
-    if (metaTransactionsChanged || depositCurveChanged){
+    if (metaTransactionsChanged || depositCurveChanged) {
       const tokenApproved = await this.checkTokenApproved();
       this.setState({
         tokenApproved
@@ -376,29 +376,29 @@ class DepositRedeem extends Component {
     }
 
     const inputChanged = prevState.inputValue[this.state.action] !== this.state.inputValue[this.state.action];
-    if (inputChanged){
+    if (inputChanged) {
       this.calculateCurveSlippage();
     }
   }
 
-  async checkMinAmountForMint(){
+  async checkMinAmountForMint() {
     let showPoolPerc = false;
     let totalAUM = this.state.totalAUM;
     let maxUnlentPerc = this.state.maxUnlentPerc;
     const isRisk = this.props.selectedStrategy === 'risk';
     const inputValue = this.functionsUtil.BNify(this.state.inputValue[this.state.action]);
 
-    if (inputValue.gt(this.props.tokenBalance)){
+    if (inputValue.gt(this.props.tokenBalance)) {
       return false;
     }
 
-    const convertedAmount = await this.functionsUtil.convertTokenBalance(inputValue,this.props.selectedToken,this.props.tokenConfig,isRisk);
-    let minAmountForMint = this.functionsUtil.BNify(this.functionsUtil.getGlobalConfig(['contract','methods','deposit','minAmountForMint']));
+    const convertedAmount = await this.functionsUtil.convertTokenBalance(inputValue, this.props.selectedToken, this.props.tokenConfig, isRisk);
+    let minAmountForMint = this.functionsUtil.BNify(this.functionsUtil.getGlobalConfig(['contract', 'methods', 'deposit', 'minAmountForMint']));
     let minAmountForMintReached = convertedAmount.gte(minAmountForMint);
 
     // Check token minAmountForMint
-    if (minAmountForMintReached){
-      if (this.props.tokenConfig.deposit && this.props.tokenConfig.deposit.minAmountForMint && convertedAmount.lt(this.props.tokenConfig.deposit.minAmountForMint)){
+    if (minAmountForMintReached) {
+      if (this.props.tokenConfig.deposit && this.props.tokenConfig.deposit.minAmountForMint && convertedAmount.lt(this.props.tokenConfig.deposit.minAmountForMint)) {
         minAmountForMintReached = false;
       } else {
         [
@@ -406,14 +406,14 @@ class DepositRedeem extends Component {
           totalAUM
         ] = await Promise.all([
           maxUnlentPerc || this.functionsUtil.genericContractCall(this.props.tokenConfig.idle.token, 'maxUnlentPerc'),
-          totalAUM ||this.functionsUtil.loadAssetField('pool',this.props.selectedToken,this.props.tokenConfig,this.props.account)
+          totalAUM || this.functionsUtil.loadAssetField('pool', this.props.selectedToken, this.props.tokenConfig, this.props.account)
         ]);
 
-        if (maxUnlentPerc && totalAUM){
+        if (maxUnlentPerc && totalAUM) {
           const depositPerc = inputValue.div(totalAUM).times(100);
           maxUnlentPerc = this.functionsUtil.BNify(maxUnlentPerc);
           const maxUnlentPercFormatted = maxUnlentPerc.div(1e3).times(2);
-          if (depositPerc.lt(maxUnlentPercFormatted)){
+          if (depositPerc.lt(maxUnlentPercFormatted)) {
             minAmountForMintReached = false;
           } else if (totalAUM.times(maxUnlentPercFormatted.div(100)).gt(minAmountForMint)) {
             showPoolPerc = true;
@@ -432,29 +432,29 @@ class DepositRedeem extends Component {
     });
   }
 
-  async calculateCurveSlippage(){
+  async calculateCurveSlippage() {
     const amount = this.state.inputValue[this.state.action] ? this.functionsUtil.BNify(this.state.inputValue[this.state.action]) : null;
 
-    if (!amount || amount.lte(0)){
+    if (!amount || amount.lte(0)) {
       return false;
     }
 
-    const curvePoolContractInfo = this.functionsUtil.getGlobalConfig(['curve','poolContract']);
+    const curvePoolContractInfo = this.functionsUtil.getGlobalConfig(['curve', 'poolContract']);
 
-    const normalizedAmount = this.functionsUtil.normalizeTokenAmount(amount,curvePoolContractInfo.decimals);
+    const normalizedAmount = this.functionsUtil.normalizeTokenAmount(amount, curvePoolContractInfo.decimals);
     const newState = {};
 
-    switch (this.state.action){
+    switch (this.state.action) {
       case 'deposit':
         newState.depositCurveBalance = amount;
-        newState.depositCurveSlippage = await this.functionsUtil.getCurveSlippage(this.props.tokenConfig.idle.token,normalizedAmount,true);
-      break;  
+        newState.depositCurveSlippage = await this.functionsUtil.getCurveSlippage(this.props.tokenConfig.idle.token, normalizedAmount, true);
+        break;
       case 'redeem':
         // newState.redeemBalance = amount;
         // newState.withdrawSlippage = await this.functionsUtil.getCurveSlippage(this.props.tokenConfig.idle.token,normalizedAmount,true);
-      break;
+        break;
       default:
-      break;
+        break;
     }
     // console.log('calculateCurveSlippage',newState);
 
@@ -463,50 +463,50 @@ class DepositRedeem extends Component {
 
   checkUseProxyContract = () => {
     const proxyContract = this.state.actionProxyContract[this.state.action];
-    const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','erc20ForwarderEnabled']) && this.state.erc20ForwarderEnabled;
-    const depositMetaTransactionsEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','metaTransactionsEnabled']) && this.state.metaTransactionsEnabled;
+    const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract', 'methods', 'deposit', 'erc20ForwarderEnabled']) && this.state.erc20ForwarderEnabled;
+    const depositMetaTransactionsEnabled = this.functionsUtil.getGlobalConfig(['contract', 'methods', 'deposit', 'metaTransactionsEnabled']) && this.state.metaTransactionsEnabled;
     return ((depositErc20ForwarderEnabled || depositMetaTransactionsEnabled) && proxyContract && this.props.biconomy);
   }
 
-  approveContract = async (callbackApprove,callbackReceiptApprove) => {
-    if (this.state.depositCurveEnabled){
-      const curveDepositContract = this.functionsUtil.getGlobalConfig(['curve','depositContract']);
-      this.functionsUtil.enableERC20(this.props.selectedToken,curveDepositContract.address,callbackApprove,callbackReceiptApprove);
+  approveContract = async (callbackApprove, callbackReceiptApprove) => {
+    if (this.state.depositCurveEnabled) {
+      const curveDepositContract = this.functionsUtil.getGlobalConfig(['curve', 'depositContract']);
+      this.functionsUtil.enableERC20(this.props.selectedToken, curveDepositContract.address, callbackApprove, callbackReceiptApprove);
     } else {
       // Check Proxy Contract Approved for Deposit with Biconomy
       const useProxyContract = this.checkUseProxyContract();
-      if (useProxyContract){
+      if (useProxyContract) {
         const proxyContract = this.state.actionProxyContract[this.state.action];
-        this.functionsUtil.enableERC20(this.props.selectedToken,proxyContract.address,callbackApprove,callbackReceiptApprove);
+        this.functionsUtil.enableERC20(this.props.selectedToken, proxyContract.address, callbackApprove, callbackReceiptApprove);
       } else {
-        this.functionsUtil.enableERC20(this.props.selectedToken,this.props.tokenConfig.idle.address,callbackApprove,callbackReceiptApprove);
+        this.functionsUtil.enableERC20(this.props.selectedToken, this.props.tokenConfig.idle.address, callbackApprove, callbackReceiptApprove);
       }
     }
   }
 
   checkTokenApproved = async () => {
     let tokenApproved = false;
-    if (this.state.depositCurveEnabled){
-      const curveDepositContract = this.functionsUtil.getGlobalConfig(['curve','depositContract']);
-      tokenApproved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken,curveDepositContract.address,this.props.account);
+    if (this.state.depositCurveEnabled) {
+      const curveDepositContract = this.functionsUtil.getGlobalConfig(['curve', 'depositContract']);
+      tokenApproved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken, curveDepositContract.address, this.props.account);
     } else {
       // Check Proxy Contract Approved for Deposit with Biconomy
       const useProxyContract = this.checkUseProxyContract();
-      if (useProxyContract){
+      if (useProxyContract) {
         // Check for Permit Deposit
-        const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','erc20ForwarderEnabled']) && this.state.erc20ForwarderEnabled;
-        if (depositErc20ForwarderEnabled){
-          const permitEnabled = this.functionsUtil.getGlobalConfig(['permit',this.props.selectedToken]);
-          if (permitEnabled){
+        const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract', 'methods', 'deposit', 'erc20ForwarderEnabled']) && this.state.erc20ForwarderEnabled;
+        if (depositErc20ForwarderEnabled) {
+          const permitEnabled = this.functionsUtil.getGlobalConfig(['permit', this.props.selectedToken]);
+          if (permitEnabled) {
             return true;
           }
         }
         // Check proxy contract approved
         const proxyContract = this.state.actionProxyContract[this.state.action];
-        tokenApproved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken,proxyContract.address,this.props.account);
+        tokenApproved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken, proxyContract.address, this.props.account);
         // console.log('tokenApproved 1',tokenApproved);
       } else {
-        tokenApproved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken,this.props.tokenConfig.idle.address,this.props.account);
+        tokenApproved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken, this.props.tokenConfig.idle.address, this.props.account);
         // console.log('tokenApproved 2',tokenApproved);
       }
     }
@@ -519,20 +519,20 @@ class DepositRedeem extends Component {
     // Check if the token is already approved
     const tokenApproved = await this.checkTokenApproved();
 
-    if (tokenApproved){
+    if (tokenApproved) {
       return this.setState((prevState) => ({
         tokenApproved,
         processing: {
           ...prevState.processing,
-          approve:{
-            txHash:null,
-            loading:false
+          approve: {
+            txHash: null,
+            loading: false
           }
         }
       }));
     }
 
-    const callbackApprove = (tx,error)=>{
+    const callbackApprove = (tx, error) => {
       // Send Google Analytics event
       const eventData = {
         eventCategory: 'Approve',
@@ -540,12 +540,12 @@ class DepositRedeem extends Component {
         eventLabel: tx.status,
       };
 
-      if (error){
+      if (error) {
         eventData.eventLabel = this.functionsUtil.getTransactionError(error);
       }
 
       // Send Google Analytics event
-      if (error || eventData.status !== 'error'){
+      if (error || eventData.status !== 'error') {
         this.functionsUtil.sendGoogleAnalyticsEvent(eventData);
       }
 
@@ -553,9 +553,9 @@ class DepositRedeem extends Component {
         tokenApproved: (tx.status === 'success'), // True
         processing: {
           ...prevState.processing,
-          approve:{
-            txHash:null,
-            loading:false
+          approve: {
+            txHash: null,
+            loading: false
           }
         }
       }));
@@ -566,7 +566,7 @@ class DepositRedeem extends Component {
       this.setState((prevState) => ({
         processing: {
           ...prevState.processing,
-          approve:{
+          approve: {
             ...prevState.processing['approve'],
             txHash
           }
@@ -574,14 +574,14 @@ class DepositRedeem extends Component {
       }));
     };
 
-    this.approveContract(callbackApprove,callbackReceiptApprove);
+    this.approveContract(callbackApprove, callbackReceiptApprove);
 
     this.setState((prevState) => ({
       processing: {
         ...prevState.processing,
-        approve:{
-          txHash:null,
-          loading:true
+        approve: {
+          txHash: null,
+          loading: true
         }
       }
     }));
@@ -589,14 +589,14 @@ class DepositRedeem extends Component {
 
   loadTokenInfo = async () => {
 
-    if (this.state.componentMounted){
+    if (this.state.componentMounted) {
       this.setState({
-        componentMounted:false
+        componentMounted: false
       });
     }
 
     const curveConfig = this.functionsUtil.getGlobalConfig(['curve']);
-    const curveTokenConfig = this.functionsUtil.getGlobalConfig(['curve','availableTokens',this.props.tokenConfig.idle.token]);
+    const curveTokenConfig = this.functionsUtil.getGlobalConfig(['curve', 'availableTokens', this.props.tokenConfig.idle.token]);
     const curveTokenEnabled = curveConfig.enabled && curveTokenConfig && curveTokenConfig.enabled;
 
     const [
@@ -605,7 +605,7 @@ class DepositRedeem extends Component {
       curveSwapContract,
       curveDepositContract,
       unlentBalance,
-      {migrationEnabled},
+      { migrationEnabled },
       curveTokenBalance,
     ] = await Promise.all([
       this.checkTokenApproved(),
@@ -613,7 +613,7 @@ class DepositRedeem extends Component {
       this.functionsUtil.getCurveSwapContract(),
       this.functionsUtil.getCurveDepositContract(),
       this.functionsUtil.getUnlentBalance(this.props.tokenConfig),
-      this.functionsUtil.checkMigration(this.props.tokenConfig,this.props.account),
+      this.functionsUtil.checkMigration(this.props.tokenConfig, this.props.account),
       curveTokenEnabled ? this.functionsUtil.getCurveTokenBalance(this.props.account) : null
     ]);
 
@@ -630,13 +630,13 @@ class DepositRedeem extends Component {
 
     const tokenGovTokens = this.functionsUtil.getTokenGovTokens(this.props.tokenConfig);
 
-    const newState = {...this.state};
+    const newState = { ...this.state };
 
     // Check curve deposit enabled
-    if (newState.depositCurveEnabled && !curveTokenEnabled){
+    if (newState.depositCurveEnabled && !curveTokenEnabled) {
       newState.depositCurveEnabled = false;
     }
-    
+
 
     newState.canRedeem = canRedeem;
     newState.canDeposit = canDeposit;
@@ -655,43 +655,43 @@ class DepositRedeem extends Component {
     newState.showETHWrapperEnabled = showETHWrapperEnabled;
 
     newState.txError = {
-      redeem:false,
-      deposit:false
+      redeem: false,
+      deposit: false
     };
     newState.processing = {
-      redeem:{
-        txHash:null,
-        loading:false
+      redeem: {
+        txHash: null,
+        loading: false
       },
-      deposit:{
-        txHash:null,
-        loading:false
+      deposit: {
+        txHash: null,
+        loading: false
       },
-      approve:{
-        txHash:null,
-        loading:false
+      approve: {
+        txHash: null,
+        loading: false
       },
-      boost:{
-        txHash:null,
-        loading:false
+      boost: {
+        txHash: null,
+        loading: false
       }
     };
     newState.inputValue = {
-      boost:null,
-      redeem:null,
-      deposit:null
+      boost: null,
+      redeem: null,
+      deposit: null
     };
     newState.fastBalanceSelector = {
-      boost:null,
-      redeem:null,
-      deposit:null
+      boost: null,
+      redeem: null,
+      deposit: null
     };
 
     newState.componentMounted = true;
 
     // console.log('loadTokenInfo',newState);
 
-    this.setState(newState,() => {
+    this.setState(newState, () => {
       this.checkAction();
       this.loadAPY();
     });
@@ -699,17 +699,17 @@ class DepositRedeem extends Component {
 
   cancelTransaction = async () => {
     this.setState((prevState) => ({
-      erc20ForwarderTx:null,
-      loadingErc20ForwarderTx:false,
+      erc20ForwarderTx: null,
+      loadingErc20ForwarderTx: false,
       processing: {
         ...prevState.processing,
-        approve:{
-          txHash:null,
-          loading:false
+        approve: {
+          txHash: null,
+          loading: false
         },
-        [this.state.action]:{
-          txHash:null,
-          loading:false
+        [this.state.action]: {
+          txHash: null,
+          loading: false
         }
       }
     }));
@@ -721,26 +721,26 @@ class DepositRedeem extends Component {
     const redeemGovTokens = this.state.redeemGovTokens;
     const selectedPercentage = this.getFastBalanceSelector();
     const inputValue = this.state.inputValue[this.state.action];
-    const redeemSkipGov = this.state.redeemSkipGov && this.state.redeemSkipGovTokens.length>0 && this.state.agreeSkipGovTokens;
+    const redeemSkipGov = this.state.redeemSkipGov && this.state.redeemSkipGovTokens.length > 0 && this.state.agreeSkipGovTokens;
 
-    const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','erc20ForwarderEnabled']) && this.state.erc20ForwarderEnabled;
-    const depositMetaTransactionsEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','metaTransactionsEnabled']) && this.state.metaTransactionsEnabled;
+    const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract', 'methods', 'deposit', 'erc20ForwarderEnabled']) && this.state.erc20ForwarderEnabled;
+    const depositMetaTransactionsEnabled = this.functionsUtil.getGlobalConfig(['contract', 'methods', 'deposit', 'metaTransactionsEnabled']) && this.state.metaTransactionsEnabled;
 
     let loading = true;
 
-    switch (this.state.action){
+    switch (this.state.action) {
       case 'deposit':
 
-        if (this.state.buttonDisabled || !inputValue || this.functionsUtil.BNify(inputValue).lte(0)){
+        if (this.state.buttonDisabled || !inputValue || this.functionsUtil.BNify(inputValue).lte(0)) {
           return false;
         }
 
-        if (!this.state.tokenApproved){
+        if (!this.state.tokenApproved) {
           return this.approveToken();
         }
 
-        if (localStorage){
-          this.functionsUtil.setLocalStorage('redirectToFundsAfterLogged',0);
+        if (localStorage) {
+          this.functionsUtil.setLocalStorage('redirectToFundsAfterLogged', 0);
         }
 
         this.setState({
@@ -749,11 +749,11 @@ class DepositRedeem extends Component {
           genericError: '',
         });
 
-        const callbackDeposit = (tx,error) => {
+        const callbackDeposit = (tx, error) => {
 
-          if (!tx && error){
+          if (!tx && error) {
             tx = {
-              status:'error'
+              status: 'error'
             };
           }
 
@@ -767,38 +767,38 @@ class DepositRedeem extends Component {
             eventValue: parseInt(inputValue)
           };
 
-          if (error){
+          if (error) {
             eventData.eventLabel = this.functionsUtil.getTransactionError(error);
           }
 
           // Send Google Analytics event
-          if (error || eventData.status !== 'error'){
+          if (error || eventData.status !== 'error') {
             this.functionsUtil.sendGoogleAnalyticsEvent(eventData);
           }
 
           this.setState((prevState) => ({
             processing: {
               ...prevState.processing,
-              [this.state.action]:{
-                txHash:null,
-                loading:false
+              [this.state.action]: {
+                txHash: null,
+                loading: false
               }
             }
           }));
 
-          if (txSucceeded){
+          if (txSucceeded) {
             this.setState((prevState) => ({
-              activeModal:'share',
-              inputValue:{
+              activeModal: 'share',
+              inputValue: {
                 ...prevState.inputValue,
                 [this.state.action]: this.functionsUtil.BNify(0)
               }
             }));
-          } else if ((this.state.metaTransactionsEnabled || this.state.erc20ForwarderEnabled) && txError){
+          } else if ((this.state.metaTransactionsEnabled || this.state.erc20ForwarderEnabled) && txError) {
             this.setState({
-              erc20ForwarderTx:null,
-              loadingErc20ForwarderTx:false,
-              txError:{
+              erc20ForwarderTx: null,
+              loadingErc20ForwarderTx: false,
+              txError: {
                 [this.state.action]: true
               }
             });
@@ -811,7 +811,7 @@ class DepositRedeem extends Component {
           this.setState((prevState) => ({
             processing: {
               ...prevState.processing,
-              [this.state.action]:{
+              [this.state.action]: {
                 ...prevState.processing[this.state.action],
                 txHash
               }
@@ -820,40 +820,40 @@ class DepositRedeem extends Component {
         };
 
         const curveConfig = this.functionsUtil.getGlobalConfig(['curve']);
-        const curveTokenEnabled = curveConfig.enabled && this.functionsUtil.getGlobalConfig(['curve','availableTokens',this.props.tokenConfig.idle.token,'enabled']);
+        const curveTokenEnabled = curveConfig.enabled && this.functionsUtil.getGlobalConfig(['curve', 'availableTokens', this.props.tokenConfig.idle.token, 'enabled']);
 
         // Curve Deposit
-        if (curveTokenEnabled && this.state.depositCurveEnabled){
+        if (curveTokenEnabled && this.state.depositCurveEnabled) {
 
-          const curvePoolContractInfo = this.functionsUtil.getGlobalConfig(['curve','poolContract']);
-          const tokensToDeposit = this.functionsUtil.normalizeTokenAmount(inputValue,curvePoolContractInfo.decimals);
+          const curvePoolContractInfo = this.functionsUtil.getGlobalConfig(['curve', 'poolContract']);
+          const tokensToDeposit = this.functionsUtil.normalizeTokenAmount(inputValue, curvePoolContractInfo.decimals);
 
-          const amounts = await this.functionsUtil.getCurveAmounts(this.props.tokenConfig.idle.token,tokensToDeposit);
+          const amounts = await this.functionsUtil.getCurveAmounts(this.props.tokenConfig.idle.token, tokensToDeposit);
           let minMintAmount = await this.functionsUtil.getCurveTokenAmount(amounts);
-          if (this.state.maxSlippage){
+          if (this.state.maxSlippage) {
             minMintAmount = this.functionsUtil.BNify(minMintAmount);
             minMintAmount = minMintAmount.minus(minMintAmount.times(this.functionsUtil.BNify(this.state.maxSlippage).div(100)));
             minMintAmount = this.functionsUtil.integerValue(minMintAmount);
           }
-          
-          const depositParams = [amounts,minMintAmount];
+
+          const depositParams = [amounts, minMintAmount];
 
           contractSendResult = await this.functionsUtil.contractMethodSendWrapper(this.state.curveDepositContract.name, 'add_liquidity', depositParams, callbackDeposit, callbackReceiptDeposit);
-        // Normal Deposit
+          // Normal Deposit
         } else {
-          const tokensToDeposit = this.functionsUtil.normalizeTokenAmount(inputValue,this.props.tokenConfig.decimals);
+          const tokensToDeposit = this.functionsUtil.normalizeTokenAmount(inputValue, this.props.tokenConfig.decimals);
 
           // const gasLimitDeposit = this.functionsUtil.BNify(1000000);
           let depositParams = [];
 
           // Use Proxy Contract if enabled
           const useProxyContract = this.checkUseProxyContract();
-          if (useProxyContract){
+          if (useProxyContract) {
             const mintProxyContractInfo = this.state.actionProxyContract[this.state.action];
             const mintProxyContract = mintProxyContractInfo.contract;
 
             // Use Meta-Transactions
-            if (depositMetaTransactionsEnabled){
+            if (depositMetaTransactionsEnabled) {
               depositParams = [tokensToDeposit, this.props.tokenConfig.idle.address];
               const functionCall = mintProxyContract.methods[mintProxyContractInfo.function](...depositParams);
               const functionSignature = functionCall.encodeABI();
@@ -863,37 +863,37 @@ class DepositRedeem extends Component {
               // } else {
               //   contractSendResult = await this.functionsUtil.contractMethodSendWrapper(mintProxyContractInfo.name, mintProxyContractInfo.function, depositParams, callbackDeposit, callbackReceiptDeposit);
               // }
-            // Use Erc20 Forwarder
-            } else if (depositErc20ForwarderEnabled){
+              // Use Erc20 Forwarder
+            } else if (depositErc20ForwarderEnabled) {
 
               // Check if the deposit method require the nonce
-              const methodAbi = mintProxyContractInfo.contract._jsonInterface.find( f => f.name === mintProxyContractInfo.function );
-              const useNonce = methodAbi ? methodAbi.inputs.find( i => i.name === 'nonce' ) : true;
+              const methodAbi = mintProxyContractInfo.contract._jsonInterface.find(f => f.name === mintProxyContractInfo.function);
+              const useNonce = methodAbi ? methodAbi.inputs.find(i => i.name === 'nonce') : true;
 
               // Build ERC20 Forwarder Tx
-              if (!this.state.erc20ForwarderTx){
+              if (!this.state.erc20ForwarderTx) {
                 this.setState({
-                  txError:{
-                    [this.state.action]:false
+                  txError: {
+                    [this.state.action]: false
                   },
-                  loadingErc20ForwarderTx:true
+                  loadingErc20ForwarderTx: true
                 }, async () => {
                   const erc20ForwarderContract = this.state.erc20ForwarderContract[this.state.action];
                   const signedParameters = await this.functionsUtil.signPermit(this.props.selectedToken, this.props.account, erc20ForwarderContract.name, 0, tokensToDeposit);
-                  
+
                   // console.log('signedParameters_1',signedParameters);
 
-                  if (signedParameters){
+                  if (signedParameters) {
 
                     const { expiry, nonce, r, s, v } = signedParameters;
 
-                    if (useNonce){
+                    if (useNonce) {
                       depositParams = [tokensToDeposit, parseInt(nonce), expiry, v, r, s];
                     } else {
                       depositParams = [tokensToDeposit, expiry, v, r, s];
                     }
 
-                    if (mintProxyContractInfo.function === 'foo'){
+                    if (mintProxyContractInfo.function === 'foo') {
                       depositParams = [];
                     }
 
@@ -909,8 +909,8 @@ class DepositRedeem extends Component {
 
                     let gasLimit = null;
                     try {
-                      gasLimit = await functionCall.estimateGas({from: this.props.account}); // 5000000;
-                      if (gasLimit){
+                      gasLimit = await functionCall.estimateGas({ from: this.props.account }); // 5000000;
+                      if (gasLimit) {
                         gasLimit = this.functionsUtil.BNify(gasLimit).times(1.2);
                       } else {
                         gasLimit = this.functionsUtil.BNify(1000000);
@@ -918,8 +918,8 @@ class DepositRedeem extends Component {
                     } catch (error) {
                       // console.log('Gas Estimate - Error: ',error);
                     }
-                    
-                    if (!gasLimit){
+
+                    if (!gasLimit) {
                       gasLimit = this.functionsUtil.BNify(1000000);
                     }
 
@@ -931,35 +931,35 @@ class DepositRedeem extends Component {
                     // console.log('erc20ForwarderTx',erc20ForwarderTx);
                     return this.setState({
                       erc20ForwarderTx,
-                      loadingErc20ForwarderTx:false
+                      loadingErc20ForwarderTx: false
                     });
                   } else {
                     return this.setState((prevState) => ({
                       processing: {
                         ...prevState.processing,
-                        [this.state.action]:{
-                          txHash:null,
-                          loading:false
+                        [this.state.action]: {
+                          txHash: null,
+                          loading: false
                         }
                       },
-                      signedParameters:null,
-                      erc20ForwarderTx:null,
-                      loadingErc20ForwarderTx:false
+                      signedParameters: null,
+                      erc20ForwarderTx: null,
+                      loadingErc20ForwarderTx: false
                     }));
                   }
                 });
-              // Send ERC20 Forwarder Tx
+                // Send ERC20 Forwarder Tx
               } else {
                 this.setState({
-                  txError:{
-                    [this.state.action]:false
+                  txError: {
+                    [this.state.action]: false
                   },
-                  loadingErc20ForwarderTx:true
+                  loadingErc20ForwarderTx: true
                 }, async () => {
                   const metaInfo = {};
                   const permitOptions = {};
                   const erc20ForwarderContract = this.state.erc20ForwarderContract[this.state.action];
-                  const erc20ForwarderBaseContract = this.functionsUtil.getGlobalConfig(['contract','methods',this.state.action,'erc20ForwarderProxyContract','forwarder']);
+                  const erc20ForwarderBaseContract = this.functionsUtil.getGlobalConfig(['contract', 'methods', this.state.action, 'erc20ForwarderProxyContract', 'forwarder']);
 
                   const permitValue = `${tokensToDeposit}00`;
                   const incrementNonce = 1; // useNonce ? 1 : 0;
@@ -967,14 +967,14 @@ class DepositRedeem extends Component {
 
                   // console.log('signedParameters_2',signedParameters);
 
-                  if (signedParameters){
+                  if (signedParameters) {
 
                     this.setState({
                       signedParameters
                     });
 
-                    const permitConfig = this.functionsUtil.getGlobalConfig(['permit',this.props.selectedToken]);
-                    const setValue = permitConfig.type.find( t => t.name==='value' );
+                    const permitConfig = this.functionsUtil.getGlobalConfig(['permit', this.props.selectedToken]);
+                    const setValue = permitConfig.type.find(t => t.name === 'value');
 
                     const { expiry, nonce, r, s, v } = signedParameters;
                     permitOptions.v = v;
@@ -997,27 +997,27 @@ class DepositRedeem extends Component {
                     contractSendResult = await this.functionsUtil.sendBiconomyTxWithErc20Forwarder(this.state.erc20ForwarderTx.request, metaInfo, callbackDeposit, callbackReceiptDeposit);
 
                     this.setState({
-                      erc20ForwarderTx:null,
-                      loadingErc20ForwarderTx:false
+                      erc20ForwarderTx: null,
+                      loadingErc20ForwarderTx: false
                     });
                   } else {
                     return this.setState((prevState) => ({
                       processing: {
                         ...prevState.processing,
-                        [this.state.action]:{
-                          txHash:null,
-                          loading:false
+                        [this.state.action]: {
+                          txHash: null,
+                          loading: false
                         }
                       },
-                      signedParameters:null,
-                      erc20ForwarderTx:null,
-                      loadingErc20ForwarderTx:false
+                      signedParameters: null,
+                      erc20ForwarderTx: null,
+                      loadingErc20ForwarderTx: false
                     }));
                   }
                 });
               }
             }
-          // Use main contract if no proxy contract exists
+            // Use main contract if no proxy contract exists
           } else {
             /*
             let _skipMint = !this.state.directMint && this.functionsUtil.getGlobalConfig(['contract','methods','deposit','skipMint']);
@@ -1037,11 +1037,11 @@ class DepositRedeem extends Component {
             contractSendResult = await this.functionsUtil.contractMethodSendWrapper(this.props.tokenConfig.idle.token, 'mintIdleToken', depositParams, callbackDeposit, callbackReceiptDeposit);
           }
         }
-      break;
+        break;
       case 'redeem':
 
-        if (redeemGovTokens){
-          const callbackRedeem = (tx,error) => {
+        if (redeemGovTokens) {
+          const callbackRedeem = (tx, error) => {
             const txSucceeded = tx.status === 'success';
 
             // Send Google Analytics event
@@ -1052,28 +1052,28 @@ class DepositRedeem extends Component {
               eventValue: 0
             };
 
-            if (error){
+            if (error) {
               eventData.eventLabel = this.functionsUtil.getTransactionError(error);
             }
 
             // Send Google Analytics event
-            if (error || eventData.status !== 'error'){
+            if (error || eventData.status !== 'error') {
               this.functionsUtil.sendGoogleAnalyticsEvent(eventData);
             }
 
             this.setState((prevState) => ({
               processing: {
                 ...prevState.processing,
-                [this.state.action]:{
-                  txHash:null,
-                  loading:false
+                [this.state.action]: {
+                  txHash: null,
+                  loading: false
                 }
               }
             }));
 
-            if (txSucceeded){
+            if (txSucceeded) {
               this.setState((prevState) => ({
-                inputValue:{
+                inputValue: {
                   ...prevState.inputValue,
                   [this.state.action]: this.functionsUtil.BNify(0)
                 }
@@ -1086,7 +1086,7 @@ class DepositRedeem extends Component {
             this.setState((prevState) => ({
               processing: {
                 ...prevState.processing,
-                [this.state.action]:{
+                [this.state.action]: {
                   ...prevState.processing[this.state.action],
                   txHash
                 }
@@ -1095,38 +1095,38 @@ class DepositRedeem extends Component {
           };
 
           contractSendResult = await this.functionsUtil.contractMethodSendWrapper(this.props.tokenConfig.idle.token, 'redeemIdleToken', [0], callbackRedeem, callbackReceiptRedeem);
-          
+
         } else {
 
-          if (this.state.buttonDisabled || !inputValue || this.functionsUtil.BNify(inputValue).lte(0)){
+          if (this.state.buttonDisabled || !inputValue || this.functionsUtil.BNify(inputValue).lte(0)) {
             return false;
           }
 
           const txData = {
-            value:this.functionsUtil.BNify(inputValue)
+            value: this.functionsUtil.BNify(inputValue)
           };
 
           let idleTokenToRedeem = null;
-          if (selectedPercentage){
+          if (selectedPercentage) {
             idleTokenToRedeem = this.functionsUtil.BNify(this.props.idleTokenBalance).times(selectedPercentage);
           } else {
-            const idleTokenPriceWithFee = await this.functionsUtil.getIdleTokenPriceWithFee(this.props.tokenConfig,this.props.account)
-            idleTokenToRedeem = this.functionsUtil.BNify(this.functionsUtil.normalizeTokenAmount(inputValue,this.props.tokenConfig.decimals)).div(idleTokenPriceWithFee);
+            const idleTokenPriceWithFee = await this.functionsUtil.getIdleTokenPriceWithFee(this.props.tokenConfig, this.props.account)
+            idleTokenToRedeem = this.functionsUtil.BNify(this.functionsUtil.normalizeTokenAmount(inputValue, this.props.tokenConfig.decimals)).div(idleTokenPriceWithFee);
           }
 
           // Check if idleTokens to redeem > idleToken balance
-          if (idleTokenToRedeem.gt(this.functionsUtil.BNify(this.props.idleTokenBalance))){
+          if (idleTokenToRedeem.gt(this.functionsUtil.BNify(this.props.idleTokenBalance))) {
             idleTokenToRedeem = this.functionsUtil.BNify(this.props.idleTokenBalance);
           }
 
           // Normalize number
-          idleTokenToRedeem = this.functionsUtil.normalizeTokenAmount(idleTokenToRedeem,18);
+          idleTokenToRedeem = this.functionsUtil.normalizeTokenAmount(idleTokenToRedeem, 18);
 
-          if (!idleTokenToRedeem){
+          if (!idleTokenToRedeem) {
             return false;
           }
 
-          const callbackRedeem = (tx,error) => {
+          const callbackRedeem = (tx, error) => {
             const txSucceeded = tx.status === 'success';
 
             // Send Google Analytics event
@@ -1137,28 +1137,28 @@ class DepositRedeem extends Component {
               eventValue: parseInt(inputValue)
             };
 
-            if (error){
+            if (error) {
               eventData.eventLabel = this.functionsUtil.getTransactionError(error);
             }
 
             // Send Google Analytics event
-            if (error || eventData.status !== 'error'){
+            if (error || eventData.status !== 'error') {
               this.functionsUtil.sendGoogleAnalyticsEvent(eventData);
             }
 
             this.setState((prevState) => ({
               processing: {
                 ...prevState.processing,
-                [this.state.action]:{
-                  txHash:null,
-                  loading:false
+                [this.state.action]: {
+                  txHash: null,
+                  loading: false
                 }
               }
             }));
 
-            if (txSucceeded){
+            if (txSucceeded) {
               this.setState((prevState) => ({
-                inputValue:{
+                inputValue: {
                   ...prevState.inputValue,
                   [this.state.action]: this.functionsUtil.BNify(0)
                 }
@@ -1171,7 +1171,7 @@ class DepositRedeem extends Component {
             this.setState((prevState) => ({
               processing: {
                 ...prevState.processing,
-                [this.state.action]:{
+                [this.state.action]: {
                   ...prevState.processing[this.state.action],
                   txHash
                 }
@@ -1182,7 +1182,7 @@ class DepositRedeem extends Component {
           let redeemMethod = 'redeemIdleToken';
           let redeemParams = [idleTokenToRedeem];
 
-          if (redeemSkipGov){
+          if (redeemSkipGov) {
             redeemMethod = 'redeemIdleTokenSkipGov';
             const _skipGovTokenRedeem = await this.getSkippedGovTokensFlags();
             redeemParams.push(_skipGovTokenRedeem);
@@ -1190,17 +1190,17 @@ class DepositRedeem extends Component {
 
           contractSendResult = await this.functionsUtil.contractMethodSendWrapper(this.props.tokenConfig.idle.token, redeemMethod, redeemParams, callbackRedeem, callbackReceiptRedeem, txData);
         }
-      break;
+        break;
       default: // Reset loading if not handled action
         loading = false;
-      break;
+        break;
     }
 
-    if (contractSendResult !== false || loading !== this.state.processing[this.state.action].loading){
+    if (contractSendResult !== false || loading !== this.state.processing[this.state.action].loading) {
       this.setState((prevState) => ({
         processing: {
           ...prevState.processing,
-          [this.state.action]:{
+          [this.state.action]: {
             ...prevState.processing[this.state.action],
             loading
           }
@@ -1217,60 +1217,60 @@ class DepositRedeem extends Component {
 
   showMaxSlippage = () => {
     this.setState({
-      showMaxSlippage:true
+      showMaxSlippage: true
     });
   }
 
   checkAction = () => {
     let action = this.state.action;
 
-    switch(action){
+    switch (action) {
       case 'redeem':
-        if (!this.state.canRedeem){
+        if (!this.state.canRedeem) {
           action = 'deposit';
         }
-      break;
+        break;
       default:
-      break;
+        break;
     }
 
-    if (action !== this.state.action){
+    if (action !== this.state.action) {
       this.setState({
         action
-      },() => {
+      }, () => {
         this.checkButtonDisabled();
       });
-    } else {
+    } else {
       this.checkButtonDisabled();
     }
   }
 
-  checkButtonDisabled = (amount=null) => {
+  checkButtonDisabled = (amount = null) => {
 
-    if (!this.state.action){
+    if (!this.state.action) {
       return false;
     }
 
-    if (!amount){
+    if (!amount) {
       amount = this.state.inputValue[this.state.action];
     }
 
     let buttonDisabled = false;
 
-    switch (this.state.action){
+    switch (this.state.action) {
       case 'deposit':
         buttonDisabled = buttonDisabled || (amount && (amount.lte(0) || amount.gt(this.props.tokenBalance)));
-      break;
+        break;
       case 'redeem':
-        buttonDisabled = !this.state.canRedeemCurve && !this.state.redeemGovTokens && (buttonDisabled || ( !amount || amount.lte(0) || amount.gt(this.props.redeemableBalance) ));
+        buttonDisabled = !this.state.canRedeemCurve && !this.state.redeemGovTokens && (buttonDisabled || (!amount || amount.lte(0) || amount.gt(this.props.redeemableBalance)));
 
-        if (!buttonDisabled && this.state.redeemSkipGov && this.state.redeemSkipGovTokens.length>0 && !this.state.agreeSkipGovTokens){
+        if (!buttonDisabled && this.state.redeemSkipGov && this.state.redeemSkipGovTokens.length > 0 && !this.state.agreeSkipGovTokens) {
           buttonDisabled = true;
         }
         // console.log('checkButtonDisabled',this.state.redeemSkipGov,this.state.redeemSkipGovTokens.length,this.state.agreeSkipGovTokens,buttonDisabled);
-      break;
+        break;
       default:
-      break;
+        break;
     }
 
     this.setState({
@@ -1279,28 +1279,28 @@ class DepositRedeem extends Component {
   }
 
   setInputValue = () => {
-    if (!this.state.action || this.state.fastBalanceSelector[this.state.action] === null){
+    if (!this.state.action || this.state.fastBalanceSelector[this.state.action] === null) {
       return false;
     }
 
     const selectedPercentage = this.functionsUtil.BNify(this.state.fastBalanceSelector[this.state.action]).div(100);
     let amount = null;
 
-    switch(this.state.action){
+    switch (this.state.action) {
       case 'deposit':
         amount = this.props.tokenBalance ? this.functionsUtil.BNify(this.props.tokenBalance).times(selectedPercentage) : null;
-      break;
+        break;
       case 'redeem':
         amount = this.props.redeemableBalance ? this.functionsUtil.BNify(this.props.redeemableBalance).times(selectedPercentage) : null;
-      break;
+        break;
       default:
-      break;
+        break;
     }
 
     this.checkButtonDisabled(amount);
 
     this.setState((prevState) => ({
-      inputValue:{
+      inputValue: {
         ...prevState.inputValue,
         [this.state.action]: amount
       }
@@ -1308,7 +1308,7 @@ class DepositRedeem extends Component {
   }
 
   getFastBalanceSelector = () => {
-    if (this.state.fastBalanceSelector[this.state.action] === null){
+    if (this.state.fastBalanceSelector[this.state.action] === null) {
       return false;
     }
 
@@ -1316,11 +1316,11 @@ class DepositRedeem extends Component {
   }
 
   setFastBalanceSelector = (percentage) => {
-    if (!this.state.action){
+    if (!this.state.action) {
       return false;
     }
     this.setState((prevState) => ({
-      fastBalanceSelector:{
+      fastBalanceSelector: {
         ...prevState.fastBalanceSelector,
         [this.state.action]: percentage
       }
@@ -1328,18 +1328,18 @@ class DepositRedeem extends Component {
   }
 
   changeInputValue = async (e) => {
-    if (!this.state.action){
+    if (!this.state.action) {
       return false;
     }
     const amount = e.target.value.length && !isNaN(e.target.value) ? this.functionsUtil.BNify(e.target.value) : this.functionsUtil.BNify(0);
     this.checkButtonDisabled(amount);
 
     this.setState((prevState) => ({
-      fastBalanceSelector:{
+      fastBalanceSelector: {
         ...prevState.fastBalanceSelector,
         [this.state.action]: null
       },
-      inputValue:{
+      inputValue: {
         ...prevState.inputValue,
         [this.state.action]: amount
       }
@@ -1347,57 +1347,60 @@ class DepositRedeem extends Component {
   }
 
   setAction = (action) => {
-    switch (action.toLowerCase()){
+    switch (action.toLowerCase()) {
       case 'deposit':
-        
-      break;
+
+        break;
       case 'redeem':
-        if (!this.state.canRedeem && !this.state.canRedeemCurve){
+        if (!this.state.canRedeem && !this.state.canRedeemCurve) {
           action = null;
         }
-      break;
+        break;
       default:
         action = null;
-      break;
+        break;
     }
 
-    if (action !== null){
+    if (action !== null) {
       this.setState({
         action
       });
     }
   }
 
-  render(){
+  render() {
 
-    if (!this.props.selectedToken || !this.props.tokenConfig){
+    if (!this.props.selectedToken || !this.props.tokenConfig) {
       return null;
     }
 
     const viewOnly = this.props.connectorName === 'custom';
-
+    const isDepositDisabled = this.props.tokenConfig.canDeposit && !this.props.tokenConfig.canDeposit.enabled;
+    const depositDisabledMessage1 = isDepositDisabled && this.props.tokenConfig.canDeposit.disabledMessageKey ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageKey]) : null;
+    const depositDisabledMessage2 = isDepositDisabled && this.props.tokenConfig.canDeposit.disabledMessageKey && this.props.canRedeem ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageKey]) : null
+    const depositDisabledMessage = depositDisabledMessage1 + depositDisabledMessage2;
     const govTokensDisabled = this.props.tokenConfig.govTokensDisabled;
-    const govTokensEnabled = !govTokensDisabled && this.functionsUtil.getGlobalConfig(['strategies',this.props.selectedStrategy,'govTokensEnabled']) && Object.keys(this.state.tokenGovTokens).length>0;
+    const govTokensEnabled = !govTokensDisabled && this.functionsUtil.getGlobalConfig(['strategies', this.props.selectedStrategy, 'govTokensEnabled']) && Object.keys(this.state.tokenGovTokens).length > 0;
     const skipMintForDepositEnabled = typeof this.props.tokenConfig.skipMintForDeposit !== 'undefined' ? this.props.tokenConfig.skipMintForDeposit : true;
-    const skipMintCheckboxEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','skipMintCheckboxEnabled']) && skipMintForDepositEnabled;
+    const skipMintCheckboxEnabled = this.functionsUtil.getGlobalConfig(['contract', 'methods', 'deposit', 'skipMintCheckboxEnabled']) && skipMintForDepositEnabled;
 
-    const showRedeemFlow = this.state.canRedeem && (!this.state.redeemCurveEnabled || this.state.showRedeemFlow) && this.state.action==='redeem';
+    const showRedeemFlow = this.state.canRedeem && (!this.state.redeemCurveEnabled || this.state.showRedeemFlow) && this.state.action === 'redeem';
 
-    const redeemGovTokenEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','redeemGovTokens','enabled']) && govTokensEnabled && showRedeemFlow;// && this.props.govTokensBalance.gt(0);
+    const redeemGovTokenEnabled = this.functionsUtil.getGlobalConfig(['contract', 'methods', 'redeemGovTokens', 'enabled']) && govTokensEnabled && showRedeemFlow;// && this.props.govTokensBalance.gt(0);
     const redeemGovTokens = redeemGovTokenEnabled && this.state.redeemGovTokens;
 
-    const redeemSkipGovConfig = this.functionsUtil.getGlobalConfig(['contract','methods','redeemSkipGov']);
+    const redeemSkipGovConfig = this.functionsUtil.getGlobalConfig(['contract', 'methods', 'redeemSkipGov']);
     const redeemSkipGovEnabled = redeemSkipGovConfig && !redeemSkipGovConfig.disabledTokens.includes(this.props.tokenConfig.idle.token) && govTokensEnabled && showRedeemFlow;
-    const redeemSkipGov = redeemSkipGovEnabled && this.state.redeemSkipGov && Object.keys(this.props.govTokensUserBalances).length>0 && this.props.govTokensBalance.gt(0);
+    const redeemSkipGov = redeemSkipGovEnabled && this.state.redeemSkipGov && Object.keys(this.props.govTokensUserBalances).length > 0 && this.props.govTokensBalance.gt(0);
     const redeemSkipGovNoTokens = redeemSkipGovEnabled && this.state.redeemSkipGov && (!Object.keys(this.props.govTokensUserBalances).length || this.props.govTokensBalance.lte(0));
 
 
     const showAdvancedRedeemOptions = redeemGovTokenEnabled || redeemSkipGovEnabled;
     // console.log('showAdvancedRedeemOptions',showAdvancedRedeemOptions,redeemGovTokenEnabled,redeemSkipGovEnabled,govTokensEnabled,showRedeemFlow);
 
-    const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','erc20ForwarderEnabled']);
-    const depositMetaTransactionsEnabled = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','metaTransactionsEnabled']);
-    const depositErc20ForwarderEnabledTokens = this.functionsUtil.getGlobalConfig(['contract','methods','deposit','erc20ForwarderProxyContract','tokens']);
+    const depositErc20ForwarderEnabled = this.functionsUtil.getGlobalConfig(['contract', 'methods', 'deposit', 'erc20ForwarderEnabled']);
+    const depositMetaTransactionsEnabled = this.functionsUtil.getGlobalConfig(['contract', 'methods', 'deposit', 'metaTransactionsEnabled']);
+    const depositErc20ForwarderEnabledTokens = this.functionsUtil.getGlobalConfig(['contract', 'methods', 'deposit', 'erc20ForwarderProxyContract', 'tokens']);
 
     // Biconomy Start
     const metaTransactionsAvailable = depositMetaTransactionsEnabled && this.props.biconomy && this.state.actionProxyContract[this.state.action];
@@ -1412,7 +1415,7 @@ class DepositRedeem extends Component {
     const migrateText = this.state.migrationEnabled && this.props.tokenConfig.migration.message !== undefined ? this.props.tokenConfig.migration.message : null;
 
     const curveConfig = this.functionsUtil.getGlobalConfig(['curve']);
-    const curveTokenEnabled = curveConfig.enabled && this.functionsUtil.getGlobalConfig(['curve','availableTokens',this.props.tokenConfig.idle.token,'enabled']);
+    const curveTokenEnabled = curveConfig.enabled && this.functionsUtil.getGlobalConfig(['curve', 'availableTokens', this.props.tokenConfig.idle.token, 'enabled']);
 
     const depositCurve = curveTokenEnabled && this.state.depositCurveEnabled && this.state.action === 'deposit';
 
@@ -1426,17 +1429,17 @@ class DepositRedeem extends Component {
     const showRebalanceOption = false && this.state.canDeposit && skipMintCheckboxEnabled && this.state.action === 'deposit';
     const showAdvancedDepositOptions = showDepositCurve || showRebalanceOption;
 
-    const batchDepositInfo = this.functionsUtil.getGlobalConfig(['tools','batchDeposit']);
+    const batchDepositInfo = this.functionsUtil.getGlobalConfig(['tools', 'batchDeposit']);
     const batchDepositEnabled = batchDepositInfo.enabled && typeof batchDepositInfo.props.availableTokens[this.props.tokenConfig.idle.token] !== 'undefined';
     const batchDepositDepositEnabled = batchDepositInfo.depositEnabled;
 
     const showBatchDeposit = !useMetaTx && batchDepositEnabled && batchDepositDepositEnabled && !this.props.isMigrationTool && this.state.action === 'deposit';
 
-    const ethWrapperInfo = this.functionsUtil.getGlobalConfig(['tools','ethWrapper']);
+    const ethWrapperInfo = this.functionsUtil.getGlobalConfig(['tools', 'ethWrapper']);
     const ETHWrapperComponent = ethWrapperInfo.subComponent;
     const showETHWrapper = this.props.selectedToken === 'WETH' && ethWrapperInfo.enabled && !this.props.isMigrationTool && this.state.action === 'deposit';
 
-    const canPerformAction = /*!depositCurve && !this.state.redeemCurveEnabled && */((this.state.action === 'deposit' && this.state.canDeposit) || (this.state.action === 'redeem' && this.state.canRedeem) || redeemGovTokens) && (!this.state.showETHWrapperEnabled || this.state.action === 'redeem');
+    const canPerformAction = /*!depositCurve && !this.state.redeemCurveEnabled && */((this.state.action === 'deposit' && this.state.canDeposit && !isDepositDisabled) || (this.state.action === 'redeem' && this.state.canRedeem) || redeemGovTokens) && (!this.state.showETHWrapperEnabled || this.state.action === 'redeem');
     const showActionFlow = !redeemGovTokens && canPerformAction;
 
     const showBuyFlow = this.state.componentMounted && (!showDepositCurve || this.state.showBuyFlow) && !this.state.depositCurveEnabled && this.state.tokenApproved && !this.state.contractPaused && (!this.state.migrationEnabled || this.state.skipMigration) && this.state.action === 'deposit' && !this.state.canDeposit && !this.state.showETHWrapperEnabled;
@@ -1452,7 +1455,7 @@ class DepositRedeem extends Component {
         justifyContent={'center'}
       >
         <Flex
-          width={[1,0.36]}
+          width={[1, 0.36]}
           alignItems={'stretch'}
           flexDirection={'column'}
           justifyContent={'center'}
@@ -1471,126 +1474,133 @@ class DepositRedeem extends Component {
             viewOnly ? (
               <IconBox
                 cardProps={{
-                  mt:3
+                  mt: 3
                 }}
                 icon={'Visibility'}
                 text={'You are using Idle in "Read-Only" mode.<br />Logout and connect with your wallet to interact.'}
               />
             ) : (
-              <Migrate
-                {...this.props}
-                migrateTextBefore={migrateText}
-                migrateText={migrateText !== null ? '' : null}
-                toggleSkipMigration={this.toggleSkipMigration.bind(this)}
-              >
-                {
-                  !this.props.account ? (
-                    <ConnectBox
-                      {...this.props}
-                    />
-                  ) : this.state.componentMounted ? (
-                    this.state.action && (
-                      <Box
-                        width={1}
-                      >
-                        <Flex
-                          mt={2}
-                          flexDirection={'column'}
+                <Migrate
+                  {...this.props}
+                  migrateTextBefore={migrateText}
+                  migrateText={migrateText !== null ? '' : null}
+                  toggleSkipMigration={this.toggleSkipMigration.bind(this)}
+                >
+                  {
+                    !this.props.account ? (
+                      <ConnectBox
+                        {...this.props}
+                      />
+                    ) : this.state.componentMounted ? (
+                      this.state.action && (
+                        <Box
+                          width={1}
                         >
-                          <Text mb={2}>
-                            Choose the action:
-                          </Text>
                           <Flex
-                            alignItems={'center'}
-                            flexDirection={'row'}
-                            justifyContent={'space-between'}
+                            mt={2}
+                            flexDirection={'column'}
                           >
-                            <DashboardCard
+                            <Text mb={2}>
+                              Choose the action:
+                          </Text>
+                            {isDepositDisabled && (<IconBox
                               cardProps={{
-                                p:3,
-                                width:0.48,
-                                onMouseDown:() => {
-                                  this.setAction('deposit');
-                                }
+                                mt: 3
                               }}
-                              isInteractive={true}
-                              isActive={ this.state.action === 'deposit' }
+                              icon={'Warning'}
+                              text={depositDisabledMessage}
+                            />)}
+                            <Flex
+                              alignItems={'center'}
+                              flexDirection={'row'}
+                              justifyContent={'space-between'}
                             >
-                              <Flex
-                                my={1}
-                                alignItems={'center'}
-                                flexDirection={'row'}
-                                justifyContent={'center'}
+                              <DashboardCard
+                                cardProps={{
+                                  p: 3,
+                                  width: 0.48,
+                                  onMouseDown: () => {
+                                    this.setAction('deposit');
+                                  }
+                                }}
+                                isInteractive={true}
+                                isActive={this.state.action === 'deposit'}
                               >
-                                <TransactionField
-                                  transaction={{
-                                    action:'deposit'
-                                  }}
-                                  fieldInfo={{
-                                    name:'icon',
-                                    props:{
-                                      mr:3
-                                    }
-                                  }}
-                                />
-                                <Text
-                                  fontSize={3}
-                                  fontWeight={3}
+                                <Flex
+                                  my={1}
+                                  alignItems={'center'}
+                                  flexDirection={'row'}
+                                  justifyContent={'center'}
                                 >
-                                  Deposit
+                                  <TransactionField
+                                    transaction={{
+                                      action: 'deposit'
+                                    }}
+                                    fieldInfo={{
+                                      name: 'icon',
+                                      props: {
+                                        mr: 3
+                                      }
+                                    }}
+                                  />
+                                  <Text
+                                    fontSize={3}
+                                    fontWeight={3}
+                                  >
+                                    Deposit
                                 </Text>
-                              </Flex>
-                            </DashboardCard>
-                            <DashboardCard
-                              cardProps={{
-                                p:3,
-                                width:0.48,
-                                onMouseDown:() => {
-                                  this.setAction('redeem');
-                                }
-                              }}
-                              isInteractive={true}
-                              isActive={ this.state.action === 'redeem' }
-                              isDisabled={ !this.state.canRedeem && !this.state.canRedeemCurve }
-                            >
-                              <Flex
-                                my={1}
-                                alignItems={'center'}
-                                flexDirection={'row'}
-                                justifyContent={'center'}
+                                </Flex>
+                              </DashboardCard>
+                              <DashboardCard
+                                cardProps={{
+                                  p: 3,
+                                  width: 0.48,
+                                  onMouseDown: () => {
+                                    this.setAction('redeem');
+                                  }
+                                }}
+                                isInteractive={true}
+                                isActive={this.state.action === 'redeem'}
+                                isDisabled={!this.state.canRedeem && !this.state.canRedeemCurve}
                               >
-                                <TransactionField
-                                  transaction={{
-                                    action:'redeem'
-                                  }}
-                                  fieldInfo={{
-                                    name:'icon',
-                                    props:{
-                                      mr:3
-                                    }
-                                  }}
-                                />
-                                <Text
-                                  fontSize={3}
-                                  fontWeight={3}
+                                <Flex
+                                  my={1}
+                                  alignItems={'center'}
+                                  flexDirection={'row'}
+                                  justifyContent={'center'}
                                 >
-                                  Redeem
+                                  <TransactionField
+                                    transaction={{
+                                      action: 'redeem'
+                                    }}
+                                    fieldInfo={{
+                                      name: 'icon',
+                                      props: {
+                                        mr: 3
+                                      }
+                                    }}
+                                  />
+                                  <Text
+                                    fontSize={3}
+                                    fontWeight={3}
+                                  >
+                                    Redeem
                                 </Text>
-                              </Flex>
-                            </DashboardCard>
+                                </Flex>
+                              </DashboardCard>
+                            </Flex>
                           </Flex>
-                        </Flex>
-                        {
-                          (showRedeemFlow && this.state.unlentBalance) &&
+                          {
+                            (showRedeemFlow && this.state.unlentBalance) &&
                             <DashboardCard
                               cardProps={{
-                                py:2,
-                                px:2,
-                                mt:3,
-                                display:'flex',
-                                alignItems:'center',
-                                flexDirection:'column',
-                                justifyContent:'center',
+                                py: 2,
+                                px: 2,
+                                mt: 3,
+                                display: 'flex',
+                                alignItems: 'center',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
                               }}
                             >
                               <Flex
@@ -1627,7 +1637,7 @@ class DepositRedeem extends Component {
                                   </Text>
                                   <Tooltip
                                     placement={'top'}
-                                    message={this.functionsUtil.getGlobalConfig(['messages','cheapRedeem'])}
+                                    message={this.functionsUtil.getGlobalConfig(['messages', 'cheapRedeem'])}
                                   >
                                     <Icon
                                       ml={1}
@@ -1639,388 +1649,388 @@ class DepositRedeem extends Component {
                                 </Flex>
                               </Flex>
                             </DashboardCard>
-                        }
-                        {
-                          showAdvancedRedeemOptions ? (
-                            <DashboardCard
-                              cardProps={{
-                                pt:2,
-                                px:2,
-                                mt:3,
-                                display:'flex',
-                                alignItems:'center',
-                                flexDirection:'column',
-                                justifyContent:'center',
-                                pb:this.state.showAdvancedOptions ? 3 : 2,
-                              }}
-                            >
-                              <Flex
-                                width={1}
-                                alignItems={'center'}
-                                flexDirection={'row'}
-                                justifyContent={'center'}
+                          }
+                          {
+                            showAdvancedRedeemOptions ? (
+                              <DashboardCard
+                                cardProps={{
+                                  pt: 2,
+                                  px: 2,
+                                  mt: 3,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  flexDirection: 'column',
+                                  justifyContent: 'center',
+                                  pb: this.state.showAdvancedOptions ? 3 : 2,
+                                }}
                               >
-                                <Link
-                                  ml={1}
-                                  mainColor={'primary'}
-                                  hoverColor={'primary'}
-                                  onClick={this.toggleShowAdvancedOptions}
+                                <Flex
+                                  width={1}
+                                  alignItems={'center'}
+                                  flexDirection={'row'}
+                                  justifyContent={'center'}
                                 >
-                                  { this.state.showAdvancedOptions ? 'Hide' : 'Show' } advanced options
+                                  <Link
+                                    ml={1}
+                                    mainColor={'primary'}
+                                    hoverColor={'primary'}
+                                    onClick={this.toggleShowAdvancedOptions}
+                                  >
+                                    {this.state.showAdvancedOptions ? 'Hide' : 'Show'} advanced options
                                 </Link>
-                                <Icon
-                                  size={'1.8em'}
-                                  color={'cellText'}
-                                  name={this.state.showAdvancedOptions ? 'ArrowDropUp' : 'ArrowDropDown'}
-                                />
-                              </Flex>
-                              {
-                                this.state.showAdvancedOptions &&
+                                  <Icon
+                                    size={'1.8em'}
+                                    color={'cellText'}
+                                    name={this.state.showAdvancedOptions ? 'ArrowDropUp' : 'ArrowDropDown'}
+                                  />
+                                </Flex>
+                                {
+                                  this.state.showAdvancedOptions &&
                                   <Flex
                                     mt={1}
                                     flexDirection={'column'}
                                   >
                                     {
-                                      redeemGovTokenEnabled && 
-                                        <Flex
-                                          alignItems={'center'}
-                                          justifyContent={'row'}
+                                      redeemGovTokenEnabled &&
+                                      <Flex
+                                        alignItems={'center'}
+                                        justifyContent={'row'}
+                                      >
+                                        <Checkbox
+                                          required={false}
+                                          checked={this.state.redeemGovTokens}
+                                          label={`Redeem governance tokens only`}
+                                          onChange={e => this.toggleRedeemGovTokens(e.target.checked)}
+                                        />
+                                        <Link
+                                          color={'link'}
+                                          hoverColor={'link'}
+                                          onClick={e => this.props.openTooltipModal('Redeem governance tokens', `This feature allows you to redeem just the amount of governance tokens accrued${this.props.govTokensBalance && this.props.govTokensBalance.gt(0) ? ` (~${this.props.govTokensBalance.toFixed(2)}$)` : null} without redeeming the underlying token.`)}
                                         >
-                                          <Checkbox
-                                            required={false}
-                                            checked={this.state.redeemGovTokens}
-                                            label={`Redeem governance tokens only`}
-                                            onChange={ e => this.toggleRedeemGovTokens(e.target.checked) }
-                                          />
-                                          <Link
-                                            color={'link'}
-                                            hoverColor={'link'}
-                                            onClick={ e => this.props.openTooltipModal('Redeem governance tokens',`This feature allows you to redeem just the amount of governance tokens accrued${ this.props.govTokensBalance && this.props.govTokensBalance.gt(0) ? ` (~${this.props.govTokensBalance.toFixed(2)}$)` : null } without redeeming the underlying token.`) }
-                                          >
-                                            (read more)
+                                          (read more)
                                           </Link>
-                                        </Flex>
+                                      </Flex>
                                     }
                                     {
-                                      redeemSkipGovEnabled && 
-                                        <Flex
-                                          alignItems={'center'}
-                                          flexDirection={'row'}
+                                      redeemSkipGovEnabled &&
+                                      <Flex
+                                        alignItems={'center'}
+                                        flexDirection={'row'}
+                                      >
+                                        <Checkbox
+                                          required={false}
+                                          checked={this.state.redeemSkipGov}
+                                          label={`Redeem without governance tokens`}
+                                          onChange={e => this.toggleRedeemSkipGov(e.target.checked)}
+                                        />
+                                        <Icon
+                                          mr={1}
+                                          size={'1.2em'}
+                                          name={'Warning'}
+                                          color={'#ffe000'}
+                                        />
+                                        <Link
+                                          color={'link'}
+                                          hoverColor={'link'}
+                                          onClick={e => this.props.openTooltipModal('Redeem without governance tokens', this.functionsUtil.getGlobalConfig(['messages', 'redeemSkipGov']))}
                                         >
-                                          <Checkbox
-                                            required={false}
-                                            checked={this.state.redeemSkipGov}
-                                            label={`Redeem without governance tokens`}
-                                            onChange={ e => this.toggleRedeemSkipGov(e.target.checked) }
-                                          />
+                                          (read more)
+                                          </Link>
+                                      </Flex>
+                                    }
+                                  </Flex>
+                                }
+                              </DashboardCard>
+                            ) : showAdvancedDepositOptions ? (
+                              <DashboardCard
+                                cardProps={{
+                                  pt: 2,
+                                  px: 2,
+                                  mt: 3,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  flexDirection: 'column',
+                                  justifyContent: 'center',
+                                  pb: this.state.showAdvancedOptions ? 3 : 2,
+                                }}
+                              >
+                                <Flex
+                                  width={1}
+                                  alignItems={'center'}
+                                  flexDirection={'row'}
+                                  justifyContent={'center'}
+                                >
+                                  <Link
+                                    ml={1}
+                                    mainColor={'primary'}
+                                    hoverColor={'primary'}
+                                    onClick={this.toggleShowAdvancedOptions}
+                                  >
+                                    {this.state.showAdvancedOptions ? 'Hide' : 'Show'} advanced options
+                                </Link>
+                                  <Icon
+                                    size={'1.8em'}
+                                    color={'cellText'}
+                                    name={this.state.showAdvancedOptions ? 'ArrowDropUp' : 'ArrowDropDown'}
+                                  />
+                                </Flex>
+                                {
+                                  this.state.showAdvancedOptions &&
+                                  <Flex
+                                    mt={1}
+                                    flexDirection={'column'}
+                                  >
+                                    {
+                                      showDepositCurve &&
+                                      <Flex
+                                        alignItems={'center'}
+                                        justifyContent={'row'}
+                                      >
+                                        <Checkbox
+                                          required={false}
+                                          disabled={this.state.directMint}
+                                          label={`Deposit in the Curve Pool`}
+                                          checked={this.state.depositCurveEnabled}
+                                          onChange={e => this.toggleDepositCurve(e.target.checked)}
+                                        />
+                                        <Link
+                                          mainColor={'primary'}
+                                          hoverColor={'primary'}
+                                          onClick={e => this.props.openTooltipModal('How Curve works', this.functionsUtil.getGlobalConfig(['messages', 'curveInstructions']))}
+                                        >
+                                          (read more)
+                                          </Link>
+                                      </Flex>
+                                    }
+                                    {
+                                      showRebalanceOption &&
+                                      <Flex
+                                        alignItems={'center'}
+                                        justifyContent={'row'}
+                                      >
+                                        <Checkbox
+                                          required={false}
+                                          label={`Rebalance the pool`}
+                                          checked={this.state.directMint}
+                                          disabled={this.state.depositCurveEnabled}
+                                          onChange={e => this.toggleSkipMint(e.target.checked)}
+                                        />
+                                        <Tooltip
+                                          placement={'bottom'}
+                                          message={this.functionsUtil.getGlobalConfig(['messages', 'directMint'])}
+                                        >
                                           <Icon
-                                            mr={1}
-                                            size={'1.2em'}
-                                            name={'Warning'}
-                                            color={'#ffe000'}
+                                            size={'1em'}
+                                            color={'cellTitle'}
+                                            name={"InfoOutline"}
                                           />
-                                          <Link
-                                            color={'link'}
-                                            hoverColor={'link'}
-                                            onClick={ e => this.props.openTooltipModal('Redeem without governance tokens',this.functionsUtil.getGlobalConfig(['messages','redeemSkipGov'])) }
-                                          >
-                                            (read more)
-                                          </Link>
-                                        </Flex>
+                                        </Tooltip>
+                                      </Flex>
                                     }
                                   </Flex>
-                              }
-                            </DashboardCard>
-                          ) :  showAdvancedDepositOptions ? (
-                            <DashboardCard
-                              cardProps={{
-                                pt:2,
-                                px:2,
-                                mt:3,
-                                display:'flex',
-                                alignItems:'center',
-                                flexDirection:'column',
-                                justifyContent:'center',
-                                pb:this.state.showAdvancedOptions ? 3 : 2,
-                              }}
-                            >
-                              <Flex
-                                width={1}
-                                alignItems={'center'}
-                                flexDirection={'row'}
-                                justifyContent={'center'}
-                              >
-                                <Link
-                                  ml={1}
-                                  mainColor={'primary'}
-                                  hoverColor={'primary'}
-                                  onClick={this.toggleShowAdvancedOptions}
-                                >
-                                  { this.state.showAdvancedOptions ? 'Hide' : 'Show' } advanced options
-                                </Link>
-                                <Icon
-                                  size={'1.8em'}
-                                  color={'cellText'}
-                                  name={this.state.showAdvancedOptions ? 'ArrowDropUp' : 'ArrowDropDown'}
-                                />
-                              </Flex>
-                              {
-                                this.state.showAdvancedOptions &&
-                                  <Flex
-                                    mt={1}
-                                    flexDirection={'column'}
-                                  >
-                                    {
-                                      showDepositCurve && 
-                                        <Flex
-                                          alignItems={'center'}
-                                          justifyContent={'row'}
-                                        >
-                                          <Checkbox
-                                            required={false}
-                                            disabled={this.state.directMint}
-                                            label={`Deposit in the Curve Pool`}
-                                            checked={this.state.depositCurveEnabled}
-                                            onChange={ e => this.toggleDepositCurve(e.target.checked) }
-                                          />
-                                          <Link
-                                            mainColor={'primary'}
-                                            hoverColor={'primary'}
-                                            onClick={ e => this.props.openTooltipModal('How Curve works',this.functionsUtil.getGlobalConfig(['messages','curveInstructions'])) }
-                                          >
-                                            (read more)
-                                          </Link>
-                                        </Flex>
-                                    }
-                                    {
-                                      showRebalanceOption && 
-                                        <Flex
-                                          alignItems={'center'}
-                                          justifyContent={'row'}
-                                        >
-                                          <Checkbox
-                                            required={false}
-                                            label={`Rebalance the pool`}
-                                            checked={this.state.directMint}
-                                            disabled={this.state.depositCurveEnabled}
-                                            onChange={ e => this.toggleSkipMint(e.target.checked) }
-                                          />
-                                          <Tooltip
-                                            placement={'bottom'}
-                                            message={this.functionsUtil.getGlobalConfig(['messages','directMint'])}
-                                          >
-                                            <Icon
-                                              size={'1em'}
-                                              color={'cellTitle'}
-                                              name={"InfoOutline"}
-                                            />
-                                          </Tooltip>
-                                        </Flex>
-                                    }
-                                  </Flex>
-                              }
-                            </DashboardCard>
-                          ) : (
-                            <Flex
-                              width={1}
-                              flexDirection={'column'}
-                            >
-                              {
-                                showDepositCurve && (
+                                }
+                              </DashboardCard>
+                            ) : (
                                   <Flex
                                     width={1}
                                     flexDirection={'column'}
-                                    justifyContent={'center'}
                                   >
-                                    <DashboardCard
-                                      isRainbow={true}
-                                      cardProps={{
-                                        py:3,
-                                        px:2,
-                                        mt:3,
-                                        display:'flex',
-                                        alignItems:'center',
-                                        flexDirection:'column',
-                                        justifyContent:'center',
-                                      }}
-                                    >
-                                      <Flex
-                                        width={1}
-                                        alignItems={'center'}
-                                        flexDirection={'column'}
-                                        justifyContent={'center'}
-                                      >
-                                        <Image
-                                          height={'1.8em'}
-                                          src={curveConfig.params.image}
-                                        />
-                                        <Text
-                                          mt={2}
-                                          px={2}
-                                          fontSize={1}
-                                          color={'dark-gray'}
-                                          textAlign={'center'}
-                                        >
-                                          Deposit your tokens in the Curve Pool and boost your APY up to {this.state.curveAPY ? this.state.curveAPY.toFixed(2) : '-'}%.
-                                          <Link
-                                            ml={1}
-                                            mainColor={'primary'}
-                                            hoverColor={'primary'}
-                                            onClick={ e => this.props.openTooltipModal('How Curve works',this.functionsUtil.getGlobalConfig(['messages','curveInstructions'])) }
-                                          >
-                                            Read More
-                                          </Link>
-                                        </Text>
-                                        <Checkbox
-                                          mt={2}
-                                          required={false}
-                                          label={`Deposit in Curve`}
-                                          checked={this.state.depositCurveEnabled}
-                                          onChange={ e => this.toggleDepositCurve(e.target.checked) }
-                                        />
-                                      </Flex>
-                                    </DashboardCard>
                                     {
-                                      (!this.state.showBuyFlow && !this.state.depositCurveEnabled && !this.state.canDeposit) &&
-                                        <Link
-                                          textAlign={'center'}
-                                          hoverColor={'primary'}
-                                          onClick={ e => this.setShowBuyFlow(true) }
+                                      showDepositCurve && (
+                                        <Flex
+                                          width={1}
+                                          flexDirection={'column'}
+                                          justifyContent={'center'}
                                         >
-                                          I just want to deposit more {this.props.selectedToken}
-                                        </Link>
+                                          <DashboardCard
+                                            isRainbow={true}
+                                            cardProps={{
+                                              py: 3,
+                                              px: 2,
+                                              mt: 3,
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              flexDirection: 'column',
+                                              justifyContent: 'center',
+                                            }}
+                                          >
+                                            <Flex
+                                              width={1}
+                                              alignItems={'center'}
+                                              flexDirection={'column'}
+                                              justifyContent={'center'}
+                                            >
+                                              <Image
+                                                height={'1.8em'}
+                                                src={curveConfig.params.image}
+                                              />
+                                              <Text
+                                                mt={2}
+                                                px={2}
+                                                fontSize={1}
+                                                color={'dark-gray'}
+                                                textAlign={'center'}
+                                              >
+                                                Deposit your tokens in the Curve Pool and boost your APY up to {this.state.curveAPY ? this.state.curveAPY.toFixed(2) : '-'}%.
+                                          <Link
+                                                  ml={1}
+                                                  mainColor={'primary'}
+                                                  hoverColor={'primary'}
+                                                  onClick={e => this.props.openTooltipModal('How Curve works', this.functionsUtil.getGlobalConfig(['messages', 'curveInstructions']))}
+                                                >
+                                                  Read More
+                                          </Link>
+                                              </Text>
+                                              <Checkbox
+                                                mt={2}
+                                                required={false}
+                                                label={`Deposit in Curve`}
+                                                checked={this.state.depositCurveEnabled}
+                                                onChange={e => this.toggleDepositCurve(e.target.checked)}
+                                              />
+                                            </Flex>
+                                          </DashboardCard>
+                                          {
+                                            (!this.state.showBuyFlow && !this.state.depositCurveEnabled && !this.state.canDeposit) &&
+                                            <Link
+                                              textAlign={'center'}
+                                              hoverColor={'primary'}
+                                              onClick={e => this.setShowBuyFlow(true)}
+                                            >
+                                              I just want to deposit more {this.props.selectedToken}
+                                            </Link>
+                                          }
+                                        </Flex>
+                                      )
+                                    }
+                                    {
+                                      showRebalanceOption && (
+                                        <DashboardCard
+                                          cardProps={{
+                                            py: 3,
+                                            px: 2,
+                                            mt: 3,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            flexDirection: 'column',
+                                            justifyContent: 'center',
+                                          }}
+                                        >
+                                          <Flex
+                                            width={1}
+                                            alignItems={'center'}
+                                            flexDirection={'column'}
+                                            justifyContent={'center'}
+                                          >
+                                            <Icon
+                                              size={'1.8em'}
+                                              color={'cellText'}
+                                              name={'InfoOutline'}
+                                            />
+                                            <Text
+                                              mt={1}
+                                              px={2}
+                                              fontSize={1}
+                                              color={'cellText'}
+                                              textAlign={'center'}
+                                            >
+                                              By checking this flag you can rebalance the pool and help all users gain an additional APR
+                                      </Text>
+                                          </Flex>
+                                          <Checkbox
+                                            mt={2}
+                                            required={false}
+                                            label={`Rebalance the pool`}
+                                            checked={this.state.directMint}
+                                            onChange={e => this.toggleSkipMint(e.target.checked)}
+                                          />
+                                        </DashboardCard>
+                                      )
+                                    }
+                                    {
+                                      redeemGovTokenEnabled && (
+                                        <DashboardCard
+                                          cardProps={{
+                                            py: 3,
+                                            px: 2,
+                                            mt: 3,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            flexDirection: 'column',
+                                            justifyContent: 'center',
+                                          }}
+                                        >
+                                          <Flex
+                                            width={1}
+                                            alignItems={'center'}
+                                            flexDirection={'column'}
+                                            justifyContent={'center'}
+                                          >
+                                            <Icon
+                                              size={'1.8em'}
+                                              color={'cellText'}
+                                              name={'InfoOutline'}
+                                            />
+                                            <Text
+                                              mt={1}
+                                              px={2}
+                                              fontSize={1}
+                                              color={'cellText'}
+                                              textAlign={'center'}
+                                            >
+                                              By redeeming your {this.props.selectedToken} you will automatically get also the proportional amount of governance tokens accrued{this.props.govTokensBalance && this.props.govTokensBalance.gt(0) ? ` (~ $${this.props.govTokensBalance.toFixed(2)})` : null}.
+                                      </Text>
+                                          </Flex>
+                                          <Checkbox
+                                            mt={2}
+                                            required={false}
+                                            checked={this.state.redeemGovTokens}
+                                            label={`Redeem governance tokens only`}
+                                            onChange={e => this.toggleRedeemGovTokens(e.target.checked)}
+                                          />
+                                        </DashboardCard>
+                                      )
                                     }
                                   </Flex>
                                 )
-                              }
-                              {
-                                showRebalanceOption && (
-                                  <DashboardCard
-                                    cardProps={{
-                                      py:3,
-                                      px:2,
-                                      mt:3,
-                                      display:'flex',
-                                      alignItems:'center',
-                                      flexDirection:'column',
-                                      justifyContent:'center',
-                                    }}
-                                  >
-                                    <Flex
-                                      width={1}
-                                      alignItems={'center'}
-                                      flexDirection={'column'}
-                                      justifyContent={'center'}
-                                    >
-                                      <Icon
-                                        size={'1.8em'}
-                                        color={'cellText'}
-                                        name={'InfoOutline'}
-                                      />
-                                      <Text
-                                        mt={1}
-                                        px={2}
-                                        fontSize={1}
-                                        color={'cellText'}
-                                        textAlign={'center'}
-                                      >
-                                        By checking this flag you can rebalance the pool and help all users gain an additional APR
-                                      </Text>
-                                    </Flex>
-                                    <Checkbox
-                                      mt={2}
-                                      required={false}
-                                      label={`Rebalance the pool`}
-                                      checked={this.state.directMint}
-                                      onChange={ e => this.toggleSkipMint(e.target.checked) }
-                                    />
-                                  </DashboardCard>
-                                )
-                              }
-                              {
-                                redeemGovTokenEnabled && (
-                                  <DashboardCard
-                                    cardProps={{
-                                      py:3,
-                                      px:2,
-                                      mt:3,
-                                      display:'flex',
-                                      alignItems:'center',
-                                      flexDirection:'column',
-                                      justifyContent:'center',
-                                    }}
-                                  >
-                                    <Flex
-                                      width={1}
-                                      alignItems={'center'}
-                                      flexDirection={'column'}
-                                      justifyContent={'center'}
-                                    >
-                                      <Icon
-                                        size={'1.8em'}
-                                        color={'cellText'}
-                                        name={'InfoOutline'}
-                                      />
-                                      <Text
-                                        mt={1}
-                                        px={2}
-                                        fontSize={1}
-                                        color={'cellText'}
-                                        textAlign={'center'}
-                                      >
-                                        By redeeming your {this.props.selectedToken} you will automatically get also the proportional amount of governance tokens accrued{ this.props.govTokensBalance && this.props.govTokensBalance.gt(0) ? ` (~ $${this.props.govTokensBalance.toFixed(2)})` : null }.
-                                      </Text>
-                                    </Flex>
-                                    <Checkbox
-                                      mt={2}
-                                      required={false}
-                                      checked={this.state.redeemGovTokens}
-                                      label={`Redeem governance tokens only`}
-                                      onChange={ e => this.toggleRedeemGovTokens(e.target.checked) }
-                                    />
-                                  </DashboardCard>
-                                )
-                              }
-                            </Flex>
-                          )
-                        }
-                        {
-                          redeemSkipGov ? (
-                            <DashboardCard
-                              cardProps={{
-                                mt:2,
-                                mb:2,
-                                py:2,
-                                px:1
-                              }}
-                            >
-                              <Flex
-                                alignItems={'center'}
-                                flexDirection={'column'}
+                          }
+                          {
+                            redeemSkipGov ? (
+                              <DashboardCard
+                                cardProps={{
+                                  mt: 2,
+                                  mb: 2,
+                                  py: 2,
+                                  px: 1
+                                }}
                               >
-                                <Text
-                                  mt={1}
-                                  fontSize={2}
-                                  color={'cellText'}
-                                  textAlign={'center'}
-                                >
-                                  Select the gov tokens you want to give away:
-                                </Text>
                                 <Flex
-                                  mt={2}
-                                  width={1}
-                                  boxShadow={0}
-                                  style={{
-                                    flexWrap:'wrap'
-                                  }}
                                   alignItems={'center'}
-                                  justifyContent={'center'}
+                                  flexDirection={'column'}
+                                >
+                                  <Text
+                                    mt={1}
+                                    fontSize={2}
+                                    color={'cellText'}
+                                    textAlign={'center'}
+                                  >
+                                    Select the gov tokens you want to give away:
+                                </Text>
+                                  <Flex
+                                    mt={2}
+                                    width={1}
+                                    boxShadow={0}
+                                    style={{
+                                      flexWrap: 'wrap'
+                                    }}
+                                    alignItems={'center'}
+                                    justifyContent={'center'}
                                   >
                                     {
-                                      Object.keys(this.props.govTokensUserBalances).map( token => {
+                                      Object.keys(this.props.govTokensUserBalances).map(token => {
                                         const balance = this.props.govTokensUserBalances[token];
                                         const isActive = this.state.redeemSkipGovTokens.includes(token);
-                                        const tokenConfig = this.functionsUtil.getGlobalConfig(['govTokens',token]);
+                                        const tokenConfig = this.functionsUtil.getGlobalConfig(['govTokens', token]);
                                         return (
                                           <Flex
                                             p={2}
@@ -2028,36 +2038,36 @@ class DepositRedeem extends Component {
                                             mx={1}
                                             width={'auto'}
                                             style={{
-                                              cursor:'pointer'
+                                              cursor: 'pointer'
                                             }}
                                             borderRadius={2}
                                             flexDirection={'row'}
                                             key={`skipGovToken_${token}`}
                                             justifyContent={'flex-start'}
                                             backgroundColor={isActive ? '#2a4b78' : 'cardBgHover'}
-                                            onClick={ e => this.setRedeemSkipGovTokens(token,!this.state.redeemSkipGovTokens.includes(token)) }
+                                            onClick={e => this.setRedeemSkipGovTokens(token, !this.state.redeemSkipGovTokens.includes(token))}
                                           >
                                             <Checkbox
                                               m={0}
                                               required={false}
                                               checked={isActive}
-                                              onChange={ e => this.setRedeemSkipGovTokens(token,e.target.checked) }
+                                              onChange={e => this.setRedeemSkipGovTokens(token, e.target.checked)}
                                             />
                                             <AssetField
                                               token={token}
                                               tokenConfig={tokenConfig}
                                               fieldInfo={{
-                                                name:'icon',
-                                                props:{
-                                                  mr:1,
-                                                  width:['1.4em','1.6em'],
-                                                  height:['1.4em','1.6em']
+                                                name: 'icon',
+                                                props: {
+                                                  mr: 1,
+                                                  width: ['1.4em', '1.6em'],
+                                                  height: ['1.4em', '1.6em']
                                                 }
                                               }}
                                             />
                                             <SmartNumber
                                               ml={1}
-                                              fontSize={[0,2]}
+                                              fontSize={[0, 2]}
                                               fontWeight={500}
                                               maxPrecision={4}
                                               color={'cellText'}
@@ -2065,445 +2075,128 @@ class DepositRedeem extends Component {
                                             />
                                           </Flex>
                                         );
-                                    })
-                                  }
+                                      })
+                                    }
+                                  </Flex>
                                 </Flex>
-                              </Flex>
-                            </DashboardCard>
-                          ) : redeemSkipGovNoTokens && (
-                            <DashboardCard
-                              cardProps={{
-                                p:2,
-                                my:2
-                              }}
-                            >
-                              <Flex
-                                alignItems={'center'}
-                                flexDirection={'column'}
-                                justifyContent={'center'}
-                              >
-                                <Icon
-                                  size={'1.8em'}
-                                  name={'MoneyOff'}
-                                  color={'cellText'}
-                                />
-                                <Text
-                                  mt={1}
-                                  fontSize={1}
-                                  color={'cellText'}
-                                  textAlign={'center'}
-                                >
-                                  You don't have any gov tokens to give away.
-                                </Text>
-                              </Flex>
-                            </DashboardCard>
-                          )
-                        }
-                        {
-                          redeemSkipGov && this.functionsUtil.BNify(this.state.skippedGovTokensBalance).gt(0) ? (
-                            <DashboardCard
-                              cardProps={{
-                                p:2,
-                                my:2
-                              }}
-                            >
-                              <Flex
-                                alignItems={'center'}
-                                flexDirection={'column'}
-                                justifyContent={'center'}
-                              >
-                                <Icon
-                                  size={'1.8em'}
-                                  name={'Warning'}
-                                  color={'#ffe000'}
-                                />
-                                <Text
-                                  mt={1}
-                                  fontSize={1}
-                                  color={'red'}
-                                  textAlign={'center'}
-                                >
-                                  You are giving away {this.functionsUtil.formatMoney(this.state.skippedGovTokensBalance)}$ worth of governance tokens!
-                                </Text>
-                                {
-                                  this.state.skipGovTokensGasSave && this.state.skipGovTokensGasSave.gte(0.0001) && (
-                                    <Text
-                                      mt={1}
-                                      fontSize={1}
-                                      color={'#00b84a'}
-                                      textAlign={'center'}
-                                    >
-                                      This will save you {this.state.skipGovTokensGasSave.toFixed(4)} ETH of gas (~{this.state.skipGovTokensGasSaveUSD.toFixed(2)}$)
-                                    </Text>
-                                  )
-                                }
-                                <Text
-                                  mt={1}
-                                  fontSize={1}
-                                  color={'cellText'}
-                                  textAlign={'center'}
-                                >
-                                  To proceed with the redeem please give your authorization by checking the following flag:
-                                </Text>
-                                <Checkbox
-                                  my={1}
-                                  required={false}
-                                  checked={this.state.agreeSkipGovTokens}
-                                  label={`I agree to give away my governance tokens`}
-                                  onChange={ e => this.toggleAgreeSkipGovTokens(e.target.checked) }
-                                />
-                              </Flex>
-                            </DashboardCard>
-                          ) : redeemSkipGov && this.state.redeemSkipGovTokens.length>0 && (
-                            <DashboardCard
-                              cardProps={{
-                                p:3,
-                                my:2
-                              }}
-                            >
-                              <FlexLoader
-                                flexProps={{
-                                  flexDirection:'row'
+                              </DashboardCard>
+                            ) : redeemSkipGovNoTokens && (
+                              <DashboardCard
+                                cardProps={{
+                                  p: 2,
+                                  my: 2
                                 }}
-                                loaderProps={{
-                                  size:'25px',
-                                }}
-                                textProps={{
-                                  ml:2
-                                }}
-                                text={'Loading estimated gas usage...'}
-                              />
-                            </DashboardCard>
-                          )
-                        }
-                        {
-                          showReferral && (
-                            <DashboardCard
-                              cardProps={{
-                                py:3,
-                                px:2,
-                                mt:3,
-                                display:'flex',
-                                alignItems:'center',
-                                flexDirection:'column',
-                                justifyContent:'center',
-                              }}
-                            >
-                              <Flex
-                                width={1}
-                                alignItems={'center'}
-                                flexDirection={'column'}
-                                justifyContent={'center'}
                               >
-                                <Icon
-                                  size={'1.8em'}
-                                  name={'Share'}
-                                  color={'cellText'}
-                                />
-                                <Text
-                                  mt={1}
-                                  px={2}
-                                  fontSize={1}
-                                  color={'cellText'}
-                                  textAlign={'center'}
+                                <Flex
+                                  alignItems={'center'}
+                                  flexDirection={'column'}
+                                  justifyContent={'center'}
                                 >
-                                  You are depositing with the following referral address:
-                                </Text>
-                                <Text
-                                  mt={1}
-                                  px={2}
-                                  fontSize={1}
-                                  fontWeight={500}
-                                  textAlign={'center'}
-                                  color={this.props.theme.colors.transactions.status.completed}
-                                >
-                                  {_referral}
-                                </Text>
-                              </Flex>
-                            </DashboardCard>
-                          )
-                        }
-                        {
-                          (metaTransactionsAvailable && !showBuyFlow && !this.state.contractPaused) ? (
-                            <DashboardCard
-                              cardProps={{
-                                py:3,
-                                px:2,
-                                my:3,
-                                display:'flex',
-                                alignItems:'center',
-                                flexDirection:'column',
-                                justifyContent:'center',
-                              }}
-                            >
-                              {
-                                this.state.metaTransactionsEnabled && this.state.txError[this.state.action] && this.state.actionProxyContract[this.state.action].approved ? (
-                                  <Flex
-                                    width={1}
-                                    alignItems={'center'}
-                                    flexDirection={'column'}
-                                    justifyContent={'center'}
-                                  >
-                                    <Icon
-                                      size={'1.8em'}
-                                      name={'Warning'}
-                                      color={'cellText'}
-                                    />
-                                    <Text
-                                      mt={1}
-                                      fontSize={1}
-                                      color={'cellText'}
-                                      textAlign={'center'}
-                                    >
-                                      Seems like you are having some trouble with Meta-Transactions... Disable them by unchecking the box below and try again!
-                                    </Text>
-                                  </Flex>
-                                ) : this.functionsUtil.getWalletProvider() === 'WalletConnect' && this.state.metaTransactionsEnabled ? (
-                                  <Flex
-                                    width={1}
-                                    alignItems={'center'}
-                                    flexDirection={'column'}
-                                    justifyContent={'center'}
-                                  >
-                                    <Icon
-                                      size={'1.8em'}
-                                      name={'Warning'}
-                                      color={'cellText'}
-                                    />
-                                    <Text
-                                      mt={1}
-                                      fontSize={1}
-                                      color={'cellText'}
-                                      textAlign={'center'}
-                                    >
-                                      Please disable Meta-Transactions if you are using Argent Wallet to avoid failed transactions!
-                                    </Text>
-                                  </Flex>
-                                ) : (
+                                  <Icon
+                                    size={'1.8em'}
+                                    name={'MoneyOff'}
+                                    color={'cellText'}
+                                  />
                                   <Text
                                     mt={1}
                                     fontSize={1}
                                     color={'cellText'}
                                     textAlign={'center'}
                                   >
-                                    Meta-Transactions are {this.state.metaTransactionsEnabled ? 'enabled' : 'disabled'} for {this.state.action}s!<br />
-                                    {
-                                      this.state.metaTransactionsEnabled && !this.state.actionProxyContract[this.state.action].approved && `Please either enable the Smart-Contract to enjoy gas-less ${this.state.action} or just disable meta-tx.`
-                                    }
-                                  </Text>
-                                )
-                              }
-                              <Checkbox
-                                mt={2}
-                                required={false}
-                                checked={this.state.metaTransactionsEnabled}
-                                onChange={ e => this.toggleMetaTransactionsEnabled(e.target.checked) }
-                                label={`${this.functionsUtil.capitalize(this.state.action)} with Meta-Transaction`}
-                              />
-                            </DashboardCard>
-                          ) : (erc20ForwarderEnabled && !showBuyFlow && !this.state.contractPaused) && (
-                            <DashboardCard
-                              cardProps={{
-                                p:3,
-                                my:3,
-                                display:'flex',
-                                alignItems:'center',
-                                flexDirection:'column',
-                                justifyContent:'center',
-                              }}
-                            >
-                              <Text
-                                mb={2}
-                                fontSize={2}
-                                color={'cellText'}
-                                textAlign={'center'}
-                              >
-                                How do you prefer to pay gas fees for this {this.state.action}?
-                              </Text>
-                              <Flex
-                                width={[1,0.7]}
-                                alignItems={'center'}
-                                flexDirection={'row'}
-                                justifyContent={'space-between'}
-                              >
-                                <CardIconButton
-                                  {...this.props}
-                                  cardProps={{
-                                    py:2,
-                                    px:[2,3],
-                                    width:0.48
-                                  }}
-                                  textProps={{
-                                    ml:[1,2],
-                                  }}
-                                  text={this.props.selectedToken}
-                                  isActive={this.state.erc20ForwarderEnabled}
-                                  imageProps={{
-                                    height:this.props.isMobile ? '1.4em' : '1.8em',
-                                    width:this.props.isMobile ? '1.4em' : '1.8em'
-                                  }}
-                                  image={`/images/tokens/${this.props.selectedToken}.svg`}
-                                  handleClick={e => this.toggleErc20ForwarderEnabled(true)}
-                                />
-                                <CardIconButton
-                                  {...this.props}
-                                  cardProps={{
-                                    py:2,
-                                    px:[2,3],
-                                    width:0.48
-                                  }}
-                                  textProps={{
-                                    ml:[1,2],
-                                  }}
-                                  text={'ETH'}
-                                  isActive={!this.state.erc20ForwarderEnabled}
-                                  imageProps={{
-                                    height:this.props.isMobile ? '1.4em' : '1.8em',
-                                    width:this.props.isMobile ? '1.4em' : '1.8em'
-                                  }}
-                                  image={`/images/tokens/ETH.svg`}
-                                  handleClick={e => this.toggleErc20ForwarderEnabled(false)}
-                                />
-                              </Flex>
-                              {
-                                this.state.erc20ForwarderEnabled && this.state.txError[this.state.action] && (
-                                  <Text
-                                    mt={2}
-                                    fontSize={1}
-                                    color={'red'}
-                                    textAlign={'center'}
-                                  >
-                                    The meta-transaction cannot be executed due to insufficient funds, fund your wallet or select ETH and try again.
-                                  </Text>
-                                )
-                              }
-                              <Text
-                                mt={2}
-                                fontSize={'11px'}
-                                color={'cellText'}
-                                textAlign={'center'}
-                              >
-                                Powered by <ExtLink fontSize={'11px'} href={'https://biconomy.io'}>Biconomy</ExtLink>
-                              </Text>
-                            </DashboardCard>
-                          )
-                        }
-                        {
-                          (this.state.minAmountForMintReached && this.state.action === 'deposit') && (
-                            <DashboardCard
-                              cardProps={{
-                                p:3,
-                                mt:3
-                              }}
-                            >
-                              <Flex
-                                alignItems={'center'}
-                                flexDirection={'column'}
-                              >
-                                <Icon
-                                  size={'1.8em'}
-                                  color={'cellText'}
-                                  name={'InfoOutline'}
-                                />
-                                <Text
-                                  mt={1}
-                                  fontSize={2}
-                                  color={'cellText'}
-                                  textAlign={'center'}
-                                >
-                                  By depositing more than {this.functionsUtil.formatMoney(this.state.minAmountForMint)}$ { this.state.showPoolPerc ? `(${this.state.minAmountForMint.div(this.state.totalAUM).times(100).toFixed(0)}% of the pool)` : null } the pool will be automatically rebalanced, gas cost may be higher.
+                                    You don't have any gov tokens to give away.
                                 </Text>
-                              </Flex>
-                            </DashboardCard>
-                          )
-                        }
-                        {
-                          showBatchDeposit ? (
-                            <Flex
-                              p={2}
-                              mt={3}
-                              width={1}
-                              borderRadius={2}
-                              alignItems={'center'}
-                              flexDirection={'row'}
-                              justifyContent={'center'}
-                              backgroundColor={'DashboardCard'}
-                              border={`1px solid ${this.props.theme.colors.primary}`}
-                            >
-                              <Link
-                                textAlign={'center'}
-                                hoverColor={'primary'}
-                                href={`/#/dashboard/tools/${batchDepositInfo.route}/${this.props.tokenConfig.idle.token}`}
-                              >
-                                Gas fees too high? Save gas with our Batch Deposit!
-                              </Link>
-                              <Icon
-                                ml={1}
-                                size={'1em'}
-                                color={'primary'}
-                                name={'LocalGasStation'}
-                              />
-                            </Flex>
-                          ) : showETHWrapper && (
-                            <Flex
-                              width={1}
-                              alignItems={'center'}
-                              flexDirection={'column'}
-                              justifyContent={'center'}
-                            >
+                                </Flex>
+                              </DashboardCard>
+                            )
+                          }
+                          {
+                            redeemSkipGov && this.functionsUtil.BNify(this.state.skippedGovTokensBalance).gt(0) ? (
                               <DashboardCard
                                 cardProps={{
-                                  py:3,
-                                  px:2,
-                                  mt:3,
-                                  display:'flex',
-                                  alignItems:'center',
-                                  flexDirection:'column',
-                                  justifyContent:'center',
-                                  pb:this.state.showAdvancedOptions ? 3 : 2,
+                                  p: 2,
+                                  my: 2
                                 }}
                               >
                                 <Flex
                                   alignItems={'center'}
-                                  justifyContent={'row'}
+                                  flexDirection={'column'}
+                                  justifyContent={'center'}
                                 >
+                                  <Icon
+                                    size={'1.8em'}
+                                    name={'Warning'}
+                                    color={'#ffe000'}
+                                  />
+                                  <Text
+                                    mt={1}
+                                    fontSize={1}
+                                    color={'red'}
+                                    textAlign={'center'}
+                                  >
+                                    You are giving away {this.functionsUtil.formatMoney(this.state.skippedGovTokensBalance)}$ worth of governance tokens!
+                                </Text>
+                                  {
+                                    this.state.skipGovTokensGasSave && this.state.skipGovTokensGasSave.gte(0.0001) && (
+                                      <Text
+                                        mt={1}
+                                        fontSize={1}
+                                        color={'#00b84a'}
+                                        textAlign={'center'}
+                                      >
+                                        This will save you {this.state.skipGovTokensGasSave.toFixed(4)} ETH of gas (~{this.state.skipGovTokensGasSaveUSD.toFixed(2)}$)
+                                    </Text>
+                                    )
+                                  }
+                                  <Text
+                                    mt={1}
+                                    fontSize={1}
+                                    color={'cellText'}
+                                    textAlign={'center'}
+                                  >
+                                    To proceed with the redeem please give your authorization by checking the following flag:
+                                </Text>
                                   <Checkbox
+                                    my={1}
                                     required={false}
-                                    checked={this.state.showETHWrapperEnabled}
-                                    label={`Convert your ETH to WETH`}
-                                    onChange={ e => this.toggleShowETHWrapper(e.target.checked) }
+                                    checked={this.state.agreeSkipGovTokens}
+                                    label={`I agree to give away my governance tokens`}
+                                    onChange={e => this.toggleAgreeSkipGovTokens(e.target.checked)}
                                   />
                                 </Flex>
                               </DashboardCard>
-                              {
-                                this.state.showETHWrapperEnabled && 
-                                  <ETHWrapperComponent
-                                    {...this.props}
-                                    action={'wrap'}
-                                    fullWidth={true}
-                                    toolProps={ethWrapperInfo.props}
-                                  />
-                              }
-                            </Flex>
-                          )
-                        }
-                        {
-                          showRedeemCurve && this.state.canRedeem && (
-                            <Flex
-                              width={1}
-                              flexDirection={'column'}
-                              justifyContent={'center'}
-                            >
+                            ) : redeemSkipGov && this.state.redeemSkipGovTokens.length > 0 && (
                               <DashboardCard
-                                isRainbow={true}
                                 cardProps={{
-                                  py:3,
-                                  px:2,
-                                  mt:3,
-                                  display:'flex',
-                                  alignItems:'center',
-                                  flexDirection:'column',
-                                  justifyContent:'center',
+                                  p: 3,
+                                  my: 2
+                                }}
+                              >
+                                <FlexLoader
+                                  flexProps={{
+                                    flexDirection: 'row'
+                                  }}
+                                  loaderProps={{
+                                    size: '25px',
+                                  }}
+                                  textProps={{
+                                    ml: 2
+                                  }}
+                                  text={'Loading estimated gas usage...'}
+                                />
+                              </DashboardCard>
+                            )
+                          }
+                          {
+                            showReferral && (
+                              <DashboardCard
+                                cardProps={{
+                                  py: 3,
+                                  px: 2,
+                                  mt: 3,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  flexDirection: 'column',
+                                  justifyContent: 'center',
                                 }}
                               >
                                 <Flex
@@ -2512,387 +2205,121 @@ class DepositRedeem extends Component {
                                   flexDirection={'column'}
                                   justifyContent={'center'}
                                 >
-                                  <Image
-                                    height={'1.8em'}
-                                    src={curveConfig.params.image}
+                                  <Icon
+                                    size={'1.8em'}
+                                    name={'Share'}
+                                    color={'cellText'}
                                   />
                                   <Text
-                                    mt={2}
+                                    mt={1}
                                     px={2}
                                     fontSize={1}
-                                    color={'dark-gray'}
+                                    color={'cellText'}
                                     textAlign={'center'}
                                   >
-                                    Redeem your tokens from the Curve Pool.
-                                    <Link
-                                      ml={1}
-                                      mainColor={'primary'}
-                                      hoverColor={'primary'}
-                                      onClick={ e => this.props.openTooltipModal('How Curve works',this.functionsUtil.getGlobalConfig(['messages','curveInstructions'])) }
-                                    >
-                                      Read More
-                                    </Link>
+                                    You are depositing with the following referral address:
+                                </Text>
+                                  <Text
+                                    mt={1}
+                                    px={2}
+                                    fontSize={1}
+                                    fontWeight={500}
+                                    textAlign={'center'}
+                                    color={this.props.theme.colors.transactions.status.completed}
+                                  >
+                                    {_referral}
                                   </Text>
-                                  {
-                                    this.state.canRedeem &&
-                                      <Checkbox
-                                        mt={2}
-                                        required={false}
-                                        label={`Redeem from Curve`}
-                                        checked={this.state.redeemCurveEnabled}
-                                        onChange={ e => this.toggleRedeemCurve(e.target.checked) }
-                                      />
-                                  }
                                 </Flex>
                               </DashboardCard>
-                              {
-                                this.canRedeem &&
-                                  <Link
-                                    textAlign={'center'}
-                                    hoverColor={'primary'}
-                                    onClick={ e => this.setShowRedeemFlow(true) }
-                                  >
-                                    I just want to redeem my {this.props.selectedToken}
-                                  </Link>
-                              }
-                            </Flex>
-                          )
-                        }
-                        {
-                          (this.state.contractPaused && this.state.action === 'deposit') ? (
-                            <DashboardCard
-                              cardProps={{
-                                p:3,
-                                mt:3
-                              }}
-                            >
-                              <Flex
-                                alignItems={'center'}
-                                flexDirection={'column'}
-                              >
-                                <Icon
-                                  size={'1.8em'}
-                                  name={'Warning'}
-                                  color={'cellText'}
-                                />
-                                <Text
-                                  mt={1}
-                                  fontSize={2}
-                                  color={'cellText'}
-                                  textAlign={'center'}
-                                >
-                                  Deposits for {this.props.selectedToken} are temporarily unavailable due to Smart-Contract maintenance. Redeems are always available.
-                                </Text>
-                              </Flex>
-                            </DashboardCard>
-                          ) : (!this.state.tokenApproved && this.state.action === 'deposit' && !this.state.showETHWrapperEnabled) ? (
-                            <DashboardCard
-                              cardProps={{
-                                p:3,
-                                mt:3
-                              }}
-                            >
-                              {
-                                this.state.processing['approve'] && this.state.processing['approve'].loading ? (
-                                  <Flex
-                                    flexDirection={'column'}
-                                  >
-                                    <TxProgressBar
-                                      {...this.props}
-                                      waitText={`Approve estimated in`}
-                                      endMessage={`Finalizing approve request...`}
-                                      hash={this.state.processing['approve'].txHash}
-                                      cancelTransaction={this.cancelTransaction.bind(this)}
-                                    />
-                                  </Flex>
-                                ) : (
-                                  <Flex
-                                    alignItems={'center'}
-                                    flexDirection={'column'}
-                                  >
-                                    <Icon
-                                      size={'1.8em'}
-                                      name={'LockOpen'}
-                                      color={'cellText'}
-                                    />
-                                    <Text
-                                      mt={3}
-                                      fontSize={2}
-                                      color={'cellText'}
-                                      textAlign={'center'}
-                                    >
-                                      {
-                                        this.state.depositCurveEnabled ? 
-                                          `To ${this.functionsUtil.capitalize(this.state.action)} your ${this.props.selectedToken} in the Curve Pool you need to approve the Smart-Contract first.`
-                                        : useMetaTx ?
-                                          `To ${this.functionsUtil.capitalize(this.state.action)} your ${this.props.selectedToken} into Idle using Meta-Transaction you need to approve our Smart-Contract first.`
-                                        :
-                                          `To ${this.functionsUtil.capitalize(this.state.action)} your ${this.props.selectedToken} into Idle you need to approve our Smart-Contract first.`
-                                      }
-                                    </Text>
-                                    <RoundButton
-                                      buttonProps={{
-                                        mt:3,
-                                        width:[1,1/2]
-                                      }}
-                                      handleClick={this.approveToken.bind(this)}
-                                    >
-                                      Approve
-                                    </RoundButton>
-                                  </Flex>
-                                )
-                              }
-                            </DashboardCard>
-                          ) : (!showBuyFlow && canPerformAction) && (
-                            !this.state.processing[this.state.action].loading ? (
-                              <Flex
-                                mt={2}
-                                flexDirection={'column'}
-                              >
-                                {
-                                  showActionFlow && (
-                                    <Flex
-                                      mb={3}
-                                      width={1}
-                                      flexDirection={'column'}
-                                    >
-                                      {
-                                        (totalBalance || this.props.tokenFeesPercentage) && (
-                                          <Box
-                                            mb={1}
-                                            width={1}
-                                          >
-                                            {
-                                              this.state.showMaxSlippage && showCurveSlippage && (
-                                                <Box
-                                                  mb={2}
-                                                  width={1}
-                                                >
-                                                  <Flex
-                                                    alignItems={'center'}
-                                                    flexDirection={'row'}
-                                                  >
-                                                    <Text>
-                                                      Choose max slippage:
-                                                    </Text>
-                                                    <Tooltip
-                                                      placement={'top'}
-                                                      message={`Max additional slippage on top of the one shown below`}
-                                                    >
-                                                      <Icon
-                                                        ml={1}
-                                                        size={'1em'}
-                                                        color={'cellTitle'}
-                                                        name={"InfoOutline"}
-                                                      />
-                                                    </Tooltip>
-                                                  </Flex>
-                                                  <Flex
-                                                    mt={2}
-                                                    alignItems={'center'}
-                                                    flexDirection={'row'}
-                                                    justifyContent={'space-between'}
-                                                  >
-                                                    {
-                                                      [0.2,0.5,1,5].map( slippage => (
-                                                        <FastBalanceSelector
-                                                          cardProps={{
-                                                            p:1
-                                                          }}
-                                                          textProps={{
-                                                            fontSize:1
-                                                          }}
-                                                          percentage={slippage}
-                                                          key={`selector_${slippage}`}
-                                                          onMouseDown={()=>this.setMaxSlippage(slippage)}
-                                                          isActive={this.state.maxSlippage === parseFloat(slippage)}
-                                                        />
-                                                      ))
-                                                    }
-                                                  </Flex>
-                                                </Box>
-                                              )
-                                            }
-                                            <Flex
-                                              width={1}
-                                              alignItems={'center'}
-                                              flexDirection={'row'}
-                                              justifyContent={'space-between'}
-                                            >
-                                              {
-                                                showCurveSlippage ? (
-                                                  <Flex
-                                                    width={1}
-                                                    maxWidth={'50%'}
-                                                    alignItems={'center'}
-                                                    flexDirection={'row'}
-                                                  >
-                                                    <Text
-                                                      fontSize={1}
-                                                      fontWeight={3}
-                                                      textAlign={'right'}
-                                                      style={{
-                                                        whiteSpace:'nowrap'
-                                                      }}
-                                                      color={ this.state.depositCurveSlippage.gt(0) ? this.props.theme.colors.transactions.status.failed : this.props.theme.colors.transactions.status.completed }
-                                                    >
-                                                      {
-                                                        parseFloat(this.state.depositCurveSlippage.times(100).toFixed(2)) === 0 ?
-                                                          'No Slippage'
-                                                        : `${ this.state.depositCurveSlippage.gt(0) ? 'Slippage: ' : 'Bonus: ' } ${this.state.depositCurveSlippage.times(100).abs().toFixed(2)}%`
-                                                      }
-                                                    </Text>
-                                                    <Tooltip
-                                                      placement={'top'}
-                                                      message={this.functionsUtil.getGlobalConfig(['messages','curveBonusSlippage'])}
-                                                    >
-                                                      <Icon
-                                                        ml={1}
-                                                        size={'1em'}
-                                                        color={'cellTitle'}
-                                                        name={"InfoOutline"}
-                                                      />
-                                                    </Tooltip>
-                                                    <Link
-                                                      ml={1}
-                                                      color={'copyColor'}
-                                                      hoverColor={'primary'}
-                                                      onClick={this.showMaxSlippage}
-                                                    >
-                                                      change
-                                                    </Link>
-                                                  </Flex>
-                                                ) : this.props.tokenFeesPercentage && (
-                                                  <Flex
-                                                    alignItems={'center'}
-                                                    flexDirection={'row'}
-                                                  >
-                                                    <Text
-                                                      fontSize={1}
-                                                      fontWeight={3}
-                                                      color={'dark-gray'}
-                                                      textAlign={'right'}
-                                                      hoverColor={'copyColor'}
-                                                    >
-                                                      Performance fee: {this.props.tokenFeesPercentage.times(100).toFixed(2)}%
-                                                    </Text>
-                                                    <Tooltip
-                                                      placement={'top'}
-                                                      message={this.functionsUtil.getGlobalConfig(['messages','performanceFee'])}
-                                                    >
-                                                      <Icon
-                                                        ml={1}
-                                                        size={'1em'}
-                                                        color={'cellTitle'}
-                                                        name={"InfoOutline"}
-                                                      />
-                                                    </Tooltip>
-                                                  </Flex>
-                                                )
-                                              }
-                                              {
-                                                totalBalance && (
-                                                  <Link
-                                                    fontSize={1}
-                                                    fontWeight={3}
-                                                    color={'dark-gray'}
-                                                    textAlign={'right'}
-                                                    hoverColor={'copyColor'}
-                                                    onClick={ (e) => this.setFastBalanceSelector(100) }
-                                                  >
-                                                    {totalBalance.toFixed(6)} {this.props.selectedToken}
-                                                  </Link>
-                                                )
-                                              }
-                                            </Flex>
-                                          </Box>
-                                        )
-                                      }
-                                      <Input
-                                        min={0}
-                                        type={"number"}
-                                        required={true}
-                                        height={'3.4em'}
-                                        borderRadius={2}
-                                        fontWeight={500}
-                                        borderColor={'cardBorder'}
-                                        backgroundColor={'cardBg'}
-                                        boxShadow={'none !important'}
-                                        placeholder={`Insert amount`}
-                                        onChange={this.changeInputValue.bind(this)}
-                                        border={`1px solid ${this.props.theme.colors.divider}`}
-                                        value={this.state.inputValue[this.state.action] !== null ? this.functionsUtil.BNify(this.state.inputValue[this.state.action]).toFixed() : ''}
-                                      />
-                                      <Flex
-                                        mt={2}
-                                        alignItems={'center'}
-                                        flexDirection={'row'}
-                                        justifyContent={'space-between'}
-                                      >
-                                        {
-                                          [25,50,75,100].map( percentage => (
-                                            <FastBalanceSelector
-                                              percentage={percentage}
-                                              key={`selector_${percentage}`}
-                                              onMouseDown={()=>this.setFastBalanceSelector(percentage)}
-                                              isActive={this.state.fastBalanceSelector[this.state.action] === parseInt(percentage)}
-                                            />
-                                          ))
-                                        }
-                                      </Flex>
-                                    </Flex>
-                                  )
-                                }
-                                {
-                                  canPerformAction && (
-                                    <Flex
-                                      justifyContent={'center'}
-                                      mt={ redeemGovTokens ? 2 : 0 }
-                                    >
-                                      <RoundButton
-                                        buttonProps={{
-                                          width:'auto',
-                                          minWidth:[1,1/2],
-                                          style:{
-                                            textTransform:'capitalize'
-                                          },
-                                          disabled:this.state.buttonDisabled
-                                        }}
-                                        handleClick={this.state.buttonDisabled ? null : this.executeAction.bind(this) }
-                                      >
-                                        {this.state.action}{ redeemGovTokens ? ' Gov Tokens' : '' /*(depositCurve ? ' in Curve' : '')*/ }
-                                      </RoundButton>
-                                    </Flex>
-                                  )
-                                }
-                              </Flex>
-                            ) : this.state.loadingErc20ForwarderTx ? (
-                              <Flex
-                                mt={3}
-                                flexDirection={'column'}
-                              >
-                                <FlexLoader
-                                  flexProps={{
-                                    flexDirection:'row'
-                                  }}
-                                  loaderProps={{
-                                    size:'25px',
-                                  }}
-                                  textProps={{
-                                    ml:2
-                                  }}
-                                  text={ this.state.erc20ForwarderTx ? ( this.state.signedParameters ? 'Please Sign the Transaction...' : 'Please Sign the Permit...' ) : 'Calculating transaction fees...'}
-                                />
-                              </Flex>
-                            ) : this.state.erc20ForwarderTx ? (
+                            )
+                          }
+                          {
+                            (metaTransactionsAvailable && !showBuyFlow && !this.state.contractPaused) ? (
                               <DashboardCard
                                 cardProps={{
-                                  p:3,
-                                  mt:3,
-                                  display:'flex',
-                                  alignItems:'center',
-                                  flexDirection:'column',
-                                  justifyContent:'center',
+                                  py: 3,
+                                  px: 2,
+                                  my: 3,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  flexDirection: 'column',
+                                  justifyContent: 'center',
+                                }}
+                              >
+                                {
+                                  this.state.metaTransactionsEnabled && this.state.txError[this.state.action] && this.state.actionProxyContract[this.state.action].approved ? (
+                                    <Flex
+                                      width={1}
+                                      alignItems={'center'}
+                                      flexDirection={'column'}
+                                      justifyContent={'center'}
+                                    >
+                                      <Icon
+                                        size={'1.8em'}
+                                        name={'Warning'}
+                                        color={'cellText'}
+                                      />
+                                      <Text
+                                        mt={1}
+                                        fontSize={1}
+                                        color={'cellText'}
+                                        textAlign={'center'}
+                                      >
+                                        Seems like you are having some trouble with Meta-Transactions... Disable them by unchecking the box below and try again!
+                                    </Text>
+                                    </Flex>
+                                  ) : this.functionsUtil.getWalletProvider() === 'WalletConnect' && this.state.metaTransactionsEnabled ? (
+                                    <Flex
+                                      width={1}
+                                      alignItems={'center'}
+                                      flexDirection={'column'}
+                                      justifyContent={'center'}
+                                    >
+                                      <Icon
+                                        size={'1.8em'}
+                                        name={'Warning'}
+                                        color={'cellText'}
+                                      />
+                                      <Text
+                                        mt={1}
+                                        fontSize={1}
+                                        color={'cellText'}
+                                        textAlign={'center'}
+                                      >
+                                        Please disable Meta-Transactions if you are using Argent Wallet to avoid failed transactions!
+                                    </Text>
+                                    </Flex>
+                                  ) : (
+                                        <Text
+                                          mt={1}
+                                          fontSize={1}
+                                          color={'cellText'}
+                                          textAlign={'center'}
+                                        >
+                                          Meta-Transactions are {this.state.metaTransactionsEnabled ? 'enabled' : 'disabled'} for {this.state.action}s!<br />
+                                          {
+                                            this.state.metaTransactionsEnabled && !this.state.actionProxyContract[this.state.action].approved && `Please either enable the Smart-Contract to enjoy gas-less ${this.state.action} or just disable meta-tx.`
+                                          }
+                                        </Text>
+                                      )
+                                }
+                                <Checkbox
+                                  mt={2}
+                                  required={false}
+                                  checked={this.state.metaTransactionsEnabled}
+                                  onChange={e => this.toggleMetaTransactionsEnabled(e.target.checked)}
+                                  label={`${this.functionsUtil.capitalize(this.state.action)} with Meta-Transaction`}
+                                />
+                              </DashboardCard>
+                            ) : (erc20ForwarderEnabled && !showBuyFlow && !this.state.contractPaused) && (
+                              <DashboardCard
+                                cardProps={{
+                                  p: 3,
+                                  my: 3,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  flexDirection: 'column',
+                                  justifyContent: 'center',
                                 }}
                               >
                                 <Text
@@ -2901,134 +2328,717 @@ class DepositRedeem extends Component {
                                   color={'cellText'}
                                   textAlign={'center'}
                                 >
-                                  The required gas fee to perform the {this.state.action} is <strong>{this.state.erc20ForwarderTx.cost} {this.props.selectedToken}</strong>
-                                </Text>
+                                  How do you prefer to pay gas fees for this {this.state.action}?
+                              </Text>
                                 <Flex
-                                  width={1}
+                                  width={[1, 0.7]}
                                   alignItems={'center'}
                                   flexDirection={'row'}
-                                  justifyContent={'center'}
+                                  justifyContent={'space-between'}
                                 >
-                                  <DashboardCard
+                                  <CardIconButton
+                                    {...this.props}
                                     cardProps={{
-                                      mx:2,
-                                      py:2,
-                                      px:[2,3],
-                                      width:0.40,
-                                      onMouseDown:() => {
-                                        this.executeAction()
-                                      }
+                                      py: 2,
+                                      px: [2, 3],
+                                      width: 0.48
                                     }}
-                                    isInteractive={true}
-                                  >
-                                    <Flex
-                                      my={1}
-                                      alignItems={'center'}
-                                      flexDirection={'row'}
-                                      justifyContent={'center'}
-                                    >
-                                      <Flex
-                                        mr={2}
-                                        alignItems={'center'}
-                                        justifyContent={'center'}
-                                      >
-                                        <Icon
-                                          align={'center'}
-                                          color={'#00b84a'}
-                                          name={'CheckCircle'}
-                                          size={this.props.isMobile ? '1em' : '1.8em'}
-                                        />
-                                      </Flex>
-                                      <Text
-                                        fontWeight={3}
-                                        fontSize={[2,3]}
-                                      >
-                                        Confirm
-                                      </Text>
-                                    </Flex>
-                                  </DashboardCard>
-                                  <DashboardCard
+                                    textProps={{
+                                      ml: [1, 2],
+                                    }}
+                                    text={this.props.selectedToken}
+                                    isActive={this.state.erc20ForwarderEnabled}
+                                    imageProps={{
+                                      height: this.props.isMobile ? '1.4em' : '1.8em',
+                                      width: this.props.isMobile ? '1.4em' : '1.8em'
+                                    }}
+                                    image={`/images/tokens/${this.props.selectedToken}.svg`}
+                                    handleClick={e => this.toggleErc20ForwarderEnabled(true)}
+                                  />
+                                  <CardIconButton
+                                    {...this.props}
                                     cardProps={{
-                                      mx:2,
-                                      py:2,
-                                      px:[2,3],
-                                      width:0.40,
-                                      onMouseDown:() => {
-                                        this.cancelTransaction();
-                                      }
+                                      py: 2,
+                                      px: [2, 3],
+                                      width: 0.48
                                     }}
-                                    isInteractive={true}
-                                  >
-                                    <Flex
-                                      my={1}
-                                      alignItems={'center'}
-                                      flexDirection={'row'}
-                                      justifyContent={'center'}
+                                    textProps={{
+                                      ml: [1, 2],
+                                    }}
+                                    text={'ETH'}
+                                    isActive={!this.state.erc20ForwarderEnabled}
+                                    imageProps={{
+                                      height: this.props.isMobile ? '1.4em' : '1.8em',
+                                      width: this.props.isMobile ? '1.4em' : '1.8em'
+                                    }}
+                                    image={`/images/tokens/ETH.svg`}
+                                    handleClick={e => this.toggleErc20ForwarderEnabled(false)}
+                                  />
+                                </Flex>
+                                {
+                                  this.state.erc20ForwarderEnabled && this.state.txError[this.state.action] && (
+                                    <Text
+                                      mt={2}
+                                      fontSize={1}
+                                      color={'red'}
+                                      textAlign={'center'}
                                     >
-                                      <Flex
-                                        mr={2}
-                                        alignItems={'center'}
-                                        justifyContent={'center'}
-                                      >
-                                        <Icon
-                                          name={'Cancel'}
-                                          align={'center'}
-                                          color={'#e13636'}
-                                          size={this.props.isMobile ? '1em' : '1.8em'}
-                                        />
-                                      </Flex>
-                                      <Text
-                                        fontWeight={3}
-                                        fontSize={[2,3]}
-                                      >
-                                        Decline
-                                      </Text>
-                                    </Flex>
-                                  </DashboardCard>
+                                      The meta-transaction cannot be executed due to insufficient funds, fund your wallet or select ETH and try again.
+                                  </Text>
+                                  )
+                                }
+                                <Text
+                                  mt={2}
+                                  fontSize={'11px'}
+                                  color={'cellText'}
+                                  textAlign={'center'}
+                                >
+                                  Powered by <ExtLink fontSize={'11px'} href={'https://biconomy.io'}>Biconomy</ExtLink>
+                                </Text>
+                              </DashboardCard>
+                            )
+                          }
+                          {
+                            (this.state.minAmountForMintReached && this.state.action === 'deposit') && (
+                              <DashboardCard
+                                cardProps={{
+                                  p: 3,
+                                  mt: 3
+                                }}
+                              >
+                                <Flex
+                                  alignItems={'center'}
+                                  flexDirection={'column'}
+                                >
+                                  <Icon
+                                    size={'1.8em'}
+                                    color={'cellText'}
+                                    name={'InfoOutline'}
+                                  />
+                                  <Text
+                                    mt={1}
+                                    fontSize={2}
+                                    color={'cellText'}
+                                    textAlign={'center'}
+                                  >
+                                    By depositing more than {this.functionsUtil.formatMoney(this.state.minAmountForMint)}$ {this.state.showPoolPerc ? `(${this.state.minAmountForMint.div(this.state.totalAUM).times(100).toFixed(0)}% of the pool)` : null} the pool will be automatically rebalanced, gas cost may be higher.
+                                </Text>
                                 </Flex>
                               </DashboardCard>
-                            ) : (
+                            )
+                          }
+                          {
+                            showBatchDeposit ? (
                               <Flex
+                                p={2}
                                 mt={3}
+                                width={1}
+                                borderRadius={2}
+                                alignItems={'center'}
+                                flexDirection={'row'}
+                                justifyContent={'center'}
+                                backgroundColor={'DashboardCard'}
+                                border={`1px solid ${this.props.theme.colors.primary}`}
+                              >
+                                <Link
+                                  textAlign={'center'}
+                                  hoverColor={'primary'}
+                                  href={`/#/dashboard/tools/${batchDepositInfo.route}/${this.props.tokenConfig.idle.token}`}
+                                >
+                                  Gas fees too high? Save gas with our Batch Deposit!
+                              </Link>
+                                <Icon
+                                  ml={1}
+                                  size={'1em'}
+                                  color={'primary'}
+                                  name={'LocalGasStation'}
+                                />
+                              </Flex>
+                            ) : showETHWrapper && (
+                              <Flex
+                                width={1}
                                 alignItems={'center'}
                                 flexDirection={'column'}
                                 justifyContent={'center'}
                               >
-                                <TxProgressBar
-                                  {...this.props}
-                                  cancelTransaction={this.cancelTransaction.bind(this)}
-                                  hash={this.state.processing[this.state.action].txHash}
-                                  endMessage={`Finalizing ${this.state.action} request...`}
-                                  waitText={`${this.functionsUtil.capitalize(this.state.action)} estimated in`}
-                                />
+                                <DashboardCard
+                                  cardProps={{
+                                    py: 3,
+                                    px: 2,
+                                    mt: 3,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                    pb: this.state.showAdvancedOptions ? 3 : 2,
+                                  }}
+                                >
+                                  <Flex
+                                    alignItems={'center'}
+                                    justifyContent={'row'}
+                                  >
+                                    <Checkbox
+                                      required={false}
+                                      checked={this.state.showETHWrapperEnabled}
+                                      label={`Convert your ETH to WETH`}
+                                      onChange={e => this.toggleShowETHWrapper(e.target.checked)}
+                                    />
+                                  </Flex>
+                                </DashboardCard>
+                                {
+                                  this.state.showETHWrapperEnabled &&
+                                  <ETHWrapperComponent
+                                    {...this.props}
+                                    action={'wrap'}
+                                    fullWidth={true}
+                                    toolProps={ethWrapperInfo.props}
+                                  />
+                                }
                               </Flex>
                             )
-                          )
-                        }
-                      </Box>
-                    )
-                  ) : (
-                    <Flex
-                      mt={4}
-                      flexDirection={'column'}
-                    >
-                      <FlexLoader
-                        flexProps={{
-                          flexDirection:'row'
-                        }}
-                        loaderProps={{
-                          size:'30px'
-                        }}
-                        textProps={{
-                          ml:2
-                        }}
-                        text={'Loading asset info...'}
-                      />
-                    </Flex>
-                  )
-                }
-              </Migrate>
-            )
+                          }
+                          {
+                            showRedeemCurve && this.state.canRedeem && (
+                              <Flex
+                                width={1}
+                                flexDirection={'column'}
+                                justifyContent={'center'}
+                              >
+                                <DashboardCard
+                                  isRainbow={true}
+                                  cardProps={{
+                                    py: 3,
+                                    px: 2,
+                                    mt: 3,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                  }}
+                                >
+                                  <Flex
+                                    width={1}
+                                    alignItems={'center'}
+                                    flexDirection={'column'}
+                                    justifyContent={'center'}
+                                  >
+                                    <Image
+                                      height={'1.8em'}
+                                      src={curveConfig.params.image}
+                                    />
+                                    <Text
+                                      mt={2}
+                                      px={2}
+                                      fontSize={1}
+                                      color={'dark-gray'}
+                                      textAlign={'center'}
+                                    >
+                                      Redeem your tokens from the Curve Pool.
+                                    <Link
+                                        ml={1}
+                                        mainColor={'primary'}
+                                        hoverColor={'primary'}
+                                        onClick={e => this.props.openTooltipModal('How Curve works', this.functionsUtil.getGlobalConfig(['messages', 'curveInstructions']))}
+                                      >
+                                        Read More
+                                    </Link>
+                                    </Text>
+                                    {
+                                      this.state.canRedeem &&
+                                      <Checkbox
+                                        mt={2}
+                                        required={false}
+                                        label={`Redeem from Curve`}
+                                        checked={this.state.redeemCurveEnabled}
+                                        onChange={e => this.toggleRedeemCurve(e.target.checked)}
+                                      />
+                                    }
+                                  </Flex>
+                                </DashboardCard>
+                                {
+                                  this.canRedeem &&
+                                  <Link
+                                    textAlign={'center'}
+                                    hoverColor={'primary'}
+                                    onClick={e => this.setShowRedeemFlow(true)}
+                                  >
+                                    I just want to redeem my {this.props.selectedToken}
+                                  </Link>
+                                }
+                              </Flex>
+                            )
+                          }
+                          {
+                            (this.state.contractPaused && this.state.action === 'deposit') ? (
+                              <DashboardCard
+                                cardProps={{
+                                  p: 3,
+                                  mt: 3
+                                }}
+                              >
+                                <Flex
+                                  alignItems={'center'}
+                                  flexDirection={'column'}
+                                >
+                                  <Icon
+                                    size={'1.8em'}
+                                    name={'Warning'}
+                                    color={'cellText'}
+                                  />
+                                  <Text
+                                    mt={1}
+                                    fontSize={2}
+                                    color={'cellText'}
+                                    textAlign={'center'}
+                                  >
+                                    Deposits for {this.props.selectedToken} are temporarily unavailable due to Smart-Contract maintenance. Redeems are always available.
+                                </Text>
+                                </Flex>
+                              </DashboardCard>
+                            ) : (!this.state.tokenApproved && this.state.action === 'deposit' && !this.state.showETHWrapperEnabled) ? (
+                              <DashboardCard
+                                cardProps={{
+                                  p: 3,
+                                  mt: 3
+                                }}
+                              >
+                                {
+                                  this.state.processing['approve'] && this.state.processing['approve'].loading ? (
+                                    <Flex
+                                      flexDirection={'column'}
+                                    >
+                                      <TxProgressBar
+                                        {...this.props}
+                                        waitText={`Approve estimated in`}
+                                        endMessage={`Finalizing approve request...`}
+                                        hash={this.state.processing['approve'].txHash}
+                                        cancelTransaction={this.cancelTransaction.bind(this)}
+                                      />
+                                    </Flex>
+                                  ) : (
+                                      <Flex
+                                        alignItems={'center'}
+                                        flexDirection={'column'}
+                                      >
+                                        <Icon
+                                          size={'1.8em'}
+                                          name={'LockOpen'}
+                                          color={'cellText'}
+                                        />
+                                        <Text
+                                          mt={3}
+                                          fontSize={2}
+                                          color={'cellText'}
+                                          textAlign={'center'}
+                                        >
+                                          {
+                                            this.state.depositCurveEnabled ?
+                                              `To ${this.functionsUtil.capitalize(this.state.action)} your ${this.props.selectedToken} in the Curve Pool you need to approve the Smart-Contract first.`
+                                              : useMetaTx ?
+                                                `To ${this.functionsUtil.capitalize(this.state.action)} your ${this.props.selectedToken} into Idle using Meta-Transaction you need to approve our Smart-Contract first.`
+                                                :
+                                                `To ${this.functionsUtil.capitalize(this.state.action)} your ${this.props.selectedToken} into Idle you need to approve our Smart-Contract first.`
+                                          }
+                                        </Text>
+                                        <RoundButton
+                                          buttonProps={{
+                                            mt: 3,
+                                            width: [1, 1 / 2]
+                                          }}
+                                          handleClick={this.approveToken.bind(this)}
+                                        >
+                                          Approve
+                                    </RoundButton>
+                                      </Flex>
+                                    )
+                                }
+                              </DashboardCard>
+                            ) : (!showBuyFlow && canPerformAction) && (
+                              !this.state.processing[this.state.action].loading ? (
+                                <Flex
+                                  mt={2}
+                                  flexDirection={'column'}
+                                >
+                                  {
+                                    showActionFlow && (
+                                      <Flex
+                                        mb={3}
+                                        width={1}
+                                        flexDirection={'column'}
+                                      >
+                                        {
+                                          (totalBalance || this.props.tokenFeesPercentage) && (
+                                            <Box
+                                              mb={1}
+                                              width={1}
+                                            >
+                                              {
+                                                this.state.showMaxSlippage && showCurveSlippage && (
+                                                  <Box
+                                                    mb={2}
+                                                    width={1}
+                                                  >
+                                                    <Flex
+                                                      alignItems={'center'}
+                                                      flexDirection={'row'}
+                                                    >
+                                                      <Text>
+                                                        Choose max slippage:
+                                                    </Text>
+                                                      <Tooltip
+                                                        placement={'top'}
+                                                        message={`Max additional slippage on top of the one shown below`}
+                                                      >
+                                                        <Icon
+                                                          ml={1}
+                                                          size={'1em'}
+                                                          color={'cellTitle'}
+                                                          name={"InfoOutline"}
+                                                        />
+                                                      </Tooltip>
+                                                    </Flex>
+                                                    <Flex
+                                                      mt={2}
+                                                      alignItems={'center'}
+                                                      flexDirection={'row'}
+                                                      justifyContent={'space-between'}
+                                                    >
+                                                      {
+                                                        [0.2, 0.5, 1, 5].map(slippage => (
+                                                          <FastBalanceSelector
+                                                            cardProps={{
+                                                              p: 1
+                                                            }}
+                                                            textProps={{
+                                                              fontSize: 1
+                                                            }}
+                                                            percentage={slippage}
+                                                            key={`selector_${slippage}`}
+                                                            onMouseDown={() => this.setMaxSlippage(slippage)}
+                                                            isActive={this.state.maxSlippage === parseFloat(slippage)}
+                                                          />
+                                                        ))
+                                                      }
+                                                    </Flex>
+                                                  </Box>
+                                                )
+                                              }
+                                              <Flex
+                                                width={1}
+                                                alignItems={'center'}
+                                                flexDirection={'row'}
+                                                justifyContent={'space-between'}
+                                              >
+                                                {
+                                                  showCurveSlippage ? (
+                                                    <Flex
+                                                      width={1}
+                                                      maxWidth={'50%'}
+                                                      alignItems={'center'}
+                                                      flexDirection={'row'}
+                                                    >
+                                                      <Text
+                                                        fontSize={1}
+                                                        fontWeight={3}
+                                                        textAlign={'right'}
+                                                        style={{
+                                                          whiteSpace: 'nowrap'
+                                                        }}
+                                                        color={this.state.depositCurveSlippage.gt(0) ? this.props.theme.colors.transactions.status.failed : this.props.theme.colors.transactions.status.completed}
+                                                      >
+                                                        {
+                                                          parseFloat(this.state.depositCurveSlippage.times(100).toFixed(2)) === 0 ?
+                                                            'No Slippage'
+                                                            : `${this.state.depositCurveSlippage.gt(0) ? 'Slippage: ' : 'Bonus: '} ${this.state.depositCurveSlippage.times(100).abs().toFixed(2)}%`
+                                                        }
+                                                      </Text>
+                                                      <Tooltip
+                                                        placement={'top'}
+                                                        message={this.functionsUtil.getGlobalConfig(['messages', 'curveBonusSlippage'])}
+                                                      >
+                                                        <Icon
+                                                          ml={1}
+                                                          size={'1em'}
+                                                          color={'cellTitle'}
+                                                          name={"InfoOutline"}
+                                                        />
+                                                      </Tooltip>
+                                                      <Link
+                                                        ml={1}
+                                                        color={'copyColor'}
+                                                        hoverColor={'primary'}
+                                                        onClick={this.showMaxSlippage}
+                                                      >
+                                                        change
+                                                    </Link>
+                                                    </Flex>
+                                                  ) : this.props.tokenFeesPercentage && (
+                                                    <Flex
+                                                      alignItems={'center'}
+                                                      flexDirection={'row'}
+                                                    >
+                                                      <Text
+                                                        fontSize={1}
+                                                        fontWeight={3}
+                                                        color={'dark-gray'}
+                                                        textAlign={'right'}
+                                                        hoverColor={'copyColor'}
+                                                      >
+                                                        Performance fee: {this.props.tokenFeesPercentage.times(100).toFixed(2)}%
+                                                    </Text>
+                                                      <Tooltip
+                                                        placement={'top'}
+                                                        message={this.functionsUtil.getGlobalConfig(['messages', 'performanceFee'])}
+                                                      >
+                                                        <Icon
+                                                          ml={1}
+                                                          size={'1em'}
+                                                          color={'cellTitle'}
+                                                          name={"InfoOutline"}
+                                                        />
+                                                      </Tooltip>
+                                                    </Flex>
+                                                  )
+                                                }
+                                                {
+                                                  totalBalance && (
+                                                    <Link
+                                                      fontSize={1}
+                                                      fontWeight={3}
+                                                      color={'dark-gray'}
+                                                      textAlign={'right'}
+                                                      hoverColor={'copyColor'}
+                                                      onClick={(e) => this.setFastBalanceSelector(100)}
+                                                    >
+                                                      {totalBalance.toFixed(6)} {this.props.selectedToken}
+                                                    </Link>
+                                                  )
+                                                }
+                                              </Flex>
+                                            </Box>
+                                          )
+                                        }
+                                        <Input
+                                          min={0}
+                                          type={"number"}
+                                          required={true}
+                                          height={'3.4em'}
+                                          borderRadius={2}
+                                          fontWeight={500}
+                                          borderColor={'cardBorder'}
+                                          backgroundColor={'cardBg'}
+                                          boxShadow={'none !important'}
+                                          placeholder={`Insert amount`}
+                                          onChange={this.changeInputValue.bind(this)}
+                                          border={`1px solid ${this.props.theme.colors.divider}`}
+                                          value={this.state.inputValue[this.state.action] !== null ? this.functionsUtil.BNify(this.state.inputValue[this.state.action]).toFixed() : ''}
+                                        />
+                                        <Flex
+                                          mt={2}
+                                          alignItems={'center'}
+                                          flexDirection={'row'}
+                                          justifyContent={'space-between'}
+                                        >
+                                          {
+                                            [25, 50, 75, 100].map(percentage => (
+                                              <FastBalanceSelector
+                                                percentage={percentage}
+                                                key={`selector_${percentage}`}
+                                                onMouseDown={() => this.setFastBalanceSelector(percentage)}
+                                                isActive={this.state.fastBalanceSelector[this.state.action] === parseInt(percentage)}
+                                              />
+                                            ))
+                                          }
+                                        </Flex>
+                                      </Flex>
+                                    )
+                                  }
+                                  {
+                                    canPerformAction && (
+                                      <Flex
+                                        justifyContent={'center'}
+                                        mt={redeemGovTokens ? 2 : 0}
+                                      >
+                                        <RoundButton
+                                          buttonProps={{
+                                            width: 'auto',
+                                            minWidth: [1, 1 / 2],
+                                            style: {
+                                              textTransform: 'capitalize'
+                                            },
+                                            disabled: this.state.buttonDisabled
+                                          }}
+                                          handleClick={this.state.buttonDisabled ? null : this.executeAction.bind(this)}
+                                        >
+                                          {this.state.action}{redeemGovTokens ? ' Gov Tokens' : '' /*(depositCurve ? ' in Curve' : '')*/}
+                                        </RoundButton>
+                                      </Flex>
+                                    )
+                                  }
+                                </Flex>
+                              ) : this.state.loadingErc20ForwarderTx ? (
+                                <Flex
+                                  mt={3}
+                                  flexDirection={'column'}
+                                >
+                                  <FlexLoader
+                                    flexProps={{
+                                      flexDirection: 'row'
+                                    }}
+                                    loaderProps={{
+                                      size: '25px',
+                                    }}
+                                    textProps={{
+                                      ml: 2
+                                    }}
+                                    text={this.state.erc20ForwarderTx ? (this.state.signedParameters ? 'Please Sign the Transaction...' : 'Please Sign the Permit...') : 'Calculating transaction fees...'}
+                                  />
+                                </Flex>
+                              ) : this.state.erc20ForwarderTx ? (
+                                <DashboardCard
+                                  cardProps={{
+                                    p: 3,
+                                    mt: 3,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                  }}
+                                >
+                                  <Text
+                                    mb={2}
+                                    fontSize={2}
+                                    color={'cellText'}
+                                    textAlign={'center'}
+                                  >
+                                    The required gas fee to perform the {this.state.action} is <strong>{this.state.erc20ForwarderTx.cost} {this.props.selectedToken}</strong>
+                                  </Text>
+                                  <Flex
+                                    width={1}
+                                    alignItems={'center'}
+                                    flexDirection={'row'}
+                                    justifyContent={'center'}
+                                  >
+                                    <DashboardCard
+                                      cardProps={{
+                                        mx: 2,
+                                        py: 2,
+                                        px: [2, 3],
+                                        width: 0.40,
+                                        onMouseDown: () => {
+                                          this.executeAction()
+                                        }
+                                      }}
+                                      isInteractive={true}
+                                    >
+                                      <Flex
+                                        my={1}
+                                        alignItems={'center'}
+                                        flexDirection={'row'}
+                                        justifyContent={'center'}
+                                      >
+                                        <Flex
+                                          mr={2}
+                                          alignItems={'center'}
+                                          justifyContent={'center'}
+                                        >
+                                          <Icon
+                                            align={'center'}
+                                            color={'#00b84a'}
+                                            name={'CheckCircle'}
+                                            size={this.props.isMobile ? '1em' : '1.8em'}
+                                          />
+                                        </Flex>
+                                        <Text
+                                          fontWeight={3}
+                                          fontSize={[2, 3]}
+                                        >
+                                          Confirm
+                                      </Text>
+                                      </Flex>
+                                    </DashboardCard>
+                                    <DashboardCard
+                                      cardProps={{
+                                        mx: 2,
+                                        py: 2,
+                                        px: [2, 3],
+                                        width: 0.40,
+                                        onMouseDown: () => {
+                                          this.cancelTransaction();
+                                        }
+                                      }}
+                                      isInteractive={true}
+                                    >
+                                      <Flex
+                                        my={1}
+                                        alignItems={'center'}
+                                        flexDirection={'row'}
+                                        justifyContent={'center'}
+                                      >
+                                        <Flex
+                                          mr={2}
+                                          alignItems={'center'}
+                                          justifyContent={'center'}
+                                        >
+                                          <Icon
+                                            name={'Cancel'}
+                                            align={'center'}
+                                            color={'#e13636'}
+                                            size={this.props.isMobile ? '1em' : '1.8em'}
+                                          />
+                                        </Flex>
+                                        <Text
+                                          fontWeight={3}
+                                          fontSize={[2, 3]}
+                                        >
+                                          Decline
+                                      </Text>
+                                      </Flex>
+                                    </DashboardCard>
+                                  </Flex>
+                                </DashboardCard>
+                              ) : (
+                                      <Flex
+                                        mt={3}
+                                        alignItems={'center'}
+                                        flexDirection={'column'}
+                                        justifyContent={'center'}
+                                      >
+                                        <TxProgressBar
+                                          {...this.props}
+                                          cancelTransaction={this.cancelTransaction.bind(this)}
+                                          hash={this.state.processing[this.state.action].txHash}
+                                          endMessage={`Finalizing ${this.state.action} request...`}
+                                          waitText={`${this.functionsUtil.capitalize(this.state.action)} estimated in`}
+                                        />
+                                      </Flex>
+                                    )
+                            )
+                          }
+                        </Box>
+                      )
+                    ) : (
+                          <Flex
+                            mt={4}
+                            flexDirection={'column'}
+                          >
+                            <FlexLoader
+                              flexProps={{
+                                flexDirection: 'row'
+                              }}
+                              loaderProps={{
+                                size: '30px'
+                              }}
+                              textProps={{
+                                ml: 2
+                              }}
+                              text={'Loading asset info...'}
+                            />
+                          </Flex>
+                        )
+                  }
+                </Migrate>
+              )
           }
         </Flex>
         {
@@ -3052,20 +3062,20 @@ class DepositRedeem extends Component {
         }
         {
           showBuyFlow &&
-            <Flex
-              mt={3}
-              width={[1,0.5]}
-              alignItems={'stretch'}
-              flexDirection={'column'}
-              justifyContent={'center'}
-            >
-              <BuyModal
-                {...this.props}
-                showInline={true}
-                availableMethods={[]}
-                buyToken={this.props.selectedToken}
-              />
-            </Flex>
+          <Flex
+            mt={3}
+            width={[1, 0.5]}
+            alignItems={'stretch'}
+            flexDirection={'column'}
+            justifyContent={'center'}
+          >
+            <BuyModal
+              {...this.props}
+              showInline={true}
+              availableMethods={[]}
+              buyToken={this.props.selectedToken}
+            />
+          </Flex>
         }
 
         <ShareModal

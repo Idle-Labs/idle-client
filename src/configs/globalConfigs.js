@@ -178,6 +178,8 @@ const globalConfigs = {
     endpoint: "https://dev.lapisgroup.it/idle/newsletter.php"
   },
   messages: {
+    riskAdjustedDisabledMessage: "The Risk Adjusted strategy is no longer available.",
+    riskAdjustedDisabledMessage2: " Please redeem your funds and deposit in the senior Tranche to receive an incentive",
     scoreShort: "Protocol Risk Score",
     apyShort: "Annual Percentage Yield",
     tokenPrice: "The token price is calculated using Uniswap spot prices.",
