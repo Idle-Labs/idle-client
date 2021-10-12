@@ -1518,7 +1518,7 @@ class DepositRedeem extends Component {
                                   }
                                 }}
                                 isInteractive={true}
-                                isActive={this.state.action === 'deposit' && !isDepositDisabled}
+                                isActive={this.state.action === 'deposit'}
 
                               >
                                 <Flex
