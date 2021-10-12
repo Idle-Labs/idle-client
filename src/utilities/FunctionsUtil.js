@@ -2917,8 +2917,9 @@ class FunctionsUtil {
       cachedData = [];
     }
 
-    const apiInfo = globalConfigs.stats.rates;
-    let endpoint = `${apiInfo.endpoint}${address}`;
+    const networkId = this.getCurrentNetworkId();
+    const apiInfo = this.getGlobalConfig(['stats','rates']);
+    let endpoint = `${apiInfo.endpoint[networkId]}${address}`;
 
     if (startTimestamp || endTimestamp || isRisk !== null || frequency !== null){
       const params = [];
@@ -7187,9 +7188,10 @@ class FunctionsUtil {
       return cachedData;
     }
 
+    const networkId = this.getCurrentNetworkId();
     const config = this.getGlobalConfig(['stats','config']);
     const endpointInfo = this.getGlobalConfig(['stats','substack']);
-    const idleSubstackFeed = await this.makeRequest(endpointInfo.endpoint,false,config);
+    const idleSubstackFeed = await this.makeRequest(endpointInfo.endpoint[networkId],false,config);
 
     if (idleSubstackFeed && idleSubstackFeed.data && idleSubstackFeed.data.items && idleSubstackFeed.data.items.length>0){
       const latestFeed = idleSubstackFeed.data.items[0];
@@ -7199,9 +7201,10 @@ class FunctionsUtil {
     return null;
   }
   getAggregatedStats = async (addGovTokens=true) => {
+    const networkId = this.getCurrentNetworkId();
     const config = this.getGlobalConfig(['stats','config']);
     const endpointInfo = this.getGlobalConfig(['stats','tvls']);
-    const tvls = await this.makeCachedRequest(endpointInfo.endpoint,endpointInfo.TTL,true,false,config);
+    const tvls = await this.makeCachedRequest(endpointInfo.endpoint[networkId],endpointInfo.TTL,true,false,config);
 
     if (tvls){
       const avgAPY = this.BNify(tvls.avgAPY);
@@ -7469,9 +7472,10 @@ class FunctionsUtil {
       return this.BNify(cachedData);
     }
 
+    const networkId = this.getCurrentNetworkId();
     const apiInfo = this.getGlobalConfig(['stats','rates']);
     const config = this.getGlobalConfig(['stats','config']);
-    const endpoint = `${apiInfo.endpoint}${tokenConfig.address}?isRisk=${isRisk}&limit=1&order=DESC`;
+    const endpoint = `${apiInfo.endpoint[networkId]}${tokenConfig.address}?isRisk=${isRisk}&limit=1&order=DESC`;
     const [
       tokenData,
       tokenAllocation
@@ -7527,9 +7531,15 @@ class FunctionsUtil {
       return this.BNify(cachedData);
     }
 
-    const apiInfo = globalConfigs.stats.scores;
+    const networkId = this.getCurrentNetworkId();
+    const apiInfo = this.getGlobalConfig(['stats','scores']);
+
+    if (!apiInfo.endpoint[networkId]){
+      return this.BNify(0);
+    }
+
     const config = this.getGlobalConfig(['stats','config']);
-    const endpoint = `${apiInfo.endpoint}${tokenConfig.address}?isRisk=${isRisk}`;
+    const endpoint = `${apiInfo.endpoint[networkId]}${tokenConfig.address}?isRisk=${isRisk}`;
     let scores = await this.makeCachedRequest(endpoint,apiInfo.TTL,true,false,config);
 
     if (scores && scores.length>0){

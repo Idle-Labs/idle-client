@@ -848,22 +848,33 @@ const globalConfigs = {
   },
   stats: {
     enabled: true, // Enable endpoint
-    availableNetworks:[1],
+    availableNetworks:[1,137],
     rates: {
       TTL: 300, // 5 minutes
-      endpoint: "https://api.idle.finance/rates/"
+      endpoint:{
+        1:"https://api.idle.finance/rates/",
+        137:"https://api-polygon.idle.finance/rates/"
+      }
     },
     tvls: {
       TTL: 120,
-      endpoint: "https://api.idle.finance/tvls/"
+      endpoint:{
+        1:"https://api.idle.finance/tvls/",
+        137:"https://api-polygon.idle.finance/tvls/"
+      }
     },
     substack: {
       TTL: 1800,
-      endpoint: "https://api.idle.finance/substack/"
+      endpoint:{
+        1:"https://api.idle.finance/substack/",
+        137:"https://api-polygon.idle.finance/substack/"
+      }
     },
     scores: {
       TTL: 300, // 5 minutes
-      endpoint: "https://api.idle.finance/scores/"
+      endpoint:{
+        1:"https://api.idle.finance/scores/"
+      }
     },
     config: {
       headers: env.REACT_APP_IDLE_KEY ? { Authorization: `Bearer ${env.REACT_APP_IDLE_KEY}` } : {}

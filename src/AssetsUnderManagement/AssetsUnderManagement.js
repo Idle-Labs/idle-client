@@ -97,7 +97,7 @@ class AssetsUnderManagement extends Component {
             >
               {
                 this.props.subtitle ? this.props.subtitle : (
-                  <Text.span fontWeight={'inherit'} color={'inherit'} fontSize={'inherit'}>Assets Under Management <Text.span color={'cellTitle'} fontWeight={3} fontSize={'70%'}>(V3 + V4)</Text.span></Text.span>
+                  <Text.span fontWeight={'inherit'} color={'inherit'} fontSize={'inherit'}>Assets Under Management{/*<Text.span color={'cellTitle'} fontWeight={3} fontSize={'70%'}>(V3 + V4)</Text.span>*/}</Text.span>
                 )
               }
             </Title>

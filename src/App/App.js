@@ -938,105 +938,110 @@ class App extends Component {
                                   setToken={e => { this.setToken(e) }}
                                 />
 
-                                {this.state.route === "onboarding" ? (
-                                  <Web3Debugger
-                                    web3={web3}
-                                    account={account}
-                                    accountBalance={accountBalance}
-                                    accountBalanceToken={accountBalanceToken}
-                                    accountBalanceLow={accountBalanceLow}
-                                    initAccount={initAccount}
-                                    rejectAccountConnect={rejectAccountConnect}
-                                    userRejectedConnect={userRejectedConnect}
-                                    accountValidated={accountValidated}
-                                    accountValidationPending={accountValidationPending}
-                                    rejectValidation={rejectValidation}
-                                    userRejectedValidation={userRejectedValidation}
-                                    validateAccount={validateAccount}
-                                    connectAndValidateAccount={connectAndValidateAccount}
-                                    modals={modals}
-                                    network={network}
-                                    transaction={transaction}
-                                  />
-                                ) : null}
+                                {
+                                  this.state.route === "onboarding" && (
+                                    <Web3Debugger
+                                      web3={web3}
+                                      account={account}
+                                      accountBalance={accountBalance}
+                                      accountBalanceToken={accountBalanceToken}
+                                      accountBalanceLow={accountBalanceLow}
+                                      initAccount={initAccount}
+                                      rejectAccountConnect={rejectAccountConnect}
+                                      userRejectedConnect={userRejectedConnect}
+                                      accountValidated={accountValidated}
+                                      accountValidationPending={accountValidationPending}
+                                      rejectValidation={rejectValidation}
+                                      userRejectedValidation={userRejectedValidation}
+                                      validateAccount={validateAccount}
+                                      connectAndValidateAccount={connectAndValidateAccount}
+                                      modals={modals}
+                                      network={network}
+                                      transaction={transaction}
+                                    />
+                                  )
+                                }
 
-                                {this.state.route === "default" ? (
-                                  <Switch>
-                                    <Route exact path="/"
-                                      render={(props) =>
-                                        <Suspense
-                                          fallback={SuspenseLoader}
-                                        >
-                                          <Landing
-                                            {...props}
-                                            web3={web3}
-                                            network={network}
-                                            account={account}
-                                            isMobile={isMobile}
-                                            simpleID={simpleID}
-                                            contracts={contracts}
-                                            initContract={initContract}
-                                            innerWidth={this.state.width}
-                                            logout={this.logout.bind(this)}
-                                            innerHeight={this.state.height}
-                                            accountBalance={accountBalance}
-                                            themeMode={this.state.themeMode}
-                                            theme={this.state.selectedTheme}
-                                            cachedData={this.state.cachedData}
-                                            currentEnv={this.state.currentEnv}
-                                            connecting={this.state.connecting}
-                                            selectedTab={this.state.selectedTab}
-                                            tokenConfig={this.state.tokenConfig}
-                                            accountBalanceLow={accountBalanceLow}
-                                            getAccountBalance={getAccountBalance}
-                                            availableTranches={availableTranches}
-                                            customAddress={this.state.customAddress}
-                                            selectedToken={this.state.selectedToken}
-                                            accountBalanceToken={accountBalanceToken}
-                                            closeToastMessage={this.closeToastMessage}
-                                            contractsInitialized={contractsInitialized}
-                                            openBuyModal={this.openBuyModal.bind(this)}
-                                            setThemeMode={this.setThemeMode.bind(this)}
-                                            processCustomParam={this.processCustomParam}
-                                            availableTokens={this.state.availableTokens}
-                                            setCachedData={this.setCachedData.bind(this)}
-                                            updateSelectedTab={this.selectTab.bind(this)}
-                                            toastMessageProps={this.state.toastMessageProps}
-                                            clearCachedData={this.clearCachedData.bind(this)}
-                                            availableStrategies={this.state.availableStrategies}
-                                            setCurrentSection={this.setCurrentSection.bind(this)}
-                                            connectAndValidateAccount={connectAndValidateAccount}
-                                            setToken={e => { this.setToken(e) }}
-                                          />
-                                          <CookieConsent
-                                            expires={365}
-                                            buttonText={"Ok"}
-                                            location={"bottom"}
-                                            acceptOnScroll={true}
-                                            cookieName={"cookieAccepted"}
-                                            acceptOnScrollPercentage={5}
-                                            style={{ background: "rgba(255,255,255,0.95)", zIndex: '9999999' }}
-                                            buttonStyle={{ display: isMobile ? "block" : "none", backgroundColor: '#0036ff', color: 'white', marginTop: isMobile ? "0px" : "15px" }}
+                                {
+                                  this.state.route === "default" && (
+                                    <Switch>
+                                      <Route exact path="/"
+                                        render={(props) =>
+                                          <Suspense
+                                            fallback={SuspenseLoader}
                                           >
-                                            <Flex flexDirection={'row'} alignItems={['flex-start', 'center']} justifyContent={'flex-start'} maxHeight={['150px', 'initial']} style={isMobile ? { overflowY: 'scroll' } : null}>
-                                              <Image display={['none', 'block']} src={'images/cookie.svg'} width={'42px'} height={'42px'} />
-                                              <Text pl={[0, 3]} color={'dark-gray'} fontSize={1} textAlign={'justify'}>
-                                                This website or its third-party tools process personal data (e.g. browsing data or IP addresses) and use cookies or other identifiers, which are necessary for its functioning and required to achieve the purposes illustrated in the cookie policy. To learn more, please refer to the <Link href={'https://www.iubenda.com/privacy-policy/61211749/cookie-policy'} target={'_blank'} rel="nofollow noopener noreferrer" hoverColor={'blue'}>cookie policy</Link>.
-                                                You accept the use of cookies or other identifiers by closing or dismissing this notice, by scrolling this page, by clicking a link or button or by continuing to browse otherwise.
-                                            </Text>
-                                            </Flex>
-                                          </CookieConsent>
-                                        </Suspense>
-                                      }
-                                    ></Route>
-                                    <Route exact path="/terms-of-service">
-                                      <Tos />
-                                    </Route>
-                                    <Route>
-                                      <PageNotFound />
-                                    </Route>
-                                  </Switch>
-                                ) : null}
+                                            <Landing
+                                              {...props}
+                                              web3={web3}
+                                              network={network}
+                                              account={account}
+                                              isMobile={isMobile}
+                                              simpleID={simpleID}
+                                              contracts={contracts}
+                                              initContract={initContract}
+                                              innerWidth={this.state.width}
+                                              logout={this.logout.bind(this)}
+                                              innerHeight={this.state.height}
+                                              accountBalance={accountBalance}
+                                              themeMode={this.state.themeMode}
+                                              theme={this.state.selectedTheme}
+                                              cachedData={this.state.cachedData}
+                                              currentEnv={this.state.currentEnv}
+                                              connecting={this.state.connecting}
+                                              selectedTab={this.state.selectedTab}
+                                              tokenConfig={this.state.tokenConfig}
+                                              accountBalanceLow={accountBalanceLow}
+                                              getAccountBalance={getAccountBalance}
+                                              availableTranches={availableTranches}
+                                              networkInitialized={networkInitialized}
+                                              customAddress={this.state.customAddress}
+                                              selectedToken={this.state.selectedToken}
+                                              accountBalanceToken={accountBalanceToken}
+                                              closeToastMessage={this.closeToastMessage}
+                                              contractsInitialized={contractsInitialized}
+                                              openBuyModal={this.openBuyModal.bind(this)}
+                                              setThemeMode={this.setThemeMode.bind(this)}
+                                              processCustomParam={this.processCustomParam}
+                                              availableTokens={this.state.availableTokens}
+                                              setCachedData={this.setCachedData.bind(this)}
+                                              updateSelectedTab={this.selectTab.bind(this)}
+                                              toastMessageProps={this.state.toastMessageProps}
+                                              clearCachedData={this.clearCachedData.bind(this)}
+                                              availableStrategies={this.state.availableStrategies}
+                                              setCurrentSection={this.setCurrentSection.bind(this)}
+                                              connectAndValidateAccount={connectAndValidateAccount}
+                                              setToken={e => { this.setToken(e) }}
+                                            />
+                                            <CookieConsent
+                                              expires={365}
+                                              buttonText={"Ok"}
+                                              location={"bottom"}
+                                              acceptOnScroll={true}
+                                              cookieName={"cookieAccepted"}
+                                              acceptOnScrollPercentage={5}
+                                              style={{ background: "rgba(255,255,255,0.95)", zIndex: '9999999' }}
+                                              buttonStyle={{ display: isMobile ? "block" : "none", backgroundColor: '#0036ff', color: 'white', marginTop: isMobile ? "0px" : "15px" }}
+                                            >
+                                              <Flex flexDirection={'row'} alignItems={['flex-start', 'center']} justifyContent={'flex-start'} maxHeight={['150px', 'initial']} style={isMobile ? { overflowY: 'scroll' } : null}>
+                                                <Image display={['none', 'block']} src={'images/cookie.svg'} width={'42px'} height={'42px'} />
+                                                <Text pl={[0, 3]} color={'dark-gray'} fontSize={1} textAlign={'justify'}>
+                                                  This website or its third-party tools process personal data (e.g. browsing data or IP addresses) and use cookies or other identifiers, which are necessary for its functioning and required to achieve the purposes illustrated in the cookie policy. To learn more, please refer to the <Link href={'https://www.iubenda.com/privacy-policy/61211749/cookie-policy'} target={'_blank'} rel="nofollow noopener noreferrer" hoverColor={'blue'}>cookie policy</Link>.
+                                                  You accept the use of cookies or other identifiers by closing or dismissing this notice, by scrolling this page, by clicking a link or button or by continuing to browse otherwise.
+                                              </Text>
+                                              </Flex>
+                                            </CookieConsent>
+                                          </Suspense>
+                                        }
+                                      ></Route>
+                                      <Route exact path="/terms-of-service">
+                                        <Tos />
+                                      </Route>
+                                      <Route>
+                                        <PageNotFound />
+                                      </Route>
+                                    </Switch>
+                                  )
+                                }
                               </Route>
                             </Switch>
                             <TransactionToastUtil

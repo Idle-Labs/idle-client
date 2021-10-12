@@ -58,6 +58,10 @@ class Landing extends Component {
   componentWillMount(){
     this.loadUtils();
     this.props.setCurrentSection('landing');
+    this.loadStrategies();
+  }
+
+  loadStrategies(){
     const currentNetworkId = this.functionsUtil.getRequiredNetworkId();
     const visibleStrategies = Object.keys(globalConfigs.strategies).filter(s => globalConfigs.strategies[s].visible && globalConfigs.strategies[s].availableNetworks.includes(currentNetworkId) && (!globalConfigs.strategies[s].enabledEnvs.length || globalConfigs.strategies[s].enabledEnvs.includes(this.props.currentEnv)) );
     const carouselMax = visibleStrategies.length-1;
@@ -106,8 +110,14 @@ class Landing extends Component {
     this.loadUtils();
     this.props.processCustomParam(this.props,prevProps);
 
-    const contractsInitialized = this.props.contractsInitialized && prevProps.contractsInitialized !== this.props.contractsInitialized;
 
+    const requiredNetworkChanged = JSON.stringify(prevProps.network.required) !== JSON.stringify(this.props.network.required);
+    const networkChanged = (!prevProps.networkInitialized && this.props.networkInitialized) || requiredNetworkChanged;
+    if (networkChanged){
+      this.loadStrategies();
+    }
+
+    const contractsInitialized = this.props.contractsInitialized && prevProps.contractsInitialized !== this.props.contractsInitialized;
     if (contractsInitialized) {
       // await Promise.all([
       //   this.getAprs(),

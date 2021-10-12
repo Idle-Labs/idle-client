@@ -555,7 +555,10 @@ class Stats extends Component {
       fontSize:[3,'23px'],
     };
 
-    const idleTokenEnabled = this.functionsUtil.getGlobalConfig(['govTokens','IDLE','enabled']);
+    const networkId = this.functionsUtil.getCurrentNetworkId();
+    const idleTokenAvailableNetworks = this.functionsUtil.getGlobalConfig(['govTokens','IDLE','availableNetworks']);
+    const idleTokenEnabled = this.functionsUtil.getGlobalConfig(['govTokens','IDLE','enabled']) && idleTokenAvailableNetworks.includes(networkId);
+
     const apyLong = this.functionsUtil.getGlobalConfig(['messages','apyLong']);
 
     if (!this.props.availableStrategies){
@@ -606,7 +609,7 @@ class Stats extends Component {
               const strategyInfo = strategies[strategy];
               const availableTokens = this.props.availableStrategies[strategy];
 
-              if (!availableTokens){
+              if (!availableTokens || !Object.keys(availableTokens).length){
                 return false;
               }
               
