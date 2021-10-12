@@ -1442,7 +1442,7 @@ class DepositRedeem extends Component {
     const canPerformAction = /*!depositCurve && !this.state.redeemCurveEnabled && */((this.state.action === 'deposit' && this.state.canDeposit && !isDepositDisabled) || (this.state.action === 'redeem' && this.state.canRedeem) || redeemGovTokens) && (!this.state.showETHWrapperEnabled || this.state.action === 'redeem');
     const showActionFlow = !redeemGovTokens && canPerformAction;
 
-    const showBuyFlow = this.state.componentMounted && (!showDepositCurve || this.state.showBuyFlow) && !this.state.depositCurveEnabled && this.state.tokenApproved && !this.state.contractPaused && (!this.state.migrationEnabled || this.state.skipMigration) && this.state.action === 'deposit' && !this.isDepositDisabled && !this.state.canDeposit && !this.state.showETHWrapperEnabled;
+    const showBuyFlow = this.state.componentMounted && (!showDepositCurve || this.state.showBuyFlow) && !this.state.depositCurveEnabled && this.state.tokenApproved && !this.state.contractPaused && (!this.state.migrationEnabled || this.state.skipMigration) && this.state.action === 'deposit' && !isDepositDisabled && !this.state.canDeposit && !this.state.showETHWrapperEnabled;
 
     const _referral = this.getReferralAddress();
     const showReferral = _referral && this.state.action === 'deposit' && showActionFlow && !showBuyFlow;
@@ -1587,7 +1587,7 @@ class DepositRedeem extends Component {
                             {isDepositDisabled && (
                               <IconBox
                                 cardProps={{
-                                  mt: 1,
+                                  mt: 3,
                                   mb: 3
                                 }}
                                 icon={'Warning'}
@@ -3067,7 +3067,7 @@ class DepositRedeem extends Component {
         }
         {
           showBuyFlow &&
-          <Flex
+          (<Flex
             mt={3}
             width={[1, 0.5]}
             alignItems={'stretch'}
@@ -3080,7 +3080,7 @@ class DepositRedeem extends Component {
               availableMethods={[]}
               buyToken={this.props.selectedToken}
             />
-          </Flex>
+          </Flex>)
         }
 
         <ShareModal
