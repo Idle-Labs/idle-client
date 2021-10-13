@@ -28,6 +28,7 @@ class StrategyPage extends Component {
     remainingTokens:null,
     batchedDeposits:null,
     portfolioLoaded:false,
+    portfolioLoading:false,
     availableGovTokens:null,
     polygonTransactions:null,
     portfolioEquityStartDate:null,
@@ -57,6 +58,7 @@ class StrategyPage extends Component {
   }
 
   async componentDidMount(){
+    console.log('componentDidMount',this.props.network);
     await this.loadPortfolio();
   }
 
@@ -66,7 +68,7 @@ class StrategyPage extends Component {
     const accountChanged = prevProps.account !== this.props.account;
     const availableTokensChanged = JSON.stringify(prevProps.availableTokens) !== JSON.stringify(this.props.availableTokens);
     if (accountChanged || availableTokensChanged){
-      // console.log('StrategyPage - availableTokensChanged',availableTokensChanged);
+      console.log('componentDidUpdate',accountChanged,availableTokensChanged);
       this.setState({
         portfolioLoaded:false
       },() => {
@@ -77,7 +79,7 @@ class StrategyPage extends Component {
 
   async setStateSafe(newState,callback=null) {
     if (!this.componentUnmounted){
-      return this.setState(newState,callback);
+      return await this.setState(newState,callback);
     }
     return null;
   }
@@ -91,9 +93,15 @@ class StrategyPage extends Component {
   async loadPortfolio(){
     const availableTokens = this.props.availableTokens || {};
 
-    if (this.state.portfolioLoaded){
+    if (this.state.portfolioLoaded || this.state.portfolioLoading){
       return false;
     }
+
+    console.log('loadPortfolio',this.props.account);
+
+    await this.setStateSafe({
+      portfolioLoading:true
+    });
 
     // Load portfolio if account is set
     if (this.props.account){
@@ -267,6 +275,7 @@ class StrategyPage extends Component {
 
       newState.tokensToMigrate = tokensToMigrate;
       newState.portfolioLoaded = true;
+      newState.portfolioLoading = false;
 
       const remainingTokens = Object.keys(availableTokens).filter(token => (!newState.depositedTokens.includes(token) && !Object.keys(newState.tokensToMigrate).includes(token)) );
       newState.remainingTokens = remainingTokens;
@@ -279,6 +288,7 @@ class StrategyPage extends Component {
         tokensToMigrate:{},
         depositedTokens:[],
         portfolioLoaded:true,
+        portfolioLoading:false,
         remainingTokens:Object.keys(availableTokens),
       });
     }

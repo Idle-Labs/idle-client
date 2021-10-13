@@ -316,7 +316,8 @@ class Dashboard extends Component {
 
     // Exit if no strategy and token selected
     if (!pageComponent){
-      return this.goToSection('/',false);
+      const firstAvailableStrategy = Object.keys(this.props.availableStrategies)[0];
+      return this.goToSection(firstAvailableStrategy);
     }
 
     // console.log('loadParams',selectedStrategy,selectedToken);
@@ -668,6 +669,9 @@ class Dashboard extends Component {
     const networkInitialized = this.props.networkInitialized && this.props.network.current.id && this.props.network.required.id;
     const networkCorrect = this.props.network.isCorrectNetwork;
     const networkSupported = this.props.network.isSupportedNetwork;
+
+    // console.log('networkInitialized',this.props.networkInitialized,networkInitialized);
+
     return (
       <Swipeable
         callback={this.swipeCallback.bind(this)}

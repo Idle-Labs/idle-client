@@ -124,6 +124,7 @@ class RimbleTransaction extends React.Component {
   }
 
   componentWillUnmount(){
+    // debugger;
     this.componentUnmounted = true;
   }
 
@@ -134,12 +135,14 @@ class RimbleTransaction extends React.Component {
     // detect Network account change
     if (window.ethereum){
       window.ethereum.on('networkChanged', async (networkId) => {
+        console.log('networkChanged');
         this.handleNetworkChanged();
         // window.location.reload();
       });
     }
 
     window.initWeb3 = this.initWeb3;
+    window.initAccount = this.initAccount;
   }
 
   handleNetworkChanged = async () => {
@@ -158,7 +161,7 @@ class RimbleTransaction extends React.Component {
   componentDidMount = async () => {
     // this.initSimpleID();
 
-    // this.functionsUtil.customLog('RimbleWeb3 componentDidMount');
+    console.log('RimbleWeb3 componentDidMount');
     // this.initWeb3();
 
     this.connectGnosisSafe();
@@ -247,7 +250,15 @@ class RimbleTransaction extends React.Component {
     }
 
     const customAddressChanged = prevProps.customAddress !== this.props.customAddress;
-    if (customAddressChanged){
+    const contextAccountChanged = prevProps.context.account !== this.props.context.account;
+    const accountDisconnected = prevProps.connectorName !== this.props.connectorName && this.props.connectorName === 'Infura';
+    if (contextAccountChanged){
+      console.log('contextAccountChanged',prevProps.context.account,this.props.context.account,contextAccountChanged);
+    }
+    if (accountDisconnected){
+      console.log('accountDisconnected',prevProps.connectorName,this.props.connectorName,accountDisconnected);
+    }
+    if (customAddressChanged || contextAccountChanged || accountDisconnected){
       this.initAccount();
     }
 
@@ -287,6 +298,7 @@ class RimbleTransaction extends React.Component {
 
     const currentNetworkChanged = this.state.networkInitialized && prevState.network.current.id !== this.state.network.current.id;
     if (currentNetworkChanged){
+      // console.log('requiredNetworkChanged',this.state.networkInitialized,JSON.stringify(prevState.network),JSON.stringify(this.state.network));
       this.initWeb3();
     }
 
@@ -688,11 +700,11 @@ class RimbleTransaction extends React.Component {
   }
 
   initAccount = async (account=false) => {
-
-    // console.log('initAccount',account);
     
     const customAddress = this.props.customAddress;
     const walletProvider = this.functionsUtil.getWalletProvider('Infura');
+
+    console.log('initAccount',account,walletProvider,this.props.connectorName);
 
     if (customAddress){
       // Set custom account
@@ -705,6 +717,11 @@ class RimbleTransaction extends React.Component {
       this.getAccountBalance();
 
       return false;
+    } else if (this.props.connectorName === 'Infura' || !this.props.connectorName){
+      this.setState({
+        account:null,
+        accountInizialized:true
+      });
     }
 
     try {
@@ -728,7 +745,7 @@ class RimbleTransaction extends React.Component {
       // console.log('initAccount 2',walletProvider,account);
 
       // Request account access if needed
-      if (account && walletProvider !== 'Infura'){
+      if (account){
 
         // Send address info to SimpleID
         const simpleID = this.initSimpleID();
@@ -786,10 +803,10 @@ class RimbleTransaction extends React.Component {
         // TODO subscribe for account changes, no polling
         // set a state flag which indicates if the subscribe handler has been
         // called at least once
-      } else if (walletProvider === 'Infura') {
+      } else {
         return this.setState({
+          account:null,
           accountInizialized: true,
-          account:this.props.currentProvider,
         });
       }
     } catch (error) {
@@ -1698,6 +1715,7 @@ class RimbleTransaction extends React.Component {
     accountBalanceDAI: null,
     initWeb3: this.initWeb3,
     accountBalanceLow: null,
+    networkInitialized:false,
     accountInizialized:false,
     erc20ForwarderClient:null,
     subscribedTransactions:{},

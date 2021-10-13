@@ -25,7 +25,8 @@ class DashboardMenu extends Component {
       this.props.setConnector(connectorName);
     }
 
-    return await this.props.context.setConnector(connectorName);
+    return await this.props.context.unsetConnector();
+    // return await this.props.context.setConnector(connectorName);
   };
 
   async logout() {

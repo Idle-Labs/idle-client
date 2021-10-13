@@ -452,6 +452,8 @@ class App extends Component {
 
   componentDidMount() {
 
+    console.log('App.js componentDidMount');
+
     // Close iFrame
     // if (window.self !== window.top && window.top.location.href.indexOf(globalConfigs.baseURL) !== -1 && typeof window.parent.closeIframe === 'function' ){
     //   window.parent.closeIframe(window.self);
@@ -663,8 +665,12 @@ class App extends Component {
             connectors={connectors}
             libraryName={'web3.js'}
           >
-            <Web3Consumer>
+            <Web3Consumer
+              recreateOnNetworkChange={false}
+              recreateOnAccountChange={false}
+            >
               {context => {
+                //console.log('Web3Consumer render',context);
                 return (
                   <RimbleWeb3
                     context={context}
