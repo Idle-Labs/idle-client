@@ -1979,7 +1979,8 @@ const availableTokens = {
       DAI: {
         canDeposit: {
           enabled: false,
-          disabledMessageKey: 'riskAdjustedDisabledMessage'
+          disabledMessageRedeemKey: 'riskAdjustedDisabledMessageRedeem',
+          disabledMessageDepositKey: 'riskAdjustedDisabledMessageDeposit'
         },
         abi: DAI,
         decimals: 18,
@@ -2113,7 +2114,8 @@ const availableTokens = {
       USDC: {
         canDeposit: {
           enabled: false,
-          disabledMessageKey: 'riskAdjustedDisabledMessage'
+          disabledMessageRedeemKey: 'riskAdjustedDisabledMessageRedeem',
+          disabledMessageDepositKey: 'riskAdjustedDisabledMessageDeposit'
         },
         decimals: 6,
         token: 'USDC',
@@ -2236,7 +2238,8 @@ const availableTokens = {
       USDT: {
         canDeposit: {
           enabled: false,
-          disabledMessageKey: 'riskAdjustedDisabledMessage'
+          disabledMessageRedeemKey: 'riskAdjustedDisabledMessageRedeem',
+          disabledMessageDepositKey: 'riskAdjustedDisabledMessageDeposit'
         },
         decimals: 6,
         token: 'USDT',

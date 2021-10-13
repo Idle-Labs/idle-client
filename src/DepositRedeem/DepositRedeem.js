@@ -1375,10 +1375,12 @@ class DepositRedeem extends Component {
     }
 
     const viewOnly = this.props.connectorName === 'custom';
+
     const isDepositDisabled = this.props.tokenConfig.canDeposit && !this.props.tokenConfig.canDeposit.enabled;
-    const depositDisabledMessage1 = isDepositDisabled && this.props.tokenConfig.canDeposit.disabledMessageKey ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageKey]) : null;
-    const depositDisabledMessage2 = this.state.canRedeem ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageKey + "2"]) : ""
-    const depositDisabledMessage = depositDisabledMessage1 + depositDisabledMessage2;
+    // const depositDisabledMessage1 = isDepositDisabled && this.props.tokenConfig.canDeposit.disabledMessageDepositKey ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageDepositKey]) : null;
+    // const depositDisabledMessage2 = this.state.canRedeem ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageRedeemKey]) : "";
+    const depositDisabledMessage = isDepositDisabled ? (this.state.canRedeem && this.props.tokenConfig.canDeposit.disabledMessageRedeemKey ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageRedeemKey]) : (this.props.tokenConfig.canDeposit.disabledMessageDepositKey ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageDepositKey]) : null) ) : null;
+
     const govTokensDisabled = this.props.tokenConfig.govTokensDisabled;
     const govTokensEnabled = !govTokensDisabled && this.functionsUtil.getGlobalConfig(['strategies', this.props.selectedStrategy, 'govTokensEnabled']) && Object.keys(this.state.tokenGovTokens).length > 0;
     const skipMintForDepositEnabled = typeof this.props.tokenConfig.skipMintForDeposit !== 'undefined' ? this.props.tokenConfig.skipMintForDeposit : true;
@@ -1406,7 +1408,7 @@ class DepositRedeem extends Component {
     const metaTransactionsAvailable = depositMetaTransactionsEnabled && this.props.biconomy && this.state.actionProxyContract[this.state.action];
     const useMetaTx = metaTransactionsAvailable && this.state.metaTransactionsEnabled;
 
-    const erc20ForwarderEnabled = depositErc20ForwarderEnabled && Object.keys(depositErc20ForwarderEnabledTokens).includes(this.props.selectedToken) && depositErc20ForwarderEnabledTokens[this.props.selectedToken].enabled && this.props.biconomy && this.props.erc20ForwarderClient && this.state.actionProxyContract[this.state.action];
+    const erc20ForwarderEnabled = depositErc20ForwarderEnabled && Object.keys(depositErc20ForwarderEnabledTokens).includes(this.props.selectedToken) && depositErc20ForwarderEnabledTokens[this.props.selectedToken].enabled && this.props.biconomy && this.props.erc20ForwarderClient && this.state.actionProxyContract[this.state.action] && !isDepositDisabled;
 
     // console.log(erc20ForwarderEnabled,depositErc20ForwarderEnabled,this.props.biconomy,this.props.erc20ForwarderClient,this.state.actionProxyContract[this.state.action]);
     // Biconomy End
@@ -1584,15 +1586,34 @@ class DepositRedeem extends Component {
                                 </Flex>
                               </DashboardCard>
                             </Flex>
-                            {isDepositDisabled && (
-                              <IconBox
-                                cardProps={{
-                                  mt: 3,
-                                  mb: 3
-                                }}
-                                icon={'Warning'}
-                                text={depositDisabledMessage}
-                              />)}
+                            {
+                              isDepositDisabled && (
+                                <IconBox
+                                  cardProps={{
+                                    mt: 3
+                                  }}
+                                  iconProps={{
+                                    color:'#ffe000'
+                                  }}
+                                  icon={'Warning'}
+                                  text={depositDisabledMessage}
+                                >
+                                  {
+                                    this.state.action === 'deposit' && this.state.canRedeem && (
+                                      <RoundButton
+                                        buttonProps={{
+                                          mt:3,
+                                          width:[1,1/2]
+                                        }}
+                                        handleClick={e => this.setAction('redeem')}
+                                      >
+                                        Redeem
+                                      </RoundButton>
+                                    )
+                                  }
+                                </IconBox>
+                              )
+                            }
                           </Flex>
                           {
                             (showRedeemFlow && this.state.unlentBalance) &&
@@ -2599,8 +2620,8 @@ class DepositRedeem extends Component {
                                 </Text>
                                 </Flex>
                               </DashboardCard>
-                            ) : (!this.state.tokenApproved && this.state.action === 'deposit' && !this.state.showETHWrapperEnabled) ? (
-                              !isDepositDisabled && (<DashboardCard
+                            ) : (!this.state.tokenApproved && this.state.action === 'deposit' && !this.state.showETHWrapperEnabled && !isDepositDisabled) ? (
+                              <DashboardCard
                                 isDisabled={isDepositDisabled}
                                 cardProps={{
                                   p: 3,
@@ -2621,43 +2642,43 @@ class DepositRedeem extends Component {
                                       />
                                     </Flex>
                                   ) : (
-                                      <Flex
-                                        alignItems={'center'}
-                                        flexDirection={'column'}
+                                    <Flex
+                                      alignItems={'center'}
+                                      flexDirection={'column'}
+                                    >
+                                      <Icon
+                                        size={'1.8em'}
+                                        name={'LockOpen'}
+                                        color={'cellText'}
+                                      />
+                                      <Text
+                                        mt={3}
+                                        fontSize={2}
+                                        color={'cellText'}
+                                        textAlign={'center'}
                                       >
-                                        <Icon
-                                          size={'1.8em'}
-                                          name={'LockOpen'}
-                                          color={'cellText'}
-                                        />
-                                        <Text
-                                          mt={3}
-                                          fontSize={2}
-                                          color={'cellText'}
-                                          textAlign={'center'}
-                                        >
-                                          {
-                                            this.state.depositCurveEnabled ?
-                                              `To ${this.functionsUtil.capitalize(this.state.action)} your ${this.props.selectedToken} in the Curve Pool you need to approve the Smart-Contract first.`
-                                              : useMetaTx ?
-                                                `To ${this.functionsUtil.capitalize(this.state.action)} your ${this.props.selectedToken} into Idle using Meta-Transaction you need to approve our Smart-Contract first.`
-                                                :
-                                                `To ${this.functionsUtil.capitalize(this.state.action)} your ${this.props.selectedToken} into Idle you need to approve our Smart-Contract first.`
-                                          }
-                                        </Text>
-                                        <RoundButton
-                                          buttonProps={{
-                                            mt: 3,
-                                            width: [1, 1 / 2]
-                                          }}
-                                          handleClick={this.approveToken.bind(this)}
-                                        >
-                                          Approve
-                                    </RoundButton>
-                                      </Flex>
-                                    )
+                                        {
+                                          this.state.depositCurveEnabled ?
+                                            `To ${this.functionsUtil.capitalize(this.state.action)} your ${this.props.selectedToken} in the Curve Pool you need to approve the Smart-Contract first.`
+                                            : useMetaTx ?
+                                              `To ${this.functionsUtil.capitalize(this.state.action)} your ${this.props.selectedToken} into Idle using Meta-Transaction you need to approve our Smart-Contract first.`
+                                              :
+                                              `To ${this.functionsUtil.capitalize(this.state.action)} your ${this.props.selectedToken} into Idle you need to approve our Smart-Contract first.`
+                                        }
+                                      </Text>
+                                      <RoundButton
+                                        buttonProps={{
+                                          mt: 3,
+                                          width: [1, 1 / 2]
+                                        }}
+                                        handleClick={this.approveToken.bind(this)}
+                                      >
+                                        Approve
+                                      </RoundButton>
+                                    </Flex>
+                                  )
                                 }
-                              </DashboardCard>)
+                              </DashboardCard>
                             ) : (!showBuyFlow && canPerformAction) && (
                               !this.state.processing[this.state.action].loading ? (
                                 <Flex
