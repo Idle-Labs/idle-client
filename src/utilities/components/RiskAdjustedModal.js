@@ -1,7 +1,7 @@
 import React from "react";
 import ModalCard from './ModalCard';
+import { Text, Modal, Flex } from "rimble-ui";
 import ExtLink from '../../ExtLink/ExtLink.js';
-import { Text, Modal, Flex, Link } from "rimble-ui";
 import FunctionsUtil from '../../utilities/FunctionsUtil';
 import RoundButton from '../../RoundButton/RoundButton.js';
 
