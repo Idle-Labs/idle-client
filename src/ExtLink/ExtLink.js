@@ -6,6 +6,7 @@ class ExtLink extends Component {
   render() {
     return (
       <Link
+        color={'link'}
         target={'_blank'}
         rel={'nofollow noopener noreferrer'}
         {...this.props}

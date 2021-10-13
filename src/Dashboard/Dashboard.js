@@ -18,6 +18,7 @@ import TooltipModal from "../utilities/components/TooltipModal";
 import MigrateModal from "../utilities/components/MigrateModal";
 import UpgradeModal from "../utilities/components/UpgradeModal";
 import DashboardHeader from '../DashboardHeader/DashboardHeader';
+import RiskAdjustedModal from "../utilities/components/RiskAdjustedModal";
 
 class Dashboard extends Component {
   state = {
@@ -318,7 +319,7 @@ class Dashboard extends Component {
     // Send GA pageview
     this.functionsUtil.sendGoogleAnalyticsPageview(currentRoute);
 
-    await this.setState({
+    const newState = {
       menu,
       params,
       baseRoute,
@@ -328,7 +329,11 @@ class Dashboard extends Component {
       selectedSection,
       pageComponentProps,
       selectedSubsection
-    });
+    };
+
+    await this.setState(newState);
+
+    return newState;
   }
 
   componentWillUnmount(){
@@ -414,10 +419,24 @@ class Dashboard extends Component {
       return null;
     }
 
+    await this.checkRiskAdjusted();
     await this.checkBetaApproval();
     await this.checkTokensToMigrate();
     await this.checkWelcomeModal();
     await this.checkProtocolsTokensBalances();
+  }
+
+  async checkRiskAdjusted(){
+    const isRiskAdjusted = this.props.selectedStrategy === 'risk';
+    if (isRiskAdjusted){
+      const activeModal = 'risk';
+      if (activeModal !== this.state.activeModal){
+        await this.setState({
+          activeModal,
+        });
+        return activeModal;
+      }
+    }
   }
 
   async checkBetaApproval(){
@@ -431,7 +450,6 @@ class Dashboard extends Component {
         await this.setState({
           activeModal,
         });
-
         return activeModal;
       }
     }
@@ -792,6 +810,10 @@ class Dashboard extends Component {
           <BetaModal
             closeModal={this.resetModal}
             isOpen={this.state.activeModal === 'beta'}
+          />
+          <RiskAdjustedModal
+            closeModal={this.resetModal}
+            isOpen={this.state.activeModal === 'risk'}
           />
           <UpgradeModal
             {...this.props}

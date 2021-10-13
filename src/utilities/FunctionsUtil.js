@@ -2203,6 +2203,9 @@ class FunctionsUtil {
     }
     return null;
   }
+  getAppUrl = (path) => {
+    return globalConfigs.baseURL+'/'+path;
+  }
   checkUrlOrigin = () => {
     return window.location.origin.toLowerCase().includes(globalConfigs.baseURL.toLowerCase());
   }
