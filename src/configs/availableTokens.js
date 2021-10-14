@@ -1977,11 +1977,6 @@ const availableTokens = {
     },
     risk: {
       DAI: {
-        canDeposit: {
-          enabled: false,
-          disabledMessageRedeemKey: 'riskAdjustedDisabledMessageRedeem',
-          disabledMessageDepositKey: 'riskAdjustedDisabledMessageDeposit'
-        },
         abi: DAI,
         decimals: 18,
         token: 'DAI',
@@ -2002,6 +1997,11 @@ const availableTokens = {
           abi: IdleTokenV4,
           token: 'idleDAISafe',
           address: '0xa14ea0e11121e6e951e87c66afe460a00bcd6a16'
+        },
+        canDeposit: {
+          enabled: false,
+          disabledMessageRedeemKey: 'riskAdjustedDisabledMessageRedeem',
+          disabledMessageDepositKey: 'riskAdjustedDisabledMessageDeposit'
         },
         migration: {
           enabled: true,
@@ -2112,11 +2112,6 @@ const availableTokens = {
         ]
       },
       USDC: {
-        canDeposit: {
-          enabled: false,
-          disabledMessageRedeemKey: 'riskAdjustedDisabledMessageRedeem',
-          disabledMessageDepositKey: 'riskAdjustedDisabledMessageDeposit'
-        },
         decimals: 6,
         token: 'USDC',
         enabled: true,
@@ -2137,6 +2132,11 @@ const availableTokens = {
           abi: IdleTokenV4,
           token: 'idleUSDCSafe',
           address: '0x3391bc034f2935ef0e1e41619445f998b2680d35'
+        },
+        canDeposit: {
+          enabled: false,
+          disabledMessageRedeemKey: 'riskAdjustedDisabledMessageRedeem',
+          disabledMessageDepositKey: 'riskAdjustedDisabledMessageDeposit'
         },
         migration: {
           enabled: true,
@@ -2236,11 +2236,6 @@ const availableTokens = {
         ]
       },
       USDT: {
-        canDeposit: {
-          enabled: false,
-          disabledMessageRedeemKey: 'riskAdjustedDisabledMessageRedeem',
-          disabledMessageDepositKey: 'riskAdjustedDisabledMessageDeposit'
-        },
         decimals: 6,
         token: 'USDT',
         enabled: true,
@@ -2258,6 +2253,11 @@ const availableTokens = {
           abi: IdleTokenV4,
           token: 'idleUSDTSafe',
           address: '0x28fAc5334C9f7262b3A3Fe707e250E01053e07b5'
+        },
+        canDeposit: {
+          enabled: false,
+          disabledMessageRedeemKey: 'riskAdjustedDisabledMessageRedeem',
+          disabledMessageDepositKey: 'riskAdjustedDisabledMessageDeposit'
         },
         migration: {
           enabled: true,
