@@ -7,6 +7,7 @@ import IdleGovToken from './IdleGovToken';
 import { toBuffer } from "ethereumjs-util";
 import globalConfigs from '../configs/globalConfigs';
 import ENS, { getEnsAddress } from '@ensdomains/ensjs';
+import IAaveIncentivesController from '../abis/aave/IAaveIncentivesController.json';
 
 const ethereumjsABI = require('ethereumjs-abi');
 const env = process.env;
@@ -5540,27 +5541,29 @@ class FunctionsUtil {
     const cachedDataKey = `getStkAaveDistribution_${tokenConfig.idle.token}_${aTokenIdleSupply}_${annualize}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData && !this.BNify(cachedData).isNaN()){
-      return this.BNify(cachedData);
+      // return this.BNify(cachedData);
     }
 
     let aaveDistribution = this.BNify(0);
     const stkAAVETokenConfig = this.getGlobalConfig(['govTokens','stkAAVE']);
     const aTokenConfig = tokenConfig.protocols.find( p => p.name === stkAAVETokenConfig.protocol );
 
+    // console.log('getStkAaveDistribution_1',tokenConfig.idle.token,aTokenConfig.token);
+
     if (!aTokenConfig || stkAAVETokenConfig.disabledTokens.includes(tokenConfig.idle.token)){
       return aaveDistribution;
     }
 
-    const aaveIncentivesController_address = await this.genericContractCallCached(aTokenConfig.token,'getIncentivesController',[],{},'latest',null);
+    const aaveIncentivesController_address = await this.genericContractCall(aTokenConfig.token,'getIncentivesController');
 
-    // console.log('getStkAaveDistribution',tokenConfig.idle.token,aTokenConfig.token,aaveIncentivesController_address);
+    // console.log('getStkAaveDistribution_2',aaveIncentivesController_address);
 
     if (!aaveIncentivesController_address){
       return aaveDistribution;
     }
 
-    const IAaveIncentivesController_name = `IAaveIncentivesController_${aTokenConfig.token}`;
-    await this.props.initContract(IAaveIncentivesController_name,aaveIncentivesController_address,stkAAVETokenConfig.abi);
+    const IAaveIncentivesController_name = `IAaveIncentivesController_${aaveIncentivesController_address}`;
+    await this.props.initContract(IAaveIncentivesController_name,aaveIncentivesController_address,IAaveIncentivesController);
 
     let [
       aTokenTotalSupply,
@@ -5569,8 +5572,10 @@ class FunctionsUtil {
     ] = await Promise.all([
       this.getTokenTotalSupply(aTokenConfig.token),
       this.getTokenAllocation(tokenConfig,false,false),
-      this.genericContractCallCached(IAaveIncentivesController_name,'getAssetData',[aTokenConfig.address]),
+      this.genericContractCall(IAaveIncentivesController_name,'assets',[aTokenConfig.address]),
     ]);
+
+    // console.log('getStkAaveDistribution',IAaveIncentivesController_name,aTokenConfig.address,assetData);
 
     if (assetData && tokenAllocation){
 
@@ -5578,10 +5583,10 @@ class FunctionsUtil {
 
       if (aaveAllocationPerc && aaveAllocationPerc.gte(0.001)){
         if (!aTokenIdleSupply){
-          aTokenIdleSupply = await this.getContractBalance(aTokenConfig.token,tokenConfig.idle.address);
+          aTokenIdleSupply = await this.genericContractCall(aTokenConfig.token,'balanceOf',[tokenConfig.idle.address]);
         }
 
-        const aaveSpeed = this.BNify(assetData[1]);
+        const aaveSpeed = this.BNify(assetData.emissionPerSecond);
         aTokenIdleSupply = this.BNify(aTokenIdleSupply);
         aTokenTotalSupply = this.BNify(aTokenTotalSupply);
         const secondsPerYear = this.getGlobalConfig(['network','secondsPerYear']);
@@ -5593,7 +5598,7 @@ class FunctionsUtil {
           aaveDistribution = aaveDistribution.div(1e18).times(secondsPerYear);
         }
 
-        // console.log('getStkAaveDistribution',tokenConfig.idle.token,aTokenIdleSupply.toFixed(),aTokenTotalSupply.toFixed(),aavePoolShare.toFixed(),aaveSpeed.toFixed(),aaveDistribution.toFixed());
+        // console.log('getStkAaveDistribution_4',tokenConfig.idle.token,aTokenIdleSupply.toFixed(),aTokenTotalSupply.toFixed(),aavePoolShare.toFixed(),aaveSpeed.toFixed(),aaveDistribution.toFixed());
 
         if (!this.BNify(aaveDistribution).isNaN()){
           return this.setCachedDataWithLocalStorage(cachedDataKey,aaveDistribution);
