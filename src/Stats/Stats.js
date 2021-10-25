@@ -930,7 +930,7 @@ class Stats extends Component {
         }
       });
 
-      const disabledCharts = tokenConfig.disabledCharts || [];
+      // const disabledCharts = tokenConfig.disabledCharts || [];
 
       const versionInfo = this.getVersionInfo(this.state.idleVersion);
 

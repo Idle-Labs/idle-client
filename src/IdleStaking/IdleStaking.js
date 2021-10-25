@@ -988,7 +988,6 @@ class IdleStaking extends Component {
                                 Amount
                               </Text>
                               <Text
-                                width={0.3}
                                 fontSize={1}
                                 fontWeight={3}
                                 width={this.props.isMobile ? 0.15 : 0.3}
