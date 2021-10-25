@@ -232,7 +232,7 @@ class LpStaking extends Component {
     const programEndTime = unlockSchedules.length>0 ? unlockSchedules.reduce( (endTime,s) => {
       endTime = Math.max(s.endAtSec,endTime);
       return endTime;
-    },parseInt(Date.now()/1000)) : null;
+    },0) : null;
 
     const programDuration = programEndTime ? `${this.functionsUtil.strToMoment(programEndTime*1000).utc().format('DD MMM, YYYY @ HH:mm')} UTC` : 'None';
     stats.push({
