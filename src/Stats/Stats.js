@@ -680,7 +680,7 @@ class Stats extends Component {
                       {
                         title:'POOL',
                         props:{
-                          width:[0.22,0.14],
+                          width:[0.22,0.15],
                         },
                         fields:[
                           {
@@ -709,7 +709,7 @@ class Stats extends Component {
                         title:'APY',
                         desc:apyLong,
                         props:{
-                          width: [0.29,0.14],
+                          width: [0.29,0.15],
                         },
                         parentProps:{
                           flexDirection:'column',
@@ -731,15 +731,15 @@ class Stats extends Component {
                         ]
                       },
                       {
-                        title:'RISK SCORE',
-                        desc:this.functionsUtil.getGlobalConfig(['messages','riskScore']),
+                        title:'FARMING',
+                        desc:this.functionsUtil.getGlobalConfig(['messages','yieldFarming']),
                         mobile:false,
                         props:{
-                          width:[0.27,0.16],
+                          width:[0.27,0.14],
                         },
                         fields:[
                           {
-                            name:'score'
+                            name:'govTokens'
                           }
                         ]
                       },
@@ -1540,6 +1540,7 @@ class Stats extends Component {
                       </Flex>
                     </DashboardCard>
                     {
+                      /*
                       !disabledCharts.includes('score') &&
                         <DashboardCard
                           cardProps={{
@@ -1578,6 +1579,7 @@ class Stats extends Component {
                             </Flex>
                           </Flex>
                         </DashboardCard>
+                        */
                     }
                     <DashboardCard
                       cardProps={{
