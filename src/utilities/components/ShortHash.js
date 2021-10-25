@@ -10,6 +10,7 @@ class ShortHash extends Component {
 
   // Utils
   functionsUtil = null;
+  componentUnmounted = false;
 
   loadUtils(){
     if (this.functionsUtil){
@@ -24,19 +25,29 @@ class ShortHash extends Component {
     this.loadData();
   }
 
+  async componentWillUnmount(){
+    this.componentUnmounted = true;
+  }
+
   async componentDidUpdate(prevProps,prevState){
     this.loadUtils();
+  }
+
+  async setStateSafe(newState,callback=null) {
+    if (!this.componentUnmounted){
+      return this.setState(newState,callback);
+    }
+    return null;
   }
 
   async loadData(){
     const resolveAddress = this.props.resolveAddress !== false;
     let text = this.functionsUtil.shortenHash(this.props.hash);
     const ensName = resolveAddress ? await this.functionsUtil.getENSName(this.props.hash) : null;
-    // console.log('ShortHash',resolveAddress,this.props.hash,ensName);
     if (ensName){
       text = ensName;
     }
-    this.setState({
+    this.setStateSafe({
       text
     });
   }
