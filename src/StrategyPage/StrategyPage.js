@@ -241,7 +241,6 @@ class StrategyPage extends Component {
     const viewOnly = this.props.connectorName === 'custom';
     const govTokens = this.functionsUtil.getGlobalConfig(['govTokens']);
     const apyLong = this.functionsUtil.getGlobalConfig(['messages','apyLong']);
-    const riskScore = this.functionsUtil.getGlobalConfig(['messages','riskScore']);
     const yieldFarming = this.functionsUtil.getGlobalConfig(['messages','yieldFarming']);
     const nexusMutualConfig = this.functionsUtil.getGlobalConfig(['tools','nexusMutual']);
     const batchDepositConfig = this.functionsUtil.getGlobalConfig(['tools','batchDeposit']);
@@ -945,7 +944,7 @@ class StrategyPage extends Component {
                             title:'APY',
                             desc:apyLong,
                             props:{
-                              width:[0.29,0.15],
+                              width:[0.26,0.15],
                             },
                             parentProps:{
                               flexDirection:'column',
@@ -967,14 +966,13 @@ class StrategyPage extends Component {
                             ]
                           },
                           {
-                            title:'SCORE',
-                            desc:riskScore,
+                            title:'OLD APY',
                             props:{
-                              width:[0.21,0.12],
+                              width:[0.26,0.12],
                             },
                             fields:[
                               {
-                                name:'score'
+                                name:'oldApy'
                               }
                             ]
                           },
@@ -1087,9 +1085,8 @@ class StrategyPage extends Component {
                           },
                           {
                             title:'POOL',
-                            mobile:false,
                             props:{
-                              width:[0.12,0.09],
+                              width:[0.21,0.11],
                             },
                             fields:[
                               {
@@ -1104,7 +1101,7 @@ class StrategyPage extends Component {
                             title:'APY',
                             desc:apyLong,
                             props:{
-                              width:[0.30,0.14],
+                              width:[0.30,0.16],
                             },
                             parentProps:{
                               flexDirection:'column',
@@ -1126,24 +1123,9 @@ class StrategyPage extends Component {
                             ]
                           },
                           {
-                            title:'SCORE',
-                            desc:riskScore,
-                            props:{
-                              width:[0.21,0.10],
-                            },
-                            parentProps:{
-                              alignItems:['center','flex-start'],
-                            },
-                            fields:[
-                              {
-                                name:'score',
-                              }
-                            ]
-                          },
-                          {
                             title:'DEPOSITED',
                             props:{
-                              width:[0.22,0.13],
+                              width:[0.22,0.15],
                               justifyContent:['center','flex-start']
                             },
                             fields:[
@@ -1157,7 +1139,7 @@ class StrategyPage extends Component {
                             title:'FARMING',
                             desc:yieldFarming,
                             props:{
-                              width:[0.25,0.11],
+                              width:[0.25,0.13],
                               textAlign:'center'
                             },
                             fields:[
@@ -1173,7 +1155,7 @@ class StrategyPage extends Component {
                             mobile:false,
                             title:'EARNINGS',
                             props:{
-                              width:[0.15,0.13],
+                              width:[0.15,0.15],
                               textAlign:'center'
                             },
                             parentProps:{
@@ -1283,11 +1265,11 @@ class StrategyPage extends Component {
                             ]
                           },
                           {
+                            mobile:true,
                             title:'POOL',
                             visibleOnDesktop:true,
-                            mobile:this.props.account !== null,
                             props:{
-                              width:[0.21, 0.10],
+                              width:[0.21, 0.13],
                             },
                             fields:[
                               {
@@ -1302,7 +1284,7 @@ class StrategyPage extends Component {
                             title:'APY',
                             desc:apyLong,
                             props:{
-                              width:[0.31,this.state.depositedTokens.length>0 ? 0.14 : 0.14],
+                              width:[0.31,0.16],
                             },
                             parentProps:{
                               flexDirection:'column',
@@ -1324,23 +1306,12 @@ class StrategyPage extends Component {
                             ]
                           },
                           {
-                            title:'SCORE',
-                            desc:riskScore,
-                            props:{
-                              width:[0.22,0.10],
-                            },
-                            fields:[
-                              {
-                                name:'score'
-                              }
-                            ]
-                          },
-                          {
-                            mobile:false,
                             title:'FARMING',
+                            visibleOnDesktop:true,
+                            mobile:this.props.account !== null,
                             desc:yieldFarming,
                             props:{
-                              width:[0.25,0.11],
+                              width:[0.22,0.16],
                               textAlign:'center'
                             },
                             fields:[

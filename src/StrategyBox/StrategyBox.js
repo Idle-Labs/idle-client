@@ -270,28 +270,17 @@ class StrategyBox extends Component {
                     color={'cellText'}
                     textAlign={'center'}
                   >
-                    SCORE
+                    TOKEN
                   </Text>
-                  <Tooltip
-                    placement={'bottom'}
-                    message={this.functionsUtil.getGlobalConfig(['messages','scoreShort'])}
-                  >
-                    <Icon
-                      ml={1}
-                      name={"Info"}
-                      size={'1em'}
-                      color={'cellTitle'}
-                    />
-                  </Tooltip>
                 </Flex>
                 <AssetField
                   fieldInfo={{
-                    name:'score',
+                    name:'tokenName',
                     props:{
                       fontWeight:4,
                       color:'copyColor',
                       textAlign:'center',
-                      fontSize:[3,'1.8em'],
+                      fontSize:[3,'1.6em'],
                       flexProps:{
                         justifyContent:'center'
                       }

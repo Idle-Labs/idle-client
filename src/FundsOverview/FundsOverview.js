@@ -316,7 +316,7 @@ class FundsOverview extends Component {
           >
             <Flex
               mb={[2,0]}
-              width={[1,1/6]}
+              width={[1,1/5]}
               alignItems={'center'}
               flexDirection={'column'}
               justifyContent={'flex-start'}
@@ -348,7 +348,7 @@ class FundsOverview extends Component {
             </Flex>
             <Flex
               mb={[2,0]}
-              width={[1,1/6]}
+              width={[1,1/5]}
               alignItems={'center'}
               flexDirection={'column'}
               justifyContent={'flex-start'}
@@ -402,7 +402,7 @@ class FundsOverview extends Component {
             </Flex>
             <Flex
               mb={[2,0]}
-              width={[1,1/6]}
+              width={[1,1/5]}
               alignItems={'center'}
               flexDirection={'column'}
               justifyContent={'flex-start'}
@@ -491,7 +491,7 @@ class FundsOverview extends Component {
             </Flex>
             <Flex
               mb={[2,0]}
-              width={[1,1/6]}
+              width={[1,1/5]}
               alignItems={'center'}
               flexDirection={'column'}
               justifyContent={'flex-start'}
@@ -525,7 +525,7 @@ class FundsOverview extends Component {
             </Flex>
             <Flex
               mb={[2,0]}
-              width={[1,1/6]}
+              width={[1,1/5]}
               alignItems={'center'}
               flexDirection={'column'}
               justifyContent={'flex-start'}
@@ -629,37 +629,41 @@ class FundsOverview extends Component {
                 */
               }
             </Flex>
-            <Flex
-              mb={[2,0]}
-              width={[1,1/6]}
-              alignItems={'center'}
-              flexDirection={'column'}
-              justifyContent={'flex-start'}
-            >
-              <Title
-                mb={2}
-                fontSize={[3,4]}
-                component={Heading.h3}
+            {
+              /*
+              <Flex
+                mb={[2,0]}
+                width={[1,1/5]}
+                alignItems={'center'}
+                flexDirection={'column'}
+                justifyContent={'flex-start'}
               >
-                Risk Score
-              </Title>
-              <AssetField
-                {...this.props}
-                token={this.props.selectedToken}
-                fieldInfo={{
-                  name:'score',
-                  props:{
-                    decimals:1,
-                    fontWeight:300,
-                    fontSize:['1.8em','1.9em'],
-                    color:this.props.theme.colors.counter,
-                    flexProps:{
-                      justifyContent:'center'
+                <Title
+                  mb={2}
+                  fontSize={[3,4]}
+                  component={Heading.h3}
+                >
+                  Risk Score
+                </Title>
+                <AssetField
+                  {...this.props}
+                  token={this.props.selectedToken}
+                  fieldInfo={{
+                    name:'score',
+                    props:{
+                      decimals:1,
+                      fontWeight:300,
+                      fontSize:['1.8em','1.9em'],
+                      color:this.props.theme.colors.counter,
+                      flexProps:{
+                        justifyContent:'center'
+                      }
                     }
-                  }
-                }}
-              />
-            </Flex>
+                  }}
+                />
+              </Flex>
+              */
+            }
           </Flex>
         </DashboardCard>
       </Flex>
