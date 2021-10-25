@@ -388,49 +388,48 @@ class StrategyPage extends Component {
                                     portfolio={this.state.portfolio}
                                   />
                                   <Flex
+                                    mt={1}
                                     width={1}
                                     alignItems={'center'}
                                     flexDirection={'row'}
                                     justifyContent={'center'}
                                   >
-                                    <Flex
-                                      width={0.45}
-                                      alignItems={'center'}
-                                      justifyContent={'flex-end'}
-                                    >
+                                    {
+                                      /*
+                                      <Flex
+                                        width={0.45}
+                                        alignItems={'center'}
+                                        justifyContent={'flex-end'}
+                                      >
+                                        <Text
+                                          fontSize={1}
+                                          fontWeight={3}
+                                          fontFamily={this.props.theme.fonts.counter}
+                                          color={this.props.theme.colors.transactions.status.completed}
+                                        >
+                                          +{this.state.portfolio.totalEarningsPerc.toFixed(2)}%
+                                        </Text>
+                                      </Flex>
                                       <Text
+                                        mx={1}
                                         fontSize={1}
                                         fontWeight={3}
                                         fontFamily={this.props.theme.fonts.counter}
                                         color={this.props.theme.colors.transactions.status.completed}
-                                      >
-                                        +{this.state.portfolio.totalEarningsPerc.toFixed(2)}%
-                                      </Text>
-                                    </Flex>
-                                    <Text
-                                      mx={1}
-                                      fontSize={1}
-                                      fontWeight={3}
-                                      fontFamily={this.props.theme.fonts.counter}
-                                      color={this.props.theme.colors.transactions.status.completed}
-                                    >|</Text>
-                                    <Flex
-                                      width={0.45}
-                                      alignItems={'center'}
-                                      justifyContent={'flex-start'}
-                                    >
-                                      <TotalEarningsCounter
-                                        {...this.props}
-                                        unit={'+$'}
-                                        decimals={4}
-                                        counterStyle={{
-                                          fontSize:14,
-                                          fontWeight:600,
-                                          color:this.props.theme.colors.transactions.status.completed
-                                        }}
-                                        portfolio={this.state.portfolio}
-                                      />
-                                    </Flex>
+                                      >|</Text>
+                                      */
+                                    }
+                                    <TotalEarningsCounter
+                                      {...this.props}
+                                      unit={'+$'}
+                                      decimals={4}
+                                      counterStyle={{
+                                        fontSize:14,
+                                        fontWeight:600,
+                                        color:this.props.theme.colors.transactions.status.completed
+                                      }}
+                                      portfolio={this.state.portfolio}
+                                    />
                                   </Flex>
                                 </Flex>
                               ) : (
@@ -490,14 +489,14 @@ class StrategyPage extends Component {
                             justifyContent={'center'}
                           >
                             {
-                              this.state.avgScore ? (
+                              this.state.portfolio ? (
                                 <Text
                                   lineHeight={1}
                                   fontWeight={[3,4]}
                                   color={'copyColor'}
                                   fontFamily={'counter'}
                                   fontSize={[4,'1.7em']}
-                                  dangerouslySetInnerHTML={{ __html: this.state.avgScore.toFixed(2) }}
+                                  dangerouslySetInnerHTML={{ __html: '<small>+</small>'+this.state.portfolio.totalEarningsPerc.toFixed(2)+'<small>%</small>' }}
                                 >
                                 </Text>
                               ) : (
@@ -516,11 +515,11 @@ class StrategyPage extends Component {
                                 fontSize={[1,2]}
                                 color={'cellText'}
                               >
-                                Avg Risk Score
+                                Total Profit
                               </Text>
                               <Tooltip
                                 placement={'bottom'}
-                                message={this.functionsUtil.getGlobalConfig(['messages','riskScoreShort'])}
+                                message={this.functionsUtil.getGlobalConfig(['messages','totalProfitPerc'])}
                               >
                                 <Icon
                                   ml={2}

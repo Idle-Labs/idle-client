@@ -180,6 +180,7 @@ const globalConfigs = {
   messages: {
     scoreShort: "Protocol Risk Score",
     apyShort: "Annual Percentage Yield",
+    totalProfitPerc: "Total percentage profit generated on your balance",
     tokenPrice: "The token price is calculated using Uniswap spot prices.",
     cheapRedeem: "Amount of unlent funds available for low gas fees redeem",
     curveBonusSlippage: "Slippage or bonus depending on if the coin is low or high in the Curve Pool",
