@@ -878,7 +878,8 @@ const globalConfigs = {
               "TUSD",
               "SUSD",
               "WBTC",
-              "WETH"
+              "WETH",
+              "RAI"
             ]
           }
         ]
