@@ -1674,6 +1674,46 @@ const globalConfigs = {
         }
       }
     },
+    stakePolygon: {
+      enabled: true,
+      icon: "Layers",
+      label: "Staking",
+      subComponent: Staking,
+      availableNetworks:[137],
+      route: "staking-polygon",
+      desc: "Stake your IDLE tokens and earn $IDLE rewards",
+      props: {
+        availableTokens: {
+          IDLE: {
+            component: IdleStaking,
+            contract: {
+              abi: stkIDLE,
+              decimals: 18,
+              name: "stkIDLE",
+              fromBlock: 12561464,
+              rewardToken: "IDLE",
+              address: "0xaac13a116ea7016689993193fce4badc8038136f" // Mainnet
+            },
+            feeDistributor: {
+              fromBlock: 12649361,
+              abi: StakingFeeDistributor,
+              name: "StakingFeeDistributor",
+              address: "0xbabb82456c013fd7e3f25857e0729de8207f80e2" // Mainnet
+            },
+            abi: IDLE,
+            name: "IDLE",
+            token: "IDLE",
+            decimals: 18,
+            enabled: true,
+            label: "IDLE Token",
+            icon: "images/tokens/IDLE.png",
+            address: "0xC25351811983818c9Fe6D8c580531819c8ADe90f", // Mainnet
+            poolLink:
+              "https://polygonscan.com/address/0xC25351811983818c9Fe6D8c580531819c8ADe90f"
+          }
+        }
+      }
+    },
     nexusMutual: {
       enabled: true,
       icon: "Security",

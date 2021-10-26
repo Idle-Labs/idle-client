@@ -121,6 +121,31 @@ class Dashboard extends Component {
       );
     }
 
+    // Add Stake Polygon
+    const stakePolygonConfig = this.functionsUtil.getGlobalConfig(['tools','stakePolygon']);
+    if (stakePolygonConfig.enabled && (!stakePolygonConfig.availableNetworks || stakePolygonConfig.availableNetworks.includes(currentNetwork.id))){
+      menu.push(
+        {
+          submenu:[],
+          label:'Stake',
+          selected:false,
+          color:'dark-gray',
+          route:'/dashboard/stake',
+          image:extraicons['stake'].icon,
+          imageDark:extraicons['stake'].iconDark,
+          bgColor:this.props.theme.colors.primary,
+          imageInactive:extraicons['stake'].iconInactive,
+          imageInactiveDark:extraicons['stake'].iconInactiveDark,
+          component:Utils,
+          componentProps:{
+            showBreadCrumb:false,
+            toolProps:stakePolygonConfig.props,
+            selectedSubsection:stakePolygonConfig
+          },
+        }
+      );
+    }
+
     const statsInfo = this.functionsUtil.getGlobalConfig(['stats']);
     if (!statsInfo.availableNetworks || statsInfo.availableNetworks.includes(currentNetwork.id)){
       menu.push(
