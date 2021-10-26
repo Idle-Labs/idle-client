@@ -452,8 +452,6 @@ class App extends Component {
 
   componentDidMount() {
 
-    console.log('App.js componentDidMount');
-
     // Close iFrame
     // if (window.self !== window.top && window.top.location.href.indexOf(globalConfigs.baseURL) !== -1 && typeof window.parent.closeIframe === 'function' ){
     //   window.parent.closeIframe(window.self);

@@ -1,7 +1,7 @@
 import Migrate from '../Migrate/Migrate';
 import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
-import ExtLink from '../ExtLink/ExtLink';
+// import ExtLink from '../ExtLink/ExtLink';
 import AssetField from '../AssetField/AssetField';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import ConnectBox from '../ConnectBox/ConnectBox';
@@ -265,8 +265,10 @@ class DepositRedeem extends Component {
         if (erc20ForwarderContractInfo) {
           mintProxyContractInfo = erc20ForwarderContractInfo;
           const erc20ForwarderContract = await this.props.initContract(erc20ForwarderContractInfo.name, erc20ForwarderContractInfo.address, erc20ForwarderContractInfo.abi);
-          newState.erc20ForwarderContract[action] = erc20ForwarderContractInfo;
-          newState.erc20ForwarderContract[action].contract = erc20ForwarderContract.contract;
+          if (erc20ForwarderContract){
+            newState.erc20ForwarderContract[action] = erc20ForwarderContractInfo;
+            newState.erc20ForwarderContract[action].contract = erc20ForwarderContract.contract;
+          }
         }
       }
 
@@ -2425,14 +2427,18 @@ class DepositRedeem extends Component {
                                   </Text>
                                   )
                                 }
-                                <Text
-                                  mt={2}
-                                  fontSize={'11px'}
-                                  color={'cellText'}
-                                  textAlign={'center'}
-                                >
-                                  Powered by <ExtLink fontSize={'11px'} href={'https://biconomy.io'}>Biconomy</ExtLink>
-                                </Text>
+                                {
+                                  /*
+                                  <Text
+                                    mt={2}
+                                    fontSize={'11px'}
+                                    color={'cellText'}
+                                    textAlign={'center'}
+                                  >
+                                    Powered by <ExtLink fontSize={'11px'} href={'https://biconomy.io'}>Biconomy</ExtLink>
+                                  </Text>
+                                  */
+                                }
                               </DashboardCard>
                             )
                           }

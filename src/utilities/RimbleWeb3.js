@@ -135,7 +135,6 @@ class RimbleTransaction extends React.Component {
     // detect Network account change
     if (window.ethereum){
       window.ethereum.on('networkChanged', async (networkId) => {
-        console.log('networkChanged');
         this.handleNetworkChanged();
         // window.location.reload();
       });
@@ -151,7 +150,14 @@ class RimbleTransaction extends React.Component {
     this.functionsUtil.removeStoredItem('transactions');
     await this.props.clearCachedData(() => {
       this.setState({
-        networkInitialized:false
+        web3:null,
+        contracts:[],
+        biconomy:null,
+        web3Infura:null,
+        permitClient:null,
+        networkInitialized:false,
+        erc20ForwarderClient:null,
+        contractsInitialized:false
       },() => {
         this.checkNetwork();
       });
@@ -160,8 +166,6 @@ class RimbleTransaction extends React.Component {
 
   componentDidMount = async () => {
     // this.initSimpleID();
-
-    console.log('RimbleWeb3 componentDidMount');
     // this.initWeb3();
 
     this.connectGnosisSafe();
@@ -253,10 +257,10 @@ class RimbleTransaction extends React.Component {
     const contextAccountChanged = prevProps.context.account !== this.props.context.account;
     const accountDisconnected = prevProps.connectorName !== this.props.connectorName && this.props.connectorName === 'Infura';
     if (contextAccountChanged){
-      console.log('contextAccountChanged',prevProps.context.account,this.props.context.account,contextAccountChanged);
+      // console.log('contextAccountChanged',prevProps.context.account,this.props.context.account,contextAccountChanged);
     }
     if (accountDisconnected){
-      console.log('accountDisconnected',prevProps.connectorName,this.props.connectorName,accountDisconnected);
+      // console.log('accountDisconnected',prevProps.connectorName,this.props.connectorName,accountDisconnected);
     }
     if (customAddressChanged || contextAccountChanged || accountDisconnected){
       this.initAccount();
@@ -704,8 +708,6 @@ class RimbleTransaction extends React.Component {
     const customAddress = this.props.customAddress;
     const walletProvider = this.functionsUtil.getWalletProvider('Infura');
 
-    console.log('initAccount',account,walletProvider,this.props.connectorName);
-
     if (customAddress){
       // Set custom account
       this.setState({
@@ -736,13 +738,16 @@ class RimbleTransaction extends React.Component {
         }
       }
 
+      if (!account){
+        account = this.props.context.account;
+      }
+
       if (!account || this.state.account === account){
         return this.setState({
           accountInizialized: true
         });
       }
 
-      // console.log('initAccount 2',walletProvider,account);
 
       // Request account access if needed
       if (account){

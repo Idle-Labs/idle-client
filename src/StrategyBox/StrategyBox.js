@@ -4,7 +4,7 @@ import AssetField from '../AssetField/AssetField';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import TrancheField from '../TrancheField/TrancheField';
 import DashboardCard from '../DashboardCard/DashboardCard';
-import { Flex, Text, Link, Icon, Tooltip, Image } from "rimble-ui";
+import { Flex, Text, Link, Icon, Tooltip, Image, Loader } from "rimble-ui";
 
 class StrategyBox extends Component {
 
@@ -273,24 +273,55 @@ class StrategyBox extends Component {
                     TOKEN
                   </Text>
                 </Flex>
-                <AssetField
-                  fieldInfo={{
-                    name:'tokenName',
-                    props:{
-                      fontWeight:4,
-                      color:'copyColor',
-                      textAlign:'center',
-                      fontSize:[3,'1.6em'],
-                      flexProps:{
-                        justifyContent:'center'
-                      }
-                    },
-                  }}
-                  {...this.props}
-                  tokenConfig={ tokenConfig }
-                  token={this.state.selectedToken}
-                  selectedStrategy={this.props.strategy}
-                />
+                {
+                  tokenConfig ? (
+                    <Flex
+                      alignItems={'center'}
+                      flexDirection={'row'}
+                    >
+                      <AssetField
+                        fieldInfo={{
+                          name:'icon',
+                          props:{
+                            mr:[1,2],
+                            fontWeight:4,
+                            textAlign:'center',
+                            size: this.props.isMobile ? '1.4em' : '1.8em'
+                          },
+                        }}
+                        {...this.props}
+                        tokenConfig={ tokenConfig }
+                        token={this.state.selectedToken}
+                        selectedStrategy={this.props.strategy}
+                      />
+                      <AssetField
+                        fieldInfo={{
+                          name:'tokenName',
+                          props:{
+                            fontWeight:4,
+                            color:'copyColor',
+                            textAlign:'center',
+                            fontSize:[3,'1.6em'],
+                            flexProps:{
+                              justifyContent:'center'
+                            }
+                          },
+                        }}
+                        {...this.props}
+                        tokenConfig={ tokenConfig }
+                        token={this.state.selectedToken}
+                        selectedStrategy={this.props.strategy}
+                      />
+                    </Flex>
+                  ) : (
+                    <Flex
+                      alignItems={'center'}
+                      flexDirection={'row'}
+                    >
+                      <Loader size="20px" />
+                    </Flex>
+                  )
+                }
               </Flex>
             </Flex>
           ) : strategyInfo.type === 'tranche' && (

@@ -8,6 +8,7 @@ import IdleGovToken from './IdleGovToken';
 import { toBuffer } from "ethereumjs-util";
 import globalConfigs from '../configs/globalConfigs';
 import ENS, { getEnsAddress } from '@ensdomains/ensjs';
+import availableTokens from '../configs/availableTokens';
 import IAaveIncentivesController from '../abis/aave/IAaveIncentivesController.json';
 
 const ethereumjsABI = require('ethereumjs-abi');
@@ -7199,6 +7200,11 @@ class FunctionsUtil {
     }
 
     return null;
+  }
+  getAvailableTokenAddress = (token,strategy) => {
+    const networkId = this.getCurrentNetworkId();
+    const tokenConfig = this.getArrayPath([networkId,strategy,token],availableTokens);
+    return tokenConfig ? tokenConfig.address : null;
   }
   getAggregatedStats = async (addGovTokens=true) => {
     const networkId = this.getCurrentNetworkId();

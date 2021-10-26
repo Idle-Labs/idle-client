@@ -58,7 +58,6 @@ class StrategyPage extends Component {
   }
 
   async componentDidMount(){
-    console.log('componentDidMount',this.props.network);
     await this.loadPortfolio();
   }
 
@@ -68,7 +67,6 @@ class StrategyPage extends Component {
     const accountChanged = prevProps.account !== this.props.account;
     const availableTokensChanged = JSON.stringify(prevProps.availableTokens) !== JSON.stringify(this.props.availableTokens);
     if (accountChanged || availableTokensChanged){
-      console.log('componentDidUpdate',accountChanged,availableTokensChanged);
       this.setState({
         portfolioLoaded:false
       },() => {
@@ -96,8 +94,6 @@ class StrategyPage extends Component {
     if (this.state.portfolioLoaded || this.state.portfolioLoading){
       return false;
     }
-
-    console.log('loadPortfolio',this.props.account);
 
     await this.setStateSafe({
       portfolioLoading:true
@@ -1581,7 +1577,7 @@ class StrategyPage extends Component {
                   </Flex>
               }
               {
-                this.state.polygonTransactions && (
+                this.props.account && this.state.polygonTransactions && (
                   <Flex
                     width={1}
                     flexDirection={'column'}

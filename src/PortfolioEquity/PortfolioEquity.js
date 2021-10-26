@@ -60,6 +60,8 @@ class PortfolioEquity extends Component {
 
     const etherscanTxs = await this.functionsUtil.getEtherscanTxs(this.props.account,0,'latest',enabledTokens);
 
+    // console.log('etherscanTxs',etherscanTxs);
+
     const chartData = [];
     let tokensBalance = {};
     let firstTxTimestamp = null;
@@ -76,7 +78,7 @@ class PortfolioEquity extends Component {
         filteredTxs.forEach((tx,index) => {
 
           // Skip transactions with no hash or pending
-          if (!tx.hash || (tx.status && tx.status === 'Pending')){
+          if (!tx.hash || !tx.action || (tx.status && tx.status === 'Pending')){
             return false;
           }
           
@@ -128,6 +130,8 @@ class PortfolioEquity extends Component {
       }
     });
 
+    // console.log('tokensBalance',tokensBalance);
+
     // Calculate Start Date
     let startDate = null;
     const currentDate = this.functionsUtil.strToMoment(new Date());
@@ -164,9 +168,11 @@ class PortfolioEquity extends Component {
     const isRisk = this.props.selectedStrategy === 'risk';
 
     await this.functionsUtil.asyncForEach(Object.keys(tokensBalance),async (token) => {
-      const tokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',token]);
-      tokensData[token] = await this.functionsUtil.getTokenApiData(tokenConfig.address,isRisk,firstTxTimestamp,null,false,3600);
+      const tokenAddress = this.functionsUtil.getAvailableTokenAddress(token,this.props.selectedStrategy);
+      tokensData[token] = await this.functionsUtil.getTokenApiData(tokenAddress,isRisk,firstTxTimestamp,null,false,3600);
     });
+
+    // console.log('tokensData',tokensData);
 
     // debugger;
 
@@ -308,6 +314,8 @@ class PortfolioEquity extends Component {
       aggregatedBalances[index].itemPos = itemPos;
       itemIndex++;
     });
+
+    // debugger;
 
     /*
     aggregatedBalances.push({
