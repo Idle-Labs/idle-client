@@ -264,6 +264,8 @@ class TrancheDetails extends Component {
     const otherTrancheType = this.props.selectedTranche === 'AA' ? 'BB' : 'AA';
     const otherTrancheDetails = this.functionsUtil.getGlobalConfig(['tranches',otherTrancheType]);
     const trancheLimit = this.functionsUtil.formatMoney(this.functionsUtil.BNify(this.props.tokenConfig.limit),0)+' '+this.props.selectedToken;
+    const stakingRewards = this.props.trancheConfig.CDORewards.stakingRewards.filter( t => t.enabled );
+    const stakingEnabled = this.state.userHasAvailableFunds && stakingRewards.length>0;
     return (
       <Flex
         width={1}
@@ -542,38 +544,42 @@ class TrancheDetails extends Component {
                 protocol={this.props.selectedProtocol}
                 trancheConfig={this.props.trancheConfig}
               />
-              <Flex
-                width={1}
-                alignItems={'center'}
-                flexDirection={'row'}
-              >
-                <Text
-                  fontSize={1}
-                  fontWeight={2}
-                  lineHeight={'1'}
-                  color={'cellText'}
-                >
-                  +
-                </Text>
-                <TrancheField
-                  {...this.props}
-                  fieldInfo={{
-                    name:'trancheIDLELastHarvest',
-                    props:{
-                      decimals:4,
-                      fontSize:1,
-                      fontWeight:2,
-                      lineHeight:'1',
-                      color:'cellText'
-                    }
-                  }}
-                  token={this.props.selectedToken}
-                  tranche={this.props.selectedTranche}
-                  tokenConfig={this.props.tokenConfig}
-                  protocol={this.props.selectedProtocol}
-                  trancheConfig={this.props.trancheConfig}
-                />
-              </Flex>
+              {
+                stakingRewards.length>0 && (
+                  <Flex
+                    width={1}
+                    alignItems={'center'}
+                    flexDirection={'row'}
+                  >
+                    <Text
+                      fontSize={1}
+                      fontWeight={2}
+                      lineHeight={'1'}
+                      color={'cellText'}
+                    >
+                      +
+                    </Text>
+                    <TrancheField
+                      {...this.props}
+                      fieldInfo={{
+                        name:'trancheIDLELastHarvest',
+                        props:{
+                          decimals:4,
+                          fontSize:1,
+                          fontWeight:2,
+                          lineHeight:'1',
+                          color:'cellText'
+                        }
+                      }}
+                      token={this.props.selectedToken}
+                      tranche={this.props.selectedTranche}
+                      tokenConfig={this.props.tokenConfig}
+                      protocol={this.props.selectedProtocol}
+                      trancheConfig={this.props.trancheConfig}
+                    />
+                  </Flex>
+                )
+              }
             </Flex>
           </Flex>
           {
@@ -757,7 +763,7 @@ class TrancheDetails extends Component {
                         icon={'Layers'}
                         iconColor={'deposit'}
                         iconBgColor={'#ced6ff'}
-                        isDisabled={ !this.state.userHasAvailableFunds }
+                        isDisabled={ !stakingEnabled }
                         isActive={ this.state.selectedAction === 'stake' }
                         handleClick={ e => this.state.userHasAvailableFunds ? this.setSelectedAction('stake') : null }
                       />

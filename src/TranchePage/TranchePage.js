@@ -6,6 +6,7 @@ import FunctionsUtil from '../utilities/FunctionsUtil';
 import TrancheDetails from '../TrancheDetails/TrancheDetails';
 // import TrancheWelcome from '../TrancheWelcome/TrancheWelcome';
 import TransactionsList from '../TransactionsList/TransactionsList';
+import TrancheDepositRedeem from '../TrancheDepositRedeem/TrancheDepositRedeem';
 import FundsOverviewTranche from '../FundsOverviewTranche/FundsOverviewTranche';
 import StakingRewardsTranche from '../StakingRewardsTranche/StakingRewardsTranche';
 
@@ -94,14 +95,27 @@ class TranchePage extends Component {
                     key={`tranche_${trancheType}`}
                     width={[1,(1/filteredTranchesTypes.length)-0.02]}
                   >
-                    <TrancheDetails
-                      {...this.props}
-                      selectedTranche={trancheType}
-                      cdoConfig={this.props.tokenConfig.CDO}
-                      showSelectButton={!this.props.trancheType}
-                      selectTrancheType={this.props.selectTrancheType}
-                      trancheConfig={this.props.tokenConfig[trancheType]}
-                    />
+                    {
+                      this.props.trancheType ? (
+                        <TrancheDepositRedeem
+                          {...this.props}
+                          selectedTranche={trancheType}
+                          cdoConfig={this.props.tokenConfig.CDO}
+                          showSelectButton={!this.props.trancheType}
+                          selectTrancheType={this.props.selectTrancheType}
+                          trancheConfig={this.props.tokenConfig[trancheType]}
+                        />
+                      ) : (
+                        <TrancheDetails
+                          {...this.props}
+                          selectedTranche={trancheType}
+                          cdoConfig={this.props.tokenConfig.CDO}
+                          showSelectButton={!this.props.trancheType}
+                          selectTrancheType={this.props.selectTrancheType}
+                          trancheConfig={this.props.tokenConfig[trancheType]}
+                        />
+                      )
+                    }
                   </Flex>
                 ))
               }
@@ -125,8 +139,8 @@ class TranchePage extends Component {
         {
           this.state.componentLoaded && this.props.account && this.props.userHasFunds && this.props.trancheType &&
             <Flex
-              mb={[0,4]}
               width={1}
+              mb={[0,4]}
               flexDirection={'column'}
               id={'funds-overview-container'}
             >
@@ -145,8 +159,8 @@ class TranchePage extends Component {
         {
           this.props.account && this.state.transactions && this.state.transactions.length>0 && 
             <Flex
-              mb={[3,4]}
               width={1}
+              mb={[3,4]}
               id={'transactions'}
               flexDirection={'column'}
             >

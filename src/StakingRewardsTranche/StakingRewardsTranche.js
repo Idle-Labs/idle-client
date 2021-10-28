@@ -67,7 +67,7 @@ class StakingRewardsTranche extends Component {
       const rewardTokenInfo = rewardTokensInfo[rewardToken];
       const tokenBalance = await this.functionsUtil.getTokenBalance(rewardToken,this.props.account);
       let distributionSpeed = rewardTokenInfo ? rewardTokenInfo.lastAmount : null;
-      if (trancheBalanceInfo){
+      if (trancheBalanceInfo && distributionSpeed){
         distributionSpeed = distributionSpeed.times(trancheBalanceInfo.poolShare);
       }
       stakingRewardsRows.push({

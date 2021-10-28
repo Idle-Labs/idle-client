@@ -6,6 +6,7 @@ import ConnectBox from '../ConnectBox/ConnectBox';
 import ImageButton from '../ImageButton/ImageButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import DashboardCard from '../DashboardCard/DashboardCard';
+import StatsCardSmall from '../StatsCardSmall/StatsCardSmall';
 import CardIconButton from '../CardIconButton/CardIconButton';
 import { Flex, Box, Text, Icon, Input, Button } from "rimble-ui";
 import SendTxWithBalance from '../SendTxWithBalance/SendTxWithBalance';
@@ -662,39 +663,6 @@ class IdleStaking extends Component {
 
   render() {
 
-    const StatsCard = props => {
-      const cardProps = {
-        p:3,
-        mb:2,
-        width:'49%',
-        ...props.cardProps
-      };
-      return (
-        <DashboardCard
-          title={props.title}
-          cardProps={cardProps}
-          titleProps={{
-            fontSize:1,
-            fontWeight:3,
-          }}
-          titleParentProps={{
-            mt:0,
-            ml:0
-          }}
-          description={props.description}
-        >
-          <Text
-            mt={1}
-            fontSize={[2,3]}
-            color={'statValue'}
-            {...props.textProps}
-          >
-            {props.value}
-          </Text>
-        </DashboardCard>
-      );
-    };
-
     const isLock = this.state.selectedAction === 'Lock';
     const isStats = this.state.selectedAction === 'Stats';
     const isClaim = this.state.selectedAction === 'Claim';
@@ -763,7 +731,7 @@ class IdleStaking extends Component {
             >
               {
                 this.state.globalStats.map( (statInfo,index) =>
-                  <StatsCard
+                  <StatsCardSmall
                     key={`globalStats_${index}`}
                     cardProps={{
                       mb:2,
@@ -928,7 +896,7 @@ class IdleStaking extends Component {
                         />
                       </Flex>
                     ) : this.state.stats.map( (statInfo,index) =>
-                      <StatsCard
+                      <StatsCardSmall
                         key={`stats_${index}`}
                         cardProps={{
                           width:[1,'49%']

@@ -286,7 +286,7 @@ class TrancheField extends Component {
           formattedValue = this.state[fieldInfo.name].toFixed(decimals);
         }
         output = this.state[fieldInfo.name] ? (
-          <Text {...fieldProps}>{formattedValue}</Text>
+          <Text {...fieldProps} dangerouslySetInnerHTML={{__html:formattedValue}}></Text>
         ) : loader
       break;
     }

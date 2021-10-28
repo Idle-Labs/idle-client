@@ -677,8 +677,8 @@ class App extends Component {
                     config={this.state.config}
                     theme={this.state.selectedTheme}
                     cachedData={this.state.cachedData}
-                    availableTranches={availableTranches}
                     tokenConfig={this.state.tokenConfig}
+                    availableTranches={availableTranches}
                     setNetwork={this.setNetwork.bind(this)}
                     customAddress={this.state.customAddress}
                     selectedToken={this.state.selectedToken}
