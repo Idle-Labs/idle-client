@@ -418,6 +418,10 @@ const globalConfigs = {
       distributionFrequency: "day", // Multiply distribution per block
       color: "hsl(162, 100%, 41%)",
       icon: "images/tokens/IDLE.png",
+      addresses:{
+        1:"0x875773784Af8135eA0ef43b5a374AaD105c5D39e",
+        137:"0xc25351811983818c9fe6d8c580531819c8ade90f"
+      },
       address: "0x875773784Af8135eA0ef43b5a374AaD105c5D39e", // MAIN
       disabledTokens: ["idleFEIYield","idleDAISafe","idleUSDCSafe","idleUSDTSafe"], // Disable IDLE distribution for idleToken
       // address:'0xAB6Bdb5CCF38ECDa7A92d04E86f7c53Eb72833dF', // KOVAN
@@ -499,6 +503,10 @@ const globalConfigs = {
         abi:UniswapV2Router02,
         useInfuraProvider:true,
         address:'0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
+      },
+      SushiswapRouter:{
+        abi:SushiV2Router02,
+        address:'0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
       },
     },
     1:{
@@ -1684,32 +1692,26 @@ const globalConfigs = {
       desc: "Stake your IDLE tokens and earn $IDLE rewards",
       props: {
         availableTokens: {
-          IDLE: {
-            component: IdleStaking,
+          SLP: {
+            component: LpStaking,
             contract: {
-              abi: stkIDLE,
-              decimals: 18,
-              name: "stkIDLE",
-              fromBlock: 12561464,
+              decimals: 24,
+              name: "LpStaking",
+              maxMultiplier: 3,
+              abi: LpStakingAbi,
+              maxBonusDays: 120,
               rewardToken: "IDLE",
-              address: "0xaac13a116ea7016689993193fce4badc8038136f" // Mainnet
+              address: "0x2540971D944921B51e3434503922ea92F2ee0862" // Polygon
             },
-            feeDistributor: {
-              fromBlock: 12649361,
-              abi: StakingFeeDistributor,
-              name: "StakingFeeDistributor",
-              address: "0xbabb82456c013fd7e3f25857e0729de8207f80e2" // Mainnet
-            },
-            abi: IDLE,
-            name: "IDLE",
-            token: "IDLE",
+            name: "SLP",
+            token: "SLP",
             decimals: 18,
             enabled: true,
-            label: "IDLE Token",
-            icon: "images/tokens/IDLE.png",
-            address: "0xC25351811983818c9Fe6D8c580531819c8ADe90f", // Mainnet
-            poolLink:
-              "https://polygonscan.com/address/0xC25351811983818c9Fe6D8c580531819c8ADe90f"
+            abi: SushiLiquidityPool,
+            label: "SushiSwap IDLE/ETH LP Token",
+            icon: "images/protocols/sushiswap.png",
+            address: "0x5518a3af961eee8771657050c5cb23d2b3e2f6ee", // Polygon
+            poolLink: "https://analytics.sushi.com/pairs/0x5518a3af961eee8771657050c5cb23d2b3e2f6ee"
           }
         }
       }

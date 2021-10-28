@@ -388,8 +388,12 @@ class LpStaking extends Component {
   async updateData(selectedActionChanged=false){
     const newState = {};
 
-    const DAITokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens','DAI']);
-    const rewardTokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.contractInfo.rewardToken]);
+    const DAITokenConfig = {
+      address:this.functionsUtil.getContractByName('DAI')._address
+    };
+    const rewardTokenConfig = {
+      address:this.functionsUtil.getContractByName(this.props.contractInfo.rewardToken)._address
+    };
 
     const [
       poolTokenPrice,
@@ -458,8 +462,6 @@ class LpStaking extends Component {
       newState.infoBox = null;
       newState.transactionSucceeded = false;
     }
-
-    // console.log('updateData',this.state.selectedAction,newState);
 
     this.setState(newState,() => {
       this.loadStats();

@@ -941,8 +941,9 @@ class RimbleTransaction extends React.Component {
         // Initialize govToken contracts
         let foundGovTokenContract = this.state.contracts.find(c => c.name === token);
         if (!foundGovTokenContract) {
-          this.functionsUtil.customLog('initializeContracts, init contract', token, govTokenConfig.address);
-          await this.initContract(token, govTokenConfig.address, govTokenConfig.abi);
+          const contractAddress = govTokenConfig.addresses && govTokenConfig.addresses[this.state.network.required.id] ? govTokenConfig.addresses[this.state.network.required.id] : govTokenConfig.address;
+          this.functionsUtil.customLog('initializeContracts, init contract', token, contractAddress);
+          await this.initContract(token, contractAddress, govTokenConfig.abi);
         }
       });
     }

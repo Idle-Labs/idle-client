@@ -841,7 +841,9 @@ class FunctionsUtil {
         const firstBlock = firstHarvest ? firstHarvest.blockNumber : tokenConfig.blockNumber;
 
         const govTokenConfig = this.getGlobalConfig(['govTokens',token]);
-        const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
+        const DAITokenConfig = {
+          address:this.getContractByName('DAI')._address
+        };
         const [
           prevBlockInfo,
           lastBlockInfo,
@@ -4439,7 +4441,9 @@ class FunctionsUtil {
       case 'tokenPrice':
         if (Object.keys(govTokens).includes(token)){
           const govTokenConfig = govTokens[token];
-          const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
+          const DAITokenConfig = {
+            address:this.getContractByName('DAI')._address
+          };
           try {
             output = await this.getUniswapConversionRate(DAITokenConfig,govTokenConfig);
           } catch (error) {
@@ -5549,7 +5553,7 @@ class FunctionsUtil {
 
     return this.setCachedData(cachedDataKey,tokenAllocation);
   }
-  getSushiswapPoolTokenPrice = async (contractName,pairAddresses) => {
+  getSushiswapPoolTokenPrice = async (contractName) => {
     const [
       token0_address,
       token1_address,
@@ -5569,7 +5573,9 @@ class FunctionsUtil {
       const token1_config = {
         address:token1_address
       };
-      const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
+      const DAITokenConfig = {
+        address:this.getContractByName('DAI')._address
+      };
 
       let [
         token0_price,
@@ -5607,7 +5613,7 @@ class FunctionsUtil {
     }
 
     try {
-      const WETHAddr = this.getGlobalConfig(['stats','tokens','WETH','address']);
+      const WETHAddr = this.getContractByName('WETH')._address;
       const one = this.normalizeTokenDecimals(18);
 
       const path = [];
@@ -5620,6 +5626,8 @@ class FunctionsUtil {
       path.push(tokenConfigDest.address);
 
       const res = await this.genericContractCall('SushiswapRouter','getAmountsIn',[one.toFixed(),path]);
+
+      // console.log('getSushiswapConversionRate',path,res);
 
       if (res){
         const price = this.BNify(res[0]).div(one);
@@ -5646,7 +5654,7 @@ class FunctionsUtil {
     }
 
     try {
-      const WETHAddr = this.getGlobalConfig(['stats','tokens','WETH','address']);
+      const WETHAddr = this.getContractByName('WETH')._address;
       const one = this.normalizeTokenDecimals(18);
 
       const path = [];
@@ -6206,7 +6214,9 @@ class FunctionsUtil {
 
       // Get COMP conversion rate
       if (!maticConversionRate){
-        const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
+        const DAITokenConfig = {
+          address:this.getContractByName('DAI')._address
+        };
         try {
           const destTokenConfig = {
             address:wMaticTokenConfig.addressForPrice || wMaticTokenConfig.address
@@ -6257,7 +6267,9 @@ class FunctionsUtil {
 
       // Get COMP conversion rate
       if (!aaveConversionRate){
-        const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
+        const DAITokenConfig = {
+          address:this.getContractByName('DAI')._address
+        };
         try {
           const destTokenConfig = {
             address:stkAAVETokenConfig.addressForPrice || stkAAVETokenConfig.address
@@ -6305,7 +6317,9 @@ class FunctionsUtil {
 
     if (compDistribution){
 
-      const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
+      const DAITokenConfig = {
+        address:this.getContractByName('DAI')._address
+      };
         
       // Get COMP conversion rate
       if (!compConversionRate){
@@ -7085,7 +7099,9 @@ class FunctionsUtil {
   }
   getTokensTVL = async () => {
     const output = {};
-    const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
+    const DAITokenConfig = {
+      address:this.getContractByName('DAI')._address
+    };
     await this.asyncForEach(Object.keys(this.props.availableStrategies),async (strategy) => {
       const isRisk = strategy === 'risk';
       const availableTokens = this.props.availableStrategies[strategy];
@@ -7239,7 +7255,9 @@ class FunctionsUtil {
     let avgAPR = this.BNify(0);
     let avgAPY = this.BNify(0);
     let totalAUM = this.BNify(0);
-    const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
+    const DAITokenConfig = {
+      address:this.getContractByName('DAI')._address
+    };
     await this.asyncForEach(Object.keys(this.props.availableStrategies),async (strategy) => {
       const isRisk = strategy === 'risk';
       const availableTokens = this.props.availableStrategies[strategy];
@@ -7456,7 +7474,9 @@ class FunctionsUtil {
       }
     }
 
-    const DAITokenConfig = this.getGlobalConfig(['stats','tokens','DAI']);
+    const DAITokenConfig = {
+      address:this.getContractByName('DAI')._address
+    };
     const ToTokenConfig = tokenConfig.token ? this.getGlobalConfig(['stats','tokens',tokenConfig.token]) : tokenConfig;
     const conversionRate = await this.getUniswapConversionRate(DAITokenConfig,ToTokenConfig);
     if (!this.BNify(conversionRate).isNaN()){
