@@ -500,7 +500,7 @@ class AssetField extends Component {
             data: []
           }];
 
-          if (cachedData !== null){
+          if (cachedData !== null && cachedData[0] && cachedData[0].data && cachedData[0].data.length>0){
             aprChartData = cachedData;
           } else {
 
@@ -527,10 +527,6 @@ class AssetField extends Component {
               const frequencySeconds = this.functionsUtil.getFrequencySeconds('hour',12);
               const apiResultsAprChart = await this.functionsUtil.getTokenApiData(this.props.tokenConfig.address,isRisk,aprChartStartTimestamp,aprChartEndTimestamp,false,frequencySeconds);
 
-              // if (isRisk){
-              //   debugger;
-              // }
-
               apiResultsAprChart.forEach((d,i) => {
                 const x = this.functionsUtil.strToMoment(d.timestamp*1000).format("YYYY/MM/DD HH:mm");
                 const y = parseFloat(this.functionsUtil.fixTokenDecimals(d.idleRate,18));
@@ -538,7 +534,9 @@ class AssetField extends Component {
               });
             }
 
-            this.functionsUtil.setCachedData(cachedDataKey,aprChartData);
+            if (aprChartData[0].data.length>0){
+              this.functionsUtil.setCachedData(cachedDataKey,aprChartData);
+            }
           }
 
 

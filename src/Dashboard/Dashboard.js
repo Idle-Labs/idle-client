@@ -236,6 +236,11 @@ class Dashboard extends Component {
   }
 
   async loadParams() {
+
+    if (!this.props.networkInitialized){
+      return;
+    }
+
     const { match: { params } } = this.props;
 
     const baseRoute = this.functionsUtil.getGlobalConfig(['dashboard','baseRoute']);

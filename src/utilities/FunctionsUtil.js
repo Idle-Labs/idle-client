@@ -2896,7 +2896,10 @@ class FunctionsUtil {
 
   }
   getTokenApiData = async (address,isRisk=null,startTimestamp=null,endTimestamp=null,forceStartTimestamp=false,frequency=null,order=null,limit=null) => {
-    if (globalConfigs.network.requiredNetwork!==1 || !globalConfigs.stats.enabled){
+    const currentNetworkId = this.getRequiredNetworkId();
+    const statsConfig = this.getGlobalConfig(['stats']);
+    const statsEnabled = statsConfig.enabled && statsConfig.availableNetworks.includes(currentNetworkId);
+    if (!statsEnabled){
       return [];
     }
 
@@ -2907,11 +2910,13 @@ class FunctionsUtil {
     if (cachedData !== null){
       // Check for fittable start and end time
       const filteredCachedData = cachedData.filter( c => ( (c.startTimestamp===null || (startTimestamp && c.startTimestamp<=startTimestamp)) && (c.endTimestamp===null || (endTimestamp && c.endTimestamp>=endTimestamp)) ) )
-
       if (filteredCachedData && filteredCachedData.length>0){
-        const filteredData = filteredCachedData.pop().data;
+        let filteredData = filteredCachedData.pop().data;
         if (filteredData){
-          return filteredData.filter( d => ((!startTimestamp || d.timestamp>=startTimestamp) && (!endTimestamp || d.timestamp<=endTimestamp)) );
+          filteredData = filteredData.filter( d => ((!startTimestamp || d.timestamp>=startTimestamp) && (!endTimestamp || d.timestamp<=endTimestamp)) );
+          if (filteredData.length>0){
+            return filteredData;
+          }
         }
         return null;
       }
