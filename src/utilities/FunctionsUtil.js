@@ -6100,13 +6100,16 @@ class FunctionsUtil {
       // return this.BNify(cachedData);
     }
 
+    const currentNetworkId = this.getRequiredNetworkId();
+
     let aaveDistribution = this.BNify(0);
     const stkAAVETokenConfig = this.getGlobalConfig(['govTokens','stkAAVE']);
     const aTokenConfig = tokenConfig.protocols.find( p => p.name === stkAAVETokenConfig.protocol );
 
     // console.log('getStkAaveDistribution_1',tokenConfig.idle.token,aTokenConfig.token);
+    const disabledTokens = this.getArrayPath(['disabledTokens',currentNetworkId],stkAAVETokenConfig) || [];
 
-    if (!aTokenConfig || stkAAVETokenConfig.disabledTokens.includes(tokenConfig.idle.token)){
+    if (!aTokenConfig || disabledTokens.includes(tokenConfig.idle.token)){
       return aaveDistribution;
     }
 
@@ -6624,15 +6627,30 @@ class FunctionsUtil {
     }
     return this.idleGovToken;
   }
+  getGovTokensFarming = () => {
+    const output = {};
+    const availableTokens = this.props.availableTokens;
+
+    Object.keys(availableTokens).forEach( token => {
+      const tokenConfig = availableTokens[token];
+      const tokenGovTokens = this.getTokenGovTokens(tokenConfig);
+      Object.keys(tokenGovTokens).forEach( govToken => {
+        output[govToken] = tokenGovTokens[govToken];
+      });
+    });
+
+    return output;
+  }
   getTokenGovTokens = (tokenConfig) => {
     const output = {};
     const currentNetworkId = this.getRequiredNetworkId();
     const govTokens = this.getGlobalConfig(['govTokens']);
     Object.keys(govTokens).forEach( govToken => {
       const govTokenConfig = govTokens[govToken];
-      if (!govTokenConfig.enabled || govTokenConfig.disabledTokens.includes(tokenConfig.idle.token) || (govTokenConfig.availableNetworks && !govTokenConfig.availableNetworks.includes(currentNetworkId))){
-              return;
-            }
+      const disabledTokens = this.getArrayPath(['disabledTokens',currentNetworkId],govTokenConfig) || [];
+      if (!govTokenConfig.enabled || disabledTokens.includes(tokenConfig.idle.token) || (govTokenConfig.availableNetworks && !govTokenConfig.availableNetworks.includes(currentNetworkId))){
+        return;
+      }
 
       if (govTokenConfig.protocol === 'idle'){
         output[govToken] = govTokenConfig;

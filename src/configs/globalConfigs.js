@@ -423,9 +423,10 @@ const globalConfigs = {
         137:"0xc25351811983818c9fe6d8c580531819c8ade90f"
       },
       address: "0x875773784Af8135eA0ef43b5a374AaD105c5D39e", // MAIN
-      disabledTokens: ["idleFEIYield","idleDAISafe","idleUSDCSafe","idleUSDTSafe"], // Disable IDLE distribution for idleToken
-      // address:'0xAB6Bdb5CCF38ECDa7A92d04E86f7c53Eb72833dF', // KOVAN
-      // address:'0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f' // Fork
+      disabledTokens:{
+        137:["idleDAIYield","idleUSDCYield","idleWETHYield"],
+        1:["idleFEIYield","idleDAISafe","idleUSDCSafe","idleUSDTSafe"]
+      }
     },
     COMP: {
       abi: COMP,
@@ -463,7 +464,9 @@ const globalConfigs = {
       distributionFrequency:'day',
       address:'0x4da27a545c0c5b758a6ba100e3a049001de870f5', // MAIN
       addressForPrice:'0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9', // MAIN
-      disabledTokens: ["idleTUSDYield", "idleSUSDYield", "idleFEIYield"],
+      disabledTokens:{
+        1:["idleTUSDYield", "idleSUSDYield", "idleFEIYield"]
+      }
     },
     WMATIC:{
       abi:ERC20,

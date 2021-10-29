@@ -176,11 +176,15 @@ class IdleGovToken{
       return false;
     }
 
+    const currentNetworkId = this.functionsUtil.getRequiredNetworkId();
+
     let totalSpeed = this.functionsUtil.BNify(0);
     await this.functionsUtil.asyncForEach(Object.keys(availableTokens),async (token) => {
       const tokenConfig = availableTokens[token];
 
-      if (this.tokenConfig && this.tokenConfig.disabledTokens.includes(tokenConfig.idle.token)){
+      const disabledTokens = this.functionsUtil.getArrayPath(['disabledTokens',currentNetworkId],this.tokenConfig);
+
+      if (disabledTokens.includes(tokenConfig.idle.token)){
         return;
       }
 

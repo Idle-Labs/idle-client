@@ -1448,7 +1448,7 @@ class StrategyPage extends Component {
                   >
                     <Title my={[3,4]}>Yield Farming</Title>
                     <AssetsList
-                      enabledTokens={Object.keys(govTokens).filter( govToken => (govTokens[govToken].enabled && (!govTokens[govToken].availableNetworks || govTokens[govToken].availableNetworks.includes(currentNetwork.id))) )}
+                      enabledTokens={Object.keys(this.functionsUtil.getGovTokensFarming())}
                       cols={[
                         {
                           title:'TOKEN',
