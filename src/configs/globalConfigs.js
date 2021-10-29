@@ -1718,7 +1718,7 @@ const globalConfigs = {
             label: "SushiSwap IDLE/WETH LP Token",
             icon: "images/protocols/sushiswap.png",
             address: "0x5518a3af961eee8771657050c5cb23d2b3e2f6ee", // Polygon
-            poolLink: "https://analytics.sushi.com/pairs/0x5518a3af961eee8771657050c5cb23d2b3e2f6ee"
+            poolLink: "https://analytics-polygon.sushi.com/pairs/0x5518a3af961eee8771657050c5cb23d2b3e2f6ee"
           }
         }
       }
