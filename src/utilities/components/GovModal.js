@@ -176,7 +176,7 @@ class GovModal extends React.Component {
                 mt={2}
                 width={'3em'}
                 height={'3em'}
-                src={'images/tokens/IDLE.png'}
+                src={'images/tokens/IDLE.svg'}
               />
               <Text
                 mt={2}

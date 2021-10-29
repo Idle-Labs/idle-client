@@ -73,7 +73,7 @@ class Footer extends Component {
                   hoverColor={'blue'}
                   fontFamily={'sansSerif'}
                   textAlign={['center','left']}
-                  href={'https://www.notion.so/idlelabs/Idle-Finance-Brand-Assets-fd63e4161cb64c999531646c7549bc4b'}
+                  href={'https://idlelabs.notion.site/Idle-Brand-Assets-fd63e4161cb64c999531646c7549bc4b'}
                 >
                   <span role="img" aria-label="brand-assets">🎨</span> Brand Assets
                 </ExtLink>

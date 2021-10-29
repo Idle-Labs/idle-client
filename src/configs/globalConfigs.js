@@ -413,11 +413,11 @@ const globalConfigs = {
       showPrice: false, // Show price in Yield Farming section
       showBalance: false, // Include IDLE balance in Portfolio Donut
       aprTooltipMode: false,
-      availableNetworks:[1],
+      availableNetworks:[1,137],
       distributionMode: "block",
       distributionFrequency: "day", // Multiply distribution per block
       color: "hsl(162, 100%, 41%)",
-      icon: "images/tokens/IDLE.png",
+      icon: "images/tokens/IDLE.svg",
       addresses:{
         1:"0x875773784Af8135eA0ef43b5a374AaD105c5D39e",
         137:"0xc25351811983818c9fe6d8c580531819c8ade90f"
@@ -1125,7 +1125,6 @@ const globalConfigs = {
           hsl: ["215", "87%", "39%"]
         },
         startTimestamp: "2020-11-10",
-        icon: "images/tokens/IDLE.png",
         conversionRateField: "idleDAIPrice",
         chart: {
           labelTextColorModifiers: ["darker", 4]
@@ -1652,7 +1651,7 @@ const globalConfigs = {
             decimals: 18,
             enabled: true,
             label: "IDLE Token",
-            icon: "images/tokens/IDLE.png",
+            icon: "images/tokens/IDLE.svg",
             address: "0x875773784Af8135eA0ef43b5a374AaD105c5D39e", // Mainnet
             poolLink:
               "https://etherscan.com/address/0x875773784Af8135eA0ef43b5a374AaD105c5D39e"
@@ -1699,16 +1698,16 @@ const globalConfigs = {
               name: "LpStaking",
               maxMultiplier: 3,
               abi: LpStakingAbi,
-              maxBonusDays: 120,
+              maxBonusDays: 60,
               rewardToken: "IDLE",
-              address: "0x2540971D944921B51e3434503922ea92F2ee0862" // Polygon
+              address: "0x59CDF902b6A964CD5dB04d28f12b774bFB876Be9" // Polygon
             },
             name: "SLP",
             token: "SLP",
             decimals: 18,
             enabled: true,
             abi: SushiLiquidityPool,
-            label: "SushiSwap IDLE/ETH LP Token",
+            label: "SushiSwap IDLE/WETH LP Token",
             icon: "images/protocols/sushiswap.png",
             address: "0x5518a3af961eee8771657050c5cb23d2b3e2f6ee", // Polygon
             poolLink: "https://analytics.sushi.com/pairs/0x5518a3af961eee8771657050c5cb23d2b3e2f6ee"
@@ -1947,6 +1946,23 @@ const globalConfigs = {
               name:'childUSDC',
               // address:'0x6D4dd09982853F08d9966aC3cA4Eb5885F16f2b2' // Mubai
               address:'0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174' // Matic
+            }
+          },
+          IDLE:{
+            decimals:18,
+            name:'IDLE',
+            token:'IDLE',
+            enabled:true,
+            bridgeType:'pos',
+            rootToken:{
+              abi:IDLE,
+              name:'IDLE',
+              address:'0x875773784Af8135eA0ef43b5a374AaD105c5D39e', // Mainnet
+            },
+            childToken:{
+              abi:ChildERC20,
+              name:'childUSDC',
+              address:'0xc25351811983818c9fe6d8c580531819c8ade90f' // Matic
             }
           },
           /*

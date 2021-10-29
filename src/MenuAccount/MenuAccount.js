@@ -239,7 +239,7 @@ class MenuAccount extends Component {
                   width={"1.7em"}
                   height={"1.7em"}
                   display={"inline-flex"}
-                  src={`images/tokens/IDLE.png`}
+                  src={`images/tokens/IDLE.svg`}
                 />
                 <Text color={"white"} fontSize={[1, 2]} fontWeight={500}>
                   {this.state.idleTokenBalance.toFixed(2)} IDLE
