@@ -225,7 +225,8 @@ const globalConfigs = {
     first_deposit_referral: false, // Referral share modal
     first_deposit_share: true, // First deposit share modal
     migrate: {
-      enabled: true
+      enabled: true,
+      availableNetworks: [1]
     },
     welcome: {
       // Welcome modal
@@ -859,7 +860,7 @@ const globalConfigs = {
   },
   stats: {
     enabled: true, // Enable endpoint
-    availableNetworks:[1,137],
+    availableNetworks:[1],
     rates: {
       TTL: 300, // 5 minutes
       endpoint:{
@@ -1318,6 +1319,10 @@ const globalConfigs = {
   },
   contract: {
     methods: {
+      refreshIdleSpeed:{
+        enabled:true,
+        availableNetworks:[1]
+      },
       redeem: {
         skipRebalance: true,
         metaTransactionsEnabled: false
@@ -1809,7 +1814,7 @@ const globalConfigs = {
       }
     },
     polygonBridge:{
-      enabled:true,
+      enabled:false,
       route:'polygon-bridge',
       subComponent:PolygonBridge,
       availableNetworks:[1,5,137,80001],
@@ -2797,18 +2802,13 @@ const globalConfigs = {
         },
         getInitParams: (props, globalConfigs, buyParams) => {
           const env = globalConfigs.payments.providers.wyre.env;
-          const envParams =
-            globalConfigs.payments.providers.wyre.envParams[env];
+          const envParams = globalConfigs.payments.providers.wyre.envParams[env];
           const referrerAccountId = envParams.accountId;
           const url = "https://pay.sendwyre.com/purchase";
 
           const params = {
             dest: `ethereum:${props.account}`,
-            destCurrency: buyParams.selectedToken
-              ? buyParams.selectedToken
-              : props.tokenConfig.wyre && props.tokenConfig.wyre.destCurrency
-                ? props.tokenConfig.wyre.destCurrency
-                : props.selectedToken,
+            destCurrency: buyParams.selectedToken ? buyParams.selectedToken : props.tokenConfig.wyre && props.tokenConfig.wyre.destCurrency ? props.tokenConfig.wyre.destCurrency : props.selectedToken,
             referrerAccountId,
             redirectUrl: globalConfigs.baseURL
             // failureRedirectUrl:globalConfigs.baseURL

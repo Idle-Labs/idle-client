@@ -40,7 +40,8 @@ class DashboardHeader extends Component {
     this.loadUtils();
 
     const accountChanged = prevProps.account !== this.props.account;
-    if (accountChanged) {
+    const networkChanged = JSON.stringify(prevProps.network.required) !== JSON.stringify(this.props.network.required);
+    if (accountChanged || networkChanged) {
       await this.loadData();
     }
   }
@@ -60,54 +61,56 @@ class DashboardHeader extends Component {
       });
     }
 
-    const stakingConfig = this.functionsUtil.getGlobalConfig([
-      "tools",
-      "stake"
-    ]);
-    const nexusMutualConfig = this.functionsUtil.getGlobalConfig([
-      "tools",
-      "nexusMutual"
-    ]);
+    const stakingConfig = this.functionsUtil.getGlobalConfig(["tools","stake"]);
+    const nexusMutualConfig = this.functionsUtil.getGlobalConfig(["tools","nexusMutual"]);
+    const stakingPolygonConfig = this.functionsUtil.getGlobalConfig(["tools","stakePolygon"]);
 
-    const flashNews = [
-      {
-        name: "Governance Forum",
-        icon: "LightbulbOutline",
-        text: `Do you have any idea to improve the Idle Protocol? Let's discuss it in our`,
-        link: {
-          text: `Governance Forum`,
-          url: this.functionsUtil.getGlobalConfig(["forumURL"])
+    const flashNews = {
+      1:[
+        {
+          name: "Governance Forum",
+          icon: "LightbulbOutline",
+          text: `Do you have any idea to improve the Idle Protocol? Let's discuss it in our`,
+          link: {
+            text: `Governance Forum`,
+            url: this.functionsUtil.getGlobalConfig(["forumURL"])
+          }
+        },
+        {
+          icon: stakingConfig.icon,
+          name: stakingConfig.label,
+          text: `You can now stake your $IDLE token and take part of the fee-sharing for long-term holders.`,
+          link: {
+            text: `Stake Now`,
+            url: this.functionsUtil.getDashboardSectionUrl(`tools/${stakingConfig.route}`)
+          }
+        },
+        {
+          icon: nexusMutualConfig.icon,
+          name: nexusMutualConfig.label,
+          text: `Protect your funds against smart-contract attacks with Nexus Mutual.`,
+          link: {
+            text: `Get Covered`,
+            url: this.functionsUtil.getDashboardSectionUrl(`tools/${this.functionsUtil.getGlobalConfig(["tools","nexusMutual","route"])}`)
+          }
         }
-      },
-      {
-        icon: stakingConfig.icon,
-        name: stakingConfig.label,
-        text: `You can now stake your $IDLE token and take part of the fee-sharing for long-term holders.`,
-        link: {
-          text: `Stake Now`,
-          url: this.functionsUtil.getDashboardSectionUrl(
-            `tools/${stakingConfig.route}`
-          )
+      ],
+      137:[
+        {
+          icon: stakingPolygonConfig.icon,
+          name: stakingPolygonConfig.label,
+          text: `SushiSwap LP Staking on Polygon is now available!`,
+          link: {
+            text: `Stake Now`,
+            url: this.functionsUtil.getDashboardSectionUrl(`tools/${stakingPolygonConfig.route}`)
+          }
         }
-      },
-      {
-        icon: nexusMutualConfig.icon,
-        name: nexusMutualConfig.label,
-        text: `Protect your funds against smart-contract attacks with Nexus Mutual.`,
-        link: {
-          text: `Get Covered`,
-          url: this.functionsUtil.getDashboardSectionUrl(
-            `tools/${this.functionsUtil.getGlobalConfig([
-              "tools",
-              "nexusMutual",
-              "route"
-            ])}`
-          )
-        }
-      }
-    ];
+      ]
+    }
 
-    const activeNews = flashNews[Math.floor(Math.random() * flashNews.length)];
+    const currentNetworkId = this.functionsUtil.getRequiredNetworkId();
+    const activeFlashNews = flashNews[currentNetworkId];
+    const activeNews = activeFlashNews[Math.floor(Math.random() * activeFlashNews.length)];
     this.setState({
       activeNews
     });

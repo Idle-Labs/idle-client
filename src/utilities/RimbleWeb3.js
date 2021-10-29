@@ -135,7 +135,7 @@ class RimbleTransaction extends React.Component {
     // detect Network account change
     if (window.ethereum){
       window.ethereum.on('networkChanged', async (networkId) => {
-        this.handleNetworkChanged();
+        this.handleNetworkChanged(networkId);
         // window.location.reload();
       });
     }
@@ -144,23 +144,28 @@ class RimbleTransaction extends React.Component {
     window.initAccount = this.initAccount;
   }
 
-  handleNetworkChanged = async () => {
+  handleNetworkChanged = async (networkId=null) => {
     this.functionsUtil.removeStoredItem('cachedRequests');
     this.functionsUtil.removeStoredItem('cachedRequests_polygon');
     this.functionsUtil.removeStoredItem('transactions');
     await this.props.clearCachedData(() => {
-      this.setState({
-        web3:null,
-        contracts:[],
-        biconomy:null,
-        web3Infura:null,
-        permitClient:null,
-        networkInitialized:false,
-        erc20ForwarderClient:null,
-        contractsInitialized:false
-      },() => {
-        this.checkNetwork();
-      });
+      // console.log(networkId,this.state.network);
+      if (this.state.network.required && networkId && parseInt(networkId) === parseInt(this.state.network.required.id)){
+        window.location.reload();
+      } else {
+        this.setState({
+          web3:null,
+          contracts:[],
+          biconomy:null,
+          web3Infura:null,
+          permitClient:null,
+          networkInitialized:false,
+          erc20ForwarderClient:null,
+          contractsInitialized:false
+        },() => {
+          this.checkNetwork();
+        });
+      }
     });
   }
 

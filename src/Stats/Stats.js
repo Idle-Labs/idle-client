@@ -555,9 +555,11 @@ class Stats extends Component {
       fontSize:[3,'23px'],
     };
 
-    const networkId = this.functionsUtil.getCurrentNetworkId();
+    const networkId = this.functionsUtil.getRequiredNetworkId();
     const idleTokenAvailableNetworks = this.functionsUtil.getGlobalConfig(['govTokens','IDLE','availableNetworks']);
     const idleTokenEnabled = this.functionsUtil.getGlobalConfig(['govTokens','IDLE','enabled']) && idleTokenAvailableNetworks.includes(networkId);
+    const refreshIdleSpeedConfig = this.functionsUtil.getGlobalConfig(['contract','methods','refreshIdleSpeed']);
+    const refreshIdleSpeedEnabled = refreshIdleSpeedConfig.enabled && refreshIdleSpeedConfig.availableNetworks.includes(networkId);
 
     const apyLong = this.functionsUtil.getGlobalConfig(['messages','apyLong']);
 
@@ -836,7 +838,7 @@ class Stats extends Component {
             })
           }
           {
-            idleTokenEnabled && !this.state.showRefreshIdleSpeed ? (
+            idleTokenEnabled && refreshIdleSpeedEnabled && !this.state.showRefreshIdleSpeed ? (
               <Flex
                 mb={4}
                 width={1}
@@ -852,7 +854,7 @@ class Stats extends Component {
                   Refresh Idle Speed
                 </Link>
               </Flex>
-            ) : idleTokenEnabled && this.state.showRefreshIdleSpeed &&
+            ) : idleTokenEnabled && refreshIdleSpeedEnabled && this.state.showRefreshIdleSpeed &&
               <DashboardCard
                 cardProps={{
                   p:2,

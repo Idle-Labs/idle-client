@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import AssetsList from '../AssetsList/AssetsList';
 import CustomList from '../CustomList/CustomList';
+import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import DashboardCard from '../DashboardCard/DashboardCard';
 import PortfolioDonut from '../PortfolioDonut/PortfolioDonut';
@@ -90,8 +91,9 @@ class StrategyPage extends Component {
 
   async loadPortfolio(){
     const availableTokens = this.props.availableTokens || {};
+    const currentNetwork = this.functionsUtil.getRequiredNetwork();
 
-    if (this.state.portfolioLoaded || this.state.portfolioLoading){
+    if (this.state.portfolioLoaded || this.state.portfolioLoading || currentNetwork.id === 137){
       return false;
     }
 
@@ -208,20 +210,20 @@ class StrategyPage extends Component {
         const isRisk = this.props.selectedStrategy === 'risk';
 
         let avgAPY = this.functionsUtil.BNify(0);
-        let avgScore = this.functionsUtil.BNify(0);
+        // let avgScore = this.functionsUtil.BNify(0);
         let totalAmountLent = this.functionsUtil.BNify(0);
-        let totalBalanceWithScore = this.functionsUtil.BNify(0);
+        // let totalBalanceWithScore = this.functionsUtil.BNify(0);
 
         await this.functionsUtil.asyncForEach(depositedTokens,async (token) => {
           const tokenConfig = availableTokens[token];
 
           const [
             tokenAprs,
-            tokenScore,
+            // tokenScore,
             amountLent,
           ] = await Promise.all([
             this.functionsUtil.getTokenAprs(tokenConfig),
-            this.functionsUtil.getTokenScore(tokenConfig,isRisk),
+            // this.functionsUtil.getTokenScore(tokenConfig,isRisk),
             this.functionsUtil.getAmountDeposited(tokenConfig,this.props.account)
           ]);
 
@@ -235,19 +237,19 @@ class StrategyPage extends Component {
             avgAPY = avgAPY.plus(tokenAPY.times(tokenWeight));
           }
 
-          if (!tokenScore.isNaN() && tokenScore.gt(0)){
-            avgScore = avgScore.plus(tokenScore.times(tokenBalance));
-            totalBalanceWithScore = totalBalanceWithScore.plus(tokenBalance);
-          }
+          // if (!tokenScore.isNaN() && tokenScore.gt(0)){
+          //   avgScore = avgScore.plus(tokenScore.times(tokenBalance));
+          //   totalBalanceWithScore = totalBalanceWithScore.plus(tokenBalance);
+          // }
 
           if (amountLentToken){
             totalAmountLent = totalAmountLent.plus(amountLentToken);
           }
         });
 
-        if (!totalBalanceWithScore.isNaN() && totalBalanceWithScore.gt(0)){
-          avgScore = avgScore.div(totalBalanceWithScore);
-        }
+        // if (!totalBalanceWithScore.isNaN() && totalBalanceWithScore.gt(0)){
+        //   avgScore = avgScore.div(totalBalanceWithScore);
+        // }
 
         // console.log('avgAPY',avgAPY.toFixed());
 
@@ -264,7 +266,7 @@ class StrategyPage extends Component {
         }).filter(v => (v !== null)) : null;
 
         newState.avgAPY = avgAPY;
-        newState.avgScore = avgScore;
+        // newState.avgScore = avgScore;
         newState.govTokensTotalBalance = govTokensTotalBalance;
         newState.govTokensTotalBalanceTooltip = govTokensTotalBalanceTooltip;
       }
@@ -298,6 +300,7 @@ class StrategyPage extends Component {
     const yieldFarming = this.functionsUtil.getGlobalConfig(['messages','yieldFarming']);
     const nexusMutualConfig = this.functionsUtil.getGlobalConfig(['tools','nexusMutual']);
     const batchDepositConfig = this.functionsUtil.getGlobalConfig(['tools','batchDeposit']);
+    const strategyName = this.functionsUtil.getGlobalConfig(['strategies',this.props.selectedStrategy,'title']);
 
     return (
       <Box
@@ -306,10 +309,54 @@ class StrategyPage extends Component {
         <Title
           mb={3}
         >
-          {this.functionsUtil.getGlobalConfig(['strategies',this.props.selectedStrategy,'title'])} strategy
+          {strategyName} strategy
         </Title>
         {
-          !this.state.portfolioLoaded ? (
+          currentNetwork.id === 137 ? (
+            <Flex
+              width={1}
+              minHeight={'45vh'}
+              alignItems={'center'}
+              flexDirection={'row'}
+              justifyContent={'center'}
+            >
+              <DashboardCard
+                cardProps={{
+                  p:3,
+                  width:[1,0.5],
+                }}
+              >
+                <Flex
+                  aligItems={'center'}
+                  alignItems={'center'}
+                  flexDirection={'column'}
+                >
+                  <Icon
+                    size={'2.3em'}
+                    color={'cellText'}
+                    name={'AccessTime'}
+                  />
+                  <Text
+                    mt={2}
+                    fontSize={2}
+                    color={'cellText'}
+                    textAlign={'center'}
+                  >
+                    Hang on, please!<br />The {strategyName} strategy has not yet been activated in Polygon.
+                  </Text>
+                  <RoundButton
+                    buttonProps={{
+                      mt:3,
+                      width:[1,1/2]
+                    }}
+                    handleClick={e => this.props.goToSection(`stake`)}
+                  >
+                    Go to Staking
+                  </RoundButton>
+                </Flex>
+              </DashboardCard>
+            </Flex>
+          ) : !this.state.portfolioLoaded ? (
             <FlexLoader
               textProps={{
                 textSize:4,

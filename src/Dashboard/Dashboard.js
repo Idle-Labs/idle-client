@@ -62,6 +62,31 @@ class Dashboard extends Component {
     const menu = [];
     const currentNetwork = this.functionsUtil.getRequiredNetwork();
 
+    // Add Stake Polygon
+    const stakePolygonConfig = this.functionsUtil.getGlobalConfig(['tools','stakePolygon']);
+    if (stakePolygonConfig.enabled && (!stakePolygonConfig.availableNetworks || stakePolygonConfig.availableNetworks.includes(currentNetwork.id))){
+      menu.push(
+        {
+          submenu:[],
+          label:'Stake',
+          selected:false,
+          color:'dark-gray',
+          route:'/dashboard/stake',
+          image:extraicons['stake'].icon,
+          imageDark:extraicons['stake'].iconDark,
+          bgColor:this.props.theme.colors.primary,
+          imageInactive:extraicons['stake'].iconInactive,
+          imageInactiveDark:extraicons['stake'].iconInactiveDark,
+          component:Utils,
+          componentProps:{
+            showBreadCrumb:false,
+            toolProps:stakePolygonConfig.props,
+            selectedSubsection:stakePolygonConfig
+          },
+        }
+      );
+    }
+
     const strategies = this.functionsUtil.getGlobalConfig(['strategies']);
     Object.keys(strategies).filter( s => ( !strategies[s].comingSoon && (!strategies[s].availableNetworks || strategies[s].availableNetworks.includes(currentNetwork.id)) && (!strategies[s].enabledEnvs.length || strategies[s].enabledEnvs.includes(this.props.currentEnv)) ) ).forEach(strategy => {
       const strategyInfo = strategies[strategy];
@@ -116,31 +141,6 @@ class Dashboard extends Component {
             showBreadCrumb:false,
             toolProps:stakeConfig.props,
             selectedSubsection:stakeConfig
-          },
-        }
-      );
-    }
-
-    // Add Stake Polygon
-    const stakePolygonConfig = this.functionsUtil.getGlobalConfig(['tools','stakePolygon']);
-    if (stakePolygonConfig.enabled && (!stakePolygonConfig.availableNetworks || stakePolygonConfig.availableNetworks.includes(currentNetwork.id))){
-      menu.push(
-        {
-          submenu:[],
-          label:'Stake',
-          selected:false,
-          color:'dark-gray',
-          route:'/dashboard/stake',
-          image:extraicons['stake'].icon,
-          imageDark:extraicons['stake'].iconDark,
-          bgColor:this.props.theme.colors.primary,
-          imageInactive:extraicons['stake'].iconInactive,
-          imageInactiveDark:extraicons['stake'].iconInactiveDark,
-          component:Utils,
-          componentProps:{
-            showBreadCrumb:false,
-            toolProps:stakePolygonConfig.props,
-            selectedSubsection:stakePolygonConfig
           },
         }
       );
@@ -600,7 +600,9 @@ class Dashboard extends Component {
     }
 
     // Show migration modal if no other modals are opened
-    const migrateModalEnabled = this.functionsUtil.getGlobalConfig(['modals','migrate','enabled']);
+    const migrateModalConfig = this.functionsUtil.getGlobalConfig(['modals','migrate']);
+    const migrateModalEnabled = migrateModalConfig.enabled && migrateModalConfig.availableNetworks.includes(this.state.currentNetwork.id);
+
     const showMigrateModal = this.functionsUtil.getStoredItem('dontShowMigrateModal',false,null) !== null ? false : true;
 
     if (this.state.activeModal === null && migrateModalEnabled && showMigrateModal && !this.state.protocolsTokensBalances){

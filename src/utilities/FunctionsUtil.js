@@ -1127,7 +1127,7 @@ class FunctionsUtil {
 
     account = account ? account : this.props.account;
 
-    if (!account){
+    if (!account || !this.props.web3){
       return [];
     }
 
@@ -5210,7 +5210,6 @@ class FunctionsUtil {
     if (cachedData && !this.BNify(cachedData).isNaN()){
       return this.BNify(cachedData);
     }
-
     const balance = await this.genericContractCall(contractName, 'balanceOf', [address], {}, blockNumber);
     return this.setCachedDataWithLocalStorage(cachedDataKey,balance,30);
   }
@@ -6097,7 +6096,7 @@ class FunctionsUtil {
     const cachedDataKey = `getStkAaveDistribution_${tokenConfig.idle.token}_${aTokenIdleSupply}_${annualize}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData && !this.BNify(cachedData).isNaN()){
-      // return this.BNify(cachedData);
+      return this.BNify(cachedData);
     }
 
     const currentNetworkId = this.getRequiredNetworkId();
@@ -6190,7 +6189,7 @@ class FunctionsUtil {
           this.getStkAaveDistribution(tokenConfig,null,false),
         ]);
 
-        if (aaveDistribution && userPoolShare){
+        if (aaveDistribution && userPoolShare && !this.BNify(aaveDistribution).isNaN() && !this.BNify(userPoolShare).isNaN() ){
           output = output.plus(aaveDistribution.times(userPoolShare));
         }
       }
@@ -6632,8 +6631,7 @@ class FunctionsUtil {
     const availableTokens = this.props.availableTokens;
 
     Object.keys(availableTokens).forEach( token => {
-      const tokenConfig = availableTokens[token];
-      const tokenGovTokens = this.getTokenGovTokens(tokenConfig);
+      const tokenGovTokens = this.getTokenGovTokens(availableTokens[token]);
       Object.keys(tokenGovTokens).forEach( govToken => {
         output[govToken] = tokenGovTokens[govToken];
       });
