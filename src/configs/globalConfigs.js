@@ -1696,7 +1696,7 @@ const globalConfigs = {
       subComponent: Staking,
       availableNetworks:[137],
       route: "staking-polygon",
-      desc: "Stake your IDLE tokens and earn $IDLE rewards",
+      desc: "Stake your Sushi Swap LP tokens and earn $IDLE rewards",
       props: {
         availableTokens: {
           SLP: {
