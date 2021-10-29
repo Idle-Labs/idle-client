@@ -1458,7 +1458,7 @@ const globalConfigs = {
       }
     },
     isForked: false, // If TRUE the tx confirmation callback is fired on the receipt
-    requiredNetwork: 1, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
+    requiredNetwork: 137, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
     blocksPerYear: 2371428,
     secondsPerYear: 31536000,
     requiredConfirmations: 1,
