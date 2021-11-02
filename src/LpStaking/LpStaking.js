@@ -21,10 +21,12 @@ class LpStaking extends Component {
     statsLoaded:false,
     tokenBalance:null,
     contractInfo:null,
+    programEnded:false,
     stakedBalance:null,
     selectedToken:null,
     rewardMultiplier:1,
     accountingData:null,
+    programEndDate:null,
     selectedAction:null,
     selectedOption:null,
     successMessage:null,
@@ -234,11 +236,13 @@ class LpStaking extends Component {
       return endTime;
     },0) : null;
 
-    const programDuration = programEndTime ? `${this.functionsUtil.strToMoment(programEndTime*1000).utc().format('DD MMM, YYYY @ HH:mm')} UTC` : 'None';
+    const programEndDate = programEndTime ? `${this.functionsUtil.strToMoment(programEndTime*1000).utc().format('DD MMM, YYYY @ HH:mm')} UTC` : 'None';
     stats.push({
       title:'Program End-Date',
-      value:programDuration
+      value:programEndDate
     });
+
+    const programEnded = programEndTime*1000<=Date.now();
 
     const distributionSpeed = unlockSchedules.reduce( (distributionSpeed,s) => {
       if (this.functionsUtil.BNify(s.initialLockedShares).gt(0) && this.functionsUtil.BNify(s.durationSec).gt(0)){
@@ -314,7 +318,9 @@ class LpStaking extends Component {
       statsLoaded,
       globalStats,
       stakingShare,
+      programEnded,
       totalRewards,
+      programEndDate,
       accountingData,
       rewardMultiplier,
       distributionSpeed,
@@ -641,7 +647,33 @@ class LpStaking extends Component {
             </Flex>
             {
               (isStake || isUnstake) ?
-                (this.props.tokenConfig && this.state.balanceProp && this.state.statsLoaded && this.props.contractInfo ? (
+                isStake && this.state.programEnded ? (
+                  <DashboardCard
+                    cardProps={{
+                      p:3,
+                      mt:1
+                    }}
+                  >
+                    <Flex
+                      alignItems={'center'}
+                      flexDirection={'column'}
+                    >
+                      <Icon
+                        name={'Warning'}
+                        color={'cellText'}
+                        size={this.props.isMobile ? '1.8em' : '2.3em'}
+                      />
+                      <Text
+                        mt={1}
+                        fontSize={2}
+                        color={'cellText'}
+                        textAlign={'center'}
+                      >
+                        The {this.props.selectedToken} staking program is ended on {this.state.programEndDate}.
+                      </Text>
+                    </Flex>
+                  </DashboardCard>
+                ) : (this.props.tokenConfig && this.state.balanceProp && this.state.statsLoaded && this.props.contractInfo ? (
                   <Box
                     mt={1}
                     width={1}
