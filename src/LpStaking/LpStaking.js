@@ -242,7 +242,7 @@ class LpStaking extends Component {
       value:programEndDate
     });
 
-    const programEnded = programEndTime*1000<=Date.now();
+    const programEnded = programEndTime && programEndTime*1000<=Date.now();
 
     const distributionSpeed = unlockSchedules.reduce( (distributionSpeed,s) => {
       if (this.functionsUtil.BNify(s.initialLockedShares).gt(0) && this.functionsUtil.BNify(s.durationSec).gt(0)){
