@@ -669,7 +669,7 @@ class LpStaking extends Component {
                         color={'cellText'}
                         textAlign={'center'}
                       >
-                        The {this.props.selectedToken} staking program is ended on {this.state.programEndDate}.
+                        The {this.props.selectedToken} staking program ended on {this.state.programEndDate}.
                       </Text>
                     </Flex>
                   </DashboardCard>
