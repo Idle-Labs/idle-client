@@ -3832,6 +3832,10 @@ class FunctionsUtil {
     });
   }
   getTrancheStakedBalance = async (contractName,walletAddr,decimals=null) => {
+    if (!walletAddr){
+      return false;
+    }
+
     // Check for cached data
     const cachedDataKey = `trancheStakedBalance_${contractName}_${walletAddr}_${decimals}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);

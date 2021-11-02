@@ -126,18 +126,6 @@ class TranchePage extends Component {
         }
         {
           this.state.componentLoaded && this.props.account && this.props.userHasFunds && this.props.trancheType &&
-            <StakingRewardsTranche
-              {...this.props}
-              token={this.props.selectedToken}
-              tranche={this.props.trancheType}
-              tokenConfig={this.props.tokenConfig}
-              protocol={this.props.selectedProtocol}
-              transactionsList={this.state.transactions}
-              trancheConfig={this.props.tokenConfig[this.props.trancheType]}
-            />
-        }
-        {
-          this.state.componentLoaded && this.props.account && this.props.userHasFunds && this.props.trancheType &&
             <Flex
               width={1}
               mb={[0,4]}
@@ -155,6 +143,18 @@ class TranchePage extends Component {
                 trancheConfig={this.props.tokenConfig[this.props.trancheType]}
               />
             </Flex>
+        }
+        {
+          this.state.componentLoaded && this.props.account && this.props.userHasFunds && this.props.trancheType &&
+            <StakingRewardsTranche
+              {...this.props}
+              token={this.props.selectedToken}
+              tranche={this.props.trancheType}
+              tokenConfig={this.props.tokenConfig}
+              protocol={this.props.selectedProtocol}
+              transactionsList={this.state.transactions}
+              trancheConfig={this.props.tokenConfig[this.props.trancheType]}
+            />
         }
         {
           this.props.account && this.state.transactions && this.state.transactions.length>0 && 

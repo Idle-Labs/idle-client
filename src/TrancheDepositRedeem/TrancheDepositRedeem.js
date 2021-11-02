@@ -1,13 +1,12 @@
 import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
-import ConnectBox from '../ConnectBox/ConnectBox';
 import ImageButton from '../ImageButton/ImageButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import BuyModal from '../utilities/components/BuyModal';
 import TrancheField from '../TrancheField/TrancheField';
+import { Flex, Text, Image, Box, Icon } from "rimble-ui";
 import DashboardCard from '../DashboardCard/DashboardCard';
-import { Flex, Text, Image, Button, Box } from "rimble-ui";
 import ShareModal from '../utilities/components/ShareModal';
 import StatsCardSmall from '../StatsCardSmall/StatsCardSmall';
 import CardIconButton from '../CardIconButton/CardIconButton';
@@ -22,13 +21,17 @@ class TrancheDetails extends Component {
     canUnstake:null,
     canWithdraw:null,
     activeModal:null,
+    actionLabel:null,
     balanceProp:null,
     tokenConfig:null,
     contractInfo:null,
     tranchePrice:null,
     tokenBalance:null,
+    stakeEnabled:true,
     stakedBalance:null,
+    unstakeEnabled:true,
     trancheBalance:null,
+    stakingEnabled:true,
     approveEnabled:null,
     buttonDisabled:false,
     selectedTranche:null,
@@ -36,6 +39,7 @@ class TrancheDetails extends Component {
     approveDescription:null,
     selectedAction:'deposit',
     selectedTrancheOption:null,
+    selectedStakeAction:'stake',
     userHasAvailableFunds:false
   }
 
@@ -63,17 +67,14 @@ class TrancheDetails extends Component {
       this.loadData();
     }
 
-    const selectedActionChange = prevState.selectedAction !== this.state.selectedAction;
-    if (selectedActionChange){
+    const selectedActionChanged = prevState.selectedAction !== this.state.selectedAction;
+    const selectedStakeActionChanged = prevState.selectedStakeAction !== this.state.selectedStakeAction;
+    if (selectedActionChanged || selectedStakeActionChanged){
       this.loadActionData();
     }
   }
 
   async loadData(){
-
-    if (!this.props.account){
-      return null;
-    }
 
     const [
       // blockNumber,
@@ -117,19 +118,37 @@ class TrancheDetails extends Component {
       trancheConfig:this.props.tokenConfig[trancheInfo.type]
     }));
 
-    const selectedTrancheOption = availableTranches[0];
+    const selectedTrancheOption = availableTranches.find( trancheInfo => trancheInfo.value === this.props.selectedTranche );
     const selectedTranche = selectedTrancheOption.value;
+
+    const stakingRewards = this.props.trancheConfig.CDORewards.stakingRewards.filter( t => t.enabled );
+    let stakingEnabled = stakingRewards.length>0;
+    const stakeEnabled = stakingEnabled && userHasAvailableFunds;
+    const unstakeEnabled = stakedBalance && this.functionsUtil.BNify(stakedBalance).gt(0);
+
+    if (!stakingEnabled && unstakeEnabled){
+      stakingEnabled = true;
+    }
+
+    let selectedStakeAction = 'stake';
+    if (!stakeEnabled && unstakeEnabled){
+      selectedStakeAction = 'unstake';
+    }
 
     this.setState({
       trancheAPY,
       canUnstake,
       canWithdraw,
       tokenBalance,
+      stakeEnabled,
       tranchePrice,
       stakedBalance,
+      stakingEnabled,
       trancheBalance,
+      unstakeEnabled,
       selectedTranche,
       availableTranches,
+      selectedStakeAction,
       selectedTrancheOption,
       userHasAvailableFunds
     }, () => {
@@ -145,6 +164,7 @@ class TrancheDetails extends Component {
     let approveEnabled = null;
     let buttonDisabled = false;
 
+    let actionLabel = this.state.selectedAction;
     const trancheDetails = this.functionsUtil.getGlobalConfig(['tranches',this.props.selectedTranche]);
     let infoText = trancheDetails.description[this.state.selectedAction];
 
@@ -156,19 +176,31 @@ class TrancheDetails extends Component {
         balanceProp = this.state.tokenBalance;
       break;
       case 'stake':
-        approveEnabled = true;
-        tokenConfig = this.props.trancheConfig;
-        balanceProp = this.state.trancheBalance;
-        contractInfo = this.props.trancheConfig.CDORewards;
-      break;
-      case 'unstake':
-        approveEnabled = false;
-        tokenConfig = this.props.trancheConfig;
-        contractInfo = this.props.trancheConfig.CDORewards;
-        balanceProp = this.state.stakedBalance;
-        if (!this.state.canUnstake){
-          buttonDisabled = true;
-          infoText = trancheDetails.description.cantUnstake;
+        actionLabel = this.state.selectedStakeAction;
+        switch (this.state.selectedStakeAction){
+          case 'stake':
+            approveEnabled = true;
+            tokenConfig = this.props.trancheConfig;
+            balanceProp = this.state.trancheBalance;
+            contractInfo = this.props.trancheConfig.CDORewards;
+          break;
+          case 'unstake':
+            approveEnabled = false;
+            tokenConfig = this.props.trancheConfig;
+            contractInfo = this.props.trancheConfig.CDORewards;
+            balanceProp = this.state.stakedBalance;
+            if (!this.state.canUnstake){
+              buttonDisabled = true;
+              infoText = trancheDetails.description.cantUnstake;
+            }
+          break;
+          default:
+          break;
+        }
+        if (this.state.stakingEnabled){
+          infoText = trancheDetails.description[this.state.selectedStakeAction];
+        } else {
+          infoText = null;
         }
       break;
       case 'withdraw':
@@ -195,13 +227,14 @@ class TrancheDetails extends Component {
       break;
     }
 
-    const approveDescription = `To ${this.state.selectedAction} your <strong>${tokenConfig.token}</strong> you need to approve the Smart-Contract first.`;
+    const approveDescription = tokenConfig ? `To ${this.state.selectedAction} your <strong>${tokenConfig.token}</strong> you need to approve the Smart-Contract first.` : null;
 
     // console.log('loadActionData',approveEnabled);
 
     this.setState({
       infoBox,
       infoText,
+      actionLabel,
       tokenConfig,
       balanceProp,
       contractInfo,
@@ -226,14 +259,12 @@ class TrancheDetails extends Component {
     if (this.props.trancheConfig.functions[this.state.selectedAction]){
       methodName = this.props.trancheConfig.functions[this.state.selectedAction];
 
-      // if (this.state.selectedAction === 'withdraw'){
-
-      // }
+      if (this.state.selectedAction === 'stake'){
+        methodName = this.props.trancheConfig.functions[this.state.selectedStakeAction];
+      }
 
       methodParams = [amount];
     }
-
-    console.log('getTransactionParams',methodName,methodParams);
 
     return {
       methodName,
@@ -279,29 +310,30 @@ class TrancheDetails extends Component {
     });
   }
 
+  setStakeAction(selectedStakeAction){
+    this.setState({
+      selectedStakeAction
+    });
+  }
+
   selectTranche(trancheType){
-    console.log('selectTranche',trancheType);
-    // this.props.selectTrancheType(trancheDetails.route)
+    // console.log('selectTranche',trancheType);
+    const trancheDetails = this.functionsUtil.getGlobalConfig(['tranches',trancheType]);
+    if (trancheDetails){
+      this.props.selectTrancheType(trancheDetails.route);
+    }
   }
 
   render() {
 
     const isStake = this.state.selectedAction === 'stake';
-    const isUnstake = this.state.selectedAction === 'unstake';
     const isDeposit = this.state.selectedAction === 'deposit';
     const isWithdraw = this.state.selectedAction === 'withdraw';
 
-    const trancheDetails = this.functionsUtil.getGlobalConfig(['tranches',this.props.selectedTranche]);
-    const otherTrancheType = this.props.selectedTranche === 'AA' ? 'BB' : 'AA';
-    const otherTrancheDetails = this.functionsUtil.getGlobalConfig(['tranches',otherTrancheType]);
-    const trancheLimit = this.functionsUtil.formatMoney(this.functionsUtil.BNify(this.props.tokenConfig.limit),0)+' '+this.props.selectedToken;
     const stakingRewards = this.props.trancheConfig.CDORewards.stakingRewards.filter( t => t.enabled );
-    const stakingEnabled = this.state.userHasAvailableFunds && stakingRewards.length>0;
+    const trancheLimit = this.functionsUtil.formatMoney(this.functionsUtil.BNify(this.props.tokenConfig.limit),0)+' '+this.props.selectedToken;
 
     const CustomOptionValue = props => {
-      console.log('CustomOptionValue',props);
-      
-      const options = props.options;
       const selectedOption = props.options.find( option => option.value === props.value );
       if (!selectedOption){
         return null;
@@ -333,12 +365,10 @@ class TrancheDetails extends Component {
     }
 
     const CustomValueContainer = props => {
-      const options = props.selectProps.options;
-      const selectProps = options.indexOf(props.selectProps.value) !== -1 ? props.selectProps.value : null;
+      const selectProps = props.selectProps.options.indexOf(props.selectProps.value) !== -1 ? props.selectProps.value : null;
       if (!selectProps){
         return null;
       }
-      const label = selectProps.label;
       return (
         <Flex
           style={{
@@ -394,7 +424,7 @@ class TrancheDetails extends Component {
                 textProps={{
                   ml:2
                 }}
-                text={'Loading assets...'}
+                text={'Loading tranches...'}
               />
             </Flex>
           ) : (
@@ -706,10 +736,11 @@ class TrancheDetails extends Component {
                 </Flex>
               </Box>
               <Box
-                mt={2}
                 width={1}
               >
-                <Text mb={1}>
+                <Text
+                  mb={1}
+                >
                   Select Action:
                 </Text>
                 <Flex
@@ -724,7 +755,7 @@ class TrancheDetails extends Component {
                     }}
                     caption={'Deposit'}
                     width={[1,'32%']}
-                    imageSrc={'images/deposit.svg'}
+                    imageSrc={'images/deposit.png'}
                     isMobile={this.props.isMobile}
                     // subcaption={'stake LP Tokens'}
                     imageProps={{
@@ -771,27 +802,15 @@ class TrancheDetails extends Component {
                 </Flex>
               </Box>
               {
-                /*
-                this.props.showSelectButton ? (
-                    <Button
-                      mt={3}
-                      width={1}
-                      contrastColor={'cardBg'}
-                      icon={trancheDetails.icon}
-                      mainColor={trancheDetails.color.hex}
-                      onClick={e => this.props.selectTrancheType(trancheDetails.route)}
-                    >
-                      {
-                        this.props.tokenConfig ? `Go to ${trancheDetails.name}` : `Start with ${trancheDetails.name}`
-                      }
-                    </Button>
-                ) : this.state.balanceProp && this.state.tokenConfig ? (
-                  <Flex
+                isStake && this.state.stakingEnabled && (
+                  <Box
+                    mb={2}
                     width={1}
-                    flexDirection={'column'}
                   >
+                    <Text mb={1}>
+                      Choose stake action:
+                    </Text>
                     <Flex
-                      mt={3}
                       alignItems={'center'}
                       flexDirection={'row'}
                       justifyContent={'space-between'}
@@ -804,55 +823,15 @@ class TrancheDetails extends Component {
                         cardProps={{
                           px:3,
                           py:2,
-                          width:0.32
+                          width:0.49
                         }}
-                        text={'Deposit'}
+                        text={'Stake'}
+                        icon={'Layers'}
                         iconColor={'deposit'}
-                        icon={'ArrowDownward'}
                         iconBgColor={'#ced6ff'}
-                        isActive={ this.state.selectedAction === 'deposit' }
-                        handleClick={ e => this.setSelectedAction('deposit') }
+                        handleClick={ e => this.setStakeAction('stake') }
+                        isActive={ this.state.selectedStakeAction === 'stake' }
                       />
-                      {
-                        this.state.stakedBalance && this.functionsUtil.BNify(this.state.stakedBalance).gt(0) ? (
-                          <CardIconButton
-                            {...this.props}
-                            textProps={{
-                              fontSize:[1,2]
-                            }}
-                            cardProps={{
-                              px:3,
-                              py:2,
-                              width:0.32
-                            }}
-                            text={'Unstake'}
-                            icon={'LayersClear'}
-                            iconColor={'redeem'}
-                            iconBgColor={'#ceeff6'}
-                            isActive={ this.state.selectedAction === 'unstake' }
-                            handleClick={ e => this.setSelectedAction('unstake') }
-                          />
-                        ) : (
-                          <CardIconButton
-                            {...this.props}
-                            textProps={{
-                              fontSize:[1,2]
-                            }}
-                            cardProps={{
-                              px:3,
-                              py:2,
-                              width:0.32
-                            }}
-                            text={'Stake'}
-                            icon={'Layers'}
-                            iconColor={'deposit'}
-                            iconBgColor={'#ced6ff'}
-                            isDisabled={ !stakingEnabled }
-                            isActive={ this.state.selectedAction === 'stake' }
-                            handleClick={ e => this.state.userHasAvailableFunds ? this.setSelectedAction('stake') : null }
-                          />
-                        )
-                      }
                       <CardIconButton
                         {...this.props}
                         textProps={{
@@ -861,102 +840,176 @@ class TrancheDetails extends Component {
                         cardProps={{
                           px:3,
                           py:2,
-                          width:0.32
+                          width:0.49
                         }}
-                        text={'Withdraw'}
-                        icon={'ArrowUpward'}
+                        text={'Unstake'}
+                        icon={'LayersClear'}
                         iconColor={'redeem'}
                         iconBgColor={'#ceeff6'}
-                        isDisabled={ !this.state.userHasAvailableFunds }
-                        isActive={ this.state.selectedAction === 'withdraw' }
-                        handleClick={ e => this.state.userHasAvailableFunds ? this.setSelectedAction('withdraw') : null }
+                        isDisabled={ !this.state.unstakeEnabled }
+                        isActive={ this.state.selectedStakeAction === 'unstake' }
+                        handleClick={ e => this.state.unstakeEnabled ? this.setStakeAction('unstake') : null }
                       />
                     </Flex>
-                    {
-                      this.state.infoText && (
-                        <IconBox
-                          cardProps={{
-                            p:2,
-                            mt:3,
-                            width:1,
-                          }}
-                          isActive={true}
-                          isInteractive={false}
-                          iconProps={{
-                            size:'1.2em',
-                            color:'flashColor'
-                          }}
-                          textProps={{
-                            fontWeight:500,
-                            color:'flashColor',
-                            textAlign:'center',
-                            fontSize:['13px','15px']
-                          }}
-                          icon={'LightbulbOutline'}
-                          text={this.state.infoText}
-                        />
-                      )
-                    }
-                    <Flex
-                      mt={2}
-                    >
-                      <SendTxWithBalance
-                        error={null}
-                        {...this.props}
-                        buttonProps={{
-                          width:[1,0.45]
-                        }}
-                        permitEnabled={false}
-                        tokenConfig={this.state.tokenConfig}
-                        tokenBalance={this.state.balanceProp}
-                        contractInfo={this.state.contractInfo}
-                        checkLimit={this.checkLimit.bind(this)}
-                        approveEnabled={this.state.approveEnabled}
-                        buttonDisabled={this.state.buttonDisabled}
-                        callback={this.transactionSucceeded.bind(this)}
-                        approveDescription={this.state.approveDescription}
-                        changeInputCallback={this.changeInputCallback.bind(this)}
-                        contractApproved={this.contractApprovedCallback.bind(this)}
-                        getTransactionParams={this.getTransactionParams.bind(this)}
-                        action={this.functionsUtil.capitalize(this.state.selectedAction)}
-                      >
-                        <Flex
-                          width={1}
-                          alignItems={'stretch'}
-                          flexDirection={'column'}
-                          justifyContent={'center'}
-                        >
-                          <BuyModal
-                            {...this.props}
-                            showInline={true}
-                            availableMethods={[]}
-                            buyToken={this.props.selectedToken}
-                          />
-                        </Flex>
-                      </SendTxWithBalance>
-                    </Flex>
-                  </Flex>
-                ) : !this.props.account ? (
-                  <ConnectBox
-                    {...this.props}
-                  />
-                ) : (
-                  <FlexLoader
-                    flexProps={{
+                  </Box>
+                )
+              }
+              {
+                this.state.infoText && this.props.account && (
+                  <IconBox
+                    cardProps={{
+                      p:2,
                       mt:3,
-                      flexDirection:'row'
+                      mb:2,
+                      width:1,
                     }}
-                    loaderProps={{
-                      size:'30px'
+                    isActive={true}
+                    isInteractive={false}
+                    iconProps={{
+                      size:'1.2em',
+                      color:'flashColor'
                     }}
                     textProps={{
-                      ml:2
+                      fontWeight:500,
+                      color:'flashColor',
+                      textAlign:'center',
+                      fontSize:['13px','15px']
                     }}
-                    text={'Loading Tranche Data...'}
+                    icon={'LightbulbOutline'}
+                    text={this.state.infoText}
                   />
                 )
-                */
               }
+              <Flex
+                width={1}
+                alignItems={'stretch'}
+                flexDirection={'column'}
+                justifyContent={'center'}
+              >
+                {
+                  isStake && !this.state.stakingEnabled ? (
+                    <DashboardCard
+                      cardProps={{
+                        p: 2,
+                        mt: 3
+                      }}
+                    >
+                      <Flex
+                        width={1}
+                        alignItems={'center'}
+                        flexDirection={'column'}
+                        justifyContent={'center'}
+                      >
+                        <Icon
+                          size={'1.8em'}
+                          color={'cellText'}
+                          name={'DoNotDisturb'}
+                        />
+                        <Text
+                          mt={1}
+                          color={'cellText'}
+                          textAlign={'center'}
+                        >
+                          Staking is not enabled for this Tranche.
+                        </Text>
+                      </Flex>
+                    </DashboardCard>
+                  ) : (
+                    <SendTxWithBalance
+                      error={null}
+                      {...this.props}
+                      buttonProps={{
+                        width:[1,0.45]
+                      }}
+                      permitEnabled={false}
+                      tokenConfig={this.state.tokenConfig}
+                      tokenBalance={this.state.balanceProp}
+                      contractInfo={this.state.contractInfo}
+                      checkLimit={this.checkLimit.bind(this)}
+                      approveEnabled={this.state.approveEnabled}
+                      buttonDisabled={this.state.buttonDisabled}
+                      callback={this.transactionSucceeded.bind(this)}
+                      approveDescription={this.state.approveDescription}
+                      changeInputCallback={this.changeInputCallback.bind(this)}
+                      contractApproved={this.contractApprovedCallback.bind(this)}
+                      getTransactionParams={this.getTransactionParams.bind(this)}
+                      action={this.functionsUtil.capitalize(this.state.actionLabel)}
+                    >
+                      {
+                        isDeposit ? (
+                          <Flex
+                            width={1}
+                            alignItems={'stretch'}
+                            flexDirection={'column'}
+                            justifyContent={'center'}
+                          >
+                            <BuyModal
+                              {...this.props}
+                              showInline={true}
+                              availableMethods={[]}
+                              buyToken={this.props.selectedToken}
+                            />
+                          </Flex>
+                        ) : isStake ? (
+                          <DashboardCard
+                            cardProps={{
+                              p: 2,
+                              my: 2
+                            }}
+                          >
+                            <Flex
+                              width={1}
+                              alignItems={'center'}
+                              flexDirection={'column'}
+                              justifyContent={'center'}
+                            >
+                              <Icon
+                                size={'1.8em'}
+                                name={'MoneyOff'}
+                                color={'cellText'}
+                              />
+                              <Text
+                                mt={1}
+                                color={'cellText'}
+                                textAlign={'center'}
+                              >
+                                You don't have any <strong>{this.state.tokenConfig.label}</strong> token to {this.state.selectedStakeAction}.
+                              </Text>
+                            </Flex>
+                          </DashboardCard>
+                        ) : isWithdraw && (
+                          <DashboardCard
+                            cardProps={{
+                              p: 2,
+                              my: 2
+                            }}
+                          >
+                            <Flex
+                              width={1}
+                              alignItems={'center'}
+                              flexDirection={'column'}
+                              justifyContent={'center'}
+                            >
+                              <Icon
+                                size={'1.8em'}
+                                name={'MoneyOff'}
+                                color={'cellText'}
+                              />
+                              <Text
+                                mt={1}
+                                color={'cellText'}
+                                textAlign={'center'}
+                              >
+                                You don't have any {this.props.selectedToken} to withdraw.<br />If you have staked your <strong>{this.state.tokenConfig.label}</strong> tokens please unstake them to be able to withdraw your {this.props.selectedToken}.
+                            </Text>
+                            </Flex>
+                          </DashboardCard>
+                        )
+                      }
+                    </SendTxWithBalance>
+                  )
+                }
+              </Flex>
               <LimitReachedModal
                 {...this.props}
                 limit={trancheLimit}
