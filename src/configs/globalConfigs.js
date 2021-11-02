@@ -1458,7 +1458,7 @@ const globalConfigs = {
       }
     },
     isForked: false, // If TRUE the tx confirmation callback is fired on the receipt
-    requiredNetwork: 137, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
+    requiredNetwork: 1, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
     blocksPerYear: 2371428,
     secondsPerYear: 31536000,
     requiredConfirmations: 1,
@@ -1814,10 +1814,10 @@ const globalConfigs = {
       }
     },
     polygonBridge:{
-      enabled:false,
+      enabled:true,
       route:'polygon-bridge',
+      availableNetworks:[1,137],
       subComponent:PolygonBridge,
-      availableNetworks:[1,5,137,80001],
       label:'Ethereum <> Polygon Bridge',
       image:'images/protocols/polygon.svg',
       desc:'Transfer your tokens from Ethereum to Polygon and vice versa with Plasma and PoS Bridge.',
