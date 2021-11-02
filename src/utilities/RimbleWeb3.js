@@ -722,13 +722,13 @@ class RimbleTransaction extends React.Component {
 
       // After account is complete, get the balance
       this.getAccountBalance();
-
       return false;
     } else if (this.props.connectorName === 'Infura' || !this.props.connectorName){
       this.setState({
         account:null,
         accountInizialized:true
       });
+      return false;
     }
 
     try {
