@@ -245,6 +245,11 @@ class DepositRedeem extends Component {
   }
 
   async loadProxyContracts() {
+
+    if (!this.props.contractsInitialized){
+      return false;
+    }
+
     const actions = ['deposit', 'redeem'];
     const newState = {
       actionProxyContract: {},
@@ -280,8 +285,10 @@ class DepositRedeem extends Component {
       newState.actionProxyContract[action] = hasProxyContract ? mintProxyContractInfo : null;
       if (hasProxyContract) {
         const proxyContract = await this.props.initContract(mintProxyContractInfo.name, mintProxyContractInfo.address, mintProxyContractInfo.abi);
-        newState.actionProxyContract[action].contract = proxyContract.contract;
-        newState.actionProxyContract[action].approved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken, mintProxyContractInfo.address, this.props.account);
+        if (proxyContract){
+          newState.actionProxyContract[action].contract = proxyContract.contract;
+          newState.actionProxyContract[action].approved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken, mintProxyContractInfo.address, this.props.account);
+        }
       }
     });
 
@@ -337,11 +344,13 @@ class DepositRedeem extends Component {
       return false;
     }
 
+    const accountChanged = prevProps.account !== this.props.account;
     const tokenChanged = prevProps.selectedToken !== this.props.selectedToken;
+    const contractsInitialized = prevProps.contractsInitialized !== this.props.contractsInitialized;
     const erc20ForwarderEnabledChanged = prevState.erc20ForwarderEnabled !== this.state.erc20ForwarderEnabled;
     const tokenBalanceChanged = prevProps.tokenBalance !== this.props.tokenBalance && this.props.tokenBalance !== null;
 
-    if (tokenChanged || tokenBalanceChanged || erc20ForwarderEnabledChanged) {
+    if (accountChanged || tokenChanged || tokenBalanceChanged || erc20ForwarderEnabledChanged || contractsInitialized) {
       await this.loadProxyContracts();
       this.loadTokenInfo();
       return false;

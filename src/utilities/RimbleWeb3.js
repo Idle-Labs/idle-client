@@ -299,6 +299,7 @@ class RimbleTransaction extends React.Component {
     if (tokenChanged || availableStrategiesChanged){
       await this.initializeContracts();
     }
+
     const selectedNetworkChanged = prevProps.config.requiredNetwork !== this.props.config.requiredNetwork;
     if (selectedNetworkChanged){
       // console.log('selectedNetworkChanged',JSON.stringify(prevProps.config.requiredNetwork),this.props.config.requiredNetwork);
@@ -655,18 +656,19 @@ class RimbleTransaction extends React.Component {
   }
 
   initContract = async (name, address, abi, useInfuraProvider=false) => {
-    this.functionsUtil.customLog(`Init contract: ${name}`);
+    // console.log(`initContract: ${name} - addr: ${address}`);
     return await this.createContract(name, address, abi, useInfuraProvider);
   }
 
   createContract = async (name, address, abi, useInfuraProvider=false) => {
-    this.functionsUtil.customLog(`creating contract ${name} - addr: ${address}`);
 
     const web3Provider = useInfuraProvider && this.state.web3Infura ? this.state.web3Infura : this.state.web3;
 
     if (!web3Provider){
       return null;
     }
+
+    // console.log(`createContract: ${name} - addr: ${address}`);
 
     // Create contract on initialized web3 provider with given abi and address
     try {
@@ -715,20 +717,17 @@ class RimbleTransaction extends React.Component {
 
     if (customAddress){
       // Set custom account
-      this.setState({
+      return this.setState({
         account:customAddress,
         accountInizialized:true,
+      },()=>{
+        this.getAccountBalance();
       });
-
-      // After account is complete, get the balance
-      this.getAccountBalance();
-      return false;
     } else if (this.props.connectorName === 'Infura' || !this.props.connectorName){
-      this.setState({
+      return this.setState({
         account:null,
         accountInizialized:true
       });
-      return false;
     }
 
     try {
@@ -921,9 +920,13 @@ class RimbleTransaction extends React.Component {
 
   initializeContracts = async () => {
 
+    if (!this.state.web3){
+      return false;
+    }
+
     const contracts = this.functionsUtil.getGlobalConfig(['contracts',this.state.network.required.id]);
 
-    // console.log('initializeContracts',contracts,this.props.availableStrategies);
+    // console.log('initializeContracts',this.state.network,this.state.web3,contracts,this.props.availableStrategies);
 
     if (contracts){
       await this.functionsUtil.asyncForEach(Object.keys(contracts),async (contractName) => {
