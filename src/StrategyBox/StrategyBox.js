@@ -75,11 +75,13 @@ class StrategyBox extends Component {
               }
             break;
             case 'risk':
-            const tokenScore = await this.functionsUtil.getTokenScore(tokenConfig,true);
-              if (!highestValue || highestValue.lt(tokenScore)){
-                highestValue = tokenScore;
+              if (!selectedToken){
                 selectedToken = token;
               }
+              // const tokenScore = await this.functionsUtil.getTokenScore(tokenConfig,true);
+              // if (!highestValue || highestValue.lt(tokenScore)){
+              //   highestValue = tokenScore;
+              // }
             break;
           }
         });

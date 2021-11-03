@@ -1110,19 +1110,8 @@ class RimbleTransaction extends React.Component {
   }
 
   getRequiredNetwork = () => {
-
-     const networkId =
-       typeof this.props.config !== "undefined" &&
-       typeof this.props.config.requiredNetwork !== "undefined"
-         ? this.props.config.requiredNetwork
-         : globalConfigs.network.requiredNetwork;
-
-     // if (!networkId || !globalConfigs.network.availableNetworks[networkId]){
-     //   return null;
-     // }
-
-     let networkName = networkId && globalConfigs.network.availableNetworks[networkId] ? globalConfigs.network.availableNetworks[networkId].name : 'unknown';
-
+     const networkId = typeof this.props.config !== "undefined" && typeof this.props.config.requiredNetwork !== "undefined" ? this.props.config.requiredNetwork : globalConfigs.network.requiredNetwork;
+     const networkName = networkId && globalConfigs.network.availableNetworks[networkId] ? globalConfigs.network.availableNetworks[networkId].name : 'unknown';
      return {
        id: networkId,
        name: networkName

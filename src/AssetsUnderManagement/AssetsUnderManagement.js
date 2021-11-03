@@ -42,10 +42,12 @@ class AssetsUnderManagement extends Component {
       return true;
     }
 
+    const allNetworks = this.props.allNetworks || false;
+
     const {
       avgAPY,
       totalAUM
-    } = await this.functionsUtil.getAggregatedStats();
+    } = await this.functionsUtil.getAggregatedStats(true,allNetworks);
 
     const totalAUMEndOfYear = totalAUM.plus(totalAUM.times(avgAPY.div(100)));
 

@@ -36,7 +36,7 @@ class Landing extends Component {
     setActiveCarousel:null,
     carouselIntervalID:null,
     protocolsAllocations:null,
-    randomAllocationEnabled:false,
+    randomAllocationEnabled:false
   };
 
   // Clear all the timeouts
@@ -310,7 +310,10 @@ class Landing extends Component {
           className={styles.headerContainer}
           minHeight={ Math.max((this.props.innerHeight+this.props.innerHeight*0.025),768) }
         >
-          <Box position={'relative'} zIndex={10}>
+          <Box
+            zIndex={10}
+            position={'relative'}
+          >
             <Flex
               overflow={'hidden'}
               alignItems={'flex-start'}
@@ -494,6 +497,11 @@ class Landing extends Component {
             >
               <AssetsUnderManagement
                 {...this.props}
+                subtitle={null}
+                allNetworks={true}
+                subtitleProps={{
+                  textAlign:'center'
+                }}
                 counterStyle={{
                   display:'block',
                   color:'dark-gray',
@@ -504,10 +512,6 @@ class Landing extends Component {
                   fontFamily:this.props.theme.fonts.counter,
                   fontWeight:this.props.theme.fontWeights[5],
                   fontSize: this.props.isMobile ? this.props.theme.fontSizes[5] : this.props.theme.fontSizes[9],
-                }}
-                subtitle={null}
-                subtitleProps={{
-                  textAlign:'center'
                 }}
               />
               <Link

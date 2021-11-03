@@ -2,6 +2,7 @@ import React from "react";
 import ExtLink from '../../ExtLink/ExtLink';
 import FunctionsUtil from '../FunctionsUtil';
 import { Box, Flex, Image, Text, Link, Icon } from "rimble-ui";
+import NetworkIndicator from "../../NetworkIndicator/NetworkIndicator";
 
 import {
   Link as RouterLink
@@ -114,14 +115,32 @@ class Header extends React.Component {
               />
             </RouterLink>
           </Flex>
-            <Flex
-              width={[0.5,8/12]}
-              alignItems={'center'}
-              flexDirection={'row'}
-              justifyContent={"flex-end"}
-            >
-              {
-                governanceEnabled && 
+          <Flex
+            width={[0.5,8/12]}
+            alignItems={'center'}
+            flexDirection={'row'}
+            justifyContent={"flex-end"}
+          >
+            {
+              !this.props.isMobile &&
+                <Flex
+                  alignItems={'center'}
+                  flexDirection={'row'}
+                >
+                  {
+                    governanceEnabled && 
+                      <Link
+                        mr={4}
+                        fontSize={3}
+                        color={'white'}
+                        hoverColor={'white'}
+                        fontFamily={'sansSerif'}
+                        textAlign={['center','left']}
+                        onClick={ (e) => window.location.hash='#/governance' }
+                      >
+                        Governance
+                      </Link>
+                  }
                   <Link
                     mr={4}
                     fontSize={3}
@@ -129,38 +148,30 @@ class Header extends React.Component {
                     hoverColor={'white'}
                     fontFamily={'sansSerif'}
                     textAlign={['center','left']}
-                    onClick={ (e) => window.location.hash='#/governance' }
+                    onClick={(e) => {this.functionsUtil.scrollTo(document.getElementById('contacts').offsetTop,300)}}
                   >
-                    Governance
+                    Contact Us
                   </Link>
-              }
-              {
-                !this.props.isMobile &&
-                  <>
-                    <Link
-                      mr={4}
-                      fontSize={3}
-                      color={'white'}
-                      hoverColor={'white'}
-                      fontFamily={'sansSerif'}
-                      textAlign={['center','left']}
-                      onClick={(e) => {this.functionsUtil.scrollTo(document.getElementById('contacts').offsetTop,300)}}
-                    >
-                      Contact Us
-                    </Link>
-                    <Link
-                      fontSize={3}
-                      color={'white'}
-                      hoverColor={'white'}
-                      fontFamily={'sansSerif'}
-                      textAlign={['center','left']}
-                      onClick={(e) => {this.functionsUtil.scrollTo(document.getElementById('faq').offsetTop,300)}}
-                    >
-                      FAQs
-                    </Link>
-                  </>
-              }
+                  <Link
+                    fontSize={3}
+                    color={'white'}
+                    hoverColor={'white'}
+                    fontFamily={'sansSerif'}
+                    textAlign={['center','left']}
+                    onClick={(e) => {this.functionsUtil.scrollTo(document.getElementById('faq').offsetTop,300)}}
+                  >
+                    FAQs
+                  </Link>
+                </Flex>
+            }
+            <Flex
+              ml={4}
+            >
+              <NetworkIndicator
+                {...this.props}
+              />
             </Flex>
+          </Flex>
         </Flex>
       </Box>
     );

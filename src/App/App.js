@@ -920,9 +920,11 @@ class App extends Component {
                                   accountValidated={accountValidated}
                                   getTokenDecimals={getTokenDecimals}
                                   rejectValidation={rejectValidation}
+                                  setToken={e => { this.setToken(e) }}
                                   tokenConfig={this.state.tokenConfig}
                                   getAccountBalance={getAccountBalance}
                                   accountBalanceLow={accountBalanceLow}
+                                  networkInitialized={networkInitialized}
                                   selectedToken={this.state.selectedToken}
                                   connectorName={this.state.connectorName}
                                   userRejectedConnect={userRejectedConnect}
@@ -939,7 +941,7 @@ class App extends Component {
                                   userRejectedValidation={userRejectedValidation}
                                   accountValidationPending={accountValidationPending}
                                   connectAndValidateAccount={connectAndValidateAccount}
-                                  setToken={e => { this.setToken(e) }}
+                                  setRequiredNetwork={this.setRequiredNetwork.bind(this)}
                                 />
 
                                 {
