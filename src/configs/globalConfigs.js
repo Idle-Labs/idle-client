@@ -1423,8 +1423,8 @@ const globalConfigs = {
         chainName:'Ethereum Testnet Rinkeby',
       },
       137:{
-        name:'Matic',
         version:'v1',
+        name:'Polygon',
         network:'mainnet',
         baseToken:'MATIC',
         explorer:'polygon',
@@ -1818,8 +1818,8 @@ const globalConfigs = {
       route:'polygon-bridge',
       availableNetworks:[1,137],
       subComponent:PolygonBridge,
-      label:'Ethereum <> Polygon Bridge',
       image:'images/protocols/polygon.svg',
+      label:'Ethereum ⇔ Polygon Bridge',
       desc:'Transfer your tokens from Ethereum to Polygon and vice versa with Plasma and PoS Bridge.',
       props:{
         contracts:{
