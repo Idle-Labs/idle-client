@@ -358,7 +358,7 @@ class RimbleTransaction extends React.Component {
     const useWeb3Provider = this.state.networkInitialized && this.state.network.isCorrectNetwork;
     const web3InfuraRpc = this.functionsUtil.getGlobalConfig(['network','providers','infura','rpc',networkId])+this.functionsUtil.getGlobalConfig(['network','providers','infura','key']);
     
-    console.log('initWeb3',this.state.network.current.id,networkId,provider,web3Rpc,web3InfuraRpc);
+    // console.log('initWeb3',this.state.network.current.id,networkId,provider,web3Rpc,web3InfuraRpc);
 
     const enabledNetworks = this.functionsUtil.getGlobalConfig(['network','enabledNetworks']);
     const web3Providers = Object.keys(availableNetworks).filter( netId => enabledNetworks.includes(parseInt(netId)) ).reduce( (acc,netId) => {
