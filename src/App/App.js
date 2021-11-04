@@ -528,8 +528,8 @@ class App extends Component {
     });
     // Clear cached data
     this.clearCachedData(() => {
-      // Reset Localstorage
-      this.functionsUtil.clearStoredData(['version', 'themeMode', 'lastLogin', 'cachedData']);
+      // Reset Localstorage except some keys
+      this.functionsUtil.clearStoredData(['version', 'themeMode', 'lastLogin', 'cachedData','requiredNetwork']);
     });
   }
 
