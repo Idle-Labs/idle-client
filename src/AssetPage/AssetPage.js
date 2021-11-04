@@ -60,7 +60,9 @@ class AssetPage extends Component {
   async loadTokensInfo(){
 
     if (!this.props.account || !this.props.contractsInitialized){
-      return false;
+      return this.setState({
+        userHasFunds:false
+      });
     }
 
     const newState = {...this.state};
@@ -337,7 +339,7 @@ class AssetPage extends Component {
                 )
               }
               {
-                this.state.userHasFunds && (
+                this.state.userHasFunds && this.props.account && (
                   <Flex
                     mb={[0,4]}
                     width={1}

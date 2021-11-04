@@ -29,6 +29,7 @@ const RimbleTransactionContext = React.createContext({
   tokenConfig: {},
   transactions: {},
   permitClient: {},
+  web3Providers: {},
   accountBalance: {},
   initWeb3: () => {},
   accountValidated: {},
@@ -124,7 +125,6 @@ class RimbleTransaction extends React.Component {
   }
 
   componentWillUnmount(){
-    // debugger;
     this.componentUnmounted = true;
   }
 
@@ -157,7 +157,6 @@ class RimbleTransaction extends React.Component {
           web3:null,
           contracts:[],
           biconomy:null,
-          web3Infura:null,
           permitClient:null,
           networkInitialized:false,
           erc20ForwarderClient:null,
@@ -350,16 +349,25 @@ class RimbleTransaction extends React.Component {
     //   return false;
     // }
 
-    const networkConfig = this.functionsUtil.getGlobalConfig(['network','availableNetworks',networkId]);
+    const availableNetworks = this.functionsUtil.getGlobalConfig(['network','availableNetworks']);
+    const networkConfig = availableNetworks[networkId];
     const provider = networkConfig ? networkConfig.provider : 'infura';
     const web3RpcKey = this.functionsUtil.getGlobalConfig(['network','providers',provider,'key']);
     const web3Rpc = this.functionsUtil.getGlobalConfig(['network','providers',provider,'rpc',networkId])+web3RpcKey;
 
     const useWeb3Provider = this.state.networkInitialized && this.state.network.isCorrectNetwork;
-
-    // console.log('initWeb3',this.state.network.current.id,networkId,provider,web3Rpc,useWeb3Provider);
-
     const web3InfuraRpc = this.functionsUtil.getGlobalConfig(['network','providers','infura','rpc',networkId])+this.functionsUtil.getGlobalConfig(['network','providers','infura','key']);
+    
+    console.log('initWeb3',this.state.network.current.id,networkId,provider,web3Rpc,web3InfuraRpc);
+
+    const enabledNetworks = this.functionsUtil.getGlobalConfig(['network','enabledNetworks']);
+    const web3Providers = Object.keys(availableNetworks).filter( netId => enabledNetworks.includes(parseInt(netId)) ).reduce( (acc,netId) => {
+      const networkConfig = availableNetworks[netId];
+      const providerConfig = this.functionsUtil.getGlobalConfig(['network','providers',networkConfig.provider]);
+      const providerRpc = providerConfig.rpc[netId]+providerConfig.key;
+      acc[netId] = new Web3(new Web3.providers.HttpProvider(providerRpc));
+      return acc;
+    },{});
 
     const web3Infura = new Web3(new Web3.providers.HttpProvider(web3InfuraRpc));
 
@@ -514,6 +522,7 @@ class RimbleTransaction extends React.Component {
       web3Infura,
       currentWeb3,
       web3Polygon,
+      web3Providers,
       maticPOSClient,
       maticPlasmaClient
     },() => {
@@ -617,6 +626,7 @@ class RimbleTransaction extends React.Component {
               biconomy,
               web3Infura,
               permitClient,
+              web3Providers,
               erc20ForwarderClient
             };
             // console.log('biconomy',newState);
@@ -662,7 +672,7 @@ class RimbleTransaction extends React.Component {
 
   createContract = async (name, address, abi, useInfuraProvider=false) => {
 
-    const web3Provider = useInfuraProvider && this.state.web3Infura ? this.state.web3Infura : this.state.web3;
+    const web3Provider = useInfuraProvider && this.state.web3Infura ? this.state.web3Infura : (this.state.network.isCorrectNetwork ? this.state.web3 : this.state.web3Providers[this.state.network.required.id]);
 
     if (!web3Provider){
       return null;
@@ -1706,6 +1716,7 @@ class RimbleTransaction extends React.Component {
     simpleID: null,
     web3Infura:null,
     transactions: {},
+    web3Providers:{},
     CrispClient: null,
     currentWeb3: null,
     permitClient:null,

@@ -1435,7 +1435,7 @@ class FunctionsUtil {
       const etherscanApiUrl = etherscanInfo.endpoints[requiredNetwork];
 
       // Get base endpoint cached transactions
-      baseEndpoint = `${etherscanApiUrl}?strategy=${selectedStrategy}&apikey=${etherscanInfo.key}&module=account&action=tokentx&address=${account}&startblock=${firstIdleBlockNumber}&endblock=${endBlockNumber}&sort=asc`;
+      baseEndpoint = `${etherscanApiUrl}?strategy=${selectedStrategy}&apikey=${etherscanInfo.keys[0]}&module=account&action=tokentx&address=${account}&startblock=${firstIdleBlockNumber}&endblock=${endBlockNumber}&sort=asc`;
       baseTxs = this.getCachedRequest(baseEndpoint);
 
       if (debug){
