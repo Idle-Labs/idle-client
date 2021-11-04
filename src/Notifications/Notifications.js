@@ -197,15 +197,18 @@ class Notifications extends Component {
       const polygonWithdrawalsToExit = polygonTransactions.filter( tx => tx.action === 'Withdraw' && tx.included && !tx.exited );
       polygonWithdrawalsToExit.forEach( tx => {
         const timestamp = tx.timeStamp*1000;
-        const text = `You can Exit ${this.functionsUtil.BNify(tx.value).toFixed(4)} ${tx.token} from Polygon`;
-        notifications.push({
-          text,
-          timestamp,
-          image:polygonBridgeConfig.image,
-          title:'Polygon Withdraw Completed',
-          hash:polygonBridgeBaseUrl+tx.tokenSymbol,
-          date:this.functionsUtil.strToMoment(timestamp).utc().format('MMM DD, YYYY HH:mm UTC')
-        });
+        const txDate = this.functionsUtil.strToMoment(timestamp);
+        if (txDate.isAfter(this.functionsUtil.strToMoment().subtract(10,'d'))){
+          const text = `You can Exit ${this.functionsUtil.BNify(tx.value).toFixed(4)} ${tx.token} from Polygon`;
+          notifications.push({
+            text,
+            timestamp,
+            image:polygonBridgeConfig.image,
+            title:'Polygon Withdraw Completed',
+            hash:polygonBridgeBaseUrl+tx.tokenSymbol,
+            date:this.functionsUtil.strToMoment(timestamp).utc().format('MMM DD, YYYY HH:mm UTC')
+          });
+        }
       });
 
       const depositBaseUrl = this.functionsUtil.getGlobalConfig(['dashboard','baseRoute'])+`/best/`;
