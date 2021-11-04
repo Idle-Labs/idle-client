@@ -426,7 +426,7 @@ class RimbleTransaction extends React.Component {
         web3Provider = window.web3;
       } else {
         this.functionsUtil.customLog("Non-Ethereum browser detected. Using Infura fallback.");
-        web3Host = globalConfigs.network.providers.infura[networkId]+INFURA_KEY;
+        web3Host = web3InfuraRpc;
       }
     } else {
       web3Provider = web3.currentProvider;
