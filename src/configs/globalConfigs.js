@@ -53,6 +53,8 @@ import BatchMigration from '../BatchMigration/BatchMigration';
 import IdleBatchedMint from '../contracts/IdleBatchedMint.json';
 import { RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
 import IdleProxyMinter from '../contracts/IdleProxyMinter.json';
+import ERC20Predicate from '../abis/polygon/ERC20Predicate.json';
+import EtherPredicate from '../abis/polygon/EtherPredicate.json';
 import DepositManager from '../abis/polygon/DepositManager.json';
 import IdleRebalancerV3 from '../contracts/IdleRebalancerV3.json';
 import LiquidityGaugeV2 from '../abis/curve/LiquidityGaugeV2.json';
@@ -1824,13 +1826,13 @@ const globalConfigs = {
       props:{
         contracts:{
           ERC20Predicate:{
-            abi:null,
+            abi:ERC20Predicate,
             name:'ERC20Predicate',
             // address:'0xdD6596F2029e6233DEFfaCa316e6A95217d4Dc34', // Goerli
             address:'0x40ec5B33f54e0E8A33A975908C5BA1c14e5BbbDf' // Mainnet
           },
           EtherPredicate:{
-            abi:null,
+            abi:EtherPredicate,
             name:'EtherPredicate',
             // address:'0xdD6596F2029e6233DEFfaCa316e6A95217d4Dc34', // Goerli
             address:'0x8484Ef722627bf18ca5Ae6BcF031c23E6e922B30' // Mainnet

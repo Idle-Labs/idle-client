@@ -349,14 +349,10 @@ class SendTxWithBalance extends Component {
     if (this.props.approveEnabled !== undefined && !this.props.approveEnabled){
       return true;
     }
-    const contractInfo = await this.props.initContract(this.props.contractInfo.name,this.props.contractInfo.address,this.props.contractInfo.abi);
-
-    if (contractInfo){
-      const contractApproved = await this.functionsUtil.checkTokenApproved(this.props.tokenConfig.token,this.props.contractInfo.address,this.props.account);
-      return contractApproved;
-    }
     
-    return false;
+    await this.props.initContract(this.props.contractInfo.name,this.props.contractInfo.address,this.props.contractInfo.abi);
+    const contractApproved = await this.functionsUtil.checkTokenApproved(this.props.tokenConfig.token,this.props.contractInfo.address,this.props.account);
+    return contractApproved;
   }
 
   async loadData(){
