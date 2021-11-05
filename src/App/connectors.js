@@ -34,8 +34,9 @@ const portisNetwork = env.REACT_APP_PORTIS_NETWORK;
 
 const supportedNetworkURLs = {};
   
-Object.keys(globalConfigs.network.providers.infura).forEach((networkId,index) => {
-  supportedNetworkURLs[networkId] = globalConfigs.network.providers.infura[networkId]+env.REACT_APP_INFURA_KEY;
+Object.keys(globalConfigs.network.providers.infura.rpc).forEach((networkId,index) => {
+  networkId = parseInt(networkId);
+  supportedNetworkURLs[networkId] = globalConfigs.network.providers.infura.rpc[networkId]+env.REACT_APP_INFURA_KEY;
 });
 
 const Injected = new InjectedConnector({
@@ -43,7 +44,7 @@ const Injected = new InjectedConnector({
 });
 
 const Infura = new NetworkOnlyConnector({
-  providerURL: globalConfigs.network.providers.infura[defaultNetwork]+env.REACT_APP_INFURA_KEY
+  providerURL: supportedNetworkURLs[defaultNetwork]
 });
 
 
