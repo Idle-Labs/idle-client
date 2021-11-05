@@ -1,0 +1,8 @@
++ rollup@2.59.0
+added 1 package from 1 contributor and audited 5566 packages in 38.047s
+
+198 packages are looking for funding
+  run `npm fund` for details
+
+found 385 vulnerabilities (48 low, 129 moderate, 202 high, 6 critical)
+  run `npm audit fix` to fix them, or `npm audit` for details

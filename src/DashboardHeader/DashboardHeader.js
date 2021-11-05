@@ -61,12 +61,12 @@ class DashboardHeader extends Component {
       });
     }
 
-    const stakingConfig = this.functionsUtil.getGlobalConfig(["tools","stake"]);
-    const nexusMutualConfig = this.functionsUtil.getGlobalConfig(["tools","nexusMutual"]);
-    const stakingPolygonConfig = this.functionsUtil.getGlobalConfig(["tools","stakePolygon"]);
+    const stakingConfig = this.functionsUtil.getGlobalConfig(["tools", "stake"]);
+    const nexusMutualConfig = this.functionsUtil.getGlobalConfig(["tools", "nexusMutual"]);
+    const stakingPolygonConfig = this.functionsUtil.getGlobalConfig(["tools", "stakePolygon"]);
 
     const flashNews = {
-      1:[
+      1: [
         {
           name: "Governance Forum",
           icon: "LightbulbOutline",
@@ -91,11 +91,11 @@ class DashboardHeader extends Component {
           text: `Protect your funds against smart-contract attacks with Nexus Mutual.`,
           link: {
             text: `Get Covered`,
-            url: this.functionsUtil.getDashboardSectionUrl(`tools/${this.functionsUtil.getGlobalConfig(["tools","nexusMutual","route"])}`)
+            url: this.functionsUtil.getDashboardSectionUrl(`tools/${this.functionsUtil.getGlobalConfig(["tools", "nexusMutual", "route"])}`)
           }
         }
       ],
-      137:[
+      137: [
         {
           icon: stakingPolygonConfig.icon,
           name: stakingPolygonConfig.label,
@@ -144,10 +144,11 @@ class DashboardHeader extends Component {
 
   render() {
     return (
-      <Box mb={3}>
+      <Box >
         <Flex
           pb={2}
           width={1}
+          bg={"white"}
           flexDirection={"row"}
           justifyContent={"space-between"}
           alignItems={["flex-end", "center"]}
@@ -157,6 +158,7 @@ class DashboardHeader extends Component {
             width={1}
             {...this.props}
             setGovModal={this.setGovModal.bind(this)}
+            goToSection={this.props.goToSection.bind(this)}
           />
         </Flex>
         {this.state.unclaimed && this.state.unclaimed.gt(0) ? (

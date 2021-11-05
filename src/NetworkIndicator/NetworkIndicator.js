@@ -7,45 +7,45 @@ import GenericSelector from '../GenericSelector/GenericSelector';
 class NetworkIndicator extends Component {
 
   state = {
-    activeNetworks:[],
-    defaultNetwork:null
+    activeNetworks: [],
+    defaultNetwork: null
   };
 
   // Utils
   functionsUtil = null;
 
-  loadUtils(){
-    if (this.functionsUtil){
+  loadUtils() {
+    if (this.functionsUtil) {
       this.functionsUtil.setProps(this.props);
     } else {
       this.functionsUtil = new FunctionsUtil(this.props);
     }
   }
 
-  async componentWillMount(){
+  async componentWillMount() {
     this.loadUtils();
     this.loadNetworks();
   }
 
-  loadNetworks(){
+  loadNetworks() {
 
-    if (!this.props.networkInitialized){
+    if (!this.props.networkInitialized) {
       return false;
     }
 
-    const availableNetworks = this.functionsUtil.getGlobalConfig(['network','availableNetworks']);
-    const enabledNetworks = this.functionsUtil.getGlobalConfig(['network','enabledNetworks']);
-    const activeNetworks = enabledNetworks.map( networkId => {
+    const availableNetworks = this.functionsUtil.getGlobalConfig(['network', 'availableNetworks']);
+    const enabledNetworks = this.functionsUtil.getGlobalConfig(['network', 'enabledNetworks']);
+    const activeNetworks = enabledNetworks.map(networkId => {
       const networkConfig = availableNetworks[networkId];
       return {
-        value:networkId,
-        config:networkConfig,
-        label:networkConfig.name,
+        value: networkId,
+        config: networkConfig,
+        label: networkConfig.name,
       }
     });
 
     const requiredNetwork = this.functionsUtil.getRequiredNetwork();
-    const defaultNetwork = activeNetworks.find( network => network.value === requiredNetwork.id );
+    const defaultNetwork = activeNetworks.find(network => network.value === requiredNetwork.id);
 
     this.setState({
       defaultNetwork,
@@ -53,19 +53,19 @@ class NetworkIndicator extends Component {
     });
   }
 
-  selectNetwork(networkId){
+  selectNetwork(networkId) {
     this.props.setRequiredNetwork(networkId);
   }
 
-  async componentDidUpdate(prevProps,prevState){
+  async componentDidUpdate(prevProps, prevState) {
     this.loadUtils();
 
     const networkInitialized = !prevProps.networkInitialized && this.props.networkInitialized;
     const requiredNetworkChanged = JSON.stringify(prevProps.network.required) !== JSON.stringify(this.props.network.required);
-    if (requiredNetworkChanged || networkInitialized){
+    if (requiredNetworkChanged || networkInitialized) {
       this.setState({
-        defaultNetwork:null
-      },() => {
+        defaultNetwork: null
+      }, () => {
         this.loadNetworks();
       });
     }
@@ -110,19 +110,19 @@ class NetworkIndicator extends Component {
       return (
         <Flex
           style={{
-            flex:'1'
+            flex: '1'
           }}
           justifyContent={'space-between'}
           {...props.innerProps}
           px={0}
         >
           <Flex
-            {...props.innerProps}
+            {...props.innerxProps}
             p={0}
             width={1}
             alignItems={'center'}
             flexDirection={'row'}
-            style={{cursor:'pointer'}}
+            style={{ cursor: 'pointer' }}
             justifyContent={'flex-start'}
           >
             <Image
@@ -157,14 +157,18 @@ class NetworkIndicator extends Component {
         name={'network'}
         isSearchable={false}
         innerProps={Object.assign({
-          px:1,
-          py:0,
-          height:'42px'
-        },this.props.innerProps)}
+          px: 1,
+          py: 0,
+          height: '42px',
+          boxShadow: 0,
+          borderRadius: 0,
+          border: 0,
+
+        }, this.props.innerProps)}
         customOptionProps={{
-          px:0,
-          pl:3,
-          pr:0
+          px: 0,
+          pl: 3,
+          pr: 0
         }}
         options={this.state.activeNetworks}
         CustomOptionValue={CustomOptionValue}
@@ -173,21 +177,24 @@ class NetworkIndicator extends Component {
         CustomValueContainer={CustomValueContainer}
       />
     ) : (
-      <DashboardCard
-        {...this.props}
-        cardProps={{
-          px:[2,3],
-          display:'flex',
-          width:[1,'auto'],
-          alignItems:'center',
-          justifyContent:'center',
-          height:(this.props.innerProps && this.props.innerProps.height) || '42px',
-        }}
-        isInteractive={false}
-      >
-        <Loader size={'20px'} />
-      </DashboardCard>
-    );
+        <DashboardCard
+          {...this.props}
+          cardProps={{
+            boxShadow: 0,
+            borderRadius: 0,
+            border: 0,
+            px: [2, 3],
+            display: 'flex',
+            width: [1, 'auto'],
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: (this.props.innerProps && this.props.innerProps.height) || '42px',
+          }}
+          isInteractive={false}
+        >
+          <Loader size={'20px'} />
+        </DashboardCard>
+      );
   }
 }
 
