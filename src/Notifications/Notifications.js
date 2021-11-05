@@ -272,7 +272,7 @@ class Notifications extends Component {
 
   render() {
     const hasUnreadNotifications = this.state.unreadNotifications > 0;
-    const iconColor = hasUnreadNotifications ? '#ffdc00' : 'cellText';
+    const iconColor = hasUnreadNotifications ? '#0239FF' : 'cellText';
     return (
       <Flex
         zIndex={999}
@@ -286,7 +286,7 @@ class Notifications extends Component {
           onMouseOver={(e) => this.setMouseOverBell(true)}
         >
           <Icon
-            size={'2.4em'}
+            {...this.props.iconaProps}
             color={iconColor}
             name={'Notifications'}
             onClick={this.toggleTab.bind(this)}

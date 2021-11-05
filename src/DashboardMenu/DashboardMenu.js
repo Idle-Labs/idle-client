@@ -176,14 +176,14 @@ class DashboardMenu extends Component {
                 ml: [0, 3],
                 mr: [2, 0],
                 display: "flex",
-                width: [1, "auto"],
+                width: 1,
                 mb: [0, 3]
               }}
               isInteractive={true}
               handleClick={e => this.props.goToSection(governanceRoute, false)}
             >
               <Flex
-                p={0}
+                p={1}
                 width={1}
                 alignItems={"center"}
                 flexDirection={"row"}
@@ -199,7 +199,7 @@ class DashboardMenu extends Component {
 
 
 
-                <Text color={"black"} fontSize={[1, 2]} fontWeight={500}>
+                <Text px={1} color={"black"} fontSize={1} fontWeight={400}>
                   Switch to Governance
                 </Text>
 
@@ -219,7 +219,7 @@ class DashboardMenu extends Component {
                     ml: [0, 3],
                     mr: [2, 0],
                     display: "flex",
-                    width: [1, "auto"],
+                    width: 1,
                     mb: [0, 3]
                   }}
                   isInteractive={true}
@@ -242,7 +242,7 @@ class DashboardMenu extends Component {
 
 
 
-                    <Text color={"black"} fontSize={[1, 2]} fontWeight={500}>
+                    <Text color={"black"} fontSize={1} fontWeight={400}>
                       Switch to Dashboard
                 </Text>
 
