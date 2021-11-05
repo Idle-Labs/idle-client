@@ -194,7 +194,7 @@ class DashboardMenu extends Component {
                   width={"1.3em"}
                   height={"1.3em"}
                   display={"inline-flex"}
-                  src={`images/tokens/IDLE.svg`}
+                  src={`images/sidebar/switch.svg`}
                 />
 
 
@@ -237,7 +237,7 @@ class DashboardMenu extends Component {
                       width={"1.3em"}
                       height={"1.3em"}
                       display={"inline-flex"}
-                      src={`images/tokens/IDLE.svg`}
+                      src={`images/sidebar/switch.svg`}
                     />
 
 
