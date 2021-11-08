@@ -18,6 +18,7 @@ class MenuAccount extends Component {
   // Utils
   idleGovToken = null;
   functionsUtil = null;
+  componentUnmounted = false;
 
   loadUtils() {
     if (this.functionsUtil) {
@@ -25,8 +26,18 @@ class MenuAccount extends Component {
     } else {
       this.functionsUtil = new FunctionsUtil(this.props);
     }
-
     this.idleGovToken = this.functionsUtil.getIdleGovToken();
+  }
+
+  async setStateSafe(newState,callback=null) {
+    if (!this.componentUnmounted){
+      return await this.setState(newState,callback);
+    }
+    return null;
+  }
+
+  componentWillUnmount(){
+    this.componentUnmounted = true;
   }
 
   async componentWillMount() {
@@ -45,14 +56,11 @@ class MenuAccount extends Component {
 
     const accountChanged = prevProps.account !== this.props.account;
     if (accountChanged) {
-      this.setState(
-        {
+      this.setStateSafe({
           isModalOpen: null
-        },
-        () => {
+      },() => {
           this.loadIdleTokenBalance();
-        }
-      );
+      });
     }
   }
 
@@ -82,13 +90,13 @@ class MenuAccount extends Component {
       }
     }
 
-    return this.setState({
+    return this.setStateSafe({
       idleTokenBalance
     });
   }
 
   toggleModal = modalName => {
-    this.setState(state => ({
+    this.setStateSafe(state => ({
       ...state,
       isModalOpen: state.isModalOpen === modalName ? null : modalName
     }));

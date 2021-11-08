@@ -382,6 +382,7 @@ class FunctionsUtil {
   getAccountPortfolio = async (availableTokens=null,account=null) => {
     const portfolio = {
       tokensBalance:{},
+      tokensToMigrate:{},
       avgAPY:this.BNify(0),
       totalBalance:this.BNify(0),
       totalEarnings:this.BNify(0),
@@ -401,7 +402,26 @@ class FunctionsUtil {
 
     await this.asyncForEach(Object.keys(availableTokens),async (token) => {
       const tokenConfig = availableTokens[token];
-      const idleTokenBalance = await this.getTokenBalance(tokenConfig.idle.token,account);
+      const [
+        {
+          migrationEnabled,
+          oldContractBalanceFormatted
+        },
+        idleTokenBalance
+      ] = await Promise.all([
+        this.checkMigration(tokenConfig,this.props.account),
+        this.getTokenBalance(tokenConfig.idle.token,account)
+      ]);
+
+      if (migrationEnabled){
+        const tokenKey = this.props.selectedStrategy ? token : tokenConfig.idle.token;
+        portfolio.tokensToMigrate[tokenKey] = {
+          token,
+          tokenConfig,
+          oldContractBalanceFormatted,
+          strategy:this.props.selectedStrategy
+        };
+      }
 
       if (idleTokenBalance){
         const tokenPrice = await this.getIdleTokenPrice(tokenConfig);
@@ -442,12 +462,15 @@ class FunctionsUtil {
 
     await this.asyncForEach(depositedTokens,async (token) => {
       const tokenConfig = availableTokens[token];
-      const amountDeposited = await this.getAmountDeposited(tokenConfig,account);
-
-      // console.log(token,'amountDeposited',amountDeposited.toString(),'amountLent',amountLents[token].toString());
+      const [
+        tokenAprs,
+        amountDeposited
+      ] = await Promise.all([
+        this.getTokenAprs(tokenConfig),
+        this.getAmountDeposited(tokenConfig,account)
+      ]);
 
       const tokenBalanceConverted = portfolio.tokensBalance[token].tokenBalanceConverted;
-      const tokenAprs = await this.getTokenAprs(tokenConfig);
 
       const tokenAPY = this.BNify(tokenAprs.avgApy);
       const tokenWeight = tokenBalanceConverted.div(portfolio.totalBalanceConverted);
@@ -1261,8 +1284,8 @@ class FunctionsUtil {
       }
 
       if (polygonTxs && polygonTxs.data && polygonTxs.data.data && polygonTxs.data.data.items && Object.values(polygonTxs.data.data.items).length){
-        // console.log('polygonTxs',polygonTxs);
         const filteredTxs = polygonTxs.data.data.items.filter( tx => tx.to_address && childTokensAddresses.includes(tx.to_address.toLowerCase()) );
+        // console.log('polygonTxs',polygonTxs,filteredTxs);
         await this.asyncForEach(filteredTxs, async (tx) => {
           const tokenConfig = Object.values(polygonAvailableTokens).find( tokenConfig => (tokenConfig.childToken && tokenConfig.childToken.address.toLowerCase() === tx.to_address.toLowerCase()) );
           if (!tokenConfig || !tokenConfig.childToken){
@@ -1289,6 +1312,7 @@ class FunctionsUtil {
             }
           }
         });
+        // debugger;
       }
     }
 

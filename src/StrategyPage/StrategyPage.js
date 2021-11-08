@@ -2,7 +2,6 @@ import Title from '../Title/Title';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import AssetsList from '../AssetsList/AssetsList';
-import CustomList from '../CustomList/CustomList';
 import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import DashboardCard from '../DashboardCard/DashboardCard';
@@ -16,6 +15,7 @@ import { Flex, Box, Heading, Text, Tooltip, Icon, Loader } from "rimble-ui";
 import DashboardIconButton from '../DashboardIconButton/DashboardIconButton';
 import TotalBalanceCounter from '../TotalBalanceCounter/TotalBalanceCounter';
 import TotalEarningsCounter from '../TotalEarningsCounter/TotalEarningsCounter';
+import PolygonBridgeTransactions from '../PolygonBridgeTransactions/PolygonBridgeTransactions';
 
 // const env = process.env;
 
@@ -31,11 +31,9 @@ class StrategyPage extends Component {
     portfolioLoaded:false,
     portfolioLoading:false,
     availableGovTokens:null,
-    polygonTransactions:null,
     portfolioEquityStartDate:null,
     batchedDepositsAvailableTokens:null,
     portfolioEquityQuickSelection:'week',
-    polygonTransactionsAvailableTokens:null,
   };
 
   // Utils
@@ -68,7 +66,7 @@ class StrategyPage extends Component {
     const accountChanged = prevProps.account !== this.props.account;
     const availableTokensChanged = JSON.stringify(prevProps.availableTokens) !== JSON.stringify(this.props.availableTokens);
     if (accountChanged || availableTokensChanged){
-      this.setState({
+      this.setStateSafe({
         portfolioLoaded:false
       },() => {
         this.loadPortfolio();
@@ -105,23 +103,16 @@ class StrategyPage extends Component {
     if (this.props.account){
       const newState = {};
       const firstBlockNumber = this.functionsUtil.getGlobalConfig(['network','firstBlockNumber']);
-      const polygonBridgeConfig = this.functionsUtil.getGlobalConfig(['tools','polygonBridge']);
 
       // Load data
       const [
         batchedDeposits,
-        tokensToMigrate,
         portfolio,
-        polygonTransactions
       ] = await Promise.all([
         // Load claimable batches
         [],//this.functionsUtil.getBatchedDeposits(this.props.account),
-        // Load tokens to be migrated
-        this.functionsUtil.getTokensToMigrate(this.props.selectedStrategy),
         // Load portfolio
         this.functionsUtil.getAccountPortfolio(availableTokens,this.props.account),
-        // Get Polygon deposits
-        polygonBridgeConfig.enabled ? this.functionsUtil.getPolygonBridgeTxs(this.props.account) : null,
         // Load and process Etherscan Txs
         this.functionsUtil.getEtherscanTxs(this.props.account,firstBlockNumber,'latest',Object.keys(availableTokens))
       ]);
@@ -161,46 +152,8 @@ class StrategyPage extends Component {
         },{});
       }
 
-      newState.polygonTransactions = polygonTransactions && polygonTransactions.length>0 ? polygonTransactions : null;
-      if (newState.polygonTransactions){
-        newState.polygonTransactionsAvailableTokens = polygonTransactions.map( (tx) => {
-          const tokenConfig = this.functionsUtil.getGlobalConfig(['tools','polygonBridge','props','availableTokens',tx.tokenSymbol]);
-          let actionIcon = null;
-          switch (tx.action){
-            default:
-            case 'Deposit':
-              actionIcon = 'ArrowDownward';
-            break;
-            case 'Withdraw':
-              actionIcon = 'ArrowUpward';
-            break;
-            case 'Exit':
-              actionIcon = 'Undo';
-            break;
-          }
-          const depositInfo = {
-            actionIcon,
-            amount:tx.value,
-            token:tx.tokenSymbol,
-            action:tx.action.toUpperCase(),
-            bridgeType:tx.bridgeType.toUpperCase(),
-            status:tx.included ? 'Completed' : 'pending',
-            hash:this.functionsUtil.shortenHash(tx.hash),
-            statusIcon:tx.included ? 'Done' : 'Timelapse',
-            actionIconProps:{
-              color:this.props.theme.colors.transactions.action[tx.action.toLowerCase()],
-              bgColor:this.props.theme.colors.transactions.actionBg[tx.action.toLowerCase()]
-            },
-            url:this.functionsUtil.getEtherscanTransactionUrl(tx.hash,tx.networkId),
-            date:this.functionsUtil.strToMoment(parseInt(tx.timeStamp)*1000).format('DD MMM, YYYY'),
-            statusIconProps:{
-              color:tx.included ? this.props.theme.colors.transactions.status.completed : this.props.theme.colors.transactions.status.pending
-            },
-            tokenIcon:tokenConfig.icon || this.functionsUtil.getGlobalConfig(['stats','tokens',tx.tokenSymbol,'icon']) || `images/tokens/${tx.tokenSymbol}.svg`
-          };
-          return depositInfo;
-        });
-      }
+      newState.depositedTokens = [];
+      newState.tokensToMigrate = [];
 
       if (portfolio){
         const depositedTokens = Object.keys(portfolio.tokensBalance).filter(token => ( this.functionsUtil.BNify(portfolio.tokensBalance[token].idleTokenBalance).gt(0) ));
@@ -267,14 +220,14 @@ class StrategyPage extends Component {
 
         newState.avgAPY = avgAPY;
         // newState.avgScore = avgScore;
+        newState.tokensToMigrate = portfolio.tokensToMigrate;
         newState.govTokensTotalBalance = govTokensTotalBalance;
         newState.govTokensTotalBalanceTooltip = govTokensTotalBalanceTooltip;
       }
 
-      newState.tokensToMigrate = tokensToMigrate;
       newState.portfolioLoaded = true;
       newState.portfolioLoading = false;
-
+      
       const remainingTokens = Object.keys(availableTokens).filter(token => (!newState.depositedTokens.includes(token) && !Object.keys(newState.tokensToMigrate).includes(token)) );
       newState.remainingTokens = remainingTokens;
 
@@ -300,6 +253,7 @@ class StrategyPage extends Component {
     const yieldFarming = this.functionsUtil.getGlobalConfig(['messages','yieldFarming']);
     const nexusMutualConfig = this.functionsUtil.getGlobalConfig(['tools','nexusMutual']);
     const batchDepositConfig = this.functionsUtil.getGlobalConfig(['tools','batchDeposit']);
+    const polygonBridgeConfig = this.functionsUtil.getGlobalConfig(['tools','polygonBridge']);
     const strategyName = this.functionsUtil.getGlobalConfig(['strategies',this.props.selectedStrategy,'title']);
 
     return (
@@ -1624,156 +1578,19 @@ class StrategyPage extends Component {
                   </Flex>
               }
               {
-                this.props.account && this.state.polygonTransactions && (
+                this.props.account && polygonBridgeConfig.enabled && polygonBridgeConfig.availableNetworks.includes(currentNetwork.id) && (
                   <Flex
                     width={1}
                     flexDirection={'column'}
                     id={'polygon-transactions'}
                   >
-                    <Title my={[3,4]}>Polygon Bridge Transactions</Title>
-                    <Flex
-                      width={1}
-                      flexDirection={'column'}
-                    >
-                      <CustomList
-                        paginationEnabled={true}
-                        handleClick={(props) => this.functionsUtil.openWindow(props.row.url)}
-                        cols={[
-                          {
-                            title:'HASH',
-                            mobile:false,
-                            props:{
-                              width:[0.44,0.18],
-                              justifyContent:['center','flex-start']
-                            },
-                            fields:[
-                              {
-                                type:'bgIcon',
-                                path:['actionIcon'],
-                              },
-                              {
-                                type:'text',
-                                path:['hash'],
-                                props:{
-                                  ml:[0,2]
-                                }
-                              },
-                            ]
-                          },
-                          {
-                            title:'ACTION',
-                            props:{
-                              width:[0.25,0.14],
-                              justifyContent:['center','flex-start']
-                            },
-                            fields:[
-                              {
-                                type:'text',
-                                path:['action'],
-                              },
-                            ]
-                          },
-                          {
-                            title:'DATE',
-                            props:{
-                              width:[0.25,0.15],
-                              justifyContent:['center','flex-start']
-                            },
-                            fields:[
-                              {
-                                type:'text',
-                                path:['date'],
-                              },
-                            ]
-                          },
-                          {
-                            title:'BRIDGE',
-                            mobile:false,
-                            props:{
-                              width:[0.44,0.12],
-                              justifyContent:['center','flex-start']
-                            },
-                            fields:[
-                              {
-                                type:'text',
-                                path:['bridgeType'],
-                              },
-                            ]
-                          },
-                          {
-                            title:'STATUS',
-                            props:{
-                              width:[0.25,0.15],
-                              justifyContent:['center','flex-start']
-                            },
-                            fields:[
-                              {
-                                type:'icon',
-                                mobile:false,
-                                path:['statusIcon'],
-                                props:{
-                                  mr:2,
-                                  size:this.props.isMobile ? '1.2em' : '1.8em'
-                                }
-                              },
-                              {
-                                name:'custom',
-                                path:['status'],
-                                props:{
-                                  style:{
-                                    textTransform:'capitalize'
-                                  }
-                                }
-                              }
-                            ]
-                          },
-                          {
-                            mobile:false,
-                            title:'AMOUNT',
-                            props:{
-                              width:[0.25, 0.15],
-                            },
-                            fields:[
-                              {
-                                type:'number',
-                                path:['amount'],
-                                props:{
-                                  decimals: 4
-                                }
-                              },
-                              {
-                                name:'tokenName',
-                                props:{
-                                  ml:2
-                                }
-                              }
-                            ]
-                          },
-                          {
-                            title:'TOKEN',
-                            props:{
-                              width:[0.25,0.13]
-                            },
-                            fields:[
-                              {
-                                type:'image',
-                                path:['tokenIcon'],
-                                props:{
-                                  mr:2,
-                                  height:['1.4em','1.6em']
-                                }
-                              },
-                              {
-                                type:'text',
-                                path:['token'],
-                              }
-                            ]
-                          },
-                        ]}
-                        {...this.props}
-                        rows={this.state.polygonTransactionsAvailableTokens}
-                      />
-                    </Flex>
+                    <PolygonBridgeTransactions
+                      {...this.props}
+                      title={'Polygon Bridge Transactions'}
+                      titleProps={{
+                        my:4
+                      }}
+                    />
                   </Flex>
                 )
               }
