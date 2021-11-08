@@ -56,10 +56,10 @@ class TranchesList extends Component {
                   token={token}
                   tranche={tranche}
                   protocol={protocol}
-                  key={`tranche-${protocol}`}
                   rowId={`tranche-col-${protocol}`}
                   tokenConfig={protocolConfig[token]}
                   cardId={`tranche-card-${protocol}`}
+                  key={`tranche-${protocol}-${token}`}
                   fieldComponent={this.props.fieldComponent || TrancheField}
                 />
               ))

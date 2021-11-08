@@ -79,6 +79,82 @@ const availableTranches = {
         token:'BB_idleDAIYield',
         address:'0x730348a54bA58F64295154F0662A08Cbde1225c2'
       }
+    },
+    FEI:{
+      token:'FEI',
+      decimals:18,
+      limit:500000,
+      protocol:'idle',
+      blockNumber:13575397,
+      address:'0x956f47f50a910163d8bf957cf5846d573e7f87ca',
+      CDO:{
+        abi:IdleCDO,
+        decimals:18,
+        name:'IdleCDO_idleFEIYield',
+        address:'0x77648a2661687ef3b05214d824503f6717311596'
+      },
+      Strategy:{
+        abi:IdleStrategy,
+        name:'IdleStrategy_idleFEIYield'
+      },
+      AA:{
+        abi:ERC20,
+        decimals:18,
+        tranche:'AA',
+        functions:{
+          stake:'stake',
+          unstake:'unstake',
+          deposit:'depositAA',
+          withdraw:'withdrawAA'
+        },
+        CDORewards:{
+          decimals:18,
+          abi:IdleCDOTrancheRewards,
+          name:'IdleCDOTrancheRewards_idleFEIYield_AA',
+          address:'0x8fcD21253AaA7E228531291cC6f644d13B3cF0Ba',
+          stakingRewards:[
+            {
+              token:'IDLE',
+              enabled:true,
+              address:'0x875773784Af8135eA0ef43b5a374AaD105c5D39e'
+            }
+          ]
+        },
+        label:'idleFEI AA',
+        blockNumber:13575397,
+        name:'AA_idleFEIYield',
+        token:'AA_idleFEIYield',
+        address:'0x9cE3a740Df498646939BcBb213A66BBFa1440af6'
+      },
+      BB:{
+        abi:ERC20,
+        decimals:18,
+        tranche:'BB',
+        functions:{
+          stake:'stake',
+          unstake:'unstake',
+          deposit:'depositBB',
+          withdraw:'withdrawBB'
+        },
+        CDORewards:{
+          decimals:18,
+          abi:IdleCDOTrancheRewards,
+          name:'IdleCDOTrancheRewards_idleFEIYield_BB',
+          address:'0x0000000000000000000000000000000000000000',
+          stakingRewards:[
+            {
+              token:'IDLE',
+              enabled:false,
+              address:'0x875773784Af8135eA0ef43b5a374AaD105c5D39e'
+            }
+          ]
+        },
+        label:'idleFEI BB',
+        blockNumber:13575397,
+        name:'BB_idleFEIYield',
+        token:'BB_idleFEIYield',
+        address:'0x2490D810BF6429264397Ba721A488b0C439aA745'
+      }
     }
   }
   /*
