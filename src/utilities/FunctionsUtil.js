@@ -1261,8 +1261,8 @@ class FunctionsUtil {
       }
 
       if (polygonTxs && polygonTxs.data && polygonTxs.data.data && polygonTxs.data.data.items && Object.values(polygonTxs.data.data.items).length){
-        const filteredTxs = polygonTxs.data.data.items.filter( tx => childTokensAddresses.includes(tx.to_address.toLowerCase()) );
         // console.log('polygonTxs',polygonTxs);
+        const filteredTxs = polygonTxs.data.data.items.filter( tx => tx.to_address && childTokensAddresses.includes(tx.to_address.toLowerCase()) );
         await this.asyncForEach(filteredTxs, async (tx) => {
           const tokenConfig = Object.values(polygonAvailableTokens).find( tokenConfig => (tokenConfig.childToken && tokenConfig.childToken.address.toLowerCase() === tx.to_address.toLowerCase()) );
           if (!tokenConfig || !tokenConfig.childToken){

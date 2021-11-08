@@ -366,10 +366,12 @@ class App extends Component {
         // Clear cached data
         this.clearCachedData(() => {
           // Reset Localstorage
-          this.functionsUtil.clearStoredData(['walletProvider', 'connectorName', 'themeMode']);
+          this.functionsUtil.clearStoredData(['walletProvider', 'connectorName', 'themeMode', 'requiredNetwork']);
           this.functionsUtil.setLocalStorage('version', globalConfigs.version);
         }, true);
       }
+
+      console.log(`Client Version: ${globalConfigs.version}`);
     }
 
     const themeMode = this.functionsUtil.getStoredItem('themeMode', false);
