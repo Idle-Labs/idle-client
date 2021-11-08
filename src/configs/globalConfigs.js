@@ -427,8 +427,8 @@ const globalConfigs = {
       },
       address: "0x875773784Af8135eA0ef43b5a374AaD105c5D39e", // MAIN
       disabledTokens:{
+        1:["idleDAISafe","idleUSDCSafe","idleUSDTSafe"],
         137:["idleDAIYield","idleUSDCYield","idleWETHYield"],
-        1:["idleFEIYield","idleDAISafe","idleUSDCSafe","idleUSDTSafe"]
       }
     },
     COMP: {
