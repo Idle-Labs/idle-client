@@ -172,10 +172,6 @@ class PortfolioEquity extends Component {
       tokensData[token] = await this.functionsUtil.getTokenApiData(tokenAddress,isRisk,firstTxTimestamp,null,false,3600);
     });
 
-    // console.log('tokensData',tokensData);
-
-    // debugger;
-
     const idleTokenBalance = {};
 
     for (let timeStamp=firstTxTimestamp;timeStamp<=currTimestamp;timeStamp+=this.props.frequencySeconds){

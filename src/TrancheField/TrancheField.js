@@ -40,6 +40,7 @@ class TrancheField extends Component {
 
   async componentDidMount(){
     this.loadField();
+    // console.log('componentDidMount',this.props.protocol,this.props.token,this.props.tranche);
   }
 
   async setStateSafe(newState,callback=null) {
@@ -59,11 +60,11 @@ class TrancheField extends Component {
     const protocolChanged = prevProps.protocol !== this.props.protocol;
     const themeModeChanged = prevProps.themeMode !== this.props.themeMode;
     const fieldChanged = prevProps.fieldInfo.name !== this.props.fieldInfo.name;
-    const contractInitialized = prevProps.contractsInitialized !== this.props.contractsInitialized && this.props.contractsInitialized;
+    const contractsInitialized = !prevProps.contractsInitialized && this.props.contractsInitialized;
     const transactionsChanged = prevProps.transactions && this.props.transactions && Object.values(prevProps.transactions).filter(tx => (tx.status==='success')).length !== Object.values(this.props.transactions).filter(tx => (tx.status==='success')).length;
 
-    if (fieldChanged || tokenChanged || protocolChanged || trancheChanged || accountChanged || transactionsChanged || (contractInitialized && !this.state.ready)){
-      // console.log('componentDidUpdate-1',fieldChanged,tokenChanged,protocolChanged,trancheChanged,accountChanged,transactionsChanged,(contractInitialized && !this.state.ready));
+    if (fieldChanged || tokenChanged || protocolChanged || trancheChanged || accountChanged || transactionsChanged || (contractsInitialized && !this.state.ready)){
+      // console.log('componentDidUpdate-1',fieldChanged,tokenChanged,protocolChanged,trancheChanged,accountChanged,transactionsChanged,(contractsInitialized && !this.state.ready));
       this.setStateSafe({
         ready:false
       },() => {
@@ -82,7 +83,7 @@ class TrancheField extends Component {
 
   loadField = async(fieldName=null) => {
 
-    if (this.componentUnmounted || !this.props.protocol || !this.props.token || !this.props.tokenConfig){
+    if (this.componentUnmounted || !this.props.protocol || !this.props.token || !this.props.tokenConfig || !this.props.contractsInitialized){
       return false;
     }
 

@@ -7,6 +7,7 @@ import styles from './Landing.module.scss';
 import FlexCards from '../FlexCards/FlexCards';
 import AuditCard from '../AuditCard/AuditCard';
 import HowItWorks from '../HowItWorks/HowItWorks';
+import FlexLoader from '../FlexLoader/FlexLoader';
 import AssetField from '../AssetField/AssetField';
 import RoundButton from '../RoundButton/RoundButton';
 import StrategyBox from '../StrategyBox/StrategyBox';
@@ -288,6 +289,37 @@ class Landing extends Component {
   render() {
     const { network } = this.props;
     const availableTokens = [];
+
+    if (!this.props.availableStrategies){
+      return (
+        <Flex
+          width={1}
+          minHeight={'100vh'}
+          alignItems={'center'}
+          flexDirection={'column'}
+          justifyContent={'center'}
+          backgroundColor={'selectBg'}
+        >
+          <FlexLoader
+            textProps={{
+              textSize: 4,
+              fontWeight: 2
+            }}
+            loaderProps={{
+              mb: 3,
+              size: '80px',
+              color: 'primary'
+            }}
+            flexProps={{
+              my: 3,
+              flexDirection: 'column'
+            }}
+            text={''}
+          />
+        </Flex>
+      );
+    }
+
     Object.values(this.props.availableStrategies).forEach( tokens => {
       Object.keys(tokens).forEach( token => {
         if (availableTokens.indexOf(token) === -1){
@@ -295,6 +327,7 @@ class Landing extends Component {
         }
       });
     });
+
     return (
       <Box
         height={'100vh'}
@@ -590,40 +623,6 @@ class Landing extends Component {
               flexDirection={'column'}
               justifyContent={['center','space-between']}
             >
-              {
-                /*
-                <Flex
-                  mb={3}
-                  width={1}
-                  flexDirection={'column'}
-                  justifyContent={'center'}
-                  alignItems={['center','flex-start']}
-                >
-                  <FlexCards
-                    itemsPerRow={4}
-                    cards={[
-                      {
-                        link:'https://zerion.io',
-                        image:'images/integrators/zerion.svg'
-                      },
-                      {
-                        link:'https://gnosis.io',
-                        image:'images/integrators/gnosis.png'
-                      },
-                      {
-                        link:'https://cryptolocally.com',
-                        image:'images/integrators/cryptolocally.png'
-                      },
-                      {
-                        link:'https://www.peepsdemocracy.com',
-                        image:'images/integrators/peeps.png'
-                      }
-                    ]}
-                    {...this.props}
-                  />
-                </Flex>
-                */
-              }
               <Flex
                 mt={2}
                 width={1}

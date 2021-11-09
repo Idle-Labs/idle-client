@@ -865,6 +865,13 @@ const globalConfigs = {
         137:"https://api-polygon.idle.finance/tvls/"
       }
     },
+    aprs: {
+      TTL: 120,
+      endpoint:{
+        1:"https://api.idle.finance/aprs/",
+        137:"https://api-polygon.idle.finance/aprs/"
+      }
+    },
     substack: {
       TTL: 1800,
       endpoint:{

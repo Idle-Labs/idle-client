@@ -56,10 +56,10 @@ class AssetField extends Component {
     const mobileChanged = prevProps.isMobile !== this.props.isMobile;
     const themeModeChanged = prevProps.themeMode !== this.props.themeMode;
     const fieldChanged = prevProps.fieldInfo.name !== this.props.fieldInfo.name;
-    const contractInitialized = prevProps.contractsInitialized !== this.props.contractsInitialized && this.props.contractsInitialized;
+    const contractsInitialized = !prevProps.contractsInitialized && this.props.contractsInitialized;
     const transactionsChanged = prevProps.transactions && this.props.transactions && Object.values(prevProps.transactions).filter(tx => (tx.status==='success')).length !== Object.values(this.props.transactions).filter(tx => (tx.status==='success')).length;
 
-    if (fieldChanged || tokenChanged || accountChanged || transactionsChanged || (contractInitialized && !this.state.ready)){
+    if (fieldChanged || tokenChanged || accountChanged || transactionsChanged || contractsInitialized){
       this.setStateSafe({
         ready:false
       },() => {
@@ -80,7 +80,7 @@ class AssetField extends Component {
     // console.log('loadField',this.props.fieldInfo.name,this.props.account,this.props.token,this.props.tokenConfig);
 
     if (this.componentUnmounted || !this.props.token || !this.props.tokenConfig || !this.props.contractsInitialized){
-      return false;
+      return null;
     }
 
     const isRisk = this.props.selectedStrategy === 'risk';
@@ -428,6 +428,7 @@ class AssetField extends Component {
 
         case 'apy':
           output = await this.functionsUtil.loadAssetField(fieldName,this.props.token,this.props.tokenConfig,this.props.account,addGovTokens);
+          // console.log(fieldName,this.props.token,this.props.tokenConfig,this.props.account,addGovTokens,output);
           // debugger;
           if (output && setState){
             if (!output.isNaN()){

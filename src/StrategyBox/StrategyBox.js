@@ -48,9 +48,10 @@ class StrategyBox extends Component {
       return false;
     }
 
-    let selectedToken = null;
-    let highestValue = null;
     const tokensAprs = {};
+    let highestValue = null;
+    let selectedToken = null;
+    const availableTokens = this.props.availableStrategies[this.props.strategy];
     
     switch (strategyInfo.type){
       case 'tranche':
@@ -58,33 +59,40 @@ class StrategyBox extends Component {
       break;
       default:
       case 'strategy':
-
-        const availableTokens = this.props.availableStrategies[this.props.strategy];
-        await this.functionsUtil.asyncForEach(Object.keys(availableTokens),async (token) => {
-          const tokenConfig = availableTokens[token];
-          switch (this.props.strategy){
-            case 'best':
-            default:
-              const tokenAPR = await this.functionsUtil.getTokenAprs(tokenConfig);
-              if (tokenAPR && tokenAPR.avgApr !== null){
-                tokensAprs[token] = tokenAPR.avgApr;
-                if (!highestValue || highestValue.lt(tokenAPR.avgApr)){
-                  highestValue = tokenAPR.avgApr;
-                  selectedToken = token;
+        switch (this.props.strategy){
+          case 'best':
+          default:
+            const aprs = await this.functionsUtil.getAprsFromApi();
+            if (aprs){
+              aprs.lendRates.forEach( aprInfo => {
+                const tokenAPR = this.functionsUtil.BNify(aprInfo.apy);
+                if (tokenAPR){
+                  const token = aprInfo.tokenSymbol;
+                  tokensAprs[token] = tokenAPR;
+                  if (!highestValue || highestValue.lt(tokenAPR)){
+                    highestValue = tokenAPR;
+                    selectedToken = token;
+                  }
                 }
-              }
-            break;
-            case 'risk':
-              if (!selectedToken){
-                selectedToken = token;
-              }
-              // const tokenScore = await this.functionsUtil.getTokenScore(tokenConfig,true);
-              // if (!highestValue || highestValue.lt(tokenScore)){
-              //   highestValue = tokenScore;
-              // }
-            break;
-          }
-        });
+              });
+            } else {
+              await this.functionsUtil.asyncForEach(Object.keys(availableTokens),async (token) => {
+                const tokenConfig = availableTokens[token];
+                const tokenAPR = await this.functionsUtil.getTokenAprs(tokenConfig);
+                if (tokenAPR && tokenAPR.avgApr !== null){
+                  tokensAprs[token] = tokenAPR.avgApr;
+                  if (!highestValue || highestValue.lt(tokenAPR.avgApr)){
+                    highestValue = tokenAPR.avgApr;
+                    selectedToken = token;
+                  }
+                }
+              });
+            }
+          break;
+          case 'risk':
+            selectedToken = strategyInfo.token;
+          break;
+        }
       break;
     }
 

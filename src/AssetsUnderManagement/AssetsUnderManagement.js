@@ -38,11 +38,11 @@ class AssetsUnderManagement extends Component {
 
   async loadTotalAUM(){
 
-    if (!this.props.availableStrategies || !this.props.contractsInitialized){
+    const allNetworks = this.props.allNetworks || false;
+
+    if (!this.props.availableStrategies || !this.props.contractsInitialized || (allNetworks && this.state.totalAUM)){
       return true;
     }
-
-    const allNetworks = this.props.allNetworks || false;
 
     const {
       avgAPY,

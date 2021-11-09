@@ -702,6 +702,36 @@ class Dashboard extends Component {
     const networkCorrect = this.props.network.isCorrectNetwork;
     const networkSupported = this.props.network.isSupportedNetwork;
 
+    if (!this.props.availableStrategies){
+      return (
+        <Flex
+          width={1}
+          minHeight={'100vh'}
+          alignItems={'center'}
+          flexDirection={'column'}
+          justifyContent={'center'}
+          backgroundColor={'selectBg'}
+        >
+          <FlexLoader
+            textProps={{
+              textSize: 4,
+              fontWeight: 2
+            }}
+            loaderProps={{
+              mb: 3,
+              size: '80px',
+              color: 'primary'
+            }}
+            flexProps={{
+              my: 3,
+              flexDirection: 'column'
+            }}
+            text={''}
+          />
+        </Flex>
+      );
+    }
+
     // console.log('networkInitialized',this.props.networkInitialized,networkInitialized);
 
     return (

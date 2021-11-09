@@ -67,6 +67,7 @@ class App extends Component {
     } else {
       this.functionsUtil = new FunctionsUtil(this.props);
     }
+    // window.functionsUtil = this.functionsUtil;
   }
 
   closeToastMessage = (e) => {
@@ -250,7 +251,7 @@ class App extends Component {
       }
     }
 
-    // console.log('loadAvailableTokens_2',newState);
+    // console.log('loadAvailableTokens',newState);
 
     await this.setState(newState);
   }
@@ -537,7 +538,8 @@ class App extends Component {
 
   setNetwork(network) {
     this.setState({
-      network
+      network,
+      availableStrategies:null
     });
   }
 

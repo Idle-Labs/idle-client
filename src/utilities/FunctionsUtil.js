@@ -1411,12 +1411,13 @@ class FunctionsUtil {
         // Cache request
         if (txs && txs.data && parseInt(txs.data.status)>0){
           const timestamp = parseInt(Date.now()/1000);
-          const cachedRequests_polygon = this.getCachedDataWithLocalStorage('cachedRequests_polygon',{});
-          cachedRequests_polygon[baseEndpoint] = {
+          // const cachedRequests_polygon = this.getCachedDataWithLocalStorage('cachedRequests_polygon',{});
+          const dataToCache = {
             data:txs,
             timestamp
           };
-          this.setCachedDataWithLocalStorage('cachedRequests_polygon',cachedRequests_polygon);
+          this.addKeyToCachedDataWithLocalStorage('cachedRequests_polygon',baseEndpoint,dataToCache);
+          // this.setCachedDataWithLocalStorage('cachedRequests_polygon',cachedRequests_polygon);
         }
       }
 
@@ -1532,12 +1533,13 @@ class FunctionsUtil {
         // Cache request
         if (txs && txs.data && parseInt(txs.data.status)>0){
           const timestamp = parseInt(Date.now()/1000);
-          const cachedRequests = this.getCachedDataWithLocalStorage('cachedRequests',{});
-          cachedRequests[baseEndpoint] = {
+          // const cachedRequests = this.getCachedDataWithLocalStorage('cachedRequests',{});
+          const dataToCache = {
             data:txs,
             timestamp
           };
-          this.setCachedDataWithLocalStorage('cachedRequests',cachedRequests);
+          this.addKeyToCachedDataWithLocalStorage('cachedRequests',baseEndpoint,dataToCache);
+          // this.setCachedDataWithLocalStorage('cachedRequests',cachedRequests);
         }
       }
 
@@ -2605,13 +2607,13 @@ class FunctionsUtil {
   }
   saveCachedRequest = (endpoint,alias=false,data) => {
     const key = alias ? alias : endpoint;
-    let cachedRequests = this.getCachedDataWithLocalStorage('cachedRequests',{});
     const timestamp = parseInt(Date.now()/1000);
-    cachedRequests[key] = {
+    const dataToCache = {
       data,
       timestamp
     };
-    return this.setCachedDataWithLocalStorage('cachedRequests',cachedRequests);
+    return this.addKeyToCachedDataWithLocalStorage('cachedRequests',key,dataToCache);
+    // return this.setCachedDataWithLocalStorage('cachedRequests',cachedRequests);
   }
   getCustomAddress = () => {
     return this.getStoredItem('customAddress',false);
@@ -2654,11 +2656,12 @@ class FunctionsUtil {
     // console.log('makeEtherscanApiRequest',endpoint+'&apikey='+apiKey,apiKeyIndex+'/'+keys.length,data,(data.data ? data.data.message : null),apiKeyIndex<keys.length-1);
 
     if (data && data.data && data.data.message === 'OK'){
-      cachedRequests[endpoint] = {
+      const dataToCache = {
         data,
         timestamp
       };
-      this.setCachedDataWithLocalStorage('cachedRequests',cachedRequests);
+      // this.setCachedDataWithLocalStorage('cachedRequests',cachedRequests);
+      this.addKeyToCachedDataWithLocalStorage('cachedRequests',endpoint,dataToCache);
       return data;
     } else if (apiKeyIndex<keys.length-1) {
       return await this.makeEtherscanApiRequest(endpoint,keys,TTL,apiKeyIndex+1);
@@ -2671,6 +2674,8 @@ class FunctionsUtil {
     
     // Check if already exists
     let cachedRequests = this.getCachedDataWithLocalStorage('cachedRequests',{});
+
+    // console.log('makeCachedRequest',endpoint,TTL,cachedRequests[key],(cachedRequests[key] ? timestamp-cachedRequests[key].timestamp : null));
     // Check if it's not expired
     if (cachedRequests && cachedRequests[key] && cachedRequests[key].timestamp && timestamp-cachedRequests[key].timestamp<TTL){
       return (cachedRequests[key].data && return_data ? cachedRequests[key].data.data : cachedRequests[key].data);
@@ -2678,11 +2683,15 @@ class FunctionsUtil {
 
     const data = await this.makeRequest(endpoint,false,config);
 
-    cachedRequests[key] = {
+    const dataToCache = {
       data,
       timestamp
     };
-    this.setCachedDataWithLocalStorage('cachedRequests',cachedRequests);
+
+    // console.log('makeCachedRequest - CACHE',key,dataToCache);
+
+    // this.setCachedDataWithLocalStorage('cachedRequests',cachedRequests);
+    this.addKeyToCachedDataWithLocalStorage('cachedRequests',key,dataToCache);
     return (data && return_data ? data.data : data);
   }
   getTransactionError = error => {
@@ -2918,7 +2927,13 @@ class FunctionsUtil {
 
       return this.setCachedData(cachedDataKey,validProposals);
     }
-
+  }
+  getAprsFromApi = async () => {
+    const networkId = this.getRequiredNetworkId();
+    const config = this.getGlobalConfig(['stats','config']);
+    const endpointInfo = this.getGlobalConfig(['stats','aprs']);
+    const aprs = await this.makeCachedRequest(endpointInfo.endpoint[networkId],endpointInfo.TTL,true,false,config);
+    return aprs;
   }
   getTokenApiData = async (address,isRisk=null,startTimestamp=null,endTimestamp=null,forceStartTimestamp=false,frequency=null,order=null,limit=null) => {
     const currentNetworkId = this.getRequiredNetworkId();
@@ -3598,8 +3613,6 @@ class FunctionsUtil {
     ];
 
     const permitConfig = this.getGlobalConfig(['permit',baseContractName]);
-
-    // console.log('permitConfig',permitConfig);
 
     const expiry = Math.round(new Date().getTime() / 1000 + 3600);
     let nonce = permitConfig.nonceMethod ? await baseContract.methods[permitConfig.nonceMethod](holder).call() : null;
@@ -4412,8 +4425,6 @@ class FunctionsUtil {
       case 'apy':
         const tokenApys = await this.getTokenAprs(tokenConfig,false,addGovTokens);
 
-        // console.log('apr',token,tokenApys.avgApr ? tokenApys.avgApr.toFixed() : null,tokenApys.avgApy ? tokenApys.avgApy.toFixed() : null);
-
         output = this.BNify(0);
 
         if (tokenApys && !this.BNify(tokenApys.avgApy).isNaN()){
@@ -4747,6 +4758,14 @@ class FunctionsUtil {
   setCachedData = (key,data,TTL=180) => {
     if (this.props.setCachedData && typeof this.props.setCachedData === 'function'){
       this.props.setCachedData(key,data,TTL);
+    }
+    return data;
+  }
+  addKeyToCachedDataWithLocalStorage = (parent_key,key,data,TTL=180) => {
+    if (this.props.setCachedData && typeof this.props.setCachedData === 'function'){
+      const cachedData = this.getCachedDataWithLocalStorage(parent_key,{});
+      cachedData[key] = data;
+      this.props.setCachedData(parent_key,cachedData,TTL,true);
     }
     return data;
   }
@@ -5413,7 +5432,7 @@ class FunctionsUtil {
     blockNumber = blockNumber !== 'latest' && blockNumber && !isNaN(blockNumber) ? parseInt(blockNumber) : blockNumber;
 
     try{
-      // this.customLog(`genericContractCall - ${contractName} - ${methodName}`);
+      // console.log(`genericContractCall - ${contractName} - ${methodName} - [${params.join(',')}]`);
       const value = await contract.methods[methodName](...params).call(callParams,blockNumber).catch(error => {
         this.customLog(`${contractName} contract method ${methodName} error: `, error);
       });
@@ -7678,7 +7697,6 @@ class FunctionsUtil {
     const cachedDataKey = `tokenAprs_${tokenConfig.idle.address}_${addGovTokens}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData && (cachedData.avgApr && !this.BNify(cachedData.avgApr).isNaN()) && (cachedData.avgApy && !this.BNify(cachedData.avgApy).isNaN()) ){
-      // console.log('getTokenAprs - CACHED',tokenConfig.idle.token,cachedData);
       return {
         avgApr:this.BNify(cachedData.avgApr),
         avgApy:this.BNify(cachedData.avgApy)

@@ -91,7 +91,7 @@ class DepositRedeem extends Component {
   }
 
   async componentDidMount() {
-
+    this.loadTokenInfo();
   }
 
   setShowRedeemFlow = (showRedeemFlow) => {
@@ -292,7 +292,9 @@ class DepositRedeem extends Component {
       }
     });
 
-    this.setState(newState);
+    // console.log('loadProxyContracts',newState);
+
+    return await this.setState(newState);
   }
 
   resetModal = () => {
@@ -699,8 +701,6 @@ class DepositRedeem extends Component {
     };
 
     newState.componentMounted = true;
-
-    // console.log('loadTokenInfo',newState);
 
     this.setState(newState, () => {
       this.checkAction();
@@ -3109,24 +3109,24 @@ class DepositRedeem extends Component {
                         </Box>
                       )
                     ) : (
-                          <Flex
-                            mt={4}
-                            flexDirection={'column'}
-                          >
-                            <FlexLoader
-                              flexProps={{
-                                flexDirection: 'row'
-                              }}
-                              loaderProps={{
-                                size: '30px'
-                              }}
-                              textProps={{
-                                ml: 2
-                              }}
-                              text={'Loading asset info...'}
-                            />
-                          </Flex>
-                        )
+                      <Flex
+                        mt={4}
+                        flexDirection={'column'}
+                      >
+                        <FlexLoader
+                          flexProps={{
+                            flexDirection: 'row'
+                          }}
+                          loaderProps={{
+                            size: '30px'
+                          }}
+                          textProps={{
+                            ml: 2
+                          }}
+                          text={'Loading asset info...'}
+                        />
+                      </Flex>
+                    )
                   }
                 </Migrate>
               )
