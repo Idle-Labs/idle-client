@@ -64,7 +64,7 @@ class Landing extends Component {
 
   loadStrategies(){
     const currentNetworkId = this.functionsUtil.getRequiredNetworkId();
-    const visibleStrategies = Object.keys(globalConfigs.strategies).filter(s => globalConfigs.strategies[s].visible && globalConfigs.strategies[s].availableNetworks.includes(currentNetworkId) && (!globalConfigs.strategies[s].enabledEnvs.length || globalConfigs.strategies[s].enabledEnvs.includes(this.props.currentEnv)) );
+    const visibleStrategies = Object.keys(globalConfigs.landingStrategies).filter(s => globalConfigs.landingStrategies[s].visible && globalConfigs.landingStrategies[s].availableNetworks.includes(currentNetworkId) && (!globalConfigs.landingStrategies[s].enabledEnvs.length || globalConfigs.landingStrategies[s].enabledEnvs.includes(this.props.currentEnv)) );
     const carouselMax = visibleStrategies.length-1;
     this.setState({
       carouselMax,

@@ -57,6 +57,7 @@ class App extends Component {
     config:globalConfigs.network,
     unsubscribeFromHistory: null,
     enableUnderlyingWithdraw: false,
+    availableStrategiesNetworks: null
   };
 
   // Utils
@@ -221,23 +222,35 @@ class App extends Component {
   async loadAvailableTokens() {
     const newState = {};
     const availableStrategies = {};
+    const availableStrategiesNetworks = {};
     const requiredNetwork = this.state.network && this.state.network.isCorrectNetwork ? (this.state.network.current.id || this.state.network.required.id) : this.state.config.requiredNetwork;
 
     // console.log('loadAvailableTokens_1',this.state.network,requiredNetwork,availableTokens);
 
     // Load available strategies
-    Object.keys(availableTokens[requiredNetwork]).forEach((strategy) => {
-      availableStrategies[strategy] = Object.keys(availableTokens[requiredNetwork][strategy]).reduce((enabledTokens, token) => {
-        const tokenConfig = availableTokens[requiredNetwork][strategy][token];
-        const envEnabled = !tokenConfig.enabledEnvs || !tokenConfig.enabledEnvs.length || tokenConfig.enabledEnvs.includes(this.state.currentEnv);
-        if (tokenConfig.enabled && envEnabled) {
-          enabledTokens[token] = tokenConfig;
+    Object.keys(availableTokens).filter( networkId => this.functionsUtil.getGlobalConfig(['network','enabledNetworks']).includes(parseInt(networkId)) ).forEach (networkId => {
+      availableStrategiesNetworks[networkId] = {};
+      Object.keys(availableTokens[networkId]).forEach((strategy) => {
+
+        availableStrategiesNetworks[networkId][strategy] = Object.keys(availableTokens[networkId][strategy]).reduce((enabledTokens, token) => {
+          const tokenConfig = availableTokens[networkId][strategy][token];
+          const envEnabled = !tokenConfig.enabledEnvs || !tokenConfig.enabledEnvs.length || tokenConfig.enabledEnvs.includes(this.state.currentEnv);
+          if (tokenConfig.enabled && envEnabled) {
+            enabledTokens[token] = tokenConfig;
+          }
+          return enabledTokens;
+        }, {});
+
+        if (parseInt(networkId) === parseInt(requiredNetwork)){
+          availableStrategies[strategy] = availableStrategiesNetworks[networkId][strategy];
         }
-        return enabledTokens;
-      }, {});
+      });
     });
 
     newState.availableStrategies = availableStrategies;
+    newState.availableStrategiesNetworks = availableStrategiesNetworks;
+
+    // console.log('availableStrategiesNetworks',availableStrategiesNetworks);
 
     // Load strategy
     const selectedStrategy = this.state.selectedStrategy;
@@ -696,6 +709,7 @@ class App extends Component {
                     availableStrategies={this.state.availableStrategies}
                     setCallbackAfterLogin={this.setCallbackAfterLogin.bind(this)}
                     enableUnderlyingWithdraw={this.state.enableUnderlyingWithdraw}
+                    availableStrategiesNetworks={this.state.availableStrategiesNetworks}
                   >
                     <RimbleWeb3.Consumer>
                       {({
@@ -724,6 +738,7 @@ class App extends Component {
                         accountValidated,
                         getTokenDecimals,
                         getAccountBalance,
+                        contractsNetworks,
                         accountBalanceLow,
                         networkInitialized,
                         accountInizialized,
@@ -783,6 +798,7 @@ class App extends Component {
                                         getTokenDecimals={getTokenDecimals}
                                         rejectValidation={rejectValidation}
                                         tokenConfig={this.state.tokenConfig}
+                                        contractsNetworks={contractsNetworks}
                                         availableTranches={availableTranches}
                                         getAccountBalance={getAccountBalance}
                                         accountBalanceLow={accountBalanceLow}
@@ -818,6 +834,7 @@ class App extends Component {
                                         setRequiredNetwork={this.setRequiredNetwork.bind(this)}
                                         initContractCustomProvider={initContractCustomProvider}
                                         setCallbackAfterLogin={this.setCallbackAfterLogin.bind(this)}
+                                        availableStrategiesNetworks={this.state.availableStrategiesNetworks}
                                       />
                                     </Suspense>
 
@@ -867,6 +884,7 @@ class App extends Component {
                                             getTokenDecimals={getTokenDecimals}
                                             rejectValidation={rejectValidation}
                                             tokenConfig={this.state.tokenConfig}
+                                            contractsNetworks={contractsNetworks}
                                             getAccountBalance={getAccountBalance}
                                             accountBalanceLow={accountBalanceLow}
                                             accountInizialized={accountInizialized}
@@ -898,6 +916,7 @@ class App extends Component {
                                             connectAndValidateAccount={connectAndValidateAccount}
                                             contractMethodSendWrapper={contractMethodSendWrapper}
                                             setCallbackAfterLogin={this.setCallbackAfterLogin.bind(this)}
+                                            availableStrategiesNetworks={this.state.availableStrategiesNetworks}
                                           />
                                         </Suspense>
                                     }
@@ -926,6 +945,7 @@ class App extends Component {
                                   rejectValidation={rejectValidation}
                                   setToken={e => { this.setToken(e) }}
                                   tokenConfig={this.state.tokenConfig}
+                                  contractsNetworks={contractsNetworks}
                                   getAccountBalance={getAccountBalance}
                                   accountBalanceLow={accountBalanceLow}
                                   networkInitialized={networkInitialized}
@@ -946,6 +966,7 @@ class App extends Component {
                                   accountValidationPending={accountValidationPending}
                                   connectAndValidateAccount={connectAndValidateAccount}
                                   setRequiredNetwork={this.setRequiredNetwork.bind(this)}
+                                  availableStrategiesNetworks={this.state.availableStrategiesNetworks}
                                 />
 
                                 {
@@ -995,6 +1016,7 @@ class App extends Component {
                                               accountBalance={accountBalance}
                                               themeMode={this.state.themeMode}
                                               theme={this.state.selectedTheme}
+                                              setToken={e => {this.setToken(e)}}
                                               cachedData={this.state.cachedData}
                                               currentEnv={this.state.currentEnv}
                                               connecting={this.state.connecting}
@@ -1003,6 +1025,7 @@ class App extends Component {
                                               accountBalanceLow={accountBalanceLow}
                                               getAccountBalance={getAccountBalance}
                                               availableTranches={availableTranches}
+                                              contractsNetworks={contractsNetworks}
                                               networkInitialized={networkInitialized}
                                               customAddress={this.state.customAddress}
                                               selectedToken={this.state.selectedToken}
@@ -1020,7 +1043,7 @@ class App extends Component {
                                               availableStrategies={this.state.availableStrategies}
                                               setCurrentSection={this.setCurrentSection.bind(this)}
                                               connectAndValidateAccount={connectAndValidateAccount}
-                                              setToken={e => { this.setToken(e) }}
+                                              availableStrategiesNetworks={this.state.availableStrategiesNetworks}
                                             />
                                             <CookieConsent
                                               expires={365}

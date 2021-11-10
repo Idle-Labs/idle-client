@@ -2,7 +2,7 @@ import Title from '../Title/Title';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import AssetsList from '../AssetsList/AssetsList';
-import RoundButton from '../RoundButton/RoundButton';
+// import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import DashboardCard from '../DashboardCard/DashboardCard';
 import PortfolioDonut from '../PortfolioDonut/PortfolioDonut';
@@ -89,7 +89,7 @@ class StrategyPage extends Component {
 
   async loadPortfolio(){
     const availableTokens = this.props.availableTokens || {};
-    const currentNetwork = this.functionsUtil.getRequiredNetwork();
+    // const currentNetwork = this.functionsUtil.getRequiredNetwork();
 
     if (this.state.portfolioLoaded || this.state.portfolioLoading){
       return false;

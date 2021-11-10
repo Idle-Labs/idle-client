@@ -57,9 +57,10 @@ class AssetField extends Component {
     const themeModeChanged = prevProps.themeMode !== this.props.themeMode;
     const fieldChanged = prevProps.fieldInfo.name !== this.props.fieldInfo.name;
     const contractsInitialized = !prevProps.contractsInitialized && this.props.contractsInitialized;
+    const requiredNetworkChanged = (!prevProps.network && this.props.network) || (prevProps.network && this.props.network && JSON.stringify(prevProps.network.required) !== JSON.stringify(this.props.network.required));
     const transactionsChanged = prevProps.transactions && this.props.transactions && Object.values(prevProps.transactions).filter(tx => (tx.status==='success')).length !== Object.values(this.props.transactions).filter(tx => (tx.status==='success')).length;
 
-    if (fieldChanged || tokenChanged || accountChanged || transactionsChanged || contractsInitialized){
+    if (fieldChanged || tokenChanged || accountChanged || transactionsChanged || contractsInitialized || requiredNetworkChanged){
       this.setStateSafe({
         ready:false
       },() => {
@@ -526,6 +527,9 @@ class AssetField extends Component {
               }
             } else {
               const frequencySeconds = this.functionsUtil.getFrequencySeconds('hour',12);
+
+              // console.log('apiResultsAprChart',this.props.tokenConfig.token,this.props.tokenConfig.address,this.props.network.required);
+
               const apiResultsAprChart = await this.functionsUtil.getTokenApiData(this.props.tokenConfig.address,isRisk,aprChartStartTimestamp,aprChartEndTimestamp,false,frequencySeconds);
 
               apiResultsAprChart.forEach((d,i) => {

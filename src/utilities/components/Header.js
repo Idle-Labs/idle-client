@@ -2,7 +2,7 @@ import React from "react";
 import ExtLink from '../../ExtLink/ExtLink';
 import FunctionsUtil from '../FunctionsUtil';
 import { Box, Flex, Image, Text, Link, Icon } from "rimble-ui";
-import NetworkIndicator from "../../NetworkIndicator/NetworkIndicator";
+// import NetworkIndicator from "../../NetworkIndicator/NetworkIndicator";
 
 import {
   Link as RouterLink
@@ -164,13 +164,17 @@ class Header extends React.Component {
                   </Link>
                 </Flex>
             }
-            <Flex
-              ml={4}
-            >
-              <NetworkIndicator
-                {...this.props}
-              />
-            </Flex>
+            {
+              /*
+              <Flex
+                ml={4}
+              >
+                <NetworkIndicator
+                  {...this.props}
+                />
+              </Flex>
+              */
+            }
           </Flex>
         </Flex>
       </Box>

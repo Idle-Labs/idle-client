@@ -9,6 +9,7 @@ import { Flex, Text, Link, Icon, Tooltip, Image, Loader } from "rimble-ui";
 class StrategyBox extends Component {
 
   state = {
+    network:null,
     selectedToken:null
   };
 
@@ -25,29 +26,48 @@ class StrategyBox extends Component {
 
   async componentWillMount(){
     this.loadUtils();
+
+    const strategyInfo = this.functionsUtil.getGlobalConfig(['landingStrategies',this.props.strategy]);
+    // Over-ride required network id
+    const network = Object.assign({},this.props.network);
+    network.required = Object.assign({},this.props.network.required);
+    network.current = Object.assign({},this.props.network.current);
+
+    network.required.id = strategyInfo.networkId;
+    network.required.name = this.functionsUtil.getGlobalConfig(['network','availableNetworks',strategyInfo.networkId,'name']);
+
+    // console.log('StrategyBox',this.props.strategy,strategyInfo.strategy,strategyInfo.networkId,this.props.network.required,network.required);
+
+    this.setState({
+      network
+    },() => {
+      this.loadData();
+    });
   }
 
   componentDidMount(){
-    this.getHighestAprToken();
   }
 
   async componentDidUpdate(prevProps,prevState){
     this.loadUtils();
 
-    const contractsInitialized = prevProps.contractsInitialized !== this.props.contractsInitialized && this.props.contractsInitialized;
+    const contractsInitialized = !prevProps.contractsInitialized && this.props.contractsInitialized;
     if (contractsInitialized){
-      this.getHighestAprToken();
+      this.loadData();
     }
   }
 
-  getHighestAprToken = async () => {
+  loadData = async () => {
 
-    const strategyInfo = this.functionsUtil.getGlobalConfig(['strategies',this.props.strategy]);
+    const strategyInfo = this.functionsUtil.getGlobalConfig(['landingStrategies',this.props.strategy]);
 
-    if (!this.props.contractsInitialized || strategyInfo.comingSoon){
+    // console.log('loadData - contractsInitialized',this.props.contractsInitialized);
+
+    if (!this.props.contractsInitialized){
       return false;
     }
 
+    let aprs = {};
     const tokensAprs = {};
     let highestValue = null;
     let selectedToken = null;
@@ -61,8 +81,35 @@ class StrategyBox extends Component {
       case 'strategy':
         switch (this.props.strategy){
           case 'best':
-          default:
-            const aprs = await this.functionsUtil.getAprsFromApi();
+            aprs = await this.functionsUtil.getAprsFromApi(strategyInfo.networkId);
+            if (aprs){
+              aprs.lendRates.forEach( aprInfo => {
+                const tokenAPR = this.functionsUtil.BNify(aprInfo.apy);
+                if (tokenAPR){
+                  const token = aprInfo.tokenSymbol;
+                  tokensAprs[token] = tokenAPR;
+                  if (!highestValue || highestValue.lt(tokenAPR)){
+                    highestValue = tokenAPR;
+                    selectedToken = token;
+                  }
+                }
+              });
+            } else {
+              await this.functionsUtil.asyncForEach(Object.keys(availableTokens),async (token) => {
+                const tokenConfig = availableTokens[token];
+                const tokenAPR = await this.functionsUtil.getTokenAprs(tokenConfig);
+                if (tokenAPR && tokenAPR.avgApr !== null){
+                  tokensAprs[token] = tokenAPR.avgApr;
+                  if (!highestValue || highestValue.lt(tokenAPR.avgApr)){
+                    highestValue = tokenAPR.avgApr;
+                    selectedToken = token;
+                  }
+                }
+              });
+            }
+          break;
+          case 'polygon':
+            aprs = await this.functionsUtil.getAprsFromApi(strategyInfo.networkId);
             if (aprs){
               aprs.lendRates.forEach( aprInfo => {
                 const tokenAPR = this.functionsUtil.BNify(aprInfo.apy);
@@ -90,11 +137,14 @@ class StrategyBox extends Component {
             }
           break;
           case 'risk':
+          default:
             selectedToken = strategyInfo.token;
           break;
         }
       break;
     }
+
+    // console.log('loadData',strategyInfo.type,this.props.strategy,strategyInfo.strategy,selectedToken);
 
     this.setState({
       selectedToken
@@ -102,8 +152,8 @@ class StrategyBox extends Component {
   }
 
   render() {
-    const strategyInfo = this.functionsUtil.getGlobalConfig(['strategies',this.props.strategy]);
-    const strategyUrl = '/#'+this.functionsUtil.getGlobalConfig(['dashboard','baseRoute'])+'/'+this.props.strategy;
+    const strategyInfo = this.functionsUtil.getGlobalConfig(['landingStrategies',this.props.strategy]);
+    const strategyUrl = strategyInfo.url ? strategyInfo.url : '/#'+this.functionsUtil.getGlobalConfig(['dashboard','baseRoute'])+'/'+this.props.strategy;
     // const chartColor = strategyInfo.chartColor ? strategyInfo.chartColor : null;
     let tokenConfig = null;
     switch (strategyInfo.type){
@@ -112,9 +162,11 @@ class StrategyBox extends Component {
       break;
       default:
       case 'strategy':
-        tokenConfig = this.state.selectedToken ? this.props.availableStrategies[this.props.strategy][this.state.selectedToken] : null;
+        tokenConfig = this.state.selectedToken ? this.props.availableStrategiesNetworks[strategyInfo.networkId][strategyInfo.strategy][this.state.selectedToken] : null;
       break;
     }
+
+    // console.log('StrategyBox',strategyInfo.type,strategyInfo.strategy,this.state.selectedToken,strategyInfo.networkId,this.props.network.required,this.state.network.required);
 
     return (
       <DashboardCard
@@ -238,9 +290,10 @@ class StrategyBox extends Component {
                     },
                   }}
                   {...this.props}
-                  tokenConfig={ tokenConfig }
+                  tokenConfig={tokenConfig}
+                  network={this.state.network}
                   token={this.state.selectedToken}
-                  selectedStrategy={this.props.strategy}
+                  selectedStrategy={strategyInfo.strategy}
                 />
                 <AssetField
                   fieldInfo={{
@@ -258,9 +311,10 @@ class StrategyBox extends Component {
                     },
                   }}
                   {...this.props}
-                  tokenConfig={ tokenConfig }
+                  tokenConfig={tokenConfig}
+                  network={this.state.network}
                   token={this.state.selectedToken}
-                  selectedStrategy={this.props.strategy}
+                  selectedStrategy={strategyInfo.strategy}
                 />
               </Flex>
               <Flex
@@ -300,9 +354,10 @@ class StrategyBox extends Component {
                           },
                         }}
                         {...this.props}
-                        tokenConfig={ tokenConfig }
+                        tokenConfig={tokenConfig}
+                        network={this.state.network}
                         token={this.state.selectedToken}
-                        selectedStrategy={this.props.strategy}
+                        selectedStrategy={strategyInfo.strategy}
                       />
                       <AssetField
                         fieldInfo={{
@@ -318,9 +373,10 @@ class StrategyBox extends Component {
                           },
                         }}
                         {...this.props}
-                        tokenConfig={ tokenConfig }
+                        tokenConfig={tokenConfig}
+                        network={this.state.network}
                         token={this.state.selectedToken}
-                        selectedStrategy={this.props.strategy}
+                        selectedStrategy={strategyInfo.strategy}
                       />
                     </Flex>
                   ) : (
@@ -392,6 +448,7 @@ class StrategyBox extends Component {
                   {...this.props}
                   tokenConfig={tokenConfig}
                   token={strategyInfo.token}
+                  network={this.state.network}
                   tranche={strategyInfo.tranche}
                   protocol={strategyInfo.protocol}
                 />
@@ -413,6 +470,7 @@ class StrategyBox extends Component {
                   {...this.props}
                   tokenConfig={tokenConfig}
                   token={strategyInfo.token}
+                  network={this.state.network}
                   trancheConfig={tokenConfig.AA}
                   tranche={strategyInfo.tranche}
                   protocol={strategyInfo.protocol}
@@ -467,6 +525,7 @@ class StrategyBox extends Component {
                   {...this.props}
                   tokenConfig={tokenConfig}
                   token={strategyInfo.token}
+                  network={this.state.network}
                   tranche={strategyInfo.tranche}
                   protocol={strategyInfo.protocol}
                 />
@@ -488,6 +547,7 @@ class StrategyBox extends Component {
                   {...this.props}
                   tokenConfig={tokenConfig}
                   token={strategyInfo.token}
+                  network={this.state.network}
                   trancheConfig={tokenConfig.BB}
                   tranche={strategyInfo.tranche}
                   protocol={strategyInfo.protocol}
@@ -507,27 +567,28 @@ class StrategyBox extends Component {
               justifyContent={'center'}
               id={`${this.props.strategy}_performance_chart`}
             >
-              <Image
-                width={1}
-                height={'60px'}
-                src={`/images/strategies/${this.props.strategy}-chart.png`} />
               {
                 /*
-                <AssetField
-                  fieldInfo={{
-                    name:'aprChart'
-                  }}
-                  chartProps={{
-                    lineWidth:2
-                  }}
-                  {...this.props}
-                  color={chartColor}
-                  tokenConfig={tokenConfig}
-                  token={this.state.selectedToken}
-                  rowId={`${this.props.strategy}_performance_chart`}
+                <Image
+                  width={1}
+                  height={'60px'}
+                  src={`/images/strategies/${this.props.strategy}-chart.png`}
                 />
                 */
               }
+              <AssetField
+                fieldInfo={{
+                  name:'aprChart'
+                }}
+                chartProps={{
+                  lineWidth:2
+                }}
+                {...this.props}
+                tokenConfig={tokenConfig}
+                network={this.state.network}
+                token={this.state.selectedToken}
+                rowId={`${this.props.strategy}_performance_chart`}
+              />
             </Flex>
         }
         <Flex

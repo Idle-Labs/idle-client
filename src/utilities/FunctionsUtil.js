@@ -62,7 +62,12 @@ class FunctionsUtil {
   customLog = (...props) => { if (globalConfigs.logs.messagesEnabled) this.customLog(moment().format('HH:mm:ss'),...props); }
   customLogError = (...props) => { if (globalConfigs.logs.errorsEnabled) console.error(moment().format('HH:mm:ss'),...props); }
   getContractByName = (contractName) => {
-    const contract = this.props.contracts.find(c => c.name === contractName);
+    let contract = this.props.contracts.find(c => c.name === contractName);
+    if (this.props.network && this.props.network.required.id !== this.props.network.current.id){
+      contract = this.props.contractsNetworks[this.props.network.required.id].find(c => c.name === contractName);
+    } else {
+      contract = this.props.contracts.find(c => c.name === contractName);
+    }
     if (!contract) {
       return false;
     }
@@ -2928,23 +2933,25 @@ class FunctionsUtil {
       return this.setCachedData(cachedDataKey,validProposals);
     }
   }
-  getAprsFromApi = async () => {
-    const networkId = this.getRequiredNetworkId();
+  getAprsFromApi = async (networkId=null) => {
     const config = this.getGlobalConfig(['stats','config']);
+    if (!networkId || !this.getGlobalConfig(['network','enabledNetworks']).includes(networkId)){
+      networkId = this.getRequiredNetworkId();
+    }
     const endpointInfo = this.getGlobalConfig(['stats','aprs']);
     const aprs = await this.makeCachedRequest(endpointInfo.endpoint[networkId],endpointInfo.TTL,true,false,config);
     return aprs;
   }
   getTokenApiData = async (address,isRisk=null,startTimestamp=null,endTimestamp=null,forceStartTimestamp=false,frequency=null,order=null,limit=null) => {
-    const currentNetworkId = this.getRequiredNetworkId();
-    const statsConfig = this.getGlobalConfig(['stats']);
-    const statsEnabled = statsConfig.enabled && statsConfig.availableNetworks.includes(currentNetworkId);
-    if (!statsEnabled){
-      return [];
-    }
+    const networkId = this.getRequiredNetworkId();
+    // const statsConfig = this.getGlobalConfig(['stats']);
+    // const statsEnabled = statsConfig.enabled && statsConfig.availableNetworks.includes(networkId);
+    // if (!statsEnabled){
+    //   return [];
+    // }
 
     // Check for cached data
-    const cachedDataKey = `tokenApiData_${address}_${isRisk}_${frequency}_${order}_${limit}`;
+    const cachedDataKey = `tokenApiData_${networkId}_${address}_${isRisk}_${frequency}_${order}_${limit}`;
     let cachedData = this.getCachedData(cachedDataKey);
 
     if (cachedData !== null){
@@ -2958,16 +2965,16 @@ class FunctionsUtil {
             return filteredData;
           }
         }
-        return null;
       }
     // Initialize cachedData
     } else {
       cachedData = [];
     }
 
-    const networkId = this.getRequiredNetworkId();
     const apiInfo = this.getGlobalConfig(['stats','rates']);
     let endpoint = `${apiInfo.endpoint[networkId]}${address}`;
+
+    // console.log('getTokenApiData',cachedDataKey,apiInfo,endpoint);
 
     if (startTimestamp || endTimestamp || isRisk !== null || frequency !== null){
       const params = [];
@@ -4124,7 +4131,7 @@ class FunctionsUtil {
       break;
       case 'trancheApy':
         let trancheApy = await this.genericContractCallCached(tokenConfig.CDO.name,'getApr',[trancheConfig.address]);
-        // console.log('trancheApy',tokenConfig,trancheConfig,output);
+        // console.log('trancheApy',this.props.network.required,tokenConfig.CDO.name,trancheConfig.address,trancheApy);
         if (trancheApy){
           output = this.fixTokenDecimals(trancheApy,tokenConfig.CDO.decimals);
           output = this.apr2apy(output.div(100)).times(100);
