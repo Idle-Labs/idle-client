@@ -123,7 +123,6 @@ class Tranches extends Component {
     }
 
     const portfolio = await this.functionsUtil.getAccountPortfolioTranches(this.props.availableTranches,this.props.account);
-    // console.log('loadPortfolio',portfolio);
 
     if (portfolio){
       const portfolioLoaded = true;
@@ -181,6 +180,8 @@ class Tranches extends Component {
       
       const transactions = portfolio.transactions;
       const userHasFunds = portfolio && this.functionsUtil.BNify(portfolio.totalBalance).gt(0);
+
+      // console.log('loadPortfolio - userHasFunds',portfolio,userHasFunds);
 
       this.setState({
         portfolio,

@@ -14,6 +14,7 @@ class TranchePage extends Component {
 
   state = {
     transactions:[],
+    userHasFunds:false,
     componentLoaded:false
   }
 
@@ -51,8 +52,12 @@ class TranchePage extends Component {
     // console.log('loadTransactions',this.props.selectedProtocol,this.props.selectedToken,this.props.trancheType,transactions);
     const componentLoaded = true;
 
+    // console.log('portfolio',this.props.portfolio);
+    const userHasFunds = this.props.portfolio && this.props.portfolio.tranchesBalance.find( balanceInfo => balanceInfo.protocol.toLowerCase() === this.props.selectedProtocol.toLowerCase() && balanceInfo.token.toLowerCase() === this.props.selectedToken.toLowerCase() && (!this.props.trancheType || balanceInfo.tranche.toLowerCase() === this.props.trancheType.toLowerCase()) ) ? true : false;
+
     this.setState({
       transactions,
+      userHasFunds,
       componentLoaded
     });
   }
@@ -125,7 +130,7 @@ class TranchePage extends Component {
         */
         }
         {
-          this.state.componentLoaded && this.props.account && this.props.userHasFunds && this.props.trancheType &&
+          this.state.componentLoaded && this.props.account && this.state.userHasFunds && this.props.trancheType &&
             <Flex
               width={1}
               mb={[0,4]}
@@ -145,7 +150,7 @@ class TranchePage extends Component {
             </Flex>
         }
         {
-          this.state.componentLoaded && this.props.account && this.props.userHasFunds && this.props.trancheType &&
+          this.state.componentLoaded && this.props.account && this.state.userHasFunds && this.props.trancheType &&
             <StakingRewardsTranche
               {...this.props}
               token={this.props.selectedToken}
