@@ -790,7 +790,7 @@ class Dashboard extends Component {
               px={[3, 5]}
               alignItems={"center"}
               justifyItems={"center"}
-              width={['100vw', 0.95]}
+              width={1}
               style={{
                 overflowY: 'scroll',
                 overflowX: 'hidden'

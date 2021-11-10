@@ -5,10 +5,10 @@ import { Flex, Icon, Heading, Card, Tooltip } from "rimble-ui";
 class DashboardCard extends Component {
 
   state = {
-    mouseOver:false
+    mouseOver: false
   }
 
-  setMouseOver(mouseOver){
+  setMouseOver(mouseOver) {
     this.setState({
       mouseOver
     });
@@ -22,24 +22,24 @@ class DashboardCard extends Component {
     const isRainbow = typeof this.props.isRainbow !== 'undefined' ? this.props.isRainbow : false;
 
     const cardProps = {
-      p:0,
-      border:1,
-      boxShadow:1,
-      borderRadius:2,
-      borderColor:null,
-      position:'relative',
-      minHeight:'initial',
-      backgroundColor:'cardBg'
+      p: 0,
+      border: 1,
+      boxShadow: 1,
+      borderRadius: 2,
+      borderColor: null,
+      position: 'relative',
+      minHeight: 'initial',
+      backgroundColor: 'cardBg'
     };
 
-    if (isActive || (isInteractive && this.state.mouseOver)){
+    if (isActive || (isInteractive && this.state.mouseOver)) {
       cardProps.border = 2;
       cardProps.boxShadow = null;
       cardProps.backgroundColor = 'cardBgHover';
     }
 
     // Replace props
-    if (this.props.cardProps && Object.keys(this.props.cardProps).length){
+    if (this.props.cardProps && Object.keys(this.props.cardProps).length) {
       Object.keys(this.props.cardProps).forEach(p => {
         cardProps[p] = this.props.cardProps[p];
       });
@@ -54,7 +54,7 @@ class DashboardCard extends Component {
       isInteractive ? styles.interactive : null,
     ];
 
-    if (this.props.className && styles[this.props.className]){
+    if (this.props.className && styles[this.props.className]) {
       className.push(styles[this.props.className]);
     }
 
@@ -67,39 +67,39 @@ class DashboardCard extends Component {
         onMouseOver={(e) => this.setMouseOver(true)}
       >
         {
-          this.props.title && this.props.title.length>0 &&
-            <Flex
-              mt={[3,4]}
-              ml={[3,4]}
-              alignItems={'center'}
-              flexDirection={'row'}
-              {...this.props.titleParentProps}
+          this.props.title && this.props.title.length > 0 &&
+          <Flex
+            mt={[3, 4]}
+            ml={[3, 4]}
+            alignItems={'center'}
+            flexDirection={'row'}
+            {...this.props.titleParentProps}
+          >
+            <Heading.h4
+              fontWeight={4}
+              fontSize={[2, 3]}
+              textAlign={'left'}
+              color={'dark-gray'}
+              lineHeight={'initial'}
+              {...this.props.titleProps}
             >
-              <Heading.h4
-                fontWeight={4}
-                fontSize={[2,3]}
-                textAlign={'left'}
-                color={'dark-gray'}
-                lineHeight={'initial'}
-                {...this.props.titleProps}
+              {this.props.title}
+            </Heading.h4>
+            {
+              this.props.description && this.props.description.length > 0 &&
+              <Tooltip
+                placement={'top'}
+                message={this.props.description}
               >
-                {this.props.title}
-              </Heading.h4>
-              {
-                this.props.description && this.props.description.length>0 &&
-                  <Tooltip
-                    placement={'top'}
-                    message={this.props.description}
-                  >
-                    <Icon
-                      ml={2}
-                      name={"Info"}
-                      size={'1em'}
-                      color={'cellTitle'}
-                    />
-                  </Tooltip>
-              }
-            </Flex>
+                <Icon
+                  ml={2}
+                  name={"Info"}
+                  size={'1em'}
+                  color={'cellTitle'}
+                />
+              </Tooltip>
+            }
+          </Flex>
         }
         {this.props.children}
       </Card>

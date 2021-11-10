@@ -154,6 +154,7 @@ class NetworkIndicator extends Component {
     return this.state.defaultNetwork ? (
       <GenericSelector
         {...this.props}
+
         name={'network'}
         isSearchable={false}
         innerProps={Object.assign({
@@ -170,6 +171,8 @@ class NetworkIndicator extends Component {
           pl: 3,
           pr: 0
         }}
+        notInteractive="true"
+        noShadow="true"
         options={this.state.activeNetworks}
         CustomOptionValue={CustomOptionValue}
         defaultValue={this.state.defaultNetwork}
@@ -191,6 +194,7 @@ class NetworkIndicator extends Component {
             height: (this.props.innerProps && this.props.innerProps.height) || '42px',
           }}
           isInteractive={false}
+          isActive={false}
         >
           <Loader size={'20px'} />
         </DashboardCard>

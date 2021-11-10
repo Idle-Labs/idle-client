@@ -272,7 +272,7 @@ class Notifications extends Component {
 
   render() {
     const hasUnreadNotifications = this.state.unreadNotifications > 0;
-    const iconColor = hasUnreadNotifications ? '#0239FF' : 'cellText';
+    const iconColor = hasUnreadNotifications ? '#0239FF' : 'dashboardBg';
     return (
       <Flex
         zIndex={999}

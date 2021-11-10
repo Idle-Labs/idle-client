@@ -115,7 +115,9 @@ class DashboardMenu extends Component {
         <Flex
           width={1}
           borderBottom={`1px solid ${this.props.theme.colors.divider}`}
+          justifyContent={"flex-start"}
           mb={3}
+          mx={3}
           pb={3}
         >
           {/*<RoundButton
@@ -170,24 +172,24 @@ class DashboardMenu extends Component {
               cardProps={{
                 border: 1,
                 boxShadow: 0,
-                borderRadius: 0,
+                borderRadius: 1,
                 py: 1,
                 px: [1, 2],
-                ml: [0, 3],
+                width: 0.8,
                 mr: [2, 0],
                 display: "flex",
-                width: 1,
+
                 mb: [0, 3]
               }}
               isInteractive={true}
               handleClick={e => this.props.goToSection(governanceRoute, false)}
             >
               <Flex
-                p={1}
-                width={1}
+                p={0}
+
                 alignItems={"center"}
                 flexDirection={"row"}
-                justifyContent={["center", "flex-start"]}
+                justifyContent={"center"}
               >
                 <Image
                   mr={1}
@@ -199,7 +201,7 @@ class DashboardMenu extends Component {
 
 
 
-                <Text px={1} color={"black"} fontSize={1} fontWeight={400}>
+                <Text color={"copyColor"} fontSize={1} fontWeight={400}>
                   Switch to Governance
                 </Text>
 
@@ -213,13 +215,13 @@ class DashboardMenu extends Component {
                   cardProps={{
                     border: 1,
                     boxShadow: 0,
-                    borderRadius: 0,
+                    borderRadius: 1,
                     py: 1,
                     px: [1, 2],
-                    ml: [0, 3],
+                    width: 0.8,
                     mr: [2, 0],
                     display: "flex",
-                    width: 1,
+
                     mb: [0, 3]
                   }}
                   isInteractive={true}
@@ -227,10 +229,10 @@ class DashboardMenu extends Component {
                 >
                   <Flex
                     p={0}
-                    width={1}
+
                     alignItems={"center"}
                     flexDirection={"row"}
-                    justifyContent={["center", "flex-start"]}
+                    justifyContent={"center"}
                   >
                     <Image
                       mr={1}
@@ -242,7 +244,7 @@ class DashboardMenu extends Component {
 
 
 
-                    <Text color={"black"} fontSize={1} fontWeight={400}>
+                    <Text color={"copyColor"} fontSize={1} fontWeight={400}>
                       Switch to Dashboard
                 </Text>
 

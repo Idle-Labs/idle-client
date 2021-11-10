@@ -12,20 +12,20 @@ class GenericSelector extends Component {
   // Utils
   functionsUtil = null;
 
-  loadUtils(){
-    if (this.functionsUtil){
+  loadUtils() {
+    if (this.functionsUtil) {
       this.functionsUtil.setProps(this.props);
     } else {
       this.functionsUtil = new FunctionsUtil(this.props);
     }
   }
 
-  async componentWillMount(){
+  async componentWillMount() {
     this.loadUtils();
     await this.loadComponents();
   }
 
-  async componentDidUpdate(prevProps,prevState){
+  async componentDidUpdate(prevProps, prevState) {
     this.loadUtils();
 
     const selectedTokenChanged = prevProps.selectedToken !== this.props.selectedToken;
@@ -33,30 +33,30 @@ class GenericSelector extends Component {
     const defaultValueChanged = JSON.stringify(prevProps.defaultValue) !== JSON.stringify(this.props.defaultValue);
     const componentsChanged = prevProps.CustomOptionValue !== this.props.CustomOptionValue || prevProps.CustomValueContainer !== this.props.CustomValueContainer;
 
-    if (optionsChanged || selectedTokenChanged || defaultValueChanged || componentsChanged){
+    if (optionsChanged || selectedTokenChanged || defaultValueChanged || componentsChanged) {
       this.loadComponents();
     }
   }
 
-  async loadComponents(){
-    
+  async loadComponents() {
+
     const ControlComponent = props => {
       const cardProps = Object.assign(
         props.innerProps,
         {
-          p:2,
-          width:1,
-          style:{cursor:'pointer'}
+          p: 2,
+          width: 1,
+          style: { cursor: 'pointer' }
         },
         (this.props.innerProps ? this.props.innerProps : {})
       );
 
-      if (props.menuIsOpen){
-        cardProps.boxShadow = 4;
+      if (props.menuIsOpen) {
+        cardProps.boxShadow = this.props.noShadow ? 0 : 4;
       }
       return (
         <DashboardCard
-          isInteractive={true}
+          isInteractive={this.props.notInteractive ? false : true}
           cardProps={cardProps}
         >
           <Flex
@@ -74,11 +74,11 @@ class GenericSelector extends Component {
     const CustomIndicatorSeparator = props => null;
 
     const CustomMenu = props => {
-      const cardProps = Object.assign(props.innerProps,{
-        mt:2,
-        zIndex:1,
-        boxShadow:null,
-        position:'absolute'
+      const cardProps = Object.assign(props.innerProps, {
+        mt: 2,
+        zIndex: 1,
+        boxShadow: null,
+        position: 'absolute'
       });
       return (
         <DashboardCard
@@ -125,7 +125,7 @@ class GenericSelector extends Component {
 
     const CustomInputContainer = this.props.CustomInputContainer ? this.props.CustomInputContainer : (props) => {
 
-      if (!props.selectProps.isSearchable){
+      if (!props.selectProps.isSearchable) {
         return null;
       }
 
@@ -137,7 +137,7 @@ class GenericSelector extends Component {
           fontWeight={this.props.theme.fontWeights[3]}
           fontFamily={this.props.theme.fonts.sansSerif}
           backgroundColor={this.props.theme.colors.cardBg}
-          className={[styles.searchInput,this.props.themeMode==='dark' ? styles.dark : null,!props.selectProps.menuIsOpen ? styles.searchInputHidden : null]}
+          className={[styles.searchInput, this.props.themeMode === 'dark' ? styles.dark : null, !props.selectProps.menuIsOpen ? styles.searchInputHidden : null]}
         />
       );
     };
@@ -148,12 +148,12 @@ class GenericSelector extends Component {
       let selectedValue = props.selectProps && props.selectProps.value && props.selectProps.value.value;
 
       // Check if the selectedValue is included in options
-      if (selectedValue && options.map( o => o.value ).indexOf(selectedValue) === -1 && this.props.defaultValue){
+      if (selectedValue && options.map(o => o.value).indexOf(selectedValue) === -1 && this.props.defaultValue) {
         selectedValue = this.props.defaultValue.value;
       }
 
       // Don't show selected value
-      if (selectedValue && selectedValue === props.value){
+      if (selectedValue && selectedValue === props.value) {
         return null;
       }
 
@@ -167,10 +167,10 @@ class GenericSelector extends Component {
           {...props.innerProps}
           alignItems={'center'}
           flexDirection={'row'}
-          style={{cursor:'pointer'}}
+          style={{ cursor: 'pointer' }}
           justifyContent={'flex-start'}
           className={styles.genericSelector}
-          backgroundColor={ props.isFocused ? 'selectBgFocused' : 'selectBg' }
+          backgroundColor={props.isFocused ? 'selectBgFocused' : 'selectBg'}
         >
           <CustomOptionValue
             {...props}
@@ -197,14 +197,14 @@ class GenericSelector extends Component {
         isSearchable={isSearchable}
         options={this.props.options}
         defaultValue={this.props.defaultValue}
-        onChange={ v => this.props.onChange(v.value) }
+        onChange={v => this.props.onChange(v.value)}
         components={{
-            Menu: this.state.CustomMenu,
-            Option: this.state.CustomOption,
-            Control: this.state.ControlComponent,
-            Input: this.state.CustomInputContainer,
-            SingleValue: this.state.CustomValueContainer,
-            IndicatorSeparator: this.state.CustomIndicatorSeparator
+          Menu: this.state.CustomMenu,
+          Option: this.state.CustomOption,
+          Control: this.state.ControlComponent,
+          Input: this.state.CustomInputContainer,
+          SingleValue: this.state.CustomValueContainer,
+          IndicatorSeparator: this.state.CustomIndicatorSeparator
         }}
       />
     );
