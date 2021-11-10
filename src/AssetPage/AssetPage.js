@@ -184,6 +184,7 @@ class AssetPage extends Component {
           Deposit / Redeem
         </Title>
         {
+          /*
           currentNetwork.id === 137 ? (
             <Flex
               width={1}
@@ -228,7 +229,9 @@ class AssetPage extends Component {
                 </Flex>
               </DashboardCard>
             </Flex>
-          ) : (
+          ) :
+          */
+          (
             <>
               <Flex
                 width={1}

@@ -91,7 +91,7 @@ class StrategyPage extends Component {
     const availableTokens = this.props.availableTokens || {};
     const currentNetwork = this.functionsUtil.getRequiredNetwork();
 
-    if (this.state.portfolioLoaded || this.state.portfolioLoading || currentNetwork.id === 137){
+    if (this.state.portfolioLoaded || this.state.portfolioLoading){
       return false;
     }
 
@@ -266,6 +266,7 @@ class StrategyPage extends Component {
           {strategyName} strategy
         </Title>
         {
+          /*
           currentNetwork.id === 137 ? (
             <Flex
               width={1}
@@ -310,7 +311,9 @@ class StrategyPage extends Component {
                 </Flex>
               </DashboardCard>
             </Flex>
-          ) : !this.state.portfolioLoaded ? (
+          ) :
+          */
+          !this.state.portfolioLoaded ? (
             <FlexLoader
               textProps={{
                 textSize:4,

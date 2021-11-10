@@ -850,7 +850,7 @@ const globalConfigs = {
   },
   stats: {
     enabled: true, // Enable endpoint
-    availableNetworks:[1],
+    availableNetworks:[1,137],
     rates: {
       TTL: 300, // 5 minutes
       endpoint:{
