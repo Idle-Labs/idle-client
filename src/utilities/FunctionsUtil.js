@@ -62,11 +62,11 @@ class FunctionsUtil {
   customLog = (...props) => { if (globalConfigs.logs.messagesEnabled) this.customLog(moment().format('HH:mm:ss'),...props); }
   customLogError = (...props) => { if (globalConfigs.logs.errorsEnabled) console.error(moment().format('HH:mm:ss'),...props); }
   getContractByName = (contractName) => {
-    let contract = this.props.contracts.find(c => c.name === contractName);
-    if (this.props.network && this.props.network.required.id !== this.props.network.current.id){
-      contract = this.props.contractsNetworks[this.props.network.required.id].find(c => c.name === contractName);
+    let contract = this.props.contracts.find(c => c && c.name && c.name === contractName);
+    if (this.props.network && this.props.network.required && this.props.network.current && this.props.network.required.id !== this.props.network.current.id && this.props.contractsNetworks && this.props.contractsNetworks[this.props.network.required.id]){
+      contract = this.props.contractsNetworks[this.props.network.required.id].find(c => c && c.name && c.name === contractName);
     } else {
-      contract = this.props.contracts.find(c => c.name === contractName);
+      contract = this.props.contracts.find(c => c && c.name && c.name === contractName);
     }
     if (!contract) {
       return false;

@@ -141,7 +141,7 @@ class AssetPage extends Component {
 
   render() {
 
-    const currentNetwork = this.functionsUtil.getRequiredNetwork();
+    // const currentNetwork = this.functionsUtil.getRequiredNetwork();
     const nexusMutualConfig = this.functionsUtil.getGlobalConfig(['tools','nexusMutual']);
 
     return (

@@ -28,6 +28,7 @@ class StrategyBox extends Component {
     this.loadUtils();
 
     const strategyInfo = this.functionsUtil.getGlobalConfig(['landingStrategies',this.props.strategy]);
+    
     // Over-ride required network id
     const network = Object.assign({},this.props.network);
     network.required = Object.assign({},this.props.network.required);
@@ -35,8 +36,6 @@ class StrategyBox extends Component {
 
     network.required.id = strategyInfo.networkId;
     network.required.name = this.functionsUtil.getGlobalConfig(['network','availableNetworks',strategyInfo.networkId,'name']);
-
-    // console.log('StrategyBox',this.props.strategy,strategyInfo.strategy,strategyInfo.networkId,this.props.network.required,network.required);
 
     this.setState({
       network
@@ -151,9 +150,20 @@ class StrategyBox extends Component {
     });
   }
 
+  async goToStrategy(){
+    const strategyInfo = this.functionsUtil.getGlobalConfig(['landingStrategies',this.props.strategy]);
+
+    if (strategyInfo.url){
+      window.location.href = strategyInfo.url;
+      return true;
+    }
+
+    await this.props.setRequiredNetwork(strategyInfo.networkId);
+    window.location.href = this.functionsUtil.getDashboardSectionUrl(strategyInfo.strategy);
+  }
+
   render() {
     const strategyInfo = this.functionsUtil.getGlobalConfig(['landingStrategies',this.props.strategy]);
-    const strategyUrl = strategyInfo.url ? strategyInfo.url : '/#'+this.functionsUtil.getGlobalConfig(['dashboard','baseRoute'])+'/'+this.props.strategy;
     // const chartColor = strategyInfo.chartColor ? strategyInfo.chartColor : null;
     let tokenConfig = null;
     switch (strategyInfo.type){
@@ -620,7 +630,7 @@ class StrategyBox extends Component {
               </Flex>
             ) : (
               <Link
-                href={strategyUrl}
+                onClick={ e => this.goToStrategy() }
                 style={{display:'flex',width:'100%'}}
                 >
                   <Flex

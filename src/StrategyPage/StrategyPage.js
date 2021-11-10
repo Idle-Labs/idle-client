@@ -104,6 +104,9 @@ class StrategyPage extends Component {
       const newState = {};
       const firstBlockNumber = this.functionsUtil.getGlobalConfig(['network','firstBlockNumber']);
 
+      // Load and process Etherscan Txs
+      this.functionsUtil.getEtherscanTxs(this.props.account,firstBlockNumber,'latest',Object.keys(availableTokens))
+
       // Load data
       const [
         batchedDeposits,
@@ -113,8 +116,6 @@ class StrategyPage extends Component {
         [],//this.functionsUtil.getBatchedDeposits(this.props.account),
         // Load portfolio
         this.functionsUtil.getAccountPortfolio(availableTokens,this.props.account),
-        // Load and process Etherscan Txs
-        this.functionsUtil.getEtherscanTxs(this.props.account,firstBlockNumber,'latest',Object.keys(availableTokens))
       ]);
 
       newState.portfolio = portfolio;

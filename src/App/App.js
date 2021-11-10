@@ -308,7 +308,7 @@ class App extends Component {
       this.functionsUtil.setLocalStorage('requiredNetwork',requiredNetwork);
       // console.log('setRequiredNetwork',requiredNetwork);
       this.functionsUtil.addEthereumChain(requiredNetwork);
-      return this.setState(prevState => ({
+      return await this.setState(prevState => ({
         config:{
           ...prevState.config,
           requiredNetwork
@@ -700,6 +700,7 @@ class App extends Component {
                     customAddress={this.state.customAddress}
                     selectedToken={this.state.selectedToken}
                     connectorName={this.state.connectorName}
+                    currentSection={this.state.currentSection}
                     walletProvider={this.state.walletProvider}
                     setConnector={this.setConnector.bind(this)}
                     availableTokens={this.state.availableTokens}
@@ -1043,6 +1044,7 @@ class App extends Component {
                                               availableStrategies={this.state.availableStrategies}
                                               setCurrentSection={this.setCurrentSection.bind(this)}
                                               connectAndValidateAccount={connectAndValidateAccount}
+                                              setRequiredNetwork={this.setRequiredNetwork.bind(this)}
                                               availableStrategiesNetworks={this.state.availableStrategiesNetworks}
                                             />
                                             <CookieConsent

@@ -778,8 +778,8 @@ const globalConfigs = {
       component: Tranches,
       iconName: "Whatshot",
       enabledEnvs: ['beta'],
+      availableNetworks:[1],
       govTokensEnabled: true,
-      availableNetworks:[1,137],
       chartColor: "hsl(40,95%,59%)",
       icon: "images/strategies/tranches-on.png",
       iconInactive: "images/strategies/tranches-off.png",
@@ -802,9 +802,9 @@ const globalConfigs = {
       titlePostfix: null,
       title: "Best-Yield",
       iconName: "Whatshot",
+      availableNetworks:[],
       govTokensEnabled: true,
       component: StrategyPage,
-      availableNetworks:[1,137],
       chartColor: "hsl(40,95%,59%)",
       icon: "images/strategies/best-on.svg",
       iconInactive: "images/strategies/best-off.svg",
@@ -826,15 +826,14 @@ const globalConfigs = {
       addGovTokens: true,
       titlePostfix: null,
       iconName: "Whatshot",
+      availableNetworks:[],
       govTokensEnabled: true,
       component: StrategyPage,
-      availableNetworks:[1,137],
       chartColor: "hsl(40,95%,59%)",
       icon: "images/protocols/polygon.svg",
       iconInactive: "images/protocols/polygon.svg",
       iconInactiveDark: "images/protocols/polygon.svg",
       desc: "Maximize your returns across DeFi protocols",
-      url: "https://polygon.idle.finance/#/dashboard/best",
       descLong:"The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols. Idle’s monitoring system automatically triggers a rebalance if it spots a better-performing allocation: this includes taking account of the total liquidity within the pool, incorporating underlying protocol rate functions and levels of supply and demand. As a user, you will end up with an higher return without constantly checking rates and burning gas on every transfer. Unlock your funds from a single protocol performance with this strategy.",
       descShort:"The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols."
     },
@@ -1565,7 +1564,7 @@ const globalConfigs = {
           80001:5
         },
         publicRpc:{
-          137:'https://rpc-mainnet.matic.network'
+          137:'https://polygon-rpc.com'
         },
         rpc:{
           // 1:'https://rpc-mainnet.maticvigil.com/v1/',

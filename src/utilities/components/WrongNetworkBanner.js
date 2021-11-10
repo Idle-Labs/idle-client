@@ -23,12 +23,11 @@ class WrongNetworkBanner extends React.Component {
               Looks like you're on the wrong network
             </Text>
             <Text>
-              You should be on the {this.props.network.required.name} Ethereum
-              network. You are currently connected to the{" "}
+              The network you are currently connected{" "}
               <Text.span style={{ textTransform: "capitalize" }}>
-                {this.props.network.current.name}
+                ({this.props.network.current.name})
               </Text.span>{" "}
-              Network - please switch to the correct network.
+              is not supported - please switch to the correct network.
             </Text>
           </Flex>
         </Flex>

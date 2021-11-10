@@ -33,6 +33,7 @@ class Landing extends Component {
     testPerformed:false,
     totalAllocation:null,
     visibleStrategies:[],
+    landingStrategies:[],
     carouselOffsetLeft:0,
     setActiveCarousel:null,
     carouselIntervalID:null,
@@ -64,11 +65,13 @@ class Landing extends Component {
 
   loadStrategies(){
     const currentNetworkId = this.functionsUtil.getRequiredNetworkId();
-    const visibleStrategies = Object.keys(globalConfigs.landingStrategies).filter(s => globalConfigs.landingStrategies[s].visible && globalConfigs.landingStrategies[s].availableNetworks.includes(currentNetworkId) && (!globalConfigs.landingStrategies[s].enabledEnvs.length || globalConfigs.landingStrategies[s].enabledEnvs.includes(this.props.currentEnv)) );
-    const carouselMax = visibleStrategies.length-1;
+    const landingStrategies = Object.keys(globalConfigs.landingStrategies);
+    const visibleStrategies = landingStrategies.filter(s => globalConfigs.landingStrategies[s].visible && (!globalConfigs.landingStrategies[s].availableNetworks.length || globalConfigs.landingStrategies[s].availableNetworks.includes(currentNetworkId)) && (!globalConfigs.landingStrategies[s].enabledEnvs.length || globalConfigs.landingStrategies[s].enabledEnvs.includes(this.props.currentEnv)) );
+    const carouselMax = landingStrategies.length-1;
     this.setState({
       carouselMax,
-      visibleStrategies
+      visibleStrategies,
+      landingStrategies
     });
   }
 
@@ -286,6 +289,10 @@ class Landing extends Component {
     }
   }
 
+  goToStrategy = async () => {
+    window.location.hash = this.functionsUtil.getGlobalConfig(['dashboard','baseRoute'])+'/'+this.state.visibleStrategies[0];
+  }
+
   render() {
     const { network } = this.props;
     const availableTokens = [];
@@ -411,9 +418,7 @@ class Landing extends Component {
                         mt={4}
                       >
                         <RoundButton
-                          handleClick={ (e) => {
-                            window.location.hash = this.functionsUtil.getGlobalConfig(['dashboard','baseRoute'])+'/'+this.state.visibleStrategies[0];
-                          }}
+                          handleClick={ (e) => this.goToStrategy() }
                         >
                           Go to Dashboard
                         </RoundButton>
@@ -454,10 +459,10 @@ class Landing extends Component {
                       overflowY:'visible',
                       transition:'left 0.3s ease-in-out'
                     }}
-                    width={[this.state.visibleStrategies.length*100+'%','140%']}
+                    width={[this.state.landingStrategies.length*100+'%','140%']}
                   >
                     {
-                      this.state.visibleStrategies.map((strategy,strategyIndex) => (
+                      this.state.landingStrategies.map((strategy,strategyIndex) => (
                         <StrategyBox
                           {...this.props}
                           strategy={strategy}

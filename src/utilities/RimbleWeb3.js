@@ -15,7 +15,6 @@ import ConnectionErrorModal from './components/ConnectionErrorModal';
 import TransactionErrorModal from './components/TransactionErrorModal';
 
 require('dotenv').config();
-const INFURA_KEY = process.env["REACT_APP_INFURA_KEY"];
 
 const RimbleTransactionContext = React.createContext({
   web3: {},
@@ -367,7 +366,6 @@ class RimbleTransaction extends React.Component {
     const useWeb3Provider = this.state.networkInitialized && this.state.network.isCorrectNetwork;
     const web3InfuraRpc = this.functionsUtil.getGlobalConfig(['network','providers','infura','rpc',networkId])+this.functionsUtil.getGlobalConfig(['network','providers','infura','key']);
     
-    console.log('initWeb3',networkId,provider,web3Rpc,web3InfuraRpc);
 
     const enabledNetworks = this.functionsUtil.getGlobalConfig(['network','enabledNetworks']);
     const web3Providers = Object.keys(availableNetworks).filter( netId => enabledNetworks.includes(parseInt(netId)) ).reduce( (acc,netId) => {
@@ -471,10 +469,7 @@ class RimbleTransaction extends React.Component {
       web3 = new Web3(web3Provider);
     // Infura
     } else if (web3Host) {
-      web3 = new Web3(new Web3.providers.HttpProvider(web3Host));
-      // if (this.state.networkInitialized && connectorName !== 'Infura'){
-      //   this.props.setConnector('Infura',null);
-      // }
+      web3 = web3Providers[networkId];
     }
 
     let web3Polygon = null;
@@ -524,7 +519,7 @@ class RimbleTransaction extends React.Component {
     } else if (window.web3) {
       currentWeb3 = new Web3(window.web3);
     } else {
-      currentWeb3 = new Web3(new Web3.providers.HttpProvider(web3Host));
+      currentWeb3 = web3Providers[networkId];
     }
 
     this.setState({
@@ -683,6 +678,10 @@ class RimbleTransaction extends React.Component {
   }
 
   initContractWithoutSet = (name, address, abi, networkId=null) => {
+    // Reset networkId is equal to injected
+    if (networkId && parseInt(networkId) === parseInt(this.state.network.required.id) && this.state.network.isCorrectNetwork){
+      networkId = null;
+    }
     const web3Provider = networkId && this.state.web3Providers[networkId] ? this.state.web3Providers[networkId] : (this.state.network.isCorrectNetwork ? this.state.web3 : this.state.web3Providers[this.state.network.required.id]);
 
     if (!web3Provider){
@@ -962,7 +961,7 @@ class RimbleTransaction extends React.Component {
       return false;
     }
 
-    // console.log(this.functionsUtil.strToMoment().format('HH:mm:ss'),'initializeContracts - START',this.state.network.required.id,this.props.availableStrategies,this.props.availableStrategiesNetworks);
+    console.log(this.functionsUtil.strToMoment().format('HH:mm:ss'),'initializeContracts - START',this.state.network.required.id,this.props.availableStrategies,this.props.availableStrategiesNetworks);
 
     const contracts = [];
     const contractsNetworks = {};
@@ -1013,13 +1012,10 @@ class RimbleTransaction extends React.Component {
           return;
         }
         // Initialize govToken contracts
-        let foundGovTokenContract = this.state.contracts.find(c => c.name === token);
-        if (!foundGovTokenContract) {
-          const contractAddress = govTokenConfig.addresses && govTokenConfig.addresses[this.state.network.required.id] ? govTokenConfig.addresses[this.state.network.required.id] : govTokenConfig.address;
-          this.functionsUtil.customLog('initializeContracts, init contract', token, contractAddress);
-          contracts.push(this.initContractWithoutSet(token, contractAddress, govTokenConfig.abi, 1));
-          contractsNetworks[1].push(this.initContractWithoutSet(token, contractAddress, govTokenConfig.abi, 1));
-        }
+        const contractAddress = govTokenConfig.addresses && govTokenConfig.addresses[this.state.network.required.id] ? govTokenConfig.addresses[this.state.network.required.id] : govTokenConfig.address;
+        this.functionsUtil.customLog('initializeContracts, init contract', token, contractAddress);
+        contracts.push(this.initContractWithoutSet(token, contractAddress, govTokenConfig.abi, 1));
+        contractsNetworks[1].push(this.initContractWithoutSet(token, contractAddress, govTokenConfig.abi, 1));
       });
     }
 
@@ -1030,26 +1026,17 @@ class RimbleTransaction extends React.Component {
         Object.keys(availableTokens).forEach( token => {
           const tokenConfig = availableTokens[token];
 
-          let foundTokenContract = this.state.contracts.find(c => c.name === token);
-          if (!foundTokenContract) {
-            this.functionsUtil.customLog('initializeContracts, init contract',token, tokenConfig.address);
-            contracts.push(this.initContractWithoutSet(token, tokenConfig.address, tokenConfig.abi));
-          }
+          this.functionsUtil.customLog('initializeContracts, init contract',token, tokenConfig.address);
+          contracts.push(this.initContractWithoutSet(token, tokenConfig.address, tokenConfig.abi));
 
           // Initialize idleTokens contracts
-          let foundIdleTokenContract = this.state.contracts.find(c => c.name === tokenConfig.idle.token);
-          if (!foundIdleTokenContract) {
-            this.functionsUtil.customLog('initializeContracts, init contract',tokenConfig.idle.token, tokenConfig.idle.address);
-            contracts.push(this.initContractWithoutSet(tokenConfig.idle.token, tokenConfig.idle.address, tokenConfig.idle.abi));
-          }
+          this.functionsUtil.customLog('initializeContracts, init contract',tokenConfig.idle.token, tokenConfig.idle.address);
+          contracts.push(this.initContractWithoutSet(tokenConfig.idle.token, tokenConfig.idle.address, tokenConfig.idle.abi));
 
           // Initialize protocols contracts
           tokenConfig.protocols.forEach(async (p,i) => {
-            let foundProtocolContract = this.state.contracts.find(c => c.name === p.token);
-            if (!foundProtocolContract) {
-              this.functionsUtil.customLog('initializeContracts, init '+p.token+' contract',p);
-              contracts.push(this.initContractWithoutSet(p.token, p.address, p.abi));
-            }
+            this.functionsUtil.customLog('initializeContracts, init '+p.token+' contract',p);
+            contracts.push(this.initContractWithoutSet(p.token, p.address, p.abi));
           });
 
           // Check migration contract
@@ -1064,11 +1051,8 @@ class RimbleTransaction extends React.Component {
             // Initialize protocols contracts
             if (tokenConfig.migration.oldProtocols){
               tokenConfig.migration.oldProtocols.forEach(async (p,i) => {
-                let foundProtocolContract = this.state.contracts.find(c => c.name === p.token);
-                if (!foundProtocolContract) {
-                  this.functionsUtil.customLog('initializeContracts, init '+p.token+' contract',p);
-                  contracts.push(this.initContractWithoutSet(p.token, p.address, p.abi));
-                }
+                this.functionsUtil.customLog('initializeContracts, init '+p.token+' contract',p);
+                contracts.push(this.initContractWithoutSet(p.token, p.address, p.abi));
               });
             }
 
@@ -1105,31 +1089,31 @@ class RimbleTransaction extends React.Component {
     }
 
     const newState = {
+      contracts,
       contractsNetworks,
       contractsInitialized:true,
-      contracts:[...this.state.contracts],
     };
 
-    contracts.forEach( newContractInfo => {
-      if (newContractInfo){
-        let foundContract = newState.contracts.find(c => c.name === newContractInfo.name);
-        const contractChanged = newState.contracts.indexOf(newContractInfo)===-1;
-        if (!foundContract || contractChanged){
-          // Replace old contract
-          if (foundContract){
-            const contractIndex = newState.contracts.indexOf(foundContract);
-            if (contractIndex!==-1){
-              newState.contracts[contractIndex] = newContractInfo;
-            }
-          // Insert new contract
-          } else {
-            newState.contracts.push(newContractInfo);
-          }
-        }
-      }
-    });
+    // contracts.forEach( newContractInfo => {
+    //   if (newContractInfo){
+    //     let foundContract = newState.contracts.find(c => c.name === newContractInfo.name);
+    //     const contractChanged = newState.contracts.indexOf(newContractInfo)===-1;
+    //     if (!foundContract || contractChanged){
+    //       // Replace old contract
+    //       if (foundContract){
+    //         const contractIndex = newState.contracts.indexOf(foundContract);
+    //         if (contractIndex!==-1){
+    //           newState.contracts[contractIndex] = newContractInfo;
+    //         }
+    //       // Insert new contract
+    //       } else {
+    //         newState.contracts.push(newContractInfo);
+    //       }
+    //     }
+    //   }
+    // });
 
-    // console.log(this.functionsUtil.strToMoment().format('HH:mm:ss'),'initializeContracts - END',newState.contractsNetworks);
+    console.log(this.functionsUtil.strToMoment().format('HH:mm:ss'),'initializeContracts - END',newState.contractsNetworks);
 
     return this.setState(newState);
   }
@@ -1928,6 +1912,7 @@ class RimbleTransaction extends React.Component {
           web3={this.state.web3}
           theme={this.props.theme}
           network={this.state.network}
+          currentSection={this.props.currentSection}
         />
       </div>
     );
