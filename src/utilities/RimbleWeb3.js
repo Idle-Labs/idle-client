@@ -1201,7 +1201,6 @@ class RimbleTransaction extends React.Component {
    }
 
    getCurrentNetwork = async (networkId=null) => {
-
      const currentWeb3 = this.functionsUtil.getCurrentWeb3();
 
      networkId = parseInt(networkId) || await currentWeb3.eth.net.getId();

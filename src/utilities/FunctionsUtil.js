@@ -1172,7 +1172,8 @@ class FunctionsUtil {
     account = account.toLowerCase();
 
     let txs = [];
-    const currentNetwork = this.getCurrentNetwork();
+    const currentNetwork = this.getRequiredNetwork();
+    const currentNetworkId = this.getRequiredNetworkId();
     const covalentInfo = this.getGlobalConfig(['network','providers','covalent']);
     const etherscanInfo = this.getGlobalConfig(['network','providers','etherscan']);
     const stateSenderConfig = this.getGlobalConfig(['tools','polygonBridge','props','contracts','StateSender']);
@@ -1181,7 +1182,6 @@ class FunctionsUtil {
     const depositManagerConfig = this.getGlobalConfig(['tools','polygonBridge','props','contracts','DepositManager']);
     const rootChainManagerConfig = this.getGlobalConfig(['tools','polygonBridge','props','contracts','RootChainManager']);
 
-    const currentNetworkId = this.getRequiredNetworkId();
     const polygonNetworkId = currentNetwork.provider === 'polygon' ? currentNetworkId : this.getGlobalConfig(['network','providers','polygon','networkPairs',currentNetworkId]);
     // Check if covalent is enabled for the required network
     if (covalentInfo.enabled && covalentInfo.endpoints[polygonNetworkId]){
@@ -1589,7 +1589,7 @@ class FunctionsUtil {
   getEtherscanTxs = async (account=false,firstBlockNumber=0,endBlockNumber='latest',enabledTokens=[],debug=false) => {
 
     let resultData = null;
-    const currentNetwork = this.getCurrentNetwork();
+    const currentNetwork = this.getRequiredNetwork();
 
     switch (currentNetwork.explorer){
       case 'polygon':
@@ -7713,13 +7713,13 @@ class FunctionsUtil {
       return tokenAprs;
     }
 
-    const networkId = this.getCurrentNetworkId();
+    const networkId = this.getRequiredNetworkId();
 
     // Check for cached data
     const cachedDataKey = `tokenAprs_${networkId}_${tokenConfig.idle.address}_${addGovTokens}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
 
-    // console.log('getTokenAprs-1',tokenConfig.idle.token,this.props.network,cachedDataKey,cachedData);
+    // console.log('getTokenAprs-1',tokenConfig.idle.token,networkId,cachedDataKey,cachedData);
 
     if (cachedData && (cachedData.avgApr && this.BNify(cachedData.avgApr).gt(0)) && (cachedData.avgApy && this.BNify(cachedData.avgApy).gt(0)) ){
       return {
@@ -7733,7 +7733,7 @@ class FunctionsUtil {
       tokenAprs.avgApr = this.fixTokenDecimals(tokenAprs.avgApr,18);
     }
 
-    // console.log('getTokenAprs',tokenConfig.idle.token,this.props.network,this.getContractByName(tokenConfig.idle.token),tokenAprs);
+    // console.log('getTokenAprs',tokenConfig.idle.token,networkId,this.getContractByName(tokenConfig.idle.token),tokenAprs);
 
     if (tokenAprs.avgApr){
 
@@ -7751,7 +7751,7 @@ class FunctionsUtil {
         }
       }
 
-      // console.log('getTokenAprs-3',tokenConfig.idle.token,this.props.network,tokenAprs.avgApr.toFixed(8),tokenAprs.avgApy.toFixed(8));
+      // console.log('getTokenAprs-3',tokenConfig.idle.token,networkId,tokenAprs.avgApr.toFixed(8),tokenAprs.avgApy.toFixed(8));
 
       if (this.BNify(tokenAprs.avgApy).isNaN()){
         tokenAprs.avgApy = this.BNify(0);

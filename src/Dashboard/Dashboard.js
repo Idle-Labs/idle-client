@@ -346,8 +346,8 @@ class Dashboard extends Component {
 
     // Exit if no strategy and token selected
     if (!pageComponent){
-      const firstAvailableStrategy = Object.keys(this.props.availableStrategies)[0];
-      return this.goToSection(firstAvailableStrategy);
+      // const firstAvailableStrategy = Object.keys(this.props.availableStrategies)[0];
+      return this.goToSection('',false);
     }
 
     // console.log('loadParams',selectedStrategy,selectedToken);

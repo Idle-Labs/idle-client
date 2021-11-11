@@ -393,10 +393,10 @@ class App extends Component {
       this.setThemeMode(themeMode);
     }
 
-    // const requiredNetwork = this.functionsUtil.getStoredItem('requiredNetwork',false);
-    // if (requiredNetwork){
-    //   this.setRequiredNetwork(requiredNetwork);
-    // }
+    const requiredNetwork = this.functionsUtil.getStoredItem('requiredNetwork',false);
+    if (requiredNetwork){
+      this.setRequiredNetwork(requiredNetwork);
+    }
 
     window.closeIframe = (w) => {
       const iFrames = document.getElementsByTagName('iframe');
@@ -410,20 +410,22 @@ class App extends Component {
 
     window.addEventListener('resize', this.handleWindowSizeChange);
 
-    this.loadCustomAddress();
     this.loadCurrentEnvironment();
+    this.loadCustomAddress();
   }
 
-  loadCurrentEnvironment() {
+  async loadCurrentEnvironment() {
     const currentEnv = this.functionsUtil.getCurrentEnvironment();
     this.setState({
       currentEnv
-    }, () => {
-      const envRequiredNetwork = this.functionsUtil.getGlobalConfig(['environments',this.state.currentEnv,'requiredNetwork']);
-      const storedRequiredNetwork = this.functionsUtil.getStoredItem('requiredNetwork',null);
-      if (!storedRequiredNetwork || parseInt(storedRequiredNetwork) !== parseInt(envRequiredNetwork)){
-        this.setRequiredNetwork(envRequiredNetwork);
-      }
+    }, async () => {
+      // const envRequiredNetwork = this.functionsUtil.getGlobalConfig(['environments',this.state.currentEnv,'requiredNetwork']);
+      // const storedRequiredNetwork = this.functionsUtil.getStoredItem('requiredNetwork',null);
+      // if (!storedRequiredNetwork || parseInt(storedRequiredNetwork) !== parseInt(envRequiredNetwork)){
+      //   const requiredNetwork = storedRequiredNetwork || envRequiredNetwork;
+      //   console.log('setRequiredNetwork',requiredNetwork);
+      //   await this.setRequiredNetwork(requiredNetwork);
+      // }
       this.loadAvailableTokens();
     })
   }

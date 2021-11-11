@@ -19,7 +19,15 @@ class StrategyBox extends Component {
 
   loadUtils(){
     if (this.functionsUtil){
-      this.functionsUtil.setProps(this.props);
+
+      // Override required network in props
+      const newProps = {...this.props};
+      if (this.state.network){
+        newProps.network = this.state.network;
+      }
+      // console.log('network',strategyInfo.networkId,newProps.network);
+
+      this.functionsUtil.setProps(newProps);
     } else {
       this.functionsUtil = new FunctionsUtil(this.props);
     }
@@ -30,7 +38,7 @@ class StrategyBox extends Component {
 
     const strategyInfo = this.functionsUtil.getGlobalConfig(['landingStrategies',this.props.strategy]);
     
-    // Over-ride required network id
+    // Override required network id
     const network = Object.assign({},this.props.network);
     network.required = Object.assign({},this.props.network.required);
     network.current = Object.assign({},this.props.network.current);
@@ -41,6 +49,7 @@ class StrategyBox extends Component {
     this.setState({
       network
     },() => {
+      this.loadUtils();
       this.loadData();
     });
   }
