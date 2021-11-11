@@ -420,9 +420,10 @@ class App extends Component {
       currentEnv
     }, () => {
       const envRequiredNetwork = this.functionsUtil.getGlobalConfig(['environments',this.state.currentEnv,'requiredNetwork']);
-      const requiredNetwork = this.functionsUtil.getStoredItem('requiredNetwork',envRequiredNetwork);
-      console.log('requiredNetwork',envRequiredNetwork,requiredNetwork);
-      this.setRequiredNetwork(requiredNetwork);
+      const storedRequiredNetwork = this.functionsUtil.getStoredItem('requiredNetwork',null);
+      if (!storedRequiredNetwork || parseInt(storedRequiredNetwork) !== parseInt(envRequiredNetwork)){
+        this.setRequiredNetwork(envRequiredNetwork);
+      }
       this.loadAvailableTokens();
     })
   }

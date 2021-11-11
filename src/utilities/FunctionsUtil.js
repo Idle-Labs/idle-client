@@ -61,10 +61,11 @@ class FunctionsUtil {
   BNify = s => new BigNumber( typeof s === 'object' ? s : String(s) )
   customLog = (...props) => { if (globalConfigs.logs.messagesEnabled) this.customLog(moment().format('HH:mm:ss'),...props); }
   customLogError = (...props) => { if (globalConfigs.logs.errorsEnabled) console.error(moment().format('HH:mm:ss'),...props); }
-  getContractByName = (contractName) => {
+  getContractByName = (contractName,networkId=null) => {
+    networkId = networkId || this.props.network.required.id;
     let contract = this.props.contracts.find(c => c && c.name && c.name === contractName);
-    if (this.props.network && this.props.network.required && this.props.network.current && (!this.props.network.isCorrectNetwork || this.props.network.required.id !== this.props.network.current.id) && this.props.contractsNetworks && this.props.contractsNetworks[this.props.network.required.id]){
-      contract = this.props.contractsNetworks[this.props.network.required.id].find(c => c && c.name && c.name === contractName);
+    if (this.props.network && this.props.network.required && this.props.network.current && (!this.props.network.isCorrectNetwork || networkId !== this.props.network.current.id) && this.props.contractsNetworks && this.props.contractsNetworks[networkId]){
+      contract = this.props.contractsNetworks[networkId].find(c => c && c.name && c.name === contractName);
     } else {
       contract = this.props.contracts.find(c => c && c.name && c.name === contractName);
     }
