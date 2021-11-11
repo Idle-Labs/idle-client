@@ -436,7 +436,7 @@ class Landing extends Component {
                 textAlign={'center'}
                 position={'relative'}
                 flexDirection={'column'}
-                height={['435px','480px']}
+                height={['415px','460px']}
                 justifyContent={['flex-start','flex-end']}
               >
                 <Flex

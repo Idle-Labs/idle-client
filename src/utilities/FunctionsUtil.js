@@ -1294,7 +1294,7 @@ class FunctionsUtil {
         const filteredTxs = polygonTxs.data.data.items.filter( tx => tx.to_address && childTokensAddresses.includes(tx.to_address.toLowerCase()) );
         // console.log('polygonTxs',polygonTxs,filteredTxs);
         await this.asyncForEach(filteredTxs, async (tx) => {
-          const tokenConfig = Object.values(polygonAvailableTokens).find( tokenConfig => (tokenConfig.childToken && tokenConfig.childToken.address.toLowerCase() === tx.to_address.toLowerCase()) );
+          const tokenConfig = Object.values(polygonAvailableTokens).find( tokenConfig => (tokenConfig.childToken && tx.to_address && tokenConfig.childToken.address.toLowerCase() === tx.to_address.toLowerCase()) );
           if (!tokenConfig || !tokenConfig.childToken){
             return;
           }
@@ -1699,7 +1699,7 @@ class FunctionsUtil {
     return curveTxs;
   }
   normalizePolygonTx = (tx,tokenConfig=null) => {
-    tokenConfig = tokenConfig || Object.values(this.props.availableTokens).find( tokenConfig => tokenConfig.idle.address.toLowerCase() === tx.to_address.toLowerCase() );
+    tokenConfig = tokenConfig || Object.values(this.props.availableTokens).find( tokenConfig => tx.to_address && tokenConfig.idle.address.toLowerCase() === tx.to_address.toLowerCase() );
     
     const depositLogEvent = tx.log_events && tokenConfig && tokenConfig.idle ? tx.log_events.find( log => log.sender_address.toLowerCase() === tokenConfig.address.toLowerCase() && log.decoded.name === 'Transfer' && log.decoded.params.find(param=>param.name==='from').value.toLowerCase() === this.props.account.toLowerCase() && log.decoded.params.find(param=>param.name==='to').value.toLowerCase() === tokenConfig.idle.address.toLowerCase() ) : null;
     const redeemLogEvent = tx.log_events && tokenConfig && tokenConfig.idle ? tx.log_events.find( log => log.sender_address.toLowerCase() === tokenConfig.address.toLowerCase() && log.decoded.name === 'Transfer' && log.decoded.params.find(param=>param.name==='to').value.toLowerCase() === this.props.account.toLowerCase() && log.decoded.params.find(param=>param.name==='from').value.toLowerCase() === tokenConfig.idle.address.toLowerCase() ) : null;
@@ -1758,7 +1758,7 @@ class FunctionsUtil {
   }
   filterPolygonTxs = async (txs,enabledTokens,processTransactions=true) => {
     const idleTokensAddresses = Object.values(this.props.availableTokens).map( tokenConfig => tokenConfig.idle.address.toLowerCase() );
-    const polygonTxs = txs ? txs.filter( tx => idleTokensAddresses.includes(tx.to_address.toLowerCase()) ).reduce( (output,tx) => {
+    const polygonTxs = txs ? txs.filter( tx => tx.to_address && idleTokensAddresses.includes(tx.to_address.toLowerCase()) ).reduce( (output,tx) => {
       const mappedTx = this.normalizePolygonTx(tx);
       output[mappedTx.hashKey] = mappedTx;
       return output;
