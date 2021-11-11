@@ -63,7 +63,7 @@ class FunctionsUtil {
   customLogError = (...props) => { if (globalConfigs.logs.errorsEnabled) console.error(moment().format('HH:mm:ss'),...props); }
   getContractByName = (contractName) => {
     let contract = this.props.contracts.find(c => c && c.name && c.name === contractName);
-    if (this.props.network && this.props.network.required && this.props.network.current && this.props.network.required.id !== this.props.network.current.id && this.props.contractsNetworks && this.props.contractsNetworks[this.props.network.required.id]){
+    if (this.props.network && this.props.network.required && this.props.network.current && (!this.props.network.isCorrectNetwork || this.props.network.required.id !== this.props.network.current.id) && this.props.contractsNetworks && this.props.contractsNetworks[this.props.network.required.id]){
       contract = this.props.contractsNetworks[this.props.network.required.id].find(c => c && c.name && c.name === contractName);
     } else {
       contract = this.props.contracts.find(c => c && c.name && c.name === contractName);
@@ -7700,10 +7700,15 @@ class FunctionsUtil {
       return tokenAprs;
     }
 
+    const networkId = this.getCurrentNetworkId();
+
     // Check for cached data
-    const cachedDataKey = `tokenAprs_${tokenConfig.idle.address}_${addGovTokens}`;
+    const cachedDataKey = `tokenAprs_${networkId}_${tokenConfig.idle.address}_${addGovTokens}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
-    if (cachedData && (cachedData.avgApr && !this.BNify(cachedData.avgApr).isNaN()) && (cachedData.avgApy && !this.BNify(cachedData.avgApy).isNaN()) ){
+
+    // console.log('getTokenAprs-1',tokenConfig.idle.token,this.props.network,cachedDataKey,cachedData);
+
+    if (cachedData && (cachedData.avgApr && this.BNify(cachedData.avgApr).gt(0)) && (cachedData.avgApy && this.BNify(cachedData.avgApy).gt(0)) ){
       return {
         avgApr:this.BNify(cachedData.avgApr),
         avgApy:this.BNify(cachedData.avgApy)
@@ -7714,6 +7719,8 @@ class FunctionsUtil {
     if (tokenAprs.avgApr){
       tokenAprs.avgApr = this.fixTokenDecimals(tokenAprs.avgApr,18);
     }
+
+    // console.log('getTokenAprs',tokenConfig.idle.token,this.props.network,this.getContractByName(tokenConfig.idle.token),tokenAprs);
 
     if (tokenAprs.avgApr){
 
@@ -7731,7 +7738,7 @@ class FunctionsUtil {
         }
       }
 
-      // console.log('getTokenAprs',tokenConfig.idle.token,govTokensApr.toFixed(8),tokenAprs.avgApr.toFixed(8),tokenAprs.avgApy.toFixed(8));
+      // console.log('getTokenAprs-3',tokenConfig.idle.token,this.props.network,tokenAprs.avgApr.toFixed(8),tokenAprs.avgApy.toFixed(8));
 
       if (this.BNify(tokenAprs.avgApy).isNaN()){
         tokenAprs.avgApy = this.BNify(0);

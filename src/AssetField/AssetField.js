@@ -532,10 +532,14 @@ class AssetField extends Component {
 
               const apiResultsAprChart = await this.functionsUtil.getTokenApiData(this.props.tokenConfig.address,isRisk,aprChartStartTimestamp,aprChartEndTimestamp,false,frequencySeconds);
 
+              let itemIndex = 0;
+              const totalItems = apiResultsAprChart.length;
+
               apiResultsAprChart.forEach((d,i) => {
                 const x = this.functionsUtil.strToMoment(d.timestamp*1000).format("YYYY/MM/DD HH:mm");
                 const y = parseFloat(this.functionsUtil.fixTokenDecimals(d.idleRate,18));
-                aprChartData[0].data.push({ x, y });
+                const itemPos = Math.floor(itemIndex++/totalItems*100);
+                aprChartData[0].data.push({ x, y, itemPos });
               });
             }
 
@@ -543,7 +547,6 @@ class AssetField extends Component {
               this.functionsUtil.setCachedData(cachedDataKey,aprChartData);
             }
           }
-
 
           // Add same value
           if (aprChartData[0].data.length === 1){

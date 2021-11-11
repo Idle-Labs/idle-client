@@ -809,7 +809,7 @@ const globalConfigs = {
       icon: "images/strategies/best-on.svg",
       iconInactive: "images/strategies/best-off.svg",
       iconInactiveDark: "images/strategies/best-white.svg",
-      desc: "Maximize your returns on Polygon across DeFi protocols",
+      desc: "Maximize your returns across DeFi protocols",
       descLong:"The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols. Idle’s monitoring system automatically triggers a rebalance if it spots a better-performing allocation: this includes taking account of the total liquidity within the pool, incorporating underlying protocol rate functions and levels of supply and demand. As a user, you will end up with an higher return without constantly checking rates and burning gas on every transfer. Unlock your funds from a single protocol performance with this strategy.",
       descShort:"The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols."
     },
@@ -833,7 +833,7 @@ const globalConfigs = {
       icon: "images/protocols/polygon.svg",
       iconInactive: "images/protocols/polygon.svg",
       iconInactiveDark: "images/protocols/polygon.svg",
-      desc: "Maximize your returns across DeFi protocols",
+      desc: "Maximize your returns on Polygon across DeFi protocols",
       descLong:"The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols. Idle’s monitoring system automatically triggers a rebalance if it spots a better-performing allocation: this includes taking account of the total liquidity within the pool, incorporating underlying protocol rate functions and levels of supply and demand. As a user, you will end up with an higher return without constantly checking rates and burning gas on every transfer. Unlock your funds from a single protocol performance with this strategy.",
       descShort:"The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols."
     },

@@ -55,6 +55,8 @@ class Landing extends Component {
     } else {
       this.functionsUtil = new FunctionsUtil(this.props);
     }
+
+    window.functionsUtil = this.functionsUtil;
   }
 
   componentWillMount(){

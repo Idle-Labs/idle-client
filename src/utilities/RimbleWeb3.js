@@ -961,7 +961,7 @@ class RimbleTransaction extends React.Component {
       return false;
     }
 
-    console.log(this.functionsUtil.strToMoment().format('HH:mm:ss'),'initializeContracts - START',this.state.network.required.id,this.props.availableStrategies,this.props.availableStrategiesNetworks);
+    // console.log(this.functionsUtil.strToMoment().format('HH:mm:ss'),'initializeContracts - START',this.state.network.required.id,this.props.availableStrategies,this.props.availableStrategiesNetworks);
 
     const contracts = [];
     const contractsNetworks = {};
@@ -1089,9 +1089,9 @@ class RimbleTransaction extends React.Component {
     }
 
     const newState = {
-      contracts,
       contractsNetworks,
       contractsInitialized:true,
+      contracts:contracts.filter( c => !!c )
     };
 
     // contracts.forEach( newContractInfo => {
@@ -1113,7 +1113,7 @@ class RimbleTransaction extends React.Component {
     //   }
     // });
 
-    console.log(this.functionsUtil.strToMoment().format('HH:mm:ss'),'initializeContracts - END',newState.contractsNetworks);
+    // console.log(this.functionsUtil.strToMoment().format('HH:mm:ss'),'initializeContracts - END',newState.contractsNetworks);
 
     return this.setState(newState);
   }
