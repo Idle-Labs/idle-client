@@ -7728,12 +7728,12 @@ class FunctionsUtil {
       };
     }
 
-    tokenAprs.avgApr = await this.genericContractCallCached(tokenConfig.idle.token,'getAvgAPR');
+    tokenAprs.avgApr = await this.genericContractCall(tokenConfig.idle.token,'getAvgAPR');
     if (tokenAprs.avgApr){
       tokenAprs.avgApr = this.fixTokenDecimals(tokenAprs.avgApr,18);
     }
 
-    // console.log('getTokenAprs',tokenConfig.idle.token,networkId,this.getContractByName(tokenConfig.idle.token),tokenAprs);
+    // console.log('getTokenAprs-2',tokenConfig.idle.token,networkId,this.getContractByName(tokenConfig.idle.token)._address,tokenAprs);
 
     if (tokenAprs.avgApr){
 
