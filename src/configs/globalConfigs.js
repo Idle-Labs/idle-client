@@ -88,6 +88,20 @@ const globalConfigs = {
   theme: {
     darkModeEnabled: true
   },
+  environments:{
+    live:{
+      requiredNetwork:1,
+      url:"https://idle.finance"
+    },
+    beta:{
+      requiredNetwork:1,
+      url:"https://beta.idle.finance"
+    },
+    polygon:{
+      requiredNetwork:137,
+      url:"https://polygon.idle.finance"
+    }
+  },
   betaURL: "https://beta.idle.finance",
   countries: {
     USA: "United States of America",
@@ -775,6 +789,7 @@ const globalConfigs = {
       title: "Tranches",
       addGovTokens: true,
       titlePostfix: null,
+      strategy:'tranches',
       component: Tranches,
       iconName: "Whatshot",
       enabledEnvs: ['beta'],
@@ -783,7 +798,6 @@ const globalConfigs = {
       chartColor: "hsl(40,95%,59%)",
       icon: "images/strategies/tranches-on.png",
       iconInactive: "images/strategies/tranches-off.png",
-      url:'https://beta.idle.finance/#/dashboard/tranches',
       iconInactiveDark: "images/strategies/tranches-white.png",
       desc:"Diversify your risk profile with dynamic tranched yield derivatives",
       descShort:"Tranches deposit assets (eg DAI) into yield sources (eg Idle Finance) and split the accrued interest between 2 classes of products with different risk profiles.",
@@ -821,18 +835,18 @@ const globalConfigs = {
       strategy:'best',
       color: "#f32121",
       type: "strategy",
-      title: "Polygon",
       comingSoon: false,
       addGovTokens: true,
       titlePostfix: null,
+      title: "Best-Yield",
       iconName: "Whatshot",
       availableNetworks:[],
       govTokensEnabled: true,
       component: StrategyPage,
       chartColor: "hsl(40,95%,59%)",
-      icon: "images/protocols/polygon.svg",
-      iconInactive: "images/protocols/polygon.svg",
-      iconInactiveDark: "images/protocols/polygon.svg",
+      icon: "images/strategies/best-on.svg",
+      iconInactive: "images/strategies/best-on.svg",
+      iconInactiveDark: "images/strategies/best-on.svg",
       desc: "Maximize your returns on Polygon across DeFi protocols",
       descLong:"The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols. Idle’s monitoring system automatically triggers a rebalance if it spots a better-performing allocation: this includes taking account of the total liquidity within the pool, incorporating underlying protocol rate functions and levels of supply and demand. As a user, you will end up with an higher return without constantly checking rates and burning gas on every transfer. Unlock your funds from a single protocol performance with this strategy.",
       descShort:"The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols."
@@ -1050,9 +1064,24 @@ const globalConfigs = {
         address:'0x6b175474e89094c44da98b954eedeac495271d0f',
         performanceTooltip:'APR is calculated proportionally to historical allocations of each lending protocol in the selected time period. This pool has 1% unlent reserve to help reduce gas costs.',
       },
+      ETH:{
+        decimals:18,
+        enabled:true,
+        color:{
+          hex:'#333',
+          rgb:[51, 51, 51],
+          hsl:['0, 0%, 20%']
+        },
+        address:'0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0'
+      },
       MATIC:{
         decimals:18,
         enabled:true,
+        color:{
+          hex:'#8247E5',
+          rgb:[130, 71, 229],
+          hsl:['262, 75%, 59%']
+        },
         address:'0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0'
       },
       USD: {
@@ -1466,8 +1495,9 @@ const globalConfigs = {
     availableNetworks:{
       1:{
         version:'v1',
-        name:'Mainnet',
+        name:'Ethereum',
         baseToken:'ETH',
+        color:'#4474f1',
         provider:'infura',
         network:'mainnet',
         explorer:'etherscan',
@@ -1475,6 +1505,7 @@ const globalConfigs = {
       },
       42:{
         name:'Kovan',
+        color:'#9064ff',
         baseToken:'ETH',
         provider:'infura',
         explorer:'etherscan',
@@ -1482,6 +1513,7 @@ const globalConfigs = {
       },
       3:{
         name:'Ropsten',
+        color:'#ff4a8d',
         baseToken:'ETH',
         provider:'infura',
         explorer:'etherscan',
@@ -1489,6 +1521,7 @@ const globalConfigs = {
       },
       4:{
         name:'Rinkeby',
+        color:'#f6c343',
         baseToken:'ETH',
         provider:'infura',
         explorer:'etherscan',
@@ -1497,6 +1530,7 @@ const globalConfigs = {
       137:{
         version:'v1',
         name:'Polygon',
+        color:'#8247E5',
         network:'mainnet',
         baseToken:'MATIC',
         explorer:'polygon',
@@ -1505,6 +1539,7 @@ const globalConfigs = {
       },
       5:{
         name:'Görli',
+        color:'#3099f2',
         baseToken:'ETH',
         version:'mumbai',
         network:'testnet',
@@ -1515,12 +1550,14 @@ const globalConfigs = {
       1337:{
         name:'Hardhat',
         baseToken:'ETH',
+        color:'#4474f1',
         provider:'infura',
         explorer:'etherscan',
         chainName:'Ethereum Mainnet',
       },
       80001:{
         name:'Mumbai',
+        color:'#4474f1',
         version:'mumbai',
         network:'testnet',
         baseToken:'MATIC',

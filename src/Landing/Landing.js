@@ -435,14 +435,14 @@ class Landing extends Component {
                 textAlign={'center'}
                 position={'relative'}
                 flexDirection={'column'}
-                height={['415px','460px']}
+                height={['435px','480px']}
                 justifyContent={['flex-start','flex-end']}
               >
                 <Flex
                   left={0}
                   right={0}
                   width={'100%'}
-                  height={'400px'}
+                  height={'420px'}
                   top={['initial','0']}
                   position={'absolute'}
                   bottom={['0','initial']}
@@ -453,7 +453,7 @@ class Landing extends Component {
                     flexDirection={'row'}
                     position={'absolute'}
                     id={'carousel-cursor'}
-                    height={['auto','400px']}
+                    height={['auto','420px']}
                     bottom={['5px','initial']}
                     justifyContent={'flex-start'}
                     left={this.state.carouselOffsetLeft}

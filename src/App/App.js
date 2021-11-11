@@ -394,7 +394,6 @@ class App extends Component {
     }
 
     const requiredNetwork = this.functionsUtil.getStoredItem('requiredNetwork',false);
-    // console.log('requiredNetwork',requiredNetwork);
     if (requiredNetwork){
       this.setRequiredNetwork(requiredNetwork);
     }
@@ -416,11 +415,12 @@ class App extends Component {
   }
 
   loadCurrentEnvironment() {
-    const isLive = this.functionsUtil.checkUrlOrigin();
-    const currentEnv = isLive ? 'live' : 'beta';
+    const currentEnv = this.functionsUtil.getCurrentEnvironment();
     this.setState({
       currentEnv
     }, () => {
+      const requiredNetwork = this.functionsUtil.getGlobalConfig(['environments',this.state.currentEnv,'requiredNetwork']);
+      this.setRequiredNetwork(requiredNetwork);
       this.loadAvailableTokens();
     })
   }

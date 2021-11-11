@@ -834,8 +834,10 @@ class FunctionsUtil {
 
     return deposits;
   }
-  getDashboardSectionUrl = (section) => {
-    return `${window.location.origin}/#${this.getGlobalConfig(['dashboard','baseRoute'])}/${section}`;
+  getDashboardSectionUrl = (section,env=null) => {
+    const envUrl = this.getGlobalConfig(['environments',env,'url']);
+    const baseUrl = env && envUrl ? envUrl : window.location.origin;
+    return `${baseUrl}/#${this.getGlobalConfig(['dashboard','baseRoute'])}/${section}`;
   }
   asyncTimeout = (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -2749,6 +2751,16 @@ class FunctionsUtil {
   }
   getAppUrl = (path) => {
     return globalConfigs.baseURL+'/'+path;
+  }
+  getCurrentEnvironment = () => {
+    let environment = Object.keys(globalConfigs.environments).find( env => {
+      const envUrl = globalConfigs.environments[env].url;
+      return envUrl.toLowerCase() === window.location.origin.toLowerCase();
+    });
+    return environment || 'beta';
+  }
+  checkUrlPolygon = () => {
+    return window.location.origin.toLowerCase().includes(globalConfigs.polygonUrl.toLowerCase());
   }
   checkUrlOrigin = () => {
     return window.location.origin.toLowerCase().includes(globalConfigs.baseURL.toLowerCase());

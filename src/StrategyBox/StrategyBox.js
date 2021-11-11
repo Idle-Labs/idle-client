@@ -81,7 +81,7 @@ class StrategyBox extends Component {
         switch (this.props.strategy){
           case 'best':
             aprs = await this.functionsUtil.getAprsFromApi(strategyInfo.networkId);
-            if (aprs){
+            if (aprs && aprs.lendRates){
               aprs.lendRates.forEach( aprInfo => {
                 const tokenAPR = this.functionsUtil.BNify(aprInfo.apy);
                 if (tokenAPR){
@@ -109,7 +109,7 @@ class StrategyBox extends Component {
           break;
           case 'polygon':
             aprs = await this.functionsUtil.getAprsFromApi(strategyInfo.networkId);
-            if (aprs){
+            if (aprs && aprs.lendRates){
               aprs.lendRates.forEach( aprInfo => {
                 const tokenAPR = this.functionsUtil.BNify(aprInfo.apy);
                 if (tokenAPR){
@@ -158,13 +158,25 @@ class StrategyBox extends Component {
       return true;
     }
 
-    await this.props.setRequiredNetwork(strategyInfo.networkId);
-    window.location.href = this.functionsUtil.getDashboardSectionUrl(strategyInfo.strategy);
+    let strategyEnv = null;
+    const currentEnv = this.functionsUtil.getCurrentEnvironment();
+    if (strategyInfo.enabledEnvs.length>0 && !strategyInfo.enabledEnvs.includes(currentEnv)){
+      strategyEnv = strategyInfo.enabledEnvs[0];
+    }
+
+    if (!strategyEnv){
+      await this.props.setRequiredNetwork(strategyInfo.networkId);
+    }
+
+    window.location.href = this.functionsUtil.getDashboardSectionUrl(strategyInfo.strategy,strategyEnv);
   }
 
   render() {
     const strategyInfo = this.functionsUtil.getGlobalConfig(['landingStrategies',this.props.strategy]);
+    const networkInfo = this.functionsUtil.getGlobalConfig(['network','availableNetworks',strategyInfo.networkId]);
+
     // const chartColor = strategyInfo.chartColor ? strategyInfo.chartColor : null;
+    // const networkTokenInfo = this.functionsUtil.getGlobalConfig(['stats','tokens',networkInfo.baseToken]);
     let tokenConfig = null;
     switch (strategyInfo.type){
       case 'tranche':
@@ -181,29 +193,56 @@ class StrategyBox extends Component {
     return (
       <DashboardCard
         cardProps={{
-          pt:[3,3],
           mt:[3,0],
           ml:['0.35em',0],
           width:[1,'21em'],
+          overflow:'hidden',
           mr:['0.35em','2em'],
           alignItems:'center',
+          height:'fit-content',
           flexDirection:'column',
           justifyContent:'flex-start',
-          height:['fit-content','400px']
         }}
         isVisible={ typeof this.props.isVisible !== 'undefined' ? this.props.isVisible : true }
       >
+        {
+          /*
+          <Flex
+            mb={3}
+            py={1}
+            width={1}
+            alignItems={'center'}
+            flexDirection={'row'}
+            justifyContent={'center'}
+            backgroundColor={networkInfo.color}
+          >
+            <Image
+              mr={2}
+              height={'1em'}
+              src={`images/networks/${networkInfo.provider}-white.svg`}
+            />
+            <Text
+              fontSize={1}
+              fontWeight={3}
+              color={'white'}
+            >
+              {networkInfo.name} Network
+            </Text>
+          </Flex>
+          */
+        }
         <Flex
+          mt={3}
           mb={2}
           justifyContent={'center'}
         >
           <Image
             src={strategyInfo.icon}
-            height={['2.2em','2.8em']}
+            height={['2.2em','2.4em']}
           />
         </Flex>
         <Flex
-          my={2}
+          mt={2}
           alignItems={'center'}
           justifyContent={'center'}
         >
@@ -215,7 +254,47 @@ class StrategyBox extends Component {
           </Title>
         </Flex>
         <Flex
-          mt={2}
+          my={1}
+          width={1}
+          alignItems={'center'}
+          justifyContent={'center'}
+        >
+          <Flex
+            pb={'1px'}
+            pl={'3px'}
+            pr={'6px'}
+            alignItems={'center'}
+            borderRadius={'50px'}
+            flexDirection={'row'}
+            display={'inline-flex'}
+            justifyContent={'center'}
+            backgroundColor={networkInfo.color}
+          >
+            <Flex
+              p={1}
+              mr={1}
+              width={'1.1em'}
+              height={'1.1em'}
+              alignItems={'center'}
+              borderRadius={'50px'}
+              justifyContent={'center'}
+              backgroundColor={'white'}
+            >
+              <Image
+                height={'1.1em'}
+                src={`images/networks/${networkInfo.provider}.svg`}
+              />
+            </Flex>
+            <Text
+              fontSize={1}
+              color={'white'}
+              fontWeight={500}
+            >
+              {networkInfo.name}
+            </Text>
+          </Flex>
+        </Flex>
+        <Flex
           mb={[2,3]}
           minHeight={'50px'}
           alignItems={'flex-start'}
