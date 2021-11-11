@@ -393,10 +393,10 @@ class App extends Component {
       this.setThemeMode(themeMode);
     }
 
-    const requiredNetwork = this.functionsUtil.getStoredItem('requiredNetwork',false);
-    if (requiredNetwork){
-      this.setRequiredNetwork(requiredNetwork);
-    }
+    // const requiredNetwork = this.functionsUtil.getStoredItem('requiredNetwork',false);
+    // if (requiredNetwork){
+    //   this.setRequiredNetwork(requiredNetwork);
+    // }
 
     window.closeIframe = (w) => {
       const iFrames = document.getElementsByTagName('iframe');
@@ -419,7 +419,9 @@ class App extends Component {
     this.setState({
       currentEnv
     }, () => {
-      const requiredNetwork = this.functionsUtil.getGlobalConfig(['environments',this.state.currentEnv,'requiredNetwork']);
+      const envRequiredNetwork = this.functionsUtil.getGlobalConfig(['environments',this.state.currentEnv,'requiredNetwork']);
+      const requiredNetwork = this.functionsUtil.getStoredItem('requiredNetwork',envRequiredNetwork);
+      console.log('requiredNetwork',envRequiredNetwork,requiredNetwork);
       this.setRequiredNetwork(requiredNetwork);
       this.loadAvailableTokens();
     })

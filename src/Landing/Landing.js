@@ -348,6 +348,7 @@ class Landing extends Component {
         <Box
           pl={[3,5]}
           pr={[3,0]}
+          overflow={'hidden'}
           pt={['2.5em', '3em']}
           className={styles.headerContainer}
           minHeight={ Math.max((this.props.innerHeight+this.props.innerHeight*0.025),768) }
@@ -357,7 +358,7 @@ class Landing extends Component {
             position={'relative'}
           >
             <Flex
-              overflow={'hidden'}
+              overflow={'visible'}
               alignItems={'flex-start'}
               flexDirection={['column','row']}
               mt={['7em',Math.max(window.innerHeight*0.225,145)+'px']}
@@ -447,8 +448,13 @@ class Landing extends Component {
                   position={'absolute'}
                   bottom={['0','initial']}
                   overflow={this.state.carouselIndex === 0 ? 'visible' : 'hidden'}
+                  style={{
+                    overflowY:'visible'
+                  }}
                 >
                   <Flex
+                    pt={'9px'}
+                    pl={'9px'}
                     top={['initial',0]}
                     flexDirection={'row'}
                     position={'absolute'}

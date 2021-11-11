@@ -1,5 +1,6 @@
 import Title from '../Title/Title';
 import React, { Component } from 'react';
+import styles from './StrategyBox.module.scss';
 import AssetField from '../AssetField/AssetField';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import TrancheField from '../TrancheField/TrancheField';
@@ -70,7 +71,6 @@ class StrategyBox extends Component {
     const tokensAprs = {};
     let highestValue = null;
     let selectedToken = null;
-    const availableTokens = this.props.availableStrategies[this.props.strategy];
     
     switch (strategyInfo.type){
       case 'tranche':
@@ -78,6 +78,7 @@ class StrategyBox extends Component {
       break;
       default:
       case 'strategy':
+        const availableTokens = this.props.availableStrategiesNetworks[strategyInfo.networkId][strategyInfo.strategy];
         switch (this.props.strategy){
           case 'best':
             aprs = await this.functionsUtil.getAprsFromApi(strategyInfo.networkId);
@@ -93,7 +94,7 @@ class StrategyBox extends Component {
                   }
                 }
               });
-            } else {
+            } else if (availableTokens) {
               await this.functionsUtil.asyncForEach(Object.keys(availableTokens),async (token) => {
                 const tokenConfig = availableTokens[token];
                 const tokenAPR = await this.functionsUtil.getTokenAprs(tokenConfig);
@@ -121,7 +122,7 @@ class StrategyBox extends Component {
                   }
                 }
               });
-            } else {
+            } else if (availableTokens) {
               await this.functionsUtil.asyncForEach(Object.keys(availableTokens),async (token) => {
                 const tokenConfig = availableTokens[token];
                 const tokenAPR = await this.functionsUtil.getTokenAprs(tokenConfig);
@@ -196,7 +197,6 @@ class StrategyBox extends Component {
           mt:[3,0],
           ml:['0.35em',0],
           width:[1,'21em'],
-          overflow:'hidden',
           mr:['0.35em','2em'],
           alignItems:'center',
           height:'fit-content',
@@ -205,6 +205,39 @@ class StrategyBox extends Component {
         }}
         isVisible={ typeof this.props.isVisible !== 'undefined' ? this.props.isVisible : true }
       >
+        <Flex
+          className={[styles.ribbon,styles[networkInfo.provider]]}
+        >
+          <Flex
+            alignItems={'center'}
+            flexDirection={'row'}
+            justifyContent={'center'}
+            className={[styles.content]}
+          >
+            <Flex
+              p={1}
+              mr={2}
+              width={'1em'}
+              height={'1em'}
+              alignItems={'center'}
+              borderRadius={'50px'}
+              justifyContent={'center'}
+              backgroundColor={'white'}
+            >
+              <Image
+                height={'1em'}
+                src={`images/networks/${networkInfo.provider}.svg`}
+              />
+            </Flex>
+            <Text
+              fontSize={1}
+              fontWeight={3}
+              color={'white'}
+            >
+              {networkInfo.name}
+            </Text>
+          </Flex>
+        </Flex>
         {
           /*
           <Flex
@@ -253,47 +286,51 @@ class StrategyBox extends Component {
             {strategyInfo.title}
           </Title>
         </Flex>
-        <Flex
-          my={1}
-          width={1}
-          alignItems={'center'}
-          justifyContent={'center'}
-        >
+        {
+          /*
           <Flex
-            pb={'1px'}
-            pl={'3px'}
-            pr={'6px'}
+            my={1}
+            width={1}
             alignItems={'center'}
-            borderRadius={'50px'}
-            flexDirection={'row'}
-            display={'inline-flex'}
             justifyContent={'center'}
-            backgroundColor={networkInfo.color}
           >
             <Flex
-              p={1}
-              mr={1}
-              width={'1.1em'}
-              height={'1.1em'}
+              pb={'1px'}
+              pl={'3px'}
+              pr={'6px'}
               alignItems={'center'}
               borderRadius={'50px'}
+              flexDirection={'row'}
+              display={'inline-flex'}
               justifyContent={'center'}
-              backgroundColor={'white'}
+              backgroundColor={networkInfo.color}
             >
-              <Image
+              <Flex
+                p={1}
+                mr={1}
+                width={'1.1em'}
                 height={'1.1em'}
-                src={`images/networks/${networkInfo.provider}.svg`}
-              />
+                alignItems={'center'}
+                borderRadius={'50px'}
+                justifyContent={'center'}
+                backgroundColor={'white'}
+              >
+                <Image
+                  height={'1.1em'}
+                  src={`images/networks/${networkInfo.provider}.svg`}
+                />
+              </Flex>
+              <Text
+                fontSize={'13px'}
+                color={'white'}
+                fontWeight={500}
+              >
+                {networkInfo.name}
+              </Text>
             </Flex>
-            <Text
-              fontSize={1}
-              color={'white'}
-              fontWeight={500}
-            >
-              {networkInfo.name}
-            </Text>
           </Flex>
-        </Flex>
+          */
+        }
         <Flex
           mb={[2,3]}
           minHeight={'50px'}
