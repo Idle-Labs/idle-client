@@ -257,8 +257,8 @@ class StrategyBox extends Component {
               borderRadius={2}
               position={'absolute'}
               alignItems={'center'}
-              backgroundColor={'red'}
               justifyContent={'center'}
+              backgroundColor={'#ff7600'}
             >
               <Text
                 fontSize={1}

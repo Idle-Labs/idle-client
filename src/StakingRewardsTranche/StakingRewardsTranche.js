@@ -63,10 +63,10 @@ class StakingRewardsTranche extends Component {
     const stakingRewardsRows = [];
     await this.functionsUtil.asyncForEach(Object.keys(stakingRewards), async (rewardToken) => {
       const tokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',rewardToken]);
-      const tokenAmount = this.functionsUtil.BNify(stakingRewards[rewardToken]);
       const rewardTokenInfo = rewardTokensInfo[rewardToken];
       const tokenBalance = await this.functionsUtil.getTokenBalance(rewardToken,this.props.account);
       let distributionSpeed = rewardTokenInfo ? rewardTokenInfo.lastAmount : null;
+      const tokenAmount = !this.functionsUtil.BNify(stakingRewards[rewardToken]).isNaN() ? this.functionsUtil.BNify(stakingRewards[rewardToken]) : this.functionsUtil.BNify(0);
       if (trancheBalanceInfo && distributionSpeed){
         distributionSpeed = distributionSpeed.times(trancheBalanceInfo.poolShare);
       }
@@ -77,11 +77,9 @@ class StakingRewardsTranche extends Component {
         reedemable:tokenAmount.toFixed(8),
         trancheBalance:this.functionsUtil.integerValue(trancheBalance),
         tokenIcon:tokenConfig.icon || `images/tokens/${rewardToken}.svg`,
-        distributionSpeed:distributionSpeed ? distributionSpeed.toFixed(8)+` ${rewardToken} (last harvest)` : '-'
+        distributionSpeed:distributionSpeed ? distributionSpeed.toFixed(8)+` ${rewardToken} (last harvest)` : this.functionsUtil.BNify(0).toFixed(8)
       });
     });
-
-    // console.log('stakingRewardsRows',stakingRewardsRows);
 
     this.setState({
       stakingRewardsRows
