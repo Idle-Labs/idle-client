@@ -1,6 +1,6 @@
 import ExtLink from "../ExtLink/ExtLink";
 import React, { Component } from "react";
-import RoundButton from "../RoundButton/RoundButton";
+
 import { Link as RouterLink } from "react-router-dom";
 import FunctionsUtil from "../utilities/FunctionsUtil";
 import { Flex, Box, Icon, Text, Image, Link } from "rimble-ui";

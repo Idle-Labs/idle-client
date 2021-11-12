@@ -1,10 +1,10 @@
-import ExtLink from "../ExtLink/ExtLink";
+
 import React, { Component } from "react";
 import MenuAccount from "../MenuAccount/MenuAccount";
 import GovModal from "../utilities/components/GovModal";
 import GovernanceUtil from "../utilities/GovernanceUtil";
-import { Box, Flex, Text, Icon, Button } from "rimble-ui";
-import DashboardCard from "../DashboardCard/DashboardCard";
+import { Box, Flex } from "rimble-ui";
+
 import DelegateVesting from "../DelegateVesting/DelegateVesting";
 
 class DashboardHeader extends Component {

@@ -742,7 +742,7 @@ class Dashboard extends Component {
           position={'fixed'}
           flexDirection={'row'}
           className={this.props.themeMode}
-          backgroundColor={['dashboardBg', 'white']}
+          backgroundColor={'dashboardBg'}
           width={this.props.isMobile && this.state.menuOpened ? '180vw' : '100vw'}
         /*onClick={ e => this.propagateClickEvent(e) }*/
         >
