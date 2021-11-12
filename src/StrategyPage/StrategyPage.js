@@ -256,6 +256,10 @@ class StrategyPage extends Component {
     const batchDepositConfig = this.functionsUtil.getGlobalConfig(['tools','batchDeposit']);
     const polygonBridgeConfig = this.functionsUtil.getGlobalConfig(['tools','polygonBridge']);
     const strategyName = this.functionsUtil.getGlobalConfig(['strategies',this.props.selectedStrategy,'title']);
+    const toolsToShow = ['addFunds','nexusMutual','tokenSwap'].filter( toolName => {
+      const toolConfig = this.functionsUtil.getGlobalConfig(['tools',toolName]);
+      return toolConfig.enabled && (!toolConfig.availableNetworks.length || toolConfig.availableNetworks.includes(parseInt(currentNetwork.id)));
+    })
 
     return (
       <Box
@@ -711,7 +715,7 @@ class StrategyPage extends Component {
                 )
               }
               {
-                !viewOnly && this.state.depositedTokens.length>0 && this.props.account && nexusMutualConfig.enabled && (
+                !viewOnly && this.state.depositedTokens.length>0 && this.props.account && toolsToShow.length>=2 && (
                   <Flex
                     mt={3}
                     width={1}
@@ -740,10 +744,10 @@ class StrategyPage extends Component {
                           const toolConfig = this.functionsUtil.getGlobalConfig(['tools',toolName]);
                           return (
                             <Flex
-                              width={[1,1/3]}
                               key={`tool_${toolIndex}`}
                               mb={toolIndex<2 ? [2,0] : 0}
                               pr={toolIndex<2 ? [0,3] : 0}
+                              width={[1,1/toolsToShow.length]}
                             >
                               <DashboardIconButton
                                 {...this.props}  

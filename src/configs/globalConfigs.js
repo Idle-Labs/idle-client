@@ -1571,8 +1571,8 @@ const globalConfigs = {
     blocksPerYear: 2371428,
     secondsPerYear: 31536000,
     requiredConfirmations: 1,
-    firstBlockNumber: 8119247,
     enabledNetworks: [1, 137],
+    firstBlockNumber: 8119247,
     accountBalanceMinimum: 0, // in ETH for gas fees
     providers:{
       infura:{
