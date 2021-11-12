@@ -703,8 +703,16 @@ class RimbleTransaction extends React.Component {
 
     const web3Provider = useInfuraProvider && this.state.web3Infura ? this.state.web3Infura : (this.state.network.isCorrectNetwork ? this.state.web3 : this.state.web3Providers[this.state.network.required.id]);
 
+    // if (name==='ERC20Predicate'){
+    //   console.log('createContract',this.state.network,web3Provider);
+    // }
+
     if (!web3Provider){
       return null;
+    }
+
+    if (!abi){
+      abi = [];
     }
 
     // Create contract on initialized web3 provider with given abi and address
@@ -714,9 +722,14 @@ class RimbleTransaction extends React.Component {
         ...state,
         contracts: [...state.contracts, {name, contract}]
       }));
+
+      // if (name==='ERC20Predicate'){
+      //   debugger;
+      // }
+
       return {name, contract};
     } catch (error) {
-      this.functionsUtil.customLogError("Could not create contract.",name,address,error);
+      console.error("Could not create contract.",name,address,abi,error);
     }
 
     return null;

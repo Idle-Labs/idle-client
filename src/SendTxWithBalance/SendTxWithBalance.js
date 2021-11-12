@@ -231,23 +231,26 @@ class SendTxWithBalance extends Component {
     // console.log('executeTx',params);
 
     const callback = (tx,error) => {
-      const txSucceeded = tx.status === 'success';
+
+      const txSucceeded = tx && tx.status === 'success';
 
       // Send Google Analytics event
-      const eventData = {
-        eventLabel: tx.status,
-        eventCategory: `CurveDeposit`,
-        eventValue: inputValue.toFixed(),
-        eventAction: this.props.tokenConfig.token,
-      };
+      if (tx){
+        const eventData = {
+          eventLabel: tx.status,
+          eventCategory: `CurveDeposit`,
+          eventValue: inputValue.toFixed(),
+          eventAction: this.props.tokenConfig.token,
+        };
 
-      if (error){
-        eventData.eventLabel = this.functionsUtil.getTransactionError(error);
-      }
+        if (error){
+          eventData.eventLabel = this.functionsUtil.getTransactionError(error);
+        }
 
-      // Send Google Analytics event
-      if (error || eventData.status !== 'error'){
-        this.functionsUtil.sendGoogleAnalyticsEvent(eventData);
+        // Send Google Analytics event
+        if (error || eventData.status !== 'error'){
+          this.functionsUtil.sendGoogleAnalyticsEvent(eventData);
+        }
       }
 
       this.setState({
@@ -285,11 +288,10 @@ class SendTxWithBalance extends Component {
       }));
     };
 
-    const contractName = this.props.contractInfo.name;
-
     let params = null;
 
     // Check contract approved without permit
+    let contractName = this.props.contractInfo.name;
     const contractApproved = await this.checkContractApproved(false);
 
     const permitEnabled = this.props.permitEnabled && this.state.permitEnabled && !contractApproved;
@@ -310,6 +312,7 @@ class SendTxWithBalance extends Component {
       } = params;
 
       const value = params.value || null;
+      contractName = params.contractName || this.props.contractInfo.name;
 
       // console.log('SendTxWithBalance',contractName, methodName, methodParams, value);
 
@@ -350,7 +353,6 @@ class SendTxWithBalance extends Component {
       return true;
     }
     
-    await this.props.initContract(this.props.contractInfo.name,this.props.contractInfo.address,this.props.contractInfo.abi);
     const contractApproved = await this.functionsUtil.checkTokenApproved(this.props.tokenConfig.token,this.props.contractInfo.address,this.props.account);
     return contractApproved;
   }
@@ -358,8 +360,12 @@ class SendTxWithBalance extends Component {
   async loadData(){
     const inputValue = null;
     const fastBalanceSelector = null;
-    const contractApproved = await this.checkContractApproved();
     const approveEnabled = this.props.approveEnabled !== false;
+
+    await this.props.initContract(this.props.contractInfo.name,this.props.contractInfo.address,this.props.contractInfo.abi);
+    // console.log('initContract',this.props.contractInfo);
+
+    const contractApproved = await this.checkContractApproved();
 
     this.setState({
       inputValue,

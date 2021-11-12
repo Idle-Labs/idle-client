@@ -1952,6 +1952,7 @@ const globalConfigs = {
             address:'0x8484Ef722627bf18ca5Ae6BcF031c23E6e922B30' // Mainnet
           },
           DepositManager:{
+            abi:DepositManager,
             name:'DepositManager',
             address:'0x401f6c983ea34274ec46f84d70b31c151321188b'
           },

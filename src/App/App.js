@@ -113,6 +113,10 @@ class App extends Component {
 
   clearCachedData = async (callback = null, clear_all = false) => {
 
+    if (!this.state.network){
+      return false;
+    }
+
     const requiredNetworkId = this.state.network.required.id;
 
     const cachedData = { ...this.state.cachedData };
@@ -147,6 +151,10 @@ class App extends Component {
   }
 
   setCachedData = (key, data, TTL = null, useLocalStorage = false) => {
+
+    if (!this.state.network){
+      return false;
+    }
 
     key = key.toLowerCase();
     const currentTime = parseInt(Date.now() / 1000);

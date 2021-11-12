@@ -125,12 +125,11 @@ class Tranches extends Component {
     const portfolio = await this.functionsUtil.getAccountPortfolioTranches(this.props.availableTranches,this.props.account);
 
     if (portfolio){
+      const tranchesTokens = [];
+      const tranchesBalances = [];
       const portfolioLoaded = true;
       const tranchesConfig = this.functionsUtil.getGlobalConfig(['tranches']);
 
-      let totalFunds = null;
-      const tranchesTokens = [];
-      const tranchesBalances = [];
       portfolio.tranchesBalance.forEach( trancheInfo => {
         if (!tranchesBalances[trancheInfo.tranche]){
           tranchesBalances[trancheInfo.tranche] = {
@@ -689,7 +688,6 @@ class Tranches extends Component {
                             {...this.props}
                             showLegend={true}
                             showLoader={false}
-                            sliceLabel={d => d.value}
                             tooltipFormat={v => v+'%'}
                             defaultLabel={'Total Funds'}
                             sliceLabel={d => {

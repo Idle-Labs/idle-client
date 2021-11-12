@@ -120,7 +120,7 @@ class PolygonBridge extends Component {
     switch (this.state.selectedAction){
       case 'Deposit':
         switch (this.state.selectedToken){
-          case 'ETH':
+          case 'WETH':
             methodName = 'depositEtherFor';
             contractName = 'RootChainManager';
             value = this.props.web3.eth.abi.encodeParameter('uint256', amount);
@@ -221,7 +221,7 @@ class PolygonBridge extends Component {
 
   async updateData(){
     const newState = {};
-    const isETH = this.state.tokenConfig.token==='ETH';
+    const isETH = this.state.selectedToken==='WETH';
     const bridgeType = this.state.tokenConfig.bridgeType;
     switch (this.state.selectedAction){
       case 'Deposit':
@@ -259,6 +259,7 @@ class PolygonBridge extends Component {
             text:`Please note that deposit of funds takes ~7-8 minutes to be accounted in the Polygon chain.`
           }
         }
+        // console.log('updateData',newState);
       break;
       case 'Withdraw':
         newState.permitEnabled = false;
@@ -452,7 +453,7 @@ class PolygonBridge extends Component {
                     alignItems={'stretch'}
                     flexDirection={'column'}
                     justifyContent={'center'}
-                    width={[1,fullWidth ? 1 : 0.38]}
+                    width={[1,fullWidth ? 1 : '33em']}
                   >
                     {
                       !this.props.selectedToken && (
