@@ -128,6 +128,7 @@ class Tranches extends Component {
       const portfolioLoaded = true;
       const tranchesConfig = this.functionsUtil.getGlobalConfig(['tranches']);
 
+      let totalFunds = null;
       const tranchesTokens = [];
       const tranchesBalances = [];
       portfolio.tranchesBalance.forEach( trancheInfo => {
@@ -150,12 +151,14 @@ class Tranches extends Component {
 
       const portfolioDonutData = Object.keys(tranchesTokens).map( token => {
         const balanceValue = parseFloat(tranchesTokens[token].toFixed(4));
+        const tokenPercentage = tranchesTokens[token].div(portfolio.totalAmountLent).times(100);
         const tokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',token]);
         return {
           id:token,
           name:token,
           label:token,
-          value:balanceValue,
+          valueHover:balanceValue,
+          value:Math.round(tokenPercentage),
           description: `$ ${balanceValue} in ${token}`,
           color:'hsl('+tokenConfig.color.hsl.join(',')+')',
           image:tokenConfig.icon || `images/tokens/${token}.svg`,
@@ -687,7 +690,15 @@ class Tranches extends Component {
                             showLegend={true}
                             showLoader={false}
                             sliceLabel={d => d.value}
+                            tooltipFormat={v => v+'%'}
                             defaultLabel={'Total Funds'}
+                            sliceLabel={d => {
+                              if (parseFloat(d.value)>=5){
+                                return d.value+'%';
+                              } else {
+                                return null;
+                              }
+                            }}
                             parentId={'portfolio-composition'}
                             chartData={this.state.portfolioDonutData}
                             defaultImage={this.props.selectedSection.image}

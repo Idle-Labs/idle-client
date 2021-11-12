@@ -299,6 +299,9 @@ class FunctionsUtil {
         await this.asyncForEach(Object.keys(tranches),async (tranche) => {
           const trancheConfig = tokenConfig[tranche];
           const trancheTokenBalance = await this.loadTrancheFieldRaw('trancheDeposited',{},protocol,token,tranche,tokenConfig,trancheConfig,account);
+
+          // console.log('trancheTokenBalance',protocol,token,tranche,trancheTokenBalance);
+
           if (trancheTokenBalance){
             const [
               tranchePool,
@@ -4175,6 +4178,7 @@ class FunctionsUtil {
       break;
       case 'trancheIDLELastHarvest':
       case 'trancheIDLEDistribution':
+        output = this.BNify(0);
         const rewardsTokensInfo = await this.getTrancheRewardTokensInfo(tokenConfig,trancheConfig);
         if (rewardsTokensInfo && rewardsTokensInfo.IDLE){
           if (field === 'trancheIDLEDistribution'){
@@ -4186,6 +4190,12 @@ class FunctionsUtil {
             output = rewardsTokensInfo.IDLE.lastAmount;
             if (formatValue){
               output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+` IDLE <a href="${this.getEtherscanTransactionUrl(rewardsTokensInfo.IDLE.latestHarvest.transactionHash)}" rel="nofollow noopener noreferrer" target="_blank" class="link">(last harvest)</a>`
+            }
+          }
+        } else {
+          if (field === 'trancheIDLEDistribution'){
+            if (formatValue){
+              output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+` IDLE/${idleGovTokenConfig.distributionFrequency}`
             }
           }
         }

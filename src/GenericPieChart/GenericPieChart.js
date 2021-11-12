@@ -77,8 +77,8 @@ class GenericPieChart extends Component {
           selectedSlice:null
         });
       },
-      tooltipFormat: this.props.tooltipFormat || (v => v),
-      sliceLabel: this.props.sliceLabel || (d => d.value),
+      tooltipFormat: this.props.tooltipFormat ? this.props.tooltipFormat : (v => v),
+      sliceLabel: this.props.sliceLabel,// ? this.props.sliceLabel : (d => d.value),
       radialLabel: d => {
         return null;
       },
@@ -190,7 +190,7 @@ class GenericPieChart extends Component {
                       decimals={3}
                       fontWeight={4}
                       maxPrecision={5}
-                      number={this.state.selectedSlice.value}
+                      number={this.state.selectedSlice.valueHover || this.state.selectedSlice.value}
                     />
                     <Text
                       fontSize={[1,2]}

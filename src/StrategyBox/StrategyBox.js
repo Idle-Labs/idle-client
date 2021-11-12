@@ -248,6 +248,29 @@ class StrategyBox extends Component {
           </Flex>
         </Flex>
         {
+          strategyInfo.enabledEnvs.includes('beta') && (
+            <Flex
+              px={2}
+              py={'1px'}
+              top={'2px'}
+              right={'2px'}
+              borderRadius={2}
+              position={'absolute'}
+              alignItems={'center'}
+              backgroundColor={'red'}
+              justifyContent={'center'}
+            >
+              <Text
+                fontSize={1}
+                fontWeight={3}
+                color={'white'}
+              >
+                BETA
+              </Text>
+            </Flex>
+          )
+        }
+        {
           /*
           <Flex
             mb={3}

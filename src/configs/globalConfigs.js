@@ -834,7 +834,6 @@ const globalConfigs = {
       protocol: "idle",
       color: "#f32121",
       comingSoon: false,
-      title: "Tranches",
       addGovTokens: true,
       titlePostfix: null,
       strategy:'tranches',
@@ -843,6 +842,7 @@ const globalConfigs = {
       enabledEnvs: ['beta'],
       availableNetworks:[1],
       govTokensEnabled: true,
+      title: "Perpetual Tranches",
       chartColor: "hsl(40,95%,59%)",
       icon: "images/strategies/tranches-on.png",
       iconInactive: "images/strategies/tranches-off.png",
@@ -1716,6 +1716,13 @@ const globalConfigs = {
   },
   events: {
     DAI: {
+      fields: {
+        to: "dst",
+        from: "src",
+        value: "wad"
+      }
+    },
+    FEI: {
       fields: {
         to: "dst",
         from: "src",
