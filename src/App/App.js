@@ -113,20 +113,22 @@ class App extends Component {
 
   clearCachedData = async (callback = null, clear_all = false) => {
 
+    const requiredNetworkId = this.state.network.required.id;
+
     const cachedData = { ...this.state.cachedData };
-    Object.keys(cachedData).forEach(key => {
-      const data = cachedData[key];
+    Object.keys(cachedData[requiredNetworkId]).forEach(key => {
+      const data = cachedData[requiredNetworkId][key];
       if (data.expirationDate !== null) {
-        delete cachedData[key];
+        delete cachedData[requiredNetworkId][key];
       }
     });
 
     const storedCachedData = clear_all ? {} : this.functionsUtil.getStoredItem('cachedData');
-    if (storedCachedData){
-      Object.keys(storedCachedData).forEach( key => {
-        const storedData = storedCachedData[key];
+    if (storedCachedData && storedCachedData[requiredNetworkId]){
+      Object.keys(storedCachedData[requiredNetworkId]).forEach( key => {
+        const storedData = storedCachedData[requiredNetworkId][key];
         if (storedData.expirationDate !== null){
-          delete storedCachedData[key];
+          delete storedCachedData[requiredNetworkId][key];
         }
       });
     }
@@ -140,14 +142,16 @@ class App extends Component {
         callback();
       }
     });
+
     return true;
   }
 
   setCachedData = (key, data, TTL = null, useLocalStorage = false) => {
 
     key = key.toLowerCase();
-    const cachedKeyFound = this.state.cachedData[key];
     const currentTime = parseInt(Date.now() / 1000);
+    const requiredNetworkId = this.state.network.required.id;
+    const cachedKeyFound = this.state.cachedData[requiredNetworkId] ? this.state.cachedData[requiredNetworkId][key] : null;
 
     const update_key = !cachedKeyFound || ((cachedKeyFound.expirationDate !== null && cachedKeyFound.expirationDate >= currentTime) || JSON.stringify(cachedKeyFound.data) !== JSON.stringify(data));
 
@@ -161,15 +165,19 @@ class App extends Component {
         let storedCachedData = this.functionsUtil.getStoredItem('cachedData');
         if (!storedCachedData) {
           storedCachedData = {};
+          storedCachedData[requiredNetworkId] = {};
         }
 
         // const storedData = typeof data === 'object' ? JSON.stringify(data) : data;
 
         storedCachedData = {
           ...storedCachedData,
-          [key]: {
-            data,
-            expirationDate
+          [requiredNetworkId]:{
+            ...storedCachedData[requiredNetworkId],
+            [key]: {
+              data,
+              expirationDate
+            }
           }
         };
         
@@ -180,9 +188,12 @@ class App extends Component {
       this.setState((prevState) => ({
         cachedData: {
           ...prevState.cachedData,
-          [key]: {
-            data,
-            expirationDate
+          [requiredNetworkId]:{
+            ...prevState.cachedData[requiredNetworkId],
+            [key]: {
+              data,
+              expirationDate
+            }
           }
         }
       }), () => {

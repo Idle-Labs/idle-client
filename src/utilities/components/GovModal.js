@@ -64,10 +64,12 @@ class GovModal extends React.Component {
 
   componentDidUpdate(prevProps,prevState){
     this.loadUtils();
-    // const txStatusChanged = prevState.txStatus !== this.state.txStatus;
-    // if (txStatusChanged && this.state.txStatus === 'success'){
-    //   this.loadTokenInfo();
-    // }
+
+    const accountChanged = prevProps.account !== this.props.account;
+    const requiredNetworkChanged = JSON.stringify(prevProps.network.required) !== JSON.stringify(this.props.network.required);
+    if (accountChanged || requiredNetworkChanged){
+      this.loadTokenInfo();
+    }
   }
 
   async cancelTransaction(){
@@ -143,6 +145,9 @@ class GovModal extends React.Component {
   }
 
   render() {
+    const currentNetworkId = this.functionsUtil.getRequiredNetworkId();
+    const governanceConfig = this.functionsUtil.getGlobalConfig(['governance']);
+    const governanceEnabled = governanceConfig.enabled && governanceConfig.availableNetworks.includes(currentNetworkId);
     return (
       <Modal
         isOpen={this.props.isOpen}
@@ -241,31 +246,35 @@ class GovModal extends React.Component {
                     {this.state.unclaimed ? this.state.unclaimed.toFixed(4) : '-'}
                   </Text>
                 </Flex>
-                <Link
-                  href={`/#${this.functionsUtil.getGlobalConfig(['governance','baseRoute'])}`}
-                >
-                  <Flex
-                    zIndex={10}
-                    position={'relative'}
-                    alignItems={'center'}
-                    flexDirection={'row'}
-                    justifyContent={'center'}
-                  >
-                    <Text
-                      fontSize={2}
-                      color={'white'}
-                      fontWeight={400}
+                {
+                  governanceEnabled && (
+                    <Link
+                      href={`/#${this.functionsUtil.getGlobalConfig(['governance','baseRoute'])}`}
                     >
-                      Go to governance
-                    </Text>
-                    <Icon
-                      ml={1}
-                      size={'1em'}
-                      color={'white'}
-                      name={"OpenInNew"}
-                    />
-                  </Flex>
-                </Link>
+                      <Flex
+                        zIndex={10}
+                        position={'relative'}
+                        alignItems={'center'}
+                        flexDirection={'row'}
+                        justifyContent={'center'}
+                      >
+                        <Text
+                          fontSize={2}
+                          color={'white'}
+                          fontWeight={400}
+                        >
+                          Go to governance
+                        </Text>
+                        <Icon
+                          ml={1}
+                          size={'1em'}
+                          color={'white'}
+                          name={"OpenInNew"}
+                        />
+                      </Flex>
+                    </Link>
+                  )
+                }
               </Flex>
               {
                 <Flex

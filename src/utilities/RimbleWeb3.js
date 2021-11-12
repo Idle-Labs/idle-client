@@ -965,6 +965,7 @@ class RimbleTransaction extends React.Component {
 
     const contracts = [];
     const contractsNetworks = {};
+    const availableNetworks = this.functionsUtil.getGlobalConfig(['network','enabledNetworks']);
 
     if (this.props.availableStrategiesNetworks){
       Object.keys(this.props.availableStrategiesNetworks).forEach( networkId => {
@@ -1011,11 +1012,15 @@ class RimbleTransaction extends React.Component {
         if (!govTokenConfig.enabled){
           return;
         }
-        // Initialize govToken contracts
-        const contractAddress = govTokenConfig.addresses && govTokenConfig.addresses[this.state.network.required.id] ? govTokenConfig.addresses[this.state.network.required.id] : govTokenConfig.address;
-        this.functionsUtil.customLog('initializeContracts, init contract', token, contractAddress);
-        contracts.push(this.initContractWithoutSet(token, contractAddress, govTokenConfig.abi, 1));
-        contractsNetworks[1].push(this.initContractWithoutSet(token, contractAddress, govTokenConfig.abi, 1));
+        availableNetworks.forEach( networkId => {
+          // Initialize govToken contracts
+          const contractAddress = govTokenConfig.addresses && govTokenConfig.addresses[networkId] ? govTokenConfig.addresses[networkId] : govTokenConfig.address;
+          this.functionsUtil.customLog('initializeContracts, init contract', token, contractAddress);
+          if (parseInt(networkId) === parseInt(this.state.network.required.id)){
+            contracts.push(this.initContractWithoutSet(token, contractAddress, govTokenConfig.abi));
+          }
+          contractsNetworks[networkId].push(this.initContractWithoutSet(token, contractAddress, govTokenConfig.abi, networkId));
+        });
       });
     }
 
@@ -1066,17 +1071,20 @@ class RimbleTransaction extends React.Component {
       });
     }
 
+    const tranchesConfig = this.functionsUtil.getGlobalConfig(['strategies','tranches']);
     if (this.props.availableTranches){
       Object.keys(this.props.availableTranches).forEach( protocol => {
         const tokens = this.props.availableTranches[protocol];
         Object.keys(tokens).forEach( token => {
           const tokenConfig = tokens[token];
-          contracts.push(this.initContractWithoutSet(tokenConfig.name,tokenConfig.address,tokenConfig.abi,1));
-          contracts.push(this.initContractWithoutSet(tokenConfig.AA.name,tokenConfig.AA.address,tokenConfig.AA.abi,1));
-          contracts.push(this.initContractWithoutSet(tokenConfig.BB.name,tokenConfig.BB.address,tokenConfig.BB.abi,1));
-          contracts.push(this.initContractWithoutSet(tokenConfig.CDO.name,tokenConfig.CDO.address,tokenConfig.CDO.abi,1));
-          contracts.push(this.initContractWithoutSet(tokenConfig.AA.CDORewards.name,tokenConfig.AA.CDORewards.address,tokenConfig.AA.CDORewards.abi,1));
-          contracts.push(this.initContractWithoutSet(tokenConfig.BB.CDORewards.name,tokenConfig.BB.CDORewards.address,tokenConfig.BB.CDORewards.abi,1));
+          if (!tranchesConfig.availableNetworks || tranchesConfig.availableNetworks.includes(this.state.network.required.id)){
+            contracts.push(this.initContractWithoutSet(tokenConfig.name,tokenConfig.address,tokenConfig.abi));
+            contracts.push(this.initContractWithoutSet(tokenConfig.AA.name,tokenConfig.AA.address,tokenConfig.AA.abi));
+            contracts.push(this.initContractWithoutSet(tokenConfig.BB.name,tokenConfig.BB.address,tokenConfig.BB.abi));
+            contracts.push(this.initContractWithoutSet(tokenConfig.CDO.name,tokenConfig.CDO.address,tokenConfig.CDO.abi));
+            contracts.push(this.initContractWithoutSet(tokenConfig.AA.CDORewards.name,tokenConfig.AA.CDORewards.address,tokenConfig.AA.CDORewards.abi));
+            contracts.push(this.initContractWithoutSet(tokenConfig.BB.CDORewards.name,tokenConfig.BB.CDORewards.address,tokenConfig.BB.CDORewards.abi));
+          }
 
           contractsNetworks[1].push(this.initContractWithoutSet(tokenConfig.name,tokenConfig.address,tokenConfig.abi,1));
           contractsNetworks[1].push(this.initContractWithoutSet(tokenConfig.AA.name,tokenConfig.AA.address,tokenConfig.AA.abi,1));
