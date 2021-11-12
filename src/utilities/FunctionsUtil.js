@@ -1733,9 +1733,7 @@ class FunctionsUtil {
     })) : [];
     const value = logEvent ? this.fixTokenDecimals(logEvent.decoded.params.find( param => param.name==='value' ).value,tokenDecimal) : this.fixTokenDecimals(tx.value,tokenDecimal);
 
-    // if (tokenSymbol === 'USDC'){
-    //   debugger;
-    // }
+    const blockNumber = tx.log_events && tx.log_events.length ? tx.log_events[0].block_height : null;
 
     return {
       logs,
@@ -1745,6 +1743,7 @@ class FunctionsUtil {
       timeStamp,
       idleToken,
       tokenSymbol,
+      blockNumber,
       tokenDecimal,
       hash:tx.tx_hash,
       to:tx.to_address,
@@ -1754,7 +1753,6 @@ class FunctionsUtil {
       gasPrice:tx.gas_price,
       token:tokenConfig.token,
       contractAddress:tokenConfig.address,
-      blockNumber:tx.log_events[0].block_height
     };
   }
   filterPolygonTxs = async (txs,enabledTokens,processTransactions=true) => {
