@@ -6435,7 +6435,7 @@ class FunctionsUtil {
     return compAPR;
   }
   getCompSpeed = async (cTokenAddress) => {
-    let compSpeed = await this.genericContractCallCached('Comptroller','compSpeeds',[cTokenAddress]);
+    let compSpeed = await this.genericContractCallCached('Comptroller','compSupplySpeeds',[cTokenAddress]);
     if (compSpeed){
       return this.BNify(compSpeed);
     }
