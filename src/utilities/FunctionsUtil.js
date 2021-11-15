@@ -1241,7 +1241,7 @@ class FunctionsUtil {
           ethereumTx.value = this.fixTokenDecimals(ethereumTx.value,tokenConfig.decimals);
           const txReceipt = await this.getTxReceipt(ethereumTx.hash,this.props.web3Infura);
           const stateSenderLog = txReceipt ? txReceipt.logs.find( log => log.address.toLowerCase() === stateSenderConfig.address.toLowerCase() ) : null;
-          const tx_state_id = stateSenderLog ? parseInt(this.props.web3.utils.hexToNumberString(stateSenderLog.topics[1])) : null;
+          const tx_state_id = stateSenderLog && this.props.web3.utils ? parseInt(this.props.web3.utils.hexToNumberString(stateSenderLog.topics[1])) : null;
           ethereumTx.included = last_state_id && tx_state_id ? last_state_id>=tx_state_id : false;
           txs.push(ethereumTx);
         });
@@ -1272,7 +1272,7 @@ class FunctionsUtil {
           ethereumTx.value = this.fixTokenDecimals(ethereumTx.value,tokenConfig.decimals);
           const txReceipt = await this.getTxReceipt(ethereumTx.hash,this.props.web3Infura);
           const stateSenderLog = txReceipt ? txReceipt.logs.find( log => log.address.toLowerCase() === stateSenderConfig.address.toLowerCase() ) : null;
-          const tx_state_id = stateSenderLog ? parseInt(this.props.web3.utils.hexToNumberString(stateSenderLog.topics[1])) : null;
+          const tx_state_id = stateSenderLog && this.props.web3.utils ? parseInt(this.props.web3.utils.hexToNumberString(stateSenderLog.topics[1])) : null;
           ethereumTx.included = last_state_id && tx_state_id ? last_state_id>=tx_state_id : false;
           txs.push(ethereumTx);
         });
@@ -1307,7 +1307,7 @@ class FunctionsUtil {
             const polygonTx = this.normalizePolygonTx(tx,tokenConfig);
             // console.log('polygonTx',polygonTx);
             if (polygonTx.action === 'Withdraw'){
-              const tx_state_id = parseInt(this.props.web3.utils.hexToNumberString(polygonTx.logs[polygonTx.logs.length-1].topics[1]));
+              const tx_state_id = this.props.web3.utils ? parseInt(this.props.web3.utils.hexToNumberString(polygonTx.logs[polygonTx.logs.length-1].topics[1])) : 0;
               polygonTx.exited = false;
               polygonTx.networkId = polygonNetworkId;
               polygonTx.bridgeType = tokenConfig.bridgeType;
@@ -1678,7 +1678,7 @@ class FunctionsUtil {
       this.props.web3Polygon.eth.getTransactionReceipt(txHash)
     ]);
 
-    const tx_state_id = tx && tx.logs && tx.logs.length ? this.props.web3.utils.hexToNumberString(tx.logs[tx.logs.length-1].topics[1]) : null;
+    const tx_state_id = tx && tx.logs && tx.logs.length && this.props.web3.utils ? this.props.web3.utils.hexToNumberString(tx.logs[tx.logs.length-1].topics[1]) : null;
 
     return tx_state_id ? parseInt(last_state_id) >= parseInt(tx_state_id) : null;
   }
