@@ -362,7 +362,9 @@ class SendTxWithBalance extends Component {
     const fastBalanceSelector = null;
     const approveEnabled = this.props.approveEnabled !== false;
 
-    await this.props.initContract(this.props.contractInfo.name,this.props.contractInfo.address,this.props.contractInfo.abi);
+    if (this.props.contractInfo){
+      await this.props.initContract(this.props.contractInfo.name,this.props.contractInfo.address,this.props.contractInfo.abi);
+    }
     // console.log('initContract',this.props.contractInfo);
 
     const contractApproved = await this.checkContractApproved();

@@ -940,6 +940,7 @@ class App extends Component {
                                             setCurrentSection={this.setCurrentSection.bind(this)}
                                             connectAndValidateAccount={connectAndValidateAccount}
                                             contractMethodSendWrapper={contractMethodSendWrapper}
+                                            setRequiredNetwork={this.setRequiredNetwork.bind(this)}
                                             setCallbackAfterLogin={this.setCallbackAfterLogin.bind(this)}
                                             availableStrategiesNetworks={this.state.availableStrategiesNetworks}
                                           />

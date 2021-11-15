@@ -509,19 +509,17 @@ const globalConfigs = {
   contracts:{
     137:{
       ProtocolDataProvider:{
-        useInfuraProvider:false,
         abi:ProtocolDataProvider,
         address:'0x7551b5D2763519d4e37e8B81929D336De671d46d'
       },
       ChildChainManager:{
         abi:ChildChainManager,
-        useInfuraProvider:false,
         // address:'0x2e5e27d50EFa501D90Ad3638ff8441a0C0C0d75e' // Mumbai
         address:'0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa' // Matic
       },
       UniswapRouter:{
+        networkId:1,
         abi:UniswapV2Router02,
-        useInfuraProvider:true,
         address:'0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
       },
       SushiswapRouter:{

@@ -35,6 +35,7 @@ class Dashboard extends Component {
     selectedSection:null,
     currentDelegate:null,
     proposalThreshold:null,
+    governanceEnabled:false,
     selectedSubsection:null,
     proposalMaxOperations:null
   };
@@ -69,12 +70,11 @@ class Dashboard extends Component {
       submenu: [],
       selected: true,
       route: baseRoute,
-
       label: "Overview",
       color: "dark-gray",
       component: Overview,
-      bgColor: this.props.theme.colors.primary,
       image: extraicons["overview"].icon,
+      bgColor: this.props.theme.colors.primary,
       imageDark: extraicons["overview"].iconDark,
       imageInactive: extraicons["overview"].iconInactive,
       imageInactiveDark: extraicons["overview"].iconInactiveDark
@@ -182,6 +182,11 @@ class Dashboard extends Component {
   };
 
   async loadParams() {
+
+    if (!this.props.networkInitialized){
+      return;
+    }
+
     const {
       match: { params }
     } = this.props;
@@ -240,7 +245,7 @@ class Dashboard extends Component {
       }
     });
 
-    // Exit if no strategy and token selected
+    // Exit if no strategy or token selected
     if (!pageComponent) {
       return this.goToSection("/", false);
     }
@@ -269,26 +274,18 @@ class Dashboard extends Component {
   async componentWillMount() {
     this.props.setCurrentSection("governance");
     this.loadUtils();
-
-    // const governanceEnabled = this.functionsUtil.getGlobalConfig(['governance','enabled']);
-    // if (!governanceEnabled){
-    //   this.goToSection('/',false);
-    // }
-
-    await this.loadMenu();
-    this.loadParams();
+    this.loadMenu();
   }
 
   async componentDidMount() {
     this.timeoutId = window.setTimeout(() => {
-      if (!this.props.accountInizialized || !this.props.contractsInitialized) {
+      if (!this.props.accountInizialized || !this.props.networkInitialized || !this.props.contractsInitialized) {
         this.setState({
           showResetButton: true
         });
       }
-    }, 20000);
+    }, 60000);
 
-    /*
     if (!this.props.web3){
       return this.props.initWeb3();
     } else if (!this.props.accountInizialized){
@@ -296,23 +293,26 @@ class Dashboard extends Component {
     } else if (!this.props.contractsInitialized){
       return this.props.initializeContracts();
     }
-    */
 
     this.loadUtils();
-    await this.loadMenu();
-    this.loadParams();
-    this.loadData();
+    this.checkEnabled();
   }
 
   checkEnabled(){
-    const currentNetwork = this.functionsUtil.getRequiredNetwork();
-    const governanceConfig = this.functionsUtil.getGlobalConfig(['governance']);
-    const governanceEnabled = governanceConfig.enabled && governanceConfig.availableNetworks.includes(currentNetwork.id);
-    console.log('governanceEnabled',currentNetwork,governanceEnabled);
-    if (!governanceEnabled){
-      this.goToSection('/',false);
+    if (!this.props.networkInitialized){
+      return false;
     }
-    return governanceEnabled;
+
+    const currentNetworkId = this.functionsUtil.getRequiredNetworkId();
+    const governanceConfig = this.functionsUtil.getGlobalConfig(['governance']);
+    const governanceEnabled = governanceConfig.enabled && governanceConfig.availableNetworks.includes(currentNetworkId);
+
+    return this.setState({
+      governanceEnabled
+    },() => {
+      this.loadParams();
+      this.loadData();
+    });
   }
 
   async componentDidUpdate(prevProps,prevState) {
@@ -333,15 +333,15 @@ class Dashboard extends Component {
     }
 
     const accountChanged = prevProps.account !== this.props.account;
-    const accountInizialized =
-      this.props.accountInizialized &&
-      prevProps.accountInizialized !== this.props.accountInizialized;
-    const contractsInitialized =
-      this.props.contractsInitialized &&
-      prevProps.contractsInitialized !== this.props.contractsInitialized;
+    const requiredNetworkChanged = JSON.stringify(prevProps.network.required) !== JSON.stringify(this.props.network.required);
+    const networkChanged = (!prevProps.networkInitialized && this.props.networkInitialized) || requiredNetworkChanged;
+    const accountInizialized = this.props.accountInizialized && prevProps.accountInizialized !== this.props.accountInizialized;
+    const contractsInitialized = this.props.contractsInitialized && prevProps.contractsInitialized !== this.props.contractsInitialized;
 
-    if (accountChanged || accountInizialized || contractsInitialized) {
-      this.loadData();
+    // console.log('networkChanged',requiredNetworkChanged,networkChanged,this.props.networkInitialized)
+
+    if (accountChanged || accountInizialized || contractsInitialized || networkChanged) {
+      this.componentDidMount();
     }
   }
 
@@ -368,7 +368,7 @@ class Dashboard extends Component {
   }
 
   async loadData() {
-    if (!this.props.web3 || !this.props.contractsInitialized) {
+    if (!this.props.web3 || !this.props.contractsInitialized || !this.props.networkInitialized || !this.state.governanceEnabled) {
       return false;
     }
 
@@ -392,7 +392,11 @@ class Dashboard extends Component {
     newState.proposalMaxOperations = proposalMaxOperations;
 
     if (this.props.account) {
-      const [votes, balance, currentDelegate] = await Promise.all([
+      const [
+        votes,
+        balance,
+        currentDelegate
+      ] = await Promise.all([
         this.governanceUtil.getCurrentVotes(this.props.account),
         this.governanceUtil.getTokensBalance(this.props.account),
         this.governanceUtil.getCurrentDelegate(this.props.account)
@@ -432,9 +436,40 @@ class Dashboard extends Component {
   }
 
   render() {
-    const PageComponent = this.state.pageComponent
-      ? this.state.pageComponent
-      : null;
+    const PageComponent = this.state.pageComponent ? this.state.pageComponent : null;
+    const availableNetworks = this.functionsUtil.getGlobalConfig(['governance','availableNetworks']);
+
+    // console.log('governanceEnabled',this.state.governanceEnabled,PageComponent);
+    if (!this.props.availableStrategies){
+      return (
+        <Flex
+          width={1}
+          minHeight={'100vh'}
+          alignItems={'center'}
+          flexDirection={'column'}
+          justifyContent={'center'}
+          backgroundColor={'selectBg'}
+        >
+          <FlexLoader
+            textProps={{
+              textSize: 4,
+              fontWeight: 2
+            }}
+            loaderProps={{
+              mb: 3,
+              size: '80px',
+              color: 'primary'
+            }}
+            flexProps={{
+              my: 3,
+              flexDirection: 'column'
+            }}
+            text={''}
+          />
+        </Flex>
+      );
+    }
+
     return (
       <Swipeable
         callback={this.swipeCallback.bind(this)}
@@ -479,74 +514,34 @@ class Dashboard extends Component {
             py={3}
             mb={0}
             px={[3,5]}
-            width={['100vw',5/6]}
             style={{
               overflowY:'scroll',
               overflowX:'hidden'
             }}
+            width={['100vw',5/6]}
+            flexDirection={'column'}
             height={['100vh','auto']}
-            flexDirection={'columns'}
             backgroundColor={'dashboardBg'}
           >
-          {
-            !this.props.accountInizialized || !this.props.contractsInitialized || !PageComponent ? (
-              <Flex
-                width={1}
-                minHeight={"50vg"}
-                alignItems={"center"}
-                flexDirection={"column"}
-                justifyContent={"center"}
-              >
-                {!this.props.network.isCorrectNetwork ? (
-                  <DashboardCard
-                    cardProps={{
-                      p: 3,
-                      mt: 3,
-                      width: [1, 0.35]
-                    }}
-                  >
-                    <Flex alignItems={"center"} flexDirection={"column"}>
-                      <Icon size={"2.3em"} name={"Warning"} color={"cellText"} />
-                      <Text
-                        mt={2}
-                        fontSize={2}
-                        color={"cellText"}
-                        textAlign={"center"}
-                      >
-                        The{" "}
-                        <strong>
-                          {this.functionsUtil.capitalize(
-                            this.props.network.current.name
-                          )}{" "}
-                          Network
-                      </strong>{" "}
-                        is not supported, please switch to the correct network.
-                    </Text>
-                    </Flex>
-                  </DashboardCard>
-                ) : !this.state.showResetButton ? (
-                  <FlexLoader
-                    textProps={{
-                      textSize: 4,
-                      fontWeight: 2
-                    }}
-                    loaderProps={{
-                      mb: 3,
-                      size: "40px"
-                    }}
-                    flexProps={{
-                      my: 3,
-                      flexDirection: "column"
-                    }}
-                    text={
-                      !this.props.accountInizialized
-                        ? "Loading account..."
-                        : !this.props.contractsInitialized
-                          ? "Loading contracts..."
-                          : "Loading assets..."
-                    }
-                  />
-                ) : (
+            <DashboardHeader
+              menuOpened={this.state.menuOpened}
+              clickEvent={this.state.clickEvent}
+              toggleMenu={this.toggleMenu.bind(this)}
+              goToSection={this.goToSection.bind(this)}
+              governanceEnabled={this.state.governanceEnabled}
+              {...this.props}
+            />
+            {
+              !this.props.accountInizialized || !this.props.contractsInitialized || !this.state.governanceEnabled || !PageComponent ? (
+                <Flex
+                  width={1}
+                  minHeight={"55vh"}
+                  alignItems={"center"}
+                  flexDirection={"column"}
+                  justifyContent={"center"}
+                >
+                  {
+                    !this.props.network.isCorrectNetwork ? (
                       <DashboardCard
                         cardProps={{
                           p: 3,
@@ -562,10 +557,81 @@ class Dashboard extends Component {
                             color={"cellText"}
                             textAlign={"center"}
                           >
-                            Idle can't connect to your wallet!
-                      <br />
+                            The{" "}
+                            <strong>
+                              {this.functionsUtil.capitalize(
+                                this.props.network.current.name
+                              )}{" "}
+                              Network
+                          </strong>{" "}
+                            is not supported, please switch to the correct network.
+                        </Text>
+                        </Flex>
+                      </DashboardCard>
+                    ) : !this.state.governanceEnabled ? (
+                      <DashboardCard
+                        cardProps={{
+                          p: 3,
+                          mt: 3,
+                          width: [1, 0.35]
+                        }}
+                      >
+                        <Flex alignItems={"center"} flexDirection={"column"}>
+                          <Icon size={"2.3em"} name={"Warning"} color={"cellText"} />
+                          <Text
+                            mt={2}
+                            fontSize={2}
+                            color={"cellText"}
+                            textAlign={"center"}
+                          >
+                            Governance is not enabled for <strong>{this.functionsUtil.capitalize(this.props.network.current.name)} Network</strong>, please switch to <strong>{this.functionsUtil.getGlobalConfig(['network','availableNetworks',availableNetworks[0],'name'])} Network</strong>.
+                          </Text>
+                          <RoundButton
+                            buttonProps={{
+                              mt:3,
+                              width:[1,1/2]
+                            }}
+                            handleClick={e => this.props.setRequiredNetwork(availableNetworks[0])}
+                          >
+                            Switch Network
+                          </RoundButton>
+                        </Flex>
+                      </DashboardCard>
+                    ) : !this.state.showResetButton ? (
+                      <FlexLoader
+                        textProps={{
+                          textSize: 4,
+                          fontWeight: 2
+                        }}
+                        loaderProps={{
+                          mb: 3,
+                          size: "40px"
+                        }}
+                        flexProps={{
+                          my: 3,
+                          flexDirection: "column"
+                        }}
+                        text={!this.props.accountInizialized ? "Loading account..." : !this.props.contractsInitialized ? "Loading contracts..." : "Loading governance..."}
+                      />
+                    ) : (
+                      <DashboardCard
+                        cardProps={{
+                          p: 3,
+                          mt: 3,
+                          width: [1, 0.35]
+                        }}
+                      >
+                        <Flex alignItems={"center"} flexDirection={"column"}>
+                          <Icon size={"2.3em"} name={"Warning"} color={"cellText"} />
+                          <Text
+                            mt={2}
+                            fontSize={2}
+                            color={"cellText"}
+                            textAlign={"center"}
+                          >
+                            Idle can't connect to your wallet!<br />
                             Make sure that your wallet is unlocked and try again.
-                    </Text>
+                          </Text>
                           <RoundButton
                             buttonProps={{
                               mt: 3,
@@ -574,42 +640,32 @@ class Dashboard extends Component {
                             handleClick={this.logout.bind(this)}
                           >
                             Logout
-                    </RoundButton>
+                          </RoundButton>
                         </Flex>
                       </DashboardCard>
-                    )}
-              </Flex>
-            ) : (
-              <Flex width={1} flexDirection={"column"}>
-                <DashboardHeader
-                  menuOpened={this.state.menuOpened}
-                  clickEvent={this.state.clickEvent}
-                  toggleMenu={this.toggleMenu.bind(this)}
-                  goToSection={this.goToSection.bind(this)}
+                    )
+                  }
+                </Flex>
+              ) : PageComponent && (
+                <PageComponent
                   {...this.props}
+                  votes={this.state.votes}
+                  balance={this.state.balance}
+                  urlParams={this.state.params}
+                  blockNumber={this.state.blockNumber}
+                  votingPeriod={this.state.votingPeriod}
+                  loadUserData={this.loadData.bind(this)}
+                  timelockDelay={this.state.timelockDelay}
+                  goToSection={this.goToSection.bind(this)}
+                  currentDelegate={this.state.currentDelegate}
+                  selectedSection={this.state.selectedSection}
+                  proposalThreshold={this.state.proposalThreshold}
+                  selectedSubsection={this.state.selectedSubsection}
+                  openTooltipModal={this.openTooltipModal.bind(this)}
+                  proposalMaxOperations={this.state.proposalMaxOperations}
                 />
-                {PageComponent && (
-                  <PageComponent
-                    {...this.props}
-                    votes={this.state.votes}
-                    balance={this.state.balance}
-                    urlParams={this.state.params}
-                    blockNumber={this.state.blockNumber}
-                    votingPeriod={this.state.votingPeriod}
-                    loadUserData={this.loadData.bind(this)}
-                    timelockDelay={this.state.timelockDelay}
-                    goToSection={this.goToSection.bind(this)}
-                    currentDelegate={this.state.currentDelegate}
-                    selectedSection={this.state.selectedSection}
-                    proposalThreshold={this.state.proposalThreshold}
-                    selectedSubsection={this.state.selectedSubsection}
-                    openTooltipModal={this.openTooltipModal.bind(this)}
-                    proposalMaxOperations={this.state.proposalMaxOperations}
-                  />
-                )}
-              </Flex>
-            )
-          }
+              )
+            }
           </Flex>
           <TooltipModal
             closeModal={this.resetModal}

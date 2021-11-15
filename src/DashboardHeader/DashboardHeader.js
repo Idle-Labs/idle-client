@@ -272,7 +272,11 @@ class DashboardHeader extends Component {
             </DashboardCard>
           )
         )}
-        {this.props.isGovernance && <DelegateVesting {...this.props} />}
+        {
+          this.props.isGovernance && this.props.governanceEnabled && (
+            <DelegateVesting {...this.props} />
+          )
+        }
         <GovModal
           {...this.props}
           isOpen={this.state.govModalOpened}

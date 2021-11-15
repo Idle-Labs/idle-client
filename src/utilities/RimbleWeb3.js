@@ -978,6 +978,7 @@ class RimbleTransaction extends React.Component {
 
     const contracts = [];
     const contractsNetworks = {};
+    const requiredNetworkId = parseInt(this.state.network.required.id);
     const availableNetworks = this.functionsUtil.getGlobalConfig(['network','enabledNetworks']);
 
     if (this.props.availableStrategiesNetworks){
@@ -1006,14 +1007,15 @@ class RimbleTransaction extends React.Component {
 
     // console.log('initializeContracts',this.state.network,this.state.web3,contracts,this.props.availableStrategies);
 
-    const contractsToInitialize = this.functionsUtil.getGlobalConfig(['contracts',this.state.network.required.id]);
+    const contractsToInitialize = this.functionsUtil.getGlobalConfig(['contracts',requiredNetworkId]);
     if (contractsToInitialize){
       Object.keys(contractsToInitialize).forEach( contractName => {
         const contractInfo = contractsToInitialize[contractName];
         if (contractInfo.address !== null && contractInfo.abi !== null){
-          const useInfuraProvider = !!contractInfo.useInfuraProvider;
-          this.functionsUtil.customLog('initializeContracts, init contract', contractName, contractInfo.address);
-          contracts.push(this.initContractWithoutSet(contractName, contractInfo.address, contractInfo.abi, useInfuraProvider));
+          const networkId = contractInfo.networkId ? parseInt(contractInfo.networkId) : requiredNetworkId;
+          // console.log('initializeContracts, init contract', requiredNetworkId, contractName, contractInfo.address);
+          contracts.push(this.initContractWithoutSet(contractName, contractInfo.address, contractInfo.abi, networkId));
+          contractsNetworks[requiredNetworkId].push(this.initContractWithoutSet(contractName, contractInfo.address, contractInfo.abi, networkId));
         }
       });
     }
@@ -1029,7 +1031,7 @@ class RimbleTransaction extends React.Component {
           // Initialize govToken contracts
           const contractAddress = govTokenConfig.addresses && govTokenConfig.addresses[networkId] ? govTokenConfig.addresses[networkId] : govTokenConfig.address;
           this.functionsUtil.customLog('initializeContracts, init contract', token, contractAddress);
-          if (parseInt(networkId) === parseInt(this.state.network.required.id)){
+          if (parseInt(networkId) === parseInt(requiredNetworkId)){
             contracts.push(this.initContractWithoutSet(token, contractAddress, govTokenConfig.abi));
           }
           contractsNetworks[networkId].push(this.initContractWithoutSet(token, contractAddress, govTokenConfig.abi, networkId));
@@ -1090,7 +1092,7 @@ class RimbleTransaction extends React.Component {
         const tokens = this.props.availableTranches[protocol];
         Object.keys(tokens).forEach( token => {
           const tokenConfig = tokens[token];
-          if (!tranchesConfig.availableNetworks || tranchesConfig.availableNetworks.includes(this.state.network.required.id)){
+          if (!tranchesConfig.availableNetworks || tranchesConfig.availableNetworks.includes(requiredNetworkId)){
             contracts.push(this.initContractWithoutSet(tokenConfig.name,tokenConfig.address,tokenConfig.abi));
             contracts.push(this.initContractWithoutSet(tokenConfig.AA.name,tokenConfig.AA.address,tokenConfig.AA.abi));
             contracts.push(this.initContractWithoutSet(tokenConfig.BB.name,tokenConfig.BB.address,tokenConfig.BB.abi));
@@ -1115,26 +1117,7 @@ class RimbleTransaction extends React.Component {
       contracts:contracts.filter( c => !!c )
     };
 
-    // contracts.forEach( newContractInfo => {
-    //   if (newContractInfo){
-    //     let foundContract = newState.contracts.find(c => c.name === newContractInfo.name);
-    //     const contractChanged = newState.contracts.indexOf(newContractInfo)===-1;
-    //     if (!foundContract || contractChanged){
-    //       // Replace old contract
-    //       if (foundContract){
-    //         const contractIndex = newState.contracts.indexOf(foundContract);
-    //         if (contractIndex!==-1){
-    //           newState.contracts[contractIndex] = newContractInfo;
-    //         }
-    //       // Insert new contract
-    //       } else {
-    //         newState.contracts.push(newContractInfo);
-    //       }
-    //     }
-    //   }
-    // });
-
-    // console.log(this.functionsUtil.strToMoment().format('HH:mm:ss'),'initializeContracts - END',newState.contractsNetworks);
+    // console.log(this.functionsUtil.strToMoment().format('HH:mm:ss'),'initializeContracts - END',newState.contracts);
 
     return this.setState(newState);
   }
