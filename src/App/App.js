@@ -1,32 +1,32 @@
 import Web3 from "web3";
-import jQuery from 'jquery';
+import jQuery from "jquery";
 import theme from "../theme";
 import Tos from "../Tos/Tos";
 import themeDark from "../theme-dark";
-import connectors from './connectors';
-import Web3Provider from 'web3-react';
-import { Web3Consumer } from 'web3-react';
+import connectors from "./connectors";
+import Web3Provider from "web3-react";
+import { Web3Consumer } from "web3-react";
 import CookieConsent from "react-cookie-consent";
 import RimbleWeb3 from "../utilities/RimbleWeb3";
-import FlexLoader from '../FlexLoader/FlexLoader';
+import FlexLoader from "../FlexLoader/FlexLoader";
 import React, { Component, Suspense } from "react";
 import GeneralUtil from "../utilities/GeneralUtil";
 import Header from "../utilities/components/Header";
-import globalConfigs from '../configs/globalConfigs';
+import globalConfigs from "../configs/globalConfigs";
 import ScrollToTop from "../ScrollToTop/ScrollToTop";
-import FunctionsUtil from '../utilities/FunctionsUtil';
+import FunctionsUtil from "../utilities/FunctionsUtil";
 import PageNotFound from "../PageNotFound/PageNotFound";
 import Web3Debugger from "../Web3Debugger/Web3Debugger";
-import availableTokens from '../configs/availableTokens';
-import availableTranches from '../configs/availableTranches';
+import availableTokens from "../configs/availableTokens";
+import availableTranches from "../configs/availableTranches";
 import TransactionToastUtil from "../utilities/TransactionToastUtil";
 import { HashRouter as Router, Switch, Route } from "react-router-dom";
-import { ThemeProvider, Box, Text, Link, Image, Flex } from 'rimble-ui';
+import { ThemeProvider, Box, Text, Link, Image, Flex } from "rimble-ui";
 
 // Lazy Loading
 const Landing = React.lazy(() => import("../Landing/Landing"));
-const Dashboard = React.lazy(() => import('../Dashboard/Dashboard'));
-const Governance = React.lazy(() => import('../Governance/Governance'));
+const Dashboard = React.lazy(() => import("../Dashboard/Dashboard"));
+const Governance = React.lazy(() => import("../Governance/Governance"));
 
 class App extends Component {
   state = {

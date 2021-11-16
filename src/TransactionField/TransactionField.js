@@ -165,7 +165,7 @@ class TransactionField extends Component {
             <Link
               target={'_blank'}
               rel={'nofollow noopener noreferrer'}
-              href={`https://etherscan.io/tx/${transaction.hash}`}
+              href={this.functionsUtil.getEtherscanTransactionUrl(transaction.hash)}
             >
               <ShortHash
                 fontSize={1}

@@ -5,6 +5,7 @@ import GenericFaqs from '../GenericFaqs/GenericFaqs';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import TrancheDetails from '../TrancheDetails/TrancheDetails';
 // import TrancheWelcome from '../TrancheWelcome/TrancheWelcome';
+import TrancheHarvests from '../TrancheHarvests/TrancheHarvests';
 import TransactionsList from '../TransactionsList/TransactionsList';
 import TrancheDepositRedeem from '../TrancheDepositRedeem/TrancheDepositRedeem';
 import FundsOverviewTranche from '../FundsOverviewTranche/FundsOverviewTranche';
@@ -158,6 +159,17 @@ class TranchePage extends Component {
               tokenConfig={this.props.tokenConfig}
               protocol={this.props.selectedProtocol}
               transactionsList={this.state.transactions}
+              trancheConfig={this.props.tokenConfig[this.props.trancheType]}
+            />
+        }
+        {
+          this.state.componentLoaded && this.props.account && this.props.trancheType &&
+            <TrancheHarvests
+              {...this.props}
+              token={this.props.selectedToken}
+              tranche={this.props.trancheType}
+              tokenConfig={this.props.tokenConfig}
+              protocol={this.props.selectedProtocol}
               trancheConfig={this.props.tokenConfig[this.props.trancheType]}
             />
         }

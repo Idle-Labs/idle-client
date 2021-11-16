@@ -190,10 +190,10 @@ class FunctionsUtil {
 
     return action;
   }
-  shortenHash = hash => {
+  shortenHash = (hash,startLen=7,endLen=4) => {
     let shortHash = hash;
-    const txStart = shortHash.substr(0, 7);
-    const txEnd = shortHash.substr(shortHash.length - 4);
+    const txStart = shortHash.substr(0, startLen);
+    const txEnd = shortHash.substr(shortHash.length - endLen);
     shortHash = txStart + "..." + txEnd;
     return shortHash;
   }
@@ -858,6 +858,36 @@ class FunctionsUtil {
     }
     return null;
   }
+  getTrancheHarvests = async (tokenConfig,trancheConfig) => {
+    const harvestsList = {};
+    const stakingRewards = await this.loadTrancheFieldRaw('stakingRewards',{},tokenConfig.protocol,tokenConfig.token,trancheConfig.tranche,tokenConfig,trancheConfig);
+    await this.asyncForEach(Object.keys(stakingRewards),async (token) => {
+      const eventFilters = {
+        from:tokenConfig.CDO.address,
+        to:trancheConfig.CDORewards.address
+      }
+      const transfers = await this.getContractEvents(token,'Transfer',{fromBlock: tokenConfig.blockNumber,toBlock:'latest',filter:eventFilters});
+
+      if (transfers && transfers.length>0){
+        harvestsList[token] = transfers;
+      }
+    });
+
+    const autoFarming = await this.loadTrancheFieldRaw('autoFarming',{},tokenConfig.protocol,tokenConfig.token,trancheConfig.tranche,tokenConfig,trancheConfig);
+    await this.asyncForEach(Object.keys(autoFarming),async (token) => {
+      const eventFilters = {
+        to:tokenConfig.CDO.address
+      }
+      const transfers = await this.getContractEvents(token,'Transfer',{fromBlock: tokenConfig.blockNumber,toBlock:'latest',filter:eventFilters});
+
+      if (transfers && transfers.length>0){
+        harvestsList[token] = transfers;
+      }
+    });
+
+    // console.log('getTrancheHarvests',stakingRewards,autoFarming,harvestsList);
+    return harvestsList;
+  }
   getTrancheRewardTokensInfo = async (tokenConfig,trancheConfig) => {
     const stakingRewards = await this.loadTrancheFieldRaw('stakingRewards',{},tokenConfig.protocol,tokenConfig.token,trancheConfig.tranche,tokenConfig,trancheConfig);
     const tokensDistribution = {};
@@ -888,6 +918,7 @@ class FunctionsUtil {
           this.getUniswapConversionRate(DAITokenConfig,govTokenConfig),
           this.genericContractCallCached(tokenConfig.CDO.name,'getContractValue',[],{},latestHarvest.blockNumber)
         ]);
+
         if (prevBlockInfo && lastBlockInfo){
           const poolSize = this.fixTokenDecimals(lastBlockPoolSize,tokenConfig.CDO.decimals);
           const elapsedBlocks = latestHarvest.blockNumber-firstBlock;
