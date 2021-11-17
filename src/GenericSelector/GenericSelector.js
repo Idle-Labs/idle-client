@@ -78,7 +78,8 @@ class GenericSelector extends Component {
         mt: 2,
         zIndex: 1,
         boxShadow: null,
-        position: 'absolute'
+        position: 'absolute',
+        backgroundColor: this.props.outerColor ? this.props.outerColor : "green"
       });
       return (
         <DashboardCard
@@ -170,7 +171,7 @@ class GenericSelector extends Component {
           style={{ cursor: 'pointer' }}
           justifyContent={'flex-start'}
           className={styles.genericSelector}
-          backgroundColor={props.isFocused ? 'selectBgFocused' : 'selectBg'}
+          backgroundColor={this.props.isDashboard ? 'dashboardBg' : (props.isFocused ? 'selectBgFocused' : 'selectBg')}
         >
           <CustomOptionValue
             {...props}

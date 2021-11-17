@@ -96,7 +96,7 @@ class DashboardMenu extends Component {
     return (
       <Flex p={0} height={"100%"} flexDirection={"column"}>
         <Flex
-          p={3}
+          p={4}
           mb={3}
           flexDirection={"row"}
           alignItems={"center"}
@@ -117,7 +117,7 @@ class DashboardMenu extends Component {
           borderBottom={`1px solid ${this.props.theme.colors.divider}`}
           justifyContent={"flex-start"}
           mb={3}
-          mx={3}
+
           pb={3}
         >
           {/*<RoundButton
@@ -173,10 +173,11 @@ class DashboardMenu extends Component {
                 border: 1,
                 boxShadow: 0,
                 borderRadius: 1,
+                borderColor: 'border',
                 py: 1,
-                px: [1, 2],
+                mx: [1, 4],
                 width: 0.8,
-                mr: [2, 0],
+
                 display: "flex",
 
                 mb: [0, 3]
@@ -185,23 +186,23 @@ class DashboardMenu extends Component {
               handleClick={e => this.props.goToSection(governanceRoute, false)}
             >
               <Flex
-                p={0}
-
+                px={2}
+                py={1}
                 alignItems={"center"}
                 flexDirection={"row"}
                 justifyContent={"center"}
               >
                 <Image
-                  mr={1}
-                  width={"1.3em"}
-                  height={"1.3em"}
+                  mr={2}
+                  width={"1.1em"}
+                  height={"0.9em"}
                   display={"inline-flex"}
                   src={`images/sidebar/switch.svg`}
                 />
 
 
 
-                <Text color={"copyColor"} fontSize={1} fontWeight={400}>
+                <Text color={"text"} fontSize={1} fontWeight={400}>
                   Switch to Governance
                 </Text>
 
@@ -216,10 +217,11 @@ class DashboardMenu extends Component {
                     border: 1,
                     boxShadow: 0,
                     borderRadius: 1,
+                    borderColor: 'border',
                     py: 1,
-                    px: [1, 2],
+                    mx: [1, 4],
                     width: 0.8,
-                    mr: [2, 0],
+
                     display: "flex",
 
                     mb: [0, 3]
@@ -228,23 +230,23 @@ class DashboardMenu extends Component {
                   handleClick={e => this.props.goToSection(dashboardRoute, false)}
                 >
                   <Flex
-                    p={0}
-
+                    px={2}
+                    py={1}
                     alignItems={"center"}
                     flexDirection={"row"}
                     justifyContent={"center"}
                   >
                     <Image
-                      mr={1}
-                      width={"1.3em"}
-                      height={"1.3em"}
+                      mr={2}
+                      width={"1.1em"}
+                      height={"0.9em"}
                       display={"inline-flex"}
                       src={`images/sidebar/switch.svg`}
                     />
 
 
 
-                    <Text color={"copyColor"} fontSize={1} fontWeight={400}>
+                    <Text color={"text"} fontSize={1} fontWeight={400}>
                       Switch to Dashboard
                 </Text>
 
@@ -333,7 +335,7 @@ class DashboardMenu extends Component {
                     <Text
                       fontSize={2}
                       fontWeight={3}
-                      color={"copyColor"}
+                      color={"text"}
                       textAlign={"center"}
                       style={{
                         whiteSpace: "nowrap"

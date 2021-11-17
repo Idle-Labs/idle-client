@@ -114,6 +114,7 @@ class NetworkIndicator extends Component {
           }}
           justifyContent={'space-between'}
           {...props.innerProps}
+          bg={"dashboardBg"}
           px={0}
         >
           <Flex
@@ -124,6 +125,8 @@ class NetworkIndicator extends Component {
             flexDirection={'row'}
             style={{ cursor: 'pointer' }}
             justifyContent={'flex-start'}
+            bg={"dashboardBg"}
+
           >
             <Image
               mr={2}
@@ -154,8 +157,9 @@ class NetworkIndicator extends Component {
     return this.state.defaultNetwork ? (
       <GenericSelector
         {...this.props}
-
+        outerColor={"dashboardBg"}
         name={'network'}
+        isDashboard={true}
         isSearchable={false}
         innerProps={Object.assign({
           px: 1,
@@ -164,6 +168,7 @@ class NetworkIndicator extends Component {
           boxShadow: 0,
           borderRadius: 0,
           border: 0,
+          backgroundColor: "dashboardBg"
 
         }, this.props.innerProps)}
         customOptionProps={{
@@ -191,6 +196,8 @@ class NetworkIndicator extends Component {
             width: [1, 'auto'],
             alignItems: 'center',
             justifyContent: 'center',
+            backgroundColor: 'dashboardBg',
+
             height: (this.props.innerProps && this.props.innerProps.height) || '42px',
           }}
           isInteractive={false}

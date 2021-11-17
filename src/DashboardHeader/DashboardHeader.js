@@ -146,7 +146,7 @@ class DashboardHeader extends Component {
     return (
       <Box >
         <Flex
-          pb={2}
+          py={2}
           width={1}
           bg={"dashboardBg"}
           flexDirection={"row"}

@@ -493,7 +493,7 @@ class Dashboard extends Component {
                 flexDirection={'column'}
               >
                 <Card
-                  p={3}
+                  p={0}
                   border={0}
                   width={'auto'}
                   height={'100vh'}
