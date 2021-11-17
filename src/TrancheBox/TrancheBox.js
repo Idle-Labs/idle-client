@@ -40,15 +40,15 @@ class Base extends Component {
     return (
       <Box my={[3, 0]} boxShadow={1} width={[1, 0.49]} borderRadius={2}>
         <Flex
-          height={"100%"}
           p={0}
           mx={0}
-          borderColor={"transparent"}
           border={"0"}
+          height={"100%"}
           borderRadius={2}
           overflow={"hidden"}
           flexDirection={"column"}
           backgroundColor={"cardBg"}
+          borderColor={"transparent"}
           justifyContent={[
             "center",
             trancheDetails.type === "AA" ? "left" : "right"
@@ -85,11 +85,15 @@ class Base extends Component {
                 alignItems={"flex-start"}
                 flexDirection={"column"}
               >
-                <Flex mr={1} flexDirection={"row"} alignItems={"baseline"}>
+                <Flex
+                  mr={1}
+                  flexDirection={"row"}
+                  alignItems={"baseline"}
+                >
                   <TrancheField
                     fieldInfo={{
-                      name: `${trancheDetails.baseName}Apy`,
                       showTooltip: false,
+                      name: `${trancheDetails.baseName}Apy`,
                       props: {
                         decimals: 2,
                         fontWeight: 4,
@@ -108,6 +112,24 @@ class Base extends Component {
                     tranche={strategyInfo.tranche}
                     protocol={strategyInfo.protocol}
                   />
+                  {
+                    /*
+                    <TrancheField
+                      fieldInfo={{
+                        name: `tokenIcon`,
+                        props: {
+                          width:'1.4em',
+                          height:'1.4em'
+                        }
+                      }}
+                      {...this.props}
+                      tokenConfig={tokenConfig}
+                      token={strategyInfo.token}
+                      tranche={strategyInfo.tranche}
+                      protocol={strategyInfo.protocol}
+                    />
+                    */
+                  }
                   <Text
                     my={1}
                     ml={[2, 3]}

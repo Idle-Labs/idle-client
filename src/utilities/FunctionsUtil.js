@@ -197,6 +197,30 @@ class FunctionsUtil {
     shortHash = txStart + "..." + txEnd;
     return shortHash;
   }
+
+  switchEthereumChain = (chainId) => {
+    const web3 = this.getCurrentWeb3();
+    if (!web3 || !web3.utils || !web3.currentProvider || typeof web3.currentProvider.request !== 'function'){
+      return false;
+    }
+
+    chainId = parseInt(chainId);
+    const networkConfig = this.getGlobalConfig(['network','availableNetworks',chainId]);
+
+    if (!networkConfig){
+      return false;
+    }
+
+    const params = [{
+      chainId:web3.utils.toHex(chainId)
+    }];
+
+    return web3.currentProvider.request({
+      params,
+      method:'wallet_switchEthereumChain',
+    });
+  }
+
   addEthereumChain = (chainId) => {
     const web3 = this.getCurrentWeb3();
 
@@ -209,10 +233,12 @@ class FunctionsUtil {
     chainId = parseInt(chainId);
     const networkConfig = this.getGlobalConfig(['network','availableNetworks',chainId]);
 
-    // console.log('networkConfig',networkConfig);
-
     if (!networkConfig){
       return false;
+    }
+
+    if (chainId === 1){
+      return this.switchEthereumChain(chainId);
     }
 
     const chainName = networkConfig.chainName || networkConfig.name;
@@ -233,10 +259,10 @@ class FunctionsUtil {
 
     // console.log('addEthereumChain',params);
 
-    web3.currentProvider.request({
+    return web3.currentProvider.request({
       params,
       method:'wallet_addEthereumChain',
-    })
+    });
   }
   getENSName = async (address) => {
 
