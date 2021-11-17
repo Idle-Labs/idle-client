@@ -163,7 +163,8 @@ class TranchePage extends Component {
             />
         }
         {
-          this.state.componentLoaded && this.props.account && this.props.trancheType &&
+          /*
+          this.state.componentLoaded && this.props.account && this.props.trancheType && (
             <TrancheHarvests
               {...this.props}
               token={this.props.selectedToken}
@@ -172,6 +173,8 @@ class TranchePage extends Component {
               protocol={this.props.selectedProtocol}
               trancheConfig={this.props.tokenConfig[this.props.trancheType]}
             />
+          )
+          */
         }
         {
           this.props.account && this.state.transactions && this.state.transactions.length>0 && 
