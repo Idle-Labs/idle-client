@@ -148,7 +148,7 @@ class DashboardHeader extends Component {
         <Flex
           py={2}
           width={1}
-          bg={"dashboardBg"}
+          bg={"cardBg"}
           flexDirection={"row"}
           justifyContent={"space-between"}
           alignItems={["flex-end", "center"]}

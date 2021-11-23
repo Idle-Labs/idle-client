@@ -69,7 +69,7 @@ export default {
     NEW COLORS
     */
     text: "#000000",
-    border: "#B7C3FA",
+    border: "#EAEAEA",
     connect: "#0042F5",
     newblue: "#2B65D9",
     alert: "#ff9900",

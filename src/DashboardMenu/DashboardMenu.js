@@ -5,11 +5,13 @@ import { Link as RouterLink } from "react-router-dom";
 import FunctionsUtil from "../utilities/FunctionsUtil";
 import { Flex, Box, Icon, Text, Image, Link } from "rimble-ui";
 import NetworkIndicator from "../NetworkIndicator/NetworkIndicator";
+import HoverImage from "../HoverImage/HoverImage"
 import DashboardCard from "../DashboardCard/DashboardCard";
 class DashboardMenu extends Component {
   state = {
     logout: false,
-    buyModalOpened: false
+    buyModalOpened: false,
+    isHover: false
   };
 
   // Utils
@@ -97,6 +99,7 @@ class DashboardMenu extends Component {
       <Flex p={0} height={"100%"} flexDirection={"column"}>
         <Flex
           p={4}
+          pb={2}
           mb={3}
           flexDirection={"row"}
           alignItems={"center"}
@@ -133,7 +136,7 @@ class DashboardMenu extends Component {
             handleClick={this.props.account ? e => this.logout() : this.props.connectAndValidateAccount}
           >
             <Flex
-              width={1}
+              width={1}f
               alignItems={"center"}
               justifyContent={"flex-start"}
             >
@@ -184,6 +187,7 @@ class DashboardMenu extends Component {
               }}
               isInteractive={true}
               handleClick={e => this.props.goToSection(governanceRoute, false)}
+
             >
               <Flex
                 px={2}
@@ -191,17 +195,24 @@ class DashboardMenu extends Component {
                 alignItems={"center"}
                 flexDirection={"row"}
                 justifyContent={"center"}
+                onMouseEnter={e => this.setState({ isHover: true })}
+                onMouseLeave={e => this.setState({ isHover: false })}
               >
-                <Image
-                  mr={2}
-                  width={"1.1em"}
-                  height={"0.9em"}
-                  display={"inline-flex"}
-                  src={`images/sidebar/switch.svg`}
+
+                <HoverImage
+                  hoverOn={this.state.isHover}
+                  hover={'images/sidebar/switchHover.svg'}
+                  noHover={'images/sidebar/switch.svg'}
+                  imageProps={
+                    {
+                      mr: 2,
+                      width: "16px",
+                      height: "16px",
+                      display: "inline-flex"
+
+                    }
+                  }
                 />
-
-
-
                 <Text color={"text"} fontSize={1} fontWeight={400}>
                   Switch to Governance
                 </Text>
@@ -228,6 +239,7 @@ class DashboardMenu extends Component {
                   }}
                   isInteractive={true}
                   handleClick={e => this.props.goToSection(dashboardRoute, false)}
+
                 >
                   <Flex
                     px={2}
@@ -235,17 +247,24 @@ class DashboardMenu extends Component {
                     alignItems={"center"}
                     flexDirection={"row"}
                     justifyContent={"center"}
+                    onMouseEnter={e => this.setState({ isHover: true })}
+                    onMouseLeave={e => this.setState({ isHover: false })}
                   >
-                    <Image
-                      mr={2}
-                      width={"1.1em"}
-                      height={"0.9em"}
-                      display={"inline-flex"}
-                      src={`images/sidebar/switch.svg`}
+
+                    <HoverImage
+                      hoverOn={this.state.isHover}
+                      hover={'images/sidebar/switchHover.svg'}
+                      noHover={'images/sidebar/switch.svg'}
+                      imageProps={
+                        {
+                          mr: 2,
+                          width: "16px",
+                          height: "16px",
+                          display: "inline-flex"
+
+                        }
+                      }
                     />
-
-
-
                     <Text color={"text"} fontSize={1} fontWeight={400}>
                       Switch to Dashboard
                 </Text>
@@ -270,85 +289,88 @@ class DashboardMenu extends Component {
             </Flex>
           )
         }
-        {visibleLinks.map((menuLink, menuIndex) => {
-          const isExternalLink = menuLink.isExternalLink;
-          const LinkComponent = isExternalLink ? ExtLink : RouterLink;
-          const activeImage = isDarkTheme && menuLink.imageDark ? menuLink.imageDark : menuLink.image;
-          const inactiveImage = isDarkTheme && menuLink.imageInactiveDark ? menuLink.imageInactiveDark : menuLink.imageInactive;
-          return (
-            <Box
-              width={"auto"}
-              my={[2, "8px"]}
-              key={`menu-${menuIndex}`}
-            >
-              <LinkComponent
-                to={menuLink.route}
-                href={menuLink.route}
-                onClick={this.props.closeMenu}
-                style={{ textDecoration: "none" }}
+        <Flex px={3} flexDirection={"column"}>
+          {visibleLinks.map((menuLink, menuIndex) => {
+            const isExternalLink = menuLink.isExternalLink;
+            const LinkComponent = isExternalLink ? ExtLink : RouterLink;
+            const activeImage = isDarkTheme && menuLink.imageDark ? menuLink.imageDark : menuLink.image;
+            const inactiveImage = isDarkTheme && menuLink.imageInactiveDark ? menuLink.imageInactiveDark : menuLink.imageInactive;
+            return (
+              <Box
+                width={"auto"}
+                my={[2, "8px"]}
+                key={`menu-${menuIndex}`}
               >
-                <Flex
-                  py={2}
-                  px={3}
-                  borderRadius={2}
-                  flexDirection={"row"}
-                  alignItems={"center"}
-                  border={menuLink.selected ? 2 : null}
-                  backgroundColor={
-                    menuLink.selected ? "menuHover" : "transparent"
-                  }
+                <LinkComponent
+                  to={menuLink.route}
+                  href={menuLink.route}
+                  onClick={this.props.closeMenu}
+                  style={{ textDecoration: "none" }}
                 >
                   <Flex
-                    py={1}
-                    width={1}
-                    alignItems={"center"}
+                    py={2}
+                    px={3}
+                    borderRadius={2}
                     flexDirection={"row"}
-                    justifyContent={"flex-start"}
-                  >
-                    {
-                      menuLink.image ? (
-                        <Image
-                          mr={3}
-                          ml={2}
-                          mb={0}
-                          align={"center"}
-                          height={"1.6em"}
-                          src={menuLink.selected ? activeImage : inactiveImage}
-                        />
-                      ) : menuLink.icon && (
-                        <Icon
-                          name={menuLink.icon}
-                          color={
-                            menuLink.selected
-                              ? "menuIconActive"
-                              : isDarkTheme
-                                ? "white"
-                                : "dark-gray"
-                          }
-                          mr={3}
-                          ml={2}
-                          mb={0}
-                          size={"1.6em"}
-                        />
-                      )
+                    alignItems={"center"}
+                    border={menuLink.selected ? 2 : null}
+                    backgroundColor={
+                      menuLink.selected ? "menuHover" : "transparent"
                     }
-                    <Text
-                      fontSize={2}
-                      fontWeight={3}
-                      color={"text"}
-                      textAlign={"center"}
-                      style={{
-                        whiteSpace: "nowrap"
-                      }}
+                  >
+                    <Flex
+                      py={1}
+                      width={1}
+                      alignItems={"center"}
+                      flexDirection={"row"}
+                      justifyContent={"flex-start"}
                     >
-                      {menuLink.label}
-                    </Text>
+                      {
+                        menuLink.image ? (
+                          <Image
+                            mr={3}
+                            ml={2}
+                            mb={0}
+                            align={"center"}
+                            height={"1.6em"}
+                            src={menuLink.selected ? activeImage : inactiveImage}
+                          />
+                        ) : menuLink.icon && (
+                          <Icon
+                            name={menuLink.icon}
+                            color={
+                              menuLink.selected
+                                ? "menuIconActive"
+                                : isDarkTheme
+                                  ? "white"
+                                  : "dark-gray"
+                            }
+                            mr={3}
+                            ml={2}
+                            mb={0}
+                            size={"1.6em"}
+                          />
+                        )
+                      }
+                      <Text
+                        fontSize={2}
+                        fontWeight={3}
+                        color={"text"}
+                        textAlign={"center"}
+                        style={{
+                          whiteSpace: "nowrap"
+                        }}
+                      >
+                        {menuLink.label}
+                      </Text>
+                    </Flex>
                   </Flex>
-                </Flex>
-              </LinkComponent>
-            </Box>
-          );
-        })}
+                </LinkComponent>
+              </Box>
+            );
+          })}
+        </Flex>
+
         {darkModeEnabled && (
           <Flex
             my={2}

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import styles from './DashboardCard.module.scss';
 import { Flex, Icon, Heading, Card, Tooltip } from "rimble-ui";
 
+
 class DashboardCard extends Component {
 
   state = {
@@ -99,6 +100,7 @@ class DashboardCard extends Component {
                 />
               </Tooltip>
             }
+
           </Flex>
         }
         {this.props.children}
