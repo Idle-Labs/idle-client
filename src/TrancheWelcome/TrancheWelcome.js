@@ -6,6 +6,7 @@ import styles from "./TrancheWelcome.module.scss";
 import TrancheBox from "../TrancheBox/TrancheBox";
 import FunctionsUtil from "../utilities/FunctionsUtil";
 import TrancheFlash from "../TrancheFlash/TrancheFlash";
+import AssetsUnderManagement from "../AssetsUnderManagement/AssetsUnderManagement";
 
 class TrancheWelcome extends Component {
   // Utils
@@ -30,26 +31,34 @@ class TrancheWelcome extends Component {
   render() {
     const tranchesDetails = this.functionsUtil.getGlobalConfig(["tranches"]);
     return (
-      <Flex width={1} aligItems={"center"} justifyContent={"center"}>
+      <Flex
+        width={1}
+        alignItems={"center"}
+        flexDirection={'column'}
+        justifyContent={"center"}
+      >
+        <AssetsUnderManagement
+          {...this.props}
+          flexProps={{
+            mb:[3,0]
+          }}
+          loaderAlign={'flex-end'}
+          subtitle={'Total Value Locked on Tranches'}
+          aggregatedStatsMethod={this.functionsUtil.getTrancheAggregatedStats}
+        />
         <Flex
           mb={3}
           width={1}
           maxWidth={8}
-          aligItems={"center"}
+          alignItems={"center"}
           flexDirection={"column"}
-          justifyContent={"space-between"}
+          justifyContent={"center"}
         >
           {!this.props.tokenConfig ? (
             <>
               <Title fontSize={[5, 6]}>Perpetual Yield Tranches</Title>
               <Flex
-                width={1}
-                mb={[3, 4]}
-                mx={"auto"}
-                aligItems={"center"}
-                justifyContent={"center"}
-              ></Flex>
-              <Flex
+                mt={[2,3]}
                 border={1}
                 borderRadius={2}
                 borderColor={"transparent"}

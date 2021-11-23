@@ -4250,10 +4250,8 @@ class FunctionsUtil {
             }
           }
         } else {
-          if (field === 'trancheIDLEDistribution'){
-            if (formatValue){
-              output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+` IDLE/${idleGovTokenConfig.distributionFrequency}`
-            }
+          if (formatValue){
+            output = this.abbreviateNumber(output,decimals,maxPrecision,minPrecision)+` IDLE/${idleGovTokenConfig.distributionFrequency}`
           }
         }
       break;
@@ -7377,6 +7375,38 @@ class FunctionsUtil {
     const networkId = this.getRequiredNetworkId();
     const tokenConfig = this.getArrayPath([networkId,strategy,token],availableTokens);
     return tokenConfig ? tokenConfig.address : null;
+  }
+  getTrancheAggregatedStats = async (tranches=null) => {
+    let avgAPY = this.BNify(0);
+    let totalAUM = this.BNify(0);
+    if (!tranches || !tranches.length){
+      tranches = Object.keys(this.getGlobalConfig(['tranches']));
+    }
+    await this.asyncForEach(Object.keys(this.props.availableTranches),async (protocol) => {
+      const protocolConfig = this.props.availableTranches[protocol];
+      await this.asyncForEach(Object.keys(protocolConfig),async (token) => {
+        const tokenConfig = protocolConfig[token];
+        await this.asyncForEach(tranches,async (tranche) => {
+          const trancheConfig = tokenConfig[tranche];
+          const [
+            trancheApy,
+            tranchePool
+          ] = await Promise.all([
+            this.loadTrancheFieldRaw('trancheApy',{},protocol,token,tranche,tokenConfig,trancheConfig,null),
+            this.loadTrancheFieldRaw('tranchePool',{},protocol,token,tranche,tokenConfig,trancheConfig,null)
+          ]);
+          avgAPY = avgAPY.plus(this.BNify(trancheApy).times(this.BNify(tranchePool)));
+          totalAUM = totalAUM.plus(this.BNify(tranchePool));
+        });
+      });
+    });
+
+    avgAPY = avgAPY.div(totalAUM);
+
+    return {
+      avgAPY,
+      totalAUM
+    };
   }
   getAggregatedStats = async (addGovTokens=true,allNetworks=false) => {
     const networkId = this.getRequiredNetworkId();

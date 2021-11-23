@@ -44,14 +44,26 @@ class AssetsUnderManagement extends Component {
       return true;
     }
 
+    if (this.props.totalAUM && this.props.totalAUMEndOfYear){
+      return this.setState({
+        totalAUM:this.props.totalAUM,
+        totalAUMEndOfYear:this.props.totalAUMEndOfYear
+      });
+    }
+
+    const aggregatedStatsMethodParams = this.props.aggregatedStatsMethodParams || [true,allNetworks];
+
     const {
       avgAPY,
       totalAUM
-    } = await this.functionsUtil.getAggregatedStats(true,allNetworks);
+    } = typeof this.props.aggregatedStatsMethod === 'function' ? await this.props.aggregatedStatsMethod(...aggregatedStatsMethodParams) : await this.functionsUtil.getAggregatedStats(...aggregatedStatsMethodParams);
 
-    const totalAUMEndOfYear = totalAUM.plus(totalAUM.times(avgAPY.div(100)));
+    let totalAUMEndOfYear = this.functionsUtil.BNify(0);
+    if (!this.functionsUtil.BNify(totalAUM).isNaN() && !this.functionsUtil.BNify(avgAPY).isNaN()){
+      totalAUMEndOfYear = totalAUM.plus(totalAUM.times(avgAPY.div(100)));
+    }
 
-    this.setState({
+    return this.setState({
       totalAUM,
       totalAUMEndOfYear
     });
@@ -61,6 +73,7 @@ class AssetsUnderManagement extends Component {
     return this.state.totalAUM ? (
       <Box
         width={1}
+        {...this.props.flexProps}
       >
         <CountUp
           delay={0}
@@ -97,17 +110,14 @@ class AssetsUnderManagement extends Component {
               textAlign={['center','right']}
               {...this.props.subtitleProps}
             >
-              {
-                this.props.subtitle ? this.props.subtitle : (
-                  <Text.span fontWeight={'inherit'} color={'inherit'} fontSize={'inherit'}>Assets Under Management{/*<Text.span color={'cellTitle'} fontWeight={3} fontSize={'70%'}>(V3 + V4)</Text.span>*/}</Text.span>
-                )
-              }
+              <Text.span fontWeight={'inherit'} color={'inherit'} fontSize={'inherit'}>{this.props.subtitle || 'Assets Under Management'}</Text.span>
             </Title>
           )
         }
       </Box>
     ) : (
       <Flex
+        width={1}
         alignItems={'center'}
         justifyContent={this.props.loaderAlign || 'center'}
       >

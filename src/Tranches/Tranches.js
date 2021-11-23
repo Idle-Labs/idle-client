@@ -12,6 +12,7 @@ import GenericSelector from '../GenericSelector/GenericSelector';
 import TransactionsList from '../TransactionsList/TransactionsList';
 import TotalBalanceCounter from '../TotalBalanceCounter/TotalBalanceCounter';
 import TotalEarningsCounter from '../TotalEarningsCounter/TotalEarningsCounter';
+import AssetsUnderManagement from "../AssetsUnderManagement/AssetsUnderManagement";
 import { Box, Flex, Heading, Loader, Text, Icon, Tooltip, Image } from "rimble-ui";
 import PortfolioEquityTranches from '../PortfolioEquityTranches/PortfolioEquityTranches';
 
@@ -338,23 +339,22 @@ class Tranches extends Component {
                 <Box
                   width={1}
                 >
+                  <AssetsUnderManagement
+                    {...this.props}
+                    flexProps={{
+                      mb:[3,0]
+                    }}
+                    loaderAlign={'flex-end'}
+                    subtitle={'Total Value Locked on Tranches'}
+                    aggregatedStatsMethod={this.functionsUtil.getTrancheAggregatedStats}
+                  />
                   <Flex
                     mb={3}
                     width={1}
                     alignItems={'center'}
                     flexDirection={'row'}
                     justifyContent={'center'}
-                  > 
-                    {
-                    /*
-                      <Icon
-                        mr={2}
-                        name={this.state.trancheDetails.icon}
-                        color={this.state.trancheDetails.color.hex}
-                        size={this.props.isMobile ? '1.8em' : '2.2em'}
-                      />
-                    */
-                    }
+                  >
                     <Image
                       mr={2}
                       src={this.state.trancheDetails.image}
@@ -382,11 +382,24 @@ class Tranches extends Component {
                   </Flex>
                 </Box>
               ) : (
-                <Title
-                  mb={3}
+                <Box
+                  width={1}
                 >
-                  Perpetual Yield Tranches
-                </Title>
+                  <AssetsUnderManagement
+                    {...this.props}
+                    flexProps={{
+                      mb:[3,0]
+                    }}
+                    loaderAlign={'flex-end'}
+                    subtitle={'Total Value Locked on Tranches'}
+                    aggregatedStatsMethod={this.functionsUtil.getTrancheAggregatedStats}
+                  />
+                  <Title
+                    mb={3}
+                  >
+                    Perpetual Yield Tranches
+                  </Title>
+                </Box>
               )}
               {
                 this.state.portfolioLoaded && this.state.userHasFunds && (
@@ -806,7 +819,7 @@ class Tranches extends Component {
                     {
                       title:'PROTOCOL',
                       props:{
-                        width:[0.25,0.15]
+                        width:[0.23,0.15]
                       },
                       fields:[
                         {
@@ -824,7 +837,7 @@ class Tranches extends Component {
                     {
                       title:'TOKEN',
                       props:{
-                        width:[0.16, 0.12],
+                        width:[0.15, 0.12],
                       },
                       fields:[
                         {
@@ -866,7 +879,7 @@ class Tranches extends Component {
                     {
                       title:'POOL',
                       props:{
-                        width:[0.21, 0.14],
+                        width:[0.25, 0.14],
                       },
                       fields:[
                         {
@@ -939,7 +952,7 @@ class Tranches extends Component {
                       mobile:true,
                       title:'TOKENS',
                       props:{
-                        width:[0.17],
+                        width:[0.16,0.17],
                       },
                       fields:[
                         {

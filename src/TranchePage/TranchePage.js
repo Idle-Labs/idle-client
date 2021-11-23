@@ -5,7 +5,7 @@ import GenericFaqs from '../GenericFaqs/GenericFaqs';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import TrancheDetails from '../TrancheDetails/TrancheDetails';
 // import TrancheWelcome from '../TrancheWelcome/TrancheWelcome';
-import TrancheHarvests from '../TrancheHarvests/TrancheHarvests';
+// import TrancheHarvests from '../TrancheHarvests/TrancheHarvests';
 import TransactionsList from '../TransactionsList/TransactionsList';
 import TrancheDepositRedeem from '../TrancheDepositRedeem/TrancheDepositRedeem';
 import FundsOverviewTranche from '../FundsOverviewTranche/FundsOverviewTranche';
