@@ -2091,9 +2091,10 @@ class DepositRedeem extends Component {
                                             }}
                                             borderRadius={2}
                                             flexDirection={'row'}
+                                            border={isActive ? 2 : 1}
                                             key={`skipGovToken_${token}`}
                                             justifyContent={'flex-start'}
-                                            backgroundColor={isActive ? '#2a4b78' : 'cardBgHover'}
+                                            backgroundColor={isActive ? 'menuHover' : 'cardBgHover'}
                                             onClick={e => this.setRedeemSkipGovTokens(token, !this.state.redeemSkipGovTokens.includes(token))}
                                           >
                                             <Checkbox
