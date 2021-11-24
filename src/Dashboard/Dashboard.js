@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
+import { Flex, Card, Icon, Text } from 'rimble-ui';
 import FunctionsUtil from '../utilities/FunctionsUtil';
-import { Flex, Card, Icon, Text, Image } from 'rimble-ui';
 import DashboardMenu from '../DashboardMenu/DashboardMenu';
 
 // Import page components
@@ -829,39 +829,15 @@ class Dashboard extends Component {
                           >
                             You should be on the <strong>{this.functionsUtil.capitalize(this.props.network.required.name)} network</strong>. You are currently connected to the <strong>{this.functionsUtil.capitalize(this.props.network.current.name)} network</strong>, please switch to the correct network.
                           </Text>
-                          {
-                            parseInt(this.props.network.required.id)!==1 ? (
-                              <RoundButton
-                                buttonProps={{
-                                  mt:3,
-                                  width:[1,1/2]
-                                }}
-                                handleClick={e => this.functionsUtil.addEthereumChain(this.props.network.required.id)}
-                              >
-                                Switch Network
-                              </RoundButton>
-                            ) : (
-                              <Flex
-                                alignItems={'center'}
-                                justifyContent={'center'}
-                                flexDirection={'column'}
-                              >
-                                <Text
-                                  my={2}
-                                  fontSize={1}
-                                  color={'alert'}
-                                  textAlign={'center'}
-                                >
-                                  To switch to {this.functionsUtil.capitalize(this.props.network.required.name)} you need to manually change the network through your Wallet Provider (eg. Metamask):
-                                </Text>
-                                <Image
-                                  mt={1}
-                                  width={[1,'80%']}
-                                  src={'images/metamask-mainnet.png'}
-                                />
-                              </Flex>
-                            )
-                          }
+                          <RoundButton
+                            buttonProps={{
+                              mt:3,
+                              width:[1,1/2]
+                            }}
+                            handleClick={e => this.functionsUtil.addEthereumChain(this.props.network.required.id)}
+                          >
+                            Switch Network
+                          </RoundButton>
                         </Flex>
                       </DashboardCard>
                     ) : networkInitialized && !networkSupported ? (
