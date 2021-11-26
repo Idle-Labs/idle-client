@@ -652,7 +652,6 @@ class DepositRedeem extends Component {
       newState.depositCurveEnabled = false;
     }
 
-
     newState.canRedeem = canRedeem;
     newState.canDeposit = canDeposit;
     newState.unlentBalance = unlentBalance;
@@ -1391,7 +1390,7 @@ class DepositRedeem extends Component {
     const viewOnly = this.props.connectorName === 'custom';
     const currentNetwork = this.functionsUtil.getCurrentNetwork();
 
-    const isDepositDisabled = this.props.tokenConfig.canDeposit && !this.props.tokenConfig.canDeposit.enabled;
+    const isDepositDisabled = this.props.tokenConfig.canDeposit && !this.props.tokenConfig.canDeposit.enabled ? true : false;
     // const depositDisabledMessage1 = isDepositDisabled && this.props.tokenConfig.canDeposit.disabledMessageDepositKey ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageDepositKey]) : null;
     // const depositDisabledMessage2 = this.state.canRedeem ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageRedeemKey]) : "";
     const depositDisabledMessage = isDepositDisabled ? (this.state.canRedeem && this.props.tokenConfig.canDeposit.disabledMessageRedeemKey ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageRedeemKey]) : (this.props.tokenConfig.canDeposit.disabledMessageDepositKey ? this.functionsUtil.getGlobalConfig(['messages', this.props.tokenConfig.canDeposit.disabledMessageDepositKey]) : null) ) : null;
@@ -1463,7 +1462,7 @@ class DepositRedeem extends Component {
     const polygonNetworkId = this.functionsUtil.getGlobalConfig(['network','providers','polygon','networkPairs',currentNetwork.id]);
     // const polygonNetwork = this.functionsUtil.getGlobalConfig(['network','availableNetworks',polygonNetworkId]);
 
-    const canPerformAction = /*!depositCurve && !this.state.redeemCurveEnabled && */((this.state.action === 'deposit' && this.state.canDeposit && !isDepositDisabled) || (this.state.action === 'redeem' && this.state.canRedeem) || redeemGovTokens) && (!this.state.showETHWrapperEnabled || this.state.action === 'redeem') && (!this.state.showPolygonBridgeEnabled || this.state.action === 'redeem');
+    const canPerformAction = /*!depositCurve && !this.state.redeemCurveEnabled && */((this.state.action === 'deposit' && this.state.canDeposit && !isDepositDisabled) || (this.state.action === 'redeem' && this.state.canRedeem) || redeemGovTokens) && /*(!this.state.showETHWrapperEnabled || this.state.action === 'redeem') && */(!this.state.showPolygonBridgeEnabled || this.state.action === 'redeem');
     const showActionFlow = !redeemGovTokens && canPerformAction;
 
     const showBuyFlow = this.state.componentMounted && currentNetwork.provider === 'infura' && (!showDepositCurve || this.state.showBuyFlow) && !this.state.depositCurveEnabled && this.state.tokenApproved && !this.state.contractPaused && (!this.state.migrationEnabled || this.state.skipMigration) && this.state.action === 'deposit' && !isDepositDisabled && !this.state.canDeposit && !this.state.showETHWrapperEnabled;
@@ -2066,7 +2065,7 @@ class DepositRedeem extends Component {
                                     textAlign={'center'}
                                   >
                                     Select the gov tokens you want to give away:
-                                </Text>
+                                  </Text>
                                   <Flex
                                     mt={2}
                                     width={1}
@@ -3092,21 +3091,21 @@ class DepositRedeem extends Component {
                                   </Flex>
                                 </DashboardCard>
                               ) : (
-                                      <Flex
-                                        mt={3}
-                                        alignItems={'center'}
-                                        flexDirection={'column'}
-                                        justifyContent={'center'}
-                                      >
-                                        <TxProgressBar
-                                          {...this.props}
-                                          cancelTransaction={this.cancelTransaction.bind(this)}
-                                          hash={this.state.processing[this.state.action].txHash}
-                                          endMessage={`Finalizing ${this.state.action} request...`}
-                                          waitText={`${this.functionsUtil.capitalize(this.state.action)} estimated in`}
-                                        />
-                                      </Flex>
-                                    )
+                                <Flex
+                                  mt={3}
+                                  alignItems={'center'}
+                                  flexDirection={'column'}
+                                  justifyContent={'center'}
+                                >
+                                  <TxProgressBar
+                                    {...this.props}
+                                    cancelTransaction={this.cancelTransaction.bind(this)}
+                                    hash={this.state.processing[this.state.action].txHash}
+                                    endMessage={`Finalizing ${this.state.action} request...`}
+                                    waitText={`${this.functionsUtil.capitalize(this.state.action)} estimated in`}
+                                  />
+                                </Flex>
+                              )
                             )
                           }
                         </Box>
