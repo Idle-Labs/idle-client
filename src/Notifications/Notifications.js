@@ -291,6 +291,7 @@ class Notifications extends Component {
             name={'Notifications'}
             onClick={this.toggleTab.bind(this)}
             className={[styles.bell, (hasUnreadNotifications ? styles.ring : null), (this.state.tabOpened || this.state.notifications.length > 0 ? styles.active : null)]}
+            sizee={hasUnreadNotifications ? "40px" : "36px"}
           />
           {
             hasUnreadNotifications &&
