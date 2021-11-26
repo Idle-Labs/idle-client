@@ -884,8 +884,8 @@ class FunctionsUtil {
     }
     return null;
   }
-  getTrancheHarvests = async (tokenConfig,trancheConfig) => {
-    const harvestsList = {};
+  getTrancheStakingRewardsDistributions = async (tokenConfig,trancheConfig) => {
+    const stakingDistributions = {};
     const stakingRewards = await this.loadTrancheFieldRaw('stakingRewards',{},tokenConfig.protocol,tokenConfig.token,trancheConfig.tranche,tokenConfig,trancheConfig);
     await this.asyncForEach(Object.keys(stakingRewards),async (token) => {
       const eventFilters = {
@@ -895,11 +895,23 @@ class FunctionsUtil {
       const transfers = await this.getContractEvents(token,'Transfer',{fromBlock: tokenConfig.blockNumber,toBlock:'latest',filter:eventFilters});
 
       if (transfers && transfers.length>0){
-        harvestsList[token] = transfers;
+        stakingDistributions[token] = transfers;
       }
     });
 
-    const autoFarming = await this.loadTrancheFieldRaw('autoFarming',{},tokenConfig.protocol,tokenConfig.token,trancheConfig.tranche,tokenConfig,trancheConfig);
+    return stakingDistributions;
+  }
+  getTrancheHarvests = async (tokenConfig,trancheConfig) => {
+    const [
+      stakingRewardsDistributions,
+      autoFarming
+    ] = await Promise.all([
+      this.getTrancheStakingRewardsDistributions(tokenConfig,trancheConfig),
+      this.loadTrancheFieldRaw('autoFarming',{},tokenConfig.protocol,tokenConfig.token,trancheConfig.tranche,tokenConfig,trancheConfig)
+    ])
+
+    const harvestsList = stakingRewardsDistributions || {};
+    
     await this.asyncForEach(Object.keys(autoFarming),async (token) => {
       const eventFilters = {
         to:tokenConfig.CDO.address

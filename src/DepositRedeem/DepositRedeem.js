@@ -517,10 +517,10 @@ class DepositRedeem extends Component {
         // Check proxy contract approved
         const proxyContract = this.state.actionProxyContract[this.state.action];
         tokenApproved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken, proxyContract.address, this.props.account);
-        // console.log('tokenApproved 1',tokenApproved);
+        // console.log('tokenApproved 1',this.props.selectedToken, proxyContract.address, this.props.account, tokenApproved);
       } else {
         tokenApproved = await this.functionsUtil.checkTokenApproved(this.props.selectedToken, this.props.tokenConfig.idle.address, this.props.account);
-        // console.log('tokenApproved 2',tokenApproved);
+        // console.log('tokenApproved 2',this.props.selectedToken, this.props.tokenConfig.idle.address, this.props.account, tokenApproved);
       }
     }
 
@@ -561,6 +561,8 @@ class DepositRedeem extends Component {
       if (error || eventData.status !== 'error') {
         this.functionsUtil.sendGoogleAnalyticsEvent(eventData);
       }
+
+      // console.log('callbackApprove',tx,tx.status === 'success');
 
       this.setState((prevState) => ({
         tokenApproved: (tx.status === 'success'), // True
@@ -2728,7 +2730,7 @@ class DepositRedeem extends Component {
                                             `To ${this.functionsUtil.capitalize(this.state.action)} your ${this.props.selectedToken} in the Curve Pool you need to approve the Smart-Contract first.`
                                             : useMetaTx ?
                                               `To ${this.functionsUtil.capitalize(this.state.action)} your ${this.props.selectedToken} into Idle using Meta-Transaction you need to approve our Smart-Contract first.`
-                                              :
+                                            :
                                               `To ${this.functionsUtil.capitalize(this.state.action)} your ${this.props.selectedToken} into Idle you need to approve our Smart-Contract first.`
                                         }
                                       </Text>

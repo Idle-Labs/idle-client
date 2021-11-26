@@ -1018,30 +1018,13 @@ const globalConfigs = {
             decimals: 16,
             protocol: "compound",
             name: "compoundWithCOMP",
-            enabledTokens: [
-              "DAI",
-              "USDC",
-              "USDT",
-              "TUSD",
-              "SUSD",
-              "WBTC",
-              "WETH"
-            ]
+            enabledTokens: ["DAI", "USDC", "USDT", "TUSD", "SUSD", "WBTC", "WETH"]
           },
           {
             decimals: 18,
             protocol: "aavev2",
             name: "aavev2WithStkAAVE",
-            enabledTokens: [
-              "DAI",
-              "USDC",
-              "USDT",
-              "TUSD",
-              "SUSD",
-              "WBTC",
-              "WETH",
-              "RAI"
-            ]
+            enabledTokens: ["DAI", "USDC", "USDT", "TUSD", "SUSD", "WBTC", "WETH", "RAI"]
           }
         ]
       }
@@ -1243,7 +1226,7 @@ const globalConfigs = {
           hsl: ["169", "42%", "37%"]
         },
         disabledCharts: ["score"],
-        startTimestamp: "2021-05-25",
+        startTimestamp: "2021-11-16",
         icon: "images/tokens/RAI.png",
         conversionRateField: "raiDAIPrice",
         chart: {

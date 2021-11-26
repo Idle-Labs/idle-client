@@ -32,10 +32,10 @@ class TrancheHarvests extends Component {
 
   async loadData(){
     let rows = [];
-    const harvests = await this.functionsUtil.getTrancheHarvests(this.props.tokenConfig,this.props.trancheConfig);
+    const distributions = await this.functionsUtil.getTrancheStakingRewardsDistributions(this.props.tokenConfig,this.props.trancheConfig);
 
-    await this.functionsUtil.asyncForEach(Object.keys(harvests), async (token) => {
-      const txs = harvests[token];
+    await this.functionsUtil.asyncForEach(Object.keys(distributions), async (token) => {
+      const txs = distributions[token];
       const tokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',token]);
       await this.functionsUtil.asyncForEach(txs, async (tx) => {
         const tokenIcon = tokenConfig && tokenConfig.icon ? tokenConfig.icon : `images/tokens/${token}.svg`;
@@ -69,7 +69,7 @@ class TrancheHarvests extends Component {
         flexDirection={'column'}
         id={'funds-overview-container'}
       >
-        <Title my={[3,4]}>Harvests List</Title>
+        <Title my={[3,4]}>Staking Rewards Distribution</Title>
         <CustomList
           rows={this.state.rows}
           paginationEnabled={true}
