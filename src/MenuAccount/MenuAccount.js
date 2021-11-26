@@ -571,7 +571,7 @@ class MenuAccount extends Component {
           isOpen={this.state.isModalOpen === "account"}
           closeModal={e => this.toggleModal("account")}
         />
-      </Flex>
+      </Flex >
     ) : (
         <Flex width={1} px={2}>
           <Flex

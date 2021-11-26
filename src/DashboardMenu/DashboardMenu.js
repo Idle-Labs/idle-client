@@ -170,55 +170,64 @@ class DashboardMenu extends Component {
           </RoundButton>*/}
 
           {governanceEnabled && this.props.isDashboard ? (
-            <DashboardCard
-              {...this.props}
-              cardProps={{
-                border: 1,
-                boxShadow: 0,
-                borderRadius: 1,
-                borderColor: 'border',
-                py: 1,
-                mx: [1, 4],
-                width: 0.8,
+            <Flex
+              width={1}
+              flexDirection="row"
+              justifyContent="center">
+              <DashboardCard
+                {...this.props}
+                cardProps={{
+                  border: 1,
+                  boxShadow: 0,
+                  borderRadius: 1,
+                  borderColor: 'border',
+                  py: 1,
+                  justifySelf: "center",
+                  justifyContent: "center",
+                  mx: [1, 4],
+                  pr: 1,
+                  width: 0.8,
 
-                display: "flex",
+                  display: "flex",
 
-                mb: [0, 3]
-              }}
-              isInteractive={true}
-              handleClick={e => this.props.goToSection(governanceRoute, false)}
+                  mb: [0, 3]
+                }}
+                isInteractive={true}
+                handleClick={e => this.props.goToSection(governanceRoute, false)}
 
-            >
-              <Flex
-                px={2}
-                py={1}
-                alignItems={"center"}
-                flexDirection={"row"}
-                justifyContent={"center"}
-                onMouseEnter={e => this.setState({ isHover: true })}
-                onMouseLeave={e => this.setState({ isHover: false })}
               >
+                <Flex
+                  px={2}
+                  py={1}
+                  alignItems={"center"}
+                  flexDirection={"row"}
 
-                <HoverImage
-                  hoverOn={this.state.isHover}
-                  hover={'images/sidebar/switchHover.svg'}
-                  noHover={'images/sidebar/switch.svg'}
-                  imageProps={
-                    {
-                      mr: 2,
-                      width: "16px",
-                      height: "16px",
-                      display: "inline-flex"
+                  onMouseEnter={e => this.setState({ isHover: true })}
+                  onMouseLeave={e => this.setState({ isHover: false })}
 
+                >
+
+                  <HoverImage
+                    hoverOn={this.state.isHover}
+                    hover={'images/sidebar/switchHover.svg'}
+                    noHover={'images/sidebar/switch.svg'}
+                    imageProps={
+                      {
+                        mr: 2,
+                        width: "16px",
+                        height: "16px",
+                        display: "inline-flex"
+
+                      }
                     }
-                  }
-                />
-                <Text color={"text"} fontSize={1} fontWeight={400}>
-                  Switch to Governance
+                  />
+                  <Text color={"text"} fontSize={1} fontWeight={400}>
+                    Switch to Governance
                 </Text>
 
-              </Flex>
-            </DashboardCard>
+                </Flex>
+              </DashboardCard>
+            </Flex>
 
           ) : (
               this.props.isGovernance && (
