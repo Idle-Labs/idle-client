@@ -279,8 +279,6 @@ class IdleStaking extends Component {
       this.props.account ? this.functionsUtil.getContractEvents(this.props.contractInfo.name,'Deposit',{fromBlock: this.props.contractInfo.fromBlock, toBlock:'latest',filter:{provider:this.props.account}}) : []
     ]);
 
-    // console.log('etherscanRewardsTxs',etherscanRewardsTxs);
-
     const rewardTokenConfig = this.functionsUtil.getGlobalConfig(['govTokens',this.props.contractInfo.rewardToken]);
 
     let distributedRewards = [];
@@ -304,21 +302,23 @@ class IdleStaking extends Component {
 
     const claimedRewards = [];
     let totalClaimedUser = this.functionsUtil.BNify(0);
-    await this.functionsUtil.asyncForEach(claimEvents, async (e) => {
-      if (this.props.account && e.returnValues && e.returnValues.recipient && e.returnValues.recipient.toLowerCase() === this.props.account.toLowerCase()){
-        const blockInfo = await this.functionsUtil.getBlockInfo(e.blockNumber);
-        if (blockInfo){
-          const claimedAmount = this.functionsUtil.fixTokenDecimals(e.returnValues.amount,rewardTokenConfig.decimals);
-          totalClaimedUser = totalClaimedUser.plus(claimedAmount);
-          claimedRewards.push({
-            amount:claimedAmount,
-            hash:e.transactionHash,
-            tokenName:this.props.contractInfo.rewardToken,
-            date:this.functionsUtil.strToMoment(parseInt(blockInfo.timestamp)*1000).utc().format('YYYY-MM-DD HH:mm')+' UTC'
-          });
+    if (claimEvents){
+      await this.functionsUtil.asyncForEach(claimEvents, async (e) => {
+        if (this.props.account && e.returnValues && e.returnValues.recipient && e.returnValues.recipient.toLowerCase() === this.props.account.toLowerCase()){
+          const blockInfo = await this.functionsUtil.getBlockInfo(e.blockNumber);
+          if (blockInfo){
+            const claimedAmount = this.functionsUtil.fixTokenDecimals(e.returnValues.amount,rewardTokenConfig.decimals);
+            totalClaimedUser = totalClaimedUser.plus(claimedAmount);
+            claimedRewards.push({
+              amount:claimedAmount,
+              hash:e.transactionHash,
+              tokenName:this.props.contractInfo.rewardToken,
+              date:this.functionsUtil.strToMoment(parseInt(blockInfo.timestamp)*1000).utc().format('YYYY-MM-DD HH:mm')+' UTC'
+            });
+          }
         }
-      }
-    });
+      });
+    }
 
     tokenUserBalance = this.functionsUtil.fixTokenDecimals(tokenUserBalance,this.props.contractInfo.decimals);
 
@@ -394,7 +394,7 @@ class IdleStaking extends Component {
 
     const totalCollectedRewards = claimable.plus(totalClaimedUser);
 
-    let stakeStartTime = depositEvents.reduce( (stakedTime,event) => {
+    let stakeStartTime = depositEvents ? depositEvents.reduce( (stakedTime,event) => {
       const depositTimestamp = this.functionsUtil.BNify(event.returnValues.ts);
       const depositValue = this.functionsUtil.fixTokenDecimals(event.returnValues.value,this.props.tokenConfig.decimals);
       if (depositValue.gt(0)){
@@ -402,7 +402,7 @@ class IdleStaking extends Component {
         // console.log(depositTimestamp.toString(),depositValue.toFixed(),stakedTime.toString());
       }
       return stakedTime;
-    },this.functionsUtil.BNify(0));
+    },this.functionsUtil.BNify(0)) : this.functionsUtil.BNify(0);
 
     // console.log('stakeStartTime',stakeStartTime,stakedBalance.toFixed());
 
@@ -571,10 +571,12 @@ class IdleStaking extends Component {
       break;
     }
 
+    const statsLoaded = false;
     const transactionSucceeded = true;
 
     this.setState({
       infoBox,
+      statsLoaded,
       internalInfoBox,
       transactionSucceeded
     },() => {

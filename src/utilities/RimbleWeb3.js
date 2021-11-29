@@ -223,7 +223,7 @@ class RimbleTransaction extends React.Component {
 
     this.loadUtils();
 
-    // this.functionsUtil.customLog('componentDidUpdate',prevProps.connectorName,this.props.connectorName,this.props.context.connectorName,this.props.context.active,(this.props.context.error ? this.props.context.error.message : null));
+    // console.log('componentDidUpdate',prevProps.connectorName,this.props.connectorName,this.props.context.connectorName,prevProps.context.active,this.props.context.active,(this.props.context.error ? this.props.context.error.message : null));
 
     const gnosisSafeLoaded = !this.state.gnosisSafeLoaded && this.props.connectors.gnosis.safeLoaded;
     // console.log('gnosisSafeLoaded',this.state.gnosisSafeLoaded,this.props.connectors.gnosis.safeLoaded,gnosisSafeLoaded);
@@ -235,7 +235,8 @@ class RimbleTransaction extends React.Component {
       });
     }
 
-    if (prevProps.connectorName !== this.props.connectorName && this.props.connectorName){
+    if ((prevProps.connectorName !== this.props.connectorName && this.props.connectorName) || (this.props.context.active && prevProps.context.active !== this.props.context.active)){
+      // console.log('initWeb3_1',prevProps.connectorName,this.props.connectorName,prevProps.context.active,this.props.context.active);
       this.initWeb3();
     } else if ( prevProps.context !== this.props.context ){
       if (this.props.context.error instanceof Error && this.props.context.error.message.length){
@@ -253,16 +254,18 @@ class RimbleTransaction extends React.Component {
         } else if (!isWalletConnectClosedModalError) {
           this.openConnectionErrorModal(null,errorMessage);
         } else {
+          // console.log('initWeb3_2',prevProps.connectorName,this.props.connectorName,prevProps.context.active,this.props.context.active);
           this.initWeb3();
         }
       // WalletConnect double trigger initWeb3
-      } else if (this.props.context.active && this.props.context.connectorName!=='WalletConnect' && this.props.connectorName==='WalletConnect') {
+      } else if (this.props.context.active && this.props.context.connectorName!=='WalletConnect' && this.props.connectorName==='WalletConnect'){
+        // console.log('initWeb3_3',prevProps.context.connectorName,this.props.context.connectorName,prevProps.context.active,this.props.context.active);
         this.initWeb3();
       }
-    } else if ( (this.props.context.connectorName && this.props.context.connectorName !== this.props.connectorName) || prevProps.customAddress !== this.props.customAddress){
+    } else if ((this.props.context.connectorName && this.props.context.connectorName !== this.props.connectorName) || prevProps.customAddress !== this.props.customAddress){
+      // console.log('initWeb3_4',prevProps.context.connectorName,this.props.context.connectorName,prevProps.context.active,this.props.context.active);
       this.initWeb3();
     }
-
 
     const currentNetworkChanged = this.state.networkInitialized && prevState.network.current.id !== this.state.network.current.id;
     if (currentNetworkChanged){
@@ -393,6 +396,16 @@ class RimbleTransaction extends React.Component {
       connectorName = this.props.connectorName;
     }
 
+    // if (connectorName !== 'Infura' && connectorName !== 'Injected' && !context.library){
+    //   connectorName = 'Infura';
+    //   this.props.setConnector('Infura',null);
+    //   if (web3 && typeof web3.currentProvider.disable === 'function'){
+    //     web3.currentProvider.disable();
+    //   } else if (context.connector && typeof context.connector.disable === 'function'){
+    //     context.connector.disable();
+    //   }
+    // }
+
     // const last_context = localStorage ? JSON.parse(localStorage.getItem('context')) : null;
 
     // this.functionsUtil.customLog('initWeb3',context.active,connectorName,context.connectorName,context.connector,(web3 && web3.currentProvider ? web3.currentProvider.disable : null),(context.connector ? context.connector.disable : null));
@@ -431,6 +444,8 @@ class RimbleTransaction extends React.Component {
 
     let web3Host = web3Rpc;
     let web3Provider = null;
+
+    // console.log('initWeb3-PRE',connectorName,currentWeb3,web3,context);
 
     if (!web3) { // safety web3 implementation
       if (window.ethereum) {
@@ -471,6 +486,8 @@ class RimbleTransaction extends React.Component {
     } else if (web3Host) {
       web3 = web3Providers[networkId];
     }
+
+    // console.log('initWeb3',connectorName,currentWeb3,web3,context,web3Provider/*,web3Provider===context.library.currentProvider*/);
 
     let web3Polygon = null;
     let maticPOSClient = null;
@@ -545,7 +562,7 @@ class RimbleTransaction extends React.Component {
 
       // console.log(this.functionsUtil.strToMoment().format('HH:mm:ss'),'initWeb3 - web3Callback');
 
-      // console.log('web3Callback',context.account,this.state.network.isSupportedNetwork,this.state.contractsInitialized,this.state.networkInitialized);
+      // console.log('web3Callback',context);
 
       // After setting the web3 provider, check network
       try {
@@ -555,11 +572,11 @@ class RimbleTransaction extends React.Component {
 
         if (this.state.network.isSupportedNetwork){
 
-          if (!this.state.contractsInitialized){
+          // if (!this.state.contractsInitialized){
             await this.initializeContracts();
-          }
+          // }
 
-          if (context.account){
+          if (context.active && context.connectorName===connectorName && context.account){
             // Login with biconomy
             if (this.state.biconomy){
               const biconomy = this.state.biconomy;
@@ -591,7 +608,6 @@ class RimbleTransaction extends React.Component {
 
             await this.initAccount(context.account);
           } else {
-
             await this.initAccount();
             // await this.setState({
             //   accountInizialized: true,
@@ -611,13 +627,9 @@ class RimbleTransaction extends React.Component {
 
     if (connectorName !== 'Infura' && biconomyInfo && biconomyInfo.enabled && biconomyInfo.supportedNetworks.includes(networkId) && (!walletProvider || !biconomyInfo.disabledWallets.includes(walletProvider.toLowerCase()))){
 
-      if (this.state.biconomy === null){
-        const biconomyWeb3Provider = web3Provider ? web3Provider : web3Host;
-
-        // console.log('biconomyWeb3Provider',web3Provider,web3Host,biconomyWeb3Provider===web3Provider);
-
+      const biconomyWeb3Provider = web3Provider ? web3Provider : web3Host;
+      if (this.state.biconomy === null || this.state.biconomy.currentProvider !== biconomyWeb3Provider ){
         const biconomy = new Biconomy(biconomyWeb3Provider,biconomyInfo.params);
-
         if (biconomy && typeof biconomy.onEvent === 'function'){
           web3 = new Web3(biconomy);
           biconomy.onEvent(biconomy.READY, () => {
@@ -718,16 +730,22 @@ class RimbleTransaction extends React.Component {
     // Create contract on initialized web3 provider with given abi and address
     try {
       const contract = new web3Provider.eth.Contract(abi, address);
-      this.setState(state => ({
-        ...state,
-        contracts: [...state.contracts, {name, contract}]
-      }));
+      const contractInfo = {name, contract};
 
-      // if (name==='ERC20Predicate'){
-      //   debugger;
-      // }
+      const contracts = Object.assign([],this.state.contracts);
+      const contractFound = contracts.find( c => c.name===contractInfo.name );
+      if (!contractFound){
+        contracts.push(contractInfo);
+      } else {
+        const contractIndex = contracts.indexOf(contractFound);
+        contracts[contractIndex] = contractInfo;
+      }
 
-      return {name, contract};
+      this.setState({
+        contracts
+      });
+
+      return contractInfo;
     } catch (error) {
       console.error("Could not create contract.",name,address,abi,error);
     }
@@ -781,16 +799,24 @@ class RimbleTransaction extends React.Component {
     }
 
     try {
+
+      if (this.props.context.active && this.props.context.connectorName===this.props.connectorName && this.props.context.account){
+        account = this.props.context.account;
+      }
+
       if (!account){
-        const wallets = await Promise.race([
-            this.state.web3.eth.getAccounts(),
-            new Promise((resolve) => setTimeout(resolve, 300))
-        ]);
+        // const wallets = await Promise.race([
+        //     this.state.web3.eth.getAccounts(),
+        //     new Promise((resolve) => setTimeout(resolve, 300))
+        // ]);
+        const wallets = await this.state.web3.eth.getAccounts();
 
         if (wallets && wallets.length){
           account = wallets[0];
         }
       }
+
+      // console.log('initAccount',account,this.props.context.account);
 
       if (!account){
         account = this.props.context.account;
@@ -801,7 +827,6 @@ class RimbleTransaction extends React.Component {
           accountInizialized: true
         });
       }
-
 
       // Request account access if needed
       if (account){
@@ -1111,13 +1136,26 @@ class RimbleTransaction extends React.Component {
       });
     }
 
+    const newContracts = Object.assign([],this.state.contracts);
+    contracts.forEach( contractInfo => {
+      if (contractInfo){
+        const contractFound = newContracts.find( c => c.name===contractInfo.name );
+        if (!contractFound){
+          newContracts.push(contractInfo);
+        } else {
+          const contractIndex = newContracts.indexOf(contractFound);
+          newContracts[contractIndex] = contractInfo;
+        }
+      }
+    });
+
+    // console.log('initializeContracts',newContracts);
+
     const newState = {
       contractsNetworks,
-      contractsInitialized:true,
-      contracts:contracts.filter( c => !!c )
+      contracts:newContracts,
+      contractsInitialized:true
     };
-
-    // console.log(this.functionsUtil.strToMoment().format('HH:mm:ss'),'initializeContracts - END',newState.contracts);
 
     return this.setState(newState);
   }

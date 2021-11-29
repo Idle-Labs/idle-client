@@ -5039,12 +5039,12 @@ class FunctionsUtil {
       }
 
       // Check if the cover matches any incidents
-      const matchedIncidents = incidentEvents.filter(incident => {
+      const matchedIncidents = incidentEvents ? incidentEvents.filter(incident => {
         return incident.returnValues.productId === coverDetails.contractAddress &&
         this.BNify(incident.blockNumber).gt(cover.blockNumber)  &&
         this.BNify(incident.returnValues.incidentDate).lt(coverDetails.validUntil) &&
         parseInt(coverDetails.validUntil) + nexusMutualConfig.directProps.yieldTokenCoverGracePeriod >= Date.now() / 1000
-      });
+      }) : [];
 
       // If multiple incidents match, return the one with the highest priceBefore
       const matchedIncident = matchedIncidents.reduce((prev, curr) => {
