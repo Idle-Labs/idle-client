@@ -88,18 +88,18 @@ const globalConfigs = {
   theme: {
     darkModeEnabled: true
   },
-  environments:{
-    live:{
-      requiredNetwork:1,
-      url:"https://idle.finance"
+  environments: {
+    live: {
+      requiredNetwork: 1,
+      url: "https://idle.finance"
     },
-    beta:{
-      requiredNetwork:1,
-      url:"https://beta.idle.finance"
+    beta: {
+      requiredNetwork: 1,
+      url: "https://beta.idle.finance"
     },
-    polygon:{
-      requiredNetwork:137,
-      url:"https://polygon.idle.finance"
+    polygon: {
+      requiredNetwork: 137,
+      url: "https://polygon.idle.finance"
     }
   },
   betaURL: "https://beta.idle.finance",
@@ -257,15 +257,15 @@ const globalConfigs = {
       darkModeEnabled: true
     }
   },
-  governance:{
-    test:false,
-    enabled:true,
-    startBlock:11333729,
-    availableNetworks:[1],
-    baseRoute:'/governance',
-    props:{
-      tokenName:'IDLE',
-      availableContracts:{
+  governance: {
+    test: false,
+    enabled: true,
+    startBlock: 11333729,
+    availableNetworks: [1],
+    baseRoute: '/governance',
+    props: {
+      tokenName: 'IDLE',
+      availableContracts: {
         IDLE,
         FeeTreasury,
         PriceOracle,
@@ -418,7 +418,7 @@ const globalConfigs = {
       ]
     }
   },
-  govTokens:{
+  govTokens: {
     IDLE: {
       abi: IDLE,
       decimals: 18,
@@ -430,19 +430,19 @@ const globalConfigs = {
       showPrice: false, // Show price in Yield Farming section
       showBalance: false, // Include IDLE balance in Portfolio Donut
       aprTooltipMode: false,
-      availableNetworks:[1,137],
+      availableNetworks: [1, 137],
       distributionMode: "block",
       distributionFrequency: "day", // Multiply distribution per block
       color: "hsl(162, 100%, 41%)",
       icon: "images/tokens/IDLE.svg",
-      addresses:{
-        1:"0x875773784Af8135eA0ef43b5a374AaD105c5D39e",
-        137:"0xc25351811983818c9fe6d8c580531819c8ade90f"
+      addresses: {
+        1: "0x875773784Af8135eA0ef43b5a374AaD105c5D39e",
+        137: "0xc25351811983818c9fe6d8c580531819c8ade90f"
       },
       address: "0x875773784Af8135eA0ef43b5a374AaD105c5D39e", // MAIN
-      disabledTokens:{
-        1:["idleDAISafe","idleUSDCSafe","idleUSDTSafe"],
-        137:["idleDAIYield","idleUSDCYield","idleWETHYield"],
+      disabledTokens: {
+        1: ["idleDAISafe", "idleUSDCSafe", "idleUSDTSafe"],
+        137: ["idleDAIYield", "idleUSDCYield", "idleWETHYield"],
       }
     },
     COMP: {
@@ -457,149 +457,149 @@ const globalConfigs = {
       disabledTokens: [],
       protocol: "compound",
       aprTooltipMode: false,
-      availableNetworks:[1],
+      availableNetworks: [1],
       distributionMode: "block",
       distributionFrequency: "day",
       color: "hsl(162, 100%, 41%)",
       address: "0xc00e94cb662c3520282e6f5717214004a7f26888" // MAIN
       // address:'0x61460874a7196d6a22d1ee4922473664b3e95270' // KOVAN
     },
-    stkAAVE:{
-      abi:aToken,
-      decimals:18,
-      showAUM:true, // Include stkAAVE balance in AUM
-      showAPR:true, // Include stkAAVE Apr
-      enabled:true,
-      showPrice:true,
-      token:'stkAAVE',
-      showBalance:true, // Include stkAAVE balance in Portfolio Donut
-      protocol:'aavev2',
-      aprTooltipMode:false,
-      availableNetworks:[1],
-      distributionMode:'second',
-      color:'hsl(314, 41%, 51%)',
-      distributionFrequency:'day',
-      address:'0x4da27a545c0c5b758a6ba100e3a049001de870f5', // MAIN
-      addressForPrice:'0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9', // MAIN
-      disabledTokens:{
-        1:["idleTUSDYield", "idleSUSDYield", "idleFEIYield"]
+    stkAAVE: {
+      abi: aToken,
+      decimals: 18,
+      showAUM: true, // Include stkAAVE balance in AUM
+      showAPR: true, // Include stkAAVE Apr
+      enabled: true,
+      showPrice: true,
+      token: 'stkAAVE',
+      showBalance: true, // Include stkAAVE balance in Portfolio Donut
+      protocol: 'aavev2',
+      aprTooltipMode: false,
+      availableNetworks: [1],
+      distributionMode: 'second',
+      color: 'hsl(314, 41%, 51%)',
+      distributionFrequency: 'day',
+      address: '0x4da27a545c0c5b758a6ba100e3a049001de870f5', // MAIN
+      addressForPrice: '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9', // MAIN
+      disabledTokens: {
+        1: ["idleTUSDYield", "idleSUSDYield", "idleFEIYield"]
       }
     },
-    WMATIC:{
-      abi:ERC20,
-      decimals:18,
-      showAUM:true, // Include stkAAVE balance in AUM
-      showAPR:true, // Include stkAAVE Apr
-      enabled:true,
-      token:'WMATIC',
-      showPrice:true,
-      showBalance:true, // Include stkAAVE balance in Portfolio Donut
-      protocol:'aavev2',
-      disabledTokens:[],
-      aprTooltipMode:false,
-      distributionMode:'second',
-      color:'hsl(314, 41%, 51%)',
-      distributionFrequency:'day',
-      availableNetworks:[137,80001],
+    WMATIC: {
+      abi: ERC20,
+      decimals: 18,
+      showAUM: true, // Include stkAAVE balance in AUM
+      showAPR: true, // Include stkAAVE Apr
+      enabled: true,
+      token: 'WMATIC',
+      showPrice: true,
+      showBalance: true, // Include stkAAVE balance in Portfolio Donut
+      protocol: 'aavev2',
+      disabledTokens: [],
+      aprTooltipMode: false,
+      distributionMode: 'second',
+      color: 'hsl(314, 41%, 51%)',
+      distributionFrequency: 'day',
+      availableNetworks: [137, 80001],
       // address:'0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889', // Mumbai
-      address:'0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', // Polygon
-      addressForPrice:'0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0' // Mainnet
+      address: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', // Polygon
+      addressForPrice: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0' // Mainnet
     }
   },
-  contracts:{
-    137:{
-      ProtocolDataProvider:{
-        abi:ProtocolDataProvider,
-        address:'0x7551b5D2763519d4e37e8B81929D336De671d46d'
+  contracts: {
+    137: {
+      ProtocolDataProvider: {
+        abi: ProtocolDataProvider,
+        address: '0x7551b5D2763519d4e37e8B81929D336De671d46d'
       },
-      ChildChainManager:{
-        abi:ChildChainManager,
+      ChildChainManager: {
+        abi: ChildChainManager,
         // address:'0x2e5e27d50EFa501D90Ad3638ff8441a0C0C0d75e' // Mumbai
-        address:'0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa' // Matic
+        address: '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa' // Matic
       },
-      UniswapRouter:{
-        networkId:1,
-        abi:UniswapV2Router02,
-        address:'0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
+      UniswapRouter: {
+        networkId: 1,
+        abi: UniswapV2Router02,
+        address: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
       },
-      SushiswapRouter:{
-        abi:SushiV2Router02,
-        address:'0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
+      SushiswapRouter: {
+        abi: SushiV2Router02,
+        address: '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
       },
     },
-    1:{
-      DepositManager:{
-        abi:DepositManager,
-        address:'0x401f6c983ea34274ec46f84d70b31c151321188b'
+    1: {
+      DepositManager: {
+        abi: DepositManager,
+        address: '0x401f6c983ea34274ec46f84d70b31c151321188b'
       },
-      RootChainManager:{
-        abi:RootChainManager,
+      RootChainManager: {
+        abi: RootChainManager,
         // address:'0xBbD7cBFA79faee899Eaf900F13C9065bF03B1A74' // Goerli
-        address:'0xA0c68C638235ee32657e8f720a23ceC1bFc77C77' // Mainnet
+        address: '0xA0c68C638235ee32657e8f720a23ceC1bFc77C77' // Mainnet
       },
       ProxyFactory: {
         abi: MinimalInitializableProxyFactory,
         address: "0x91baced76e3e327ba7850ef82a7a8251f6e43fb8"
       },
-      LockedIDLE:{
-        abi:LockedIDLE,
-        address:'0xF241a0151841AE2E6ea750D50C5794b5EDC31D99'
+      LockedIDLE: {
+        abi: LockedIDLE,
+        address: '0xF241a0151841AE2E6ea750D50C5794b5EDC31D99'
       },
-      FeeTreasury:{
-        abi:FeeTreasury,
-        address:'0x69a62c24f16d4914a48919613e8ee330641bcb94' // MAIN
+      FeeTreasury: {
+        abi: FeeTreasury,
+        address: '0x69a62c24f16d4914a48919613e8ee330641bcb94' // MAIN
       },
-      PriceOracle:{
-        abi:PriceOracle,
-        address:'0x972A64d108e250dF98dbeac8170678501f5EF181' // MAIN
+      PriceOracle: {
+        abi: PriceOracle,
+        address: '0x972A64d108e250dF98dbeac8170678501f5EF181' // MAIN
         // address:'0xCab5760688db837Bb453FE1DFBC5eDeE6fa8F0FF' // KOVAN
       },
-      Timelock:{
-        abi:Timelock,
-        address:'0xD6dABBc2b275114a2366555d6C481EF08FDC2556' // MAIN
+      Timelock: {
+        abi: Timelock,
+        address: '0xD6dABBc2b275114a2366555d6C481EF08FDC2556' // MAIN
         // address:'0xfD88D7E737a06Aa9c62B950C1cB5eE63DA379AFd' // KOVAN
       },
-      EcosystemFund:{
-        abi:EcosystemFund,
-        address:'0xb0aA1f98523Ec15932dd5fAAC5d86e57115571C7' // MAIN
+      EcosystemFund: {
+        abi: EcosystemFund,
+        address: '0xb0aA1f98523Ec15932dd5fAAC5d86e57115571C7' // MAIN
         // address:'0x125d3D6A8e546BD13802c309429CBB4db5737d57' // KOVAN
       },
-      VesterFactory:{
-        abi:VesterFactory,
-        address:'0xbF875f2C6e4Cc1688dfe4ECf79583193B6089972' // MAIN
+      VesterFactory: {
+        abi: VesterFactory,
+        address: '0xbF875f2C6e4Cc1688dfe4ECf79583193B6089972' // MAIN
         // address:'0x9b52f91578c8AfA8e2DF07d4D7726bB6b73Ec1FE' // KOVAN
       },
-      IdleController:{
-        abi:IdleController,
-        address:'0x275DA8e61ea8E02d51EDd8d0DC5c0E62b4CDB0BE' // MAIN
+      IdleController: {
+        abi: IdleController,
+        address: '0x275DA8e61ea8E02d51EDd8d0DC5c0E62b4CDB0BE' // MAIN
         // address:'0x8Ad5F0644b17208c81bA5BDBe689c9bcc7143d87' // KOVAN
       },
-      EarlyRewards:{
-          abi:EarlyRewards,
-          address:'0xa1F71ED24ABA6c8Da8ca8C046bBc9804625d88Fc' // MAIN
-          // address:'0x07A94A60B54c6b2Da19e23D6E9123180Bf92ED40' // KOVAN
+      EarlyRewards: {
+        abi: EarlyRewards,
+        address: '0xa1F71ED24ABA6c8Da8ca8C046bBc9804625d88Fc' // MAIN
+        // address:'0x07A94A60B54c6b2Da19e23D6E9123180Bf92ED40' // KOVAN
       },
-      GovernorAlpha:{
-        abi:GovernorAlpha,
-        address:'0x2256b25CFC8E35c3135664FD03E77595042fe31B' // MAIN
+      GovernorAlpha: {
+        abi: GovernorAlpha,
+        address: '0x2256b25CFC8E35c3135664FD03E77595042fe31B' // MAIN
         // address:'0x782cB1dbd0bD4df95c2497819be3984EeA5c2c25' // KOVAN
       },
-      Comptroller:{
-        abi:Comptroller,
-        address:'0x3d9819210a31b4961b30ef54be2aed79b9c9cd3b', // Main
+      Comptroller: {
+        abi: Comptroller,
+        address: '0x3d9819210a31b4961b30ef54be2aed79b9c9cd3b', // Main
         // address:'0x5eae89dc1c671724a672ff0630122ee834098657' // Kovan
       },
-      SushiswapRouter:{
-        abi:SushiV2Router02,
-        address:'0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
+      SushiswapRouter: {
+        abi: SushiV2Router02,
+        address: '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
       },
-      UniswapRouter:{
-        abi:UniswapV2Router02,
-        address:'0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
+      UniswapRouter: {
+        abi: UniswapV2Router02,
+        address: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
       },
-      BalancerExchangeProxy:{
-        abi:BalancerExchangeProxy,
-        address:'0x3E66B66Fd1d0b02fDa6C811Da9E0547970DB2f21'
+      BalancerExchangeProxy: {
+        abi: BalancerExchangeProxy,
+        address: '0x3E66B66Fd1d0b02fDa6C811Da9E0547970DB2f21'
       }
     }
   },
@@ -630,7 +630,7 @@ const globalConfigs = {
   tranchflash: {
     name: "perpetual yield tranches",
     subtitle: "Make yield your own.",
-    desc:"Choose the benefits of high-yield or low-risk, while enjoying the flexibility of Tranches. This comes with auto-compounding for accrued governance tokens and no locking period.",
+    desc: "Choose the benefits of high-yield or low-risk, while enjoying the flexibility of Tranches. This comes with auto-compounding for accrued governance tokens and no locking period.",
     arrows: "images/idlearrows.svg",
     juniorinfo:
       "<b>Junior Tranches</b><br>Higher risk, leveraged for variable rate rewards",
@@ -640,11 +640,11 @@ const globalConfigs = {
     questions: [
       {
         desc: "How it Works?",
-        msg:"This product aggregates user deposits into underlying markets and allocates the accrued yield on the sum between two different risk profile subsets. You get to choose the strategy according to your risk tolerance. Users are able to deposit funds into either the Junior or Senior Tranches in exchange for a token indicating their claim on their principal and whatever yield is allocated for them. These aggregated holdings are then deposited into the specified originating lending market, in this current version Idle Best-Yield strategy."
+        msg: "This product aggregates user deposits into underlying markets and allocates the accrued yield on the sum between two different risk profile subsets. You get to choose the strategy according to your risk tolerance. Users are able to deposit funds into either the Junior or Senior Tranches in exchange for a token indicating their claim on their principal and whatever yield is allocated for them. These aggregated holdings are then deposited into the specified originating lending market, in this current version Idle Best-Yield strategy."
       },
       {
         desc: "What happens in a case of a default?",
-        msg:"In case of hack, an emergency shutdown can be triggered (by both the guardian, which would be a multi-sig wallet, and the owner which will be the Idle governance) in order to pause both deposits and redeems.<br />The redistribution of remaining funds can happens selectively, by allowing only Senior tranche holders to withdraw first directly in the main contract, or through a separate contract for more complex cases and resolutions (managed by the Idle governance)."
+        msg: "In case of hack, an emergency shutdown can be triggered (by both the guardian, which would be a multi-sig wallet, and the owner which will be the Idle governance) in order to pause both deposits and redeems.<br />The redistribution of remaining funds can happens selectively, by allowing only Senior tranche holders to withdraw first directly in the main contract, or through a separate contract for more complex cases and resolutions (managed by the Idle governance)."
       }
     ]
   },
@@ -671,12 +671,12 @@ const globalConfigs = {
       ],
       description: {
         withdraw: "You can withdraw your funds at any time from the tranche.",
-        stake:"Stake your tranche tokens to earn additional rewards and boost the APY.",
-        unstake:"By unstaking your tranche tokens you will no more get additional rewards.",
-        cantUnstake:"To unstake your funds you just need to wait 10 blocks after your last stake transaction.",
-        cantWithdraw:"To withdraw your funds you just need to wait at least 1 block from the latest harvest transaction.",
-        long:"Senior Tranches provide a shielded access to optimized DeFi yields, thanks to an integrated funds' coverage given by Junior Tranches",
-        deposit:"By depositing in the Senior Tranche in case of Smart-Contract breach your funds are covered by the funds deposited in the Junior Tranche.",
+        stake: "Stake your tranche tokens to earn additional rewards and boost the APY.",
+        unstake: "By unstaking your tranche tokens you will no more get additional rewards.",
+        cantUnstake: "To unstake your funds you just need to wait 10 blocks after your last stake transaction.",
+        cantWithdraw: "To withdraw your funds you just need to wait at least 1 block from the latest harvest transaction.",
+        long: "Senior Tranches provide a shielded access to optimized DeFi yields, thanks to an integrated funds' coverage given by Junior Tranches",
+        deposit: "By depositing in the Senior Tranche in case of Smart-Contract breach your funds are covered by the funds deposited in the Junior Tranche.",
       }
     },
     BB: {
@@ -701,12 +701,12 @@ const globalConfigs = {
       ],
       description: {
         withdraw: "You can withdraw your funds at any time from the tranche.",
-        stake:"Stake your tranche tokens to earn additional rewards and boost the APY.",
-        unstake:"By unstaking your tranche tokens you will no more get additional rewards.",
-        cantUnstake:"To unstake your funds you just need to wait 10 blocks after your last stake transaction.",
-        cantWithdraw:"To withdraw your funds you just need to wait at least 1 block from the latest harvest transaction.",
-        long:"The Junior Tranches provide amplified optimized DeFi yields by carrying a higher grade of risks and protecting Senior Tranches",
-        deposit:"By depositing in the Junior Tranche in case of Smart-Contract breach your funds will be used to cover eventual losses on the Senior Tranche.",
+        stake: "Stake your tranche tokens to earn additional rewards and boost the APY.",
+        unstake: "By unstaking your tranche tokens you will no more get additional rewards.",
+        cantUnstake: "To unstake your funds you just need to wait 10 blocks after your last stake transaction.",
+        cantWithdraw: "To withdraw your funds you just need to wait at least 1 block from the latest harvest transaction.",
+        long: "The Junior Tranches provide amplified optimized DeFi yields by carrying a higher grade of risks and protecting Senior Tranches",
+        deposit: "By depositing in the Junior Tranche in case of Smart-Contract breach your funds will be used to cover eventual losses on the Senior Tranche.",
       }
     }
   },
@@ -775,12 +775,12 @@ const globalConfigs = {
       iconInactiveDark: "images/sidebar/delegate-off-dark.svg"
     },
   },
-  landingStrategies:{
+  landingStrategies: {
     best: {
-      networkId:1,
+      networkId: 1,
       token: "DAI",
       visible: true,
-      strategy:'best',
+      strategy: 'best',
       enabledEnvs: [],
       color: "#f32121",
       type: "strategy",
@@ -789,7 +789,7 @@ const globalConfigs = {
       titlePostfix: null,
       title: "Best-Yield",
       iconName: "Whatshot",
-      availableNetworks:[],
+      availableNetworks: [],
       govTokensEnabled: true,
       component: StrategyPage,
       chartColor: "hsl(40,95%,59%)",
@@ -797,15 +797,15 @@ const globalConfigs = {
       iconInactive: "images/strategies/best-off.svg",
       iconInactiveDark: "images/strategies/best-white.svg",
       desc: "Maximize your returns across DeFi protocols",
-      descLong:"The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols. Idle’s monitoring system automatically triggers a rebalance if it spots a better-performing allocation: this includes taking account of the total liquidity within the pool, incorporating underlying protocol rate functions and levels of supply and demand. As a user, you will end up with an higher return without constantly checking rates and burning gas on every transfer. Unlock your funds from a single protocol performance with this strategy.",
-      descShort:"The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols."
+      descLong: "The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols. Idle’s monitoring system automatically triggers a rebalance if it spots a better-performing allocation: this includes taking account of the total liquidity within the pool, incorporating underlying protocol rate functions and levels of supply and demand. As a user, you will end up with an higher return without constantly checking rates and burning gas on every transfer. Unlock your funds from a single protocol performance with this strategy.",
+      descShort: "The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols."
     },
     polygon: {
       token: "DAI",
       visible: true,
-      networkId:137,
+      networkId: 137,
       enabledEnvs: [],
-      strategy:'best',
+      strategy: 'best',
       color: "#f32121",
       type: "strategy",
       comingSoon: false,
@@ -813,7 +813,7 @@ const globalConfigs = {
       titlePostfix: null,
       title: "Best-Yield",
       iconName: "Whatshot",
-      availableNetworks:[],
+      availableNetworks: [],
       govTokensEnabled: true,
       component: StrategyPage,
       chartColor: "hsl(40,95%,59%)",
@@ -821,11 +821,11 @@ const globalConfigs = {
       iconInactive: "images/strategies/best-on.svg",
       iconInactiveDark: "images/strategies/best-on.svg",
       desc: "Maximize your returns on Polygon across DeFi protocols",
-      descLong:"The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols. Idle’s monitoring system automatically triggers a rebalance if it spots a better-performing allocation: this includes taking account of the total liquidity within the pool, incorporating underlying protocol rate functions and levels of supply and demand. As a user, you will end up with an higher return without constantly checking rates and burning gas on every transfer. Unlock your funds from a single protocol performance with this strategy.",
-      descShort:"The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols."
+      descLong: "The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols. Idle’s monitoring system automatically triggers a rebalance if it spots a better-performing allocation: this includes taking account of the total liquidity within the pool, incorporating underlying protocol rate functions and levels of supply and demand. As a user, you will end up with an higher return without constantly checking rates and burning gas on every transfer. Unlock your funds from a single protocol performance with this strategy.",
+      descShort: "The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols."
     },
     tranches: {
-      networkId:1,
+      networkId: 1,
       token: "DAI",
       visible: true,
       type: "tranche",
@@ -834,20 +834,20 @@ const globalConfigs = {
       comingSoon: false,
       addGovTokens: true,
       titlePostfix: null,
-      strategy:'tranches',
+      strategy: 'tranches',
       component: Tranches,
       iconName: "Whatshot",
       enabledEnvs: ['beta'],
-      availableNetworks:[1],
+      availableNetworks: [1],
       govTokensEnabled: true,
       title: "Perpetual Tranches",
       chartColor: "hsl(40,95%,59%)",
       icon: "images/strategies/tranches-on.png",
       iconInactive: "images/strategies/tranches-off.png",
       iconInactiveDark: "images/strategies/tranches-white.png",
-      desc:"Diversify your risk profile with dynamic tranched yield derivatives",
-      descShort:"Tranches deposit assets (eg DAI) into yield sources (eg Idle Finance) and split the accrued interest between 2 classes of products with different risk profiles.",
-      descLong:"Choose the benefits of high-yield or low-risk, while enjoying the flexibility of Tranches. This comes with auto-compounding for accrued governance tokens and no locking period."
+      desc: "Diversify your risk profile with dynamic tranched yield derivatives",
+      descShort: "Tranches deposit assets (eg DAI) into yield sources (eg Idle Finance) and split the accrued interest between 2 classes of products with different risk profiles.",
+      descLong: "Choose the benefits of high-yield or low-risk, while enjoying the flexibility of Tranches. This comes with auto-compounding for accrued governance tokens and no locking period."
     },
   },
   strategies: {
@@ -864,15 +864,15 @@ const globalConfigs = {
       component: Tranches,
       iconName: "Whatshot",
       enabledEnvs: ['beta'],
-      availableNetworks:[1],
+      availableNetworks: [1],
       govTokensEnabled: true,
       chartColor: "hsl(40,95%,59%)",
       icon: "images/strategies/tranches-on.png",
       iconInactive: "images/strategies/tranches-off.png",
       iconInactiveDark: "images/strategies/tranches-white.png",
-      desc:"Diversify your risk profile with dynamic tranched yield derivatives",
-      descShort:"Tranches deposit assets (eg DAI) into yield sources (eg Idle Finance) and split the accrued interest between 2 classes of products with different risk profiles.",
-      descLong:"Choose the benefits of high-yield or low-risk, while enjoying the flexibility of Tranches. This comes with auto-compounding for accrued governance tokens and no locking period."
+      desc: "Diversify your risk profile with dynamic tranched yield derivatives",
+      descShort: "Tranches deposit assets (eg DAI) into yield sources (eg Idle Finance) and split the accrued interest between 2 classes of products with different risk profiles.",
+      descLong: "Choose the benefits of high-yield or low-risk, while enjoying the flexibility of Tranches. This comes with auto-compounding for accrued governance tokens and no locking period."
     },
     best: {
       token: "DAI",
@@ -887,14 +887,14 @@ const globalConfigs = {
       iconName: "Whatshot",
       govTokensEnabled: true,
       component: StrategyPage,
-      availableNetworks:[1,137],
+      availableNetworks: [1, 137],
       chartColor: "hsl(40,95%,59%)",
       icon: "images/strategies/best-on.svg",
       iconInactive: "images/strategies/best-off.svg",
       iconInactiveDark: "images/strategies/best-white.svg",
       desc: "Maximize your returns across DeFi protocols",
-      descLong:"The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols. Idle’s monitoring system automatically triggers a rebalance if it spots a better-performing allocation: this includes taking account of the total liquidity within the pool, incorporating underlying protocol rate functions and levels of supply and demand. As a user, you will end up with an higher return without constantly checking rates and burning gas on every transfer. Unlock your funds from a single protocol performance with this strategy.",
-      descShort:"The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols."
+      descLong: "The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols. Idle’s monitoring system automatically triggers a rebalance if it spots a better-performing allocation: this includes taking account of the total liquidity within the pool, incorporating underlying protocol rate functions and levels of supply and demand. As a user, you will end up with an higher return without constantly checking rates and burning gas on every transfer. Unlock your funds from a single protocol performance with this strategy.",
+      descShort: "The Best-Yield allocation strategy allows to maximize the interest rate returns by detecting the interest rate changes on different lending protocols."
     },
     risk: {
       token: "DAI",
@@ -906,7 +906,7 @@ const globalConfigs = {
       titlePostfix: null,
       addGovTokens: true,
       iconName: "Security",
-      availableNetworks:[1],
+      availableNetworks: [1],
       title: "Risk-Adjusted",
       govTokensEnabled: true,
       component: StrategyPage,
@@ -915,8 +915,8 @@ const globalConfigs = {
       iconInactive: "images/strategies/risk-off.svg",
       iconInactiveDark: "images/strategies/risk-white.svg",
       desc: "Optimize your risk exposure across DeFi protocols",
-      descLong:"The Risk-Adjusted allocation strategy provides a way to earn the best rate at the lowest risk-level. The risk-management algorithm takes account of the total assets within a pool, incorporates underlying protocol rate functions and levels of supply and demand, skimming protocols with a bad score/rate mix, and finally determining an allocation that achieves the highest risk-return score possible after the rebalance happens.",
-      descShort:"The Risk-Adjusted allocation strategy provides a way to earn the best rate at the lowest risk-level."
+      descLong: "The Risk-Adjusted allocation strategy provides a way to earn the best rate at the lowest risk-level. The risk-management algorithm takes account of the total assets within a pool, incorporates underlying protocol rate functions and levels of supply and demand, skimming protocols with a bad score/rate mix, and finally determining an allocation that achieves the highest risk-return score possible after the rebalance happens.",
+      descShort: "The Risk-Adjusted allocation strategy provides a way to earn the best rate at the lowest risk-level."
     }
     /*
     new:{
@@ -937,39 +937,39 @@ const globalConfigs = {
   },
   stats: {
     enabled: true, // Enable endpoint
-    availableNetworks:[1,137],
+    availableNetworks: [1, 137],
     rates: {
       TTL: 300, // 5 minutes
-      endpoint:{
-        1:"https://api.idle.finance/rates/",
-        137:"https://api-polygon.idle.finance/rates/"
+      endpoint: {
+        1: "https://api.idle.finance/rates/",
+        137: "https://api-polygon.idle.finance/rates/"
       }
     },
     tvls: {
       TTL: 120,
-      endpoint:{
-        1:"https://api.idle.finance/tvls/",
-        137:"https://api-polygon.idle.finance/tvls/"
+      endpoint: {
+        1: "https://api.idle.finance/tvls/",
+        137: "https://api-polygon.idle.finance/tvls/"
       }
     },
     aprs: {
       TTL: 120,
-      endpoint:{
-        1:"https://api.idle.finance/aprs/",
-        137:"https://api-polygon.idle.finance/aprs/"
+      endpoint: {
+        1: "https://api.idle.finance/aprs/",
+        137: "https://api-polygon.idle.finance/aprs/"
       }
     },
     substack: {
       TTL: 1800,
-      endpoint:{
-        1:"https://api.idle.finance/substack/",
-        137:"https://api-polygon.idle.finance/substack/"
+      endpoint: {
+        1: "https://api.idle.finance/substack/",
+        137: "https://api-polygon.idle.finance/substack/"
       }
     },
     scores: {
       TTL: 300, // 5 minutes
-      endpoint:{
-        1:"https://api.idle.finance/scores/"
+      endpoint: {
+        1: "https://api.idle.finance/scores/"
       }
     },
     config: {
@@ -1029,41 +1029,41 @@ const globalConfigs = {
         ]
       }
     },
-    tokens:{
-      DAI:{
-        decimals:18,
-        enabled:true,
-        color:{
-          rgb:[250,184,51],
-          hex:'#F7B24A',
-          hsl:['40', '95%', '59%']
+    tokens: {
+      DAI: {
+        decimals: 18,
+        enabled: true,
+        color: {
+          rgb: [250, 184, 51],
+          hex: '#F7B24A',
+          hsl: ['40', '95%', '59%']
         },
-        chart:{
-          labelTextColorModifiers:['darker', 2]
+        chart: {
+          labelTextColorModifiers: ['darker', 2]
         },
-        startTimestamp:'2020-02-11',
-        address:'0x6b175474e89094c44da98b954eedeac495271d0f',
-        performanceTooltip:'APR is calculated proportionally to historical allocations of each lending protocol in the selected time period. This pool has 1% unlent reserve to help reduce gas costs.',
+        startTimestamp: '2020-02-11',
+        address: '0x6b175474e89094c44da98b954eedeac495271d0f',
+        performanceTooltip: 'APR is calculated proportionally to historical allocations of each lending protocol in the selected time period. This pool has 1% unlent reserve to help reduce gas costs.',
       },
-      ETH:{
-        decimals:18,
-        enabled:true,
-        color:{
-          hex:'#333',
-          rgb:[51, 51, 51],
-          hsl:['0, 0%, 20%']
+      ETH: {
+        decimals: 18,
+        enabled: true,
+        color: {
+          hex: '#333',
+          rgb: [51, 51, 51],
+          hsl: ['0, 0%, 20%']
         },
-        address:'0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0'
+        address: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0'
       },
-      MATIC:{
-        decimals:18,
-        enabled:true,
-        color:{
-          hex:'#8247E5',
-          rgb:[130, 71, 229],
-          hsl:['262, 75%, 59%']
+      MATIC: {
+        decimals: 18,
+        enabled: true,
+        color: {
+          hex: '#8247E5',
+          rgb: [130, 71, 229],
+          hsl: ['262, 75%, 59%']
         },
-        address:'0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0'
+        address: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0'
       },
       USD: {
         enabled: true,
@@ -1250,28 +1250,28 @@ const globalConfigs = {
         },
         address: '0x956f47f50a910163d8bf957cf5846d573e7f87ca',
       },
-      WMATIC:{
-        decimals:18,
-        enabled:true,
-        color:{
-          hex:'#2891f8',
-          rgb:[40, 145, 248],
-          hsl:['210', '94%', '56%']
+      WMATIC: {
+        decimals: 18,
+        enabled: true,
+        color: {
+          hex: '#2891f8',
+          rgb: [40, 145, 248],
+          hsl: ['210', '94%', '56%']
         },
-        startTimestamp:'2021-05-25',
-        chart:{
-          labelTextColorModifiers:['darker', 4]
+        startTimestamp: '2021-05-25',
+        chart: {
+          labelTextColorModifiers: ['darker', 4]
         },
-        address:'0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0',
+        address: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0',
       },
-      'idleDAI+idleUSDC+idleUSDT':{
-        decimals:18,
-        enabled:false,
-        name:'Curve.fi',
-        color:{
-          hex:'#ff0000',
-          rgb:[255, 0, 0],
-          hsl:['0', '100%', '50%']
+      'idleDAI+idleUSDC+idleUSDT': {
+        decimals: 18,
+        enabled: false,
+        name: 'Curve.fi',
+        color: {
+          hex: '#ff0000',
+          rgb: [255, 0, 0],
+          hsl: ['0', '100%', '50%']
         },
         startTimestamp: "2020-06-15"
       }
@@ -1401,9 +1401,9 @@ const globalConfigs = {
   },
   contract: {
     methods: {
-      refreshIdleSpeed:{
-        enabled:true,
-        availableNetworks:[1]
+      refreshIdleSpeed: {
+        enabled: true,
+        availableNetworks: [1]
       },
       redeem: {
         skipRebalance: true,
@@ -1472,79 +1472,79 @@ const globalConfigs = {
       }
     }
   },
-  network:{ // Network configurations
-    availableNetworks:{
-      1:{
-        version:'v1',
-        name:'Ethereum',
-        baseToken:'ETH',
-        color:'#4474f1',
-        provider:'infura',
-        network:'mainnet',
-        explorer:'etherscan',
-        chainName:'Ethereum Mainnet',
+  network: { // Network configurations
+    availableNetworks: {
+      1: {
+        version: 'v1',
+        name: 'Ethereum',
+        baseToken: 'ETH',
+        color: '#4474f1',
+        provider: 'infura',
+        network: 'mainnet',
+        explorer: 'etherscan',
+        chainName: 'Ethereum Mainnet',
       },
-      42:{
-        name:'Kovan',
-        color:'#9064ff',
-        baseToken:'ETH',
-        provider:'infura',
-        explorer:'etherscan',
-        chainName:'Ethereum Testnet Kovan',
+      42: {
+        name: 'Kovan',
+        color: '#9064ff',
+        baseToken: 'ETH',
+        provider: 'infura',
+        explorer: 'etherscan',
+        chainName: 'Ethereum Testnet Kovan',
       },
-      3:{
-        name:'Ropsten',
-        color:'#ff4a8d',
-        baseToken:'ETH',
-        provider:'infura',
-        explorer:'etherscan',
-        chainName:'Ethereum Testnet Ropsten',
+      3: {
+        name: 'Ropsten',
+        color: '#ff4a8d',
+        baseToken: 'ETH',
+        provider: 'infura',
+        explorer: 'etherscan',
+        chainName: 'Ethereum Testnet Ropsten',
       },
-      4:{
-        name:'Rinkeby',
-        color:'#f6c343',
-        baseToken:'ETH',
-        provider:'infura',
-        explorer:'etherscan',
-        chainName:'Ethereum Testnet Rinkeby',
+      4: {
+        name: 'Rinkeby',
+        color: '#f6c343',
+        baseToken: 'ETH',
+        provider: 'infura',
+        explorer: 'etherscan',
+        chainName: 'Ethereum Testnet Rinkeby',
       },
-      137:{
-        version:'v1',
-        name:'Polygon',
-        color:'#8247E5',
-        network:'mainnet',
-        baseToken:'MATIC',
-        explorer:'polygon',
-        provider:'polygon',
-        chainName:'Matic(Polygon) Mainnet',
+      137: {
+        version: 'v1',
+        name: 'Polygon',
+        color: '#8247E5',
+        network: 'mainnet',
+        baseToken: 'MATIC',
+        explorer: 'polygon',
+        provider: 'polygon',
+        chainName: 'Matic(Polygon) Mainnet',
       },
-      5:{
-        name:'Görli',
-        color:'#3099f2',
-        baseToken:'ETH',
-        version:'mumbai',
-        network:'testnet',
-        provider:'infura',
-        explorer:'etherscan',
-        chainName:'Ethereum Testnet Görli',
+      5: {
+        name: 'Görli',
+        color: '#3099f2',
+        baseToken: 'ETH',
+        version: 'mumbai',
+        network: 'testnet',
+        provider: 'infura',
+        explorer: 'etherscan',
+        chainName: 'Ethereum Testnet Görli',
       },
-      1337:{
-        name:'Hardhat',
-        baseToken:'ETH',
-        color:'#4474f1',
-        provider:'infura',
-        explorer:'etherscan',
-        chainName:'Ethereum Mainnet',
+      1337: {
+        name: 'Hardhat',
+        baseToken: 'ETH',
+        color: '#4474f1',
+        provider: 'infura',
+        explorer: 'etherscan',
+        chainName: 'Ethereum Mainnet',
       },
-      80001:{
-        name:'Mumbai',
-        color:'#4474f1',
-        version:'mumbai',
-        network:'testnet',
-        baseToken:'MATIC',
-        explorer:'polygon',
-        provider:'polygon',
-        chainName:'Matic Testnet Mumbai',
+      80001: {
+        name: 'Mumbai',
+        color: '#4474f1',
+        version: 'mumbai',
+        network: 'testnet',
+        baseToken: 'MATIC',
+        explorer: 'polygon',
+        provider: 'polygon',
+        chainName: 'Matic Testnet Mumbai',
       }
     },
     isForked: false, // If TRUE the tx confirmation callback is fired on the receipt
@@ -1555,10 +1555,10 @@ const globalConfigs = {
     enabledNetworks: [1, 137],
     firstBlockNumber: 8119247,
     accountBalanceMinimum: 0, // in ETH for gas fees
-    providers:{
-      infura:{
-        key:env.REACT_APP_INFURA_KEY,
-        rpc:{
+    providers: {
+      infura: {
+        key: env.REACT_APP_INFURA_KEY,
+        rpc: {
           5: 'https://goerli.infura.io/v3/',
           42: 'https://kovan.infura.io/v3/',
           1: 'https://mainnet.infura.io/v3/',
@@ -1567,33 +1567,33 @@ const globalConfigs = {
           80001: 'https://goerli.infura.io/v3/'
         }
       },
-      polygon:{
-        enabled:true,
+      polygon: {
+        enabled: true,
         // key:env.REACT_APP_POLYGON_KEY,
-        key:env.REACT_APP_INFURA_KEY,
-        baseUrl:{
-          137:'https://polygonscan.com',
-          80001:'https://explorer-mumbai.maticvigil.com'
+        key: env.REACT_APP_INFURA_KEY,
+        baseUrl: {
+          137: 'https://polygonscan.com',
+          80001: 'https://explorer-mumbai.maticvigil.com'
         },
-        networkPairs:{
-          1:137,
-          137:1,
-          5:80001,
-          80001:5
+        networkPairs: {
+          1: 137,
+          137: 1,
+          5: 80001,
+          80001: 5
         },
-        publicRpc:{
-          137:'https://polygon-rpc.com'
+        publicRpc: {
+          137: 'https://polygon-rpc.com'
         },
-        rpc:{
+        rpc: {
           // 1:'https://rpc-mainnet.maticvigil.com/v1/',
           // 5:'https://rpc-mumbai.maticvigil.com/v1/',
           // 137:'https://rpc-mainnet.maticvigil.com/v1/',
           // 80001:'https://rpc-mumbai.maticvigil.com/v1/'
 
-          1:'https://polygon-mainnet.infura.io/v3/',
-          5:'https://polygon-mainnet.infura.io/v3/',
-          137:'https://polygon-mainnet.infura.io/v3/',
-          80001:'https://polygon-mainnet.infura.io/v3/'
+          1: 'https://polygon-mainnet.infura.io/v3/',
+          5: 'https://polygon-mainnet.infura.io/v3/',
+          137: 'https://polygon-mainnet.infura.io/v3/',
+          80001: 'https://polygon-mainnet.infura.io/v3/'
 
           // 1:'https://matic-mainnet.chainstacklabs.com/',
           // 137:'https://matic-mainnet.chainstacklabs.com/',
@@ -1607,33 +1607,33 @@ const globalConfigs = {
           42: "https://api.staging.nexusmutual.io/v1/"
         }
       },
-      ens:{
-        enabled:true,
-        supportedNetworks:[1]
+      ens: {
+        enabled: true,
+        supportedNetworks: [1]
       },
-      covalent:{
-        enabled:true,
-        key:env.REACT_APP_COVALENT_KEY,
-        endpoints:{
-          137:'https://api.covalenthq.com/v1/137/',
-          80001:'https://api.covalenthq.com/v1/80001/'
+      covalent: {
+        enabled: true,
+        key: env.REACT_APP_COVALENT_KEY,
+        endpoints: {
+          137: 'https://api.covalenthq.com/v1/137/',
+          80001: 'https://api.covalenthq.com/v1/80001/'
         }
       },
-      etherscan:{
-        enabled:true, // False for empty txs list (try new wallet)
+      etherscan: {
+        enabled: true, // False for empty txs list (try new wallet)
         keys: [
           env.REACT_APP_ETHERSCAN_KEY,
           env.REACT_APP_ETHERSCAN_KEY2,
           env.REACT_APP_ETHERSCAN_KEY3,
           env.REACT_APP_ETHERSCAN_KEY4
         ],
-        endpoints:{
+        endpoints: {
           1: 'https://api.etherscan.io/api',
           1337: 'https://api.etherscan.io/api',
           5: 'https://api-goerli.etherscan.io/api',
           42: 'https://api-kovan.etherscan.io/api'
         },
-        baseUrl:{
+        baseUrl: {
           1: 'https://etherscan.io',
           1337: 'https://etherscan.io',
           5: 'https://goerli.etherscan.io',
@@ -1646,10 +1646,68 @@ const globalConfigs = {
           "0xf12ce5807e3d3128B876aa1Cec0632D63547E22E"
         ],
         endpoints: {
-          proposals: "https://hub.snapshot.page/api/idlefinance.eth/proposals"
+          proposals: "https://hub.snapshot.org/graphql"
         },
         urls: {
           proposals: "https://signal.idle.finance/#/idlefinance.eth/proposal/"
+        },
+        queries: {
+          proposals: `query Proposals {
+            proposals (
+            first: 20,
+            skip: 0,
+            where: {
+            space_in: ["idlefinance.eth"],
+            
+            },
+            orderBy: "created",
+            orderDirection: desc
+            ) {
+            id
+            ipfs
+            strategies
+            title
+            body
+            choices
+            start
+            end
+            snapshot
+            state
+            author
+            space {
+            id
+            name
+            }
+            }
+            }`,
+          proposalsActive: `query Proposals {
+              proposals (
+              first: 20,
+              skip: 0,
+              where: {
+              space_in: ["idlefinance.eth"],
+             
+              },
+              orderBy: "created",
+              orderDirection: desc
+              ) {
+              id
+              ipfs
+              strategies
+              title
+              body
+              choices
+              start
+              end
+              snapshot
+              state
+              author
+              space {
+              id
+              name
+              }
+              }
+              }`
         }
       },
       biconomy: {
@@ -1730,7 +1788,7 @@ const globalConfigs = {
       label: "Staking",
       route: "staking",
       subComponent: Staking,
-      availableNetworks:[1],
+      availableNetworks: [1],
       desc: "Stake your IDLE / Sushi Swap LP tokens and earn $IDLE rewards",
       props: {
         availableTokens: {
@@ -1791,7 +1849,7 @@ const globalConfigs = {
       icon: "Layers",
       label: "Staking",
       subComponent: Staking,
-      availableNetworks:[137],
+      availableNetworks: [137],
       route: "staking-polygon",
       desc: "Stake your Sushi Swap LP tokens and earn $IDLE rewards",
       props: {
@@ -1825,7 +1883,7 @@ const globalConfigs = {
       icon: "Security",
       route: "coverage",
       label: "Coverage",
-      availableNetworks:[1],
+      availableNetworks: [1],
       desc: "Buy Nexus Mutual coverage without KYC for your deposits",
       subComponent: NexusMutual,
       props: {
@@ -1897,10 +1955,10 @@ const globalConfigs = {
       visible: true,
       icon: "CloudUpload",
       label: "B2B Vesting",
-      availableNetworks:[1],
+      availableNetworks: [1],
       route: "b2b-vesting-contract",
       subComponent: DeployB2BVesting,
-      desc:'Deploy/Deposit/Claim for B2B Vesting Contracts<br /><small style="color:#ff9900">(only for partners that joined the B2B Affiliate program)</small>',
+      desc: 'Deploy/Deposit/Claim for B2B Vesting Contracts<br /><small style="color:#ff9900">(only for partners that joined the B2B Affiliate program)</small>',
       props: {
         contracts: {
           vesterImplementation: {
@@ -1910,43 +1968,43 @@ const globalConfigs = {
         }
       }
     },
-    polygonBridge:{
-      enabled:true,
-      route:'polygon-bridge',
-      availableNetworks:[1,137],
-      subComponent:PolygonBridge,
-      image:'images/protocols/polygon.svg',
-      label:'Ethereum ⇔ Polygon Bridge',
-      desc:'Transfer your tokens from Ethereum to Polygon and vice versa with Plasma and PoS Bridge.',
-      props:{
-        contracts:{
-          ERC20Predicate:{
-            abi:ERC20Predicate,
-            name:'ERC20Predicate',
+    polygonBridge: {
+      enabled: true,
+      route: 'polygon-bridge',
+      availableNetworks: [1, 137],
+      subComponent: PolygonBridge,
+      image: 'images/protocols/polygon.svg',
+      label: 'Ethereum ⇔ Polygon Bridge',
+      desc: 'Transfer your tokens from Ethereum to Polygon and vice versa with Plasma and PoS Bridge.',
+      props: {
+        contracts: {
+          ERC20Predicate: {
+            abi: ERC20Predicate,
+            name: 'ERC20Predicate',
             // address:'0xdD6596F2029e6233DEFfaCa316e6A95217d4Dc34', // Goerli
-            address:'0x40ec5B33f54e0E8A33A975908C5BA1c14e5BbbDf' // Mainnet
+            address: '0x40ec5B33f54e0E8A33A975908C5BA1c14e5BbbDf' // Mainnet
           },
-          EtherPredicate:{
-            abi:EtherPredicate,
-            name:'EtherPredicate',
+          EtherPredicate: {
+            abi: EtherPredicate,
+            name: 'EtherPredicate',
             // address:'0xdD6596F2029e6233DEFfaCa316e6A95217d4Dc34', // Goerli
-            address:'0x8484Ef722627bf18ca5Ae6BcF031c23E6e922B30' // Mainnet
+            address: '0x8484Ef722627bf18ca5Ae6BcF031c23E6e922B30' // Mainnet
           },
-          DepositManager:{
-            abi:DepositManager,
-            name:'DepositManager',
-            address:'0x401f6c983ea34274ec46f84d70b31c151321188b'
+          DepositManager: {
+            abi: DepositManager,
+            name: 'DepositManager',
+            address: '0x401f6c983ea34274ec46f84d70b31c151321188b'
           },
-          RootChainManager:{
-            name:'RootChainManager',
-            address:'0xA0c68C638235ee32657e8f720a23ceC1bFc77C77' // Mainnet
+          RootChainManager: {
+            name: 'RootChainManager',
+            address: '0xA0c68C638235ee32657e8f720a23ceC1bFc77C77' // Mainnet
           },
-          StateSender:{
-            name:'StateSender',
-            address:'0x28e4F3a7f651294B9564800b2D01f35189A5bFbE'
+          StateSender: {
+            name: 'StateSender',
+            address: '0x28e4F3a7f651294B9564800b2D01f35189A5bFbE'
           }
         },
-        availableTokens:{
+        availableTokens: {
           /*
           DERC20:{
             decimals:18,
@@ -1965,34 +2023,34 @@ const globalConfigs = {
             }
           },
           */
-          MATIC:{
-            name:'MATIC',
-            token:'MATIC',
-            decimals:18,
-            enabled:true,
-            sendValue:true,
-            bridgeType:'plasma',
-            rootToken:{
-              abi:ERC20,
-              name:'MATIC',
-              address:'0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0', // Mainnet
+          MATIC: {
+            name: 'MATIC',
+            token: 'MATIC',
+            decimals: 18,
+            enabled: true,
+            sendValue: true,
+            bridgeType: 'plasma',
+            rootToken: {
+              abi: ERC20,
+              name: 'MATIC',
+              address: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0', // Mainnet
             },
-            childToken:{
-              abi:ChildERC20,
-              name:'childMATIC',
-              address:'0x0000000000000000000000000000000000001010' // Matic
+            childToken: {
+              abi: ChildERC20,
+              name: 'childMATIC',
+              address: '0x0000000000000000000000000000000000001010' // Matic
             }
           },
-          WETH:{
-            name:'WETH',
-            token:'ETH',
-            decimals:18,
-            enabled:true,
-            bridgeType:'pos',
-            childToken:{
-              abi:ChildERC20,
-              name:'maticWETH',
-              address:'0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619' // Matic
+          WETH: {
+            name: 'WETH',
+            token: 'ETH',
+            decimals: 18,
+            enabled: true,
+            bridgeType: 'pos',
+            childToken: {
+              abi: ChildERC20,
+              name: 'maticWETH',
+              address: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619' // Matic
             }
           },
           /*
@@ -2015,60 +2073,60 @@ const globalConfigs = {
             }
           },
           */
-          DAI:{
-            name:'DAI',
-            token:'DAI',
-            decimals:18,
-            enabled:true,
-            sendValue:false,
-            bridgeType:'pos',
-            rootToken:{
-              abi:DAI,
-              name:'DAI',
+          DAI: {
+            name: 'DAI',
+            token: 'DAI',
+            decimals: 18,
+            enabled: true,
+            sendValue: false,
+            bridgeType: 'pos',
+            rootToken: {
+              abi: DAI,
+              name: 'DAI',
               // address:'0x6311344B50D2077BF9804d376EA4C2cEDcB75C1f', // Goerli
-              address:'0x6b175474e89094c44da98b954eedeac495271d0f', // Mainnet
+              address: '0x6b175474e89094c44da98b954eedeac495271d0f', // Mainnet
             },
-            childToken:{
-              abi:ChildERC20,
-              name:'childDAI',
+            childToken: {
+              abi: ChildERC20,
+              name: 'childDAI',
               // address:'0x001B3B4d0F3714Ca98ba10F6042DaEbF0B1B7b6F', // Mumbai
-              address:'0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063' // Matic
+              address: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063' // Matic
             }
           },
-          USDC:{
-            decimals:6,
-            name:'USDC',
-            token:'USDC',
-            enabled:true,
-            bridgeType:'pos',
-            rootToken:{
-              abi:USDC,
-              name:'USDC',
+          USDC: {
+            decimals: 6,
+            name: 'USDC',
+            token: 'USDC',
+            enabled: true,
+            bridgeType: 'pos',
+            rootToken: {
+              abi: USDC,
+              name: 'USDC',
               // address:'0x98339D8C260052B7ad81c28c16C0b98420f2B46a' // Goerli
-              address:'0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // Mainnet
+              address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // Mainnet
             },
-            childToken:{
-              abi:ChildERC20,
-              name:'childUSDC',
+            childToken: {
+              abi: ChildERC20,
+              name: 'childUSDC',
               // address:'0x6D4dd09982853F08d9966aC3cA4Eb5885F16f2b2' // Mubai
-              address:'0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174' // Matic
+              address: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174' // Matic
             }
           },
-          IDLE:{
-            decimals:18,
-            name:'IDLE',
-            token:'IDLE',
-            enabled:true,
-            bridgeType:'pos',
-            rootToken:{
-              abi:IDLE,
-              name:'IDLE',
-              address:'0x875773784Af8135eA0ef43b5a374AaD105c5D39e', // Mainnet
+          IDLE: {
+            decimals: 18,
+            name: 'IDLE',
+            token: 'IDLE',
+            enabled: true,
+            bridgeType: 'pos',
+            rootToken: {
+              abi: IDLE,
+              name: 'IDLE',
+              address: '0x875773784Af8135eA0ef43b5a374AaD105c5D39e', // Mainnet
             },
-            childToken:{
-              abi:ChildERC20,
-              name:'childUSDC',
-              address:'0xc25351811983818c9fe6d8c580531819c8ade90f' // Matic
+            childToken: {
+              abi: ChildERC20,
+              name: 'childUSDC',
+              address: '0xc25351811983818c9fe6d8c580531819c8ade90f' // Matic
             }
           },
           /*
@@ -2093,48 +2151,48 @@ const globalConfigs = {
         }
       }
     },
-    ethWrapper:{
-      enabled:true,
-      label:'ETH Wrapper',
-      route:'eth-wrapper',
-      availableNetworks:[1,42],
-      subComponent:TokenWrapper,
-      image:'images/tokens/WETH.svg',
-      desc:'Wrap your ETH and get WETH. Unwrap your WETH and get back ETH.',
-      props:{
-        startContract:{
-          name:'ETH',
-          token:'ETH',
-          decimals:18,
-          wrapMethod:'deposit',
+    ethWrapper: {
+      enabled: true,
+      label: 'ETH Wrapper',
+      route: 'eth-wrapper',
+      availableNetworks: [1, 42],
+      subComponent: TokenWrapper,
+      image: 'images/tokens/WETH.svg',
+      desc: 'Wrap your ETH and get WETH. Unwrap your WETH and get back ETH.',
+      props: {
+        startContract: {
+          name: 'ETH',
+          token: 'ETH',
+          decimals: 18,
+          wrapMethod: 'deposit',
         },
-        destContract:{
-          abi:WETH,
-          name:'WETH',
-          decimals:18,
-          token:'WETH',
-          unwrapMethod:'withdraw',
-          address:'0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+        destContract: {
+          abi: WETH,
+          name: 'WETH',
+          decimals: 18,
+          token: 'WETH',
+          unwrapMethod: 'withdraw',
+          address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
         },
       }
     },
-    coverProtocol:{
-      enabled:false,
-      availableNetworks:[1],
-      label:'Cover Protocol',
-      route:'cover-protocol',
-      subComponent:CoverProtocol,
-      image:'images/protocols/cover-logo.svg',
-      desc:'Get your Idle Portfolio covered against Smart Contract risk',
-      fileClaimUrl:'https://app.coverprotocol.com/app/claims/new?protocol=IDLE',
-      props:{
-        contract:{
-          decimals:18,
-          abi:CoverMint,
-          name:'CoverMint',
-          address:'0x46f2f34742c1d9b9b220aabf0ff26bf59ec9f8a0'
+    coverProtocol: {
+      enabled: false,
+      availableNetworks: [1],
+      label: 'Cover Protocol',
+      route: 'cover-protocol',
+      subComponent: CoverProtocol,
+      image: 'images/protocols/cover-logo.svg',
+      desc: 'Get your Idle Portfolio covered against Smart Contract risk',
+      fileClaimUrl: 'https://app.coverprotocol.com/app/claims/new?protocol=IDLE',
+      props: {
+        contract: {
+          decimals: 18,
+          abi: CoverMint,
+          name: 'CoverMint',
+          address: '0x46f2f34742c1d9b9b220aabf0ff26bf59ec9f8a0'
         },
-        coverages:[
+        coverages: [
           {
             collateral: "DAI",
             expirationTimestamp: 1714470400,
@@ -2166,16 +2224,16 @@ const globalConfigs = {
         ]
       }
     },
-    batchDeposit:{
+    batchDeposit: {
       enabled: true,
       icon: "Storage",
       claimEnabled: true,
       depositEnabled: true,
-      availableNetworks:[1],
+      availableNetworks: [1],
       route: "batch-deposit",
       label: "Batch Deposit",
       subComponent: BatchDeposit,
-      desc:"Deposit your tokens in the batch and wait until its execution to claim your Idle Tokens V4",
+      desc: "Deposit your tokens in the batch and wait until its execution to claim your Idle Tokens V4",
       props: {
         availableTokens: {
           idleDAIYield: {
@@ -2225,12 +2283,12 @@ const globalConfigs = {
       enabled: true,
       claimEnabled: true,
       icon: "FileDownload",
-      depositEnabled:false,
-      availableNetworks:[1],
+      depositEnabled: false,
+      availableNetworks: [1],
       route: "batch-migration",
       label: "Batch Migration",
       subComponent: BatchMigration,
-      desc:"Deposit your Idle Tokens V3 into a batch and wait until its conversion to the Idle Token V4",
+      desc: "Deposit your Idle Tokens V3 into a batch and wait until its conversion to the Idle Token V4",
       props: {
         availableTokens: {
           idleDAIYield: {
@@ -2420,9 +2478,9 @@ const globalConfigs = {
       enabled: true,
       icon: "SwapHoriz",
       route: "convert",
-      availableNetworks:[1],
+      availableNetworks: [1],
       label: "Token Migration",
-      desc:"Easily convert your Compound, Fulcrum, Aave and iEarn tokens into Idle",
+      desc: "Easily convert your Compound, Fulcrum, Aave and iEarn tokens into Idle",
       subComponent: TokenMigration,
       props: {
         migrationContract: {
@@ -2703,17 +2761,17 @@ const globalConfigs = {
         }
       }
     },
-    addFunds:{
-      enabled:true,
-      route:'add-funds',
-      label:'Add Funds',
-      availableNetworks:[1],
-      icon:'AddCircleOutline',
-      desc:'Buy tokens with your Bank account, Credit card or Ethereum Wallet',
-      subComponent:BuyModal,
-      directProps:{
-        showInline:true,
-        showAllTokens:true
+    addFunds: {
+      enabled: true,
+      route: 'add-funds',
+      label: 'Add Funds',
+      availableNetworks: [1],
+      icon: 'AddCircleOutline',
+      desc: 'Buy tokens with your Bank account, Credit card or Ethereum Wallet',
+      subComponent: BuyModal,
+      directProps: {
+        showInline: true,
+        showAllTokens: true
       }
     },
     tokenSwap: {
@@ -2721,7 +2779,7 @@ const globalConfigs = {
       icon: "Sync",
       route: "token-swap",
       label: "Token Swap",
-      availableNetworks:[1],
+      availableNetworks: [1],
       desc: "Easily swap your tokens using Kyber Swap widget",
       subComponent: TokenSwap,
       props: {

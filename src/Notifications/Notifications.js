@@ -138,15 +138,15 @@ class Notifications extends Component {
 
     if (activeSnapshotProposals) {
       activeSnapshotProposals.forEach(p => {
-        const text = this.functionsUtil.htmlDecode(p.msg.payload.body.replace(/^[#]*/, ''));
+        const text = p.body.replace(/^[#]*/, '');
         // const text = p.msg.payload.name.replace(/^[#]*/,'');
         notifications.push({
           text,
           image: '/images/snapshot.png',
-          timestamp: p.msg.payload.start * 1000,
-          link: snapshotProposalBaseUrl + p.authorIpfsHash,
-          title: this.functionsUtil.htmlDecode(p.msg.payload.name),
-          date: this.functionsUtil.strToMoment(p.msg.payload.start * 1000).utc().format('MMM DD, YYYY HH:mm UTC'),
+          timestamp: p.start * 1000,
+          link: snapshotProposalBaseUrl + p.id,
+          title: p.title,
+          date: this.functionsUtil.strToMoment(p.start * 1000).utc().format('MMM DD, YYYY HH:mm UTC'),
         });
       });
     }
@@ -197,15 +197,18 @@ class Notifications extends Component {
       const polygonWithdrawalsToExit = polygonTransactions.filter(tx => tx.action === 'Withdraw' && tx.included && !tx.exited);
       polygonWithdrawalsToExit.forEach(tx => {
         const timestamp = tx.timeStamp * 1000;
-        const text = `You can Exit ${this.functionsUtil.BNify(tx.value).toFixed(4)} ${tx.token} from Polygon`;
-        notifications.push({
-          text,
-          timestamp,
-          image: polygonBridgeConfig.image,
-          title: 'Polygon Withdraw Completed',
-          hash: polygonBridgeBaseUrl + tx.tokenSymbol,
-          date: this.functionsUtil.strToMoment(timestamp).utc().format('MMM DD, YYYY HH:mm UTC')
-        });
+        const txDate = this.functionsUtil.strToMoment(timestamp);
+        if (txDate.isAfter(this.functionsUtil.strToMoment().subtract(10, 'd'))) {
+          const text = `You can Exit ${this.functionsUtil.BNify(tx.value).toFixed(4)} ${tx.token} from Polygon`;
+          notifications.push({
+            text,
+            timestamp,
+            image: polygonBridgeConfig.image,
+            title: 'Polygon Withdraw Completed',
+            hash: polygonBridgeBaseUrl + tx.tokenSymbol,
+            date: this.functionsUtil.strToMoment(timestamp).utc().format('MMM DD, YYYY HH:mm UTC')
+          });
+        }
       });
 
       const depositBaseUrl = this.functionsUtil.getGlobalConfig(['dashboard', 'baseRoute']) + `/best/`;
