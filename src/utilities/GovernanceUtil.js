@@ -77,6 +77,15 @@ class GovernanceUtil {
     return vestingContract;
   }
 
+  claimVestedTokens = async (account=null,callback=null,callbackReceipt=null) => {
+    account = account ? account : this.props.account;
+    const founderVesting = await this.getVestingContract(account);
+    if (founderVesting){
+      return await this.functionsUtil.contractMethodSendWrapper('VestingContract','claim',[],callback,callbackReceipt);
+    }
+    return null;
+  }
+
   delegateVesting = async (account=null,delegate=null,callback=null,callbackReceipt=null) => {
     account = account ? account : this.props.account;
     const founderVesting = await this.getVestingContract(account);

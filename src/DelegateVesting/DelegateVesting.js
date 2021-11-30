@@ -196,6 +196,58 @@ class DelegateVesting extends Component {
     }));
   }
 
+  async claimVestedTokens(){
+    const callback = (tx,error) => {
+      // Send Google Analytics event
+      const eventData = {
+        eventCategory: 'Governance',
+        eventAction: 'claimVestedTokens',
+      };
+
+      if (error){
+        eventData.eventLabel = this.functionsUtil.getTransactionError(error);
+      }
+
+      // Send Google Analytics event
+      if (error || eventData.status !== 'error'){
+        this.functionsUtil.sendGoogleAnalyticsEvent(eventData);
+      }
+
+      const newState = {
+        processing: {
+          txHash:null,
+          loading:false
+        }
+      };
+
+      const txSucceeded = tx.status === 'success';
+      if (txSucceeded){
+        this.loadData();
+      }
+
+      this.setState(newState);
+    };
+
+    const callbackReceipt = (tx) => {
+      const txHash = tx.transactionHash;
+      this.setState((prevState) => ({
+        processing: {
+          ...prevState.processing,
+          txHash
+        }
+      }));
+    };
+
+    this.governanceUtil.claimVestedTokens(this.props.account,callback,callbackReceipt);
+
+    this.setState((prevState) => ({
+      processing: {
+        ...prevState.processing,
+        loading:true
+      }
+    }));
+  }
+
   changeDelegate(e){
     const newDelegate = e.target.value;
     const delegateAddressValid = this.functionsUtil.checkAddress(newDelegate);
@@ -220,7 +272,7 @@ class DelegateVesting extends Component {
     });
   }
 
-  async componentWillMount(){
+  async componentDidMount(){
     this.loadUtils();
     this.loadData();
   }
@@ -234,10 +286,10 @@ class DelegateVesting extends Component {
   }
 
   render() {
-    return this.state.vestingAmount ? (
+    return this.state.vestingAmount && this.functionsUtil.BNify(this.state.vestingAmount).gt(0) ? (
       <Flex
         p={2}
-        mt={3}
+        mb={3}
         width={1}
         border={2}
         borderRadius={1}
@@ -261,6 +313,18 @@ class DelegateVesting extends Component {
           >
             You have {this.state.vestingAmount.div(1e18).toFixed(5)} {this.functionsUtil.getGlobalConfig(['governance','props','tokenName'])} in the Vesting Contract
           </Text>
+          {
+            (!this.state.processing || !this.state.processing.loading) && (
+              <Button
+                mb={3}
+                size={'small'}
+                mainColor={'blue'}
+                onClick={ e => this.claimVestedTokens() }
+              >
+                CLAIM TOKENS
+              </Button>
+            )
+          }
           {
             (this.state.vestingContractDelegated && this.state.delegatee && !this.state.delegateDifferentWallet) ? (
               <Text

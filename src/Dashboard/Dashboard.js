@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import FlashNews from '../FlashNews/FlashNews';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import { Flex, Card, Icon, Text } from 'rimble-ui';
 import FunctionsUtil from '../utilities/FunctionsUtil';
@@ -696,10 +697,10 @@ class Dashboard extends Component {
 
   render() {
 
-    const PageComponent = this.state.pageComponent ? this.state.pageComponent : null;
-    const networkInitialized = this.props.networkInitialized && this.props.network.current.id && this.props.network.required.id;
     const networkCorrect = this.props.network.isCorrectNetwork;
     const networkSupported = this.props.network.isSupportedNetwork;
+    const PageComponent = this.state.pageComponent ? this.state.pageComponent : null;
+    const networkInitialized = this.props.networkInitialized && this.props.network.current.id && this.props.network.required.id;
 
     if (!this.props.availableStrategies){
       return (
@@ -741,23 +742,23 @@ class Dashboard extends Component {
           height={'100vh'}
           position={'fixed'}
           flexDirection={'row'}
-          className={this.props.themeMode}
           backgroundColor={'dashboardBg'}
+          className={this.props.themeMode}
           width={this.props.isMobile && this.state.menuOpened ? '180vw' : '100vw'}
-        /*onClick={ e => this.propagateClickEvent(e) }*/
         >
           {
             (!this.props.isMobile || this.state.menuOpened) && (
               <Flex
                 bottom={0}
                 zIndex={99999}
-                width={['80vw', 1 / 6]}
                 position={'relative'}
+                width={['80vw', 1 / 6]}
                 flexDirection={'column'}
               >
                 <Card
                   p={0}
                   border={0}
+                  boxShadow={0}
                   width={'auto'}
                   height={'100vh'}
                   backgroundColor={'menuBg'}
@@ -775,8 +776,10 @@ class Dashboard extends Component {
             )
           }
           <Flex
+            minHeight={'70vh'}
+            width={['100vw', 5 / 6]}
             flexDirection={"column"}
-            width={['100vw', 5 / 6]}>
+          >
             <DashboardHeader
               menuOpened={this.state.menuOpened}
               clickEvent={this.state.clickEvent}
@@ -787,19 +790,25 @@ class Dashboard extends Component {
             <Flex
               py={3}
               mb={0}
+              width={1}
               px={[3, 5]}
               alignItems={"center"}
-              justifyItems={"center"}
-              width={1}
               style={{
                 overflowY: 'scroll',
                 overflowX: 'hidden'
               }}
-              height={['100vh', 'auto']}
+              justifyItems={"center"}
               flexDirection={'column'}
+              height={['100vh', '100%']}
               backgroundColor={'dashboardBg'}
             >
-
+              {
+                this.props.isDashboard && (
+                  <FlashNews
+                    {...this.props}
+                  />
+                )
+              }
               {
                 !networkInitialized || !this.props.accountInizialized || !this.props.contractsInitialized || !PageComponent || !networkCorrect || !networkSupported ? (
                   <Flex
@@ -950,7 +959,8 @@ class Dashboard extends Component {
                   </Flex>
                 )
               }
-            </Flex></Flex>
+            </Flex>
+          </Flex>
           {
             this.state.currentNetwork &&
             <PolygonModal

@@ -286,12 +286,11 @@ class Notifications extends Component {
           onMouseOver={(e) => this.setMouseOverBell(true)}
         >
           <Icon
-            {...this.props.iconaProps}
             color={iconColor}
             name={'Notifications'}
+            {...this.props.iconProps}
             onClick={this.toggleTab.bind(this)}
             className={[styles.bell, (hasUnreadNotifications ? styles.ring : null), (this.state.tabOpened || this.state.notifications.length > 0 ? styles.active : null)]}
-            sizee={hasUnreadNotifications ? "40px" : "36px"}
           />
           {
             hasUnreadNotifications &&
@@ -407,7 +406,7 @@ class Notifications extends Component {
                       textAlign={'center'}
                     >
                       There are no notifications.
-                  </Text>
+                    </Text>
                   )
               }
             </Flex>

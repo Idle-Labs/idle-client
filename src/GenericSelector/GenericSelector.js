@@ -56,8 +56,8 @@ class GenericSelector extends Component {
       }
       return (
         <DashboardCard
-          isInteractive={this.props.notInteractive ? false : true}
           cardProps={cardProps}
+          isInteractive={this.props.notInteractive ? false : true}
         >
           <Flex
             width={1}
@@ -79,7 +79,7 @@ class GenericSelector extends Component {
         zIndex: 1,
         boxShadow: null,
         position: 'absolute',
-        backgroundColor: this.props.outerColor ? this.props.outerColor : "green"
+        backgroundColor: this.props.outerColor ? this.props.outerColor : "cardBg"
       });
       return (
         <DashboardCard

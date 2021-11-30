@@ -1,12 +1,12 @@
 import ExtLink from "../ExtLink/ExtLink";
 import React, { Component } from "react";
-
+import HoverImage from "../HoverImage/HoverImage"
 import { Link as RouterLink } from "react-router-dom";
 import FunctionsUtil from "../utilities/FunctionsUtil";
+import DashboardCard from "../DashboardCard/DashboardCard";
 import { Flex, Box, Icon, Text, Image, Link } from "rimble-ui";
 import NetworkIndicator from "../NetworkIndicator/NetworkIndicator";
-import HoverImage from "../HoverImage/HoverImage"
-import DashboardCard from "../DashboardCard/DashboardCard";
+
 class DashboardMenu extends Component {
   state = {
     logout: false,
@@ -71,11 +71,9 @@ class DashboardMenu extends Component {
     if (!this.props.menu.length) {
       return null;
     }
-    const currentNetwork = this.functionsUtil.getRequiredNetwork();
+    
     const governanceConfig = this.functionsUtil.getGlobalConfig(['governance']);
-
     const governanceRoute = governanceConfig.baseRoute;
-    const governanceEnabled = governanceConfig.enabled && governanceConfig.availableNetworks.includes(currentNetwork.id);
     const dashboardRoute = this.functionsUtil.getGlobalConfig(['dashboard', 'baseRoute']) + '/' + Object.keys(this.props.availableStrategies)[0];
 
     const visibleLinks = this.props.menu.filter(menuLink => {
@@ -116,178 +114,70 @@ class DashboardMenu extends Component {
           </RouterLink>
         </Flex>
         <Flex
-          width={1}
-          borderBottom={`1px solid ${this.props.theme.colors.divider}`}
-          justifyContent={"flex-start"}
           mb={3}
-
           pb={3}
+          width={1}
+          justifyContent={"flex-start"}
+          borderBottom={`1px solid ${this.props.theme.colors.divider}`}
         >
-          {/*<RoundButton
-            {...this.props}
-            buttonProps={{
-              mb: 3,
-              style: {
-                display: "flex",
-                paddingLeft: 16,
-                justifyContent: "flex-start"
-              }
-            }}
-            handleClick={this.props.account ? e => this.logout() : this.props.connectAndValidateAccount}
+          <Flex
+            width={1}
+            flexDirection={"row"}
+            justifyContent={"center"}
           >
-            <Flex
-              width={1}f
-              alignItems={"center"}
-              justifyContent={"flex-start"}
+            <DashboardCard
+              {...this.props}
+              cardProps={{
+                py: 1,
+                pr: 1,
+                mx: [1, 4],
+                mb: [0, 3],
+                width: 0.8,
+                boxShadow: 0,
+                display: "flex",
+                borderRadius: 1,
+                justifySelf: "center",
+                justifyContent: "center",
+              }}
+              isInteractive={true}
+              handleClick={e => this.props.isDashboard ? this.props.goToSection(governanceRoute, false) : this.props.goToSection(dashboardRoute, false) }
             >
-              {this.props.account ? (
-                <Icon
-                  mx={2}
-                  size={"1.4em"}
-                  color={"white"}
-                  align={"center"}
-                  name={"ExitToApp"}
-                />
-              ) : (
-                  <Image
-                    mx={2}
-                    align={"center"}
-                    height={"1.6em"}
-                    src={"images/sidebar/plug_white.svg"}
-                  />
-                )}
-              <Text
-                ml={1}
-                fontWeight={3}
-                color={"white"}
-                fontSize={[1, 2]}
-                alignContent={"center"}
-                justifyContent={"center"}
+              <Flex
+                px={2}
+                py={1}
+                alignItems={"center"}
+                flexDirection={"row"}
+                onMouseEnter={e => this.setState({ isHover: true })}
+                onMouseLeave={e => this.setState({ isHover: false })}
               >
-                {this.props.account ? "Logout" : "Connect"}
-              </Text>
-            </Flex>
-          </RoundButton>*/}
-
-          {governanceEnabled && this.props.isDashboard ? (
-            <Flex
-              width={1}
-              flexDirection="row"
-              justifyContent="center">
-              <DashboardCard
-                {...this.props}
-                cardProps={{
-                  border: 1,
-                  boxShadow: 0,
-                  borderRadius: 1,
-                  borderColor: 'border',
-                  py: 1,
-                  justifySelf: "center",
-                  justifyContent: "center",
-                  mx: [1, 4],
-                  pr: 1,
-                  width: 0.8,
-
-                  display: "flex",
-
-                  mb: [0, 3]
-                }}
-                isInteractive={true}
-                handleClick={e => this.props.goToSection(governanceRoute, false)}
-
-              >
-                <Flex
-                  px={2}
-                  py={1}
-                  alignItems={"center"}
-                  flexDirection={"row"}
-
-                  onMouseEnter={e => this.setState({ isHover: true })}
-                  onMouseLeave={e => this.setState({ isHover: false })}
-
-                >
-
-                  <HoverImage
-                    hoverOn={this.state.isHover}
-                    hover={'images/sidebar/switchHover.svg'}
-                    noHover={'images/sidebar/switch.svg'}
-                    imageProps={
-                      {
-                        mr: 2,
-                        width: "16px",
-                        height: "16px",
-                        display: "inline-flex"
-
-                      }
-                    }
-                  />
-                  <Text color={"text"} fontSize={1} fontWeight={400}>
-                    Switch to Governance
-                </Text>
-
-                </Flex>
-              </DashboardCard>
-            </Flex>
-
-          ) : (
-              this.props.isGovernance && (
-                <DashboardCard
-                  {...this.props}
-                  cardProps={{
-                    border: 1,
-                    boxShadow: 0,
-                    borderRadius: 1,
-                    borderColor: 'border',
-                    py: 1,
-                    mx: [1, 4],
-                    width: 0.8,
-
-                    display: "flex",
-
-                    mb: [0, 3]
+                <HoverImage
+                  hoverOn={this.state.isHover}
+                  noHover={'images/sidebar/switch.svg'}
+                  hover={'images/sidebar/switchHover.svg'}
+                  imageProps={{
+                    mr: 2,
+                    width: "16px",
+                    height: "16px",
+                    display: "inline-flex"
                   }}
-                  isInteractive={true}
-                  handleClick={e => this.props.goToSection(dashboardRoute, false)}
-
+                />
+                <Text
+                  fontSize={1}
+                  color={"text"}
+                  fontWeight={500}
                 >
-                  <Flex
-                    px={2}
-                    py={1}
-                    alignItems={"center"}
-                    flexDirection={"row"}
-                    justifyContent={"center"}
-                    onMouseEnter={e => this.setState({ isHover: true })}
-                    onMouseLeave={e => this.setState({ isHover: false })}
-                  >
-
-                    <HoverImage
-                      hoverOn={this.state.isHover}
-                      hover={'images/sidebar/switchHover.svg'}
-                      noHover={'images/sidebar/switch.svg'}
-                      imageProps={
-                        {
-                          mr: 2,
-                          width: "16px",
-                          height: "16px",
-                          display: "inline-flex"
-
-                        }
-                      }
-                    />
-                    <Text color={"text"} fontSize={1} fontWeight={400}>
-                      Switch to Dashboard
+                  Switch to {this.props.isDashboard ? 'Governance' : 'Dashboard'}
                 </Text>
-
-                  </Flex>
-                </DashboardCard>
-              )
-            )}
+              </Flex>
+            </DashboardCard>
+          </Flex>
         </Flex>
         {
           this.props.isMobile && (
             <Flex
               mb={3}
-              width={'100%'}
+              width={'82%'}
+              alignSelf={'center'}
               alignItems={'stretch'}
               flexDirection={'column'}
               justifyContent={'space-between'}

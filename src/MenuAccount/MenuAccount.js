@@ -3,8 +3,7 @@ import HoverImage from "../HoverImage/HoverImage"
 import RoundButton from "../RoundButton/RoundButton";
 import FunctionsUtil from "../utilities/FunctionsUtil";
 import ShortHash from "../utilities/components/ShortHash";
-import { Flex, Icon, Image, Text } from "rimble-ui";
-import DashboardCard from "../DashboardCard/DashboardCard";
+import { Flex, Icon, Image, Text, Link } from "rimble-ui";
 import Notifications from "../Notifications/Notifications";
 import AccountModal from "../utilities/components/AccountModal";
 import NetworkIndicator from "../NetworkIndicator/NetworkIndicator";
@@ -122,33 +121,36 @@ class MenuAccount extends Component {
     const connectorInfo = walletProvider ? this.functionsUtil.getGlobalConfig(["connectors", walletProvider.toLowerCase()]) : null;
     const walletIcon = connectorInfo && connectorInfo.icon ? connectorInfo.icon : walletProvider ? `${walletProvider.toLowerCase()}.svg` : null;
 
-
-
     return this.props.account ? (
       <Flex
-        bg={"cardBg"}
         width={1}
-        mr={6}
+        mr={[0,5]}
+        bg={"cardBg"}
         flexDirection={["column", "row"]}
         alignItems={["flex-start", "center"]}
       >
         <Flex
-          mb={[2, 0]}
+          px={[2,0]}
           flexDirection={"row"}
           alignItems={"center"}
           width={[1, "fit-content"]}
           justifyContent={"space-between"}
         >
-          {this.props.isMobile && (
-            <Flex ml={1} mr={2}>
-              <Icon
-                size={"2.4em"}
-                color={"copyColor"}
-                onClick={this.props.toggleMenu}
-                name={this.props.menuOpened ? "Close" : "Menu"}
-              />
-            </Flex>
-          )}
+          {
+            this.props.isMobile && (
+              <Flex
+                ml={1}
+                mr={2}
+              >
+                <Icon
+                  size={"2.4em"}
+                  color={"copyColor"}
+                  onClick={this.props.toggleMenu}
+                  name={this.props.menuOpened ? "Close" : "Menu"}
+                />
+              </Flex>
+            )
+          }
           {
             !this.props.isMobile && (
               <Flex
@@ -165,59 +167,49 @@ class MenuAccount extends Component {
               </Flex>
             )
           }
-
-          {this.props.isMobile && (
-            <Flex
-
-              width={0.86}
-              justifyContent={"flex-end"}
-            >
-              <DashboardCard
-                {...this.props}
-                cardProps={{
-                  border: 0,
-                  boxShadow: 0,
-                  borderRadius: 0,
-                  py: 1,
-                  px: [1, 2],
-                  mr: 1,
-                  display: "flex",
-                  width: [1, "auto"],
-                  backgroundColor: "cardBg"
-                }}
-                isInteractive={true}
-                handleClick={e => this.toggleModal("account")}
+          {
+            this.props.isMobile && (
+              <Flex
+                width={0.86}
+                justifyContent={"flex-end"}
               >
-                <Flex
-                  p={0}
-                  width={1}
-                  alignItems={"center"}
-                  flexDirection={"row"}
-                  justifyContent={["center", "flex-start"]}
-
+                <Link
+                  style={{
+                    display:'flex',
+                    width:'inherit',
+                    textDecoration:'none'
+                  }}
+                  onClick={e => this.toggleModal("account")}
                 >
-                  {connectorInfo ? (
-                    <Image
-                      mr={[1, 2]}
-                      width={"2em"}
-                      height={"2em"}
-                      display={"inline-flex"}
-                      alt={walletProvider.toLowerCase()}
-                      src={`images/connectors/${walletIcon}`}
-                    />
-                  ) : (
+                  <Flex
+                    p={0}
+                    width={'100%'}
+                    alignItems={"center"}
+                    flexDirection={"row"}
+                    justifyContent={["center", "flex-start"]}
+                  >
+                  {
+                    connectorInfo ? (
+                      <Image
+                        mr={[1, 2]}
+                        width={"2em"}
+                        height={"2em"}
+                        display={"inline-flex"}
+                        alt={walletProvider.toLowerCase()}
+                        src={`images/connectors/${walletIcon}`}
+                      />
+                    ) : (
                       <Icon
                         mr={[1, 2]}
                         size={"2em"}
                         color={"copyColor"}
                         name={"AccountCircle"}
                       />
-                    )}
+                    )
+                  }
                   {
                     this.props.isMobile ? (
-
                       <Text
-
                         fontSize={2}
                         fontWeight={3}
                         color={"copyColor"}
@@ -230,297 +222,154 @@ class MenuAccount extends Component {
                       >
                         {this.props.account}
                       </Text>
-
                     ) : (
-                        <Flex borderRight={`1px solid ${this.props.theme.colors.divider}`}>
-                          <Flex mr={3}>
-                            <ShortHash
-                              fontSize={2}
-                              fontWeight={3}
-                              {...this.props}
-                              color={"copyColor"}
-                              hash={this.props.account}
-                            />
-                          </Flex>
-                        </Flex>
-                      )
-                  }
-                </Flex>
-              </DashboardCard>
-
-              <Notifications
-                flexProps={{ p: 2 }}
-                iconaProps={{ p: 1, size: "40px" }}
-                {...this.props} />
-            </Flex>
-          )
-          }
-        </Flex>
-        <Flex
-          pr={2}
-          ml={[0, 3]}
-          style={{
-            flex: "1 1 auto"
-          }}
-          width={[1, "auto"]}
-          alignItems={"center"}
-          flexDirection={"row"}
-          justifyContent={
-            "flex-end"
-          }
-        >
-          {!this.props.isMobile && (<Flex
-          >
-            <DashboardCard
-              {...this.props}
-              cardProps={{
-                border: 0,
-                boxShadow: 0,
-                borderRadius: 0,
-                py: 1,
-                px: [1, 2],
-                mr: 1,
-                display: "flex",
-                width: [1, "auto"],
-                backgroundColor: "cardBg"
-              }}
-              isInteractive={true}
-              handleClick={e => this.toggleModal("account")}
-            >
-              <Flex
-                p={0}
-                width={1}
-                alignItems={"center"}
-                flexDirection={"row"}
-                justifyContent={["center", "flex-start"]}
-
-              >
-                {connectorInfo ? (
-                  <Image
-                    mr={[1, 2]}
-                    width={"2em"}
-                    height={"2em"}
-                    display={"inline-flex"}
-                    alt={walletProvider.toLowerCase()}
-                    src={`images/connectors/${walletIcon}`}
-                  />
-                ) : (
-                    <Icon
-                      mr={[1, 2]}
-                      size={"2em"}
-                      color={"copyColor"}
-                      name={"AccountCircle"}
-                    />
-                  )}
-                {
-                  this.props.isMobile ? (
-
-                    <Text
-                      mr={2}
-                      fontSize={2}
-                      fontWeight={3}
-                      color={"copyColor"}
-
-                      style={{
-                        flex: '1',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis'
-                      }}
-                    >
-                      {this.props.account}
-                    </Text>
-
-                  ) : (
-                      <Flex borderRight={`1px solid ${this.props.theme.colors.divider}`}>
-                        <Flex mr={3}>
-                          <ShortHash
-                            fontSize={2}
-                            fontWeight={3}
-                            {...this.props}
-                            color={"copyColor"}
-                            hash={this.props.account}
-                          />
-                        </Flex>
+                      <Flex
+                        pr={3}
+                        borderRight={`1px solid ${this.props.theme.colors.divider}`}
+                      >
+                        <ShortHash
+                          fontSize={2}
+                          fontWeight={3}
+                          {...this.props}
+                          color={"copyColor"}
+                          hash={this.props.account}
+                        />
                       </Flex>
                     )
-                }
-              </Flex>
-            </DashboardCard>
-          </Flex>)}
-          {!this.props.isMobile && (
-            <DashboardCard
-              {...this.props}
-              cardProps={{
-                border: 0,
-                boxShadow: 0,
-                borderRadius: 0,
-                py: 1,
-                px: [1, 2],
-                mr: [2, 0],
-                display: "flex",
-                width: [1, "auto"],
-                backgroundColor: "carddBg"
-              }}
-              isInteractive={true}
-              handleClick={e => this.props.setGovModal(true)}
-            >
-              <Flex
-                p={0}
-                width={1}
-                alignItems={"center"}
-                flexDirection={"row"}
-                justifyContent={["center", "flex-start"]}
-              >
-                <Image
-                  mr={1}
-                  width={"1.7em"}
-                  height={"1.7em"}
-                  display={"inline-flex"}
-                  src={`images/tokens/IDLE.svg`}
+                  }
+                  </Flex>
+                </Link>
+                <Notifications
+                  flexProps={{ p: 2 }}
+                  iconProps={{ p: 1, size: "2.5em" }}
+                  {...this.props}
                 />
-
-
-                {this.state.idleTokenBalance && (
-                  <Text color={"copyColor"} fontSize={[1, 2]} fontWeight={500}>
-                    {this.state.idleTokenBalance.toFixed(2)} IDLE
-                </Text>)
-                }
               </Flex>
-            </DashboardCard>
-          )
+            )
           }
-
-          <Flex
-
-            alignItems={"center"}
-            flexDirection={"row"}
-            justifyContent={"flex-end"}
-          >
-            {/*governanceEnabled && this.props.isDashboard ? (
-              <RoundButton
-                buttonProps={{
-                  mainColor: "redeem",
-                  style: {
-                    width: "auto",
-                    height: this.props.isMobile ? "38px" : "45px"
-                  },
-                  size: this.props.isMobile ? "small" : "medium"
+        </Flex>
+        {
+          !this.props.isMobile && (
+            <Flex
+              pr={[2,0]}
+              style={{
+                flex: "1 1 auto"
+              }}
+              width={[1, "auto"]}
+              alignItems={"center"}
+              flexDirection={"row"}
+              justifyContent={"flex-end"}
+            >
+              <Link
+                mr={3}
+                style={{
+                  textDecoration:'none'
                 }}
-                handleClick={e => {
-                  this.props.goToSection(governanceRoute, false);
-                }}
+                onClick={e => this.toggleModal("account")}
               >
-                <Flex alignItems={"center"} flexDirection={"row"}>
-                  <Icon
-                    mr={[1, 2]}
-                    size={"1.6em"}
-                    color={"white"}
-                    name={"ExitToApp"}
-                  />
-                  <Text fontWeight={3} color={"white"} fontSize={[2, 3]}>
-                    Governance
-                  </Text>
-                </Flex>
-              </RoundButton>
-            ) : (
-                this.props.isGovernance && (
-                  <RoundButton
-                    buttonProps={{
-                      mainColor: "redeem",
-                      style: {
-                        width: "auto",
-                        height: this.props.isMobile ? "38px" : "45px"
-                      },
-                      size: this.props.isMobile ? "small" : "medium"
-                    }}
-                    handleClick={e => {
-                      this.props.goToSection(dashboardRoute, false);
-                    }}
-                  >
-                    <Flex alignItems={"center"} flexDirection={"row"}>
+                <Flex
+                  p={0}
+                  width={1}
+                  alignItems={"center"}
+                  flexDirection={"row"}
+                  justifyContent={["center", "flex-start"]}
+                >
+                  {
+                    connectorInfo ? (
+                      <Image
+                        mr={[1, 2]}
+                        width={"2em"}
+                        height={"2em"}
+                        display={"inline-flex"}
+                        alt={walletProvider.toLowerCase()}
+                        src={`images/connectors/${walletIcon}`}
+                      />
+                    ) : (
                       <Icon
                         mr={[1, 2]}
-                        size={"1.6em"}
-                        color={"white"}
-                        name={"ExitToApp"}
+                        size={"2em"}
+                        color={"copyColor"}
+                        name={"AccountCircle"}
                       />
-                      <Text fontWeight={3} color={"white"} fontSize={[2, 3]}>
-                        Dashboard
-                    </Text>
-                    </Flex>
-                  </RoundButton>
-                )
-              )*/}
-            {/*<RoundButton
-              {...this.props}
-              buttonProps={{
-                px: 0,
-                width: "45px",
+                    )
+                  }
+                  {
+                    this.props.isMobile ? (
+                      <Text
+                        mr={2}
+                        fontSize={2}
+                        fontWeight={3}
+                        color={"copyColor"}
 
-                mainColor: "white",
-                style: {
-                  display: "flex",
-
-                  justifyContent: "flex-start"
-                }
-              }}
-              handleClick={this.props.account ? e => this.logout() : this.props.connectAndValidateAccount}
-            >
-              <Flex
-                width={1}
-                alignItems={"center"}
-                justifyContent={"flex-start"}
+                        style={{
+                          flex: '1',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}
+                      >
+                        {this.props.account}
+                      </Text>
+                    ) : (
+                      <Flex
+                        pr={3}
+                        borderRight={`1px solid ${this.props.theme.colors.divider}`}
+                      >
+                        <ShortHash
+                          fontSize={2}
+                          fontWeight={3}
+                          {...this.props}
+                          color={"copyColor"}
+                          hash={this.props.account}
+                        />
+                      </Flex>
+                    )
+                  }
+                </Flex>
+              </Link>
+              <Link
+                style={{
+                  textDecoration:'none'
+                }}
+                onClick={e => this.props.setGovModal(true)}
               >
-                <Icon
-                  mx={2}
-                  size={"1em"}
-                  color={"grey"}
-                  align={"center"}
-                  name={"ExitToApp"}
-                />
-              </Flex>
-            </RoundButton>*/}
-            {
-              /*<ImageButton
-                buttonProps={{
-                  height: 2,
-                  py: 0,
-                  px: 0,
-                  mx: 0,
-                  my: 0,
-                  border: 0,
-                  boxShadow: 0
-                }}
-
-                width={1}
-                imageSrc={'images/logout.svg'}
-                isMobile={this.props.isMobile}
-                // subcaption={'stake LP Tokens'}
-                imageProps={{
-                  height: "20px"
-                }}
-                isActive={false}
-                handleClick={this.props.account ? e => this.logout() : this.props.connectAndValidateAccount}
-              />*/}
-            {
-
-              !this.props.isMobile && (
-                <DashboardCard
-                  {...this.props}
-                  cardProps={{
-                    border: 0,
-                    boxShadow: 0,
-                    borderRadius: 0,
-                    py: 0,
-                    px: 0,
-                    mr: 0,
-                    display: "flex",
-                    width: 1,
-                    backgroundColor: "dashbboardBg"
+                <Flex
+                  p={0}
+                  width={1}
+                  alignItems={"center"}
+                  flexDirection={"row"}
+                  justifyContent={["center", "flex-start"]}
+                >
+                  <Image
+                    mr={2}
+                    width={"1.7em"}
+                    height={"1.7em"}
+                    display={"inline-flex"}
+                    src={`images/tokens/IDLE.svg`}
+                  />
+                  {
+                    this.state.idleTokenBalance && (
+                      <Text
+                        fontWeight={3}
+                        fontSize={[1, 2]}
+                        color={"copyColor"}
+                      >
+                        {this.state.idleTokenBalance.toFixed(2)} IDLE
+                      </Text>
+                    )
+                  }
+                </Flex>
+              </Link>
+              <Flex
+                ml={3}
+                alignItems={"center"}
+                flexDirection={"row"}
+                justifyContent={"flex-end"}
+              >
+                <Link
+                  style={{
+                    textDecoration:'none'
                   }}
-                  isInteractive={true}
-                  isActive={true}
-                  handleClick={this.props.account ? e => this.logout() : this.props.connectAndValidateAccount}
+                  onClick={this.props.account ? e => this.logout() : this.props.connectAndValidateAccount}
                 >
                   <Flex
                     p={0}
@@ -531,41 +380,32 @@ class MenuAccount extends Component {
                     onMouseEnter={e => this.setState({ isHover: true })}
                     onMouseLeave={e => this.setState({ isHover: false })}
                   >
-
                     <HoverImage
                       hoverOn={this.state.isHover}
-                      hover={'images/logoutHover.svg'}
                       noHover={'images/logout.svg'}
-                      imageProps={
-                        {
-
-                          mx: 2,
-                          width: "24px",
-                          height: "24px",
-                          display: "inline-flex"
-
-                        }
-                      }
+                      hover={'images/logoutHover.svg'}
+                      imageProps={{
+                        mx: 2,
+                        width: "24px",
+                        height: "24px",
+                        display: "inline-flex"
+                      }}
                     />
                   </Flex>
-                </DashboardCard>
-              )
-            }
-
-            {!this.props.isMobile && (
-              <Notifications
-                {...this.props}
-                iconaProps={{
-                  size: "1.8em"
-                }
-                }
-                flexProps={{
-                  ml: 2
-                }}
-              />
-            )}
-          </Flex>
-        </Flex>
+                </Link>
+                <Notifications
+                  {...this.props}
+                  iconProps={{
+                    size: "2.1em"
+                  }}
+                  flexProps={{
+                    ml: 2
+                  }}
+                />
+              </Flex>
+            </Flex>
+          )
+        }
         <AccountModal
           {...this.props}
           isOpen={this.state.isModalOpen === "account"}
@@ -573,113 +413,103 @@ class MenuAccount extends Component {
         />
       </Flex>
     ) : (
-        <Flex width={1} px={2}>
-          <Flex
-
-            width={1}
-
-            alignItems={"center"}
-            justifyContent={["flex-start", "flex-end"]}
-            style={{ justifyContent: "flex-start" }}
-          >
-            {this.props.isMobile && (
-              <Flex mr={2}>
-                <Icon
-                  size={"2.4em"}
-                  color={"copyColor"}
-                  onClick={this.props.toggleMenu}
-                  name={this.props.menuOpened ? "Close" : "Menu"}
-                />
-              </Flex>
-            )}
-            {
-              !this.props.isMobile && (
-                <Flex
-                  width={1}
-                  justifyContent={['space-between', 'flex-start']}
-                >
-                  <NetworkIndicator
-                    innerProps={{
-                      px: 1,
-                      py: 0,
-                      width: ['100%', 'auto'],
-                      height: ['45px', '54px']
-                    }}
-                    {...this.props}
-                  />
-                </Flex>
-              )
-            }
-          </Flex>
-          <Flex
-            width={1}
-            alignItems={["center"]}
-            flexDirection={"row"}
-            justifyContent={"flex-end"}
-            style={this.props.isMobile && ({ justifyContent: "flex-end" })}
-
-          >
-            {<RoundButton
-              {...this.props}
-              buttonProps={{
-                boxShadow: "null",
-
-
-                style: {
-                  display: "flex",
-                  justifyContent: "flex-start"
-                }
-              }}
-              handleClick={this.props.account ? e => this.logout() : this.props.connectAndValidateAccount}
-            >
-              <Flex
-                mr={2}
-                width={1}
-                alignItems={"center"}
-                justifyContent={"flex-start"}
-              >
-
-                <Image
-
-                  align={"center"}
-                  height={["1.5em", "1em"]}
-                  mr={[2, 3]}
-                  ml={0}
-                  pl={0}
-                  src={"images/sidebar/plug_white.svg"}
-                />
-
-
-                <Text
-                  pr={1}
-                  mr={2}
-                  fontWeight={3}
-                  color={"white"}
-                  fontSize={[2]}
-                  alignContent={"center"}
-                  justifyContent={"center"}
-                >
-                  Connect to Idle
-                  </Text>
-
-              </Flex>
-            </RoundButton>}
-            {
-              <Notifications
-                {...this.props}
-                iconaProps={{
-                  size: "2.2em"
-                }
-                }
-                flexProps={{
-                  ml: 2
-                }}
+      <Flex
+        px={2}
+        width={1}
+        mr={[0,5]}
+      >
+        <Flex
+          width={1}
+          alignItems={"center"}
+          style={{ justifyContent: "flex-start" }}
+          justifyContent={["flex-start", "flex-end"]}
+        >
+          {this.props.isMobile && (
+            <Flex mr={2}>
+              <Icon
+                size={"2.4em"}
+                color={"copyColor"}
+                onClick={this.props.toggleMenu}
+                name={this.props.menuOpened ? "Close" : "Menu"}
               />
-            }
-          </Flex>
-
-        </Flex >
-      );
+            </Flex>
+          )}
+          {
+            !this.props.isMobile && (
+              <Flex
+                width={1}
+                justifyContent={['space-between', 'flex-start']}
+              >
+                <NetworkIndicator
+                  innerProps={{
+                    px: 1,
+                    py: 0,
+                    width: ['100%', 'auto'],
+                    height: ['45px', '54px']
+                  }}
+                  {...this.props}
+                />
+              </Flex>
+            )
+          }
+        </Flex>
+        <Flex
+          width={1}
+          flexDirection={"row"}
+          alignItems={["center"]}
+          justifyContent={"flex-end"}
+        >
+          <RoundButton
+            {...this.props}
+            buttonProps={{
+              width:'auto',
+              boxShadow: "none",
+              style: {
+                display: "flex",
+                justifyContent: "flex-start"
+              }
+            }}
+            handleClick={this.props.account ? e => this.logout() : this.props.connectAndValidateAccount}
+          >
+            <Flex
+              mr={2}
+              width={1}
+              alignItems={"center"}
+              justifyContent={"flex-start"}
+            >
+              <Image
+                ml={0}
+                pl={0}
+                mr={[2, 3]}
+                align={"center"}
+                height={"1.4em"}
+                src={"images/sidebar/plug_white.svg"}
+              />
+              <Text
+                pr={1}
+                mr={2}
+                fontWeight={3}
+                color={"white"}
+                fontSize={[2]}
+                alignContent={"center"}
+                justifyContent={"center"}
+              >
+                Connect to Idle
+              </Text>
+            </Flex>
+          </RoundButton>
+          <Notifications
+            {...this.props}
+            iconProps={{
+              size: "2.2em"
+            }}
+            flexProps={{
+              ml: 2
+            }}
+          />
+        </Flex>
+      </Flex >
+    );
   }
 }
 

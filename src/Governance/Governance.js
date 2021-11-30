@@ -14,6 +14,7 @@ import Swipeable from '../utilities/components/Swipeable';
 import DashboardCard from "../DashboardCard/DashboardCard";
 import TooltipModal from "../utilities/components/TooltipModal";
 import DashboardHeader from "../DashboardHeader/DashboardHeader";
+import DelegateVesting from "../DelegateVesting/DelegateVesting";
 
 class Dashboard extends Component {
   state = {
@@ -438,8 +439,9 @@ class Dashboard extends Component {
   render() {
     const PageComponent = this.state.pageComponent ? this.state.pageComponent : null;
     const availableNetworks = this.functionsUtil.getGlobalConfig(['governance','availableNetworks']);
+    const networkInitialized = this.props.networkInitialized && this.props.network.current.id && this.props.network.required.id;
 
-    // console.log('governanceEnabled',this.state.governanceEnabled,PageComponent);
+    // console.log('networkInitialized',networkInitialized,this.props.network.current.id,this.props.network.required.id);
     if (!this.props.availableStrategies){
       return (
         <Flex
@@ -478,10 +480,9 @@ class Dashboard extends Component {
           height={'100vh'}
           position={'fixed'}
           flexDirection={'row'}
+          backgroundColor={'dashboardBg'}
           className={this.props.themeMode}
-          backgroundColor={['dashboardBg','white']}
           width={this.props.isMobile && this.state.menuOpened ? '180vw' : '100vw'}
-          /*onClick={ e => this.propagateClickEvent(e) }*/
         >
           {
             (!this.props.isMobile || this.state.menuOpened) && (
@@ -505,167 +506,195 @@ class Dashboard extends Component {
                     {...this.props}
                     menu={this.state.menu}
                     closeMenu={e => this.setMenu(false)}
+                    goToSection={this.goToSection.bind(this)}
                   />
                 </Card>
               </Flex>
             )
           }
           <Flex
-            py={3}
-            mb={0}
-            px={[3,5]}
-            style={{
-              overflowY:'scroll',
-              overflowX:'hidden'
-            }}
-            width={['100vw',5/6]}
-            flexDirection={'column'}
-            height={['100vh','auto']}
-            backgroundColor={'dashboardBg'}
+            flexDirection={"column"}
+            width={['100vw', 5 / 6]}
           >
             <DashboardHeader
               menuOpened={this.state.menuOpened}
               clickEvent={this.state.clickEvent}
               toggleMenu={this.toggleMenu.bind(this)}
               goToSection={this.goToSection.bind(this)}
-              governanceEnabled={this.state.governanceEnabled}
               {...this.props}
             />
-            {
-              !this.props.accountInizialized || !this.props.contractsInitialized || !this.state.governanceEnabled || !PageComponent ? (
-                <Flex
-                  width={1}
-                  minHeight={"55vh"}
-                  alignItems={"center"}
-                  flexDirection={"column"}
-                  justifyContent={"center"}
-                >
-                  {
-                    !this.props.network.isCorrectNetwork ? (
-                      <DashboardCard
-                        cardProps={{
-                          p: 3,
-                          mt: 3,
-                          width: [1, 0.35]
-                        }}
-                      >
-                        <Flex alignItems={"center"} flexDirection={"column"}>
-                          <Icon size={"2.3em"} name={"Warning"} color={"cellText"} />
-                          <Text
-                            mt={2}
-                            fontSize={2}
-                            color={"cellText"}
-                            textAlign={"center"}
+            <Flex
+              py={3}
+              mb={0}
+              width={1}
+              px={[3,5]}
+              style={{
+                overflowY:'scroll',
+                overflowX:'hidden'
+              }}
+              flexDirection={'column'}
+              minHeight={['92vh','auto']}
+              backgroundColor={'dashboardBg'}
+            >
+              {
+                this.state.governanceEnabled && this.props.accountInizialized && this.props.networkInitialized && this.props.web3 && (
+                  <DelegateVesting
+                    {...this.props}
+                  />
+                )
+              }
+              {
+                !networkInitialized || !this.props.accountInizialized || !this.props.contractsInitialized || !this.state.governanceEnabled || !PageComponent ? (
+                  <Flex
+                    width={1}
+                    minHeight={"55vh"}
+                    alignItems={"center"}
+                    flexDirection={"column"}
+                    justifyContent={"center"}
+                  >
+                    {
+                      networkInitialized && !this.props.network.isCorrectNetwork ? (
+                        <DashboardCard
+                          cardProps={{
+                            p: 3,
+                            mt: 3,
+                            width: [1, 0.35]
+                          }}
+                        >
+                          <Flex
+                            alignItems={'center'}
+                            flexDirection={'column'}
                           >
-                            The{" "}
-                            <strong>
-                              {this.functionsUtil.capitalize(
-                                this.props.network.current.name
-                              )}{" "}
-                              Network
-                          </strong>{" "}
-                            is not supported, please switch to the correct network.
-                        </Text>
-                        </Flex>
-                      </DashboardCard>
-                    ) : !this.state.governanceEnabled ? (
-                      <DashboardCard
-                        cardProps={{
-                          p: 3,
-                          mt: 3,
-                          width: [1, 0.35]
-                        }}
-                      >
-                        <Flex alignItems={"center"} flexDirection={"column"}>
-                          <Icon size={"2.3em"} name={"Warning"} color={"cellText"} />
-                          <Text
-                            mt={2}
-                            fontSize={2}
-                            color={"cellText"}
-                            textAlign={"center"}
+                            <Icon
+                              size={'2.3em'}
+                              name={'Warning'}
+                              color={'cellText'}
+                            />
+                            <Text
+                              mt={2}
+                              fontSize={2}
+                              color={'cellText'}
+                              textAlign={'center'}
+                            >
+                              You should be on the <strong>{this.functionsUtil.capitalize(this.props.network.required.name)} network</strong>. You are currently connected to the <strong>{this.functionsUtil.capitalize(this.props.network.current.name)} network</strong>, please switch to the correct network.
+                            </Text>
+                            <RoundButton
+                              buttonProps={{
+                                mt:3,
+                                width:[1,1/2]
+                              }}
+                              handleClick={e => this.functionsUtil.addEthereumChain(this.props.network.required.id)}
+                            >
+                              Switch Network
+                            </RoundButton>
+                          </Flex>
+                        </DashboardCard>
+                      ) : networkInitialized && !this.state.governanceEnabled ? (
+                        <DashboardCard
+                          cardProps={{
+                            p: 3,
+                            mt: 3,
+                            width: [1, 0.35]
+                          }}
+                        >
+                          <Flex alignItems={"center"} flexDirection={"column"}>
+                            <Icon size={"2.3em"} name={"Warning"} color={"cellText"} />
+                            <Text
+                              mt={2}
+                              fontSize={2}
+                              color={"cellText"}
+                              textAlign={"center"}
+                            >
+                              Governance is not enabled for <strong>{this.functionsUtil.capitalize(this.props.network.required.name)} Network</strong>, please switch to <strong>{this.functionsUtil.getGlobalConfig(['network','availableNetworks',availableNetworks[0],'name'])} Network</strong>.
+                            </Text>
+                            <RoundButton
+                              buttonProps={{
+                                mt:3,
+                                width:[1,1/2]
+                              }}
+                              handleClick={e => this.props.setRequiredNetwork(availableNetworks[0])}
+                            >
+                              Switch Network
+                            </RoundButton>
+                          </Flex>
+                        </DashboardCard>
+                      ) : !this.state.showResetButton ? (
+                        <FlexLoader
+                          textProps={{
+                            textSize: 4,
+                            fontWeight: 2
+                          }}
+                          loaderProps={{
+                            mb: 3,
+                            size: "40px"
+                          }}
+                          flexProps={{
+                            my: 3,
+                            flexDirection: "column"
+                          }}
+                          text={!this.props.networkInitialized ? 'Loading network...' : !this.props.accountInizialized ? "Loading account..." : !this.props.contractsInitialized ? "Loading contracts..." : "Loading governance..."}
+                        />
+                      ) : (
+                        <DashboardCard
+                          cardProps={{
+                            p: 3,
+                            mt: 3,
+                            width: [1, 0.35]
+                          }}
+                        >
+                          <Flex
+                            alignItems={"center"}
+                            flexDirection={"column"}
                           >
-                            Governance is not enabled for <strong>{this.functionsUtil.capitalize(this.props.network.current.name)} Network</strong>, please switch to <strong>{this.functionsUtil.getGlobalConfig(['network','availableNetworks',availableNetworks[0],'name'])} Network</strong>.
-                          </Text>
-                          <RoundButton
-                            buttonProps={{
-                              mt:3,
-                              width:[1,1/2]
-                            }}
-                            handleClick={e => this.props.setRequiredNetwork(availableNetworks[0])}
-                          >
-                            Switch Network
-                          </RoundButton>
-                        </Flex>
-                      </DashboardCard>
-                    ) : !this.state.showResetButton ? (
-                      <FlexLoader
-                        textProps={{
-                          textSize: 4,
-                          fontWeight: 2
-                        }}
-                        loaderProps={{
-                          mb: 3,
-                          size: "40px"
-                        }}
-                        flexProps={{
-                          my: 3,
-                          flexDirection: "column"
-                        }}
-                        text={!this.props.accountInizialized ? "Loading account..." : !this.props.contractsInitialized ? "Loading contracts..." : "Loading governance..."}
-                      />
-                    ) : (
-                      <DashboardCard
-                        cardProps={{
-                          p: 3,
-                          mt: 3,
-                          width: [1, 0.35]
-                        }}
-                      >
-                        <Flex alignItems={"center"} flexDirection={"column"}>
-                          <Icon size={"2.3em"} name={"Warning"} color={"cellText"} />
-                          <Text
-                            mt={2}
-                            fontSize={2}
-                            color={"cellText"}
-                            textAlign={"center"}
-                          >
-                            Idle can't connect to your wallet!<br />
-                            Make sure that your wallet is unlocked and try again.
-                          </Text>
-                          <RoundButton
-                            buttonProps={{
-                              mt: 3,
-                              width: [1, 1 / 2]
-                            }}
-                            handleClick={this.logout.bind(this)}
-                          >
-                            Logout
-                          </RoundButton>
-                        </Flex>
-                      </DashboardCard>
-                    )
-                  }
-                </Flex>
-              ) : PageComponent && (
-                <PageComponent
-                  {...this.props}
-                  votes={this.state.votes}
-                  balance={this.state.balance}
-                  urlParams={this.state.params}
-                  blockNumber={this.state.blockNumber}
-                  votingPeriod={this.state.votingPeriod}
-                  loadUserData={this.loadData.bind(this)}
-                  timelockDelay={this.state.timelockDelay}
-                  goToSection={this.goToSection.bind(this)}
-                  currentDelegate={this.state.currentDelegate}
-                  selectedSection={this.state.selectedSection}
-                  proposalThreshold={this.state.proposalThreshold}
-                  selectedSubsection={this.state.selectedSubsection}
-                  openTooltipModal={this.openTooltipModal.bind(this)}
-                  proposalMaxOperations={this.state.proposalMaxOperations}
-                />
-              )
-            }
+                            <Icon
+                              size={"2.3em"}
+                              name={"Warning"}
+                              color={"cellText"}
+                            />
+                            <Text
+                              mt={2}
+                              fontSize={2}
+                              color={"cellText"}
+                              textAlign={"center"}
+                            >
+                              Idle can't connect to your wallet!<br />
+                              Make sure that your wallet is unlocked and try again.
+                            </Text>
+                            <RoundButton
+                              buttonProps={{
+                                mt: 3,
+                                width: [1, 1 / 2]
+                              }}
+                              handleClick={this.logout.bind(this)}
+                            >
+                              Logout
+                            </RoundButton>
+                          </Flex>
+                        </DashboardCard>
+                      )
+                    }
+                  </Flex>
+                ) : PageComponent && (
+                  <PageComponent
+                    {...this.props}
+                    votes={this.state.votes}
+                    balance={this.state.balance}
+                    urlParams={this.state.params}
+                    blockNumber={this.state.blockNumber}
+                    votingPeriod={this.state.votingPeriod}
+                    loadUserData={this.loadData.bind(this)}
+                    timelockDelay={this.state.timelockDelay}
+                    goToSection={this.goToSection.bind(this)}
+                    currentDelegate={this.state.currentDelegate}
+                    selectedSection={this.state.selectedSection}
+                    proposalThreshold={this.state.proposalThreshold}
+                    selectedSubsection={this.state.selectedSubsection}
+                    openTooltipModal={this.openTooltipModal.bind(this)}
+                    proposalMaxOperations={this.state.proposalMaxOperations}
+                  />
+                )
+              }
+            </Flex>
           </Flex>
           <TooltipModal
             closeModal={this.resetModal}

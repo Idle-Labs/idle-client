@@ -33,17 +33,17 @@ class DashboardCard extends Component {
       backgroundColor: 'cardBg'
     };
 
-    if (isActive || (isInteractive && this.state.mouseOver)) {
-      cardProps.border = 2;
-      cardProps.boxShadow = null;
-      cardProps.backgroundColor = 'cardBgHover';
-    }
-
     // Replace props
     if (this.props.cardProps && Object.keys(this.props.cardProps).length) {
       Object.keys(this.props.cardProps).forEach(p => {
         cardProps[p] = this.props.cardProps[p];
       });
+    }
+
+    if (isActive || (isInteractive && this.state.mouseOver)) {
+      cardProps.border = 2;
+      cardProps.boxShadow = null;
+      cardProps.backgroundColor = 'cardBgHover';
     }
 
     const className = [
