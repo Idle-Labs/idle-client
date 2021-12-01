@@ -65,6 +65,43 @@ class GovernanceUtil {
     return null;
   }
 
+  getVestedAmount = async (account=null) => {
+    let vestedAmount = this.functionsUtil.BNify(0);
+    account = account ? account : this.props.account;
+    const founderVesting = await this.getVestingContract(account);
+    if (founderVesting){
+      const governanceTokenName = this.functionsUtil.getGlobalConfig(['governance','props','tokenName']);
+      const governanceTokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',governanceTokenName]);
+      let [
+        vestingEnd,
+        lastUpdate,
+        vestingBegin,
+        vestingAmount,
+      ] = await Promise.all([
+        this.functionsUtil.genericContractCall('VestingContract','vestingEnd'),
+        this.functionsUtil.genericContractCall('VestingContract','lastUpdate'),
+        this.functionsUtil.genericContractCall('VestingContract','vestingBegin'),
+        this.functionsUtil.genericContractCall('VestingContract','vestingAmount')
+      ]);
+
+      if (vestingAmount && vestingBegin && vestingEnd && lastUpdate){
+        vestingEnd = this.functionsUtil.BNify(vestingEnd);
+        lastUpdate = this.functionsUtil.BNify(lastUpdate);
+        vestingBegin = this.functionsUtil.BNify(vestingBegin);
+        vestingAmount = this.functionsUtil.BNify(vestingAmount);
+        const blockTimestamp = this.functionsUtil.BNify(parseInt(Date.now()/1000));
+
+        if (blockTimestamp.gt(vestingEnd)) {
+          vestedAmount = await this.functionsUtil.getContractBalance(governanceTokenName,account);
+        } else {
+          vestedAmount = vestingAmount.times(blockTimestamp.minus(this.functionsUtil.BNify(lastUpdate))).div(vestingEnd.minus(vestingBegin));
+        }
+        vestedAmount = this.functionsUtil.fixTokenDecimals(vestedAmount,governanceTokenConfig.decimals);
+      }
+    }
+    return vestedAmount;
+  }
+
   getVestingContract = async (account=null) => {
     account = account ? account : this.props.account;
     const vestingContract = await this.functionsUtil.genericContractCall('VesterFactory','vestingContracts',[account]);

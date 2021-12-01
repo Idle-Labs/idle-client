@@ -12,6 +12,7 @@ class DelegateVesting extends Component {
     },
     newDelegate:'',
     delegatee:null,
+    vestedAmount:null,
     vestingAmount:null,
     currentDelegate:null,
     delegateAddressValid:false,
@@ -50,11 +51,13 @@ class DelegateVesting extends Component {
 
       // Init flags
       let delegatee = null;
+      let vestedAmount = null;
       let vestingAmount = null;
       let vestingContractDelegated = false;
 
       if (vestingContract){
-        // Take vesting amount
+        // Take vesting and vested amount
+        vestedAmount = await this.governanceUtil.getVestedAmount(this.props.account);
         vestingAmount = await this.governanceUtil.getVestingAmount(this.props.account);
 
         // Check Vesting Contract Delegated
@@ -65,6 +68,7 @@ class DelegateVesting extends Component {
 
       return this.setState({
         delegatee,
+        vestedAmount,
         vestingAmount,
         currentDelegate,
         vestingContractDelegated
@@ -311,7 +315,7 @@ class DelegateVesting extends Component {
             color={'flashColor'}
             textAlign={'center'}
           >
-            You have {this.state.vestingAmount.div(1e18).toFixed(5)} {this.functionsUtil.getGlobalConfig(['governance','props','tokenName'])} in the Vesting Contract
+            You have {this.state.vestingAmount.div(1e18).toFixed(5)} {this.functionsUtil.getGlobalConfig(['governance','props','tokenName'])} in the Vesting Contract ({this.state.vestedAmount.toFixed(5)} IDLE vested).
           </Text>
           {
             (!this.state.processing || !this.state.processing.loading) && (
