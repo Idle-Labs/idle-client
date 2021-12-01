@@ -2720,12 +2720,10 @@ class FunctionsUtil {
     if (data)
       return data;
     else {
-      const result = axios({ config }
-      ).then((result) => {
-        console.log(result.data)
-        return result.data
-      });
+      let result= axios(config)
+
       return result
+      
     }
 
   }
@@ -2963,7 +2961,6 @@ class FunctionsUtil {
     }
   }
   getSnapshotProposals = async (activeOnly = false) => {
-
     const cachedDataKey = `snapshotProposals_${activeOnly}`;
     const cachedData = this.getCachedData(cachedDataKey);
     if (cachedData !== null) {
@@ -2972,28 +2969,33 @@ class FunctionsUtil {
 
     const whitelist = this.getGlobalConfig(['network', 'providers', 'snapshot', 'whitelist']).map(addr => addr.toLowerCase());
     const endpoint = this.getGlobalConfig(['network', 'providers', 'snapshot', 'endpoints', 'proposals']);
-
-    const query = this.getGlobalConfig(['network', 'providers', 'snapshot', 'queries', 'proposals']);
+    const query = activeOnly?(this.getGlobalConfig(['network', 'providers', 'snapshot', 'queries', 'proposalsActive'])):(this.getGlobalConfig(['network', 'providers', 'snapshot', 'queries', 'proposals']));
+    const headers = {
+  "content-type": "application/json",
+    "Authorization": "<token>"
+};
     const config = {
-      method: 'post',
-      url: `${endpoint}`,
-      data: {
-        query: `${query}`
-      }
+        url:endpoint,
+        method:`post`,
+        data:{
+                query: `${query}`,
+                
+              }
+      
     }
     console.log("Try")
     let proposals = await this.makeCachedRequest(endpoint, 1440, true, false, config);
     console.log("proposal", proposals)
     console.log("Fail")
+    proposals=proposals.data.proposals
 
     // console.log('getSnapshotProposals',proposals);
 
     if (proposals && !proposals.error) {
-
+   
       const currTime = parseInt(Date.now() / 1000);
 
 
-      // console.log(proposals);
 
       const validProposals = [];
       await this.asyncForEach(proposals, async (p) => {

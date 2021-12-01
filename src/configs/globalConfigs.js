@@ -1657,15 +1657,16 @@ const globalConfigs = {
             first: 20,
             skip: 0,
             where: {
-            space_in: ["idlefinance.eth"],
-            
+            space_in: ["idlefinance.eth"]
             },
             orderBy: "created",
             orderDirection: desc
             ) {
             id
             ipfs
-            strategies
+            strategies{
+              params
+            }
             title
             body
             choices
@@ -1686,14 +1687,15 @@ const globalConfigs = {
               skip: 0,
               where: {
               space_in: ["idlefinance.eth"],
-             
               },
               orderBy: "created",
               orderDirection: desc
               ) {
               id
               ipfs
-              strategies
+              strategies{
+                params
+              }
               title
               body
               choices
