@@ -1687,6 +1687,7 @@ const globalConfigs = {
               skip: 0,
               where: {
               space_in: ["idlefinance.eth"],
+              state:"active"
               },
               orderBy: "created",
               orderDirection: desc
