@@ -71,7 +71,7 @@ class DashboardMenu extends Component {
     if (!this.props.menu.length) {
       return null;
     }
-    
+
     const governanceConfig = this.functionsUtil.getGlobalConfig(['governance']);
     const governanceRoute = governanceConfig.baseRoute;
     const dashboardRoute = this.functionsUtil.getGlobalConfig(['dashboard', 'baseRoute']) + '/' + Object.keys(this.props.availableStrategies)[0];
@@ -113,65 +113,59 @@ class DashboardMenu extends Component {
             />
           </RouterLink>
         </Flex>
-        <Flex
+        <Box
           mb={3}
           pb={3}
           width={1}
-          justifyContent={"flex-start"}
+          justifyContent={"center"}
           borderBottom={`1px solid ${this.props.theme.colors.divider}`}
         >
-          <Flex
-            width={1}
-            flexDirection={"row"}
-            justifyContent={"center"}
+          <DashboardCard
+            {...this.props}
+            isInteractive={true}
+            cardProps={{
+              py: 1,
+              pr: 1,
+              mx: 'auto',
+              mb: [0, 3],
+              width: 0.8,
+              boxShadow: 0,
+              display: "flex",
+              borderRadius: 1,
+              justifySelf: "center",
+              justifyContent: "center",
+            }}
+            handleClick={e => this.props.isDashboard ? this.props.goToSection(governanceRoute, false) : this.props.goToSection(dashboardRoute, false) }
           >
-            <DashboardCard
-              {...this.props}
-              cardProps={{
-                py: 1,
-                pr: 1,
-                mx: [1, 4],
-                mb: [0, 3],
-                width: 0.8,
-                boxShadow: 0,
-                display: "flex",
-                borderRadius: 1,
-                justifySelf: "center",
-                justifyContent: "center",
-              }}
-              isInteractive={true}
-              handleClick={e => this.props.isDashboard ? this.props.goToSection(governanceRoute, false) : this.props.goToSection(dashboardRoute, false) }
+            <Flex
+              px={2}
+              py={1}
+              alignItems={"center"}
+              flexDirection={"row"}
+              onMouseEnter={e => this.setState({ isHover: true })}
+              onMouseLeave={e => this.setState({ isHover: false })}
             >
-              <Flex
-                px={2}
-                py={1}
-                alignItems={"center"}
-                flexDirection={"row"}
-                onMouseEnter={e => this.setState({ isHover: true })}
-                onMouseLeave={e => this.setState({ isHover: false })}
+              <HoverImage
+                hoverOn={this.state.isHover}
+                noHover={'images/sidebar/switch.svg'}
+                hover={'images/sidebar/switchHover.svg'}
+                imageProps={{
+                  mr: 2,
+                  width: "16px",
+                  height: "16px",
+                  display: "inline-flex"
+                }}
+              />
+              <Text
+                fontSize={1}
+                color={"text"}
+                fontWeight={500}
               >
-                <HoverImage
-                  hoverOn={this.state.isHover}
-                  noHover={'images/sidebar/switch.svg'}
-                  hover={'images/sidebar/switchHover.svg'}
-                  imageProps={{
-                    mr: 2,
-                    width: "16px",
-                    height: "16px",
-                    display: "inline-flex"
-                  }}
-                />
-                <Text
-                  fontSize={1}
-                  color={"text"}
-                  fontWeight={500}
-                >
-                  Switch to {this.props.isDashboard ? 'Governance' : 'Dashboard'}
-                </Text>
-              </Flex>
-            </DashboardCard>
-          </Flex>
-        </Flex>
+                Switch to {this.props.isDashboard ? 'Governance' : 'Dashboard'}
+              </Text>
+            </Flex>
+          </DashboardCard>
+        </Box>
         {
           this.props.isMobile && (
             <Flex

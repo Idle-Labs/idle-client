@@ -323,20 +323,20 @@ class IdleStaking extends Component {
     tokenUserBalance = this.functionsUtil.fixTokenDecimals(tokenUserBalance,this.props.contractInfo.decimals);
 
     const totalDeposited = totalSupply ? this.functionsUtil.fixTokenDecimals(totalSupply,this.props.tokenConfig.decimals) : this.functionsUtil.BNify(0);
-    const totalLockedFunds = totalSupply ? this.functionsUtil.formatMoney(totalDeposited,4)+' '+this.props.selectedToken : (this.state.stats.length ? this.state.stats[0] : this.functionsUtil.formatMoney(totalDeposited,4)+' '+this.props.selectedToken);
+    const totalLockedFunds = totalSupply ? this.functionsUtil.formatMoney(totalDeposited,4)+' '+this.props.selectedToken : (this.state.stats.length ? this.state.stats[0].value : this.functionsUtil.formatMoney(totalDeposited,4)+' '+this.props.selectedToken);
     stats.push({
       title:'Total Locked Funds',
       value:totalLockedFunds
     });
 
     tokenTotalSupply = tokenTotalSupply ? this.functionsUtil.fixTokenDecimals(tokenTotalSupply,this.props.tokenConfig.decimals) : this.functionsUtil.BNify(0);
-    const stkTokenTotalSupply = tokenTotalSupply ? this.functionsUtil.formatMoney(tokenTotalSupply,4)+' '+this.props.contractInfo.name : (this.state.stats.length ? this.state.stats[1] : this.functionsUtil.formatMoney(tokenTotalSupply,4)+' '+this.props.contractInfo.name);
+    const stkTokenTotalSupply = tokenTotalSupply ? this.functionsUtil.formatMoney(tokenTotalSupply,4)+' '+this.props.contractInfo.name : (this.state.stats.length ? this.state.stats[1].value : this.functionsUtil.formatMoney(tokenTotalSupply,4)+' '+this.props.contractInfo.name);
     stats.push({
       title:`${this.props.contractInfo.name} Total Supply`,
       value:stkTokenTotalSupply
     });
 
-    const claimableRewardsFormatted = claimableRewards ? this.functionsUtil.formatMoney(claimableRewards,4)+' '+this.props.contractInfo.rewardToken : (this.state.stats.length ? this.state.stats[2] : this.functionsUtil.formatMoney(claimableRewards,4)+' '+this.props.contractInfo.rewardToken);
+    const claimableRewardsFormatted = claimableRewards ? this.functionsUtil.formatMoney(claimableRewards,4)+' '+this.props.contractInfo.rewardToken : (this.state.stats.length ? this.state.stats[2].value : this.functionsUtil.formatMoney(claimableRewards,4)+' '+this.props.contractInfo.rewardToken);
     stats.push({
       title:'Claimable Rewards',
       value:claimableRewardsFormatted
@@ -931,7 +931,7 @@ class IdleStaking extends Component {
                     >
                       {
                         this.state.distributedRewards && this.state.distributedRewards.length ? (
-                          <Flex
+                          <Box
                             width={1}
                             flexDirection={'column'}
                           >
@@ -965,7 +965,7 @@ class IdleStaking extends Component {
                                 { this.props.isMobile ? '' : 'Hash' }
                               </Text>
                             </Flex>
-                            <Flex
+                            <Box
                               flexDirection={'column'}
                               alignItems={'flex-start'}
                               overflow={['visible','scroll']}
@@ -1033,8 +1033,8 @@ class IdleStaking extends Component {
                                   </Flex>
                                 ))
                               }
-                            </Flex>
-                          </Flex>
+                            </Box>
+                          </Box>
                         ) : (
                           <Text
                             fontSize={2}

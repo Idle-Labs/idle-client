@@ -627,7 +627,7 @@ class RimbleTransaction extends React.Component {
 
     if (connectorName !== 'Infura' && biconomyInfo && biconomyInfo.enabled && biconomyInfo.supportedNetworks.includes(networkId) && (!walletProvider || !biconomyInfo.disabledWallets.includes(walletProvider.toLowerCase()))){
 
-      const biconomyWeb3Provider = web3Provider ? web3Provider : web3Host;
+      const biconomyWeb3Provider = web3Provider ? web3Provider : new Web3.providers.HttpProvider(web3Host);
       if (this.state.biconomy === null || this.state.biconomy.currentProvider !== biconomyWeb3Provider ){
         const biconomy = new Biconomy(biconomyWeb3Provider,biconomyInfo.params);
         if (biconomy && typeof biconomy.onEvent === 'function'){
@@ -732,17 +732,14 @@ class RimbleTransaction extends React.Component {
       const contract = new web3Provider.eth.Contract(abi, address);
       const contractInfo = {name, contract};
 
-      const contracts = Object.assign([],this.state.contracts);
-      const contractFound = contracts.find( c => c.name===contractInfo.name );
-      if (!contractFound){
+      this.setState(prevState => {
+        // Remove old contract
+        const contracts = prevState.contracts.filter( c => c.name !== contractInfo.name );
+        // Insert updated contract
         contracts.push(contractInfo);
-      } else {
-        const contractIndex = contracts.indexOf(contractFound);
-        contracts[contractIndex] = contractInfo;
-      }
-
-      this.setState({
-        contracts
+        return {
+          contracts
+        };
       });
 
       return contractInfo;

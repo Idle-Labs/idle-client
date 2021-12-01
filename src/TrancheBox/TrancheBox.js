@@ -38,7 +38,12 @@ class Base extends Component {
       this.props.availableTranches[strategyInfo.protocol][strategyInfo.token];
 
     return (
-      <Box my={[3, 0]} boxShadow={1} width={[1, 0.49]} borderRadius={2}>
+      <Box
+        my={[3, 0]}
+        boxShadow={1}
+        borderRadius={2}
+        width={[1, 0.49]}
+      >
         <Flex
           p={0}
           mx={0}
@@ -49,22 +54,24 @@ class Base extends Component {
           flexDirection={"column"}
           backgroundColor={"cardBg"}
           borderColor={"transparent"}
-          justifyContent={[
-            "center",
-            trancheDetails.type === "AA" ? "left" : "right"
-          ]}
+          justifyContent={["center",trancheDetails.type === "AA" ? "left" : "right"]}
         >
-          <Flex
+          <Box
             width={1}
             borderBottom={`1px solid ${this.props.theme.colors.divider2}`}
           >
-            <Flex pb={2} mx={2} my={3} flexDirection={"column"}>
+            <Flex
+              pb={2}
+              mx={2}
+              my={3}
+              flexDirection={"column"}
+            >
               <Flex mt={3} alignItems={"center"}>
                 <Image
                   ml={3}
                   mr={1}
+                  alt={trancheDetails.name}
                   src={trancheDetails.image}
-                  alt={"random unsplash image"}
                   size={this.props.isMobile ? "2em" : "2.4em"}
                 />
                 <Flex mx={1}>
@@ -78,7 +85,7 @@ class Base extends Component {
                   </Text>
                 </Flex>
               </Flex>
-              <Flex
+              <Box
                 ml={5}
                 mr={3}
                 mt={3}
@@ -112,24 +119,6 @@ class Base extends Component {
                     tranche={strategyInfo.tranche}
                     protocol={strategyInfo.protocol}
                   />
-                  {
-                    /*
-                    <TrancheField
-                      fieldInfo={{
-                        name: `tokenIcon`,
-                        props: {
-                          width:'1.4em',
-                          height:'1.4em'
-                        }
-                      }}
-                      {...this.props}
-                      tokenConfig={tokenConfig}
-                      token={strategyInfo.token}
-                      tranche={strategyInfo.tranche}
-                      protocol={strategyInfo.protocol}
-                    />
-                    */
-                  }
                   <Text
                     my={1}
                     ml={[2, 3]}
@@ -141,30 +130,6 @@ class Base extends Component {
                     Current APY (variable)
                   </Text>
                 </Flex>
-                {/*
-                <TrancheField
-                  fieldInfo={{
-                    showLoader:false,
-                    name:'trancheIDLEDistribution',
-                    props:{
-                      decimals:2,
-                      fontWeight:2,
-                      fontSize:[0,1],
-                      color:'cellText',
-                      textAlign:'center',
-                      flexProps:{
-                        justifyContent:'center'
-                      }
-                    },
-                  }}
-                  {...this.props}
-                  tokenConfig={tokenConfig}
-                  token={strategyInfo.token}
-                  trancheConfig={tokenConfig.AA}
-                  tranche={strategyInfo.tranche}
-                  protocol={strategyInfo.protocol}
-                />
-                */}
                 <Text
                   mt={3}
                   fontWeight={2}
@@ -175,11 +140,19 @@ class Base extends Component {
                 >
                   {trancheDetails.description.long}
                 </Text>
-              </Flex>
+              </Box>
             </Flex>
-          </Flex>
-          <Flex bg={"cardBgContrast"} height={"100%"} flexDirection={"column"}>
-            <Flex mt={3} my={3} pl={2} width={1} flexDirection={"column"}>
+          </Box>
+          <Box
+            height={"100%"}
+            bg={"cardBgContrast"}
+          >
+            <Box
+              mt={3}
+              my={3}
+              pl={2}
+              width={1}
+            >
               {trancheDetails.features.map((feature, index) => (
                 <Flex
                   mb={2}
@@ -202,11 +175,11 @@ class Base extends Component {
                   </Text>
                 </Flex>
               ))}
-            </Flex>
+            </Box>
             <Flex
-              height={"100%"}
-              alignItems={"flex-end"}
               width={1}
+              height={"auto"}
+              alignItems={"flex-end"}
               justifyContent={"center"}
             >
               <RoundButton
@@ -226,7 +199,7 @@ class Base extends Component {
                   : `Enter the ${trancheDetails.name}`}
               </RoundButton>
             </Flex>
-          </Flex>
+          </Box>
         </Flex>
       </Box>
     );
