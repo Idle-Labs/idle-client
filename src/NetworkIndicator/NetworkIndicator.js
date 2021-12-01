@@ -88,12 +88,12 @@ class NetworkIndicator extends Component {
             <Image
               mr={2}
               src={imageSrc}
-              width={'1.3em'}
-              height={'1.3em'}
+              width={['1.2em','1.3em']}
+              height={['1.2em','1.3em']}
             />
             <Text
-              fontSize={2}
               fontWeight={3}
+              fontSize={[1,2]}
               color={'copyColor'}
             >
               {props.label}
@@ -131,12 +131,12 @@ class NetworkIndicator extends Component {
             <Image
               mr={2}
               src={imageSrc}
-              width={'1.3em'}
-              height={'1.3em'}
+              width={['1.2em','1.3em']}
+              height={['1.2em','1.3em']}
             />
             <Text
-              fontSize={2}
               fontWeight={3}
+              fontSize={[1,2]}
               color={'copyColor'}
             >
               {label}

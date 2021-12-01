@@ -169,7 +169,6 @@ class DashboardMenu extends Component {
         {
           this.props.isMobile && (
             <Flex
-              mb={3}
               width={'82%'}
               alignSelf={'center'}
               alignItems={'stretch'}
@@ -182,93 +181,100 @@ class DashboardMenu extends Component {
             </Flex>
           )
         }
-        <Flex px={3} flexDirection={"column"}>
-          {visibleLinks.map((menuLink, menuIndex) => {
-            const isExternalLink = menuLink.isExternalLink;
-            const LinkComponent = isExternalLink ? ExtLink : RouterLink;
-            const activeImage = isDarkTheme && menuLink.imageDark ? menuLink.imageDark : menuLink.image;
-            const inactiveImage = isDarkTheme && menuLink.imageInactiveDark ? menuLink.imageInactiveDark : menuLink.imageInactive;
-            return (
-              <Box
-                width={"auto"}
-                my={[2, "8px"]}
-                key={`menu-${menuIndex}`}
-              >
-                <LinkComponent
-                  to={menuLink.route}
-                  href={menuLink.route}
-                  onClick={this.props.closeMenu}
-                  style={{ textDecoration: "none" }}
+        <Flex
+          px={3}
+          height={'100%'}
+          style={{
+            overflowY:'scroll'
+          }}
+          flexDirection={"column"}
+        >
+          {
+            visibleLinks.map((menuLink, menuIndex) => {
+              const isExternalLink = menuLink.isExternalLink;
+              const LinkComponent = isExternalLink ? ExtLink : RouterLink;
+              const activeImage = isDarkTheme && menuLink.imageDark ? menuLink.imageDark : menuLink.image;
+              const inactiveImage = isDarkTheme && menuLink.imageInactiveDark ? menuLink.imageInactiveDark : menuLink.imageInactive;
+              return (
+                <Box
+                  width={"auto"}
+                  my={[1, "8px"]}
+                  key={`menu-${menuIndex}`}
                 >
-                  <Flex
-                    py={2}
-                    px={3}
-                    borderRadius={2}
-                    flexDirection={"row"}
-                    alignItems={"center"}
-                    border={menuLink.selected ? 2 : null}
-                    backgroundColor={
-                      menuLink.selected ? "menuHover" : "transparent"
-                    }
+                  <LinkComponent
+                    to={menuLink.route}
+                    href={menuLink.route}
+                    onClick={this.props.closeMenu}
+                    style={{ textDecoration: "none" }}
                   >
                     <Flex
-                      py={1}
-                      width={1}
-                      alignItems={"center"}
+                      py={2}
+                      px={3}
+                      borderRadius={2}
                       flexDirection={"row"}
-                      justifyContent={"flex-start"}
+                      alignItems={"center"}
+                      border={menuLink.selected ? 2 : null}
+                      backgroundColor={menuLink.selected ? "menuHover" : "transparent"}
                     >
-                      {
-                        menuLink.image ? (
-                          <Image
-                            mr={3}
-                            ml={2}
-                            mb={0}
-                            align={"center"}
-                            height={"1.6em"}
-                            src={menuLink.selected ? activeImage : inactiveImage}
-                          />
-                        ) : menuLink.icon && (
-                          <Icon
-                            name={menuLink.icon}
-                            color={
-                              menuLink.selected
-                                ? "menuIconActive"
-                                : isDarkTheme
-                                  ? "white"
-                                  : "dark-gray"
-                            }
-                            mr={3}
-                            ml={2}
-                            mb={0}
-                            size={"1.6em"}
-                          />
-                        )
-                      }
-                      <Text
-                        fontSize={2}
-                        fontWeight={3}
-                        color={"text"}
-                        textAlign={"center"}
-                        style={{
-                          whiteSpace: "nowrap"
-                        }}
+                      <Flex
+                        py={1}
+                        width={1}
+                        alignItems={"center"}
+                        flexDirection={"row"}
+                        justifyContent={"flex-start"}
                       >
-                        {menuLink.label}
-                      </Text>
+                        {
+                          menuLink.image ? (
+                            <Image
+                              mr={3}
+                              ml={2}
+                              mb={0}
+                              align={"center"}
+                              height={["1.2em","1.6em"]}
+                              src={menuLink.selected ? activeImage : inactiveImage}
+                            />
+                          ) : menuLink.icon && (
+                            <Icon
+                              name={menuLink.icon}
+                              color={
+                                menuLink.selected
+                                  ? "menuIconActive"
+                                  : isDarkTheme
+                                    ? "white"
+                                    : "dark-gray"
+                              }
+                              mr={3}
+                              ml={2}
+                              mb={0}
+                              size={ this.props.isMobile ? "1.2em" : "1.6em"}
+                            />
+                          )
+                        }
+                        <Text
+                          fontWeight={3}
+                          color={"text"}
+                          fontSize={[1,2]}
+                          textAlign={"center"}
+                          style={{
+                            whiteSpace: "nowrap"
+                          }}
+                        >
+                          {menuLink.label}
+                        </Text>
+                      </Flex>
                     </Flex>
-                  </Flex>
-                </LinkComponent>
-              </Box>
-            );
-          })}
+                  </LinkComponent>
+                </Box>
+              );
+            })
+          }
         </Flex>
 
         {darkModeEnabled && (
           <Flex
             my={2}
             width={"auto"}
-            height={"100%"}
+            height={"auto"}
             flexDirection={"column"}
             justifyContent={"flex-end"}
           >
@@ -301,9 +307,7 @@ class DashboardMenu extends Component {
                   alignItems={"center"}
                   borderRadius={"1.6em"}
                   backgroundColor={"cellText"}
-                  justifyContent={
-                    this.props.themeMode === "light" ? "flex-end" : "flex-start"
-                  }
+                  justifyContent={this.props.themeMode === "light" ? "flex-end" : "flex-start"}
                 >
                   <Box
                     width={"1.3em"}

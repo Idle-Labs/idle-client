@@ -315,7 +315,7 @@ class DelegateVesting extends Component {
             color={'flashColor'}
             textAlign={'center'}
           >
-            You have {this.state.vestingAmount.div(1e18).toFixed(5)} {this.functionsUtil.getGlobalConfig(['governance','props','tokenName'])} in the Vesting Contract ({this.state.vestedAmount.toFixed(5)} IDLE vested).
+            You have {this.state.vestingAmount.div(1e18).toFixed(5)} {this.functionsUtil.getGlobalConfig(['governance','props','tokenName'])} in the Vesting Contract ({this.state.vestedAmount.toFixed(5)} IDLE unlocked).
           </Text>
           {
             (!this.state.processing || !this.state.processing.loading) && (
