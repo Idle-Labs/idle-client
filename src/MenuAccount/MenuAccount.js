@@ -142,6 +142,7 @@ class MenuAccount extends Component {
               <Flex
                 ml={1}
                 mr={2}
+                width={'12%'}
               >
                 <Icon
                   size={"2.4em"}
@@ -171,13 +172,14 @@ class MenuAccount extends Component {
           {
             this.props.isMobile && (
               <Flex
-                width={0.86}
-                justifyContent={"flex-end"}
+                width={'87%'}
+                justifyContent={"space-between"}
               >
                 <Link
                   style={{
+                    width:'80%',
                     display:'flex',
-                    width:'inherit',
+                    overflow:'hidden',
                     textDecoration:'none'
                   }}
                   onClick={e => this.toggleModal("account")}
