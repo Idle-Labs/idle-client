@@ -1,8 +1,0 @@
-+ karma@6.3.7
-added 50 packages from 598 contributors and audited 5449 packages in 37.319s
-
-169 packages are looking for funding
-  run `npm fund` for details
-
-found 383 vulnerabilities (48 low, 129 moderate, 201 high, 5 critical)
-  run `npm audit fix` to fix them, or `npm audit` for details
