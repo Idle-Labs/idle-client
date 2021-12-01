@@ -67,7 +67,8 @@ class GovModal extends React.Component {
 
     const accountChanged = prevProps.account !== this.props.account;
     const requiredNetworkChanged = JSON.stringify(prevProps.network.required) !== JSON.stringify(this.props.network.required);
-    if (accountChanged || requiredNetworkChanged){
+    const contractsInitialized = this.props.contractsInitialized && prevProps.contractsInitialized !== this.props.contractsInitialized;
+    if (accountChanged || requiredNetworkChanged || contractsInitialized){
       this.loadTokenInfo();
     }
   }

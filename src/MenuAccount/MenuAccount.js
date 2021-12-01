@@ -3,9 +3,9 @@ import HoverImage from "../HoverImage/HoverImage"
 import RoundButton from "../RoundButton/RoundButton";
 import FunctionsUtil from "../utilities/FunctionsUtil";
 import ShortHash from "../utilities/components/ShortHash";
-import { Flex, Icon, Image, Text, Link } from "rimble-ui";
 import Notifications from "../Notifications/Notifications";
 import AccountModal from "../utilities/components/AccountModal";
+import { Flex, Icon, Image, Text, Link, Loader } from "rimble-ui";
 import NetworkIndicator from "../NetworkIndicator/NetworkIndicator";
 
 class MenuAccount extends Component {
@@ -51,36 +51,37 @@ class MenuAccount extends Component {
     this.idleGovToken = this.functionsUtil.getIdleGovToken();
   }
 
-  async componentWillMount() {
+  componentWillMount() {
     this.loadUtils();
+  }
+
+  async componentDidMount() {
     this.loadIdleTokenBalance();
   }
-  editCardProp() { }
 
   async componentDidUpdate(prevProps, prevState) {
     this.loadUtils();
 
     const requiredNetworkChanged = JSON.stringify(prevProps.network.required) !== JSON.stringify(this.props.network.required);
-    if (requiredNetworkChanged) {
+    const accountInizialized = this.props.accountInizialized && prevProps.accountInizialized !== this.props.accountInizialized;
+    const contractsInitialized = this.props.contractsInitialized && prevProps.contractsInitialized !== this.props.contractsInitialized;
+    if (requiredNetworkChanged || accountInizialized || contractsInitialized) {
       this.loadIdleTokenBalance();
     }
 
     const accountChanged = prevProps.account !== this.props.account;
     if (accountChanged) {
-      this.setState(
-        {
+      this.setState({
           isModalOpen: null
-        },
-        () => {
-          this.loadIdleTokenBalance();
-        }
-      );
+      },() => {
+        this.loadIdleTokenBalance();
+      });
     }
   }
 
   async loadIdleTokenBalance() {
 
-    if (!this.props.account) {
+    if (!this.props.account || !this.props.contractsInitialized) {
       return false;
     }
 
@@ -347,7 +348,7 @@ class MenuAccount extends Component {
                     src={`images/tokens/IDLE.svg`}
                   />
                   {
-                    this.state.idleTokenBalance && (
+                    this.state.idleTokenBalance ? (
                       <Text
                         fontWeight={3}
                         fontSize={[1, 2]}
@@ -355,7 +356,7 @@ class MenuAccount extends Component {
                       >
                         {this.state.idleTokenBalance.toFixed(2)} IDLE
                       </Text>
-                    )
+                    ) : <Loader size={'20px'} />
                   }
                 </Flex>
               </Link>
