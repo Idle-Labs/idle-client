@@ -3958,6 +3958,38 @@ class FunctionsUtil {
       }
     });
   }
+  getBestToken = async (networkId=null,availableTokens=null) => {
+    let highestValue = null;
+    let selectedToken = null;
+    if (!networkId){
+      networkId = this.getRequiredNetworkId();
+    }
+    const aprs = await this.getAprsFromApi(networkId);
+    if (aprs && aprs.lendRates){
+      aprs.lendRates.forEach( aprInfo => {
+        const tokenAPR = this.BNify(aprInfo.apy);
+        if (tokenAPR){
+          const token = aprInfo.tokenSymbol;
+          if ((!highestValue || highestValue.lt(tokenAPR)) && (!availableTokens || availableTokens[token])){
+            highestValue = tokenAPR;
+            selectedToken = token;
+          }
+        }
+      });
+    } else if (availableTokens) {
+      await this.asyncForEach(Object.keys(availableTokens),async (token) => {
+        const tokenConfig = availableTokens[token];
+        const tokenAPR = await this.getTokenAprs(tokenConfig);
+        if (tokenAPR && tokenAPR.avgApr !== null){
+          if (!highestValue || highestValue.lt(tokenAPR.avgApr)){
+            highestValue = tokenAPR.avgApr;
+            selectedToken = token;
+          }
+        }
+      });
+    }
+    return selectedToken;
+  }
   getTrancheStakedBalance = async (contractName,walletAddr,decimals=null) => {
     if (!walletAddr){
       return false;
@@ -4216,10 +4248,18 @@ class FunctionsUtil {
         let trancheApy = await this.genericContractCallCached(tokenConfig.CDO.name,'getApr',[trancheConfig.address]);
         // console.log('trancheApy',this.props.network.required,tokenConfig.CDO.name,trancheConfig.address,trancheApy);
         if (trancheApy){
-          output = this.fixTokenDecimals(trancheApy,tokenConfig.CDO.decimals);
-          output = this.apr2apy(output.div(100)).times(100);
+          const apr = this.fixTokenDecimals(trancheApy,tokenConfig.CDO.decimals);
+          const apy = this.apr2apy(apr.div(100)).times(100);
+          if (apy.gt(1000)){
+            output = this.BNify(1000);
+          } else {
+            output = this.BNify(apy);
+          }
           if (formatValue){
             output = output.toFixed(2)+'%';
+            if (apy.gt(1000)){
+              output = `>${output}`;
+            }
           }
         }
       break;
@@ -7407,6 +7447,7 @@ class FunctionsUtil {
             this.loadTrancheFieldRaw('trancheApy',{},protocol,token,tranche,tokenConfig,trancheConfig,null),
             this.loadTrancheFieldRaw('tranchePool',{},protocol,token,tranche,tokenConfig,trancheConfig,null)
           ]);
+
           avgAPY = avgAPY.plus(this.BNify(trancheApy).times(this.BNify(tranchePool)));
           totalAUM = totalAUM.plus(this.BNify(tranchePool));
         });
