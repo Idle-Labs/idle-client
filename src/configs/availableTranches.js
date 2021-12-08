@@ -7,7 +7,7 @@ const availableTranches = {
     DAI:{
       token:'DAI',
       decimals:18,
-      limit:500000,
+      limit:1700000,
       protocol:'idle',
       blockNumber:13054628,
       address:'0x6b175474e89094c44da98b954eedeac495271d0f',
@@ -83,7 +83,7 @@ const availableTranches = {
     FEI:{
       token:'FEI',
       decimals:18,
-      limit:500000,
+      limit:1700000,
       protocol:'idle',
       blockNumber:13575397,
       address:'0x956f47f50a910163d8bf957cf5846d573e7f87ca',

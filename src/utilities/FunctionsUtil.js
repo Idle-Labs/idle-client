@@ -324,11 +324,12 @@ class FunctionsUtil {
         const tokenConfig = protocolConfig[token];
         await this.asyncForEach(Object.keys(tranches), async (tranche) => {
           const trancheConfig = tokenConfig[tranche];
-          const trancheTokenBalance = await this.loadTrancheFieldRaw('trancheDeposited', {}, protocol, token, tranche, tokenConfig, trancheConfig, account);
+          let trancheTokenBalance = await this.getContractBalance(trancheConfig.name,account);
 
           // console.log('trancheTokenBalance',protocol,token,tranche,trancheTokenBalance);
 
-          if (trancheTokenBalance) {
+          if (trancheTokenBalance && this.BNify(trancheTokenBalance).gt(0)) {
+            trancheTokenBalance = this.fixTokenDecimals(trancheTokenBalance,trancheConfig.decimals);
             const [
               tranchePool,
               tranchePrice,
