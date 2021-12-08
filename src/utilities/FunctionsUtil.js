@@ -2967,36 +2967,24 @@ class FunctionsUtil {
       return cachedData;
     }
 
-    const whitelist = this.getGlobalConfig(['network', 'providers', 'snapshot', 'whitelist']).map(addr => addr.toLowerCase());
+    // const whitelist = this.getGlobalConfig(['network', 'providers', 'snapshot', 'whitelist']).map(addr => addr.toLowerCase());
     const endpoint = this.getGlobalConfig(['network', 'providers', 'snapshot', 'endpoints', 'proposals']);
-    const query = activeOnly?(this.getGlobalConfig(['network', 'providers', 'snapshot', 'queries', 'proposalsActive'])):(this.getGlobalConfig(['network', 'providers', 'snapshot', 'queries', 'proposals']));
-    const headers = {
-  "content-type": "application/json",
-    "Authorization": "<token>"
-};
+    const query = activeOnly ? this.getGlobalConfig(['network', 'providers', 'snapshot', 'queries', 'proposalsActive']) : this.getGlobalConfig(['network', 'providers', 'snapshot', 'queries', 'proposals']);
+    // const headers = {
+    //   "content-type": "application/json"
+    // };
     const config = {
-        url:endpoint,
-        method:`post`,
-        data:{
-                query: `${query}`,
-                
-              }
-      
-    }
-    console.log("Try")
+      url:endpoint,
+      method:`post`,
+      data:{
+        query: `${query}`
+      }
+    };
+
     let proposals = await this.makeCachedRequest(endpoint, 1440, true, false, config);
-    console.log("proposal", proposals)
-    console.log("Fail")
-    proposals=proposals.data.proposals
-
-    // console.log('getSnapshotProposals',proposals);
-
-    if (proposals && !proposals.error) {
-   
+    if (proposals && proposals.data && proposals.data.proposals){
+      proposals = proposals.data.proposals;
       const currTime = parseInt(Date.now() / 1000);
-
-
-
       const validProposals = [];
       await this.asyncForEach(proposals, async (p) => {
         // Add proposal if ended
