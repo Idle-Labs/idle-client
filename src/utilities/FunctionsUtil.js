@@ -2710,6 +2710,16 @@ class FunctionsUtil {
     }
     return null;
   }
+  makePostRequest = async (endpoint, postData={}, error_callback = false, config = null) => {
+    const data = await axios
+      .post(endpoint, postData, config)
+      .catch(err => {
+        if (typeof error_callback === 'function') {
+          error_callback(err);
+        }
+      });
+    return data;
+  }
   makeRequest = async (endpoint, error_callback = false, config = null) => {
     const data = await axios
       .get(endpoint, config)
@@ -2718,15 +2728,12 @@ class FunctionsUtil {
           error_callback(err);
         }
       });
-    if (data)
+    if (data) {
       return data;
-    else {
+    } else {
       let result= axios(config)
-
       return result
-      
     }
-
   }
   makeEtherscanApiRequest = async (endpoint, keys = [], TTL = 120, apiKeyIndex = 0) => {
     const timestamp = parseInt(Date.now() / 1000);
@@ -2774,10 +2781,25 @@ class FunctionsUtil {
       data,
       timestamp
     };
+    this.addKeyToCachedDataWithLocalStorage('cachedRequests', key, dataToCache);
+    return (data && return_data ? data.data : data);
+  }
+  makeCachedPostRequest = async (endpoint, postData={}, TTL=60, return_data=false, alias=false, config=null) => {
+    const key = alias ? alias : endpoint;
+    const timestamp = parseInt(Date.now() / 1000);
 
-    // console.log('makeCachedRequest - CACHE',key,dataToCache);
+    // Check if already exists
+    const cachedRequests = this.getCachedDataWithLocalStorage('cachedRequests', {});
+    // Check if it's not expired
+    if (cachedRequests && cachedRequests[key] && cachedRequests[key].timestamp && timestamp - cachedRequests[key].timestamp < TTL) {
+      return (cachedRequests[key].data && return_data ? cachedRequests[key].data.data : cachedRequests[key].data);
+    }
 
-    // this.setCachedDataWithLocalStorage('cachedRequests',cachedRequests);
+    const data = await this.makePostRequest(endpoint, postData, false, config);
+    const dataToCache = {
+      data,
+      timestamp
+    };
     this.addKeyToCachedDataWithLocalStorage('cachedRequests', key, dataToCache);
     return (data && return_data ? data.data : data);
   }
@@ -2968,32 +2990,24 @@ class FunctionsUtil {
       return cachedData;
     }
 
-    // const whitelist = this.getGlobalConfig(['network', 'providers', 'snapshot', 'whitelist']).map(addr => addr.toLowerCase());
+    const whitelist = this.getGlobalConfig(['network', 'providers', 'snapshot', 'whitelist']).map(addr => addr.toLowerCase());
     const endpoint = this.getGlobalConfig(['network', 'providers', 'snapshot', 'endpoints', 'proposals']);
     const query = activeOnly ? this.getGlobalConfig(['network', 'providers', 'snapshot', 'queries', 'proposalsActive']) : this.getGlobalConfig(['network', 'providers', 'snapshot', 'queries', 'proposals']);
-    // const headers = {
-    //   "content-type": "application/json"
-    // };
-    const config = {
-      url:endpoint,
-      method:`post`,
-      data:{
-        query: `${query}`
-      }
-    };
 
-    let proposals = await this.makeCachedRequest(endpoint, 1440, true, false, config);
+    const data = {
+      query: `${query}`
+    }
+
+    let proposals = await this.makeCachedPostRequest(endpoint, data, 1440, true, false);
     if (proposals && proposals.data && proposals.data.proposals){
       proposals = proposals.data.proposals;
       const currTime = parseInt(Date.now() / 1000);
       const validProposals = [];
       await this.asyncForEach(proposals, async (p) => {
-        // Add proposal if ended
-        if (p.end <= currTime) {
+        if (p.end <= currTime || whitelist.includes(p.address.toLowerCase())){
           validProposals.push(p);
         } else {
           const blockNumber = p.snapshot;
-
           let checkedStrategies = false;
           await this.asyncForEach(p.strategies, async (s) => {
             if (checkedStrategies) {
@@ -3012,8 +3026,6 @@ class FunctionsUtil {
             } else {
               // checkedStrategies = true;
             }
-
-            // console.log(p.relayerIpfsHash,p.address,s.name,checkedStrategies);
           });
 
           // Add proposal is passed token balances check
