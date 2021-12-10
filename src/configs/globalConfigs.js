@@ -1055,7 +1055,7 @@ const globalConfigs = {
         },
         address: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0'
       },
-      stETH: {
+      STETH: {
         decimals: 18,
         enabled: true,
         label: 'stETH',
@@ -1386,6 +1386,7 @@ const globalConfigs = {
         legend: false,
         enabled: true,
         label: "Lido",
+        icon: "lido.png",
         color: {
           rgb: [0, 163, 255],
           hsl: ['202', '100%', '50%']

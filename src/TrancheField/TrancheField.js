@@ -162,8 +162,10 @@ class TrancheField extends Component {
 
     switch (fieldInfo.name){
       case 'protocolIcon':
+        const protocolConfig = this.functionsUtil.getGlobalConfig(['stats', 'protocols', this.props.protocol]);
+        const protocolIcon = protocolConfig && protocolConfig.icon ? protocolConfig.icon : `${this.props.protocol}.svg`;
         output = (
-          <Image src={`images/protocols/${this.props.protocol}.svg`} {...fieldProps} />
+          <Image src={`images/protocols/${protocolIcon}`} {...fieldProps} />
         );
       break;
       case 'trancheTypeIcon':

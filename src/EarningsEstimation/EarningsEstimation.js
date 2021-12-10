@@ -260,7 +260,7 @@ class EarningsEstimation extends Component {
             const finalEarnings = tokenEarnings.earningsYear.times(estimationStepPerc);
             const cursorPerc = finalEarnings.gt(0) ? Math.min(1,parseFloat(tokenEarnings.earnings.div(finalEarnings))) : 1;
             const tokenIcon = tokenConfig && tokenConfig.icon ? tokenConfig.icon :`images/tokens/${token}.svg`;
-            const tokenRGBColor = this.functionsUtil.getGlobalConfig(['stats','tokens',token,'color','rgb']).join(',');
+            const tokenRGBColor = this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase(),'color','rgb']).join(',');
             // console.log(tokenEarnings.earnings.toFixed(10),tokenEarnings.earningsYear.toFixed(10),finalEarnings.toFixed(10),cursorPerc.toFixed(10),estimationStepPerc.toFixed(10));
             return (
               <Flex
@@ -295,7 +295,7 @@ class EarningsEstimation extends Component {
                           const estimationStep = estimationSteps[label];
                           const estimationStepEarnings = tokenEarnings.earningsYear.times(this.functionsUtil.BNify(estimationStep.perc));
                           let estimationStepEarningsFormatted = this.functionsUtil.formatMoney(estimationStepEarnings,this.props.isMobile ? 2 : estimationStepEarnings.lt(1) ? 3 : 2);
-                          const conversionRateField = this.functionsUtil.getGlobalConfig(['stats','tokens',token,'conversionRateField']);
+                          const conversionRateField = this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase(),'conversionRateField']);
                           if (conversionRateField){
                             estimationStepEarningsFormatted = '$ '+estimationStepEarningsFormatted;
                           }

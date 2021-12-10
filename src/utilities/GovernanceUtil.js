@@ -71,7 +71,7 @@ class GovernanceUtil {
     const founderVesting = await this.getVestingContract(account);
     if (founderVesting){
       const governanceTokenName = this.functionsUtil.getGlobalConfig(['governance','props','tokenName']);
-      const governanceTokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',governanceTokenName]);
+      const governanceTokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',governanceTokenName.toUpperCase()]);
       let [
         vestingEnd,
         lastUpdate,

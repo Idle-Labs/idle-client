@@ -71,6 +71,8 @@ class TransactionField extends Component {
     let icon = null;
     let color = null;
     let output = null;
+    let tokenSymbol = null;
+    let tokenConfig = null;
     const fieldInfo = this.props.fieldInfo;
     const transaction = this.props.transaction;
     let bgColor = theme.colors.transactions.actionBg.default;
@@ -246,16 +248,18 @@ class TransactionField extends Component {
         );
       break;
       case 'tokenIcon':
-        const tokenSymbol = transaction.tokenSymbol.toUpperCase();
-        const tokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',tokenSymbol]);
+      tokenSymbol = transaction.tokenSymbol.toUpperCase();
+      tokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',tokenSymbol]);
         const iconSrc = tokenConfig && tokenConfig.icon ? tokenConfig.icon : `images/tokens/${tokenSymbol}.svg`;
         output = (
           <Image src={iconSrc} {...fieldProps} />
         );
       break;
       case 'tokenName':
+        tokenSymbol = transaction.tokenSymbol.toUpperCase();
+        tokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',tokenSymbol]);
         output = (
-          <Text {...fieldProps}>{transaction.tokenSymbol.toUpperCase()}</Text>
+          <Text {...fieldProps}>{tokenConfig && tokenConfig.label ? tokenConfig.label : tokenSymbol}</Text>
         );
       break;
       case 'custom':

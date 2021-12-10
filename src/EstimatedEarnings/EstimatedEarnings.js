@@ -67,36 +67,36 @@ class EstimatedEarnings extends Component {
         label:'MONTH',
         value:amountMonth,
         month:amountMonth,
-        color:this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken,'color','rgb']).join(','),
-        monthColor:'hsl('+this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken,'color','hsl']).join(',')+')',
+        color:this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken.toUpperCase(),'color','rgb']).join(','),
+        monthColor:'hsl('+this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken.toUpperCase(),'color','hsl']).join(',')+')',
       },
       {
         perc:3/12,
         label:'3 MONTHS',
         value:amount3Months,
         month3:amount3Months,
-        color:this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken,'color','rgb']).join(','),
-        month3Color:'hsl('+this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken,'color','hsl']).join(',')+')',
+        color:this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken.toUpperCase(),'color','rgb']).join(','),
+        month3Color:'hsl('+this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken.toUpperCase(),'color','hsl']).join(',')+')',
       },
       {
         perc:6/12,
         label:'6 MONTHS',
         value:amount6Months,
         month6:amount6Months,
-        color:this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken,'color','rgb']).join(','),
-        month6Color:'hsl('+this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken,'color','hsl']).join(',')+')',
+        color:this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken.toUpperCase(),'color','rgb']).join(','),
+        month6Color:'hsl('+this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken.toUpperCase(),'color','hsl']).join(',')+')',
       },
       {
         perc:1,
         label:'YEAR',
         year:amountYear,
         value:amountYear,
-        color:this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken,'color','rgb']).join(','),
-        yearColor:'hsl('+this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken,'color','hsl']).join(',')+')',
+        color:this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken.toUpperCase(),'color','rgb']).join(','),
+        yearColor:'hsl('+this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken.toUpperCase(),'color','hsl']).join(',')+')',
       }
     ];
 
-    let labelTextColorModifiers = this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken,'chart','labelTextColorModifiers']);
+    let labelTextColorModifiers = this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken.toUpperCase(),'chart','labelTextColorModifiers']);
 
     const maxGridLines = 4;
     const gridYStep = amountYear/maxGridLines;

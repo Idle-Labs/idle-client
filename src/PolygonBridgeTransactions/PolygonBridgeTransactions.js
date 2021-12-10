@@ -96,7 +96,7 @@ class PolygonBridgeTransactions extends Component {
           statusIconProps:{
             color:tx.included ? this.props.theme.colors.transactions.status.completed : this.props.theme.colors.transactions.status.pending
           },
-          tokenIcon:tokenConfig.icon || this.functionsUtil.getGlobalConfig(['stats','tokens',tx.tokenSymbol,'icon']) || `images/tokens/${tx.tokenSymbol}.svg`
+          tokenIcon:tokenConfig.icon || this.functionsUtil.getGlobalConfig(['stats','tokens',tx.tokenSymbol.toUpperCase(),'icon']) || `images/tokens/${tx.tokenSymbol}.svg`
         };
         return depositInfo;
       });

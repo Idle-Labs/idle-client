@@ -250,7 +250,7 @@ class PortfolioEquity extends Component {
         if (lastTxBalance.gt(0)){
           // Convert token balance to USD
           let tokenUsdConversionRate = null;
-          const conversionRateField = this.functionsUtil.getGlobalConfig(['stats','tokens',token,'conversionRateField']);
+          const conversionRateField = this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase(),'conversionRateField']);
           if (!this.props.chartToken && conversionRateField){
             const conversionRate = lastTokenData && lastTokenData[conversionRateField] ? lastTokenData[conversionRateField] : (lastTokenDataUnfiltered && lastTokenDataUnfiltered[conversionRateField] ? lastTokenDataUnfiltered[conversionRateField] : null);
             if (conversionRate){
@@ -339,7 +339,7 @@ class PortfolioEquity extends Component {
     // Add token Data
     chartData.push({
       id:chartToken,
-      color: 'hsl('+ this.functionsUtil.getGlobalConfig(['stats','tokens',chartToken,'color','hsl']).join(',')+')',
+      color: 'hsl('+ this.functionsUtil.getGlobalConfig(['stats','tokens',chartToken.toUpperCase(),'color','hsl']).join(',')+')',
       data:aggregatedBalances
     });
 
@@ -464,7 +464,7 @@ class PortfolioEquity extends Component {
                 if (token === point.serieId){
                   return null;
                 }
-                const color = this.functionsUtil.getGlobalConfig(['stats','tokens',token,'color','hex']);
+                const color = this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase(),'color','hex']);
                 const balance = point.data.balances[token];
                 let formattedBalance = this.functionsUtil.formatMoney(balance,2);
                 if (parseFloat(balance)>=0.01){

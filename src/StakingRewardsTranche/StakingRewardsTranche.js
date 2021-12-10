@@ -62,7 +62,7 @@ class StakingRewardsTranche extends Component {
     
     const stakingRewardsRows = [];
     await this.functionsUtil.asyncForEach(Object.keys(stakingRewards), async (rewardToken) => {
-      const tokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',rewardToken]);
+      const tokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',rewardToken.toUpperCase()]);
       const rewardTokenInfo = rewardTokensInfo[rewardToken];
       const tokenBalance = await this.functionsUtil.getTokenBalance(rewardToken,this.props.account);
       let distributionSpeed = rewardTokenInfo ? rewardTokenInfo.lastAmount : null;

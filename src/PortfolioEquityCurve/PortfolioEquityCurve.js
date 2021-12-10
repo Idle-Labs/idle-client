@@ -394,7 +394,7 @@ class PortfolioEquityCurve extends Component {
                 if (token === point.serieId){
                   return null;
                 }
-                const tokenInfo = this.functionsUtil.getGlobalConfig(['stats','tokens',token]);
+                const tokenInfo = this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase()]);
                 if (tokenInfo){
                   const tokenName = tokenInfo.name ? tokenInfo.name : token;
                   const color = tokenInfo.color.hex;

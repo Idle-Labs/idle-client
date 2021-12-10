@@ -488,16 +488,6 @@ class Stats extends Component {
       aum = aum.plus(govTokensPool);
     }
 
-    // Format AUM
-    /*
-    aum = this.functionsUtil.formatMoney(parseFloat(aum));
-
-    const conversionRateField = this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken,'conversionRateField']);
-    if (conversionRateField){
-      aum += ' $';
-    }
-    */
-
     let unlentBalance = await this.functionsUtil.getUnlentBalance(this.props.tokenConfig);
     if (unlentBalance){
       unlentBalance = this.functionsUtil.formatMoney(parseFloat(unlentBalance));

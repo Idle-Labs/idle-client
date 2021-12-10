@@ -468,7 +468,7 @@ class BuyModal extends React.Component {
             >
             {
               availableTokens.map((token,i) => {
-                const imageSrc = this.functionsUtil.getGlobalConfig(['stats','tokens',token,'icon']) || `images/tokens/${token}.svg`;
+                const imageSrc = this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase(),'icon']) || `images/tokens/${token}.svg`;
                 return (
                   <ImageButton
                     caption={token}
@@ -634,7 +634,7 @@ class BuyModal extends React.Component {
                       <Flex mb={this.props.showInline ? 2 : 4} flexDirection={['column','row']} alignItems={'center'} justifyContent={'center'}>
                       {
                         this.state.availableTokens.map((token,i) => {
-                          const imageSrc = this.functionsUtil.getGlobalConfig(['stats','tokens',token,'icon']) || `images/tokens/${token}.svg`;
+                          const imageSrc = this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase(),'icon']) || `images/tokens/${token}.svg`;
                           return (
                             <ImageButton key={`token_${token}`} imageSrc={imageSrc} caption={token} imageProps={{p:[2,3],height:'80px'}} handleClick={ e => { this.selectToken(e,token); } } />
                           );

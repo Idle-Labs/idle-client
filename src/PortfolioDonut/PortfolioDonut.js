@@ -82,7 +82,7 @@ class PortfolioDonut extends Component {
       const tokenBalance = portfolio[token];
       if (tokenBalance.gt(0)){
         const tokenPercentage = tokenBalance.div(totalFunds).times(100);
-        let tokenColorHsl = this.functionsUtil.getGlobalConfig(['stats','tokens',token,'color','hsl']);
+        let tokenColorHsl = this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase(),'color','hsl']);
         tokenColorHsl = tokenColorHsl ? tokenColorHsl.join(',') : '0,0%,0%';
         chartData.push({
           id:token,
@@ -156,7 +156,7 @@ class PortfolioDonut extends Component {
       margin: this.props.isMobile ? { top: 15, right: 25, bottom: 30, left: 25 } : { top: 30, right: 50, bottom: 60, left: 50 },
       onMouseEnter:(data, e) => {
         const selectedToken = data.id;
-        const selectedTokenConfig = selectedToken ? this.props.availableTokens[selectedToken] || this.functionsUtil.getGlobalConfig(['stats','tokens',selectedToken]) : null;
+        const selectedTokenConfig = selectedToken ? this.props.availableTokens[selectedToken] || this.functionsUtil.getGlobalConfig(['stats','tokens',selectedToken.toUpperCase()]) : null;
         this.setState({
           selectedToken,
           selectedTokenConfig
@@ -192,7 +192,7 @@ class PortfolioDonut extends Component {
 
     const selectedToken = this.state.selectedToken !== null && this.state.portfolio[this.state.selectedToken] ? this.state.portfolio[this.state.selectedToken] : false;
     const strategyIcon = this.functionsUtil.getGlobalConfig(['strategies',this.props.selectedStrategy,'icon']);
-    const convertToken = this.state.selectedToken ? this.functionsUtil.getGlobalConfig(['stats','tokens',this.state.selectedToken,'conversionRateField']) : false;
+    const convertToken = this.state.selectedToken ? this.functionsUtil.getGlobalConfig(['stats','tokens',this.state.selectedToken.toUpperCase(),'conversionRateField']) : false;
 
     return (
       <Flex

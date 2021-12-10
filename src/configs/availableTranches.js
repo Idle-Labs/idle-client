@@ -169,12 +169,12 @@ const availableTranches = {
       CDO:{
         abi:IdleCDO,
         decimals:18,
-        name:'IdleCDO_lido_stETHYield',
+        name:'IdleCDO_lido_stETH',
         address:'0x34dcd573c5de4672c8248cd12a99f875ca112ad8'
       },
       Strategy:{
         abi:IdleStrategy,
-        name:'IdleStrategy_lido_stETHYield'
+        name:'IdleStrategy_lido_stETH'
       },
       AA:{
         abi:ERC20,
@@ -190,13 +190,13 @@ const availableTranches = {
           decimals:18,
           stakingRewards:[],
           abi:IdleCDOTrancheRewards,
-          name:'IdleCDOTrancheRewards_lido_stETHYield_AA',
+          name:'IdleCDOTrancheRewards_lido_stETH_AA',
           address:'0x0000000000000000000000000000000000000000'
         },
-        label:'lido stETH AA',
         blockNumber:13776954,
-        name:'AA_lido_stETHYield',
-        token:'AA_lido_stETHYield',
+        name:'AA_lido_stETH',
+        token:'AA_lido_stETH',
+        label:'lido stETH AA',
         address:'0x2688fc68c4eac90d9e5e1b94776cf14eade8d877'
       },
       BB:{
@@ -213,13 +213,13 @@ const availableTranches = {
           decimals:18,
           stakingRewards:[],
           abi:IdleCDOTrancheRewards,
-          name:'IdleCDOTrancheRewards_lido_stETHYield_BB',
+          name:'IdleCDOTrancheRewards_lido_stETH_BB',
           address:'0x0000000000000000000000000000000000000000'
         },
-        label:'lido stETH BB',
         blockNumber:13776954,
-        name:'BB_lido_stETHYield',
-        token:'BB_lido_stETHYield',
+        name:'BB_lido_stETH',
+        token:'BB_lido_stETH',
+        label:'lido stETH BB',
         address:'0x3a52fa30c33caf05faee0f9c5dfe5fd5fe8b3978'
       }
     }

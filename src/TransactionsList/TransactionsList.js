@@ -226,7 +226,7 @@ class TransactionsList extends Component {
 
     txsIndexes.forEach((tx, i) => {
       const selectedToken = tx.token;
-      const tokenConfig = this.props.availableTokens && this.props.availableTokens[selectedToken] ? this.props.availableTokens[selectedToken] : this.functionsUtil.getGlobalConfig(['stats','tokens',selectedToken]);
+      const tokenConfig = this.props.availableTokens && this.props.availableTokens[selectedToken] ? this.props.availableTokens[selectedToken] : this.functionsUtil.getGlobalConfig(['stats','tokens',selectedToken.toUpperCase()]);
       const decimals = Math.min(tokenConfig.decimals,8);
       
       const date = new Date(tx.timeStamp*1000);

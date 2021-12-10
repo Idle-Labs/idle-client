@@ -36,7 +36,7 @@ class TrancheHarvests extends Component {
 
     await this.functionsUtil.asyncForEach(Object.keys(distributions), async (token) => {
       const txs = distributions[token];
-      const tokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',token]);
+      const tokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase()]);
       await this.functionsUtil.asyncForEach(txs, async (tx) => {
         const tokenIcon = tokenConfig && tokenConfig.icon ? tokenConfig.icon : `images/tokens/${token}.svg`;
         const blockInfo = await this.functionsUtil.getBlockInfo(tx.blockNumber);

@@ -128,7 +128,7 @@ class AccountModal extends React.Component {
                       token={token}
                       tokenConfig={{
                         token:token
-                        ,...this.functionsUtil.getGlobalConfig(['stats','tokens',token])
+                        ,...this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase()])
                       }}
                       fieldInfo={{
                         name:'icon',

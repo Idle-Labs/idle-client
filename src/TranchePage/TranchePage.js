@@ -298,7 +298,7 @@ class TranchePage extends Component {
                         name:'tokenIcon',
                         props:{
                           mr:[0,2],
-                          height:['1.4em','1.6em']
+                          height:['1.4em','2em']
                         }
                       },
                       {

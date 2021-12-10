@@ -1046,7 +1046,7 @@ class FunctionsUtil {
       const blockInfo = await this.getBlockInfo(tokenTransferEvent.blockNumber);
       const hashKey = `${trancheConfig.token}_${tokenTransferEvent.transactionHash}`;
       const protocolConfig = this.getGlobalConfig(['stats', 'protocols', tokenConfig.protocol]);
-      const protocolIcon = protocolConfig ? `images/protocols/${protocolConfig.icon}.svg` : `images/protocols/${tokenConfig.protocol}.svg`;
+      const protocolIcon = protocolConfig && protocolConfig.icon ? `images/protocols/${protocolConfig.icon}` : `images/protocols/${tokenConfig.protocol}.svg`;
 
       const tx = {
         hashKey,
@@ -2127,7 +2127,7 @@ class FunctionsUtil {
     const curveAvailableTokens = this.getGlobalConfig(['curve', 'availableTokens']);
     Object.keys(curveAvailableTokens).forEach(token => {
       const curveTokenConfig = curveAvailableTokens[token];
-      const baseTokenConfig = this.getGlobalConfig(['stats', 'tokens', curveTokenConfig.baseToken]);
+      const baseTokenConfig = this.getGlobalConfig(['stats', 'tokens', curveTokenConfig.baseToken.toUpperCase()]);
       const baseTokenAddress = baseTokenConfig.address.toLowerCase();
       baseTokensConfigs[baseTokenAddress] = baseTokenConfig;
       baseTokensConfigs[baseTokenAddress].token = curveTokenConfig.baseToken;
@@ -3166,7 +3166,7 @@ class FunctionsUtil {
       return this.BNify(cachedData);
     }
 
-    const tokenConfig = this.getGlobalConfig(['stats', 'tokens', contractName]);
+    const tokenConfig = this.getGlobalConfig(['stats', 'tokens', contractName.toUpperCase()]);
     const decimals = tokenConfig && tokenConfig.decimals ? tokenConfig.decimals : await this.genericContractCall(contractName, 'decimals');
 
     return this.setCachedDataWithLocalStorage(cachedDataKey, decimals, null);
@@ -4040,7 +4040,7 @@ class FunctionsUtil {
   getTrancheStakingRewards = async (account, trancheConfig) => {
     const stakingRewards = {};
     await this.asyncForEach(trancheConfig.CDORewards.stakingRewards, async (tokenConfig) => {
-      const tokenGlobalConfig = this.getGlobalConfig(['stats', 'tokens', tokenConfig.token]);
+      const tokenGlobalConfig = this.getGlobalConfig(['stats', 'tokens', tokenConfig.token.toUpperCase()]);
       tokenConfig = { ...tokenConfig, ...tokenGlobalConfig };
       const tokenAmount = await this.genericContractCallCached(trancheConfig.CDORewards.name, 'expectedUserReward', [account, tokenConfig.address]);
       stakingRewards[tokenConfig.token] = this.fixTokenDecimals(tokenAmount, tokenConfig.decimals);
@@ -4060,7 +4060,7 @@ class FunctionsUtil {
     const internal_view = this.getQueryStringParameterByName('internal_view');
     const decimals = (fieldProps && fieldProps.decimals) || (this.props.isMobile ? 2 : 3);
     const minPrecision = (fieldProps && fieldProps.minPrecision) || (this.props.isMobile ? 3 : 4);
-    const tokenName = this.getGlobalConfig(['stats', 'tokens', token, 'label']) || this.capitalize(token);
+    const tokenName = this.getGlobalConfig(['stats', 'tokens', token.toUpperCase(), 'label']) || this.capitalize(token);
 
     const strategyConfig = tokenConfig.Strategy;
     const show_idle_apy = internal_view && parseInt(internal_view) === 1;
@@ -7128,7 +7128,7 @@ class FunctionsUtil {
         // Get gov token conversion rate
         let tokenConversionRate = null;
         if (convertToken) {
-          const fromTokenConfig = this.getGlobalConfig(['stats', 'tokens', convertToken]);
+          const fromTokenConfig = this.getGlobalConfig(['stats', 'tokens', convertToken.toUpperCase()]);
           try {
             tokenConversionRate = await this.getUniswapConversionRate(fromTokenConfig, destTokenConfig);
           } catch (error) {
@@ -7257,7 +7257,7 @@ class FunctionsUtil {
               // Get gov token conversion rate
               let tokenConversionRate = null;
               if (convertToken) {
-                const fromTokenConfig = this.getGlobalConfig(['stats', 'tokens', convertToken]);
+                const fromTokenConfig = this.getGlobalConfig(['stats', 'tokens', convertToken.toUpperCase()]);
                 if (fromTokenConfig) {
                   try {
                     tokenConversionRate = await this.getUniswapConversionRate(fromTokenConfig, govTokenConfig);
@@ -7719,7 +7719,6 @@ class FunctionsUtil {
     }
     return tokenBalance;
   }
-
   getAvgAPYStats = async (address, isRisk, startTimestamp = null, endTimestamp = null) => {
 
     const apiResults = await this.getTokenApiData(address, isRisk, startTimestamp, endTimestamp, true, 7200);
@@ -7743,7 +7742,7 @@ class FunctionsUtil {
   getTokenConversionRate = async (tokenConfig, isRisk, conversionRateField = null, count = 0) => {
 
     if (!conversionRateField) {
-      conversionRateField = this.getGlobalConfig(['stats', 'tokens', tokenConfig.token, 'conversionRateField']);
+      conversionRateField = this.getGlobalConfig(['stats', 'tokens', tokenConfig.token.toUpperCase(), 'conversionRateField']);
       if (!conversionRateField) {
         return null;
       }
@@ -7770,7 +7769,7 @@ class FunctionsUtil {
     const DAITokenConfig = {
       address: this.getContractByName('DAI')._address
     };
-    const ToTokenConfig = tokenConfig.token ? this.getGlobalConfig(['stats', 'tokens', tokenConfig.token]) : tokenConfig;
+    const ToTokenConfig = tokenConfig.token ? this.getGlobalConfig(['stats', 'tokens', tokenConfig.token.toUpperCase()]) : tokenConfig;
     const conversionRate = await this.getUniswapConversionRate(DAITokenConfig, ToTokenConfig);
     if (!this.BNify(conversionRate).isNaN()) {
       return this.setCachedDataWithLocalStorage(cachedDataKey, conversionRate);

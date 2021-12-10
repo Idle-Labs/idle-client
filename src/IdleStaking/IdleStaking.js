@@ -586,9 +586,6 @@ class IdleStaking extends Component {
 
   async updateData(selectedActionChanged=false){
     const newState = {};
-
-    // const rewardTokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.contractInfo.rewardToken]);
-
     const [
       tokenBalance,
       lockedEnd,

@@ -93,9 +93,10 @@ class AssetField extends Component {
     }
 
     const fieldProps = fieldInfo.props;
-    const decimals = fieldProps && fieldProps.decimals ? fieldProps.decimals : ( this.props.isMobile ? 2 : 3 );
-    // const addCurveApy = typeof this.props.addCurveApy !== 'undefined' ? this.props.addCurveApy : false;
     const addGovTokens = typeof this.props.addGovTokens !== 'undefined' ? this.props.addGovTokens : true;
+    // const addCurveApy = typeof this.props.addCurveApy !== 'undefined' ? this.props.addCurveApy : false;
+    const decimals = fieldProps && fieldProps.decimals ? fieldProps.decimals : ( this.props.isMobile ? 2 : 3 );
+    const tokenConfigStats = this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token.toUpperCase()]);
 
     let output = null;
     if (this.props.token){
@@ -498,7 +499,7 @@ class AssetField extends Component {
 
           aprChartData = [{
             id:this.props.token,
-            color: this.props.color ? this.props.color : 'hsl('+this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token,'color','hsl']).join(',')+')',
+            color: this.props.color ? this.props.color : 'hsl('+tokenConfigStats.color.hsl.join(',')+')',
             data: []
           }];
 
@@ -723,7 +724,7 @@ class AssetField extends Component {
 
           const performanceChartData = [{
             id:'Idle',
-            color: 'hsl('+this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token,'color','hsl']).join(',')+')',
+            color: 'hsl('+tokenConfigStats.color.hsl.join(',')+')',
             data: idleTokenPerformance
           }];
 
@@ -825,7 +826,8 @@ class AssetField extends Component {
       });
     }
 
-    const tokenConfig = this.props.tokenConfig || this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token]);
+    const tokenConfigStats = this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token.toUpperCase()]);
+    const tokenConfig = this.props.tokenConfig || tokenConfigStats;
       
     const maxPrecision = fieldProps && fieldProps.maxPrecision ? fieldProps.maxPrecision : 5;
     const decimals = fieldProps && fieldProps.decimals ? fieldProps.decimals : ( this.props.isMobile ? 2 : 3 );

@@ -680,7 +680,7 @@ class SendTxWithBalance extends Component {
                                   textOverflow:'ellipsis'
                                 }}
                               >
-                                Balance: {this.functionsUtil.BNify(this.props.tokenBalance).toFixed(this.props.isMobile ? 2 : 4)} {this.props.tokenConfig.token}
+                                Balance: {this.functionsUtil.BNify(this.props.tokenBalance).toFixed(this.props.isMobile ? 2 : 4)} {this.props.tokenConfig.label || this.props.tokenConfig.token}
                               </Link>
                             </Flex>
                           )

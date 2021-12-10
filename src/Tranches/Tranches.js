@@ -151,8 +151,8 @@ class Tranches extends Component {
 
       const portfolioDonutData = Object.keys(tranchesTokens).map( token => {
         const balanceValue = parseFloat(tranchesTokens[token].toFixed(4));
-        const tokenPercentage = tranchesTokens[token].div(portfolio.totalAmountLent).times(100);
-        const tokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',token]);
+        const tokenPercentage = tranchesTokens[token].div(portfolio.totalBalance).times(100);
+        const tokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase()]);
         return {
           id:token,
           name:token,
@@ -1115,7 +1115,7 @@ class Tranches extends Component {
                               name:'tokenIcon',
                               props:{
                                 mr:[0,2],
-                                height:['1.4em','1.6em']
+                                height:['1.4em','2em']
                               }
                             },
                             {
