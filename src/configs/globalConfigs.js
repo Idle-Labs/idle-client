@@ -1055,6 +1055,17 @@ const globalConfigs = {
         },
         address: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0'
       },
+      stETH: {
+        decimals: 18,
+        enabled: true,
+        label: 'stETH',
+        color: {
+          hex: '#00a3ff',
+          rgb: [0, 163, 255],
+          hsl: ['202', '100%', '50%']
+        },
+        address: '0xae7ab96520de3a18e5e111b5eaab095312d7fe84'
+      },
       MATIC: {
         decimals: 18,
         enabled: true,
@@ -1369,6 +1380,15 @@ const globalConfigs = {
         color: {
           rgb: [105, 226, 220],
           hsl: ["177", "68%", "65%"]
+        }
+      },
+      lido: {
+        legend: false,
+        enabled: true,
+        label: "Lido",
+        color: {
+          rgb: [0, 163, 255],
+          hsl: ['202', '100%', '50%']
         }
       },
       fuse: {

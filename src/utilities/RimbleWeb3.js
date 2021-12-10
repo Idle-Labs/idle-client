@@ -1115,7 +1115,9 @@ class RimbleTransaction extends React.Component {
         Object.keys(tokens).forEach( token => {
           const tokenConfig = tokens[token];
           if (!tranchesConfig.availableNetworks || tranchesConfig.availableNetworks.includes(requiredNetworkId)){
-            contracts.push(this.initContractWithoutSet(tokenConfig.name,tokenConfig.address,tokenConfig.abi));
+            if (tokenConfig.abi){
+              contracts.push(this.initContractWithoutSet(tokenConfig.token,tokenConfig.address,tokenConfig.abi));
+            }
             contracts.push(this.initContractWithoutSet(tokenConfig.AA.name,tokenConfig.AA.address,tokenConfig.AA.abi));
             contracts.push(this.initContractWithoutSet(tokenConfig.BB.name,tokenConfig.BB.address,tokenConfig.BB.abi));
             contracts.push(this.initContractWithoutSet(tokenConfig.CDO.name,tokenConfig.CDO.address,tokenConfig.CDO.abi));
@@ -1123,7 +1125,9 @@ class RimbleTransaction extends React.Component {
             contracts.push(this.initContractWithoutSet(tokenConfig.BB.CDORewards.name,tokenConfig.BB.CDORewards.address,tokenConfig.BB.CDORewards.abi));
           }
 
-          contractsNetworks[1].push(this.initContractWithoutSet(tokenConfig.name,tokenConfig.address,tokenConfig.abi,1));
+          if (tokenConfig.abi){
+            contractsNetworks[1].push(this.initContractWithoutSet(tokenConfig.token,tokenConfig.address,tokenConfig.abi,1));
+          }
           contractsNetworks[1].push(this.initContractWithoutSet(tokenConfig.AA.name,tokenConfig.AA.address,tokenConfig.AA.abi,1));
           contractsNetworks[1].push(this.initContractWithoutSet(tokenConfig.BB.name,tokenConfig.BB.address,tokenConfig.BB.abi,1));
           contractsNetworks[1].push(this.initContractWithoutSet(tokenConfig.CDO.name,tokenConfig.CDO.address,tokenConfig.CDO.abi,1));

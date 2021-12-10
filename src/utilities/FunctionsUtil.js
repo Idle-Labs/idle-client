@@ -1046,7 +1046,7 @@ class FunctionsUtil {
       const blockInfo = await this.getBlockInfo(tokenTransferEvent.blockNumber);
       const hashKey = `${trancheConfig.token}_${tokenTransferEvent.transactionHash}`;
       const protocolConfig = this.getGlobalConfig(['stats', 'protocols', tokenConfig.protocol]);
-      const protocolIcon = `images/protocols/${protocolConfig.icon || `${tokenConfig.protocol}.svg`}`;
+      const protocolIcon = protocolConfig ? `images/protocols/${protocolConfig.icon}.svg` : `images/protocols/${tokenConfig.protocol}.svg`;
 
       const tx = {
         hashKey,

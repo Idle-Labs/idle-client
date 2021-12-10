@@ -156,18 +156,73 @@ const availableTranches = {
         address:'0x2490D810BF6429264397Ba721A488b0C439aA745'
       }
     }
+  },
+  lido:{
+    stETH:{
+      abi:ERC20,
+      decimals:18,
+      token:'stETH',
+      limit:1700000,
+      protocol:'lido',
+      blockNumber:13776954,
+      address:'0xae7ab96520de3a18e5e111b5eaab095312d7fe84',
+      CDO:{
+        abi:IdleCDO,
+        decimals:18,
+        name:'IdleCDO_lido_stETHYield',
+        address:'0x34dcd573c5de4672c8248cd12a99f875ca112ad8'
+      },
+      Strategy:{
+        abi:IdleStrategy,
+        name:'IdleStrategy_lido_stETHYield'
+      },
+      AA:{
+        abi:ERC20,
+        decimals:18,
+        tranche:'AA',
+        functions:{
+          stake:'stake',
+          unstake:'unstake',
+          deposit:'depositAA',
+          withdraw:'withdrawAA'
+        },
+        CDORewards:{
+          decimals:18,
+          stakingRewards:[],
+          abi:IdleCDOTrancheRewards,
+          name:'IdleCDOTrancheRewards_lido_stETHYield_AA',
+          address:'0x0000000000000000000000000000000000000000'
+        },
+        label:'lido stETH AA',
+        blockNumber:13776954,
+        name:'AA_lido_stETHYield',
+        token:'AA_lido_stETHYield',
+        address:'0x2688fc68c4eac90d9e5e1b94776cf14eade8d877'
+      },
+      BB:{
+        abi:ERC20,
+        decimals:18,
+        tranche:'BB',
+        functions:{
+          stake:'stake',
+          unstake:'unstake',
+          deposit:'depositBB',
+          withdraw:'withdrawBB'
+        },
+        CDORewards:{
+          decimals:18,
+          stakingRewards:[],
+          abi:IdleCDOTrancheRewards,
+          name:'IdleCDOTrancheRewards_lido_stETHYield_BB',
+          address:'0x0000000000000000000000000000000000000000'
+        },
+        label:'lido stETH BB',
+        blockNumber:13776954,
+        name:'BB_lido_stETHYield',
+        token:'BB_lido_stETHYield',
+        address:'0x3a52fa30c33caf05faee0f9c5dfe5fd5fe8b3978'
+      }
+    }
   }
-  /*
-  yearn:{
-  	DAI:{
-  	  junior:{
-  	    address:'0x000000000000000000000000000000000000'
-  	  },
-  	  senior:{
-  	    address:'0x000000000000000000000000000000000000'
-  	  }
-  	}
-  }
-  */
 };
 export default availableTranches;
