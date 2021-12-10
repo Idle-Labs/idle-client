@@ -4055,12 +4055,16 @@ class FunctionsUtil {
   }
   loadTrancheField = async (field, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account = null, addGovTokens = true, formatValue = true, addTokenName = true) => {
     let output = null;
+    let rewardsTokensInfo = null;
     const maxPrecision = (fieldProps && fieldProps.maxPrecision) || 5;
+    const internal_view = this.getQueryStringParameterByName('internal_view');
     const decimals = (fieldProps && fieldProps.decimals) || (this.props.isMobile ? 2 : 3);
     const minPrecision = (fieldProps && fieldProps.minPrecision) || (this.props.isMobile ? 3 : 4);
     const tokenName = this.getGlobalConfig(['stats', 'tokens', token, 'label']) || this.capitalize(token);
 
     const strategyConfig = tokenConfig.Strategy;
+    const show_idle_apy = internal_view && parseInt(internal_view) === 1;
+    
     const idleStrategyAddress = await this.genericContractCallCached(tokenConfig.CDO.name, 'strategy');
     if (idleStrategyAddress) {
       await this.props.initContract(strategyConfig.name, idleStrategyAddress, strategyConfig.abi);
@@ -4267,11 +4271,23 @@ class FunctionsUtil {
         }
         break;
       case 'trancheApy':
-        let trancheApy = await this.genericContractCallCached(tokenConfig.CDO.name, 'getApr', [trancheConfig.address]);
+        let trancheApy = null;
+        [
+          rewardsTokensInfo,
+          trancheApy
+        ] = await Promise.all([
+          show_idle_apy ? this.getTrancheRewardTokensInfo(tokenConfig,trancheConfig) : null,
+          this.genericContractCallCached(tokenConfig.CDO.name, 'getApr', [trancheConfig.address])
+        ]);
         // console.log('trancheApy',this.props.network.required,tokenConfig.CDO.name,trancheConfig.address,trancheApy);
         if (trancheApy){
           const apr = this.fixTokenDecimals(trancheApy,tokenConfig.CDO.decimals);
-          const apy = this.apr2apy(apr.div(100)).times(100);
+          let apy = this.apr2apy(apr.div(100)).times(100);
+
+          if (rewardsTokensInfo && rewardsTokensInfo.IDLE && !this.BNify(rewardsTokensInfo.IDLE.apy).isNaN()){
+            apy = apy.plus(this.BNify(rewardsTokensInfo.IDLE.apy).times(100));
+          }
+
           if (apy.gt(1000)){
             output = this.BNify(1000);
           } else {
@@ -4310,7 +4326,7 @@ class FunctionsUtil {
       case 'trancheIDLELastHarvest':
       case 'trancheIDLEDistribution':
         output = this.BNify(0);
-        const rewardsTokensInfo = await this.getTrancheRewardTokensInfo(tokenConfig, trancheConfig);
+        rewardsTokensInfo = await this.getTrancheRewardTokensInfo(tokenConfig, trancheConfig);
         if (rewardsTokensInfo && rewardsTokensInfo.IDLE) {
           if (field === 'trancheIDLEDistribution') {
             output = this.fixDistributionSpeed(rewardsTokensInfo.IDLE.tokensPerSecond, idleGovTokenConfig.distributionFrequency);
@@ -4377,6 +4393,8 @@ class FunctionsUtil {
 
     let output = null;
     const govTokens = this.getGlobalConfig(['govTokens']);
+    const internal_view = this.getQueryStringParameterByName('internal_view');
+    const showIdleAPR = internal_view && parseInt(internal_view) === 1;
 
     // Remove gov tokens for risk adjusted strategy
     const strategyInfo = this.getGlobalConfig(['strategies', this.props.selectedStrategy]);
@@ -4572,7 +4590,7 @@ class FunctionsUtil {
             output = await idleGovToken.getAvgApr(govTokenAvailableTokens);
             break;
           default:
-            const tokenAprs = await this.getTokenAprs(tokenConfig, false, addGovTokens);
+            const tokenAprs = await this.getTokenAprs(tokenConfig, false, addGovTokens, showIdleAPR);
             if (tokenAprs && tokenAprs.avgApr !== null) {
               output = tokenAprs.avgApr;
             }
@@ -4580,7 +4598,7 @@ class FunctionsUtil {
         }
         break;
       case 'apy':
-        const tokenApys = await this.getTokenAprs(tokenConfig, false, addGovTokens);
+        const tokenApys = await this.getTokenAprs(tokenConfig, false, addGovTokens, showIdleAPR);
 
         output = this.BNify(0);
 
@@ -7872,7 +7890,7 @@ class FunctionsUtil {
   /*
   Get idleTokens aggregated APR
   */
-  getTokenAprs = async (tokenConfig, tokenAllocation = false, addGovTokens = true) => {
+  getTokenAprs = async (tokenConfig, tokenAllocation = false, addGovTokens = true, showIdleAPR = false) => {
 
     const tokenAprs = {
       avgApr: this.BNify(0),
@@ -7910,7 +7928,7 @@ class FunctionsUtil {
       tokenAprs.avgApy = this.apr2apy(tokenAprs.avgApr.div(100)).times(100);
 
       // Add $IDLE token APR
-      const idleGovTokenShowAPR = this.getGlobalConfig(['govTokens', 'IDLE', 'showAPR']);
+      const idleGovTokenShowAPR = showIdleAPR || this.getGlobalConfig(['govTokens', 'IDLE', 'showAPR']);
       const idleGovTokenEnabled = this.getGlobalConfig(['govTokens', 'IDLE', 'enabled']);
       if (idleGovTokenEnabled && idleGovTokenShowAPR) {
         const idleGovToken = this.getIdleGovToken();
