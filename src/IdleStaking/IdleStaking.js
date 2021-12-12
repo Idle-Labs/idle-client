@@ -148,8 +148,11 @@ class IdleStaking extends Component {
     let buttonDisabled = false;
     const minLockPeriod = this.state.lockPeriods[0];
     const maxLockPeriod = Object.assign([],this.state.lockPeriods).pop();
-    const minDate = this.state.lockedEnd ? this.functionsUtil.strToMoment(this.state.lockedEnd*1000).add(minLockPeriod.value,minLockPeriod.type) : this.functionsUtil.strToMoment().add(minLockPeriod.value,minLockPeriod.type);
-    const mDate = this.functionsUtil.strToMoment(this.state.lockPeriodInput,'YYYY-MM-DD');
+
+    let minDate = this.state.lockedEnd ? this.functionsUtil.strToMoment(this.state.lockedEnd*1000).add(minLockPeriod.value,minLockPeriod.type) : this.functionsUtil.strToMoment().add(minLockPeriod.value,minLockPeriod.type);
+    minDate = this.functionsUtil.strToMoment(minDate.format('YYYY-MM-DD'),'YYYY-MM-DD');
+
+    const mDate = this.functionsUtil.strToMoment(this.state.lockPeriodInput+' '+this.functionsUtil.strToMoment().format('HH:mm:ss'),'YYYY-MM-DD HH:mm:ss');
     const maxDate = this.functionsUtil.strToMoment().add(maxLockPeriod.value,maxLockPeriod.type);
     switch (this.state.selectedAction){
       default:
@@ -244,7 +247,6 @@ class IdleStaking extends Component {
       case 'Lock':
         methodName = 'create_lock';
         methodParams = [_value,_unlock_time];
-        // console.log('getTransactionParams',methodName,methodParams);
       break;
       case 'Increase Lock':
         methodName = 'increase_amount';
