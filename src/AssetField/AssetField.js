@@ -826,7 +826,7 @@ class AssetField extends Component {
       });
     }
 
-    const tokenConfigStats = this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token.toUpperCase()]);
+    const tokenConfigStats = this.props.token ? this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token.toUpperCase()]) : null;
     const tokenConfig = this.props.tokenConfig || tokenConfigStats;
       
     const maxPrecision = fieldProps && fieldProps.maxPrecision ? fieldProps.maxPrecision : 5;

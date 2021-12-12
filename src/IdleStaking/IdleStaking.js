@@ -47,6 +47,7 @@ class IdleStaking extends Component {
     description:null,
     tokenConfig:null,
     balanceProp:null,
+    maxTime:126144000,// 4 * 365 * 86400  # 4 years
     lockExpired:false,
     statsLoaded:false,
     tokenBalance:null,
@@ -148,7 +149,7 @@ class IdleStaking extends Component {
     const minLockPeriod = this.state.lockPeriods[0];
     const maxLockPeriod = Object.assign([],this.state.lockPeriods).pop();
     const minDate = this.state.lockedEnd ? this.functionsUtil.strToMoment(this.state.lockedEnd*1000).add(minLockPeriod.value,minLockPeriod.type) : this.functionsUtil.strToMoment().add(minLockPeriod.value,minLockPeriod.type);
-    const mDate = this.functionsUtil.strToMoment(this.state.lockPeriodTimestamp*1000);
+    const mDate = this.functionsUtil.strToMoment(this.state.lockPeriodInput,'YYYY-MM-DD');
     const maxDate = this.functionsUtil.strToMoment().add(maxLockPeriod.value,maxLockPeriod.type);
     switch (this.state.selectedAction){
       default:
@@ -161,8 +162,6 @@ class IdleStaking extends Component {
         }
       break;
     }
-
-    // console.log('checkButtonDisabled',this.state.selectedAction,this.state.increaseAction,buttonDisabled);
 
     this.setState({
       buttonDisabled
@@ -178,13 +177,24 @@ class IdleStaking extends Component {
     });
   }
 
-  calculateStkIDLEAmount(){
+  async getMaxStakeTimestamp(){
+    const blockInfo = await this.functionsUtil.getBlockInfo();
+    let timestamp = parseInt(Date.now()/1000);
+    if (blockInfo){
+      timestamp = blockInfo.timestamp;
+    }
+    timestamp += this.state.maxTime;
+    return timestamp;
+  }
+
+  async calculateStkIDLEAmount(){
     let internalInfoBox = null;
     if (this.state.inputValue && this.functionsUtil.BNify(this.state.inputValue).gt(0) && this.state.lockPeriodTimestamp !== null){
       switch (this.state.selectedAction){
         case 'Lock':
           const currTime = parseInt(Date.now()/1000);
-          const maxDate = this.functionsUtil.strToMoment().add(4,'year');
+          const maxStakeTimestamp = await this.getMaxStakeTimestamp();
+          const maxDate = this.functionsUtil.strToMoment(maxStakeTimestamp*1000);
           let endDate = this.functionsUtil.strToMoment(this.state.lockPeriodTimestamp*1000);
           if (endDate.isAfter(maxDate)){
             endDate = maxDate;
@@ -229,7 +239,7 @@ class IdleStaking extends Component {
     let methodName = null;
     let methodParams = [];
     const _value = this.functionsUtil.toBN(amount);
-    const _unlock_time = parseInt(this.state.lockPeriodTimestamp);
+    let _unlock_time = parseInt(this.state.lockPeriodTimestamp);
     switch (this.state.selectedAction){
       case 'Lock':
         methodName = 'create_lock';
@@ -464,36 +474,41 @@ class IdleStaking extends Component {
     });
   }
 
-  changelockPeriodInput(e){
+  async changeLockPeriodInput(e){
     const selectedLockPeriod = null;
     const lockPeriodInput = e.target.value;
     const currDate = this.functionsUtil.strToMoment();
     const mDate = this.functionsUtil.strToMoment(lockPeriodInput+' '+currDate.format('HH:mm:ss'),'YYYY-MM-DD HH:mm:ss').add(1,'second');
     if (mDate.isValid()){
-      const lockPeriodTimestamp = parseInt(mDate._d.getTime()/1000);
-      // console.log('changelockPeriodInput',lockPeriodTimestamp);
+      let lockPeriodTimestamp = parseInt(mDate._d.getTime()/1000);
+      // Check if lockPeriodTimestamp > maxStakeTimestamp
+      const maxStakeTimestamp = await this.getMaxStakeTimestamp();
+      if (lockPeriodTimestamp>maxStakeTimestamp){
+        lockPeriodTimestamp = maxStakeTimestamp;
+      }
+
       this.setState({
         lockPeriodInput,
         selectedLockPeriod,
         lockPeriodTimestamp
+      },() => {
+        this.checkButtonDisabled()
       });
     }
   }
 
-  selectLockPeriod(selectedLockPeriod){
+  async selectLockPeriod(selectedLockPeriod){
     const minDate = this.state.lockedEnd ? this.functionsUtil.strToMoment(this.state.lockedEnd*1000) : this.functionsUtil.strToMoment();
-    const maxDate = this.functionsUtil.strToMoment().add(4,'year');
-    let mDate = minDate.add(selectedLockPeriod.value,selectedLockPeriod.type).add(1,'second');
-
-    // Check if after 4 years from now
-    if (mDate.isAfter(maxDate)){
-      mDate = maxDate;
-    }
+    const mDate = minDate.add(selectedLockPeriod.value,selectedLockPeriod.type).add(1,'second');
 
     const lockPeriodInput = mDate.format('YYYY-MM-DD');
-    const lockPeriodTimestamp = parseInt(mDate._d.getTime()/1000);
+    let lockPeriodTimestamp = parseInt(mDate._d.getTime()/1000);
 
-    // console.log('selectLockPeriod',lockPeriodInput,lockPeriodTimestamp);
+    // Check if lockPeriodTimestamp > maxStakeTimestamp
+    const maxStakeTimestamp = await this.getMaxStakeTimestamp();
+    if (lockPeriodTimestamp>maxStakeTimestamp){
+      lockPeriodTimestamp = maxStakeTimestamp;
+    }
 
     this.setState({
       lockPeriodInput,
@@ -650,7 +665,8 @@ class IdleStaking extends Component {
       newState.transactionSucceeded = false;
     }
 
-    const maxDate = this.functionsUtil.strToMoment().add(4,'year').format('YYYY-MM-DD');
+    const maxDateTimestamp = await this.getMaxStakeTimestamp();
+    const maxDate = this.functionsUtil.strToMoment(maxDateTimestamp*1000).format('YYYY-MM-DD');
     newState.lockEndDateIsMaxEndDate = newState.lockedEnd ? this.functionsUtil.strToMoment(newState.lockedEnd*1000).format('YYYY-MM-DD')===maxDate : false;
 
     // console.log('lockEndDateIsMaxEndDate',newState.lockEndDateIsMaxEndDate,maxDate,this.functionsUtil.strToMoment(newState.lockedEnd*1000).format('YYYY-MM-DD'));
@@ -1135,7 +1151,7 @@ class IdleStaking extends Component {
                                       backgroundColor={'cardBg'}
                                       boxShadow={'none !important'}
                                       value={this.state.lockPeriodInput || ''}
-                                      onChange={this.changelockPeriodInput.bind(this)}
+                                      onChange={this.changeLockPeriodInput.bind(this)}
                                       border={`1px solid ${this.props.theme.colors.divider}`}
                                     />
                                     <Flex

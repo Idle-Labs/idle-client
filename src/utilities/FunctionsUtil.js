@@ -3004,7 +3004,7 @@ class FunctionsUtil {
       const currTime = parseInt(Date.now() / 1000);
       const validProposals = [];
       await this.asyncForEach(proposals, async (p) => {
-        if (p.end <= currTime || whitelist.includes(p.address.toLowerCase())){
+        if (p.end <= currTime || whitelist.includes(p.author.toLowerCase())){
           validProposals.push(p);
         } else {
           const blockNumber = p.snapshot;
@@ -3018,7 +3018,6 @@ class FunctionsUtil {
               const tokenContract = this.getContractByName(tokenName);
               if (tokenContract) {
                 const tokenBalance = await this.getTokenBalance(tokenName, tokenContract.address, true, blockNumber);
-                // console.log(p.relayerIpfsHash,p.address,s.name,tokenBalance ? tokenBalance.toFixed() : null);
                 if (tokenBalance && this.BNify(tokenBalance).gt(100)) {
                   checkedStrategies = true;
                 }
@@ -5539,13 +5538,17 @@ class FunctionsUtil {
     }
     return await this.props.web3.eth.getBlockNumber();
   }
-  getBlockInfo = async (blockNumber) => {
+  getBlockInfo = async (blockNumber='latest') => {
     const cachedDataKey = `getBlockInfo_${blockNumber}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
-    if (cachedData) {
+    if (cachedData && blockNumber !== 'latest') {
       return cachedData;
     }
     const blockInfo = await this.props.web3.eth.getBlock(blockNumber);
+    if (blockNumber === 'latest'){
+      return blockInfo;
+    }
+
     return blockInfo ? this.setCachedDataWithLocalStorage(cachedDataKey, blockInfo, null) : null;
   }
   getContractPastEvents = async (contractName, methodName, params = {}) => {
