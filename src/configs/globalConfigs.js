@@ -1066,6 +1066,18 @@ const globalConfigs = {
         },
         address: '0xae7ab96520de3a18e5e111b5eaab095312d7fe84'
       },
+      FRAX3CRV: {
+        decimals: 18,
+        enabled: true,
+        label: 'FRAX3CRV',
+        icon: "images/tokens/FRAX3CRV.png",
+        color: {
+          hex: '#333',
+          rgb: [51, 51, 51],
+          hsl: ['0, 0%, 20%']
+        },
+        address: '0xd632f22692FaC7611d2AA1C0D552930D43CAEd3B'
+      },
       MATIC: {
         decimals: 18,
         enabled: true,
@@ -1390,6 +1402,15 @@ const globalConfigs = {
         color: {
           rgb: [0, 163, 255],
           hsl: ['202', '100%', '50%']
+        }
+      },
+      convex: {
+        legend: false,
+        enabled: true,
+        label: "Convex",
+        color: {
+          rgb: [23, 129, 254],
+          hsl: ['212', '99%', '54%']
         }
       },
       fuse: {

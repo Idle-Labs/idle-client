@@ -223,6 +223,73 @@ const availableTranches = {
         address:'0x3a52fa30c33caf05faee0f9c5dfe5fd5fe8b3978'
       }
     }
+  },
+  convex:{
+    FRAX3CRV:{
+      abi:ERC20,
+      decimals:18,
+      limit:1700000,
+      token:'FRAX3CRV',
+      protocol:'convex',
+      blockNumber:13812864,
+      address:'0xd632f22692FaC7611d2AA1C0D552930D43CAEd3B',
+      CDO:{
+        abi:IdleCDO,
+        decimals:18,
+        name:'IdleCDO_convex_frax3crv',
+        address:'0x4ccaf1392a17203edab55a1f2af3079a8ac513e7'
+      },
+      Strategy:{
+        abi:IdleStrategy,
+        name:'IdleStrategy_convex_frax3crv'
+      },
+      AA:{
+        abi:ERC20,
+        decimals:18,
+        tranche:'AA',
+        functions:{
+          stake:'stake',
+          unstake:'unstake',
+          deposit:'depositAA',
+          withdraw:'withdrawAA'
+        },
+        CDORewards:{
+          decimals:18,
+          stakingRewards:[],
+          abi:IdleCDOTrancheRewards,
+          name:'IdleCDOTrancheRewards_convex_frax3crv_AA',
+          address:'0x0000000000000000000000000000000000000000'
+        },
+        blockNumber:13812864,
+        name:'AA_convex_frax3crv',
+        token:'AA_convex_frax3crv',
+        label:'convex frax3crv AA',
+        address:'0x15794da4dcf34e674c18bbfaf4a67ff6189690f5'
+      },
+      BB:{
+        abi:ERC20,
+        decimals:18,
+        tranche:'BB',
+        functions:{
+          stake:'stake',
+          unstake:'unstake',
+          deposit:'depositBB',
+          withdraw:'withdrawBB'
+        },
+        CDORewards:{
+          decimals:18,
+          stakingRewards:[],
+          abi:IdleCDOTrancheRewards,
+          name:'IdleCDOTrancheRewards_convex_frax3crv_BB',
+          address:'0x0000000000000000000000000000000000000000'
+        },
+        blockNumber:13812864,
+        name:'BB_convex_frax3crv',
+        token:'BB_convex_frax3crv',
+        label:'convex frax3crv BB',
+        address:'0x18cf59480d8c16856701f66028444546b7041307'
+      }
+    }
   }
 };
 export default availableTranches;

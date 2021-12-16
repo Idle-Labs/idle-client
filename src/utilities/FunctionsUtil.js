@@ -4064,6 +4064,7 @@ class FunctionsUtil {
     const strategyConfig = tokenConfig.Strategy;
     const show_idle_apy = internal_view && parseInt(internal_view) === 1;
     
+    // Create Tranche Strategy contract
     const idleStrategyAddress = await this.genericContractCallCached(tokenConfig.CDO.name, 'strategy');
     if (idleStrategyAddress) {
       await this.props.initContract(strategyConfig.name, idleStrategyAddress, strategyConfig.abi);
