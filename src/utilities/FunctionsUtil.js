@@ -4346,8 +4346,13 @@ class FunctionsUtil {
         }
         break;
       case 'AAIDLEDistribution':
-        output = this.abbreviateNumber('1234', decimals, maxPrecision, minPrecision) + ` IDLE/day`;
-        break;
+        output = this.abbreviateNumber('1234',decimals,maxPrecision,minPrecision)+` IDLE/day`;
+      break;
+      case 'trancheAPRSplitRatio':
+        output = await this.genericContractCall(tokenConfig.CDO.name,'trancheAPRSplitRatio')
+        output= output/1000
+        output= output.toString()+"/"+(100-output).toString();
+      break;
       case 'BBIDLEDistribution':
         output = this.abbreviateNumber('4321', decimals, maxPrecision, minPrecision) + ` IDLE/day`;
         break;

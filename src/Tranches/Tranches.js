@@ -817,7 +817,7 @@ class Tranches extends Component {
                   handleClick={(props) => this.selectTranche(props.protocol,props.token)}
                   cols={[
                     {
-                      title:'PROTOCOL',
+                      title:'PROTOCOL', 
                       props:{
                         width:[0.23,0.15]
                       },
@@ -837,7 +837,7 @@ class Tranches extends Component {
                     {
                       title:'TOKEN',
                       props:{
-                        width:[0.15, 0.12],
+                        width:[0.15, 0.08],
                       },
                       fields:[
                         {
@@ -853,6 +853,7 @@ class Tranches extends Component {
                         }
                       ]
                     },
+                    
                     /*
                     {
                       title:'TYPE',
@@ -879,7 +880,7 @@ class Tranches extends Component {
                     {
                       title:'POOL',
                       props:{
-                        width:[0.25, 0.14],
+                        width:[0.25, 0.09],
                       },
                       fields:[
                         {
@@ -894,7 +895,7 @@ class Tranches extends Component {
                       title:this.state.useTrancheType ? 'APY' : 'SENIOR APY',
                       visible:!this.state.useTrancheType || this.state.trancheType === 'AA',
                       props:{
-                        width:[this.state.useTrancheType ? 0.16 : 0.29,this.state.useTrancheType ? 0.12 : 0.15],
+                        width:[this.state.useTrancheType ? 0.16 : 0.29,this.state.useTrancheType ? 0.08 : 0.13],
                       },
                       parentProps:{
                         flexDirection:'column',
@@ -911,7 +912,7 @@ class Tranches extends Component {
                       title:this.state.useTrancheType ? 'APY' : 'JUNIOR APY',
                       visible:!this.state.useTrancheType || this.state.trancheType === 'BB',
                       props:{
-                        width:[this.state.useTrancheType ? 0.16 : 0.29,this.state.useTrancheType ? 0.12 : 0.15],
+                        width:[this.state.useTrancheType ? 0.16 : 0.29,this.state.useTrancheType ? 0.08 : 0.13],
                       },
                       parentProps:{
                         flexDirection:'column',
@@ -920,9 +921,33 @@ class Tranches extends Component {
                       fields:[
                         {
                           name:'juniorApy',
+                          props:{
+                            flexProps:{
+                              mr:3
+                            }
+                          },
                           showTooltip:true
                         },
                       ],
+                    },
+                    {
+                      mobile:false,
+                      title:'APR Ratio',
+                      props:{
+                        width:[0.15, 0.10],
+                      },
+                      fields:[
+                        {
+                          name:'trancheAPRSplitRatio',
+                          props:{
+                            flexProps:{
+                              mr:2
+                            },
+                            height:['1.4em','2em']
+                          }
+                        },
+                        
+                      ]
                     },
                     {
                       mobile:false,
