@@ -819,7 +819,7 @@ class Tranches extends Component {
                     {
                       title:'PROTOCOL', 
                       props:{
-                        width:[0.23,0.15]
+                        width:[0.23, this.state.useTrancheType ? 0.13 : 0.12]
                       },
                       fields:[
                         {
@@ -837,7 +837,7 @@ class Tranches extends Component {
                     {
                       title:'TOKEN',
                       props:{
-                        width:[0.15, 0.08],
+                        width:[0.15, this.state.useTrancheType ? 0.14 : 0.13],
                       },
                       fields:[
                         {
@@ -880,11 +880,11 @@ class Tranches extends Component {
                     {
                       title:'POOL',
                       props:{
-                        width:[0.25, 0.09],
+                        width:[0.25, this.state.useTrancheType ? 0.1 : 0.09],
                       },
                       fields:[
                         {
-                          name:this.state.useTrancheType ? `${this.state.trancheDetails.baseName}Pool` : 'pool',
+                          name:this.state.useTrancheType ? `${this.state.trancheDetails.baseName}PoolNoLabel` : 'pool',
                           props:{
                             decimals:2
                           }
@@ -895,7 +895,7 @@ class Tranches extends Component {
                       title:this.state.useTrancheType ? 'APY' : 'SENIOR APY',
                       visible:!this.state.useTrancheType || this.state.trancheType === 'AA',
                       props:{
-                        width:[this.state.useTrancheType ? 0.16 : 0.29,this.state.useTrancheType ? 0.08 : 0.13],
+                        width:[this.state.useTrancheType ? 0.16 : 0.29,this.state.useTrancheType ? 0.09 : 0.12],
                       },
                       parentProps:{
                         flexDirection:'column',
@@ -912,7 +912,7 @@ class Tranches extends Component {
                       title:this.state.useTrancheType ? 'APY' : 'JUNIOR APY',
                       visible:!this.state.useTrancheType || this.state.trancheType === 'BB',
                       props:{
-                        width:[this.state.useTrancheType ? 0.16 : 0.29,this.state.useTrancheType ? 0.08 : 0.13],
+                        width:[this.state.useTrancheType ? 0.16 : 0.29,this.state.useTrancheType ? 0.09 : 0.12],
                       },
                       parentProps:{
                         flexDirection:'column',
@@ -932,9 +932,9 @@ class Tranches extends Component {
                     },
                     {
                       mobile:false,
-                      title:'APR Ratio',
+                      title:'APR RATIO',
                       props:{
-                        width:[0.15, 0.10],
+                        width:[0.15, this.state.useTrancheType ? 0.12 : 0.10],
                       },
                       fields:[
                         {
@@ -953,7 +953,7 @@ class Tranches extends Component {
                       mobile:false,
                       title:'AUTO-FARMING',
                       props:{
-                        width:[0.25,this.state.useTrancheType ? 0.18 : 0.15],
+                        width:[0.25,this.state.useTrancheType ? 0.15 : 0.15],
                       },
                       fields:[
                         {
@@ -965,7 +965,7 @@ class Tranches extends Component {
                       mobile:false,
                       title:'STAKING REWARDS',
                       props:{
-                        width:[0.25,this.state.useTrancheType ? 0.18 : 0.13],
+                        width:[0.25,this.state.useTrancheType ? 0.15 : 0.13],
                       },
                       fields:[
                         {

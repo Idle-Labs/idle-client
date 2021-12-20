@@ -337,9 +337,10 @@ class FunctionsUtil {
               this.loadTrancheFieldRaw('tranchePool', {}, protocol, token, tranche, tokenConfig, trancheConfig, account),
               this.loadTrancheFieldRaw('tranchePrice', {}, protocol, token, tranche, tokenConfig, trancheConfig, account)
             ]);
-            const tokenBalance = trancheTokenBalance.times(tranchePrice);
 
+            let tokenBalance = trancheTokenBalance.times(tranchePrice);
             if (!this.BNify(tranchePrice).isNaN() && !this.BNify(tokenBalance).isNaN()) {
+              tokenBalance = await this.convertTrancheTokenBalance(tokenBalance,tokenConfig);
               const [
                 trancheUserInfo,
                 trancheApy,
@@ -349,10 +350,11 @@ class FunctionsUtil {
               ]);
 
               const poolShare = tokenBalance.div(tranchePool);
-              const amountDeposited = trancheUserInfo.amountDeposited;
+              const amountDeposited = await this.convertTrancheTokenBalance(trancheUserInfo.amountDeposited,tokenConfig);
               const trancheEarnings = tokenBalance.minus(amountDeposited);
 
-              // console.log('trancheBalance',protocol,token,tranche,'trancheTokenBalance',trancheTokenBalance.toFixed(),'tranchePrice',tranchePrice.toFixed(),'tokenBalance',tokenBalance.toFixed(),'trancheApy',trancheApy.toFixed(),'amountDeposited',amountDeposited.toFixed());
+              // console.log('trancheBalance',protocol,token,tranche,'trancheTokenBalance',trancheTokenBalance.toFixed(5),'tranchePrice',tranchePrice.toFixed(5),'tokenBalance',tokenBalance.toFixed(5),'trancheApy',trancheApy.toFixed(5),'amountDeposited',amountDeposited.toFixed(5));
+              
               portfolio.transactions = [...portfolio.transactions, ...trancheUserInfo.transactions];
 
               portfolio.tranchesBalance.push({
@@ -4074,35 +4076,42 @@ class FunctionsUtil {
     switch (field) {
       case 'protocolName':
         output = (this.getGlobalConfig(['stats', 'protocols', protocol, 'label']) || this.capitalize(protocol)).toUpperCase();
-        break;
+      break;
       case 'tokenName':
         output = tokenName;
-        break;
+      break;
       case 'trancheType':
         output = (this.getGlobalConfig(['tranches', tranche, 'baseName']) || '').toUpperCase();
         // console.log('trancheType',tranche,trancheConfig,output);
-        break;
+      break;
       case 'pool':
         let poolSize = await this.genericContractCallCached(tokenConfig.CDO.name, 'getContractValue');
         if (!this.BNify(poolSize).isNaN()) {
           output = this.fixTokenDecimals(poolSize, tokenConfig.CDO.decimals);
+          output = await this.convertTrancheTokenBalance(output, tokenConfig);
           if (formatValue) {
             output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision);
           }
         }
-        break;
+      break;
+      case 'seniorPoolNoLabel':
+        output = await this.loadTrancheField('tranchePool', fieldProps, protocol, token, tranche, tokenConfig, tokenConfig.AA, account, addGovTokens, formatValue, false);
+      break;
+      case 'juniorPoolNoLabel':
+        output = await this.loadTrancheField('tranchePool', fieldProps, protocol, token, tranche, tokenConfig, tokenConfig.BB, account, addGovTokens, formatValue, false);
+      break;
       case 'seniorPool':
         output = await this.loadTrancheField('tranchePool', fieldProps, protocol, token, tranche, tokenConfig, tokenConfig.AA, account, addGovTokens);
-        break;
+      break;
       case 'juniorPool':
         output = await this.loadTrancheField('tranchePool', fieldProps, protocol, token, tranche, tokenConfig, tokenConfig.BB, account, addGovTokens);
-        break;
+      break;
       case 'seniorApy':
         output = await this.loadTrancheField('trancheApy', fieldProps, protocol, token, tranche, tokenConfig, tokenConfig.AA, account, addGovTokens);
-        break;
+      break;
       case 'juniorApy':
         output = await this.loadTrancheField('trancheApy', fieldProps, protocol, token, tranche, tokenConfig, tokenConfig.BB, account, addGovTokens);
-        break;
+      break;
       case 'tranchePool':
         let [
           totalSupply,
@@ -4115,11 +4124,12 @@ class FunctionsUtil {
         output = this.BNify(0);
         if (!this.BNify(virtualPrice).isNaN() && !this.BNify(totalSupply).isNaN()) {
           output = this.fixTokenDecimals(totalSupply, tokenConfig.CDO.decimals).times(virtualPrice);
+          output = await this.convertTrancheTokenBalance(output, tokenConfig);
         }
         if (formatValue) {
           output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');
         }
-        break;
+      break;
       case 'trancheDeposited':
         const deposited = await this.getAmountDepositedTranche(tokenConfig, trancheConfig, account);
 
@@ -4133,19 +4143,19 @@ class FunctionsUtil {
         } else {
           output = formatValue ? '-' : null;
         }
-        break;
+      break;
       case 'trancheFee':
         output = await this.genericContractCallCached(tokenConfig.CDO.name, 'fee');
         if (output) {
           output = this.BNify(output).div(this.BNify(100000));
         }
-        break;
+      break;
       case 'tranchePrice':
         output = await this.genericContractCall(tokenConfig.CDO.name, 'virtualPrice', [trancheConfig.address]);
         if (output) {
           output = this.fixTokenDecimals(output, trancheConfig.decimals);
         }
-        break;
+      break;
       case 'trancheStaked':
         let [
           staked1,
@@ -4164,7 +4174,7 @@ class FunctionsUtil {
             output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');
           }
         }
-        break;
+      break;
       case 'trancheRedeemable':
         let [
           deposited1,
@@ -4181,7 +4191,7 @@ class FunctionsUtil {
             output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');
           }
         }
-        break;
+      break;
       case 'trancheRedeemableWithStaked':
         let [
           redeemable1,
@@ -4198,7 +4208,7 @@ class FunctionsUtil {
             output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');
           }
         }
-        break;
+      break;
       case 'earningsCounter':
         let [
           earningsStart,
@@ -4219,7 +4229,7 @@ class FunctionsUtil {
             earningsStart
           };
         }
-        break;
+      break;
       case 'feesCounter':
         let [
           trancheFee,
@@ -4240,7 +4250,7 @@ class FunctionsUtil {
             feesStart
           };
         }
-        break;
+      break;
       case 'earnings':
         const [
           deposited4,
@@ -4256,7 +4266,7 @@ class FunctionsUtil {
             output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');
           }
         }
-        break;
+      break;
       case 'earningsPerc':
         const [
           deposited2,
@@ -4269,7 +4279,7 @@ class FunctionsUtil {
         if (formatValue) {
           output = output.toFixed(decimals) + '%';
         }
-        break;
+      break;
       case 'trancheApy':
         let trancheApy = null;
         [
@@ -4288,19 +4298,19 @@ class FunctionsUtil {
             apy = apy.plus(this.BNify(rewardsTokensInfo.IDLE.apy).times(100));
           }
 
-          if (apy.gt(1000)){
-            output = this.BNify(1000);
+          if (apy.gt(9999)){
+            output = this.BNify(9999.99);
           } else {
             output = this.BNify(apy);
           }
           if (formatValue){
             output = output.toFixed(2)+'%';
-            if (apy.gt(1000)){
+            if (apy.gt(9999)){
               output = `>${output}`;
             }
           }
         }
-        break;
+      break;
       case 'realizedApy':
         const [
           firstDepositTx,
@@ -4322,7 +4332,7 @@ class FunctionsUtil {
             output = output.toFixed(2) + '%';
           }
         }
-        break;
+      break;
       case 'trancheIDLELastHarvest':
       case 'trancheIDLEDistribution':
         output = this.BNify(0);
@@ -4344,7 +4354,7 @@ class FunctionsUtil {
             output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + ` IDLE/${idleGovTokenConfig.distributionFrequency}`
           }
         }
-        break;
+      break;
       case 'AAIDLEDistribution':
         output = this.abbreviateNumber('1234',decimals,maxPrecision,minPrecision)+` IDLE/day`;
       break;
@@ -4355,7 +4365,7 @@ class FunctionsUtil {
       break;
       case 'BBIDLEDistribution':
         output = this.abbreviateNumber('4321', decimals, maxPrecision, minPrecision) + ` IDLE/day`;
-        break;
+      break;
       case 'govTokens':
       case 'autoFarming':
       case 'stakingRewards':
@@ -4385,9 +4395,19 @@ class FunctionsUtil {
             output[govTokenConfig.token] = govTokenConfig;
           });
         }
-        break;
+
+        // Add hard-coded tokens
+        if (tokenConfig[field] && typeof tokenConfig[field].forEach === 'function'){
+          tokenConfig[field].forEach( govToken => {
+            const govTokenConfig = this.getGlobalConfig(['stats','tokens',govToken]);
+            if (govTokenConfig){
+              output[govToken] = govTokenConfig;
+            }
+          });
+        }
+      break;
       default:
-        break;
+      break;
     }
 
     // console.log('loadTrancheField',field,fieldProps,protocol,token,tranche,tokenConfig,trancheConfig,account,addGovTokens,formatValue);
@@ -7713,6 +7733,25 @@ class FunctionsUtil {
 
     return tokenBalances;
   }
+  getTokenConversionRateField = (token) => {
+    return this.getGlobalConfig(['stats', 'tokens', token.toUpperCase(), 'conversionRateField']);
+  }
+  convertTrancheTokenBalance = async (tokenBalance, tokenConfig) => {
+    // Check for USD conversion rate
+    tokenBalance = this.BNify(tokenBalance);
+
+    const conversionRateField = this.getTokenConversionRateField(tokenConfig.token);
+    if (!conversionRateField) {
+      return tokenBalance;
+    }
+    if (tokenBalance.gt(0)){
+      const tokenUsdConversionRate = await this.getTokenConversionRateUniswap(tokenConfig);
+      if (tokenUsdConversionRate) {
+        tokenBalance = tokenBalance.times(tokenUsdConversionRate);
+      }
+    }
+    return tokenBalance;
+  }
   /*
   Convert token Balance
   */
@@ -7729,9 +7768,7 @@ class FunctionsUtil {
     return tokenBalance;
   }
   getAvgAPYStats = async (address, isRisk, startTimestamp = null, endTimestamp = null) => {
-
     const apiResults = await this.getTokenApiData(address, isRisk, startTimestamp, endTimestamp, true, 7200);
-
     if (apiResults && apiResults.length) {
       const apr = apiResults.reduce((sum, r) => {
         const idleRate = this.fixTokenDecimals(r.idleRate, 18);
@@ -7744,14 +7781,33 @@ class FunctionsUtil {
 
     return this.BNify(0);
   }
+  getTokenConversionRateUniswap = async (tokenConfig) => {
 
+    // Check for cached data
+    const cachedDataKey = `tokenConversionRateUniswap_${tokenConfig.address}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData && !this.BNify(cachedData).isNaN()) {
+      return this.BNify(cachedData);
+    }
+
+    const DAITokenConfig = {
+      address: this.getContractByName('DAI')._address
+    };
+    const ToTokenConfig = tokenConfig.token ? this.getGlobalConfig(['stats', 'tokens', tokenConfig.token.toUpperCase()]) : tokenConfig.token;
+    const conversionRate = await this.getUniswapConversionRate(DAITokenConfig, ToTokenConfig);
+    if (!this.BNify(conversionRate).isNaN()) {
+      return this.setCachedDataWithLocalStorage(cachedDataKey, conversionRate);
+    }
+
+    return null;
+  }
   /*
   Get idleToken conversion rate
   */
   getTokenConversionRate = async (tokenConfig, isRisk, conversionRateField = null, count = 0) => {
 
     if (!conversionRateField) {
-      conversionRateField = this.getGlobalConfig(['stats', 'tokens', tokenConfig.token.toUpperCase(), 'conversionRateField']);
+      conversionRateField = this.getTokenConversionRateField(tokenConfig.token);
       if (!conversionRateField) {
         return null;
       }

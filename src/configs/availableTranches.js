@@ -232,6 +232,7 @@ const availableTranches = {
       token:'FRAX3CRV',
       protocol:'convex',
       blockNumber:13812864,
+      autoFarming:['CVX','CRV'],
       address:'0xd632f22692FaC7611d2AA1C0D552930D43CAEd3B',
       CDO:{
         abi:IdleCDO,

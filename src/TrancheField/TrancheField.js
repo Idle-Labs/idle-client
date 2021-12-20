@@ -259,27 +259,30 @@ class TrancheField extends Component {
             {...fieldInfo.parentProps}
           >
             {
-              Object.values(this.state[fieldInfo.name]).map( (govTokenConfig,govTokenIndex) => (
-                <AssetField
-                  token={govTokenConfig.token}
-                  tokenConfig={govTokenConfig}
-                  key={`asset_${govTokenIndex}`}
-                  fieldInfo={{
-                    name:'iconTooltip',
-                    tooltipProps:{
-                      message:`${govTokenConfig.token}`+(this.state.getGovTokensDistributionSpeed && this.state.getGovTokensDistributionSpeed[govTokenConfig.token] ? `: ${this.state.getGovTokensDistributionSpeed[govTokenConfig.token].toFixed(decimals)}/${govTokenConfig.distributionFrequency} (for the whole pool)` : '')
-                    },
-                    props:{
-                      borderRadius:'50%',
-                      position:'relative',
-                      height:['1.4em','2em'],
-                      ml:govTokenIndex ? '-10px' : 0,
-                      zIndex:Object.values(this.state[fieldInfo.name]).length-govTokenIndex,
-                      boxShadow:['1px 1px 1px 0px rgba(0,0,0,0.1)','1px 2px 3px 0px rgba(0,0,0,0.1)'],
-                    }
-                  }}
-                />
-              ))
+              Object.keys(this.state[fieldInfo.name]).map( (govToken,govTokenIndex) => {
+                const govTokenConfig = this.state[fieldInfo.name][govToken];
+                return (
+                  <AssetField
+                    token={govToken}
+                    tokenConfig={govTokenConfig}
+                    key={`asset_${govTokenIndex}`}
+                    fieldInfo={{
+                      name:'iconTooltip',
+                      tooltipProps:{
+                        message:`${govToken}`+(this.state.getGovTokensDistributionSpeed && this.state.getGovTokensDistributionSpeed[govToken] ? `: ${this.state.getGovTokensDistributionSpeed[govToken].toFixed(decimals)}/${govTokenConfig.distributionFrequency} (for the whole pool)` : '')
+                      },
+                      props:{
+                        borderRadius:'50%',
+                        position:'relative',
+                        height:['1.4em','2em'],
+                        ml:govTokenIndex ? '-10px' : 0,
+                        zIndex:Object.values(this.state[fieldInfo.name]).length-govTokenIndex,
+                        boxShadow:['1px 1px 1px 0px rgba(0,0,0,0.1)','1px 2px 3px 0px rgba(0,0,0,0.1)'],
+                      }
+                    }}
+                  />
+                );
+              })
             }
           </Flex>
         ) : this.state[fieldInfo.name] ? (

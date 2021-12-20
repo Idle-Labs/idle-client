@@ -697,7 +697,6 @@ const globalConfigs = {
         "Higher risk exposure by protecting senior tranches",
         "No locking period or epochs",
         "Auto-Reinvest accrued tokens",
-        "Stake to receive $IDLE tokens"
       ],
       description: {
         withdraw: "You can withdraw your funds at any time from the tranche.",
@@ -1064,7 +1063,30 @@ const globalConfigs = {
           rgb: [0, 163, 255],
           hsl: ['202', '100%', '50%']
         },
+        conversionRateField: "stETHDAIPrice",
         address: '0xae7ab96520de3a18e5e111b5eaab095312d7fe84'
+      },
+      CVX: {
+        decimals: 18,
+        enabled: true,
+        label: 'CVX',
+        color: {
+          hex: '#3a3a3a',
+          rgb: [58, 58, 58],
+          hsl: ['0', '0%', '23%']
+        },
+        address: '0x4e3fbd56cd56c3e72c1403e103b45db9da5b9d2b'
+      },
+      CRV: {
+        decimals: 18,
+        enabled: true,
+        label: 'CRV',
+        color: {
+          hex: '#3466a3',
+          rgb: [52, 102, 163],
+          hsl: ['213', '52%', '42%']
+        },
+        address: '0xD533a949740bb3306d119CC777fa900bA034cd52'
       },
       FRAX3CRV: {
         decimals: 18,
@@ -1409,8 +1431,8 @@ const globalConfigs = {
         enabled: true,
         label: "Convex",
         color: {
-          rgb: [23, 129, 254],
-          hsl: ['212', '99%', '54%']
+          rgb: [58, 58, 58],
+          hsl: ['0', '0%', '23%']
         }
       },
       fuse: {
