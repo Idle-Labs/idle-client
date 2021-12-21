@@ -4386,7 +4386,13 @@ class FunctionsUtil {
         ]);
         // console.log('trancheApy',this.props.network.required,tokenConfig.CDO.name,trancheConfig.address,trancheApy);
         if (trancheApy){
-          const apr = this.fixTokenDecimals(trancheApy,tokenConfig.CDO.decimals);
+          let apr = this.fixTokenDecimals(trancheApy,tokenConfig.CDO.decimals);
+
+          // Hot-fix for convex
+          if (protocol === 'convex'){
+            apr = apr.times(100);
+          }
+
           let apy = this.apr2apy(apr.div(100)).times(100);
 
           if (rewardsTokensInfo && rewardsTokensInfo.IDLE && !this.BNify(rewardsTokensInfo.IDLE.apy).isNaN()){

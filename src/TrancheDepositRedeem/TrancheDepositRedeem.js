@@ -274,12 +274,14 @@ class TrancheDetails extends Component {
 
   async checkLimit(amount){
     const trancheLimit = this.functionsUtil.BNify(this.props.tokenConfig.limit);
-    const poolSize = await this.functionsUtil.loadTrancheFieldRaw(`pool`,{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account);
-    if (poolSize.plus(amount).gt(trancheLimit)){
-      this.setState({
-        activeModal:'limit'
-      })
-      return false;
+    if (trancheLimit.gt(0)){
+      const poolSize = await this.functionsUtil.loadTrancheFieldRaw(`pool`,{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account);
+      if (poolSize.plus(amount).gt(trancheLimit)){
+        this.setState({
+          activeModal:'limit'
+        })
+        return false;
+      }
     }
     return true;
   }

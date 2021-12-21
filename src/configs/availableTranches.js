@@ -5,9 +5,9 @@ import IdleCDOTrancheRewards from '../contracts/IdleCDOTrancheRewards.json';
 const availableTranches = {
   idle:{
     DAI:{
+      limit:0,
       token:'DAI',
       decimals:18,
-      limit:1700000,
       protocol:'idle',
       blockNumber:13054628,
       address:'0x6b175474e89094c44da98b954eedeac495271d0f',
@@ -81,9 +81,9 @@ const availableTranches = {
       }
     },
     FEI:{
+      limit:0,
       token:'FEI',
       decimals:18,
-      limit:1700000,
       protocol:'idle',
       blockNumber:13575397,
       address:'0x956f47f50a910163d8bf957cf5846d573e7f87ca',
@@ -153,10 +153,10 @@ const availableTranches = {
   },
   lido:{
     stETH:{
+      limit:0,
       abi:ERC20,
       decimals:18,
       token:'stETH',
-      limit:1700000,
       protocol:'lido',
       blockNumber:13776954,
       address:'0xae7ab96520de3a18e5e111b5eaab095312d7fe84',
@@ -222,7 +222,7 @@ const availableTranches = {
     FRAX3CRV:{
       abi:ERC20,
       decimals:18,
-      limit:1700000,
+      limit:1000000,
       token:'FRAX3CRV',
       protocol:'convex',
       experimental:true,
@@ -289,7 +289,7 @@ const availableTranches = {
     MIM3CRV:{
       abi:ERC20,
       decimals:18,
-      limit:1700000,
+      limit:1000000,
       token:'MIM3CRV',
       protocol:'convex',
       experimental:true,
