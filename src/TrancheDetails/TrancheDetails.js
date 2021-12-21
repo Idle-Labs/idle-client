@@ -583,8 +583,8 @@ class TrancheDetails extends Component {
             </Flex>
           </Flex>
           {
-            /*
-            (this.functionsUtil.BNify(this.state.stakedBalance).gt(0) || this.functionsUtil.BNify(this.state.trancheBalance).gt(0)) && (
+            //(this.functionsUtil.BNify(this.state.stakedBalance).gt(0) || this.functionsUtil.BNify(this.state.trancheBalance).gt(0)) && (
+            this.props.showSelectButton && (
               <Flex
                 py={2}
                 style={{
@@ -613,8 +613,8 @@ class TrancheDetails extends Component {
                       name:'trancheDeposited',
                       props:{
                         decimals:4,
-                        fontWeight:2,
-                        fontSize:[2,4],
+                        fontWeight:3,
+                        fontSize:[2,3],
                         color:'copyColor'
                       }
                     }}
@@ -642,8 +642,8 @@ class TrancheDetails extends Component {
                       name:'trancheStaked',
                       props:{
                         decimals:4,
-                        fontWeight:2,
-                        fontSize:[2,4],
+                        fontWeight:3,
+                        fontSize:[2,3],
                         color:'copyColor'
                       }
                     }}
@@ -663,16 +663,16 @@ class TrancheDetails extends Component {
                     fontSize={[1,2]}
                     color={'cellText'}
                   >
-                    Redeemable
+                    Limit Cap
                   </Text>
                   <TrancheField
                     {...this.props}
                     fieldInfo={{
-                      name:'trancheRedeemable',
+                      name:'trancheLimit',
                       props:{
                         decimals:4,
-                        fontWeight:2,
-                        fontSize:[2,4],
+                        fontWeight:3,
+                        fontSize:[2,3],
                         color:'copyColor'
                       }
                     }}
@@ -685,7 +685,6 @@ class TrancheDetails extends Component {
                 </Flex>
               </Flex>
             )
-            */
           }
           {
             this.props.showSelectButton ? (

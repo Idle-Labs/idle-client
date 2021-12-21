@@ -69,7 +69,9 @@ class PortfolioEquityTranches extends Component {
     const transactions = this.props.transactionsList;
 
     const chartData = [];
+    const tokensData = {};
     let tokensBalance = {};
+    let lastTxTimestamp = null;
     let firstTxTimestamp = null;
 
     await this.functionsUtil.asyncForEach(enabledTokens,async (selectedToken) => {
@@ -81,15 +83,16 @@ class PortfolioEquityTranches extends Component {
 
         let amountLent = this.functionsUtil.BNify(0);
 
-        filteredTxs.forEach((tx,index) => {
+        await this.functionsUtil.asyncForEach(filteredTxs,async (tx,index) => {
 
           // Skip transactions with no hash or pending
           if (!tx.hash || (tx.status && tx.status === 'Pending')){
             return false;
           }
-          
+
           firstTxTimestamp = firstTxTimestamp ? Math.min(firstTxTimestamp,parseInt(tx.timeStamp)) : parseInt(tx.timeStamp);
 
+          const timeStamp = parseInt(tx.timeStamp);
           const tokenAmount = this.functionsUtil.BNify(tx.tokenAmount);
 
           switch (tx.action){
@@ -110,25 +113,71 @@ class PortfolioEquityTranches extends Component {
 
           const action = tx.action;
           const balance = amountLent;
-          const timeStamp = parseInt(tx.timeStamp);
+          const tranche = tx.tranche;
+          const protocol = tx.protocol;
           const tranchePrice = this.functionsUtil.BNify(tx.tranchePrice);
           const trancheTokens = this.functionsUtil.BNify(tx.trancheTokens);
-
-          if (!tranchePrice.isNaN() && !tranchePrice.isNaN()){
+          if (!tranchePrice.isNaN() && !trancheTokens.isNaN()){
             tokensBalance[selectedToken].push({
               action,
               balance,
+              tranche,
+              protocol,
               timeStamp,
               tokenAmount,
               tranchePrice,
               trancheTokens
             });
           }
+
+          // Get updated tranches prices
+          await this.functionsUtil.asyncForEach(Object.keys(tokensBalance),async (token) => {
+            if (tokensBalance[token].length){
+              const tokenBalanceConfig = tokensBalance[token][0];
+              const tokenConfig = this.props.availableTranches[tokenBalanceConfig.protocol.toLowerCase()][token];
+              const conversionRateField = this.functionsUtil.getTokenConversionRateField(token);
+              const [
+                tokenConversionRate,
+                tranchePriceAA,
+                tranchePriceBB
+              ] = await Promise.all([
+                conversionRateField ? this.functionsUtil.getTokenConversionRateUniswap(tokenConfig, tx.blockNumber) : null,
+                this.functionsUtil.genericContractCallCached(tokenConfig.CDO.name, 'virtualPrice', [tokenConfig.AA.address], {}, tx.blockNumber),
+                this.functionsUtil.genericContractCallCached(tokenConfig.CDO.name, 'virtualPrice', [tokenConfig.BB.address], {}, tx.blockNumber)
+              ]);
+              if (!tokensData[token]){
+                tokensData[token] = [];
+              }
+
+              const tokenDataAA = {
+                timeStamp,
+                tranche:'AA',
+                tranchePrice:this.functionsUtil.BNify(tranchePriceAA)
+              };
+              const tokenDataBB = {
+                timeStamp,
+                tranche:'BB',
+                tranchePrice:this.functionsUtil.BNify(tranchePriceBB)
+              };
+              if (conversionRateField){
+                tokenDataAA[conversionRateField] = tokenConversionRate;
+                tokenDataBB[conversionRateField] = tokenConversionRate;
+              }
+
+              if (timeStamp>lastTxTimestamp){
+                lastTxTimestamp = timeStamp;
+              }
+              // console.log(token,tokenConfig.CDO.name,tokenBalanceConfig.protocol,tokenBalanceConfig.tranche,tx.blockNumber,tranchePrice,tokenDataAA);
+
+              tokensData[token].push(tokenDataAA);
+              tokensData[token].push(tokenDataBB);
+
+              tokensData[token] = tokensData[token].sort((a, b) => (parseInt(a.timeStamp) > parseInt(b.timeStamp) ? 1 : -1));
+            }
+          });
         });
       }
     });
-
-    // console.log('tokensBalance',tokensBalance);
 
     // Calculate Start Date
     let startDate = null;
@@ -160,14 +209,7 @@ class PortfolioEquityTranches extends Component {
     let aggregatedBalance = null;
     const aggregatedBalancesKeys = {};
     const tokensBalancesPerDate = {};
-    const currTimestamp = parseInt(Date.now()/1000)+86400;
-
-    const tokensData = {};
-
-    await this.functionsUtil.asyncForEach(Object.keys(tokensBalance),async (token) => {
-      // tokensData[token] = await this.functionsUtil.getTokenApiData(this.props.availableTokens[token].address,isRisk,firstTxTimestamp,null,false,3600);
-      tokensData[token] = [];
-    });
+    const currTimestamp = parseInt(this.functionsUtil.strToMoment(this.functionsUtil.strToMoment().format('YYYY-MM-DD')+' 23:59:59','YYYY-MM-DD HH:mm:ss')._d.getTime()/1000);
 
     const trancheTokenBalance = {};
 
@@ -175,7 +217,56 @@ class PortfolioEquityTranches extends Component {
       firstTxTimestamp = currTimestamp;
     }
 
-    for (let timeStamp=firstTxTimestamp;timeStamp<=currTimestamp;timeStamp+=this.props.frequencySeconds){
+    let lastTimestamp = parseInt(this.functionsUtil.strToMoment(this.functionsUtil.strToMoment().format('YYYY-MM-DD')+' 00:00:00','YYYY-MM-DD HH:mm:ss')._d.getTime()/1000);
+
+    // Collect tranche prices and conversion rates for the current timestamp
+    await this.functionsUtil.asyncForEach(Object.keys(tokensBalance),async (token) => {
+      if (tokensBalance[token].length){
+        const tokenBalanceConfig = tokensBalance[token][0];
+        const tokenConfig = this.props.availableTranches[tokenBalanceConfig.protocol.toLowerCase()][token];
+        const conversionRateField = this.functionsUtil.getTokenConversionRateField(token);
+        const [
+          tokenConversionRate,
+          tranchePriceAA,
+          tranchePriceBB
+        ] = await Promise.all([
+          conversionRateField ? this.functionsUtil.getTokenConversionRateUniswap(tokenConfig) : null,
+          this.functionsUtil.genericContractCallCached(tokenConfig.CDO.name, 'virtualPrice', [tokenConfig.AA.address]),
+          this.functionsUtil.genericContractCallCached(tokenConfig.CDO.name, 'virtualPrice', [tokenConfig.BB.address])
+        ]);
+        if (!tokensData[token]){
+          tokensData[token] = [];
+        }
+
+        const tokenDataAA = {
+          tranche:'AA',
+          timeStamp:lastTimestamp,
+          tranchePrice:this.functionsUtil.BNify(tranchePriceAA)
+        };
+        const tokenDataBB = {
+          tranche:'BB',
+          timeStamp:lastTimestamp,
+          tranchePrice:this.functionsUtil.BNify(tranchePriceBB)
+        };
+        if (conversionRateField){
+          tokenDataAA[conversionRateField] = tokenConversionRate;
+          tokenDataBB[conversionRateField] = tokenConversionRate;
+        }
+
+        tokensData[token].push(tokenDataAA);
+        tokensData[token].push(tokenDataBB);
+
+        tokensData[token] = tokensData[token].sort((a, b) => (parseInt(a.timeStamp) > parseInt(b.timeStamp) ? 1 : -1));
+      }
+    });
+
+    // console.log('tokensData',tokensData);
+    // console.log('transactions',transactions);
+    // console.log('tokensBalance',tokensBalance);
+
+    const tranches = this.functionsUtil.getGlobalConfig(['tranches']);
+
+    for (let timeStamp=firstTxTimestamp;timeStamp<=currTimestamp;timeStamp+=this.props.frequencySeconds) {
 
       const foundBalances = {};
       const tokensBalances = {};
@@ -187,84 +278,119 @@ class PortfolioEquityTranches extends Component {
 
       // await this.functionsUtil.asyncForEach(Object.keys(tokensBalance),async (token) => {
       // eslint-disable-next-line
-      Object.keys(tokensBalance).forEach(token => {
+      Object.keys(tokensBalance).forEach( token => {
 
-        let lastTokenData = null;
-        const lastTokenDataUnfiltered = Object.values(tokensData[token]).pop();
-        const filteredTokenData = tokensData[token].filter(tx => (tx.timestamp>=prevTimestamp && tx.timestamp<=timeStamp));
-        if (filteredTokenData && filteredTokenData.length){
-          lastTokenData = filteredTokenData.pop();
+        if (!prevBalances[token]){
+          prevBalances[token] = {};
         }
-
+        if (!foundBalances[token]){
+          foundBalances[token] = {};
+        }
+        if (!tokensBalances[token]){
+          tokensBalances[token] = this.functionsUtil.BNify(0);
+        }
         if (!trancheTokenBalance[token]){
-          trancheTokenBalance[token] = this.functionsUtil.BNify(0);
+          trancheTokenBalance[token] = {};
         }
 
-        const tokenDecimals = this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase(),'decimals']);
-        let filteredBalances = tokensBalance[token].filter(tx => (tx.timeStamp<=timeStamp && (!prevTimestamp || tx.timeStamp>prevTimestamp)));
-        
-        if (!filteredBalances.length){
-          if (prevBalances && prevBalances[token]){
-            filteredBalances = prevBalances[token];
-            const lastFilteredTx = Object.assign([],filteredBalances).pop();
-            const currentBalance = parseFloat(lastFilteredTx.balance);
+        Object.keys(tranches).forEach( tranche => {
 
-            // Take idleToken price from API and calculate new balance
-            if (currentBalance>0 && timeStamp>firstTxTimestamp && lastTokenData){
-              const trancheTokens = trancheTokenBalance[token];
-              const tranchePrice = this.functionsUtil.fixTokenDecimals(lastTokenData.tranchePrice,tokenDecimals);
-              let newBalance = trancheTokens.times(tranchePrice);
+          // Skip tranche if no balance
+          const filteredTrancheBalances = tokensBalance[token].filter(tx => (tx.tranche===tranche));
+          if (!filteredTrancheBalances || !filteredTrancheBalances.length) {
+            return;
+          }
 
-              // Set new balance and tranchePrice
-              lastFilteredTx.balance = newBalance;
-              lastFilteredTx.tranchePrice = tranchePrice;
-              filteredBalances = [lastFilteredTx];
+          let lastTokenData = null;
+          const lastTokenDataUnfiltered = tokensData[token] ? Object.values(tokensData[token].filter( tx => tx.tranche===tranche )).pop() : null;
+          let filteredTokenData = tokensData[token] ? tokensData[token].filter(tx => (tx.tranche===tranche && tx.timeStamp>=prevTimestamp && tx.timeStamp<=timeStamp)) : null;
+          if (filteredTokenData && filteredTokenData.length){
+            lastTokenData = filteredTokenData.pop();
+          } else {
+            lastTokenData = lastTokenDataUnfiltered;
+            if (lastTokenData && lastTokenData.timeStamp>timeStamp){
+              lastTokenData = null;
+            }
+          }
+
+          // console.log(this.functionsUtil.strToMoment(timeStamp*1000).format('DD/MM/YYYY HH:mm:ss'),timeStamp,token,tranche,filteredTokenData,lastTokenData,(lastTokenData ? this.functionsUtil.strToMoment(lastTokenData.timeStamp*1000).format('DD/MM/YYYY HH:mm:ss') : null),(lastTokenData ? lastTokenData.tranchePrice.toFixed(5) : null ));
+
+          if (!trancheTokenBalance[token][tranche]){
+            trancheTokenBalance[token][tranche] = this.functionsUtil.BNify(0);
+          }
+
+          if (!prevBalances[token][tranche]){
+            prevBalances[token][tranche] = null;
+          }
+
+          if (!foundBalances[token][tranche]){
+            foundBalances[token][tranche] = null;
+          }
+
+          const tokenDecimals = this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase(),'decimals']);
+          let filteredBalances = tokensBalance[token].filter(tx => (tx.tranche===tranche && tx.timeStamp<=timeStamp && (!prevTimestamp || tx.timeStamp>prevTimestamp)));
+          
+          if (!filteredBalances.length){
+            if (prevBalances && prevBalances[token] && prevBalances[token][tranche]){
+              filteredBalances = prevBalances[token][tranche];
+              const lastFilteredTx = Object.values(filteredBalances).pop();
+              const currentBalance = parseFloat(lastFilteredTx.balance);
+
+              // Take tranchePrice from API and calculate new balance
+              if (currentBalance>0 && timeStamp>firstTxTimestamp && lastTokenData){
+                const trancheTokens = trancheTokenBalance[token][tranche];
+                const tranchePrice = this.functionsUtil.fixTokenDecimals(lastTokenData.tranchePrice,tokenDecimals);
+                let newBalance = trancheTokens.times(tranchePrice);
+
+                // Set new balance and tranchePrice
+                lastFilteredTx.balance = newBalance;
+                lastFilteredTx.tranchePrice = tranchePrice;
+                filteredBalances = [lastFilteredTx];
+
+                // console.log(this.functionsUtil.strToMoment(timeStamp*1000).format('DD/MM/YYYY HH:mm:ss'),token,trancheTokens.toFixed(5),tranchePrice.toFixed(5),newBalance.toFixed(5),filteredBalances);
+              }
+            } else {
+              filteredBalances = [{
+                balance:this.functionsUtil.BNify(0),
+                tranchePrice:this.functionsUtil.BNify(0)
+              }];
             }
           } else {
-            filteredBalances = [{
-              balance:this.functionsUtil.BNify(0),
-              tranchePrice:this.functionsUtil.BNify(0)
-            }];
+            filteredBalances.forEach(tx => {
+              switch (tx.action){
+                case 'Deposit':
+                  trancheTokenBalance[token][tranche] = trancheTokenBalance[token][tranche].plus(tx.trancheTokens);
+                break;
+                default:
+                  trancheTokenBalance[token][tranche] = trancheTokenBalance[token][tranche].minus(tx.trancheTokens);
+                  if (trancheTokenBalance[token][tranche].lt(0)){
+                    trancheTokenBalance[token][tranche] = this.functionsUtil.BNify(0);
+                  }
+                break;
+              }
+            });
           }
-        } else {
-          filteredBalances.forEach(tx => {
-            switch (tx.action){
-              case 'Deposit':
-                trancheTokenBalance[token] = trancheTokenBalance[token].plus(tx.trancheTokens);
-              break;
-              default:
-                trancheTokenBalance[token] = trancheTokenBalance[token].minus(tx.trancheTokens);
-                if (trancheTokenBalance[token].lt(0)){
-                  trancheTokenBalance[token] = this.functionsUtil.BNify(0);
-                }
-              break;
-            }
-          });
-        }
 
-        const lastTx = Object.assign([],filteredBalances).pop();
-        // let lastTxBalance = this.functionsUtil.BNify(lastTx.balance);
-        let lastTxBalance = trancheTokenBalance[token].times(lastTx.tranchePrice);
-
-        if (lastTxBalance.gt(0)){
-          // Convert token balance to USD
-          let tokenUsdConversionRate = null;
-          const conversionRateField = this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase(),'conversionRateField']);
-          if (!this.props.chartToken && conversionRateField){
-            const conversionRate = lastTokenData && lastTokenData[conversionRateField] ? lastTokenData[conversionRateField] : (lastTokenDataUnfiltered && lastTokenDataUnfiltered[conversionRateField] ? lastTokenDataUnfiltered[conversionRateField] : null);
-            if (conversionRate){
-              tokenUsdConversionRate = this.functionsUtil.fixTokenDecimals(conversionRate,18);
-              if (tokenUsdConversionRate.gt(0)){
+          const lastTx = Object.values(filteredBalances).pop();
+          let lastTxBalance = trancheTokenBalance[token][tranche].times(lastTx.tranchePrice);
+          if (lastTxBalance.gt(0)){
+            // Convert token balance to USD
+            const conversionRateField = this.functionsUtil.getTokenConversionRateField(token);
+            if (!this.props.chartToken && conversionRateField){
+              const tokenUsdConversionRate = lastTokenData && lastTokenData[conversionRateField] ? lastTokenData[conversionRateField] : (lastTokenDataUnfiltered && lastTokenDataUnfiltered[conversionRateField] ? lastTokenDataUnfiltered[conversionRateField] : null);
+              if (tokenUsdConversionRate && this.functionsUtil.BNify(tokenUsdConversionRate).gt(0)){
                 lastTxBalance = lastTxBalance.times(tokenUsdConversionRate);
               }
             }
-          }
-          
-          tokensBalances[token] = lastTxBalance;
-          aggregatedBalance = aggregatedBalance.plus(lastTxBalance);
-        }
+              
+            aggregatedBalance = aggregatedBalance.plus(lastTxBalance);
+            tokensBalances[token] = tokensBalances[token].plus(lastTxBalance);
 
-        foundBalances[token] = filteredBalances;
+            // console.log(this.functionsUtil.strToMoment(timeStamp*1000).format('DD/MM/YYYY HH:mm:ss'),token,tranche,trancheTokenBalance[token][tranche].toFixed(5),lastTx.tranchePrice.toFixed(5),lastTxBalance.toFixed(5));
+          }
+
+          foundBalances[token][tranche] = filteredBalances;
+        });
       });
 
       let momentDate = this.functionsUtil.strToMoment(timeStamp*1000);

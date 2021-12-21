@@ -186,11 +186,12 @@ class GenericPieChart extends Component {
                       src={this.state.selectedSlice.image}
                     />
                     <SmartNumber
-                      fontSize={[3,4]}
                       decimals={3}
                       fontWeight={4}
+                      fontSize={[3,4]}
                       maxPrecision={5}
                       number={this.state.selectedSlice.valueHover || this.state.selectedSlice.value}
+                      {...this.state.selectedSlice.valueHoverProps}
                     />
                     <Text
                       fontSize={[1,2]}

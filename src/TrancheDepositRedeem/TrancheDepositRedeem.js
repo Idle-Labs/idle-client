@@ -289,9 +289,11 @@ class TrancheDetails extends Component {
     switch (this.state.selectedAction){
       case 'stake':
       case 'deposit':
-        this.setState({
-          activeModal:'share'
-        })
+        if (this.state.selectedAction === 'deposit' || this.state.selectedStakeAction === 'stake'){
+          this.setState({
+            activeModal:'share'
+          });
+        }
       break;
       default:
       break;
@@ -784,13 +786,13 @@ class TrancheDetails extends Component {
                   <ImageButton
                     buttonProps={{
                       mx:0,
-                      border:isStake ? 2 : 0
+                      border:isStake ? 2 : 0,
+                      disabled:!this.state.stakingEnabled
                     }}
                     width={[1,'32%']}
                     caption={'Stake / Unstake'}
                     imageSrc={'images/mint.svg'}
                     isMobile={this.props.isMobile}
-                    // subcaption={'withdraw LP tokens'}
                     imageProps={{
                       mb:[0,2],
                       height:this.props.isMobile ? '42px' : '52px'

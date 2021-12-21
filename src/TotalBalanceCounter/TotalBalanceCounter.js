@@ -57,7 +57,8 @@ class TotalBalanceCounter extends Component {
     const availableTokens = this.props.availableTokens || {};
     const portfolio = this.props.portfolio || await this.functionsUtil.getAccountPortfolio(availableTokens,this.props.account);
 
-    const counterStart = portfolio.totalAmountLent.plus(portfolio.totalEarnings);
+    // const counterStart = portfolio.totalAmountLent.plus(portfolio.totalEarnings);
+    const counterStart = portfolio.totalBalance;
     const counterEnd = counterStart.plus(counterStart.times(portfolio.avgAPY.div(100)));
 
     this.setState({

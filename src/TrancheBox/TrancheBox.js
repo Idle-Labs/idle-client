@@ -143,9 +143,11 @@ class Base extends Component {
               </Box>
             </Flex>
           </Box>
-          <Box
+          <Flex
             height={"100%"}
             bg={"cardBgContrast"}
+            flexDirection={'column'}
+            justifyContent={'space-between'}
           >
             <Box
               mt={3}
@@ -199,7 +201,7 @@ class Base extends Component {
                   : `Enter the ${trancheDetails.name}`}
               </RoundButton>
             </Flex>
-          </Box>
+          </Flex>
         </Flex>
       </Box>
     );

@@ -157,6 +157,15 @@ class Tranches extends Component {
           id:token,
           name:token,
           label:token,
+          valueHoverProps:{
+            unit:'$',
+            unitPos:'left',
+            unitProps:{
+              mr:2,
+              fontWeight:4,
+              fontSize:[3,4]
+            }
+          },
           valueHover:balanceValue,
           value:Math.round(tokenPercentage),
           description: `$ ${balanceValue} in ${token}`,

@@ -1100,6 +1100,17 @@ const globalConfigs = {
         },
         address: '0xd632f22692FaC7611d2AA1C0D552930D43CAEd3B'
       },
+      MIM3CRV: {
+        decimals: 18,
+        enabled: true,
+        label: 'MIM3CRV',
+        color: {
+          hex: '#231b46',
+          rgb: [35, 27, 70],
+          hsl: ['251', '44%', '19%']
+        },
+        address: '0x5a6A4D54456819380173272A5E8E9B9904BdF41B'
+      },
       MATIC: {
         decimals: 18,
         enabled: true,

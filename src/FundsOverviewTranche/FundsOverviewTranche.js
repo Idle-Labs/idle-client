@@ -184,6 +184,10 @@ class FundsOverviewTranche extends Component {
   }
 
   render() {
+    const stakingRewards = this.props.tokenConfig && this.props.trancheType ? this.props.tokenConfig[this.props.trancheType].CDORewards.stakingRewards : [];
+    const stakingRewardsEnabled = stakingRewards.length ? stakingRewards.filter( t => t.enabled ) : null;
+    const stakingEnabled = stakingRewardsEnabled && stakingRewardsEnabled.length>0;
+    const colWidth = stakingEnabled ? 1/6 : 1/5;
 
     return (
       <Flex
@@ -297,7 +301,7 @@ class FundsOverviewTranche extends Component {
           >
             <Flex
               mb={[2,0]}
-              width={[1,1/6]}
+              width={[1,colWidth]}
               alignItems={'center'}
               flexDirection={'column'}
               justifyContent={'flex-start'}
@@ -327,41 +331,45 @@ class FundsOverviewTranche extends Component {
                 }}
               />
             </Flex>
+            {
+              stakingEnabled && (
+                <Flex
+                  mb={[2,0]}
+                  width={[1,colWidth]}
+                  alignItems={'center'}
+                  flexDirection={'column'}
+                  justifyContent={'flex-start'}
+                >
+                  <Title
+                    mb={2}
+                    fontSize={[3,4]}
+                    component={Heading.h3}
+                  >
+                    Staked Amount
+                  </Title>
+                  <TrancheField
+                    {...this.props}
+                    addTokenName={false}
+                    fieldInfo={{
+                      name:'trancheStaked',
+                      props:{
+                        decimals:7,
+                        fontWeight:300,
+                        maxPrecision:8,
+                        fontSize:['1.8em','1.9em'],
+                        color:this.props.theme.colors.counter,
+                        flexProps:{
+                          justifyContent:'center'
+                        }
+                      }
+                    }}
+                  />
+                </Flex>
+              )
+            }
             <Flex
               mb={[2,0]}
-              width={[1,1/6]}
-              alignItems={'center'}
-              flexDirection={'column'}
-              justifyContent={'flex-start'}
-            >
-              <Title
-                mb={2}
-                fontSize={[3,4]}
-                component={Heading.h3}
-              >
-                Staked Amount
-              </Title>
-              <TrancheField
-                {...this.props}
-                addTokenName={false}
-                fieldInfo={{
-                  name:'trancheStaked',
-                  props:{
-                    decimals:7,
-                    fontWeight:300,
-                    maxPrecision:8,
-                    fontSize:['1.8em','1.9em'],
-                    color:this.props.theme.colors.counter,
-                    flexProps:{
-                      justifyContent:'center'
-                    }
-                  }
-                }}
-              />
-            </Flex>
-            <Flex
-              mb={[2,0]}
-              width={[1,1/6]}
+              width={[1,colWidth]}
               alignItems={'center'}
               flexDirection={'column'}
               justifyContent={'flex-start'}
@@ -416,7 +424,7 @@ class FundsOverviewTranche extends Component {
             </Flex>
             <Flex
               mb={[2,0]}
-              width={[1,1/6]}
+              width={[1,colWidth]}
               alignItems={'center'}
               flexDirection={'column'}
               justifyContent={'flex-start'}
@@ -476,7 +484,7 @@ class FundsOverviewTranche extends Component {
             </Flex>
             <Flex
               mb={[2,0]}
-              width={[1,1/6]}
+              width={[1,colWidth]}
               alignItems={'center'}
               flexDirection={'column'}
               justifyContent={'flex-start'}
@@ -510,7 +518,7 @@ class FundsOverviewTranche extends Component {
             </Flex>
             <Flex
               mb={[2,0]}
-              width={[1,1/6]}
+              width={[1,colWidth]}
               alignItems={'center'}
               flexDirection={'column'}
               justifyContent={'flex-start'}

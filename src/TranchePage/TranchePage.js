@@ -16,6 +16,7 @@ class TranchePage extends Component {
   state = {
     transactions:[],
     userHasFunds:false,
+    stakingEnabled:false,
     componentLoaded:false
   }
 
@@ -32,7 +33,7 @@ class TranchePage extends Component {
 
   async componentWillMount(){
     this.loadUtils();
-    this.loadTransactions();
+    this.loadData();
   }
 
   async componentDidMount(){
@@ -41,24 +42,29 @@ class TranchePage extends Component {
   async componentDidUpdate(prevProps,prevState){
     this.loadUtils();
 
+    const tokenConfigChanged = JSON.stringify(prevProps.tokenConfig) !== JSON.stringify(this.props.tokenConfig);
+    const trancheTypeChanged = prevProps.trancheType !== this.props.trancheType;
     const portfolioChanged = (this.props.portfolio && !prevProps.portfolio) || JSON.stringify(this.props.portfolio) !== JSON.stringify(prevProps.portfolio);
-    if (portfolioChanged){
-      this.loadTransactions();
+    if (portfolioChanged || tokenConfigChanged || trancheTypeChanged){
+      this.loadData();
     }
   }
 
-  loadTransactions(){
-    const transactions = this.props.portfolio ? this.props.portfolio.transactions.filter( t => t.protocol.toLowerCase() === this.props.selectedProtocol.toLowerCase() && t.token.toLowerCase() === this.props.selectedToken.toLowerCase() && (!this.props.trancheType || t.tranche === this.props.trancheType) ) : [];
-
-    // console.log('loadTransactions',this.props.selectedProtocol,this.props.selectedToken,this.props.trancheType,transactions);
+  loadData(){
     const componentLoaded = true;
-
-    // console.log('portfolio',this.props.portfolio);
+    const transactions = this.props.portfolio ? this.props.portfolio.transactions.filter( t => t.protocol.toLowerCase() === this.props.selectedProtocol.toLowerCase() && t.token.toLowerCase() === this.props.selectedToken.toLowerCase() && (!this.props.trancheType || t.tranche === this.props.trancheType) ) : [];
     const userHasFunds = this.props.portfolio && this.props.portfolio.tranchesBalance.find( balanceInfo => balanceInfo.protocol.toLowerCase() === this.props.selectedProtocol.toLowerCase() && balanceInfo.token.toLowerCase() === this.props.selectedToken.toLowerCase() && (!this.props.trancheType || balanceInfo.tranche.toLowerCase() === this.props.trancheType.toLowerCase()) ) ? true : false;
+
+    const stakingRewards = this.props.tokenConfig && this.props.trancheType ? this.props.tokenConfig[this.props.trancheType].CDORewards.stakingRewards : [];
+    const stakingRewardsEnabled = stakingRewards.length ? stakingRewards.filter( t => t.enabled ) : null;
+    const stakingEnabled = stakingRewardsEnabled && stakingRewardsEnabled.length>0;
+
+    // console.log('loadData',this.props.tokenConfig,this.props.trancheType,this.props.tokenConfig[this.props.trancheType].CDORewards,stakingRewards,stakingRewardsEnabled,stakingEnabled);
 
     this.setState({
       transactions,
       userHasFunds,
+      stakingEnabled,
       componentLoaded
     });
   }
@@ -151,7 +157,7 @@ class TranchePage extends Component {
             </Flex>
         }
         {
-          this.state.componentLoaded && this.props.account && this.state.userHasFunds && this.props.trancheType &&
+          this.state.componentLoaded && this.state.stakingEnabled && this.props.account && this.state.userHasFunds && this.props.trancheType &&
             <StakingRewardsTranche
               {...this.props}
               token={this.props.selectedToken}

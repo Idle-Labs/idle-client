@@ -138,16 +138,10 @@ const availableTranches = {
         },
         CDORewards:{
           decimals:18,
+          stakingRewards:[],
           abi:IdleCDOTrancheRewards,
           name:'IdleCDOTrancheRewards_idleFEIYield_BB',
-          address:'0x0000000000000000000000000000000000000000',
-          stakingRewards:[
-            {
-              token:'IDLE',
-              enabled:false,
-              address:'0x875773784Af8135eA0ef43b5a374AaD105c5D39e'
-            }
-          ]
+          address:'0x0000000000000000000000000000000000000000'
         },
         label:'idleFEI BB',
         blockNumber:13575397,
@@ -289,6 +283,72 @@ const availableTranches = {
         token:'BB_convex_frax3crv',
         label:'convex frax3crv BB',
         address:'0x18cf59480d8c16856701f66028444546b7041307'
+      }
+    },
+    MIM3CRV:{
+      abi:ERC20,
+      decimals:18,
+      limit:1700000,
+      token:'MIM3CRV',
+      protocol:'convex',
+      blockNumber:13848124,
+      autoFarming:['CVX','CRV'],
+      address:'0x5a6A4D54456819380173272A5E8E9B9904BdF41B',
+      CDO:{
+        abi:IdleCDO,
+        decimals:18,
+        name:'IdleCDO_convex_mim3crv',
+        address:'0x151e89e117728ac6c93aae94c621358b0ebd1866'
+      },
+      Strategy:{
+        abi:IdleStrategy,
+        name:'IdleStrategy_convex_mim3crv'
+      },
+      AA:{
+        abi:ERC20,
+        decimals:18,
+        tranche:'AA',
+        functions:{
+          stake:'stake',
+          unstake:'unstake',
+          deposit:'depositAA',
+          withdraw:'withdrawAA'
+        },
+        CDORewards:{
+          decimals:18,
+          stakingRewards:[],
+          abi:IdleCDOTrancheRewards,
+          name:'IdleCDOTrancheRewards_convex_mim3crv_AA',
+          address:'0x0000000000000000000000000000000000000000'
+        },
+        blockNumber:13848124,
+        name:'AA_convex_mim3crv',
+        token:'AA_convex_mim3crv',
+        label:'convex mim3crv AA',
+        address:'0xFC96989b3Df087C96C806318436B16e44c697102'
+      },
+      BB:{
+        abi:ERC20,
+        decimals:18,
+        tranche:'BB',
+        functions:{
+          stake:'stake',
+          unstake:'unstake',
+          deposit:'depositBB',
+          withdraw:'withdrawBB'
+        },
+        CDORewards:{
+          decimals:18,
+          stakingRewards:[],
+          abi:IdleCDOTrancheRewards,
+          name:'IdleCDOTrancheRewards_convex_mim3crv_BB',
+          address:'0x0000000000000000000000000000000000000000'
+        },
+        blockNumber:13848124,
+        name:'BB_convex_mim3crv',
+        token:'BB_convex_mim3crv',
+        label:'convex mim3crv BB',
+        address:'0x5346217536852CD30A5266647ccBB6f73449Cbd1'
       }
     }
   }

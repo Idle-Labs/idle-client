@@ -324,56 +324,74 @@ class FunctionsUtil {
         const tokenConfig = protocolConfig[token];
         await this.asyncForEach(Object.keys(tranches), async (tranche) => {
           const trancheConfig = tokenConfig[tranche];
-          let trancheTokenBalance = await this.getContractBalance(trancheConfig.name,account);
+          let [
+            trancheTokenBalance,
+            trancheUserInfo,
+            trancheStakedBalance,
+          ] = await Promise.all([
+            this.getContractBalance(trancheConfig.name,account),
+            this.getTrancheUserInfo(tokenConfig, trancheConfig, account),
+            this.getTrancheStakedBalance(trancheConfig.CDORewards.name,account),
+          ]);
 
-          // console.log('trancheTokenBalance',protocol,token,tranche,trancheTokenBalance);
+          // console.log(protocol,token,tranche,trancheConfig.name,account,this.BNify(trancheTokenBalance).toFixed(5),this.BNify(trancheStakedBalance).toFixed(5));
 
-          if (trancheTokenBalance && this.BNify(trancheTokenBalance).gt(0)) {
+          if (trancheUserInfo && trancheUserInfo.transactions){
+            portfolio.transactions = [...portfolio.transactions, ...trancheUserInfo.transactions];
+          }
+
+          if ((trancheTokenBalance && this.BNify(trancheTokenBalance).gt(0)) || (trancheStakedBalance && this.BNify(trancheStakedBalance).gt(0))) {
             trancheTokenBalance = this.fixTokenDecimals(trancheTokenBalance,trancheConfig.decimals);
-            const [
-              tranchePool,
-              tranchePrice,
-            ] = await Promise.all([
-              this.loadTrancheFieldRaw('tranchePool', {}, protocol, token, tranche, tokenConfig, trancheConfig, account),
-              this.loadTrancheFieldRaw('tranchePrice', {}, protocol, token, tranche, tokenConfig, trancheConfig, account)
-            ]);
+            trancheStakedBalance = this.fixTokenDecimals(trancheStakedBalance,trancheConfig.decimals);
+            trancheTokenBalance = trancheTokenBalance.plus(trancheStakedBalance);
 
-            let tokenBalance = trancheTokenBalance.times(tranchePrice);
-            if (!this.BNify(tranchePrice).isNaN() && !this.BNify(tokenBalance).isNaN()) {
-              tokenBalance = await this.convertTrancheTokenBalance(tokenBalance,tokenConfig);
+            // console.log(protocol,token,tranche,'trancheTokenBalance',trancheTokenBalance.toFixed(5));
+
+            if (this.BNify(trancheTokenBalance).gt(0)) {
               const [
-                trancheUserInfo,
-                trancheApy,
+                tranchePrice,
+                tranchePool
               ] = await Promise.all([
-                this.getTrancheUserInfo(tokenConfig, trancheConfig, account),
-                this.loadTrancheFieldRaw('trancheApy', {}, protocol, token, tranche, tokenConfig, trancheConfig, account),
+                this.loadTrancheFieldRaw('tranchePrice', {}, protocol, token, tranche, tokenConfig, trancheConfig, account),
+                this.loadTrancheFieldRaw('tranchePoolConverted', {}, protocol, token, tranche, tokenConfig, trancheConfig, account)
               ]);
 
-              const poolShare = tokenBalance.div(tranchePool);
-              const amountDeposited = await this.convertTrancheTokenBalance(trancheUserInfo.amountDeposited,tokenConfig);
-              const trancheEarnings = tokenBalance.minus(amountDeposited);
+              if (!this.BNify(tranchePrice).isNaN() && !this.BNify(tranchePool).isNaN()) {
+                const tokenBalance = trancheTokenBalance.times(tranchePrice);
+                const [
+                  tokenBalanceConverted,
+                  trancheEarnings,
+                  trancheApy
+                ] = await Promise.all([
+                  this.convertTrancheTokenBalance(tokenBalance,tokenConfig),
+                  this.convertTrancheTokenBalance(tokenBalance.minus(trancheUserInfo.amountDeposited),tokenConfig),
+                  this.loadTrancheFieldRaw('trancheApy', {}, protocol, token, tranche, tokenConfig, trancheConfig, account)
+                ])
 
-              // console.log('trancheBalance',protocol,token,tranche,'trancheTokenBalance',trancheTokenBalance.toFixed(5),'tranchePrice',tranchePrice.toFixed(5),'tokenBalance',tokenBalance.toFixed(5),'trancheApy',trancheApy.toFixed(5),'amountDeposited',amountDeposited.toFixed(5));
-              
-              portfolio.transactions = [...portfolio.transactions, ...trancheUserInfo.transactions];
+                const poolShare = tokenBalanceConverted.div(tranchePool);
+                const amountDeposited = trancheUserInfo.amountDepositedConverted;
 
-              portfolio.tranchesBalance.push({
-                token,
-                tranche,
-                protocol,
-                poolShare,
-                trancheApy,
-                tranchePrice,
-                tokenBalance,
-                trancheEarnings,
-                amountDeposited,
-                trancheTokenBalance
-              });
+                // console.log(protocol,token,tranche,'trancheTokenBalance',trancheTokenBalance.toFixed(5),'trancheStakedBalance',trancheStakedBalance.toFixed(5),'tranchePrice',tranchePrice.toFixed(5),'tokenBalance',tokenBalance.toFixed(5),'amountDeposited',trancheUserInfo.amountDeposited.toFixed(5),'tokenBalanceConverted',tokenBalanceConverted.toFixed(5),'amountDepositedConverted',amountDeposited.toFixed(5),'trancheEarnings',trancheEarnings.toFixed(5));
 
-              // console.log(protocol,token,tranche,amountDeposited.toFixed(),tokenBalance.toFixed(),trancheEarnings.toFixed());
+                portfolio.tranchesBalance.push({
+                  token,
+                  tranche,
+                  protocol,
+                  poolShare,
+                  trancheApy,
+                  tranchePrice,
+                  trancheEarnings,
+                  amountDeposited,
+                  trancheTokenBalance,
+                  trancheStakedBalance,
+                  tokenBalance:tokenBalanceConverted
+                });
 
-              // Increment total balance
-              portfolio.totalBalance = portfolio.totalBalance.plus(tokenBalance);
+                // console.log(protocol,token,tranche,amountDeposited.toFixed(),tokenBalance.toFixed(),trancheEarnings.toFixed());
+
+                // Increment total balance
+                portfolio.totalBalance = portfolio.totalBalance.plus(tokenBalanceConverted);
+              }
             }
           }
         });
@@ -381,6 +399,7 @@ class FunctionsUtil {
     });
 
     let avgAPY = this.BNify(0);
+    let totalBalance = this.BNify(0);
     let totalEarnings = this.BNify(0);
     let totalAmountLent = this.BNify(0);
     let totalEarningsPerc = this.BNify(0);
@@ -403,6 +422,11 @@ class FunctionsUtil {
 
       if (trancheInfo.amountDeposited) {
         totalAmountLent = totalAmountLent.plus(trancheInfo.amountDeposited);
+        // console.log(trancheInfo.protocol,trancheInfo.token,trancheInfo.tranche,trancheInfo.amountDeposited.toFixed(5),totalAmountLent.toFixed(5));
+      }
+
+      if (trancheInfo.tokenBalance){
+        totalBalance = totalBalance.plus(trancheInfo.tokenBalance);
       }
     });
 
@@ -411,9 +435,12 @@ class FunctionsUtil {
     }
 
     portfolio.avgAPY = avgAPY;
+    portfolio.totalBalance = totalBalance;
     portfolio.totalEarnings = totalEarnings;
     portfolio.totalAmountLent = totalAmountLent;
     portfolio.totalEarningsPerc = totalEarningsPerc;
+
+    // console.log('portfolio',portfolio);
 
     return portfolio;
   }
@@ -538,6 +565,7 @@ class FunctionsUtil {
     portfolio.totalEarnings = totalEarnings;
     portfolio.totalAmountLent = totalAmountLent;
     portfolio.totalEarningsPerc = totalEarningsPerc;
+    portfolio.totalBalance = totalAmountLent.plus(totalEarnings);
 
     // debugger;
 
@@ -1016,7 +1044,7 @@ class FunctionsUtil {
     underlyingEventsFilters[underlyingEventsConfig.to] = [this.props.account, tokenConfig.CDO.address];
     underlyingEventsFilters[underlyingEventsConfig.from] = [this.props.account, tokenConfig.CDO.address];
 
-    const [
+    let [
       underlying_transfers,
       trancheToken_transfers
     ] = await Promise.all([
@@ -1031,8 +1059,35 @@ class FunctionsUtil {
     let avgBuyPrice = this.BNify(0);
     let amountDeposited = this.BNify(0);
     let totalAmountDeposited = this.BNify(0);
+    let amountDepositedConverted = this.BNify(0);
+
+    // Order token transfers
+    underlying_transfers = underlying_transfers.sort((a, b) => (parseInt(a.blockNumber) > parseInt(b.blockNumber) ? 1 : -1));
+    trancheToken_transfers = trancheToken_transfers.sort((a, b) => (parseInt(a.blockNumber) > parseInt(b.blockNumber) ? 1 : -1));
+
+    const blocksInfo = {};
 
     await this.asyncForEach(trancheToken_transfers, async (trancheTokenTransferEvent) => {
+      const tokenTransferEvent = underlying_transfers.find(t => t.transactionHash.toLowerCase() === trancheTokenTransferEvent.transactionHash.toLowerCase());
+      if (!tokenTransferEvent) {
+        return;
+      }
+      const [
+        blockInfo,
+        tokenConversionRate
+      ] = await Promise.all([
+        this.getBlockInfo(tokenTransferEvent.blockNumber),
+        this.convertTrancheTokenBalance(1,tokenConfig,tokenTransferEvent.blockNumber)
+      ]);
+
+      blocksInfo[tokenTransferEvent.blockNumber] = {
+        blockInfo,
+        tokenConversionRate
+      };
+    });
+
+
+    trancheToken_transfers.forEach( trancheTokenTransferEvent => {
       const tokenTransferEvent = underlying_transfers.find(t => t.transactionHash.toLowerCase() === trancheTokenTransferEvent.transactionHash.toLowerCase());
 
       // Skip if no tranche token transfer event found
@@ -1045,7 +1100,7 @@ class FunctionsUtil {
 
       // console.log('tranchePrice',trancheConfig.token,tokenAmount.toFixed(),trancheTokenAmount.toFixed(),tranchePrice.toFixed());
       const tranchePrice = tokenAmount.div(trancheTokenAmount);
-      const blockInfo = await this.getBlockInfo(tokenTransferEvent.blockNumber);
+      const blockInfo = blocksInfo[tokenTransferEvent.blockNumber].blockInfo;
       const hashKey = `${trancheConfig.token}_${tokenTransferEvent.transactionHash}`;
       const protocolConfig = this.getGlobalConfig(['stats', 'protocols', tokenConfig.protocol]);
       const protocolIcon = protocolConfig && protocolConfig.icon ? `images/protocols/${protocolConfig.icon}` : `images/protocols/${tokenConfig.protocol}.svg`;
@@ -1068,29 +1123,38 @@ class FunctionsUtil {
         timeStamp: blockInfo ? blockInfo.timestamp : null,
       };
 
+      const tokenAmountConverted = this.BNify(tokenAmount).times(blocksInfo[tokenTransferEvent.blockNumber].tokenConversionRate);
+
+      // Get conversion rate outside the loop
+      // await this.convertTrancheTokenBalance(tokenAmount,tokenConfig,tokenTransferEvent.blockNumber);
+
       // Deposit
       if (trancheTokenTransferEvent.returnValues.from.toLowerCase() === '0x0000000000000000000000000000000000000000') {
         // Set first deposit tx
         if (!firstDepositTx) {
           firstDepositTx = tx;
         }
-        avgBuyPrice = avgBuyPrice.plus(tranchePrice.times(tokenAmount));
-        amountDeposited = amountDeposited.plus(tokenAmount);
-        totalAmountDeposited = totalAmountDeposited.plus(tokenAmount);
 
         tx.action = 'Deposit';
-        // console.log('Deposit',trancheConfig.token,tokenAmount.toFixed(),amountDeposited.toFixed(),tranchePrice.toFixed(),avgBuyPrice.toFixed());
+        amountDeposited = amountDeposited.plus(tokenAmount);
+        totalAmountDeposited = totalAmountDeposited.plus(tokenAmount);
+        avgBuyPrice = avgBuyPrice.plus(tranchePrice.times(tokenAmount));
+        amountDepositedConverted = amountDepositedConverted.plus(tokenAmountConverted);
+
+        // console.log('Deposit',blockInfo.timestamp,trancheConfig.token,tokenAmount.toFixed(),tokenAmountConverted.toFixed(),amountDeposited.toFixed(),amountDepositedConverted.toFixed(),trancheTokenAmount.toFixed());
         // Withdraw
       } else if (trancheTokenTransferEvent.returnValues.to.toLowerCase() === '0x0000000000000000000000000000000000000000') {
         tx.action = 'Withdraw';
         amountDeposited = amountDeposited.minus(tokenAmount);
+        amountDepositedConverted = amountDepositedConverted.minus(tokenAmountConverted);
         if (amountDeposited.lt(0)) {
           firstDepositTx = null;
           avgBuyPrice = this.BNify(0);
           amountDeposited = this.BNify(0);
           totalAmountDeposited = this.BNify(0);
+          amountDepositedConverted = this.BNify(0);
         }
-        // console.log('Redeem',trancheConfig.token,tokenAmount.toFixed(),amountDeposited.toFixed(),avgBuyPrice.toFixed());
+        // console.log('Redeem',blockInfo.timestamp,trancheConfig.token,tokenAmount.toFixed(),tokenAmountConverted.toFixed(),amountDeposited.toFixed(),amountDepositedConverted.toFixed(),trancheTokenAmount.toFixed());
       }
 
       transactions.push(tx);
@@ -1104,7 +1168,8 @@ class FunctionsUtil {
       avgBuyPrice,
       transactions,
       firstDepositTx,
-      amountDeposited
+      amountDeposited,
+      amountDepositedConverted
     }
   }
   getTrancheUserTransactions = async (tokenConfig, trancheConfig, account) => {
@@ -4063,6 +4128,12 @@ class FunctionsUtil {
     const minPrecision = (fieldProps && fieldProps.minPrecision) || (this.props.isMobile ? 3 : 4);
     const tokenName = this.getGlobalConfig(['stats', 'tokens', token.toUpperCase(), 'label']) || this.capitalize(token);
 
+    const stakingRewards = tokenConfig && tranche ? tokenConfig[tranche].CDORewards.stakingRewards : [];
+    const stakingRewardsEnabled = stakingRewards.length>0 ? stakingRewards.filter( t => t.enabled ) : null;
+    const stakingEnabled = stakingRewardsEnabled && stakingRewardsEnabled.length>0 ? true : false;
+
+    // console.log('loadTrancheField',protocol,token,tranche,stakingRewards,stakingEnabled);
+
     const strategyConfig = tokenConfig.Strategy;
     const show_idle_apy = internal_view && parseInt(internal_view) === 1;
     
@@ -4088,10 +4159,16 @@ class FunctionsUtil {
         let poolSize = await this.genericContractCallCached(tokenConfig.CDO.name, 'getContractValue');
         if (!this.BNify(poolSize).isNaN()) {
           output = this.fixTokenDecimals(poolSize, tokenConfig.CDO.decimals);
-          output = await this.convertTrancheTokenBalance(output, tokenConfig);
           if (formatValue) {
             output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision);
           }
+        }
+      break;
+      case 'poolConverted':
+        output = await this.loadTrancheFieldRaw('pool', fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens);
+        output = await this.convertTrancheTokenBalance(output, tokenConfig);
+        if (formatValue) {
+          output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');
         }
       break;
       case 'seniorPoolNoLabel':
@@ -4124,17 +4201,21 @@ class FunctionsUtil {
         output = this.BNify(0);
         if (!this.BNify(virtualPrice).isNaN() && !this.BNify(totalSupply).isNaN()) {
           output = this.fixTokenDecimals(totalSupply, tokenConfig.CDO.decimals).times(virtualPrice);
-          output = await this.convertTrancheTokenBalance(output, tokenConfig);
         }
+        if (formatValue) {
+          output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');
+        }
+      break;
+      case 'tranchePoolConverted':
+        output = await this.loadTrancheFieldRaw('tranchePool', fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens);
+        output = await this.convertTrancheTokenBalance(output, tokenConfig);
         if (formatValue) {
           output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');
         }
       break;
       case 'trancheDeposited':
         const deposited = await this.getAmountDepositedTranche(tokenConfig, trancheConfig, account);
-
         output = output || this.BNify(0);
-
         output = this.BNify(deposited);
         if (output.gt(0)) {
           if (formatValue) {
@@ -4157,19 +4238,29 @@ class FunctionsUtil {
         }
       break;
       case 'trancheStaked':
-        let [
-          staked1,
-          lastPrice1
-        ] = await Promise.all([
-          this.getTrancheStakedBalance(trancheConfig.CDORewards.name, account, trancheConfig.CDORewards.decimals),
-          this.loadTrancheField(`tranchePrice`, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens)
-        ]);
+        output = formatValue ? 'N/A' : this.BNify(0);
+        if (stakingEnabled){
+          let [
+            staked1,
+            lastPrice1
+          ] = await Promise.all([
+            this.getTrancheStakedBalance(trancheConfig.CDORewards.name, account, trancheConfig.CDORewards.decimals),
+            this.loadTrancheField(`tranchePrice`, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens)
+          ]);
 
-
-        output = formatValue ? '-' : null;
-        if (staked1 && lastPrice1) {
-          output = this.BNify(staked1).times(lastPrice1);
-          // console.log('trancheStaked',staked1.toString(),lastPrice1.toString(),output.toString());
+          if (staked1 && lastPrice1) {
+            output = this.BNify(staked1).times(lastPrice1);
+            // console.log('trancheStaked',staked1.toString(),lastPrice1.toString(),output.toString());
+            if (formatValue) {
+              output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');
+            }
+          }
+        }
+      break;
+      case 'trancheLimit':
+        output = formatValue ? '-' :  this.BNify(0);
+        if (tokenConfig.limit){
+          output = this.BNify(tokenConfig.limit);
           if (formatValue) {
             output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');
           }
@@ -4275,9 +4366,11 @@ class FunctionsUtil {
           this.loadTrancheFieldRaw(`trancheDeposited`, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens),
           this.loadTrancheFieldRaw(`trancheRedeemableWithStaked`, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens)
         ]);
-        output = redeemable2.div(deposited2).minus(1).times(100);
-        if (formatValue) {
-          output = output.toFixed(decimals) + '%';
+        if (!this.BNify(redeemable2).isNaN() && !this.BNify(deposited2).isNaN()){
+          output = redeemable2.div(deposited2).minus(1).times(100);
+          if (formatValue) {
+            output = output.toFixed(decimals) + '%';
+          }
         }
       break;
       case 'trancheApy':
@@ -5896,7 +5989,7 @@ class FunctionsUtil {
       return null;
     }
   }
-  getUniswapConversionRate = async (tokenConfigFrom, tokenConfigDest) => {
+  getUniswapConversionRate = async (tokenConfigFrom, tokenConfigDest, blockNumber='latest') => {
 
     if (tokenConfigDest.addressForPrice) {
       tokenConfigDest = Object.assign({}, tokenConfigDest);
@@ -5904,11 +5997,12 @@ class FunctionsUtil {
     }
 
     // Check for cached data
-    const cachedDataKey = `uniswapConversionRate_${tokenConfigFrom.address}_${tokenConfigDest.address}`;
-    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
-    // console.log('getUniswapConversionRate - CACHED',cachedDataKey,cachedData);
-    if (cachedData && !this.BNify(cachedData).isNaN()) {
-      return this.BNify(cachedData);
+    const cachedDataKey = `uniswapConversionRate_${tokenConfigFrom.address}_${tokenConfigDest.address}_${blockNumber}`;
+    if (blockNumber !== 'latest'){
+      const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+      if (cachedData && !this.BNify(cachedData).isNaN()) {
+        return this.BNify(cachedData);
+      }
     }
 
     try {
@@ -5923,13 +6017,16 @@ class FunctionsUtil {
       }
       path.push(tokenConfigDest.address);
 
-      const unires = await this.genericContractCall('UniswapRouter', 'getAmountsIn', [one.toFixed(), path]);
+      const unires = await this.genericContractCall('UniswapRouter', 'getAmountsIn', [one.toFixed(), path], {}, blockNumber);
 
       // console.log('getUniswapConversionRate',path,unires);
 
       if (unires) {
         const price = this.BNify(unires[0]).div(one);
-        return this.setCachedDataWithLocalStorage(cachedDataKey, price);
+        if (blockNumber !== 'latest'){
+          return this.setCachedDataWithLocalStorage(cachedDataKey, price);
+        }
+        return price;
       }
       return null;
     } catch (error) {
@@ -7514,11 +7611,13 @@ class FunctionsUtil {
             tranchePool
           ] = await Promise.all([
             this.loadTrancheFieldRaw('trancheApy', {}, protocol, token, tranche, tokenConfig, trancheConfig, null),
-            this.loadTrancheFieldRaw('tranchePool', {}, protocol, token, tranche, tokenConfig, trancheConfig, null)
+            this.loadTrancheFieldRaw('tranchePoolConverted', {}, protocol, token, tranche, tokenConfig, trancheConfig, null)
           ]);
 
           avgAPY = avgAPY.plus(this.BNify(trancheApy).times(this.BNify(tranchePool)));
           totalAUM = totalAUM.plus(this.BNify(tranchePool));
+
+          // console.log('getTrancheAggregatedStats',protocol, token, tranche, tranchePool.toFixed(5),totalAUM.toFixed(5));
         });
       });
     });
@@ -7736,7 +7835,7 @@ class FunctionsUtil {
   getTokenConversionRateField = (token) => {
     return this.getGlobalConfig(['stats', 'tokens', token.toUpperCase(), 'conversionRateField']);
   }
-  convertTrancheTokenBalance = async (tokenBalance, tokenConfig) => {
+  convertTrancheTokenBalance = async (tokenBalance, tokenConfig, blockNumber='latest') => {
     // Check for USD conversion rate
     tokenBalance = this.BNify(tokenBalance);
 
@@ -7745,7 +7844,7 @@ class FunctionsUtil {
       return tokenBalance;
     }
     if (tokenBalance.gt(0)){
-      const tokenUsdConversionRate = await this.getTokenConversionRateUniswap(tokenConfig);
+      const tokenUsdConversionRate = await this.getTokenConversionRateUniswap(tokenConfig,blockNumber);
       if (tokenUsdConversionRate) {
         tokenBalance = tokenBalance.times(tokenUsdConversionRate);
       }
@@ -7781,22 +7880,15 @@ class FunctionsUtil {
 
     return this.BNify(0);
   }
-  getTokenConversionRateUniswap = async (tokenConfig) => {
-
-    // Check for cached data
-    const cachedDataKey = `tokenConversionRateUniswap_${tokenConfig.address}`;
-    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
-    if (cachedData && !this.BNify(cachedData).isNaN()) {
-      return this.BNify(cachedData);
-    }
+  getTokenConversionRateUniswap = async (tokenConfig, blockNumber='latest') => {
 
     const DAITokenConfig = {
       address: this.getContractByName('DAI')._address
     };
     const ToTokenConfig = tokenConfig.token ? this.getGlobalConfig(['stats', 'tokens', tokenConfig.token.toUpperCase()]) : tokenConfig.token;
-    const conversionRate = await this.getUniswapConversionRate(DAITokenConfig, ToTokenConfig);
+    const conversionRate = await this.getUniswapConversionRate(DAITokenConfig, ToTokenConfig, blockNumber);
     if (!this.BNify(conversionRate).isNaN()) {
-      return this.setCachedDataWithLocalStorage(cachedDataKey, conversionRate);
+      return conversionRate;
     }
 
     return null;
