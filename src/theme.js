@@ -105,6 +105,8 @@ export default {
     cardBorder: "#eee",
     pageActive: "#4f4f4f",
     pageInactive: "#d8d8d8",
+    experimental: "#8500ff",
+    production: "#00b84a",
     transactions: {
       action: {
         send: "#10a0dd",

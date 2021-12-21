@@ -56,17 +56,18 @@ class TrancheWelcome extends Component {
         >
           {!this.props.tokenConfig ? (
             <>
-              <Title fontSize={[5, 6]}>Perpetual Yield Tranches</Title>
+              <Title
+                fontSize={[5,6]}
+              >
+                Perpetual Yield Tranches
+              </Title>
               <Flex
                 mt={[2,3]}
                 border={1}
                 borderRadius={2}
                 borderColor={"transparent"}
                 backgroundColor={"newblue"}
-                className={[
-                  styles.trancheFlash,
-                  this.props.isMobile ? styles.mobile : null
-                ]}
+                className={[styles.trancheFlash,this.props.isMobile ? styles.mobile : null]}
               >
                 <TrancheFlash {...this.props}></TrancheFlash>
               </Flex>

@@ -181,6 +181,36 @@ class TrancheField extends Component {
           );
         }
       break;
+      case 'statusBadge':
+        output = null;
+        let badgeText = null;
+        let badgeColor = null;
+        if (this.props.tokenConfig.experimental){
+          badgeText = 'Experimental';
+          badgeColor = 'experimental';
+        } else {
+          badgeText = 'Production';
+          badgeColor = 'production';
+        }
+        output = (
+          <Flex
+            px={2}
+            py={1}
+            borderRadius={2}
+            alignItems={'center'}
+            justifyContent={'center'}
+            backgroundColor={badgeColor}
+          >
+            <Text
+              fontSize={1}
+              fontWeight={3}
+              color={'white'}
+            >
+              {badgeText}
+            </Text>
+          </Flex>
+        );
+      break;
       case 'trancheTypeIcon':
         const trancheDetails = this.functionsUtil.getGlobalConfig(['tranches',this.props.tranche]);
         output = (

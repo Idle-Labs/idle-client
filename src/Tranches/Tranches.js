@@ -56,7 +56,7 @@ class Tranches extends Component {
       const tranchesDetails = this.functionsUtil.getGlobalConfig(['tranches']);
       const trancheDetails = Object.values(tranchesDetails).find( t => t.route === trancheRoute );
 
-      if (trancheDetails !== undefined){
+      if (trancheDetails !== undefined) {
         const trancheType = trancheDetails.type;
         const useTrancheType = !this.state.userHasFunds;
         const selectedToken = this.props.urlParams.param3;

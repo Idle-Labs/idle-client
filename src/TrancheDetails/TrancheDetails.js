@@ -341,7 +341,7 @@ class TrancheDetails extends Component {
                     borderRadius={2}
                     alignItems={'center'}
                     justifyContent={'center'}
-                    backgroundColor={'#8500ff'}
+                    backgroundColor={'experimental'}
                   >
                     <Text
                       fontSize={1}

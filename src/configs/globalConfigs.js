@@ -851,7 +851,7 @@ const globalConfigs = {
   },
   strategies: {
     tranches: {
-      token: "DAI",
+      token: "FEI",
       visible: true,
       type: "tranche",
       enabledEnvs: [],
