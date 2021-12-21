@@ -234,7 +234,7 @@ class TrancheField extends Component {
       break;
       case 'tokenIcon':
         const tokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token.toUpperCase()]);
-        const tokenIcon = tokenConfig && tokenConfig.icon ? tokenConfig.icon : `images/tokens/${this.props.token}.svg`;
+        const tokenIcon = tokenConfig && tokenConfig.icon ? tokenConfig.icon : `images/tokens/${this.props.token.toUpperCase()}.svg`;
         output = (
           <Image src={tokenIcon} {...fieldProps} />
         );
