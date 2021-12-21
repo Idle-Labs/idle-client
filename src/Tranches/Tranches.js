@@ -170,7 +170,7 @@ class Tranches extends Component {
           value:Math.round(tokenPercentage),
           description: `$ ${balanceValue} in ${token}`,
           color:'hsl('+tokenConfig.color.hsl.join(',')+')',
-          image:tokenConfig.icon || `images/tokens/${token}.svg`,
+          image:tokenConfig && tokenConfig.icon ? tokenConfig.icon : `images/tokens/${token.toUpperCase()}.svg`,
         };
       });
 
