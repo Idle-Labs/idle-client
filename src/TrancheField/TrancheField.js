@@ -152,9 +152,9 @@ class TrancheField extends Component {
     // const tokenName = this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token,'label']) || this.functionsUtil.capitalize(this.props.token);
 
     // const tokenConfig = this.props.tokenConfig;// || this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token]);
-    const maxPrecision = fieldProps && fieldProps.maxPrecision ? fieldProps.maxPrecision : 5;
-    const decimals = fieldProps && fieldProps.decimals ? fieldProps.decimals : ( this.props.isMobile ? 2 : 3 );
-    const minPrecision = fieldProps && fieldProps.minPrecision ? fieldProps.minPrecision : ( this.props.isMobile ? 3 : 4 );
+    const maxPrecision = fieldProps && parseInt(fieldProps.maxPrecision)>=0 ? fieldProps.maxPrecision : 5;
+    const decimals = fieldProps && parseInt(fieldProps.decimals)>=0 ? fieldProps.decimals : ( this.props.isMobile ? 2 : 3 );
+    const minPrecision = fieldProps && parseInt(fieldProps.minPrecision)>=0 ? fieldProps.minPrecision : ( this.props.isMobile ? 3 : 4 );
 
     // console.log('TrancheField',fieldInfo.name,fieldProps);
     const flexProps = fieldProps.flexProps;
@@ -171,10 +171,11 @@ class TrancheField extends Component {
       case 'experimentalBadge':
         output = null;
         if (this.props.tokenConfig.experimental){
+          const limitCap = this.functionsUtil.abbreviateNumber(this.props.tokenConfig.limit, 2, maxPrecision, 0) + ` ${this.props.token}`;
           output = (
             <Tooltip
               placement={'top'}
-              message={`This pool is experimental, use at your own risk.`}
+              message={`This pool is experimental and has a cap limit of ${limitCap}`}
             >
               <Image src={`images/experimental.png`} {...fieldProps} />
             </Tooltip>

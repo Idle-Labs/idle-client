@@ -640,7 +640,6 @@ class Tranches extends Component {
                                     {...this.props}
                                     inline={true}
                                     showLoader={false}
-                                    legendItemWidth={120}
                                     tooltipFormat={v => v+'%'}
                                     sliceLabel={d => d.value+'%'}
                                     width={ this.props.isMobile ? 55 : 59 }
@@ -711,6 +710,10 @@ class Tranches extends Component {
                             {...this.props}
                             showLegend={true}
                             showLoader={false}
+                            legendProps={{
+                              itemWidth:80,
+                              itemsSpacing:8
+                            }}
                             tooltipFormat={v => v+'%'}
                             defaultLabel={'Total Funds'}
                             sliceLabel={d => {
@@ -829,7 +832,7 @@ class Tranches extends Component {
                     {
                       title:'PROTOCOL', 
                       props:{
-                        width:[0.23, this.state.useTrancheType ? 0.15 : 0.14]
+                        width:[0.34, this.state.useTrancheType ? 0.15 : 0.14]
                       },
                       fields:[
                         {
@@ -843,6 +846,7 @@ class Tranches extends Component {
                           name:'protocolName'
                         },
                         {
+                          mobile:false,
                           name:'experimentalBadge',
                           props:{
                             ml:1,
@@ -903,7 +907,8 @@ class Tranches extends Component {
                         {
                           name:this.state.useTrancheType ? `${this.state.trancheDetails.baseName}PoolNoLabel` : 'pool',
                           props:{
-                            decimals:2
+                            minPrecision:1,
+                            decimals:this.props.isMobile ? 0 : 2,
                           }
                         }
                       ]
@@ -912,7 +917,7 @@ class Tranches extends Component {
                       title:this.state.useTrancheType ? 'APY' : 'SENIOR APY',
                       visible:!this.state.useTrancheType || this.state.trancheType === 'AA',
                       props:{
-                        width:[this.state.useTrancheType ? 0.16 : 0.29,this.state.useTrancheType ? 0.09 : 0.12],
+                        width:[this.state.useTrancheType ? 0.16 : 0.27,this.state.useTrancheType ? 0.09 : 0.12],
                       },
                       parentProps:{
                         flexDirection:'column',
@@ -929,7 +934,7 @@ class Tranches extends Component {
                       title:this.state.useTrancheType ? 'APY' : 'JUNIOR APY',
                       visible:!this.state.useTrancheType || this.state.trancheType === 'BB',
                       props:{
-                        width:[this.state.useTrancheType ? 0.16 : 0.29,this.state.useTrancheType ? 0.09 : 0.12],
+                        width:[this.state.useTrancheType ? 0.16 : 0.27,this.state.useTrancheType ? 0.09 : 0.12],
                       },
                       parentProps:{
                         flexDirection:'column',
@@ -990,6 +995,7 @@ class Tranches extends Component {
                         }
                       ]
                     },
+                    /*
                     {
                       mobile:true,
                       title:'TOKENS',
@@ -1002,6 +1008,7 @@ class Tranches extends Component {
                         }
                       ]
                     },
+                    */
                     {
                       title:'',
                       mobile:false,

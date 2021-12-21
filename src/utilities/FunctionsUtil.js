@@ -4123,15 +4123,15 @@ class FunctionsUtil {
   loadTrancheField = async (field, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account = null, addGovTokens = true, formatValue = true, addTokenName = true) => {
     let output = null;
     let rewardsTokensInfo = null;
-    const maxPrecision = (fieldProps && fieldProps.maxPrecision) || 5;
-    const internal_view = this.getQueryStringParameterByName('internal_view');
-    const decimals = (fieldProps && fieldProps.decimals) || (this.props.isMobile ? 2 : 3);
-    const minPrecision = (fieldProps && fieldProps.minPrecision) || (this.props.isMobile ? 3 : 4);
-    const tokenName = this.getGlobalConfig(['stats', 'tokens', token.toUpperCase(), 'label']) || this.capitalize(token);
+    const maxPrecision = (fieldProps && parseInt(fieldProps.maxPrecision)>0) ? fieldProps.maxPrecision : 5;
+    const decimals = (fieldProps && parseInt(fieldProps.decimals)>0) ? fieldProps.decimals : (this.props.isMobile ? 2 : 3);
+    const minPrecision = (fieldProps && parseInt(fieldProps.minPrecision)>0) ? fieldProps.minPrecision : (this.props.isMobile ? 3 : 4);
 
+    const internal_view = this.getQueryStringParameterByName('internal_view');
     const stakingRewards = tokenConfig && tranche ? tokenConfig[tranche].CDORewards.stakingRewards : [];
     const stakingRewardsEnabled = stakingRewards.length>0 ? stakingRewards.filter( t => t.enabled ) : null;
     const stakingEnabled = stakingRewardsEnabled && stakingRewardsEnabled.length>0 ? true : false;
+    const tokenName = this.getGlobalConfig(['stats', 'tokens', token.toUpperCase(), 'label']) || this.capitalize(token);
 
     // console.log('loadTrancheField',protocol,token,tranche,stakingRewards,stakingEnabled);
 
@@ -4376,6 +4376,7 @@ class FunctionsUtil {
       break;
       case 'trancheApy':
         let trancheApy = null;
+        let trancheApyDecimals = 2;
         output = this.BNify(0);
         [
           rewardsTokensInfo,
@@ -4400,19 +4401,20 @@ class FunctionsUtil {
           }
 
           if (apy.gt(9999)){
-            output = this.BNify(9999.99);
+            trancheApyDecimals = 0;
+            output = this.BNify(9999);
           } else {
             output = this.BNify(apy);
           }
           if (formatValue){
-            output = output.toFixed(2)+'%';
+            output = output.toFixed(trancheApyDecimals)+'%';
             if (apy.gt(9999)){
               output = `>${output}`;
             }
           }
         } else {
           if (formatValue){
-            output = output.toFixed(2)+'%';
+            output = output.toFixed(trancheApyDecimals)+'%';
           }
         }
       break;

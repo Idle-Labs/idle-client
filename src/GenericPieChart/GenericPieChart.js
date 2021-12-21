@@ -122,15 +122,15 @@ class GenericPieChart extends Component {
 
     if (this.props.showLegend){
       chartProps.legends = [
-        {
-          itemWidth: this.props.legendItemWidth || 60,
+        Object.assign({
+          itemWidth: 60,
           itemHeight: 18,
-          translateY: this.props.isMobile ? 25 : 50,
           symbolSize: 10,
           anchor: 'bottom',
           direction: 'row',
-          itemTextColor: this.props.theme.colors.legend,
           symbolShape: 'circle',
+          translateY: this.props.isMobile ? 25 : 50,
+          itemTextColor: this.props.theme.colors.legend,
           effects: [
             {
               on: 'hover',
@@ -139,7 +139,7 @@ class GenericPieChart extends Component {
               }
             }
           ]
-        }
+        },this.props.legendProps)
       ];
     }
 

@@ -1,15 +1,10 @@
-import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
-import ConnectBox from '../ConnectBox/ConnectBox';
 import { Flex, Text, Image, Button } from "rimble-ui";
 import FunctionsUtil from '../utilities/FunctionsUtil';
-import BuyModal from '../utilities/components/BuyModal';
 import TrancheField from '../TrancheField/TrancheField';
 import DashboardCard from '../DashboardCard/DashboardCard';
 import ShareModal from '../utilities/components/ShareModal';
-import CardIconButton from '../CardIconButton/CardIconButton';
-import SendTxWithBalance from '../SendTxWithBalance/SendTxWithBalance';
 import LimitReachedModal from '../utilities/components/LimitReachedModal';
 
 class TrancheDetails extends Component {
@@ -96,8 +91,6 @@ class TrancheDetails extends Component {
     ]);
 
     const userHasAvailableFunds = trancheBalance && trancheBalance.gt(0);
-
-
     const canUnstake = true; // !stakeCoolingPeriod || this.functionsUtil.BNify(userStakeBlock).plus(stakeCoolingPeriod).lt(blockNumber);
     const canWithdraw = true; // !cdoCoolingPeriod || !latestHarvestBlock || this.functionsUtil.BNify(latestHarvestBlock).plus(cdoCoolingPeriod).lt(blockNumber);
     
@@ -265,7 +258,6 @@ class TrancheDetails extends Component {
     const otherTrancheDetails = this.functionsUtil.getGlobalConfig(['tranches',otherTrancheType]);
     const trancheLimit = this.functionsUtil.formatMoney(this.functionsUtil.BNify(this.props.tokenConfig.limit),0)+' '+this.props.selectedToken;
     const stakingRewards = this.props.trancheConfig.CDORewards.stakingRewards.filter( t => t.enabled );
-    const stakingEnabled = this.state.userHasAvailableFunds && stakingRewards.length>0;
     return (
       <Flex
         width={1}
@@ -310,50 +302,20 @@ class TrancheDetails extends Component {
             mb={2}
             alignItems={'center'}
             flexDirection={'row'}
-            justifyContent={'space-between'}
             borderBottom={`1px solid ${trancheDetails.color.hex}`}
           > 
-            <Flex
-              flexDirection={'row'}
+            <Image
+              mr={2}
+              src={trancheDetails.image}
+              size={this.props.isMobile ? '1.6em' : '1.8em'}
+            />
+            <Text
+              fontWeight={4}
+              fontSize={[3,4]}
+              color={'copyColor'}
             >
-              <Image
-                mr={2}
-                src={trancheDetails.image}
-                size={this.props.isMobile ? '1.6em' : '1.8em'}
-              />
-              <Text
-                fontWeight={4}
-                fontSize={[3,4]}
-                color={'copyColor'}
-              >
-                {trancheDetails.name}
-              </Text>
-            </Flex>
-            <Flex
-              alignItems={'center'}
-              justifyContent={'flex-end'}
-            >
-              {
-                this.props.tokenConfig.experimental && (
-                  <Flex
-                    px={2}
-                    py={1}
-                    borderRadius={2}
-                    alignItems={'center'}
-                    justifyContent={'center'}
-                    backgroundColor={'experimental'}
-                  >
-                    <Text
-                      fontSize={1}
-                      fontWeight={3}
-                      color={'white'}
-                    >
-                      Experimental
-                    </Text>
-                  </Flex>
-                )
-              }
-            </Flex>
+              {trancheDetails.name}
+            </Text>
           </Flex>
           <Flex
             style={{
@@ -611,82 +573,73 @@ class TrancheDetails extends Component {
                 )
               }
             </Flex>
-          </Flex>
-          {
-            //(this.functionsUtil.BNify(this.state.stakedBalance).gt(0) || this.functionsUtil.BNify(this.state.trancheBalance).gt(0)) && (
-            this.props.showSelectButton && (
-              <Flex
-                py={2}
-                style={{
-                  flexBasis:'0',
-                  flex:'1 1 0px',
-                  flexWrap:'wrap',
-                  borderBottom:`1px solid ${this.props.theme.colors.divider}`
-                }}
-                alignItems={'flex-start'}
-                justifyContent={'flex-start'}
+            <Flex
+              mb={3}
+              width={[0.5,0.33]}
+              flexDirection={'column'}
+              alignItems={'flex-start'}
+            >
+              <Text
+                fontWeight={3}
+                fontSize={[1,2]}
+                color={'cellText'}
               >
+                Apr Ratio
+              </Text>
+              <TrancheField
+                {...this.props}
+                fieldInfo={{
+                  name:'trancheAPRRatio',
+                  props:{
+                    fontWeight:3,
+                    fontSize:[2,3],
+                    color:'copyColor'
+                  }
+                }}
+                token={this.props.selectedToken}
+                tranche={this.props.selectedTranche}
+                tokenConfig={this.props.tokenConfig}
+                protocol={this.props.selectedProtocol}
+                trancheConfig={this.props.trancheConfig}
+              />
+            </Flex>
+            <Flex
+              mb={3}
+              width={[0.5,0.33]}
+              flexDirection={'column'}
+              alignItems={'flex-start'}
+            >
+              <Text
+                fontWeight={3}
+                fontSize={[1,2]}
+                color={'cellText'}
+              >
+                Status
+              </Text>
+              <TrancheField
+                {...this.props}
+                fieldInfo={{
+                  name:'statusBadge',
+                  props:{
+                    fontWeight:3,
+                    fontSize:[2,3],
+                    color:'copyColor'
+                  }
+                }}
+                token={this.props.selectedToken}
+                tranche={this.props.selectedTranche}
+                tokenConfig={this.props.tokenConfig}
+                protocol={this.props.selectedProtocol}
+                trancheConfig={this.props.trancheConfig}
+              />
+            </Flex>
+            {
+              (this.props.tokenConfig.experimental || !this.props.isMobile) && (
                 <Flex
-                  width={0.33}
+                  mb={3}
+                  width={[0.5,0.33]}
                   flexDirection={'column'}
-                >
-                  <Text
-                    fontWeight={3}
-                    fontSize={[1,2]}
-                    color={'cellText'}
-                  >
-                    Deposited
-                  </Text>
-                  <TrancheField
-                    {...this.props}
-                    fieldInfo={{
-                      name:'trancheDeposited',
-                      props:{
-                        decimals:4,
-                        fontWeight:3,
-                        fontSize:[2,3],
-                        color:'copyColor'
-                      }
-                    }}
-                    token={this.props.selectedToken}
-                    tranche={this.props.selectedTranche}
-                    tokenConfig={this.props.tokenConfig}
-                    protocol={this.props.selectedProtocol}
-                    trancheConfig={this.props.trancheConfig}
-                  />
-                </Flex>
-                <Flex
-                  width={0.33}
-                  flexDirection={'column'}
-                >
-                  <Text
-                    fontWeight={3}
-                    fontSize={[1,2]}
-                    color={'cellText'}
-                  >
-                    Staked
-                  </Text>
-                  <TrancheField
-                    {...this.props}
-                    fieldInfo={{
-                      name:'trancheStaked',
-                      props:{
-                        decimals:4,
-                        fontWeight:3,
-                        fontSize:[2,3],
-                        color:'copyColor'
-                      }
-                    }}
-                    token={this.props.selectedToken}
-                    tranche={this.props.selectedTranche}
-                    tokenConfig={this.props.tokenConfig}
-                    protocol={this.props.selectedProtocol}
-                    trancheConfig={this.props.trancheConfig}
-                  />
-                </Flex>
-                <Flex
-                  width={0.33}
-                  flexDirection={'column'}
+                  alignItems={'flex-start'}
                 >
                   <Text
                     fontWeight={3}
@@ -700,7 +653,7 @@ class TrancheDetails extends Component {
                     fieldInfo={{
                       name:'trancheLimit',
                       props:{
-                        decimals:4,
+                        decimals:3,
                         fontWeight:3,
                         fontSize:[2,3],
                         color:'copyColor'
@@ -713,9 +666,9 @@ class TrancheDetails extends Component {
                     trancheConfig={this.props.trancheConfig}
                   />
                 </Flex>
-              </Flex>
-            )
-          }
+              )
+            }
+          </Flex>
           {
             this.props.showSelectButton ? (
                 <Button
@@ -730,161 +683,6 @@ class TrancheDetails extends Component {
                     this.props.tokenConfig ? `Go to ${trancheDetails.name}` : `Start with ${trancheDetails.name}`
                   }
                 </Button>
-            ) : this.state.balanceProp && this.state.tokenConfig ? (
-              <Flex
-                width={1}
-                flexDirection={'column'}
-              >
-                <Flex
-                  mt={3}
-                  alignItems={'center'}
-                  flexDirection={'row'}
-                  justifyContent={'space-between'}
-                >
-                  <CardIconButton
-                    {...this.props}
-                    textProps={{
-                      fontSize:[1,2]
-                    }}
-                    cardProps={{
-                      px:3,
-                      py:2,
-                      width:0.32
-                    }}
-                    text={'Deposit'}
-                    iconColor={'deposit'}
-                    icon={'ArrowDownward'}
-                    iconBgColor={'#ced6ff'}
-                    isActive={ this.state.selectedAction === 'deposit' }
-                    handleClick={ e => this.setSelectedAction('deposit') }
-                  />
-                  {
-                    this.state.stakedBalance && this.functionsUtil.BNify(this.state.stakedBalance).gt(0) ? (
-                      <CardIconButton
-                        {...this.props}
-                        textProps={{
-                          fontSize:[1,2]
-                        }}
-                        cardProps={{
-                          px:3,
-                          py:2,
-                          width:0.32
-                        }}
-                        text={'Unstake'}
-                        icon={'LayersClear'}
-                        iconColor={'redeem'}
-                        iconBgColor={'#ceeff6'}
-                        isActive={ this.state.selectedAction === 'unstake' }
-                        handleClick={ e => this.setSelectedAction('unstake') }
-                      />
-                    ) : (
-                      <CardIconButton
-                        {...this.props}
-                        textProps={{
-                          fontSize:[1,2]
-                        }}
-                        cardProps={{
-                          px:3,
-                          py:2,
-                          width:0.32
-                        }}
-                        text={'Stake'}
-                        icon={'Layers'}
-                        iconColor={'deposit'}
-                        iconBgColor={'#ced6ff'}
-                        isDisabled={ !stakingEnabled }
-                        isActive={ this.state.selectedAction === 'stake' }
-                        handleClick={ e => this.state.userHasAvailableFunds ? this.setSelectedAction('stake') : null }
-                      />
-                    )
-                  }
-                  <CardIconButton
-                    {...this.props}
-                    textProps={{
-                      fontSize:[1,2]
-                    }}
-                    cardProps={{
-                      px:3,
-                      py:2,
-                      width:0.32
-                    }}
-                    text={'Withdraw'}
-                    icon={'ArrowUpward'}
-                    iconColor={'redeem'}
-                    iconBgColor={'#ceeff6'}
-                    isDisabled={ !this.state.userHasAvailableFunds }
-                    isActive={ this.state.selectedAction === 'withdraw' }
-                    handleClick={ e => this.state.userHasAvailableFunds ? this.setSelectedAction('withdraw') : null }
-                  />
-                </Flex>
-                {
-                  this.state.infoText && (
-                    <IconBox
-                      cardProps={{
-                        p:2,
-                        mt:3,
-                        width:1,
-                      }}
-                      isActive={true}
-                      isInteractive={false}
-                      iconProps={{
-                        size:'1.2em',
-                        color:'flashColor'
-                      }}
-                      textProps={{
-                        fontWeight:500,
-                        color:'flashColor',
-                        textAlign:'center',
-                        fontSize:['13px','15px']
-                      }}
-                      icon={'LightbulbOutline'}
-                      text={this.state.infoText}
-                    />
-                  )
-                }
-                <Flex
-                  mt={2}
-                >
-                  <SendTxWithBalance
-                    error={null}
-                    {...this.props}
-                    buttonProps={{
-                      width:[1,0.45]
-                    }}
-                    permitEnabled={false}
-                    tokenConfig={this.state.tokenConfig}
-                    tokenBalance={this.state.balanceProp}
-                    contractInfo={this.state.contractInfo}
-                    checkLimit={this.checkLimit.bind(this)}
-                    approveEnabled={this.state.approveEnabled}
-                    buttonDisabled={this.state.buttonDisabled}
-                    callback={this.transactionSucceeded.bind(this)}
-                    approveDescription={this.state.approveDescription}
-                    changeInputCallback={this.changeInputCallback.bind(this)}
-                    contractApproved={this.contractApprovedCallback.bind(this)}
-                    getTransactionParams={this.getTransactionParams.bind(this)}
-                    action={this.functionsUtil.capitalize(this.state.selectedAction)}
-                  >
-                    <Flex
-                      width={1}
-                      alignItems={'stretch'}
-                      flexDirection={'column'}
-                      justifyContent={'center'}
-                    >
-                      <BuyModal
-                        {...this.props}
-                        showInline={true}
-                        availableMethods={[]}
-                        buyToken={this.props.selectedToken}
-                      />
-                    </Flex>
-                  </SendTxWithBalance>
-                </Flex>
-              </Flex>
-            ) : !this.props.account ? (
-              <ConnectBox
-                {...this.props}
-              />
             ) : (
               <FlexLoader
                 flexProps={{
