@@ -270,9 +270,13 @@ class PortfolioEquityTranches extends Component {
 
       const foundBalances = {};
       const tokensBalances = {};
+
+      // Shift timestamp to end of the day
       if (timeStamp > currTimestamp){
         timeStamp = currTimestamp;
       }
+      timeStamp = parseInt(this.functionsUtil.strToMoment(this.functionsUtil.strToMoment(timeStamp*1000).format('YYYY-MM-DD')+' 23:59:59','YYYY-MM-DD HH:mm:ss')._d.getTime()/1000);
+      
       // timeStamp = Math.min(currTimestamp,timeStamp);
       aggregatedBalance = this.functionsUtil.BNify(0);
 
@@ -312,8 +316,6 @@ class PortfolioEquityTranches extends Component {
               lastTokenData = null;
             }
           }
-
-          // console.log(this.functionsUtil.strToMoment(timeStamp*1000).format('DD/MM/YYYY HH:mm:ss'),timeStamp,token,tranche,filteredTokenData,lastTokenData,(lastTokenData ? this.functionsUtil.strToMoment(lastTokenData.timeStamp*1000).format('DD/MM/YYYY HH:mm:ss') : null),(lastTokenData ? lastTokenData.tranchePrice.toFixed(5) : null ));
 
           if (!trancheTokenBalance[token][tranche]){
             trancheTokenBalance[token][tranche] = this.functionsUtil.BNify(0);
@@ -356,6 +358,7 @@ class PortfolioEquityTranches extends Component {
               }];
             }
           } else {
+            // console.log(this.functionsUtil.strToMoment(timeStamp*1000).format('DD/MM/YYYY HH:mm:ss'),timeStamp,token,tranche,lastTokenData,(lastTokenData ? this.functionsUtil.strToMoment(lastTokenData.timeStamp*1000).format('DD/MM/YYYY HH:mm:ss') : null),(lastTokenData ? lastTokenData.tranchePrice.toFixed(5) : null ));
             filteredBalances.forEach(tx => {
               switch (tx.action){
                 case 'Deposit':

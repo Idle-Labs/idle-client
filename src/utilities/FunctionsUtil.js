@@ -4117,7 +4117,8 @@ class FunctionsUtil {
     return stakingRewards;
   }
   loadTrancheFieldRaw = async (field, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens = true) => {
-    return await this.loadTrancheField(field, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens, false);
+    const result = await this.loadTrancheField(field, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens, false);
+    return result;
   }
   loadTrancheField = async (field, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account = null, addGovTokens = true, formatValue = true, addTokenName = true) => {
     let output = null;
@@ -4375,6 +4376,7 @@ class FunctionsUtil {
       break;
       case 'trancheApy':
         let trancheApy = null;
+        output = this.BNify(0);
         [
           rewardsTokensInfo,
           trancheApy
@@ -4401,6 +4403,10 @@ class FunctionsUtil {
             if (apy.gt(9999)){
               output = `>${output}`;
             }
+          }
+        } else {
+          if (formatValue){
+            output = output.toFixed(2)+'%';
           }
         }
       break;
@@ -7617,12 +7623,14 @@ class FunctionsUtil {
           avgAPY = avgAPY.plus(this.BNify(trancheApy).times(this.BNify(tranchePool)));
           totalAUM = totalAUM.plus(this.BNify(tranchePool));
 
-          // console.log('getTrancheAggregatedStats',protocol, token, tranche, tranchePool.toFixed(5),totalAUM.toFixed(5));
+          // console.log('getTrancheAggregatedStats',protocol, token, tranche, trancheApy.toFixed(5), tranchePool.toFixed(5),totalAUM.toFixed(5));
         });
       });
     });
 
     avgAPY = avgAPY.div(totalAUM);
+
+    // console.log('getTrancheAggregatedStats',avgAPY.toFixed(5),totalAUM.toFixed(5));
 
     return {
       avgAPY,
