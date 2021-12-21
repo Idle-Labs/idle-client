@@ -4259,8 +4259,8 @@ class FunctionsUtil {
         }
       break;
       case 'trancheLimit':
-        output = formatValue ? '-' :  this.BNify(0);
-        if (tokenConfig.limit){
+        output = formatValue ? 'None' :  this.BNify(0);
+        if (this.BNify(tokenConfig.limit).gt(0)){
           output = this.BNify(tokenConfig.limit);
           if (formatValue) {
             output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');

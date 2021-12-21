@@ -310,20 +310,50 @@ class TrancheDetails extends Component {
             mb={2}
             alignItems={'center'}
             flexDirection={'row'}
+            justifyContent={'space-between'}
             borderBottom={`1px solid ${trancheDetails.color.hex}`}
           > 
-            <Image
-              mr={2}
-              src={trancheDetails.image}
-              size={this.props.isMobile ? '1.6em' : '1.8em'}
-            />
-            <Text
-              fontWeight={4}
-              fontSize={[3,4]}
-              color={'copyColor'}
+            <Flex
+              flexDirection={'row'}
             >
-              {trancheDetails.name}
-            </Text>
+              <Image
+                mr={2}
+                src={trancheDetails.image}
+                size={this.props.isMobile ? '1.6em' : '1.8em'}
+              />
+              <Text
+                fontWeight={4}
+                fontSize={[3,4]}
+                color={'copyColor'}
+              >
+                {trancheDetails.name}
+              </Text>
+            </Flex>
+            <Flex
+              alignItems={'center'}
+              justifyContent={'flex-end'}
+            >
+              {
+                this.props.tokenConfig.experimental && (
+                  <Flex
+                    px={2}
+                    py={1}
+                    borderRadius={2}
+                    alignItems={'center'}
+                    justifyContent={'center'}
+                    backgroundColor={'#8500ff'}
+                  >
+                    <Text
+                      fontSize={1}
+                      fontWeight={3}
+                      color={'white'}
+                    >
+                      Experimental
+                    </Text>
+                  </Flex>
+                )
+              }
+            </Flex>
           </Flex>
           <Flex
             style={{

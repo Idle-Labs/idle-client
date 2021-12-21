@@ -123,7 +123,7 @@ class GenericPieChart extends Component {
     if (this.props.showLegend){
       chartProps.legends = [
         {
-          itemWidth: 60,
+          itemWidth: this.props.legendItemWidth || 60,
           itemHeight: 18,
           translateY: this.props.isMobile ? 25 : 50,
           symbolSize: 10,

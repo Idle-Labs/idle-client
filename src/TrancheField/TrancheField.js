@@ -7,7 +7,7 @@ import CustomField from '../CustomField/CustomField';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 // import GenericChart from '../GenericChart/GenericChart';
 // import CustomTooltip from '../CustomTooltip/CustomTooltip';
-import { Image, Text, Loader, Button, Flex, Icon } from "rimble-ui";
+import { Image, Text, Loader, Button, Flex, Icon, Tooltip } from "rimble-ui";
 // import VariationNumber from '../VariationNumber/VariationNumber';
 // import AllocationChart from '../AllocationChart/AllocationChart';
 // import CustomTooltipRow from '../CustomTooltip/CustomTooltipRow';
@@ -167,6 +167,19 @@ class TrancheField extends Component {
         output = (
           <Image src={`images/protocols/${protocolIcon}`} {...fieldProps} />
         );
+      break;
+      case 'experimentalBadge':
+        output = null;
+        if (this.props.tokenConfig.experimental){
+          output = (
+            <Tooltip
+              placement={'top'}
+              message={`This pool is experimental, use at your own risk.`}
+            >
+              <Image src={`images/experimental.png`} {...fieldProps} />
+            </Tooltip>
+          );
+        }
       break;
       case 'trancheTypeIcon':
         const trancheDetails = this.functionsUtil.getGlobalConfig(['tranches',this.props.tranche]);

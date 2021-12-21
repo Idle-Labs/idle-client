@@ -640,6 +640,7 @@ class Tranches extends Component {
                                     {...this.props}
                                     inline={true}
                                     showLoader={false}
+                                    legendItemWidth={120}
                                     tooltipFormat={v => v+'%'}
                                     sliceLabel={d => d.value+'%'}
                                     width={ this.props.isMobile ? 55 : 59 }
@@ -828,7 +829,7 @@ class Tranches extends Component {
                     {
                       title:'PROTOCOL', 
                       props:{
-                        width:[0.23, this.state.useTrancheType ? 0.13 : 0.12]
+                        width:[0.23, this.state.useTrancheType ? 0.15 : 0.14]
                       },
                       fields:[
                         {
@@ -840,6 +841,13 @@ class Tranches extends Component {
                         },
                         {
                           name:'protocolName'
+                        },
+                        {
+                          name:'experimentalBadge',
+                          props:{
+                            ml:1,
+                            height:'1.5em'
+                          }
                         }
                       ]
                     },
@@ -962,7 +970,7 @@ class Tranches extends Component {
                       mobile:false,
                       title:'AUTO-FARMING',
                       props:{
-                        width:[0.25,this.state.useTrancheType ? 0.15 : 0.15],
+                        width:[0.25,this.state.useTrancheType ? 0.14 : 0.14],
                       },
                       fields:[
                         {
@@ -998,7 +1006,7 @@ class Tranches extends Component {
                       title:'',
                       mobile:false,
                       props:{
-                        width:[0.29, 0.16],
+                        width:[0.29, 0.15],
                       },
                       parentProps:{
                         width:1
