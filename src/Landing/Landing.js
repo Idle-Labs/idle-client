@@ -684,8 +684,8 @@ class Landing extends Component {
                             name:'icon',
                             props:{
                               mr:2,
-                              width:'2.2em',
-                              height:'2.2em'
+                              width:'1.9em',
+                              height:'1.9em'
                             }
                           }}
                           key={`asset_${token}`}

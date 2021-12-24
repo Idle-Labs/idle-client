@@ -93,6 +93,16 @@ class DashboardMenu extends Component {
       "darkModeEnabled"
     ]);
 
+    const isProdEnv = true;//this.functionsUtil.checkUrlOrigin();
+    const isChristmas = this.functionsUtil.strToMoment().format('DD-MM') === '24-12';
+    let logoSrc = isProdEnv ? (!isDarkTheme ? "images/logo-gradient.svg" : "images/logo-dark.svg") : (!isDarkTheme ? "images/logo-gradient-beta.png" : "images/logo-white-beta.png");
+
+    let logoHeight = '42px';
+    if (isChristmas && isProdEnv){
+      logoHeight = '62px';
+      logoSrc = !isDarkTheme ? "images/logo-gradient-christmas.svg" : "images/logo-dark-christmas.svg";
+    }
+
     return (
       <Flex p={0} height={"100%"} flexDirection={"column"}>
         <Flex
@@ -107,9 +117,9 @@ class DashboardMenu extends Component {
             to={"/"}
           >
             <Image
-              height={"42px"}
+              src={logoSrc}
+              height={logoHeight}
               position={"relative"}
-              src={this.functionsUtil.checkUrlOrigin() ? !isDarkTheme ? "images/logo-gradient.svg" : "images/logo-dark.svg" : !isDarkTheme ? "images/logo-gradient-beta.png" : "images/logo-white-beta.png"}
             />
           </RouterLink>
         </Flex>

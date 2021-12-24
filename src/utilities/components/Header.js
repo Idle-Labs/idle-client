@@ -43,6 +43,13 @@ class Header extends React.Component {
 
   render() {
 
+    let logoSrc = 'images/logo.svg';
+    let logoHeight = ['35px','48px'];
+    const isChristmas = this.functionsUtil.strToMoment().format('DD-MM') === '24-12';
+    if (isChristmas){
+      logoHeight = ['42px','70px'];
+      logoSrc = 'images/logo-christmas.svg';
+    }
     const governanceEnabled = this.functionsUtil.getGlobalConfig(['governance','enabled']);
 
     return (
@@ -109,9 +116,9 @@ class Header extends React.Component {
               to="/"
             >
               <Image
+                src={logoSrc}
                 position={'relative'}
-                src={'images/logo.svg'}
-                height={['35px','48px']}
+                height={logoHeight}
               />
             </RouterLink>
           </Flex>
