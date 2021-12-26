@@ -94,7 +94,7 @@ class DashboardMenu extends Component {
     ]);
 
     const isProdEnv = this.functionsUtil.checkUrlOrigin();
-    const isChristmas = this.functionsUtil.strToMoment().format('DD-MM') === '24-12';
+    const isChristmas = this.functionsUtil.checkChristmas();
     let logoSrc = isProdEnv ? (!isDarkTheme ? "images/logo-gradient.svg" : "images/logo-dark.svg") : (!isDarkTheme ? "images/logo-gradient-beta.png" : "images/logo-white-beta.png");
 
     let logoHeight = '42px';

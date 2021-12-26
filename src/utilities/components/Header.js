@@ -45,7 +45,7 @@ class Header extends React.Component {
 
     let logoSrc = 'images/logo.svg';
     let logoHeight = ['35px','48px'];
-    const isChristmas = this.functionsUtil.strToMoment().format('DD-MM') === '24-12';
+    const isChristmas = this.functionsUtil.checkChristmas();
     if (isChristmas){
       logoHeight = ['42px','70px'];
       logoSrc = 'images/logo-christmas.svg';

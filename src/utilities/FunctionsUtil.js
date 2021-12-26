@@ -2928,6 +2928,9 @@ class FunctionsUtil {
     });
     return environment || 'beta';
   }
+  checkChristmas = () => {
+    return ['24','25','26','27'].includes(this.strToMoment().format('DD')) && this.strToMoment().format('MM')==='12';
+  }
   checkUrlPolygon = () => {
     return window.location.origin.toLowerCase().includes(globalConfigs.polygonUrl.toLowerCase());
   }
