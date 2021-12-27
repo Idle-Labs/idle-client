@@ -430,8 +430,8 @@ const globalConfigs = {
       showPrice: false, // Show price in Yield Farming section
       showBalance: false, // Include IDLE balance in Portfolio Donut
       aprTooltipMode: false,
-      availableNetworks: [1, 137],
       distributionMode: "block",
+      availableNetworks: [1, 137],
       distributionFrequency: "day", // Multiply distribution per block
       color: "hsl(162, 100%, 41%)",
       icon: "images/tokens/IDLE.svg",

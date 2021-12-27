@@ -39,7 +39,7 @@ class TableRow extends Component {
         {...this.props.rowProps}
         className={this.props.token}
         isInteractive={isInteractive}
-        handleClick={ isInteractive ? e => this.props.handleClick(this.props) : null }
+        handleClick={isInteractive ? e => this.props.handleClick(this.props) : null}
       >
         <Flex
           flexDirection={'row'}
@@ -64,7 +64,7 @@ class TableRow extends Component {
                   >
                     {
                       colInfo.fields.map((fieldInfo,fieldIndex) => {
-                        if (fieldInfo.visible === false || (fieldInfo.mobile === false && this.props.isMobile)){
+                        if (!fieldInfo || fieldInfo.visible === false || (fieldInfo.mobile === false && this.props.isMobile)){
                           return null;
                         }
                         const CustomComponent = fieldInfo.fieldComponent;

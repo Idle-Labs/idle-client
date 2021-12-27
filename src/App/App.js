@@ -321,12 +321,14 @@ class App extends Component {
     await this.setState(newState, callback);
   }
 
-  async setRequiredNetwork(requiredNetwork){
+  async setRequiredNetwork(requiredNetwork,forceChangeChain=false){
     requiredNetwork = parseInt(requiredNetwork);
     if (globalConfigs.network.enabledNetworks.includes(requiredNetwork)){
       this.functionsUtil.setLocalStorage('requiredNetwork',requiredNetwork);
       // console.log('setRequiredNetwork',requiredNetwork);
-      this.functionsUtil.addEthereumChain(requiredNetwork);
+      if (forceChangeChain || (this.state.currentSection && this.state.currentSection !== 'landing')){
+        this.functionsUtil.addEthereumChain(requiredNetwork);
+      }
       return await this.setState(prevState => ({
         config:{
           ...prevState.config,

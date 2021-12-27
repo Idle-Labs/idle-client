@@ -548,6 +548,7 @@ class Stats extends Component {
     const networkId = this.functionsUtil.getRequiredNetworkId();
     const idleTokenAvailableNetworks = this.functionsUtil.getGlobalConfig(['govTokens','IDLE','availableNetworks']);
     const idleTokenEnabled = this.functionsUtil.getGlobalConfig(['govTokens','IDLE','enabled']) && idleTokenAvailableNetworks.includes(networkId);
+    
     const refreshIdleSpeedConfig = this.functionsUtil.getGlobalConfig(['contract','methods','refreshIdleSpeed']);
     const refreshIdleSpeedEnabled = refreshIdleSpeedConfig.enabled && refreshIdleSpeedConfig.availableNetworks.includes(networkId);
 
@@ -709,20 +710,21 @@ class Stats extends Component {
                         parentProps:{
                           flexDirection:'column',
                           alignItems:'flex-start',
+                          justifyContent:networkId === 1 ? 'flex-start' : 'center',
                         },
                         fields:[
                           {
                             name:'apy',
                             showTooltip:true
                           },
-                          {
+                          networkId === 1 ? {
                             name:'idleDistribution',
                             showLoader:false,
                             props:{
                               decimals:this.props.isMobile ? 1 : 2,
                               fontSize:this.props.isMobile ? '9px' : 0
                             }
-                          },
+                          } : null,
                         ]
                       },
                       {

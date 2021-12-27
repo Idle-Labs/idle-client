@@ -175,7 +175,7 @@ class StrategyBox extends Component {
     }
 
     if (!strategyEnv){
-      await this.props.setRequiredNetwork(strategyInfo.networkId);
+      await this.props.setRequiredNetwork(strategyInfo.networkId,true);
     }
 
     window.location.href = this.functionsUtil.getDashboardSectionUrl(strategyInfo.strategy,strategyEnv);
