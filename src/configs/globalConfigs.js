@@ -1418,7 +1418,7 @@ const globalConfigs = {
         }
       },
       cream: {
-        legend: true,
+        legend: false,
         enabled: true,
         label: "Cream",
         icon: "cream.svg",
@@ -1891,7 +1891,7 @@ const globalConfigs = {
             token: "IDLE",
             decimals: 18,
             enabled: true,
-            label: "IDLE Token",
+            label: "IDLE",
             icon: "images/tokens/IDLE.svg",
             address: "0x875773784Af8135eA0ef43b5a374AaD105c5D39e", // Mainnet
             poolLink:
