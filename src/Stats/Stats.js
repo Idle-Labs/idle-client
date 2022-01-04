@@ -1,21 +1,17 @@
 import moment from 'moment';
 import Title from '../Title/Title';
-
 import React, { Component } from 'react';
-
 import AssetsList from '../AssetsList/AssetsList';
 import FlexLoader from '../FlexLoader/FlexLoader';
-
+import StatsAsset from '../StatsAsset/StatsAsset';
 import globalConfigs from '../configs/globalConfigs';
 import FunctionsUtil from '../utilities/FunctionsUtil';
+import TranchesList from "../TranchesList/TranchesList";
+import StatsTranche from '../StatsTranche/StatsTranche';
 import DashboardCard from '../DashboardCard/DashboardCard';
-
 import { Flex, Text, Box, Icon, Button, Link } from 'rimble-ui';
 import ExecuteTransaction from '../ExecuteTransaction/ExecuteTransaction';
 import AssetsUnderManagement from '../AssetsUnderManagement/AssetsUnderManagement';
-import TranchesList from "../TranchesList/TranchesList";
-import StatsAsset from '../StatsAsset/StatsAsset';
-import StatsTranche from '../StatsTranche/StatsTranche';
 
 class Stats extends Component {
   state = {
@@ -45,8 +41,8 @@ class Stats extends Component {
     carouselOffsetLeft:0,
     startTimestampObj:null,
     showRefreshIdleSpeed:false,
-    apiResults_unfiltered:null,
-    dateRangeModalOpened:false
+    dateRangeModalOpened:false,
+    apiResults_unfiltered:null
   };
 
   quickSelections = {
@@ -164,7 +160,7 @@ class Stats extends Component {
     }
 
     newState.tokenConfig = this.props.availableTokens[newState.selectedToken];
-    newState.minStartTime = moment(globalConfigs.stats.tokens[this.props.selectedToken].startTimestamp,'YYYY-MM-DD');
+    newState.minStartTime = moment(globalConfigs.stats.tokens[this.props.selectedToken.toUpperCase()].startTimestamp,'YYYY-MM-DD');
     newState.maxEndDate = moment();
 
     newState.endTimestampObj = moment(moment().format('YYYY-MM-DD 23:59'),'YYYY-MM-DD HH:mm');
@@ -215,7 +211,7 @@ class Stats extends Component {
 
   setDateRange = (ranges,quickSelection=null) => {
 
-    const minStartTime = moment(globalConfigs.stats.tokens[this.props.selectedToken].startTimestamp);
+    const minStartTime = moment(globalConfigs.stats.tokens[this.props.selectedToken.toUpperCase()].startTimestamp);
 
     let startTimestampObj = moment(ranges.startDate).isSameOrAfter(minStartTime) ? moment(ranges.startDate) : minStartTime;
     let endTimestampObj = moment(ranges.endDate);
@@ -509,7 +505,6 @@ class Stats extends Component {
   selectTranche = async (strategy,protocol,token) => {
     await this.props.setStrategyToken(strategy,token,protocol);
     this.props.changeProtocolToken(protocol,token);
-    console.log("THIS CHECK", this.props.selectedStrategy)
   }
 
   handleCarousel = action => {
