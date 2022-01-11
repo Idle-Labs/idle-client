@@ -669,6 +669,32 @@ class Dashboard extends Component {
     }
   }
 
+  changeProtocolToken(selectedProtocol, selectedToken) {
+    selectedProtocol = selectedProtocol.toLowerCase();
+    selectedToken=selectedToken.toUpperCase();
+    if (Object.keys(this.props.availableTranches).includes(selectedProtocol)&& Object.keys(this.props.availableTranches[selectedProtocol]).includes(selectedToken)) {
+    
+        const routeParts = [];
+
+        // Add section
+        if (this.state.currentSection.toLowerCase() !== this.props.selectedStrategy.toLowerCase()) {
+          routeParts.push(this.state.currentSection);
+        }
+
+        // Add strategy
+        routeParts.push(this.props.selectedStrategy);
+
+        // Add protocol
+        routeParts.push(selectedProtocol);
+        
+        //Add Token
+        routeParts.push(selectedToken);
+
+        this.goToSection(routeParts.join('/'));
+      
+    }
+  }
+
   propagateClickEvent(clickEvent) {
     this.setState({
       clickEvent: clickEvent.target
@@ -949,6 +975,7 @@ class Dashboard extends Component {
                         match={{ params: {} }}
                         urlParams={this.state.params}
                         changeToken={this.changeToken.bind(this)}
+                        changeProtocolToken={this.changeProtocolToken.bind(this)}
                         goToSection={this.goToSection.bind(this)}
                         selectedSection={this.state.selectedSection}
                         selectedSubsection={this.state.selectedSubsection}
