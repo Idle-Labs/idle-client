@@ -71,7 +71,6 @@ class PortfolioEquityTranches extends Component {
     const chartData = [];
     const tokensData = {};
     let tokensBalance = {};
-    let lastTxTimestamp = null;
     let firstTxTimestamp = null;
 
     await this.functionsUtil.asyncForEach(enabledTokens,async (selectedToken) => {
@@ -115,6 +114,7 @@ class PortfolioEquityTranches extends Component {
           const balance = amountLent;
           const tranche = tx.tranche;
           const protocol = tx.protocol;
+          const blockNumber = tx.blockNumber;
           const tranchePrice = this.functionsUtil.BNify(tx.tranchePrice);
           const trancheTokens = this.functionsUtil.BNify(tx.trancheTokens);
           if (!tranchePrice.isNaN() && !trancheTokens.isNaN()){
@@ -125,56 +125,13 @@ class PortfolioEquityTranches extends Component {
               protocol,
               timeStamp,
               tokenAmount,
+              blockNumber,
               tranchePrice,
               trancheTokens
             });
+
+            tokensBalance[selectedToken] = tokensBalance[selectedToken].sort((a, b) => (parseInt(a.timeStamp) > parseInt(b.timeStamp) ? 1 : -1));
           }
-
-          // Get updated tranches prices
-          await this.functionsUtil.asyncForEach(Object.keys(tokensBalance),async (token) => {
-            if (tokensBalance[token].length){
-              const tokenBalanceConfig = tokensBalance[token][0];
-              const tokenConfig = this.props.availableTranches[tokenBalanceConfig.protocol.toLowerCase()][token];
-              const conversionRateField = this.functionsUtil.getTokenConversionRateField(token);
-              const [
-                tokenConversionRate,
-                tranchePriceAA,
-                tranchePriceBB
-              ] = await Promise.all([
-                conversionRateField ? this.functionsUtil.getTokenConversionRateUniswap(tokenConfig, tx.blockNumber) : null,
-                this.functionsUtil.genericContractCallCached(tokenConfig.CDO.name, 'virtualPrice', [tokenConfig.AA.address], {}, tx.blockNumber),
-                this.functionsUtil.genericContractCallCached(tokenConfig.CDO.name, 'virtualPrice', [tokenConfig.BB.address], {}, tx.blockNumber)
-              ]);
-              if (!tokensData[token]){
-                tokensData[token] = [];
-              }
-
-              const tokenDataAA = {
-                timeStamp,
-                tranche:'AA',
-                tranchePrice:this.functionsUtil.BNify(tranchePriceAA)
-              };
-              const tokenDataBB = {
-                timeStamp,
-                tranche:'BB',
-                tranchePrice:this.functionsUtil.BNify(tranchePriceBB)
-              };
-              if (conversionRateField){
-                tokenDataAA[conversionRateField] = tokenConversionRate;
-                tokenDataBB[conversionRateField] = tokenConversionRate;
-              }
-
-              if (timeStamp>lastTxTimestamp){
-                lastTxTimestamp = timeStamp;
-              }
-              // console.log(token,tokenConfig.CDO.name,tokenBalanceConfig.protocol,tokenBalanceConfig.tranche,tx.blockNumber,tranchePrice,tokenDataAA);
-
-              tokensData[token].push(tokenDataAA);
-              tokensData[token].push(tokenDataBB);
-
-              tokensData[token] = tokensData[token].sort((a, b) => (parseInt(a.timeStamp) > parseInt(b.timeStamp) ? 1 : -1));
-            }
-          });
         });
       }
     });
@@ -217,46 +174,75 @@ class PortfolioEquityTranches extends Component {
       firstTxTimestamp = currTimestamp;
     }
 
-    let lastTimestamp = parseInt(this.functionsUtil.strToMoment(this.functionsUtil.strToMoment().format('YYYY-MM-DD')+' 00:00:00','YYYY-MM-DD HH:mm:ss')._d.getTime()/1000);
+    // let lastTimestamp = parseInt(this.functionsUtil.strToMoment(this.functionsUtil.strToMoment().format('YYYY-MM-DD')+' 00:00:00','YYYY-MM-DD HH:mm:ss')._d.getTime()/1000);
 
-    // Collect tranche prices and conversion rates for the current timestamp
+    const lastBlockNumber = await this.functionsUtil.getBlockNumber();
+
     await this.functionsUtil.asyncForEach(Object.keys(tokensBalance),async (token) => {
       if (tokensBalance[token].length){
         const tokenBalanceConfig = tokensBalance[token][0];
-        const tokenConfig = this.props.availableTranches[tokenBalanceConfig.protocol.toLowerCase()][token];
+        const firstTokenTx = tokensBalance[token][0];
+        const firstAATokenTx = tokensBalance[token].find( tx => tx.tranche==='AA' ) || null;
+        const firstBBTokenTx = tokensBalance[token].find( tx => tx.tranche==='BB' ) || null;
+
+        const firstBlockNumber = firstTokenTx.blockNumber;
+
         const conversionRateField = this.functionsUtil.getTokenConversionRateField(token);
+        const tokenConfig = this.props.availableTranches[tokenBalanceConfig.protocol.toLowerCase()][token];
+
         const [
-          tokenConversionRate,
-          tranchePriceAA,
-          tranchePriceBB
+          startTokenConversionRate,
+          lastTokenConversionRate,
+          trancheAAInfos,
+          trancheBBInfos
         ] = await Promise.all([
-          conversionRateField ? this.functionsUtil.getTokenConversionRateUniswap(tokenConfig) : null,
-          this.functionsUtil.genericContractCallCached(tokenConfig.CDO.name, 'virtualPrice', [tokenConfig.AA.address]),
-          this.functionsUtil.genericContractCallCached(tokenConfig.CDO.name, 'virtualPrice', [tokenConfig.BB.address])
+          conversionRateField ? this.functionsUtil.getTokenConversionRateUniswap(tokenConfig,firstBlockNumber) : null,
+          conversionRateField ? this.functionsUtil.getTokenConversionRateUniswap(tokenConfig,lastBlockNumber) : null,
+          firstAATokenTx ? this.functionsUtil.getSubgraphTrancheInfo(tokenConfig.AA.address,firstAATokenTx.timeStamp,currTimestamp,['timeStamp','virtualPrice']) : [],
+          firstBBTokenTx ? this.functionsUtil.getSubgraphTrancheInfo(tokenConfig.BB.address,firstBBTokenTx.timeStamp,currTimestamp,['timeStamp','virtualPrice']) : [],
         ]);
+
+        // console.log(token,firstBlockNumber,lastBlockNumber,startTokenConversionRate ? startTokenConversionRate.toString() : null,lastTokenConversionRate ? lastTokenConversionRate.toString() : null);
+
         if (!tokensData[token]){
           tokensData[token] = [];
         }
 
-        const tokenDataAA = {
-          tranche:'AA',
-          timeStamp:lastTimestamp,
-          tranchePrice:this.functionsUtil.BNify(tranchePriceAA)
-        };
-        const tokenDataBB = {
-          tranche:'BB',
-          timeStamp:lastTimestamp,
-          tranchePrice:this.functionsUtil.BNify(tranchePriceBB)
-        };
-        if (conversionRateField){
-          tokenDataAA[conversionRateField] = tokenConversionRate;
-          tokenDataBB[conversionRateField] = tokenConversionRate;
+        if (trancheAAInfos){
+          trancheAAInfos.forEach( (trancheInfo,index) => {
+            const tokenDataAA = {
+              tranche:'AA',
+              timeStamp:trancheInfo.timeStamp,
+              tranchePrice:this.functionsUtil.BNify(trancheInfo.virtualPrice)
+            };
+            if (conversionRateField){
+              if (index === trancheAAInfos.length-1){
+                tokenDataAA[conversionRateField] = lastTokenConversionRate;
+              } else {
+                tokenDataAA[conversionRateField] = startTokenConversionRate;
+              }
+            }
+            tokensData[token].push(tokenDataAA);
+          });
         }
 
-        tokensData[token].push(tokenDataAA);
-        tokensData[token].push(tokenDataBB);
-
-        tokensData[token] = tokensData[token].sort((a, b) => (parseInt(a.timeStamp) > parseInt(b.timeStamp) ? 1 : -1));
+        if (trancheBBInfos){
+          trancheBBInfos.forEach( (trancheInfo,index) => {
+            const tokenDataBB = {
+              tranche:'BB',
+              timeStamp:trancheInfo.timeStamp,
+              tranchePrice:this.functionsUtil.BNify(trancheInfo.virtualPrice)
+            };
+            if (conversionRateField){
+              if (index === trancheBBInfos.length-1){
+                tokenDataBB[conversionRateField] = lastTokenConversionRate;
+              } else {
+                tokenDataBB[conversionRateField] = startTokenConversionRate;
+              }
+            }
+            tokensData[token].push(tokenDataBB);
+          });
+        }
       }
     });
 

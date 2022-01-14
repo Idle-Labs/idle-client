@@ -2777,6 +2777,40 @@ class FunctionsUtil {
     }
     return null;
   }
+  buildSubgraphQuery = (entity,fields,params={}) => {
+    params = JSON.stringify(params);
+    params = params.substr(1).substr(0,params.length-2).replace(/"([^"]+)":/g, '$1:');;
+    return `{
+      ${entity}(${params}){
+        ${fields.join(",")}
+      }
+    }`;
+  }
+  getSubgraphTrancheInfo = async (trancheAddress,startTimestamp=null,endTimestamp=null,fields=null) => {
+    const subgraphConfig = this.getGlobalConfig(['network','providers','subgraph','tranches']);
+    const queryParams = {
+      first:1000,
+      orderBy:"timeStamp",
+      orderDirection:"asc",
+      where:{
+        "Tranche":trancheAddress.toLowerCase()
+      }
+    };
+    if (startTimestamp){
+      queryParams.where.timeStamp_gte = startTimestamp;
+    }
+    if (endTimestamp){
+      queryParams.where.timeStamp_lte = endTimestamp;
+    }
+    fields = fields || subgraphConfig.entities.trancheInfos;
+    const subgraphQuery = this.buildSubgraphQuery('trancheInfos',fields,queryParams);
+    const postData = {
+      query:subgraphQuery
+    }
+    const results = await this.makePostRequest(subgraphConfig.endpoint,postData);
+    // console.log('getSubgraphTrancheInfo',trancheAddress,postData,results,this.getArrayPath(['data','data','trancheInfos'],results));
+    return this.getArrayPath(['data','data','trancheInfos'],results);
+  }
   makePostRequest = async (endpoint, postData={}, error_callback = false, config = null) => {
     const data = await axios
       .post(endpoint, postData, config)

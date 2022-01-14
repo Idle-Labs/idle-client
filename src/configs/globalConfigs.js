@@ -1715,6 +1715,20 @@ const globalConfigs = {
           42: 'https://kovan.etherscan.io',
         }
       },
+      subgraph: {
+        tranches:{
+          endpoint:"https://api.studio.thegraph.com/query/12583/idle-tranches/v0.0.4",
+          entities:{
+            trancheInfos:[
+              'id',
+              'timeStamp',
+              'blockNumber',
+              'totalSupply',
+              'virtualPrice',
+            ]
+          }
+        }
+      },
       snapshot: {
         whitelist: [
           "0x9993ADB62085AcB05Fc493f7A1D10C11227A78fa",
