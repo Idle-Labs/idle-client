@@ -260,6 +260,7 @@ class Dashboard extends Component {
       const param2 = params.param2;
       const param3 = params.param3;
 
+      console.log("section",currentSection)
       const section_is_strategy = Object.keys(this.props.availableStrategies).includes(currentSection.toLowerCase());
       const param1_is_strategy = param1 && (Object.keys(this.props.availableStrategies).includes(param1.toLowerCase()) || param1==='tranches');
 
@@ -362,19 +363,12 @@ class Dashboard extends Component {
     }
 
     // console.log('loadParams',selectedStrategy,selectedToken);
-<<<<<<< HEAD
     if(selectedStrategy==="tranches" && currentSection==="stats") {
       // console.log("Argss",selectedStrategy,selectedToken,params.param2)
       await this.props.setStrategyToken(selectedStrategy,selectedToken,params.param2);
     } else {
       await this.props.setStrategyToken(selectedStrategy, selectedToken);
     }
-=======
-    if(selectedStrategy==='tranches')
-    await this.props.setStrategy(selectedStrategy);
-    else
-    await this.props.setStrategyToken(selectedStrategy, selectedToken);
->>>>>>> aa59958 (routes)
 
     // Send GA pageview
     this.functionsUtil.sendGoogleAnalyticsPageview(currentRoute);
@@ -694,11 +688,6 @@ class Dashboard extends Component {
 
   changeProtocolToken(selectedProtocol, selectedToken) {
     selectedProtocol = selectedProtocol.toLowerCase();
-<<<<<<< HEAD
-=======
-    console.log(this.props.availableTranches)
-    console.log("P&T",selectedProtocol,selectedToken)
->>>>>>> aa59958 (routes)
     if (Object.keys(this.props.availableTranches).includes(selectedProtocol)&& Object.keys(this.props.availableTranches[selectedProtocol]).includes(selectedToken)) {
     
         const routeParts = [];
