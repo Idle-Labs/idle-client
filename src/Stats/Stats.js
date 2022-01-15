@@ -19,6 +19,7 @@ import StatsTranche from '../StatsTranche/StatsTranche';
 
 class Stats extends Component {
   state = {
+    selectedView:null,
     aum:null,
     apr:null,
     days:'-',
@@ -146,10 +147,14 @@ class Stats extends Component {
 
   async loadParams() {
 
-    if (!this.props.selectedToken || !this.props.tokenConfig){
+    console.log("Loading Params")
+    if (!this.props.selectedToken&&!this.state.selectedView){
+
+    console.log("Failed here")
+    const selectedView=null;
+    this.setStateSafe({selectedView})
       return false;
     }
-
     const newState = {};
     const { match: { params } } = this.props;
 
@@ -203,10 +208,10 @@ class Stats extends Component {
         newState.minStartTime = newStartTimestampObj;
       }
     }
-
     newState.minDate = newState.minStartTime._d;
     newState.maxDate = newState.maxEndDate._d;
 
+    console.log("Loaded Params")
     if (newState !== this.state){
       await this.setStateSafe(newState);
     }
@@ -267,6 +272,8 @@ class Stats extends Component {
 
   async componentDidMount() {
 
+    const selectedView=null;
+    this.setStateSafe({selectedView})
     if (!this.props.web3){
       this.props.initWeb3();
       return false;
@@ -505,10 +512,14 @@ class Stats extends Component {
   selectToken = async (strategy,token) => {
     await this.props.setStrategyToken(strategy,token);
     this.props.changeToken(token);
+    const selectedView='best'
+
   }
   selectTranche = async (strategy,protocol,token) => {
     await this.props.setStrategy(strategy);
     this.props.changeProtocolToken(protocol,token);
+    console.log("THIS CHECK", this.props.selectedStrategy)
+    const selectedView='tranche'
   }
 
   handleCarousel = action => {
@@ -529,21 +540,6 @@ class Stats extends Component {
   }
 
   render() {
-
-    const valueProps = {
-      lineHeight:1,
-      fontSize:[4,5],
-      fontWeight:[3,4],
-      color:'statValue'
-    };
-
-    const unitProps = {
-      ml:2,
-      lineHeight:1,
-      fontWeight:[2,3],
-      color:'statValue',
-      fontSize:[3,'23px'],
-    };
 
     const networkId = this.functionsUtil.getRequiredNetworkId();
     const idleTokenAvailableNetworks = this.functionsUtil.getGlobalConfig(['govTokens','IDLE','availableNetworks']);
@@ -579,7 +575,6 @@ class Stats extends Component {
     if (!this.props.selectedToken){
       const strategies = this.functionsUtil.getGlobalConfig(['strategies']);
       const enabledTokens = [];
-      const strategyTranche=this.functionsUtil.getGlobalConfig(['strategies','tranches'])
       const statsProtocols = this.functionsUtil.getGlobalConfig(['stats','protocols']);
 
       Object.keys(statsTokens).forEach(token => {
@@ -599,9 +594,12 @@ class Stats extends Component {
             loaderAlign={'flex-end'}
           />
           {
-            Object.keys(strategies).map(strategy => {
-              if(strategy!=='risk')
+            Object.keys(strategies).map(strategy => 
+             
               {
+                if(strategy==='risk')
+                return false;
+
                 const strategyInfo = strategies[strategy];
                 const availableTokens = this.props.availableStrategies[strategy];
 
@@ -834,14 +832,14 @@ class Stats extends Component {
                   </Box>
                 );
               }
-            })
+            )
           }
 
           <Title mb={[3,4]}>Tranches</Title>
           <TranchesList
               enabledProtocols={[]}
               availableTranches={this.props.availableTranches}
-              handleClick={(props) => this.selectTranche(strategyTranche,props.protocol,props.token)}
+              handleClick={(props) => this.selectTranche('tranche',props.protocol,props.token)}
               cols={[
                 {
                   title:'PROTOCOL',
@@ -1047,7 +1045,7 @@ class Stats extends Component {
                         boxShadow:null,
                         mainColor:'redeem',
                         size: this.props.isMobile ? 'small' : 'medium',
-                        handleClick:(props) => this.selectTranche(strategyTranche,props.protocol,props.token)
+                        handleClick:(props) => this.selectTranche('tranches',props.protocol,props.token)
                       }
                     }
                   ]
@@ -1140,25 +1138,25 @@ class Stats extends Component {
         </Flex>
       );
     } else {
-      if(this.props.selectedStrategy==='best')
+      if(this.state.selectedStrategy==='best')
       {
         return(
           <Flex>
-            <StatsAsset
-            {...this.props}
+           <Text>
+             THIS IS STATS
+           </Text>
             />
           </Flex> 
         );
       }
-      
+      else if(this.state.selectedStrategy==='tranches')
         return(
           <Flex>
-            <StatsTranche
-            {...this.props}
-            />
+            <Text>
+              Tranche From Stats
+            </Text>
           </Flex> 
-        );
-      
+      );
     }
   }
 }
