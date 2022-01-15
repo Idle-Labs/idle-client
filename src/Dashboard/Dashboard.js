@@ -273,9 +273,9 @@ class Dashboard extends Component {
         currentRoute += '/' + selectedStrategy;
         
         // Set token
-        const param1_is_token = param1==="tranches"?null:param1 && Object.keys(this.props.availableStrategies[selectedStrategy]).includes(param1.toUpperCase());
-        const param2_is_token = param1==="tranches"?null:param2 && Object.keys(this.props.availableStrategies[selectedStrategy]).includes(param2.toUpperCase());
-        
+        const param1_is_token = param1==="tranches" ? null : param1 && Object.keys(this.props.availableStrategies[selectedStrategy]).includes(param1.toUpperCase());
+        const param2_is_token = param1==="tranches" ? null : param2 && Object.keys(this.props.availableStrategies[selectedStrategy]).includes(param2.toUpperCase());
+
         if (param1_is_token || param2_is_token) {
           selectedToken = param1_is_token ? param1.toUpperCase() : param2.toUpperCase();
           currentRoute += '/' + selectedToken;
@@ -362,12 +362,19 @@ class Dashboard extends Component {
     }
 
     // console.log('loadParams',selectedStrategy,selectedToken);
+<<<<<<< HEAD
     if(selectedStrategy==="tranches" && currentSection==="stats") {
       // console.log("Argss",selectedStrategy,selectedToken,params.param2)
       await this.props.setStrategyToken(selectedStrategy,selectedToken,params.param2);
     } else {
       await this.props.setStrategyToken(selectedStrategy, selectedToken);
     }
+=======
+    if(selectedStrategy==='tranches')
+    await this.props.setStrategy(selectedStrategy);
+    else
+    await this.props.setStrategyToken(selectedStrategy, selectedToken);
+>>>>>>> aa59958 (routes)
 
     // Send GA pageview
     this.functionsUtil.sendGoogleAnalyticsPageview(currentRoute);
@@ -687,10 +694,17 @@ class Dashboard extends Component {
 
   changeProtocolToken(selectedProtocol, selectedToken) {
     selectedProtocol = selectedProtocol.toLowerCase();
+<<<<<<< HEAD
+=======
+    console.log(this.props.availableTranches)
+    console.log("P&T",selectedProtocol,selectedToken)
+>>>>>>> aa59958 (routes)
     if (Object.keys(this.props.availableTranches).includes(selectedProtocol)&& Object.keys(this.props.availableTranches[selectedProtocol]).includes(selectedToken)) {
     
         const routeParts = [];
 
+        console.log("Section",this.state.currentSection)
+        console.log("Strategy",this.props.selectedStrategy)
         // Add section
         if (this.state.currentSection.toLowerCase() !== this.props.selectedStrategy.toLowerCase()) {
           routeParts.push(this.state.currentSection);
