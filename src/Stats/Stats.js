@@ -19,7 +19,6 @@ import StatsTranche from '../StatsTranche/StatsTranche';
 
 class Stats extends Component {
   state = {
-    selectedView:null,
     aum:null,
     apr:null,
     days:'-',
@@ -148,11 +147,9 @@ class Stats extends Component {
   async loadParams() {
 
     console.log("Loading Params")
-    if (!this.props.selectedToken&&!this.state.selectedView){
+    if (!this.props.selectedToken){
 
     console.log("Failed here")
-    const selectedView=null;
-    this.setStateSafe({selectedView})
       return false;
     }
     const newState = {};
@@ -272,8 +269,6 @@ class Stats extends Component {
 
   async componentDidMount() {
 
-    const selectedView=null;
-    this.setStateSafe({selectedView})
     if (!this.props.web3){
       this.props.initWeb3();
       return false;
@@ -512,14 +507,12 @@ class Stats extends Component {
   selectToken = async (strategy,token) => {
     await this.props.setStrategyToken(strategy,token);
     this.props.changeToken(token);
-    const selectedView='best'
 
   }
   selectTranche = async (strategy,protocol,token) => {
     await this.props.setStrategy(strategy);
     this.props.changeProtocolToken(protocol,token);
     console.log("THIS CHECK", this.props.selectedStrategy)
-    const selectedView='tranche'
   }
 
   handleCarousel = action => {
@@ -839,7 +832,7 @@ class Stats extends Component {
           <TranchesList
               enabledProtocols={[]}
               availableTranches={this.props.availableTranches}
-              handleClick={(props) => this.selectTranche('tranche',props.protocol,props.token)}
+              handleClick={(props) => this.selectTranche('tranches',props.protocol,props.token)}
               cols={[
                 {
                   title:'PROTOCOL',
@@ -1138,7 +1131,7 @@ class Stats extends Component {
         </Flex>
       );
     } else {
-      if(this.state.selectedStrategy==='best')
+      if(this.props.selectedStrategy==='best')
       {
         return(
           <Flex>
@@ -1149,13 +1142,21 @@ class Stats extends Component {
           </Flex> 
         );
       }
-      else if(this.state.selectedStrategy==='tranches')
+      else if(this.props.selectedStrategy==='tranches')
         return(
           <Flex>
             <Text>
               Tranche From Stats
             </Text>
           </Flex> 
+      );
+      else
+      return(
+        <Flex>
+          <Text>
+            Mistake
+          </Text>
+        </Flex>
       );
     }
   }
