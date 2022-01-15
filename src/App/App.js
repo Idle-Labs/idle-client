@@ -343,8 +343,9 @@ class App extends Component {
     const callback = () => {
       this.loadAvailableTokens();
     }
+    console.log("availabble",this.state.availableStrategies)
 
-    if (selectedStrategy && selectedStrategy !== this.state.selectedStrategy && Object.keys(this.state.availableStrategies).includes(selectedStrategy.toLowerCase())) {
+    if (selectedStrategy && selectedStrategy !== this.state.selectedStrategy && (Object.keys(this.state.availableStrategies).includes(selectedStrategy.toLowerCase())||selectedStrategy==='tranches')) {
       selectedStrategy = selectedStrategy.toLowerCase();
       await this.setState({
         selectedStrategy
