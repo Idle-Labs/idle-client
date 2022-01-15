@@ -288,7 +288,7 @@ class App extends Component {
     await this.setState(newState);
   }
 
-  async setStrategyToken(selectedStrategy, selectedToken) {
+  async setStrategyToken(selectedStrategy, selectedToken,selectedProtocol=null) {
 
     const callback = () => {
       this.loadAvailableTokens();
@@ -304,9 +304,20 @@ class App extends Component {
     if (selectedStrategy && this.state.availableStrategies && selectedStrategy !== this.state.selectedStrategy && Object.keys(this.state.availableStrategies).includes(selectedStrategy.toLowerCase())) {
       newState.selectedStrategy = selectedStrategy.toLowerCase();
     }
+    else if(selectedStrategy==='tranches'&&selectedStrategy!==this.state.selectedStrategy)
+    {
+      newState.selectedStrategy = selectedStrategy.toLowerCase();
+    }
 
-    if (selectedToken && selectedToken !== this.state.selectedToken) {
-      if (this.state.availableTokens && Object.keys(this.state.availableTokens).includes(selectedToken.toUpperCase())) {
+      
+      else if (selectedToken && selectedToken !== this.state.selectedToken) {
+        if(selectedStrategy==='tranches')
+        {
+          if(this.state.availableTranches&&Object.keys(this.state.availableTranches[selectedProtocol]).includes(selectedToken))
+          newState.selectedToken = selectedToken;
+
+        }
+      else if (this.state.availableTokens && Object.keys(this.state.availableTokens).includes(selectedToken.toUpperCase())) {
         newState.selectedToken = selectedToken.toUpperCase();
         newState.tokenConfig = this.state.availableTokens[selectedToken];
       } else if (this.state.availableStrategies && Object.keys(this.state.availableStrategies[selectedStrategy]).includes(selectedToken.toUpperCase())) {

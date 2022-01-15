@@ -365,7 +365,9 @@ class Dashboard extends Component {
     }
 
     // console.log('loadParams',selectedStrategy,selectedToken);
-    
+    if(selectedStrategy==="tranches"&&currentSection==="stats")
+    await this.props.setStrategyToken(selectedStrategy,selectedToken,params.param2)
+    else
     await this.props.setStrategyToken(selectedStrategy, selectedToken);
 
     // Send GA pageview
