@@ -294,12 +294,14 @@ class App extends Component {
       this.loadAvailableTokens();
     }
 
+    console.log(selectedToken,selectedProtocol)
     const newState = {
       tokenConfig: !selectedToken ? null : this.state.tokenConfig,
       availableTokens: !selectedToken ? null : this.state.availableTokens,
       selectedToken: !selectedToken ? selectedToken : this.state.selectedToken,
       selectedStrategy: !selectedStrategy ? selectedStrategy : this.state.selectedStrategy,
     };
+    console.log("here",newState.selectedToken)
 
     if (selectedStrategy && this.state.availableStrategies && selectedStrategy !== this.state.selectedStrategy && Object.keys(this.state.availableStrategies).includes(selectedStrategy.toLowerCase())) {
       newState.selectedStrategy = selectedStrategy.toLowerCase();
@@ -310,17 +312,21 @@ class App extends Component {
     }
 
       
-      else if (selectedToken && selectedToken !== this.state.selectedToken) {
+     if (selectedToken && selectedToken !== this.state.selectedToken) {
+       console.log("Step1")
         if(selectedStrategy==='tranches')
         {
-          if(this.state.availableTranches&&Object.keys(this.state.availableTranches[selectedProtocol]).includes(selectedToken))
+          console.log("Step2")
+          console.log(availableTranches)
+          if(availableTranches&&Object.keys(availableTranches[selectedProtocol]).includes(selectedToken))
           newState.selectedToken = selectedToken;
-
+          console.log(newState.selectedToken)
         }
       else if (this.state.availableTokens && Object.keys(this.state.availableTokens).includes(selectedToken.toUpperCase())) {
         newState.selectedToken = selectedToken.toUpperCase();
         newState.tokenConfig = this.state.availableTokens[selectedToken];
-      } else if (this.state.availableStrategies && Object.keys(this.state.availableStrategies[selectedStrategy]).includes(selectedToken.toUpperCase())) {
+      } 
+      else if (this.state.availableStrategies && Object.keys(this.state.availableStrategies[selectedStrategy]).includes(selectedToken.toUpperCase())) {
         newState.selectedToken = selectedToken.toUpperCase();
         newState.tokenConfig = this.state.availableStrategies[selectedStrategy][newState.selectedToken];
         newState.availableTokens = this.state.availableStrategies[selectedStrategy];
@@ -328,7 +334,7 @@ class App extends Component {
     }
 
     // console.log('setStrategyToken',selectedStrategy,selectedToken,newState);
-
+    console.log(newState)
     await this.setState(newState, callback);
   }
 
