@@ -341,6 +341,7 @@ class App extends Component {
     await this.setState(newState, callback);
   }
 
+
   async setRequiredNetwork(requiredNetwork,forceChangeChain=false){
     requiredNetwork = parseInt(requiredNetwork);
     if (globalConfigs.network.enabledNetworks.includes(requiredNetwork)){

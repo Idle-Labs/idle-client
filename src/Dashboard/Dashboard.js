@@ -242,8 +242,10 @@ class Dashboard extends Component {
       return;
     }
 
+
     const { match: { params } } = this.props;
 
+    console.log("params",params)
     const baseRoute = this.functionsUtil.getGlobalConfig(['dashboard', 'baseRoute']);
     let currentRoute = baseRoute;
 
