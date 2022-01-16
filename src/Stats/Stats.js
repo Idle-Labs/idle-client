@@ -1135,19 +1135,18 @@ class Stats extends Component {
       {
         return(
           <Flex>
-           <Text>
-             THIS IS STATS
-           </Text>
-            />
+             <StatsAsset
+               {...this.props}
+             />
           </Flex> 
         );
       }
       else if(this.props.selectedStrategy==='tranches')
         return(
           <Flex>
-            <Text>
-              Tranche From Stats
-            </Text>
+            <StatsAsset
+               {...this.props}
+             />
           </Flex> 
       );
       else
