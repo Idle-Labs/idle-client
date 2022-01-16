@@ -319,7 +319,10 @@ class App extends Component {
           console.log("Step2")
           console.log(availableTranches)
           if(availableTranches&&Object.keys(availableTranches[selectedProtocol]).includes(selectedToken))
-          newState.selectedToken = selectedToken;
+          {
+            newState.selectedToken = selectedToken;
+            newState.availableTokens=availableTranches;
+          }
           console.log(newState.selectedToken)
         }
       else if (this.state.availableTokens && Object.keys(this.state.availableTokens).includes(selectedToken.toUpperCase())) {

@@ -242,8 +242,10 @@ class Dashboard extends Component {
       return;
     }
 
+
     const { match: { params } } = this.props;
 
+    console.log("params",params)
     const baseRoute = this.functionsUtil.getGlobalConfig(['dashboard', 'baseRoute']);
     let currentRoute = baseRoute;
 
@@ -290,6 +292,7 @@ class Dashboard extends Component {
         }
         else if(param1==="tranches")
         {
+          selectedToken=params.param3
           currentRoute+='/'+param2+'/'+param3;
 
         }
@@ -366,7 +369,10 @@ class Dashboard extends Component {
 
     // console.log('loadParams',selectedStrategy,selectedToken);
     if(selectedStrategy==="tranches"&&currentSection==="stats")
-    await this.props.setStrategyToken(selectedStrategy,selectedToken,params.param2)
+
+   {
+     console.log("Argss",selectedStrategy,selectedToken,params.param2)
+     await this.props.setStrategyToken(selectedStrategy,selectedToken,params.param2)}
     else
     await this.props.setStrategyToken(selectedStrategy, selectedToken);
 
