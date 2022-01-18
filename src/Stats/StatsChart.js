@@ -51,17 +51,19 @@ class StatsChart extends Component {
   }
 
   loadApiData = async () => {
+    console.log("HERE")
 
-    if (!this.props.tokenConfig || !this.props.selectedToken || !this.props.chartMode || !this.props.apiResults){
+    if (!this.props.tokenConfig || !this.props.selectedToken || !this.props.chartMode || (!this.props.apiResults&&!this.props.apiResults_aa)){
+      console.log("Failed",this.props.tokenConfig,"TOKEN",this.props.selectedToken,"CHARTMODE",this.props.chartMode,this.props.apiResults,this.props.apiResults_aa)
       return false;
     }
-
+    console.log("Success")
     const maxGridLines = 4;
     const apiResults = this.props.apiResults;
     const apiResults_aa=this.props.apiResults_aa;
     const apiResults_bb=this.props.apiResults_bb;
     const apiResults_unfiltered = this.props.apiResults_unfiltered;
-    const totalItems = apiResults.length;
+    const totalItems = apiResults_aa ? apiResults_aa.length : apiResults.length;
     const protocols = Object.assign([],this.props.tokenConfig.protocols);
     // const compoundProtocol = this.props.tokenConfig.protocols.find( p => (p.name === 'compound'));
 
