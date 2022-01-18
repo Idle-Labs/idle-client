@@ -146,22 +146,18 @@ class Stats extends Component {
 
   async loadParams() {
 
-    console.log("Loading Params")
     if (!this.props.selectedToken){
-
-    console.log("Failed here")
       return false;
     }
+
     const newState = {};
     const { match: { params } } = this.props;
 
     const currentNetworkAvailableTokens = Object.keys(this.props.availableTokens);
 
-    if(this.props.selectedStrategy==='tranches')
-    {
+    if(this.props.selectedStrategy==='tranches') {
       newState.selectedToken=this.props.selectedTokens
-    }
-    else if (!!params.customToken && currentNetworkAvailableTokens.indexOf(params.customToken.toUpperCase()) !== -1 ){
+    } else if (!!params.customToken && currentNetworkAvailableTokens.indexOf(params.customToken.toUpperCase()) !== -1 ){
       newState.selectedToken = params.customToken.toUpperCase();
     } else {
       newState.selectedToken = this.props.selectedToken.toUpperCase();
@@ -212,10 +208,7 @@ class Stats extends Component {
     newState.minDate = newState.minStartTime._d;
     newState.maxDate = newState.maxEndDate._d;
 
-    console.log("Loaded Params",newState)
-
     if (newState !== this.state){
-      console.log("Success")
       await this.setStateSafe(newState);
     }
   }
@@ -1137,33 +1130,15 @@ class Stats extends Component {
         </Flex>
       );
     } else {
-      if(this.props.selectedStrategy==='best')
-      {
-        return(
-          <Flex>
-             <StatsAsset
-               {...this.props}
-             />
-          </Flex> 
-        );
-      }
-      else if(this.props.selectedStrategy==='tranches')
-        return(
-          <Flex>
-          Plain Text
-            {/*<StatsTranche
-               {...this.props}
-             />*/}
-          </Flex> 
-      );
-      else
-      return(
-        <Flex>
-          <Text>
-            Mistake
-          </Text>
-        </Flex>
-      );
+      return this.props.selectedStrategy==='best' ? (
+         <StatsAsset
+           {...this.props}
+         />
+      ) : this.props.selectedStrategy==='tranches' && (
+        <StatsTranche
+           {...this.props}
+         />
+      )
     }
   }
 }

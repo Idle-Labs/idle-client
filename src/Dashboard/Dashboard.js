@@ -242,10 +242,8 @@ class Dashboard extends Component {
       return;
     }
 
-
     const { match: { params } } = this.props;
 
-    console.log("params",params)
     const baseRoute = this.functionsUtil.getGlobalConfig(['dashboard', 'baseRoute']);
     let currentRoute = baseRoute;
 
@@ -262,7 +260,6 @@ class Dashboard extends Component {
       const param2 = params.param2;
       const param3 = params.param3;
 
-      console.log("section",currentSection)
       const section_is_strategy = Object.keys(this.props.availableStrategies).includes(currentSection.toLowerCase());
       const param1_is_strategy = param1 && (Object.keys(this.props.availableStrategies).includes(param1.toLowerCase()) || param1==='tranches');
 
@@ -274,11 +271,8 @@ class Dashboard extends Component {
 
         selectedStrategy = section_is_strategy ? currentSection : param1;
         currentRoute += '/' + selectedStrategy;
-        console.log("Sel",selectedStrategy)
-
-        // Set token
-
         
+        // Set token
         const param1_is_token = param1==="tranches"?null:param1 && Object.keys(this.props.availableStrategies[selectedStrategy]).includes(param1.toUpperCase());
         const param2_is_token = param1==="tranches"?null:param2 && Object.keys(this.props.availableStrategies[selectedStrategy]).includes(param2.toUpperCase());
         
@@ -368,13 +362,12 @@ class Dashboard extends Component {
     }
 
     // console.log('loadParams',selectedStrategy,selectedToken);
-    if(selectedStrategy==="tranches"&&currentSection==="stats")
-
-   {
-     console.log("Argss",selectedStrategy,selectedToken,params.param2)
-     await this.props.setStrategyToken(selectedStrategy,selectedToken,params.param2)}
-    else
-    await this.props.setStrategyToken(selectedStrategy, selectedToken);
+    if(selectedStrategy==="tranches" && currentSection==="stats") {
+      // console.log("Argss",selectedStrategy,selectedToken,params.param2)
+      await this.props.setStrategyToken(selectedStrategy,selectedToken,params.param2);
+    } else {
+      await this.props.setStrategyToken(selectedStrategy, selectedToken);
+    }
 
     // Send GA pageview
     this.functionsUtil.sendGoogleAnalyticsPageview(currentRoute);
