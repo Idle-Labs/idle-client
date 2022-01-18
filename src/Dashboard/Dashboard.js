@@ -242,10 +242,8 @@ class Dashboard extends Component {
       return;
     }
 
-
     const { match: { params } } = this.props;
 
-    console.log("params",params)
     const baseRoute = this.functionsUtil.getGlobalConfig(['dashboard', 'baseRoute']);
     let currentRoute = baseRoute;
 
@@ -262,7 +260,6 @@ class Dashboard extends Component {
       const param2 = params.param2;
       const param3 = params.param3;
 
-      console.log("section",currentSection)
       const section_is_strategy = Object.keys(this.props.availableStrategies).includes(currentSection.toLowerCase());
       const param1_is_strategy = param1 && (Object.keys(this.props.availableStrategies).includes(param1.toLowerCase()) || param1==='tranches');
 

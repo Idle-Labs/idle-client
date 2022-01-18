@@ -554,43 +554,7 @@ class StatsAsset extends Component {
             width={1}
             flexDirection={'column'}
             >
-            {
-            /*
-            }
-            <Flex position={['absolute','relative']} left={0} px={[3,0]} zIndex={10} width={1} flexDirection={'row'} mb={[0,3]}>
-                <Flex alignItems={'center'} width={[2/3,1/2]}>
-                <RouterLink to="/">
-                    <Image src="images/logo-gradient.svg"
-                    height={['35px','48px']}
-                    position={'relative'} />
-                </RouterLink>
-                <Heading.h3 color={'dark-gray'} textAlign={'left'} fontWeight={3} lineHeight={'initial'} fontSize={[4,5]} ml={[1,2]}>
-                    <Text.span fontSize={'80%'}>|</Text.span> Stats
-                </Heading.h3>
-                </Flex>
-                <Flex flexDirection={'row'} width={[1/3,1/2]} justifyContent={'flex-end'} alignItems={'center'}>
-                {
-                    this.state.buttonGroups && 
-                    this.props.isMobile ? (
-                        <ButtonGroup
-                        isMobile={this.props.isMobile}
-                        components={ this.state.buttonGroups.reduce((components,array) => components.concat(array),[]) }
-                        theme={'light'}
-                        />
-                    ) :
-                    this.state.buttonGroups.map((buttonGroup,i) => (
-                        <ButtonGroup
-                        key={`buttonGroup_${i}`}
-                        isMobile={this.props.isMobile}
-                        components={buttonGroup}
-                        theme={'light'}
-                        />
-                    ))
-                }
-                </Flex>
-            </Flex>
-            */
-            }
+            
             <Box
                 mb={[3,4]}
             >
