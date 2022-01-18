@@ -628,7 +628,7 @@ class TrancheDetails extends Component {
                           fontSize:[1,2],
                           fontWeight:[2,3]
                         }}
-                        text={'Auto-Farming'}
+                        text={'Auto-Compounding'}
                         message={this.functionsUtil.getGlobalConfig(['messages','autoFarming'])}
                       />
                       <Flex

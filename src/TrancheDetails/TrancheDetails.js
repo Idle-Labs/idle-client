@@ -461,7 +461,7 @@ class TrancheDetails extends Component {
                 flexProps={{
                   mb:1
                 }}
-                text={'Auto-Farming'}
+                text={'Auto-Compounding'}
                 tooltipProps={{
                   message:this.functionsUtil.getGlobalConfig(['messages','autoFarming'])
                 }}
