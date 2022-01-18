@@ -239,6 +239,7 @@ class StatsTranche extends Component {
   loadApiData = async () => {
 
     if (!this.props.selectedToken || !this.props.selectedProtocol || !this.props.selectedStrategy || !this.props.tokenConfig){
+      console.log("FAILED HERE")
       return false;
     }
 
@@ -583,7 +584,7 @@ render() {
                 >
                   <StatsChart
                     height={ 350 }
-                    {...this.state}
+                    
                     theme={this.props.theme}
                     chartMode={'PRICE_TRANCHE'}
                     isMobile={this.props.isMobile}
