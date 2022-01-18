@@ -29,12 +29,12 @@ class StatsTranche extends Component {
     rebalances:'-',
     buttonGroups:[],
     apiResults:null,
-    apiResults_aa:null,
-    apiResults_bb:null,
     carouselIndex:0,
     idleVersion:null,
     minStartTime:null,
     endTimestamp:null,
+    apiResults_aa:null,
+    apiResults_bb:null,
     govTokensPool:null,
     unlentBalance:null,
     quickSelection:null,
@@ -247,7 +247,7 @@ class StatsTranche extends Component {
     const endTimestamp = this.state.maxDate ? parseInt(this.functionsUtil.strToMoment(this.functionsUtil.strToMoment(this.state.maxDate).format('DD/MM/YYYY 23:59:59'),'DD/MM/YYYY HH:mm:ss')._d.getTime()/1000) : null;
 
     let apiResults_unfiltered_aa = await this.functionsUtil.getSubgraphTrancheInfo(this.props.tokenConfig.AA.address,startTimestamp,endTimestamp);
-    let apiResults_unfiltered_bb = await this.functionsUtil.getSubgraphTrancheInfo(this.props.tokenConfig.AA.address,startTimestamp,endTimestamp);
+    let apiResults_unfiltered_bb = await this.functionsUtil.getSubgraphTrancheInfo(this.props.tokenConfig.BB.address,startTimestamp,endTimestamp);
 
     const apiResults_aa = this.filterTokenData(apiResults_unfiltered_aa);
     const apiResults_bb = this.filterTokenData(apiResults_unfiltered_bb);
@@ -585,17 +585,16 @@ render() {
                   <StatsChart
                     height={ 350 }
                     {...this.state}
+                    parentId={'chart-PRICE'}
                     theme={this.props.theme}
                     chartMode={'PRICE_TRANCHE'}
                     isMobile={this.props.isMobile}
                     contracts={this.props.contracts}
                     themeMode={this.props.themeMode}
+                    tokenConfig={this.props.tokenConfig}
                     apiResults_aa={this.state.apiResults_aa}
                     apiResults_bb={this.state.apiResults_bb}
-                    tokenConfig={this.props.tokenConfig}
                     selectedToken={this.props.selectedToken}
-                    apiResults_unfiltered_aa={this.state.apiResults_unfiltered__aa}
-                    apiResults_unfiltered_bb={this.state.apiResults_unfiltered__bb}
 
                   />
                 </Flex>
