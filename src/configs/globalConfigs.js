@@ -1717,7 +1717,7 @@ const globalConfigs = {
       },
       subgraph: {
         tranches:{
-          endpoint:"https://api.studio.thegraph.com/query/12583/idle-tranches/v0.0.4",
+          endpoint:"https://api.studio.thegraph.com/query/12583/idle-tranches-test/v0.0.4",
           entities:{
             trancheInfos:[
               'id',

@@ -512,30 +512,29 @@ class StatsAsset extends Component {
 
     render() {
       const networkId = this.functionsUtil.getRequiredNetworkId();
-    const idleTokenAvailableNetworks = this.functionsUtil.getGlobalConfig(['govTokens','IDLE','availableNetworks']);
-    const idleTokenEnabled = this.functionsUtil.getGlobalConfig(['govTokens','IDLE','enabled']) && idleTokenAvailableNetworks.includes(networkId);
-    
-    const refreshIdleSpeedConfig = this.functionsUtil.getGlobalConfig(['contract','methods','refreshIdleSpeed']);
-    const refreshIdleSpeedEnabled = refreshIdleSpeedConfig.enabled && refreshIdleSpeedConfig.availableNetworks.includes(networkId);
-
-    const apyLong = this.functionsUtil.getGlobalConfig(['messages','apyLong']);
-
-  
-    const statsTokens = this.functionsUtil.getGlobalConfig(['stats','tokens']);
-        const valueProps = {
-            lineHeight:1,
-            fontSize:[4,5],
-            fontWeight:[3,4],
-            color:'statValue'
-          };
+      const idleTokenAvailableNetworks = this.functionsUtil.getGlobalConfig(['govTokens','IDLE','availableNetworks']);
+      const idleTokenEnabled = this.functionsUtil.getGlobalConfig(['govTokens','IDLE','enabled']) && idleTokenAvailableNetworks.includes(networkId);
       
-          const unitProps = {
-            ml:2,
-            lineHeight:1,
-            fontWeight:[2,3],
-            color:'statValue',
-            fontSize:[3,'23px'],
-          };
+      const refreshIdleSpeedConfig = this.functionsUtil.getGlobalConfig(['contract','methods','refreshIdleSpeed']);
+      const refreshIdleSpeedEnabled = refreshIdleSpeedConfig.enabled && refreshIdleSpeedConfig.availableNetworks.includes(networkId);
+
+      const apyLong = this.functionsUtil.getGlobalConfig(['messages','apyLong']);
+    
+      const statsTokens = this.functionsUtil.getGlobalConfig(['stats','tokens']);
+      const valueProps = {
+          lineHeight:1,
+          fontSize:[4,5],
+          fontWeight:[3,4],
+          color:'statValue'
+        };
+    
+        const unitProps = {
+          ml:2,
+          lineHeight:1,
+          fontWeight:[2,3],
+          color:'statValue',
+          fontSize:[3,'23px'],
+        };
         const tokenConfig = statsTokens[this.props.selectedToken];
         const versionsOptions = Object.keys(globalConfigs.stats.versions).filter( version => {
             const versionInfo = this.getVersionInfo(version);
@@ -612,14 +611,14 @@ class StatsAsset extends Component {
                 <Flex
                     width={[1,0.4]}
                 >
-                    <Breadcrumb
+                  <Breadcrumb
                     {...this.props}
                     showPathMobile={true}
                     text={'ASSETS OVERVIEW'}
                     isMobile={this.props.isMobile}
                     handleClick={ e => this.props.goToSection('stats') }
                     path={[this.functionsUtil.getGlobalConfig(['strategies',this.props.selectedStrategy,'title'])]}
-                    />
+                  />
                 </Flex>
                 <Flex
                     mt={[3,0]}

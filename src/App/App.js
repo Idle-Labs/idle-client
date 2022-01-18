@@ -48,6 +48,7 @@ class App extends Component {
     walletProvider: null,
     availableTokens: null,
     buyModalOpened: false,
+    selectedProtocol: null,
     selectedStrategy: null,
     toastMessageProps: null,
     callbackAfterLogin: null,
@@ -294,14 +295,14 @@ class App extends Component {
       this.loadAvailableTokens();
     }
 
-    console.log(selectedToken,selectedProtocol)
+    // console.log(selectedToken,selectedProtocol)
     const newState = {
       tokenConfig: !selectedToken ? null : this.state.tokenConfig,
       availableTokens: !selectedToken ? null : this.state.availableTokens,
       selectedToken: !selectedToken ? selectedToken : this.state.selectedToken,
       selectedStrategy: !selectedStrategy ? selectedStrategy : this.state.selectedStrategy,
     };
-    console.log("here",newState.selectedToken)
+    // console.log("here",newState.selectedToken)
 
     if (selectedStrategy && this.state.availableStrategies && selectedStrategy !== this.state.selectedStrategy && Object.keys(this.state.availableStrategies).includes(selectedStrategy.toLowerCase())) {
       newState.selectedStrategy = selectedStrategy.toLowerCase();
@@ -313,17 +314,16 @@ class App extends Component {
 
       
      if (selectedToken && selectedToken !== this.state.selectedToken) {
-       console.log("Step1")
-        if(selectedStrategy==='tranches')
-        {
-          console.log("Step2")
-          console.log(availableTranches)
-          if(availableTranches&&Object.keys(availableTranches[selectedProtocol]).includes(selectedToken))
-          {
+       // console.log("Step1")
+        if(selectedStrategy==='tranches') {
+          // console.log("Step2");
+          // console.log(availableTranches);
+          if(availableTranches && Object.keys(availableTranches[selectedProtocol]).includes(selectedToken)) {
             newState.selectedToken = selectedToken;
-            newState.availableTokens=availableTranches;
+            newState.availableTokens = availableTranches;
+            newState.selectedProtocol = selectedProtocol;
+            newState.tokenConfig = availableTranches[selectedProtocol][selectedToken];
           }
-          console.log(newState.selectedToken)
         }
       else if (this.state.availableTokens && Object.keys(this.state.availableTokens).includes(selectedToken.toUpperCase())) {
         newState.selectedToken = selectedToken.toUpperCase();
@@ -337,7 +337,7 @@ class App extends Component {
     }
 
     // console.log('setStrategyToken',selectedStrategy,selectedToken,newState);
-    console.log(newState)
+    // console.log(newState);
     await this.setState(newState, callback);
   }
 
@@ -871,6 +871,7 @@ class App extends Component {
                                         closeBuyModal={this.closeBuyModal.bind(this)}
                                         setCachedData={this.setCachedData.bind(this)}
                                         selectedStrategy={this.state.selectedStrategy}
+                                        selectedProtocol={this.state.selectedProtocol}
                                         userRejectedValidation={userRejectedValidation}
                                         clearCachedData={this.clearCachedData.bind(this)}
                                         setStrategyToken={this.setStrategyToken.bind(this)}
