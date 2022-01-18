@@ -2793,6 +2793,7 @@ class FunctionsUtil {
       return false;
     }
 
+    const currTime = parseInt(Date.now()/1000);
     const queryParams = {
       first:1000,
       orderBy:"timeStamp",
@@ -2812,9 +2813,19 @@ class FunctionsUtil {
     const postData = {
       query:subgraphQuery
     }
+
     const results = await this.makePostRequest(subgraphConfig.endpoint,postData);
-    // console.log('getSubgraphTrancheInfo',trancheAddress,postData,results,this.getArrayPath(['data','data','trancheInfos'],results));
-    return this.getArrayPath(['data','data','trancheInfos'],results);
+    let subgraphData = this.getArrayPath(['data','data','trancheInfos'],results);
+    const lastTimestamp = subgraphData ? parseInt(subgraphData[subgraphData.length-1].timeStamp) : null;
+
+    if (lastTimestamp && lastTimestamp>startTimestamp && lastTimestamp<endTimestamp && currTime-lastTimestamp>86400){
+      const subgraphData_2 = await this.getSubgraphTrancheInfo(trancheAddress,lastTimestamp+1,endTimestamp,fields);
+      if (subgraphData_2){
+        subgraphData = subgraphData.concat(subgraphData_2);
+      }
+    }
+
+    return subgraphData;
   }
   makePostRequest = async (endpoint, postData={}, error_callback = false, config = null) => {
     const data = await axios

@@ -828,6 +828,9 @@ class Tranches extends Component {
                   trancheType={this.state.trancheType}
                   availableTranches={this.props.availableTranches}
                   handleClick={(props) => this.selectTranche(props.protocol,props.token)}
+                  colsProps={{
+                    fontSize:['10px','14px'],
+                  }}
                   cols={[
                     {
                       title:'PROTOCOL', 
@@ -915,6 +918,7 @@ class Tranches extends Component {
                     },
                     {
                       title:this.state.useTrancheType ? 'APY' : 'SENIOR APY',
+                      desc:this.functionsUtil.getGlobalConfig(['messages','apyTranches']),
                       visible:!this.state.useTrancheType || this.state.trancheType === 'AA',
                       props:{
                         width:[this.state.useTrancheType ? 0.16 : 0.27,this.state.useTrancheType ? 0.09 : 0.12],
@@ -932,6 +936,7 @@ class Tranches extends Component {
                     },
                     {
                       title:this.state.useTrancheType ? 'APY' : 'JUNIOR APY',
+                      desc:this.functionsUtil.getGlobalConfig(['messages','apyTranches']),
                       visible:!this.state.useTrancheType || this.state.trancheType === 'BB',
                       props:{
                         width:[this.state.useTrancheType ? 0.16 : 0.27,this.state.useTrancheType ? 0.09 : 0.12],
@@ -955,6 +960,7 @@ class Tranches extends Component {
                     {
                       mobile:false,
                       title:'APR RATIO',
+                      desc:this.functionsUtil.getGlobalConfig(['messages','aprRatio']),
                       props:{
                         width:[0.15, this.state.useTrancheType ? 0.12 : 0.10],
                       },
@@ -974,6 +980,7 @@ class Tranches extends Component {
                     {
                       mobile:false,
                       title:'AUTO-FARMING',
+                      desc:this.functionsUtil.getGlobalConfig(['messages','autoFarming']),
                       props:{
                         width:[0.25,this.state.useTrancheType ? 0.14 : 0.14],
                       },
@@ -986,6 +993,7 @@ class Tranches extends Component {
                     {
                       mobile:false,
                       title:'STAKING REWARDS',
+                      desc:this.functionsUtil.getGlobalConfig(['messages','stakingRewards']),
                       props:{
                         width:[0.25,this.state.useTrancheType ? 0.15 : 0.13],
                       },
