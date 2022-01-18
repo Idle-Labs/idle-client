@@ -584,7 +584,7 @@ render() {
                 >
                   <StatsChart
                     height={ 350 }
-                    
+                    {...this.state}
                     theme={this.props.theme}
                     chartMode={'PRICE_TRANCHE'}
                     isMobile={this.props.isMobile}
