@@ -53,21 +53,18 @@ class StatsChart extends Component {
   }
 
   loadApiData = async () => {
-    console.log("HERE",this.props.apiResults_aa)
 
     if (!this.props.tokenConfig || !this.props.selectedToken || !this.props.chartMode || (!this.props.apiResults&&!this.props.apiResults_aa)){
-      console.log("Failed",this.props.tokenConfig,"TOKEN",this.props.selectedToken,"CHARTMODE",this.props.chartMode,this.props.apiResults,this.props.apiResults_aa)
       return false;
     }
-    console.log("Success",this.props.tokenConfig,"TOKEN",this.props.selectedToken,"CHARTMODE",this.props.chartMode,this.props.apiResults,this.props.apiResults_aa)
     const maxGridLines = 4;
     const apiResults = this.props.apiResults;
     const apiResults_aa=this.props.apiResults_aa;
     const apiResults_bb=this.props.apiResults_bb;
     const apiResults_unfiltered = this.props.apiResults_unfiltered;
-    const totalItems = apiResults_aa ? apiResults_aa.length : apiResults.length;
     const protocols = Object.assign([],this.props.tokenConfig.protocols);
-    // const compoundProtocol = this.props.tokenConfig.protocols.find( p => (p.name === 'compound'));
+    const totalItems = apiResults_aa ? apiResults_aa.length : apiResults.length;
+    const tranchesConfig = this.functionsUtil.getGlobalConfig(['tranches']);
 
     const versionInfo = globalConfigs.stats.versions[this.props.idleVersion];
 
@@ -87,7 +84,224 @@ class StatsChart extends Component {
     let firstIdleBlock = null;
     let axisBottomMaxValues = 12;
 
+    const seniorTrancheName = this.functionsUtil.capitalize(tranchesConfig.AA.baseName);
+    const juniorTrancheName = this.functionsUtil.capitalize(tranchesConfig.BB.baseName);
+
     switch (this.props.chartMode){
+
+      case 'APR_TRANCHE':
+
+        maxChartValue = 0;
+        chartData.push({
+          id:`APR ${seniorTrancheName}`,
+          color:tranchesConfig.AA.color.hex,
+          data:apiResults_aa.map((d,i) => {
+            const x = moment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
+            const y = parseFloat(this.functionsUtil.fixTokenDecimals(d.apr,18));
+            maxChartValue = Math.max(maxChartValue,y);
+            return { x, y };
+          })
+        });
+        chartData.push({
+          id:`APR ${juniorTrancheName}`,
+          color:tranchesConfig.BB.color.hex,
+          data:apiResults_bb.map((d,i) => {
+            const x = moment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
+            const y = parseFloat(this.functionsUtil.fixTokenDecimals(d.apr,18));
+            maxChartValue = Math.max(maxChartValue,y);
+            return { x, y };
+          })
+        });
+
+        /*
+        const csv = {};
+        chartData.forEach( protocolData => {
+          protocolData.data.forEach( d => {
+            if (!csv[d.x]){
+              csv[d.x] = {};
+            }
+            csv[d.x][protocolData.id] = d.y;
+          });
+        });
+
+        const csv_ordered = Object.keys(csv).sort().reduce(
+          (obj, key) => { 
+            obj[key] = csv[key]; 
+            return obj;
+          }, 
+          {}
+        );
+
+        const csv_array = [];
+        const csv_header = [];
+        csv_header.push('Date');
+        chartData.forEach( pData => csv_header.push(pData.id) );
+        csv_array.push(csv_header.join(','));
+
+        Object.keys(csv_ordered).forEach( date => {
+          const csv_row = [date];
+          chartData.forEach( cData => {
+            if (csv_ordered[date][cData.id]){
+              csv_row.push(parseFloat(csv_ordered[date][cData.id]).toFixed(4));
+            } else {
+              csv_row.push('0.0000');
+            }
+          });
+          csv_array.push(csv_row.join(','));
+        });
+
+        console.log('-------DEBUG-------');
+        console.log(csv_ordered);
+        console.log('-------START-------');
+        console.log(csv_array.join('\n'));
+        console.log('-------END-------');
+        */
+
+        // Set chart type
+        chartType = Line;
+
+        gridYStep = parseFloat(maxChartValue/maxGridLines);
+        gridYValues = [0];
+        for (let i=1;i<=5;i++){
+          gridYValues.push(i*gridYStep);
+        }
+
+        axisBottomIndex = 0;
+        axisBottomMaxValues = 6;
+        const Values = chartData[chartData.length-1].data.sort((a,b) => (moment(a.x,"YYYY/MM/DD HH:mm").isBefore(moment(b.x,"YYYY/MM/DD HH:mm")) ? -1 : 1));
+        daysCount = moment(Values[Values.length-1].x,"YYYY/MM/DD HH:mm").diff(moment(Values[0].x,"YYYY/MM/DD HH:mm"),'days');
+        daysFrequency = Math.max(1,Math.ceil(daysCount/axisBottomMaxValues));
+
+        // console.log('APR',chartValues,chartValues[0].x,chartValues[chartValues.length-1].x,daysCount,daysFrequency);
+
+        chartProps = {
+          xScale:{
+            type: 'time',
+            format: '%Y/%m/%d %H:%M',
+            // precision: 'hour',
+          },
+          xFormat:'time:%b %d %H:%M',
+          yFormat:value => parseFloat(value).toFixed(2)+'%',
+          yScale:{
+            type: 'linear',
+            stacked: false
+          },
+          axisLeft:{
+            legend: '',
+            tickSize: 0,
+            orient: 'left',
+            tickPadding: 10,
+            tickRotation: 0,
+            legendOffset: -70,
+            tickValues:gridYValues,
+            legendPosition: 'middle',
+            format:value => parseFloat(value).toFixed(1)+'%',
+          },
+          axisBottom: this.props.isMobile ? null : {
+            legend: '',
+            tickSize: 0,
+            tickPadding: 15,
+            legendOffset: 0,
+            orient: 'bottom',
+            format: (value) => {
+              if (axisBottomIndex++ % daysFrequency === 0){
+                return moment(value,'YYYY/MM/DD HH:mm').format('MMM DD')
+              }
+            },
+            tickValues: 'every day',
+            legendPosition: 'middle'
+          },
+          gridYValues,
+          pointSize:0,
+          useMesh:true,
+          animate:false,
+          pointLabel:"y",
+          curve:'linear',
+          enableArea:false,
+          enableSlices:'x',
+          enableGridX:false,
+          enableGridY:true,
+          pointBorderWidth:1,
+          colors:d => d.color,
+          pointLabelYOffset:-12,
+          legends:[
+            {
+              itemWidth: this.props.isMobile ? 110 : 120,
+              itemHeight: 18,
+              translateX: this.props.isMobile ? -35 : 0,
+              translateY: this.props.isMobile ? 40 : 65,
+              symbolSize: 10,
+              itemsSpacing: 0,
+              direction: 'row',
+              anchor: 'bottom-left',
+              symbolShape: 'circle',
+              itemTextColor: this.props.theme.colors.legend,
+              effects: [
+                {
+                  on: 'hover',
+                  style: {
+                    itemTextColor: this.props.themeMode === 'light' ? '#000' : '#fff'
+                  }
+                }
+              ]
+            }
+          ],
+          theme:{
+            axis: {
+              ticks: {
+                text: {
+                  fontSize: this.props.isMobile ? 12: 14,
+                  fontWeight:600,
+                  fill:this.props.theme.colors.legend,
+                  fontFamily: this.props.theme.fonts.sansSerif
+                }
+              }
+            },
+            grid: {
+              line: {
+                stroke: this.props.theme.colors.lineChartStroke, strokeDasharray: '10 6'
+              }
+            },
+            legends:{
+              text:{
+                fontWeight:500,
+                fill:this.props.theme.colors.legend,
+                textTransform:'capitalize',
+                fontFamily: this.props.theme.fonts.sansSerif,
+                fontSize: this.props.isMobile ? 12: 14
+              }
+            }
+          },
+          pointColor:{ from: 'color', modifiers: []},
+          margin: this.props.isMobile ? { top: 20, right: 20, bottom: 40, left: 65 } : { top: 20, right: 40, bottom: 70, left: 70 },
+          sliceTooltip:(slideData) => {
+            const { slice } = slideData;
+            const point = slice.points[0];
+            return (
+              <CustomTooltip
+                point={point}
+              >
+                {
+                typeof slice.points === 'object' && slice.points.length &&
+                  slice.points.map(point => {
+                    const protocolName = point.serieId;
+                    const protocolEarning = point.data.yFormatted;
+                    // const protocolApy = point.data.apy;
+                    return (
+                      <CustomTooltipRow
+                        key={point.id}
+                        color={point.color}
+                        label={protocolName}
+                        value={protocolEarning}
+                      />
+                    );
+                  })
+                }
+              </CustomTooltip>
+            );
+          }
+        };
+      break;
       case 'PRICE_TRANCHE':
         // let prevTokenPrice = null;
         maxChartValue = 0;
@@ -168,16 +382,15 @@ class StatsChart extends Component {
         }
         chartDataAA.splice(0,1);
 
-        const tranchesConfig = this.functionsUtil.getGlobalConfig(['tranches']);
-
+        
         chartData.push({
-          id:this.props.tokenConfig.AA.label,
+          id:`Performance ${seniorTrancheName}`,
           color: tranchesConfig.AA.color.hex,
           data: chartDataAA
         });
 
         chartData.push({
-          id:this.props.tokenConfig.BB.label,
+          id:`Performance ${juniorTrancheName}`,
           color: tranchesConfig.BB.color.hex,
           data: chartDataBB
         });
@@ -535,8 +748,8 @@ class StatsChart extends Component {
                 xFormatted
               }
             };
-            const depositFormatted = this.functionsUtil.abbreviateNumber(data.data.deposits,2)+' '+this.props.selectedToken;
-            const redeemFormatted = this.functionsUtil.abbreviateNumber(data.data.redeems,2)+' '+this.props.selectedToken;
+            const depositFormatted = this.functionsUtil.abbreviateNumber(data.data.deposits,4)+' '+this.props.selectedToken;
+            const redeemFormatted = this.functionsUtil.abbreviateNumber(data.data.redeems,4)+' '+this.props.selectedToken;
             return (
               <CustomTooltip
                 point={point}
@@ -793,29 +1006,37 @@ class StatsChart extends Component {
           }
         };
       break;
-
       case'AUM_TRANCHE':
 
         maxChartValue = 0;
-        console.log("Here In Aum")
         chartData.push({
-          id:'AUM',
-          color: 'hsl('+globalConfigs.stats.tokens[this.props.selectedToken].color.hsl.join(',')+')',
-          data: apiResults.map((d,i) => {
+          id:`AUM ${seniorTrancheName}`,
+          color: tranchesConfig.AA.color.hex,
+          data: apiResults_aa.map((d,i) => {
 
-            const aum = this.functionsUtil.fixTokenDecimals(d.contractValue,18);
+            const aum_aa = this.functionsUtil.fixTokenDecimals(d.contractValue,18);
             const x = moment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
-            const y = parseFloat(aum.toString());
+            const y = parseFloat(aum_aa.toString());
 
             maxChartValue = Math.max(maxChartValue,y);
 
             return { x,y };
           })
         });
-        console.log("Aum",chartData)
+        chartData.push({
+          id:`AUM ${juniorTrancheName}`,
+          color: tranchesConfig.BB.color.hex,
+          data: apiResults_bb.map((d,i) => {
 
-        // Add allocation
+            const aum_bb = this.functionsUtil.fixTokenDecimals(d.contractValue,18);
+            const x = moment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
+            const y = parseFloat(aum_bb.toString());
 
+            maxChartValue = Math.max(maxChartValue,y);
+
+            return { x,y };
+          })
+        });
         // Set chart type
         chartType = Line;
 
@@ -873,7 +1094,7 @@ class StatsChart extends Component {
           animate:false,
           pointLabel:"y",
           curve:'linear',
-          enableArea:true,
+          enableArea:false,
           enableSlices:'x',
           enableGridX:false,
           enableGridY:true,
@@ -882,8 +1103,8 @@ class StatsChart extends Component {
           pointLabelYOffset:-12,
           legends:[
             {
-              itemWidth: this.props.isMobile ? 70 : 80,
               itemHeight: 18,
+              itemWidth: this.props.isMobile ? 90 : 100,
               translateX: this.props.isMobile ? -35 : 0,
               translateY: this.props.isMobile ? 40 : 65,
               symbolSize: 10,
@@ -920,9 +1141,9 @@ class StatsChart extends Component {
             },
             legends:{
               text:{
-                fontSize: this.props.isMobile ? 12: 14,
-                fill:this.props.theme.colors.legend,
                 fontWeight:500,
+                fill:this.props.theme.colors.legend,
+                fontSize: this.props.isMobile ? 12: 14,
                 fontFamily: this.props.theme.fonts.sansSerif
               }
             }
@@ -932,87 +1153,190 @@ class StatsChart extends Component {
           sliceTooltip:(slideData) => {
             const { slice } = slideData;
             const point = slice.points[0];
-            if (typeof point === 'object' && typeof point.data === 'object'){
+            return (
+              <CustomTooltip
+                point={point}
+              >
+                {
+                typeof slice.points === 'object' && slice.points.length &&
+                  slice.points.map(point => {
+                    const protocolName = point.serieId;
+                    const contractValue = point.data.yFormatted;
+                    return (
+                      <CustomTooltipRow
+                        key={point.id}
+                        color={point.color}
+                        label={protocolName}
+                        value={`${contractValue} ${this.props.selectedToken}`}
+                      />
+                    );
+                  })
+                }
+              </CustomTooltip>
+            );
+          }
+        };
+        break;
+        case'COVERAGE_TRANCHE':
+
+          maxChartValue = 0;
+          chartData.push({
+            id:'Coverage',
+            color: tranchesConfig.AA.color.hex,
+            data: apiResults_aa.map((d,i) => {
+              const aum_aa = this.functionsUtil.fixTokenDecimals(d.contractValue,18);
+              const x = moment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
+              const aum_bb=apiResults_bb[i]?(this.functionsUtil.fixTokenDecimals(apiResults_bb[i].contractValue,18)):this.functionsUtil.BNify(0);
+              const ratio=aum_aa>0?aum_bb.div(aum_aa):1;
+              const coverage=ratio>1?100:ratio*100
+              const y = parseFloat(coverage.toString());
+              maxChartValue = Math.max(maxChartValue,y);
+
+              return { x,y };
+            })
+          });
+
+          // Add allocation
+
+          // Set chart type
+          chartType = Line;
+
+          gridYStep = parseFloat(maxChartValue/maxGridLines);
+          gridYValues = [0];
+          for (let i=1;i<=5;i++){
+            gridYValues.push(i*gridYStep);
+          }
+
+          axisBottomIndex = 0;
+          axisBottomMaxValues = 6;
+          daysCount = moment(chartData[0].data[chartData[0].data.length-1].x,"YYYY/MM/DD HH:mm").diff(moment(chartData[0].data[0].x,"YYYY/MM/DD HH:mm"),'days');
+          daysFrequency = Math.max(1,Math.ceil(daysCount/axisBottomMaxValues));
+
+          chartProps = {
+            xScale:{
+              type: 'time',
+              format: '%Y/%m/%d %H:%M',
+              // precision: 'hour',
+            },
+            xFormat:'time:%b %d %H:%M',
+            yFormat:v => parseFloat(v).toFixed(3)+'%',
+            yScale:{
+              type: 'linear',
+              stacked: false
+            },
+            axisLeft:{
+              legend: '',
+              tickSize: 0,
+              orient: 'left',
+              tickPadding: 10,
+              tickRotation: 0,
+              legendOffset: -70,
+              tickValues:gridYValues,
+              legendPosition: 'middle',
+              format: v => this.functionsUtil.abbreviateNumber(v,v<1 ? 3 :0),
+            },
+            axisBottom: this.props.isMobile ? null : {
+              legend: '',
+              tickSize: 0,
+              format: (value) => {
+                if (axisBottomIndex++ % daysFrequency === 0){
+                  return moment(value,'YYYY/MM/DD HH:mm').format('MMM DD')
+                }
+              },
+              tickPadding: 15,
+              orient: 'bottom',
+              legendOffset: 0,
+              tickValues: 'every day',
+              legendPosition: 'middle'
+            },
+            gridYValues,
+            pointSize:0,
+            useMesh:true,
+            animate:false,
+            pointLabel:"y",
+            curve:'linear',
+            enableArea:false,
+            enableSlices:'x',
+            enableGridX:false,
+            enableGridY:true,
+            pointBorderWidth:1,
+            colors:d => d.color,
+            pointLabelYOffset:-12,
+            legends:[
+              {
+                itemWidth: this.props.isMobile ? 70 : 80,
+                itemHeight: 18,
+                translateX: this.props.isMobile ? -35 : 0,
+                translateY: this.props.isMobile ? 40 : 65,
+                symbolSize: 10,
+                itemsSpacing: 5,
+                direction: 'row',
+                anchor: 'bottom-left',
+                symbolShape: 'circle',
+                itemTextColor: this.props.theme.colors.legend,
+                effects: [
+                  {
+                    on: 'hover',
+                    style: {
+                      itemTextColor: this.props.themeMode === 'light' ? '#000' : '#fff'
+                    }
+                  }
+                ]
+              }
+            ],
+            theme:{
+              axis: {
+                ticks: {
+                  text: {
+                    fontSize: this.props.isMobile ? 12: 14,
+                    fontWeight:600,
+                    fill:this.props.theme.colors.legend,
+                    fontFamily: this.props.theme.fonts.sansSerif
+                  }
+                }
+              },
+              grid: {
+                line: {
+                  stroke: this.props.theme.colors.lineChartStroke, strokeDasharray: '10 6'
+                }
+              },
+              legends:{
+                text:{
+                  fontSize: this.props.isMobile ? 12: 14,
+                  fill:this.props.theme.colors.legend,
+                  fontWeight:500,
+                  fontFamily: this.props.theme.fonts.sansSerif
+                }
+              }
+            },
+            pointColor:{ from: 'color', modifiers: []},
+            margin: this.props.isMobile ? { top: 20, right: 20, bottom: 40, left: 65 } : { top: 20, right: 40, bottom: 70, left: 70 },
+            sliceTooltip:(slideData) => {
+              const { slice } = slideData;
+              const point = slice.points[0];
               return (
                 <CustomTooltip
                   point={point}
                 >
-                  <CustomTooltipRow
-                    label={point.serieId}
-                    color={point.serieColor}
-                    value={point.data.yFormatted}
-                  />
                   {
-                    point.data.allocations && typeof point.data.allocations === 'object' &&
-                      Object.keys(point.data.allocations).map(protocolName => {
-                        const protocolInfo = globalConfigs.stats.protocols[protocolName];
-                        const protocolColor = 'hsl('+protocolInfo.color.hsl.join(',')+')';
-                        const protocolAllocation = point.data.allocations[protocolName];
-                        const protocolAllocationFormatted = this.functionsUtil.formatMoney(protocolAllocation,protocolAllocation<1 ? 3 : 0);
-                        const protocolAllocationPerc = this.functionsUtil.BNify(point.data.allocations[protocolName]).div(this.functionsUtil.BNify(point.data.y)).times(100).toFixed(0)+'%';
-                        return (
-                          <CustomTooltipRow
-                            color={protocolColor}
-                            label={protocolInfo.label}
-                            key={`${point.id}_${protocolName}`}
-                            value={`${protocolAllocationFormatted} (${protocolAllocationPerc})`}
-                          />
-                        );
-                      })
+                  typeof slice.points === 'object' && slice.points.length &&
+                    slice.points.map(point => {
+                      const protocolName = point.serieId;
+                      const contractValue = point.data.yFormatted;
+                      return (
+                        <CustomTooltipRow
+                          key={point.id}
+                          label={protocolName}
+                          color={point.color}
+                          value={`${contractValue}`}
+                        />
+                      );
+                    })
                   }
                 </CustomTooltip>
               );
-              /*
-              return (
-                <div
-                    key={point.id}
-                    style={{
-                      background: 'white',
-                      color: 'inherit',
-                      fontSize: 'inherit',
-                      borderRadius: '2px',
-                      boxShadow: 'rgba(0, 0, 0, 0.25) 0px 1px 2px',
-                      padding: '5px 9px'
-                    }}
-                >
-                  <div>
-                    <table style={{width:'100%',borderCollapse:'collapse'}}>
-                      <tbody>
-                        <tr>
-                          <td style={{padding:'3px 5px'}}>
-                            <span style={{display:'block', width: '12px', height: '12px', background: point.serieColor}}></span>
-                          </td>
-                          <td style={{padding:'3px 5px'}}>{point.serieId}</td>
-                          <td style={{padding:'3px 5px'}}><strong>{point.data.yFormatted}</strong></td>
-                        </tr>
-                        {
-                          point.data.allocations && typeof point.data.allocations === 'object' &&
-                            Object.keys(point.data.allocations).map(protocolName => {
-                              const protocolColor = 'hsl('+globalConfigs.stats.protocols[protocolName].color.hsl.join(',')+')';
-                              const protocolAllocation = this.functionsUtil.formatMoney(point.data.allocations[protocolName],0);
-                              const protocolAllocationPerc = this.functionsUtil.BNify(point.data.allocations[protocolName]).div(this.functionsUtil.BNify(point.data.y)).times(100).toFixed(0)+'%';
-                              return (
-                                <tr key={`${point.id}_${protocolName}`}>
-                                  <td style={{padding:'3px 5px'}}>
-                                    <span style={{display:'block', width: '12px', height: '12px', background: protocolColor}}></span>
-                                  </td>
-                                  <td style={{padding:'3px 5px',textTransform:'capitalize'}}>{protocolName}</td>
-                                  <td style={{padding:'3px 5px'}}><strong>{protocolAllocation}</strong> ({protocolAllocationPerc})</td>
-                                </tr>
-                              );
-                            })
-                        }
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              );
-              */
             }
-
-            return null;
-          }
-        };
+          };
         break;
       /*
       case 'AUM_ALL':
@@ -2272,8 +2596,6 @@ class StatsChart extends Component {
         for (let i=1;i<=5;i++){
           gridYValues.push(i*gridYStep);
         }
-
-        console.log("ChartDAATA",idleChartData)
         chartData.push({
           id:'Idle',
           data: idleChartData,
@@ -2730,9 +3052,6 @@ class StatsChart extends Component {
       default:
       break;
     }
-
-    console.log(this.props.chartMode,chartProps,chartData);
-
     this.setState({
       chartType,
       chartProps,
