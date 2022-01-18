@@ -58,6 +58,8 @@ class StatsChart extends Component {
 
     const maxGridLines = 4;
     const apiResults = this.props.apiResults;
+    const apiResults_aa=this.props.apiResults_aa;
+    const apiResults_bb=this.props.apiResults_bb;
     const apiResults_unfiltered = this.props.apiResults_unfiltered;
     const totalItems = apiResults.length;
     const protocols = Object.assign([],this.props.tokenConfig.protocols);
@@ -82,6 +84,200 @@ class StatsChart extends Component {
     let axisBottomMaxValues = 12;
 
     switch (this.props.chartMode){
+      case 'PRICE_TRANCHE':
+        // let prevTokenPrice = null;
+        maxChartValue = 0;
+        console.log("API RESULTS",apiResults_aa,apiResults_bb)
+        let firstPriceAA = null;
+        let firstPriceBB = null;
+        let chartDataAA=null;
+        let chartDataBB=null;
+        chartDataAA = apiResults_aa.map((d,i) => {
+
+          let y = 0;
+          let apy = 0;
+          let days = 0;
+          const x = moment(d.timestamp*1000).format("YYYY/MM/DD HH:mm");
+          const tokenPrice = this.functionsUtil.fixTokenDecimals(d.virtualPrice,this.props.tokenConfig.decimals);
+
+          if (!firstPriceAA){
+            firstPriceAA = tokenPrice;
+          } else {
+            y = parseFloat(tokenPrice.div(firstPriceAA).minus(1).times(100));
+
+            days = (d.timestamp-apiResults[0].timestamp)/86400;
+            const earning = tokenPrice.div(firstPriceAA).minus(1).times(100);
+            apy = earning.times(365).div(days).toFixed(2);
+
+            // console.log(firstTokenPrice.toString(),tokenPrice.toString(),earning.toString(),days,y,apy);
+          }
+
+          if (firstIdleBlock === null){
+            firstIdleBlock = parseInt(d.blocknumber);
+          }
+
+          maxChartValue = Math.max(maxChartValue,y);
+
+          const itemPos = Math.floor(itemIndex/totalItems*100);
+          const blocknumber = d.blocknumber;
+
+          itemIndex++;
+
+          return { x, y, apy, blocknumber, itemPos };
+        });
+        chartDataBB = apiResults_bb.map((d,i) => {
+
+          let y = 0;
+          let apy = 0;
+          let days = 0;
+          const x = moment(d.timestamp*1000).format("YYYY/MM/DD HH:mm");
+          const tokenPrice = this.functionsUtil.fixTokenDecimals(d.virtualPrice,this.props.tokenConfig.decimals);
+
+          if (!firstPriceBB){
+            firstPriceBB = tokenPrice;
+          } else {
+            y = parseFloat(tokenPrice.div(firstPriceBB).minus(1).times(100));
+
+            days = (d.timestamp-apiResults[0].timestamp)/86400;
+            const earning = tokenPrice.div(firstPriceBB).minus(1).times(100);
+            apy = earning.times(365).div(days).toFixed(2);
+
+            // console.log(firstTokenPrice.toString(),tokenPrice.toString(),earning.toString(),days,y,apy);
+          }
+
+          if (firstIdleBlock === null){
+            firstIdleBlock = parseInt(d.blocknumber);
+          }
+
+          maxChartValue = Math.max(maxChartValue,y);
+
+          const itemPos = Math.floor(itemIndex/totalItems*100);
+          const blocknumber = d.blocknumber;
+
+          itemIndex++;
+
+          return { x, y, apy, blocknumber, itemPos };
+        });
+
+        gridYStep = parseFloat(maxChartValue/maxGridLines);
+        gridYValues = [0];
+        for (let i=1;i<=5;i++){
+          gridYValues.push(i*gridYStep);
+        }
+
+        chartData.push({
+          id:'Idle',
+          color: 'red',
+          data: chartDataAA
+        });
+        chartData.push({
+          id:'Idle',
+          color: 'blue',
+          data: chartDataBB
+        });
+
+        // Set chart type
+        chartType = Line;
+
+        chartProps = {
+          xScale:{
+            type: 'time',
+            format: '%Y/%m/%d %H:%M',
+            // precision: 'day',
+          },
+          xFormat:'time:%b %d %H:%M',
+          yFormat:value => parseFloat(value).toFixed(3)+'%',
+          yScale:{
+            type: 'linear',
+            stacked: false,
+            // min: 1
+          },
+          axisLeft:{
+            legend: '',
+            tickSize: 0,
+            orient: 'left',
+            tickPadding: 10,
+            tickRotation: 0,
+            legendOffset: -70,
+            tickValues:gridYValues,
+            legendPosition: 'middle',
+            format: value => parseFloat(value).toFixed(2)+'%',
+          },
+          axisBottom: this.props.isMobile ? null : {
+            legend: '',
+            tickSize: 0,
+            format: '%b %d',
+            tickPadding: 10,
+            legendOffset: 0,
+            orient: 'bottom',
+            legendPosition: 'middle',
+            tickValues: this.props.isMobile ? 'every 4 days' : ( this.props.showAdvanced ? 'every 3 days' : 'every 2 days'),
+          },
+          gridYValues,
+          pointSize:0,
+          useMesh:true,
+          animate:false,
+          pointLabel:"y",
+          curve:'monotoneX',
+          enableArea:false,
+          enableSlices:'x',
+          enableGridX:false,
+          enableGridY:true,
+          pointBorderWidth:1,
+          colors:d => d.color,
+          pointLabelYOffset:-12,
+          legends:[
+            {
+              itemHeight: 18,
+              itemWidth: this.props.isMobile ? 70 : 100,
+              translateX: this.props.isMobile ? -35 : 0,
+              translateY: this.props.isMobile ? 40 : 65,
+              symbolSize: 10,
+              itemsSpacing: 5,
+              direction: 'row',
+              anchor: 'bottom-left',
+              symbolShape: 'circle',
+              itemTextColor: this.props.theme.colors.legend,
+              effects: [
+                {
+                  on: 'hover',
+                  style: {
+                    itemTextColor: this.props.themeMode === 'light' ? '#000' : '#fff'
+                  }
+                }
+              ]
+            }
+          ],
+          theme:{
+            axis: {
+              ticks: {
+                text: {
+                  fontSize: this.props.isMobile ? 12: 14,
+                  fontWeight:600,
+                  fill:this.props.theme.colors.legend,
+                  fontFamily: this.props.theme.fonts.sansSerif
+                }
+              }
+            },
+            grid: {
+              line: {
+                stroke: this.props.theme.colors.lineChartStroke, strokeDasharray: '10 6'
+              }
+            },
+            legends:{
+              text:{
+                fontWeight:500,
+                fill:this.props.theme.colors.legend,
+                textTransform:'capitalize',
+                fontFamily: this.props.theme.fonts.sansSerif,
+                fontSize: this.props.isMobile ? 12: 14
+              }
+            }
+          },
+          pointColor:{ from: 'color', modifiers: []},
+          margin: this.props.isMobile ? { top: 20, right: 20, bottom: 40, left: 65 } : { top: 20, right: 40, bottom: 80, left: 80 },
+        };
+      break;
       case 'VOL':
         let divergingData = {};
 

@@ -15,7 +15,7 @@ import VariationNumber from '../VariationNumber/VariationNumber';
 import AllocationChart from '../AllocationChart/AllocationChart';
 import DateRangeModal from '../utilities/components/DateRangeModal';
 import { Flex, Text, Heading, Box, Icon } from 'rimble-ui';
-class StatsAsset extends Component {
+class StatsTranche extends Component {
 
   state = {
     aum:null,
@@ -247,10 +247,12 @@ class StatsAsset extends Component {
 
     const apiResults_aa = this.filterTokenData(apiResults_unfiltered_aa);
     const apiResults_bb = this.filterTokenData(apiResults_unfiltered_bb);
+    console.log("data aa",apiResults_aa,"UF", apiResults_unfiltered_aa,"length", apiResults_aa.length,"UF length", apiResults_unfiltered_aa.length, apiResults_bb, apiResults_unfiltered_bb, apiResults_bb.length, apiResults_unfiltered_bb.length)
     
     console.log('loadApiData',startTimestamp,endTimestamp,new Date(startTimestamp*1000),new Date(endTimestamp*1000),apiResults_unfiltered_aa,apiResults_unfiltered_bb,apiResults_aa,apiResults_bb);
 
     if (!apiResults_aa || !apiResults_unfiltered_aa || !apiResults_aa.length || !apiResults_unfiltered_aa.length || !apiResults_bb || !apiResults_unfiltered_bb || !apiResults_bb.length || !apiResults_unfiltered_bb.length){
+      console.log("Failed")
       return false;
     }
 
@@ -338,7 +340,7 @@ class StatsAsset extends Component {
       unlentBalance = this.functionsUtil.formatMoney(parseFloat(unlentBalance));
     }
     */
-
+console.log("Successfully loaded")
     this.setStateSafe({
       // aum,
       // apr,
@@ -570,131 +572,6 @@ render() {
             <Box
               width={1}
             >
-              <Box
-                mt={[3,0]}
-                mb={[3,4]}
-              >
-                <Flex
-                  width={1}
-                  alignItems={'center'}
-                  justifyContent={'center'}
-                  flexDirection={['column','row']}
-                >
-                  <Flex
-                    mb={[2,0]}
-                    pr={[0,2]}
-                    width={[1,1/4]}
-                    flexDirection={'column'}
-                  >
-                    <StatsCard
-                      title={'Asset Under Management'}
-                      label={ this.state.unlentBalance ? `Unlent funds: ${this.state.unlentBalance} ${this.props.selectedToken}` : this.props.selectedToken }
-                      labelTooltip={ this.state.unlentBalance ? this.functionsUtil.getGlobalConfig(['messages','cheapRedeem']) : null}
-                    >
-                      <SmartNumber
-                        precision={2}
-                        type={'money'}
-                        {...valueProps}
-                        unitProps={unitProps}
-                        number={this.state.aum}
-                        flexProps={{
-                            alignItems:'baseline',
-                            justifyContent:'flex-start'
-                        }}
-                        unit={this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken,'conversionRateField']) ? '$' : null}
-                      />
-                    </StatsCard>
-                  </Flex>
-                  <Flex
-                    mb={[2,0]}
-                    pr={[0,2]}
-                    width={[1,1/4]}
-                    flexDirection={'column'}
-                  >
-                    <StatsCard
-                      title={'Avg APY'}
-                      label={'Annualized'}
-                    >
-                      <Flex
-                        width={1}
-                        alignItems={'center'}
-                        flexDirection={['column','row']}
-                      >
-                        <VariationNumber
-                          direction={'up'}
-                          iconPos={'right'}
-                          iconSize={'1.8em'}
-                          justifyContent={'flex-start'}
-                          width={1}
-                        >
-                          <Text
-                            lineHeight={1}
-                            fontWeight={[3,4]}
-                            color={'statValue'}
-                            fontSize={[4,5]}
-                          >
-                            {this.state.apr}
-                            <Text.span color={'statValue'} fontWeight={3} fontSize={['90%','70%']}>%</Text.span>
-                          </Text>
-                        </VariationNumber>
-                      </Flex>
-                    </StatsCard>
-                  </Flex>
-                  <Flex
-                    mb={[2,0]}
-                    pr={[0,2]}
-                    width={[1,1/4]}
-                    flexDirection={'column'}
-                  >
-                    <StatsCard
-                      title={'Overperformance on Compound'}
-                      label={'Annualized'}
-                    >
-                      {
-                        this.state.delta && !isNaN(this.state.delta) ? (
-                          <VariationNumber
-                            direction={'up'}
-                            iconPos={'right'}
-                            iconSize={'1.8em'}
-                            justifyContent={'flex-start'}
-                          >
-                            <Text
-                              lineHeight={1}
-                              fontSize={[4,5]}
-                              fontWeight={[3,4]}
-                              color={'statValue'}
-                            >
-                              {this.state.delta}
-                              <Text.span color={'statValue'} fontWeight={3} fontSize={['90%','70%']}>%</Text.span>
-                            </Text>
-                          </VariationNumber>
-                        ) : (
-                          <Text
-                            lineHeight={1}
-                            fontSize={[4,5]}
-                            fontWeight={[3,4]}
-                            color={'statValue'}
-                          >
-                            {this.state.delta}
-                          </Text>
-                        )
-                      }
-                    </StatsCard>
-                  </Flex>
-                  <Flex
-                    mb={[2,0]}
-                    pr={[0,2]}
-                    width={[1,1/4]}
-                    flexDirection={'column'}
-                    >
-                    <StatsCard
-                      label={' '}
-                      title={'Rebalances'}
-                      value={this.state.rebalances.toString()}
-                    />
-                  </Flex>
-                </Flex>
-              </Box>
               <DashboardCard
                 title={'Historical Performance'}
                 description={performanceTooltip}
@@ -710,13 +587,13 @@ render() {
                   <StatsChart
                     height={ 350 }
                     {...this.state}
-                    parentId={'chart-PRICE'}
                     theme={this.props.theme}
                     chartMode={'PRICE_TRANCHE'}
                     isMobile={this.props.isMobile}
                     contracts={this.props.contracts}
                     themeMode={this.props.themeMode}
-                    apiResults={this.state.apiResults}
+                    apiResults_aa={this.props.apiResults_aa}
+                    apiResults_bb={this.props.apiResults_bb}
                     selectedToken={this.props.selectedToken}
                     apiResults_unfiltered={this.state.apiResults_unfiltered}
                   />
@@ -979,4 +856,4 @@ render() {
     );
   }
 }
-export default StatsAsset
+export default StatsTranche

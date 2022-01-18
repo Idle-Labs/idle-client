@@ -156,7 +156,7 @@ class Stats extends Component {
     const currentNetworkAvailableTokens = Object.keys(this.props.availableTokens);
 
     if(this.props.selectedStrategy==='tranches') {
-      newState.selectedToken=this.props.selectedTokens
+      newState.selectedToken=this.props.selectedToken
     } else if (!!params.customToken && currentNetworkAvailableTokens.indexOf(params.customToken.toUpperCase()) !== -1 ){
       newState.selectedToken = params.customToken.toUpperCase();
     } else {
