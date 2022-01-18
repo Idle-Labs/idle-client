@@ -109,7 +109,7 @@ class StatsAsset extends Component {
     const newState = {};
     const { match: { params } } = this.props;
 
-    console.log('loadParams',params,this.props);
+    // console.log('loadParams',params,this.props);
 
     const currentNetworkAvailableTokens = Object.keys(this.props.availableTokens);
 
@@ -247,12 +247,13 @@ class StatsAsset extends Component {
 
     const apiResults_aa = this.filterTokenData(apiResults_unfiltered_aa);
     const apiResults_bb = this.filterTokenData(apiResults_unfiltered_bb);
+    
+    console.log('loadApiData',startTimestamp,endTimestamp,new Date(startTimestamp*1000),new Date(endTimestamp*1000),apiResults_unfiltered_aa,apiResults_unfiltered_bb,apiResults_aa,apiResults_bb);
 
     if (!apiResults_aa || !apiResults_unfiltered_aa || !apiResults_aa.length || !apiResults_unfiltered_aa.length || !apiResults_bb || !apiResults_unfiltered_bb || !apiResults_bb.length || !apiResults_unfiltered_bb.length){
       return false;
     }
 
-    console.log('loadApiData',startTimestamp,endTimestamp,new Date(startTimestamp*1000),new Date(endTimestamp*1000),apiResults_unfiltered_aa,apiResults_unfiltered_bb,apiResults_aa,apiResults_bb);
     /*
     const firstResult = apiResults[0];
     const lastResult = Object.values(apiResults).pop();

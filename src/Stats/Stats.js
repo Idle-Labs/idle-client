@@ -331,13 +331,10 @@ class Stats extends Component {
 
   loadApiData = async () => {
 
+    /*
     if (!this.props.selectedToken || !this.props.tokenConfig){
       return false;
     }
-
-    // Get COMP APR
-    // const compAPR = await this.functionsUtil.getCompAPR(this.props.tokenConfig);
-    // console.log('compAPR',compAPR.toString());
 
     const startTimestamp = this.state.minDate ? parseInt(this.functionsUtil.strToMoment(this.functionsUtil.strToMoment(this.state.minDate).format('DD/MM/YYYY 00:00:00'),'DD/MM/YYYY HH:mm:ss')._d.getTime()/1000) : null;
     const endTimestamp = this.state.maxDate ? parseInt(this.functionsUtil.strToMoment(this.functionsUtil.strToMoment(this.state.maxDate).format('DD/MM/YYYY 23:59:59'),'DD/MM/YYYY HH:mm:ss')._d.getTime()/1000) : null;
@@ -501,6 +498,7 @@ class Stats extends Component {
       unlentBalance,
       apiResults_unfiltered
     });
+    */
   }
 
   selectToken = async (strategy,token) => {
