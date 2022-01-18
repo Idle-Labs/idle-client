@@ -29,6 +29,8 @@ class StatsTranche extends Component {
     rebalances:'-',
     buttonGroups:[],
     apiResults:null,
+    apiResults_aa:null,
+    apiResults_bb:null,
     carouselIndex:0,
     idleVersion:null,
     minStartTime:null,
@@ -87,6 +89,7 @@ class StatsTranche extends Component {
   async componentWillMount() {
     this.loadUtils();
     await this.loadParams();
+    await this.loadApiData();
   }
 
   componentWillUnmount(){
@@ -120,7 +123,7 @@ class StatsTranche extends Component {
     }
 
     newState.tokenConfig = this.props.availableTokens[newState.selectedToken];
-    newState.minStartTime = moment('2021-08-01','YYYY-MM-DD');
+    newState.minStartTime = moment('2021-12-01','YYYY-MM-DD');
     newState.maxEndDate = moment();
 
     newState.endTimestampObj = moment(moment().format('YYYY-MM-DD 23:59'),'YYYY-MM-DD HH:mm');
@@ -247,12 +250,7 @@ class StatsTranche extends Component {
 
     const apiResults_aa = this.filterTokenData(apiResults_unfiltered_aa);
     const apiResults_bb = this.filterTokenData(apiResults_unfiltered_bb);
-    console.log("data aa",apiResults_aa,"UF", apiResults_unfiltered_aa,"length", apiResults_aa.length,"UF length", apiResults_unfiltered_aa.length, apiResults_bb, apiResults_unfiltered_bb, apiResults_bb.length, apiResults_unfiltered_bb.length)
-    
-    console.log('loadApiData',startTimestamp,endTimestamp,new Date(startTimestamp*1000),new Date(endTimestamp*1000),apiResults_unfiltered_aa,apiResults_unfiltered_bb,apiResults_aa,apiResults_bb);
-
     if (!apiResults_aa || !apiResults_unfiltered_aa || !apiResults_aa.length || !apiResults_unfiltered_aa.length || !apiResults_bb || !apiResults_unfiltered_bb || !apiResults_bb.length || !apiResults_unfiltered_bb.length){
-      console.log("Failed")
       return false;
     }
 
@@ -340,7 +338,7 @@ class StatsTranche extends Component {
       unlentBalance = this.functionsUtil.formatMoney(parseFloat(unlentBalance));
     }
     */
-console.log("Successfully loaded")
+console.log("Successfully loaded",this.state.apiResults_aa,"QQQ")
     this.setStateSafe({
       // aum,
       // apr,
@@ -352,9 +350,8 @@ console.log("Successfully loaded")
       // unlentBalance,
       apiResults_aa,
       apiResults_bb,
-      apiResults_unfiltered_aa,
-      apiResults_unfiltered_bb
     });
+    console.log("ZZZ",this.state.apiResults_aa)
   }
 
   selectToken = async (strategy,token) => {
@@ -592,10 +589,13 @@ render() {
                     isMobile={this.props.isMobile}
                     contracts={this.props.contracts}
                     themeMode={this.props.themeMode}
-                    apiResults_aa={this.props.apiResults_aa}
-                    apiResults_bb={this.props.apiResults_bb}
+                    apiResults_aa={this.state.apiResults_aa}
+                    apiResults_bb={this.state.apiResults_bb}
+                    tokenConfig={this.props.tokenConfig}
                     selectedToken={this.props.selectedToken}
-                    apiResults_unfiltered={this.state.apiResults_unfiltered}
+                    apiResults_unfiltered_aa={this.state.apiResults_unfiltered__aa}
+                    apiResults_unfiltered_bb={this.state.apiResults_unfiltered__bb}
+
                   />
                 </Flex>
               </DashboardCard>
