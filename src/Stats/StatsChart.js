@@ -126,7 +126,7 @@ class StatsChart extends Component {
           maxChartValue = Math.max(maxChartValue,y);
 
           const itemPos = Math.floor(itemIndex/totalItems*100);
-          const blocknumber = d.blockNumber;
+          const blocknumber = parseInt(d.blockNumber);
           console.log(blocknumber,'blocknumber')
           itemIndex++;
 
@@ -160,7 +160,7 @@ class StatsChart extends Component {
           maxChartValue = Math.max(maxChartValue,y);
 
           const itemPos = Math.floor(itemIndex/totalItems*100);
-          const blocknumber = d.blockNumber;
+          const blocknumber = parseInt(d.blockNumber);
 
           itemIndex++;
 
@@ -173,20 +173,22 @@ class StatsChart extends Component {
           gridYValues.push(i*gridYStep);
         }
         console.log("Step1")
+        chartDataAA.splice(0,1);
         console.log(chartDataAA,chartDataBB,"AND")
         chartData.push({
           id:'Idle',
           color: 'red',
           data: chartDataAA
         });
-        chartData.push({
-          id:'Idle',
-          color: 'blue',
-          data: chartDataBB
-        });
+     
 
         // Set chart type
         chartType = Line;
+
+        axisBottomIndex = 0;
+        axisBottomMaxValues = 12;
+        daysCount = moment(chartDataAA[chartDataAA.length-1].x,"YYYY/MM/DD HH:mm").diff(moment(chartDataAA[0].x,"YYYY/MM/DD HH:mm"),'days');
+        daysFrequency = Math.max(1,Math.ceil(daysCount/axisBottomMaxValues));
 
         chartProps = {
           xScale:{
@@ -215,12 +217,16 @@ class StatsChart extends Component {
           axisBottom: this.props.isMobile ? null : {
             legend: '',
             tickSize: 0,
-            format: '%b %d',
+            format: (value) => {
+              if (axisBottomIndex++ % daysFrequency === 0){
+                return moment(value,'YYYY/MM/DD HH:mm').format('MMM DD')
+              }
+            },
             tickPadding: 10,
             legendOffset: 0,
             orient: 'bottom',
+            tickValues:`every day`,
             legendPosition: 'middle',
-            tickValues: this.props.isMobile ? 'every 4 days' : ( this.props.showAdvanced ? 'every 3 days' : 'every 2 days'),
           },
           gridYValues,
           pointSize:0,
@@ -238,15 +244,15 @@ class StatsChart extends Component {
           legends:[
             {
               itemHeight: 18,
-              itemWidth: this.props.isMobile ? 70 : 100,
-              translateX: this.props.isMobile ? -35 : 0,
-              translateY: this.props.isMobile ? 40 : 65,
               symbolSize: 10,
               itemsSpacing: 5,
               direction: 'row',
               anchor: 'bottom-left',
               symbolShape: 'circle',
               itemTextColor: this.props.theme.colors.legend,
+              itemWidth: this.props.isMobile ? 70 : 160,
+              translateX: this.props.isMobile ? -35 : 0,
+              translateY: this.props.isMobile ? 40 : 65,
               effects: [
                 {
                   on: 'hover',
@@ -275,16 +281,41 @@ class StatsChart extends Component {
             },
             legends:{
               text:{
-                fontWeight:500,
+                fontSize: this.props.isMobile ? 12: 14,
                 fill:this.props.theme.colors.legend,
-                textTransform:'capitalize',
-                fontFamily: this.props.theme.fonts.sansSerif,
-                fontSize: this.props.isMobile ? 12: 14
+                fontWeight:500,
+                fontFamily: this.props.theme.fonts.sansSerif
               }
             }
           },
           pointColor:{ from: 'color', modifiers: []},
           margin: this.props.isMobile ? { top: 20, right: 20, bottom: 40, left: 65 } : { top: 20, right: 40, bottom: 80, left: 80 },
+          sliceTooltip:(slideData) => {
+            const { slice } = slideData;
+            const point = slice.points[0];
+            return (
+              <CustomTooltip
+                point={point}
+              >
+                {
+                typeof slice.points === 'object' && slice.points.length &&
+                  slice.points.map(point => {
+                    const protocolName = point.serieId;
+                    const protocolEarning = point.data.yFormatted;
+                    const protocolApy = point.data.apy;
+                    return (
+                      <CustomTooltipRow
+                        key={point.id}
+                        label={protocolName}
+                        color={point.color}
+                        value={`${protocolEarning} <small>(${protocolApy}% APY)</small>`}
+                      />
+                    );
+                  })
+                }
+              </CustomTooltip>
+            );
+          }
         };
       break;
       case 'VOL':
@@ -1773,7 +1804,7 @@ class StatsChart extends Component {
               }
             }
           });
-
+          
           chartData.push(chartRow);
         });
 
@@ -1783,6 +1814,7 @@ class StatsChart extends Component {
           gridYValues.push(i*gridYStep);
         }
 
+        console.log("ChartDAATA",idleChartData)
         chartData.push({
           id:'Idle',
           data: idleChartData,
