@@ -29,9 +29,11 @@ class StatsChart extends Component {
 
   async componentDidUpdate(prevProps) {
     const showAdvancedChanged = prevProps.showAdvanced !== this.props.showAdvanced;
+    const apiResults_aa_Changed = prevProps.apiResults_aa !== this.props.apiResults_aa;
+    const apiResults_bb_Changed = prevProps.apiResults_bb !== this.props.apiResults_bb;
     const apiResultsChanged = prevProps.apiResults !== this.props.apiResults;
     const tokenChanged = prevProps.selectedToken !== this.props.selectedToken || JSON.stringify(prevProps.tokenConfig) !== JSON.stringify(this.props.tokenConfig);
-    if (apiResultsChanged || showAdvancedChanged || tokenChanged){
+    if (apiResultsChanged || showAdvancedChanged || tokenChanged||apiResults_aa_Changed||apiResults_bb_Changed){
       this.componentDidMount();
     }
   }
@@ -51,7 +53,7 @@ class StatsChart extends Component {
   }
 
   loadApiData = async () => {
-    console.log("HERE")
+    console.log("HERE",this.props.apiResults_aa)
 
     if (!this.props.tokenConfig || !this.props.selectedToken || !this.props.chartMode || (!this.props.apiResults&&!this.props.apiResults_aa)){
       console.log("Failed",this.props.tokenConfig,"TOKEN",this.props.selectedToken,"CHARTMODE",this.props.chartMode,this.props.apiResults,this.props.apiResults_aa)
@@ -94,12 +96,14 @@ class StatsChart extends Component {
         let firstPriceBB = null;
         let chartDataAA=null;
         let chartDataBB=null;
+        let firstBlock=null;
         chartDataAA = apiResults_aa.map((d,i) => {
 
           let y = 0;
           let apy = 0;
           let days = 0;
-          const x = moment(d.timestamp*1000).format("YYYY/MM/DD HH:mm");
+          console.log(d.timeStamp,d.virtualPrice,d.blockNumber,"DATA")
+          const x = moment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
           const tokenPrice = this.functionsUtil.fixTokenDecimals(d.virtualPrice,this.props.tokenConfig.decimals);
 
           if (!firstPriceAA){
@@ -107,22 +111,23 @@ class StatsChart extends Component {
           } else {
             y = parseFloat(tokenPrice.div(firstPriceAA).minus(1).times(100));
 
-            days = (d.timestamp-apiResults[0].timestamp)/86400;
+            days = (d.timeStamp-apiResults_aa[0].timeStamp)/86400;
             const earning = tokenPrice.div(firstPriceAA).minus(1).times(100);
+            console.log(earning,"Earning")
             apy = earning.times(365).div(days).toFixed(2);
-
+            console.log(apy,"apy")
             // console.log(firstTokenPrice.toString(),tokenPrice.toString(),earning.toString(),days,y,apy);
           }
 
-          if (firstIdleBlock === null){
-            firstIdleBlock = parseInt(d.blocknumber);
+          if (firstBlock === null){
+            firstBlock = parseInt(d.blockNumber);
           }
 
           maxChartValue = Math.max(maxChartValue,y);
 
           const itemPos = Math.floor(itemIndex/totalItems*100);
-          const blocknumber = d.blocknumber;
-
+          const blocknumber = d.blockNumber;
+          console.log(blocknumber,'blocknumber')
           itemIndex++;
 
           return { x, y, apy, blocknumber, itemPos };
@@ -132,7 +137,7 @@ class StatsChart extends Component {
           let y = 0;
           let apy = 0;
           let days = 0;
-          const x = moment(d.timestamp*1000).format("YYYY/MM/DD HH:mm");
+          const x = moment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
           const tokenPrice = this.functionsUtil.fixTokenDecimals(d.virtualPrice,this.props.tokenConfig.decimals);
 
           if (!firstPriceBB){
@@ -140,7 +145,8 @@ class StatsChart extends Component {
           } else {
             y = parseFloat(tokenPrice.div(firstPriceBB).minus(1).times(100));
 
-            days = (d.timestamp-apiResults[0].timestamp)/86400;
+            days = (d.timeStamp-apiResults_bb[0].timeStamp)/86400;
+            console.log('da',days,'ys')
             const earning = tokenPrice.div(firstPriceBB).minus(1).times(100);
             apy = earning.times(365).div(days).toFixed(2);
 
@@ -148,13 +154,13 @@ class StatsChart extends Component {
           }
 
           if (firstIdleBlock === null){
-            firstIdleBlock = parseInt(d.blocknumber);
+            firstIdleBlock = parseInt(d.blockNumber);
           }
 
           maxChartValue = Math.max(maxChartValue,y);
 
           const itemPos = Math.floor(itemIndex/totalItems*100);
-          const blocknumber = d.blocknumber;
+          const blocknumber = d.blockNumber;
 
           itemIndex++;
 
@@ -166,7 +172,8 @@ class StatsChart extends Component {
         for (let i=1;i<=5;i++){
           gridYValues.push(i*gridYStep);
         }
-
+        console.log("Step1")
+        console.log(chartDataAA,chartDataBB,"AND")
         chartData.push({
           id:'Idle',
           color: 'red',
