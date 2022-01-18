@@ -97,8 +97,8 @@ class StatsChart extends Component {
         let chartDataAA=null;
         let chartDataBB=null;
         let firstBlock=null;
-        chartDataAA = apiResults_aa.map((d,i) => {
 
+        chartDataAA = apiResults_aa.map((d,i) => {
           let y = 0;
           let apy = 0;
           let days = 0;
@@ -132,8 +132,8 @@ class StatsChart extends Component {
 
           return { x, y, apy, blocknumber, itemPos };
         });
-        chartDataBB = apiResults_bb.map((d,i) => {
 
+        chartDataBB = apiResults_bb.map((d,i) => {
           let y = 0;
           let apy = 0;
           let days = 0;
@@ -175,10 +175,19 @@ class StatsChart extends Component {
         console.log("Step1")
         chartDataAA.splice(0,1);
         console.log(chartDataAA,chartDataBB,"AND")
+
+        const tranchesConfig = this.functionsUtil.getGlobalConfig(['tranches']);
+
         chartData.push({
-          id:'Idle',
-          color: 'red',
+          id:this.props.tokenConfig.AA.label,
+          color: tranchesConfig.AA.color.hex,
           data: chartDataAA
+        });
+
+        chartData.push({
+          id:this.props.tokenConfig.BB.label,
+          color: tranchesConfig.BB.color.hex,
+          data: chartDataBB
         });
      
 
@@ -2271,6 +2280,8 @@ class StatsChart extends Component {
       default:
       break;
     }
+
+    console.log(this.props.chartMode,chartProps,chartData);
 
     this.setState({
       chartType,
