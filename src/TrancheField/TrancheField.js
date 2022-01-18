@@ -170,8 +170,8 @@ class TrancheField extends Component {
       break;
       case 'experimentalBadge':
         output = null;
-        if (this.props.tokenConfig.experimental){
-          const limitCap = this.functionsUtil.abbreviateNumber(this.props.tokenConfig.limit, 2, maxPrecision, 0) + ` ${this.props.token}`;
+        if (this.state.experimentalBadge && this.functionsUtil.BNify(this.state.experimentalBadge).gt(0)){
+          const limitCap = this.functionsUtil.abbreviateNumber(this.state.experimentalBadge, 2, maxPrecision, 0) + ` ${this.props.token}`;
           output = (
             <Tooltip
               placement={'top'}
@@ -186,31 +186,36 @@ class TrancheField extends Component {
         output = null;
         let badgeText = null;
         let badgeColor = null;
-        if (this.props.tokenConfig.experimental){
-          badgeText = 'Experimental';
-          badgeColor = 'experimental';
+
+        if (!this.state.statusBadge){
+          output = loader;
         } else {
-          badgeText = 'Production';
-          badgeColor = 'production';
-        }
-        output = (
-          <Flex
-            px={2}
-            py={1}
-            borderRadius={2}
-            alignItems={'center'}
-            justifyContent={'center'}
-            backgroundColor={badgeColor}
-          >
-            <Text
-              fontSize={1}
-              fontWeight={3}
-              color={'white'}
+          if (this.functionsUtil.BNify(this.state.statusBadge).gt(0)){
+            badgeText = 'Experimental';
+            badgeColor = 'experimental';
+          } else {
+            badgeText = 'Production';
+            badgeColor = 'production';
+          }
+          output = (
+            <Flex
+              px={2}
+              py={1}
+              borderRadius={2}
+              alignItems={'center'}
+              justifyContent={'center'}
+              backgroundColor={badgeColor}
             >
-              {badgeText}
-            </Text>
-          </Flex>
-        );
+              <Text
+                fontSize={1}
+                fontWeight={3}
+                color={'white'}
+              >
+                {badgeText}
+              </Text>
+            </Flex>
+          );
+        }
       break;
       case 'trancheTypeIcon':
         const trancheDetails = this.functionsUtil.getGlobalConfig(['tranches',this.props.tranche]);

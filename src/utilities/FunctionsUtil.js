@@ -2788,6 +2788,11 @@ class FunctionsUtil {
   }
   getSubgraphTrancheInfo = async (trancheAddress,startTimestamp=null,endTimestamp=null,fields=null) => {
     const subgraphConfig = this.getGlobalConfig(['network','providers','subgraph','tranches']);
+
+    if (!subgraphConfig.enabled){
+      return false;
+    }
+
     const queryParams = {
       first:1000,
       orderBy:"timeStamp",
@@ -4295,15 +4300,6 @@ class FunctionsUtil {
           }
         }
       break;
-      case 'trancheLimit':
-        output = formatValue ? 'None' :  this.BNify(0);
-        if (this.BNify(tokenConfig.limit).gt(0)){
-          output = this.BNify(tokenConfig.limit);
-          if (formatValue) {
-            output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');
-          }
-        }
-      break;
       case 'trancheRedeemable':
         let [
           deposited1,
@@ -4479,7 +4475,7 @@ class FunctionsUtil {
       break;
       case 'trancheIDLELastHarvest':
       case 'trancheIDLEDistribution':
-        output = this.BNify(0);
+        output = null;
         rewardsTokensInfo = await this.getTrancheRewardTokensInfo(tokenConfig, trancheConfig);
         if (rewardsTokensInfo && rewardsTokensInfo.IDLE) {
           if (field === 'trancheIDLEDistribution') {
@@ -4493,11 +4489,12 @@ class FunctionsUtil {
               output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + ` IDLE <a href="${this.getEtherscanTransactionUrl(rewardsTokensInfo.IDLE.latestHarvest.transactionHash)}" rel="nofollow noopener noreferrer" target="_blank" class="link">(last harvest)</a>`
             }
           }
-        } else {
-          if (formatValue) {
-            output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + ` IDLE/${idleGovTokenConfig.distributionFrequency}`
-          }
         }
+        // else {
+        //   if (formatValue) {
+        //     output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + ` IDLE/${idleGovTokenConfig.distributionFrequency}`
+        //   }
+        // }
       break;
       case 'AAIDLEDistribution':
         output = this.abbreviateNumber('1234',decimals,maxPrecision,minPrecision)+` IDLE/day`;
@@ -4519,6 +4516,27 @@ class FunctionsUtil {
       break;
       case 'BBIDLEDistribution':
         output = this.abbreviateNumber('4321', decimals, maxPrecision, minPrecision) + ` IDLE/day`;
+      break;
+      case 'statusBadge':
+      case 'trancheLimit':
+      case 'experimentalBadge':
+        output = await this.genericContractCall(tokenConfig.CDO.name,'limit');
+        if (output){
+          output = this.fixTokenDecimals(output, tokenConfig.CDO.decimals);
+
+          if (field === 'trancheLimit'){
+            if (output.gt(0)){
+              if (formatValue) {
+                output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');
+              }
+            } else {
+              output = this.BNify(0);
+              if (formatValue){
+                output = 'None';
+              }
+            }
+          }
+        }
       break;
       case 'govTokens':
       case 'autoFarming':
