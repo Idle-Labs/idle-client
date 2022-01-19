@@ -164,7 +164,7 @@ class Stats extends Component {
     }
 
     newState.tokenConfig = this.props.availableTokens[newState.selectedToken];
-    newState.minStartTime = moment(globalConfigs.stats.tokens[this.props.selectedToken].startTimestamp,'YYYY-MM-DD');
+    newState.minStartTime = moment(globalConfigs.stats.tokens[this.props.selectedToken.toUpperCase()].startTimestamp,'YYYY-MM-DD');
     newState.maxEndDate = moment();
 
     newState.endTimestampObj = moment(moment().format('YYYY-MM-DD 23:59'),'YYYY-MM-DD HH:mm');
@@ -215,7 +215,7 @@ class Stats extends Component {
 
   setDateRange = (ranges,quickSelection=null) => {
 
-    const minStartTime = moment(globalConfigs.stats.tokens[this.props.selectedToken].startTimestamp);
+    const minStartTime = moment(globalConfigs.stats.tokens[this.props.selectedToken.toUpperCase()].startTimestamp);
 
     let startTimestampObj = moment(ranges.startDate).isSameOrAfter(minStartTime) ? moment(ranges.startDate) : minStartTime;
     let endTimestampObj = moment(ranges.endDate);
