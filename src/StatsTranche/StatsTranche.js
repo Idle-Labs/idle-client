@@ -44,6 +44,8 @@ class StatsTranche extends Component {
     carouselOffsetLeft:0,
     startTimestampObj:null,
     apiResults_unfiltered:null,
+    apiResults_unfiltered_aa:null,
+    apiResults_unfiltered_bb:null,
     dateRangeModalOpened:false
   };
 
@@ -339,7 +341,6 @@ class StatsTranche extends Component {
       unlentBalance = this.functionsUtil.formatMoney(parseFloat(unlentBalance));
     }
     */
-console.log("Successfully loaded",this.state.apiResults_aa,"QQQ")
     this.setStateSafe({
       // aum,
       // apr,
@@ -351,8 +352,9 @@ console.log("Successfully loaded",this.state.apiResults_aa,"QQQ")
       // unlentBalance,
       apiResults_aa,
       apiResults_bb,
+      apiResults_unfiltered_aa,
+      apiResults_unfiltered_bb
     });
-    console.log("ZZZ",this.state.apiResults_aa)
   }
 
   selectToken = async (strategy,token) => {
@@ -599,6 +601,97 @@ render() {
                   />
                 </Flex>
               </DashboardCard>
+              <DashboardCard
+                        cardProps={{
+                            mr:4,
+                            height:'fit-content',
+                            style:this.props.isMobile ? {width:'100%'} : {width:'32vw'}
+                        }}
+                        >
+                        <Flex id='chart-VOL' width={1}>
+                            <Flex
+                            mb={3}
+                            width={1}
+                            flexDirection={'column'}
+                            alignItems={'flex-start'}
+                            justifyContent={'center'}
+                            >
+                            <Heading.h4
+                                mb={2}
+                                ml={3}
+                                mt={3}
+                                fontWeight={4}
+                                fontSize={[2,3]}
+                                textAlign={'left'}
+                                color={'dark-gray'}
+                                lineHeight={'initial'}
+                            >
+                                Volume
+                            </Heading.h4>
+                            <StatsChart
+                                height={300}
+                                {...this.state}
+                                chartMode={'VOL_TRANCHE'}
+                                parentId={'chart-VOL'}
+                                theme={this.props.theme}
+                                isMobile={this.props.isMobile}
+                                themeMode={this.props.themeMode}
+                                contracts={this.props.contracts}
+                                apiResults={this.state.apiResults_aa}
+                                idleVersion={this.state.idleVersion}
+                                tokenConfig={this.props.tokenConfig}
+                                apiResults_unfiltered={this.state.apiResults_unfiltered_aa}
+                            />
+                            </Flex>
+                        </Flex>
+                        </DashboardCard>
+                        <DashboardCard
+                        cardProps={{
+                            mr:4,
+                            height:'fit-content',
+                            style:this.props.isMobile ? {width:'100%'} : {width:'32vw'}
+                        }}
+                        >
+                        <Flex
+                            width={1}
+                            id='chart-AUM'
+                        >
+                            <Flex
+                            mb={3}
+                            width={1}
+                            flexDirection={'column'}
+                            alignItems={'flex-start'}
+                            justifyContent={'center'}
+                            >
+                            <Heading.h4
+                                ml={3}
+                                mt={3}
+                                mb={2}
+                                fontWeight={4}
+                                fontSize={[2,3]}
+                                textAlign={'left'}
+                                color={'dark-gray'}
+                                lineHeight={'initial'}
+                            >
+                                Asset Under Management
+                            </Heading.h4>
+                            <StatsChart
+                                height={300}
+                                {...this.state}
+                                chartMode={'AUM_TRANCHE'}
+                                parentId={'chart-AUM'}
+                                theme={this.props.theme}
+                                isMobile={this.props.isMobile}
+                                themeMode={this.props.themeMode}
+                                contracts={this.props.contracts}
+                                apiResults={this.state.apiResults_aa}
+                                idleVersion={this.state.idleVersion}
+                                tokenConfig={this.props.tokenConfig}
+                                apiResults_unfiltered={this.state.apiResults_unfiltered_aa}
+                            />
+                            </Flex>
+                        </Flex>
+                        </DashboardCard>
               {
                 /*
                 <DashboardCard
