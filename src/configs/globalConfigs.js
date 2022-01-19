@@ -1725,6 +1725,7 @@ const globalConfigs = {
               'blockNumber',
               'totalSupply',
               'virtualPrice',
+              'contractValue',
             ]
           }
         }
