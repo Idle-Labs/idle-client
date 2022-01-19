@@ -4492,7 +4492,7 @@ class FunctionsUtil {
           if (field === 'trancheIDLEDistribution') {
             output = this.fixDistributionSpeed(rewardsTokensInfo.IDLE.tokensPerSecond, idleGovTokenConfig.distributionFrequency);
             if (formatValue) {
-              output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + ` IDLE/${idleGovTokenConfig.distributionFrequency}`
+              output = '+'+this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + ` IDLE/${idleGovTokenConfig.distributionFrequency}`
             }
           } else {
             output = rewardsTokensInfo.IDLE.lastAmount;
