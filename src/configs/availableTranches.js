@@ -234,6 +234,7 @@ const availableTranches = {
         abi:IdleStrategy,
         name:'IdleStrategy_convex_frax3crv'
       },
+      buyInstructions:'To get FRAX3CRV token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://curve.fi/frax/deposit">FRAX Curve Pool</a>.',
       AA:{
         abi:ERC20,
         decimals:18,
@@ -299,6 +300,7 @@ const availableTranches = {
         abi:IdleStrategy,
         name:'IdleStrategy_convex_mim3crv'
       },
+      buyInstructions:'To get MIM3CRV token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://curve.fi/mim/deposit">MIM Curve Pool</a>.',
       AA:{
         abi:ERC20,
         decimals:18,
