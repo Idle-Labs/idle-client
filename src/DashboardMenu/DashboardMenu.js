@@ -72,9 +72,13 @@ class DashboardMenu extends Component {
       return null;
     }
 
+    const currentNetworkId = this.functionsUtil.getRequiredNetworkId();
+    const landingStrategies = this.functionsUtil.getGlobalConfig(['landingStrategies']);
+    const visibleStrategies = Object.keys(landingStrategies).filter(s => landingStrategies[s].visible && (!landingStrategies[s].availableNetworks.length || landingStrategies[s].availableNetworks.includes(currentNetworkId)) && (!landingStrategies[s].enabledEnvs.length || landingStrategies[s].enabledEnvs.includes(this.props.currentEnv)) );
+
     const governanceConfig = this.functionsUtil.getGlobalConfig(['governance']);
     const governanceRoute = governanceConfig.baseRoute;
-    const dashboardRoute = this.functionsUtil.getGlobalConfig(['dashboard', 'baseRoute']) + '/' + Object.keys(this.props.availableStrategies)[0];
+    const dashboardRoute = this.functionsUtil.getGlobalConfig(['dashboard', 'baseRoute']) + '/' + visibleStrategies[0];
 
     const visibleLinks = this.props.menu.filter(menuLink => {
       const isVisible = menuLink.visible === undefined || menuLink.visible;

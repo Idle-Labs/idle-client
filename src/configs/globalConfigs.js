@@ -279,8 +279,11 @@ const globalConfigs = {
       }
     },
     proposals: {
+      18: {
+        description: `This IIP includes Governor bravo update, M1-2022 Leagues budget transfer, Idle Smart Treasury migration, and Enzyme Bug Bounty. For more information, check: <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://gov.idle.finance/t/iip-18-governor-bravo-update-m1-2022-leagues-budget-transfer-idle-smart-treasury-migration-and-enzyme-bug-bounty/895">https://gov.idle.finance/t/iip-18-governor-bravo-update-m1-2022-leagues-budget-transfer-idle-smart-treasury-migration-and-enzyme-bug-bounty/895</a>.`,
+      },
       12: {
-        description: 'Details in the gov forum post: <a class="link" href="https://gov.idle.finance/t/iip-12-enable-idle-lm-on-idlerai-and-fund-leagues-mandate/620">https://gov.idle.finance/t/iip-12-enable-idle-lm-on-idlerai-and-fund-leagues-mandate/620</a>'
+        description: 'Details in the gov forum post: <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://gov.idle.finance/t/iip-12-enable-idle-lm-on-idlerai-and-fund-leagues-mandate/620">https://gov.idle.finance/t/iip-12-enable-idle-lm-on-idlerai-and-fund-leagues-mandate/620</a>.'
       },
       7: {
         description: `Upgrade of IdleTokenGovernance contract to include the following changes:<br />
@@ -290,7 +293,7 @@ const globalConfigs = {
           <li>support for new cWBCT distribution</li>
           <li>other minor updates for gas and redeems</li>
         </ul>
-        See more in the gov forum post: <a class="link" href="https://gov.idle.finance/t/iip-7-idletoken-upgrade-stkaave-distribution/466">https://gov.idle.finance/t/iip-7-idletoken-upgrade-stkaave-distribution/466</a>`
+        See more in the gov forum post: <a class="link" href="https://gov.idle.finance/t/iip-7-idletoken-upgrade-stkaave-distribution/466">https://gov.idle.finance/t/iip-7-idletoken-upgrade-stkaave-distribution/466</a>.`
       }
     },
     contracts: {
