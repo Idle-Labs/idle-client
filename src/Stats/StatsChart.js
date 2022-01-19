@@ -802,9 +802,8 @@ class StatsChart extends Component {
           id:'AUM',
           color: 'hsl('+globalConfigs.stats.tokens[this.props.selectedToken].color.hsl.join(',')+')',
           data: apiResults.map((d,i) => {
-            const idleTokens = this.functionsUtil.fixTokenDecimals(d.totalSupply,18);
-            const idlePrice = this.functionsUtil.fixTokenDecimals(d.virtualPrice,this.props.tokenConfig.decimals);
-            const aum = idleTokens.times(idlePrice);
+
+            const aum = this.functionsUtil.fixTokenDecimals(d.contractValue,18);
             const x = moment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
             const y = parseFloat(aum.toString());
 
