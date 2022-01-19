@@ -1078,7 +1078,44 @@ class TrancheDetails extends Component {
                               showInline={true}
                               availableMethods={[]}
                               buyToken={this.props.selectedToken}
-                            />
+                            >
+                              {
+                                this.props.tokenConfig.buyInstructions ? (
+                                  <DashboardCard
+                                    cardProps={{
+                                      p: 2,
+                                      my: 2
+                                    }}
+                                  >
+                                    <Flex
+                                      width={1}
+                                      alignItems={'center'}
+                                      flexDirection={'column'}
+                                      justifyContent={'center'}
+                                    >
+                                      <Icon
+                                        size={'1.8em'}
+                                        name={'MoneyOff'}
+                                        color={'cellText'}
+                                      />
+                                      <Text
+                                        mt={1}
+                                        color={'cellText'}
+                                        textAlign={'center'}
+                                      >
+                                        You don't have any <strong>{this.props.selectedToken}</strong> to deposit.
+                                      </Text>
+                                      <Text
+                                        mt={1}
+                                        color={'cellText'}
+                                        textAlign={'center'}
+                                        dangerouslySetInnerHTML={{__html:this.props.tokenConfig.buyInstructions}}>
+                                      </Text>
+                                    </Flex>
+                                  </DashboardCard>
+                                ) : null
+                              }
+                            </BuyModal>
                           </Flex>
                         ) : isStake ? (
                           <DashboardCard

@@ -495,11 +495,19 @@ class BuyModal extends React.Component {
                 !this.props.showInline &&
                   <Image height={2} mb={2} src={`images/tokens/${this.state.selectedToken}.svg`} />
               }
-              <Text textAlign={'center'} fontWeight={500} fontSize={[2, this.props.showInline ? 2 : 3]} my={0}>
-                {
-                  this.props.buyText ? this.props.buyText : (this.props.showInline && this.props.buyToken ? ( Object.keys(this.state.availableMethods).length>0 ? `Ops... you don't have any ${this.props.buyToken} in your wallet, how do you prefer do buy some?` : `Ops... you don't have any ${this.props.buyToken} in your wallet.` ) : `How do you prefer to buy ${this.state.selectedToken}?`)
-                }
-              </Text>
+              {
+                this.props.children ?
+                  this.props.children
+                : this.props.buyText ? (
+                  <Text textAlign={'center'} fontWeight={500} fontSize={[2, this.props.showInline ? 2 : 3]} mt={3} dangerouslySetInnerHTML={{__html:this.props.buyText}}></Text>
+                ) : (
+                  <Text textAlign={'center'} fontWeight={500} fontSize={[2, this.props.showInline ? 2 : 3]}>
+                    {
+                      (this.props.showInline && this.props.buyToken ? ( Object.keys(this.state.availableMethods).length>0 ? `Ops... you don't have any ${this.props.buyToken} in your wallet, how do you prefer do buy some?` : `Ops... you don't have any ${this.props.buyToken} in your wallet.` ) : `How do you prefer to buy ${this.state.selectedToken}?`)
+                    }
+                  </Text>
+                )
+              }
             </Flex>
             <Flex mb={this.props.showInline ? 2 : 4} flexDirection={['column','row']} alignItems={'center'} justifyContent={'center'}>
               {
