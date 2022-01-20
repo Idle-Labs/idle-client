@@ -684,10 +684,10 @@ render() {
                                 isMobile={this.props.isMobile}
                                 themeMode={this.props.themeMode}
                                 contracts={this.props.contracts}
-                                apiResults={this.state.apiResults_aa}
+                                apiResults_aa={this.state.apiResults_aa}
+                                apiResults_bb={this.state.apiResults_bb}
                                 idleVersion={this.state.idleVersion}
                                 tokenConfig={this.props.tokenConfig}
-                                apiResults_unfiltered={this.state.apiResults_unfiltered_aa}
                             />
                             </Flex>
                         </Flex>

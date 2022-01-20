@@ -61,6 +61,7 @@ class StatsChart extends Component {
     }
     console.log("Success",this.props.tokenConfig,"TOKEN",this.props.selectedToken,"CHARTMODE",this.props.chartMode,this.props.apiResults,this.props.apiResults_aa)
     const maxGridLines = 4;
+    const tranchesConfig = this.functionsUtil.getGlobalConfig(['tranches']);
     const apiResults = this.props.apiResults;
     const apiResults_aa=this.props.apiResults_aa;
     const apiResults_bb=this.props.apiResults_bb;
@@ -168,8 +169,7 @@ class StatsChart extends Component {
         }
         chartDataAA.splice(0,1);
 
-        const tranchesConfig = this.functionsUtil.getGlobalConfig(['tranches']);
-
+        
         chartData.push({
           id:this.props.tokenConfig.AA.label,
           color: tranchesConfig.AA.color.hex,
@@ -799,9 +799,23 @@ class StatsChart extends Component {
         maxChartValue = 0;
         console.log("Here In Aum")
         chartData.push({
-          id:'AUM',
-          color: 'hsl('+globalConfigs.stats.tokens[this.props.selectedToken].color.hsl.join(',')+')',
-          data: apiResults.map((d,i) => {
+          id:'AUM_AA',
+          color: tranchesConfig.AA.color.hex,
+          data: apiResults_aa.map((d,i) => {
+
+            const aum = this.functionsUtil.fixTokenDecimals(d.contractValue,18);
+            const x = moment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
+            const y = parseFloat(aum.toString());
+
+            maxChartValue = Math.max(maxChartValue,y);
+
+            return { x,y };
+          })
+        });
+        chartData.push({
+          id:'AUM_BB',
+          color: tranchesConfig.BB.color.hex,
+          data: apiResults_bb.map((d,i) => {
 
             const aum = this.functionsUtil.fixTokenDecimals(d.contractValue,18);
             const x = moment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
@@ -873,7 +887,7 @@ class StatsChart extends Component {
           animate:false,
           pointLabel:"y",
           curve:'linear',
-          enableArea:true,
+          enableArea:false,
           enableSlices:'x',
           enableGridX:false,
           enableGridY:true,
