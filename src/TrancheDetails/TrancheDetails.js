@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
+import TooltipText from '../TooltipText/TooltipText';
 import { Flex, Text, Image, Button } from "rimble-ui";
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import TrancheField from '../TrancheField/TrancheField';
@@ -456,14 +457,15 @@ class TrancheDetails extends Component {
               flexDirection={'column'}
               alignItems={'flex-start'}
             >
-              <Text
-                mb={1}
-                fontWeight={3}
-                fontSize={[1,2]}
-                color={'cellText'}
-              >
-                Auto-Farming
-              </Text>
+              <TooltipText
+                flexProps={{
+                  mb:1
+                }}
+                text={'Auto-Compounding'}
+                tooltipProps={{
+                  message:this.functionsUtil.getGlobalConfig(['messages','autoFarming'])
+                }}
+              />
               <TrancheField
                 {...this.props}
                 fieldInfo={{
@@ -483,14 +485,15 @@ class TrancheDetails extends Component {
               width={[0.5,0.33]}
               flexDirection={'column'}
             >
-              <Text
-                mb={1}
-                fontWeight={3}
-                fontSize={[1,2]}
-                color={'cellText'}
-              >
-                Staking Rewards
-              </Text>
+              <TooltipText
+                flexProps={{
+                  mb:1
+                }}
+                text={'Staking Rewards'}
+                tooltipProps={{
+                  message:this.functionsUtil.getGlobalConfig(['messages','stakingRewards'])
+                }}
+              />
               <TrancheField
                 {...this.props}
                 fieldInfo={{
@@ -513,13 +516,12 @@ class TrancheDetails extends Component {
               width={[0.5,0.33]}
               flexDirection={'column'}
             >
-              <Text
-                fontWeight={3}
-                fontSize={[1,2]}
-                color={'cellText'}
-              >
-                APY
-              </Text>
+              <TooltipText
+                text={'APY'}
+                tooltipProps={{
+                  message:this.functionsUtil.getGlobalConfig(['messages','apyTranches'])
+                }}
+              />
               <TrancheField
                 {...this.props}
                 fieldInfo={{
@@ -579,13 +581,12 @@ class TrancheDetails extends Component {
               flexDirection={'column'}
               alignItems={'flex-start'}
             >
-              <Text
-                fontWeight={3}
-                fontSize={[1,2]}
-                color={'cellText'}
-              >
-                Apr Ratio
-              </Text>
+              <TooltipText
+                text={'Apr Ratio'}
+                tooltipProps={{
+                  message:this.functionsUtil.getGlobalConfig(['messages','aprRatio'])
+                }}
+              />
               <TrancheField
                 {...this.props}
                 fieldInfo={{

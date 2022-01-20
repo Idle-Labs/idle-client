@@ -2788,6 +2788,12 @@ class FunctionsUtil {
   }
   getSubgraphTrancheInfo = async (trancheAddress,startTimestamp=null,endTimestamp=null,fields=null) => {
     const subgraphConfig = this.getGlobalConfig(['network','providers','subgraph','tranches']);
+
+    if (!subgraphConfig.enabled){
+      return false;
+    }
+
+    const currTime = parseInt(Date.now()/1000);
     const queryParams = {
       first:1000,
       orderBy:"timeStamp",
@@ -2807,9 +2813,19 @@ class FunctionsUtil {
     const postData = {
       query:subgraphQuery
     }
+
     const results = await this.makePostRequest(subgraphConfig.endpoint,postData);
-    // console.log('getSubgraphTrancheInfo',trancheAddress,postData,results,this.getArrayPath(['data','data','trancheInfos'],results));
-    return this.getArrayPath(['data','data','trancheInfos'],results);
+    let subgraphData = this.getArrayPath(['data','data','trancheInfos'],results);
+    const lastTimestamp = subgraphData ? parseInt(subgraphData[subgraphData.length-1].timeStamp) : null;
+
+    if (lastTimestamp && lastTimestamp>startTimestamp && lastTimestamp<endTimestamp && currTime-lastTimestamp>86400){
+      const subgraphData_2 = await this.getSubgraphTrancheInfo(trancheAddress,lastTimestamp+1,endTimestamp,fields);
+      if (subgraphData_2){
+        subgraphData = subgraphData.concat(subgraphData_2);
+      }
+    }
+
+    return subgraphData;
   }
   makePostRequest = async (endpoint, postData={}, error_callback = false, config = null) => {
     const data = await axios
@@ -4295,15 +4311,6 @@ class FunctionsUtil {
           }
         }
       break;
-      case 'trancheLimit':
-        output = formatValue ? 'None' :  this.BNify(0);
-        if (this.BNify(tokenConfig.limit).gt(0)){
-          output = this.BNify(tokenConfig.limit);
-          if (formatValue) {
-            output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');
-          }
-        }
-      break;
       case 'trancheRedeemable':
         let [
           deposited1,
@@ -4479,7 +4486,7 @@ class FunctionsUtil {
       break;
       case 'trancheIDLELastHarvest':
       case 'trancheIDLEDistribution':
-        output = this.BNify(0);
+        output = null;
         rewardsTokensInfo = await this.getTrancheRewardTokensInfo(tokenConfig, trancheConfig);
         if (rewardsTokensInfo && rewardsTokensInfo.IDLE) {
           if (field === 'trancheIDLEDistribution') {
@@ -4493,11 +4500,12 @@ class FunctionsUtil {
               output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + ` IDLE <a href="${this.getEtherscanTransactionUrl(rewardsTokensInfo.IDLE.latestHarvest.transactionHash)}" rel="nofollow noopener noreferrer" target="_blank" class="link">(last harvest)</a>`
             }
           }
-        } else {
-          if (formatValue) {
-            output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + ` IDLE/${idleGovTokenConfig.distributionFrequency}`
-          }
         }
+        // else {
+        //   if (formatValue) {
+        //     output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + ` IDLE/${idleGovTokenConfig.distributionFrequency}`
+        //   }
+        // }
       break;
       case 'AAIDLEDistribution':
         output = this.abbreviateNumber('1234',decimals,maxPrecision,minPrecision)+` IDLE/day`;
@@ -4519,6 +4527,27 @@ class FunctionsUtil {
       break;
       case 'BBIDLEDistribution':
         output = this.abbreviateNumber('4321', decimals, maxPrecision, minPrecision) + ` IDLE/day`;
+      break;
+      case 'statusBadge':
+      case 'trancheLimit':
+      case 'experimentalBadge':
+        output = await this.genericContractCall(tokenConfig.CDO.name,'limit');
+        if (output){
+          output = this.fixTokenDecimals(output, tokenConfig.CDO.decimals);
+
+          if (field === 'trancheLimit'){
+            if (output.gt(0)){
+              if (formatValue) {
+                output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');
+              }
+            } else {
+              output = this.BNify(0);
+              if (formatValue){
+                output = 'None';
+              }
+            }
+          }
+        }
       break;
       case 'govTokens':
       case 'autoFarming':

@@ -2,6 +2,7 @@ import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import ImageButton from '../ImageButton/ImageButton';
+import TooltipText from '../TooltipText/TooltipText';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import BuyModal from '../utilities/components/BuyModal';
 import TrancheField from '../TrancheField/TrancheField';
@@ -495,6 +496,7 @@ class TrancheDetails extends Component {
                     >
                       <Text
                         fontSize={[1,2]}
+                        color={'cellText'}
                         fontWeight={[2,3]}
                       >
                         Protocol
@@ -541,6 +543,7 @@ class TrancheDetails extends Component {
                     >
                       <Text
                         fontSize={[1,2]}
+                        color={'cellText'}
                         fontWeight={[2,3]}
                       >
                         Token
@@ -587,6 +590,7 @@ class TrancheDetails extends Component {
                     >
                       <Text
                         fontSize={[1,2]}
+                        color={'cellText'}
                         fontWeight={[2,3]}
                       >
                         Pool Size
@@ -619,12 +623,14 @@ class TrancheDetails extends Component {
                       width={['49%','33%']}
                       flexDirection={'column'}
                     >
-                      <Text
-                        fontSize={[1,2]}
-                        fontWeight={[2,3]}
-                      >
-                        Auto-Farming
-                      </Text>
+                      <TooltipText
+                        textProps={{
+                          fontSize:[1,2],
+                          fontWeight:[2,3]
+                        }}
+                        text={'Auto-Compounding'}
+                        message={this.functionsUtil.getGlobalConfig(['messages','autoFarming'])}
+                      />
                       <Flex
                         mt={1}
                         alignItems={'center'}
@@ -653,12 +659,14 @@ class TrancheDetails extends Component {
                       width={['49%','33%']}
                       flexDirection={'column'}
                     >
-                      <Text
-                        fontSize={[1,2]}
-                        fontWeight={[2,3]}
-                      >
-                        Staking Rewards
-                      </Text>
+                      <TooltipText
+                        textProps={{
+                          fontSize:[1,2],
+                          fontWeight:[2,3]
+                        }}
+                        text={'Staking Rewards'}
+                        message={this.functionsUtil.getGlobalConfig(['messages','stakingRewards'])}
+                      />
                       <Flex
                         mt={1}
                         alignItems={'center'}
@@ -687,12 +695,14 @@ class TrancheDetails extends Component {
                       width={['49%','33%']}
                       flexDirection={'column'}
                     >
-                      <Text
-                        fontSize={[1,2]}
-                        fontWeight={[2,3]}
-                      >
-                        APY
-                      </Text>
+                      <TooltipText
+                        textProps={{
+                          fontSize:[1,2],
+                          fontWeight:[2,3]
+                        }}
+                        text={'APY'}
+                        message={this.functionsUtil.getGlobalConfig(['messages','apyTranches'])}
+                      />
                       <Flex
                         flexDirection={'column'}
                         alignItems={'flex-start'}
@@ -757,12 +767,14 @@ class TrancheDetails extends Component {
                       width={['49%','33%']}
                       flexDirection={'column'}
                     >
-                      <Text
-                        fontSize={[1,2]}
-                        fontWeight={[2,3]}
-                      >
-                        Apr Ratio
-                      </Text>
+                      <TooltipText
+                        textProps={{
+                          fontSize:[1,2],
+                          fontWeight:[2,3]
+                        }}
+                        text={'Apr Ratio'}
+                        message={this.functionsUtil.getGlobalConfig(['messages','aprRatio'])}
+                      />
                       <Flex
                         mt={1}
                         alignItems={'center'}
@@ -792,6 +804,7 @@ class TrancheDetails extends Component {
                     >
                       <Text
                         fontSize={[1,2]}
+                        color={'cellText'}
                         fontWeight={[2,3]}
                       >
                         Status
@@ -821,6 +834,7 @@ class TrancheDetails extends Component {
                     >
                       <Text
                         fontSize={[1,2]}
+                        color={'cellText'}
                         fontWeight={[2,3]}
                       >
                         Limit Cap
@@ -1064,7 +1078,44 @@ class TrancheDetails extends Component {
                               showInline={true}
                               availableMethods={[]}
                               buyToken={this.props.selectedToken}
-                            />
+                            >
+                              {
+                                this.props.tokenConfig.buyInstructions ? (
+                                  <DashboardCard
+                                    cardProps={{
+                                      p: 2,
+                                      my: 2
+                                    }}
+                                  >
+                                    <Flex
+                                      width={1}
+                                      alignItems={'center'}
+                                      flexDirection={'column'}
+                                      justifyContent={'center'}
+                                    >
+                                      <Icon
+                                        size={'1.8em'}
+                                        name={'MoneyOff'}
+                                        color={'cellText'}
+                                      />
+                                      <Text
+                                        mt={1}
+                                        color={'cellText'}
+                                        textAlign={'center'}
+                                      >
+                                        You don't have any <strong>{this.props.selectedToken}</strong> to deposit.
+                                      </Text>
+                                      <Text
+                                        mt={1}
+                                        color={'cellText'}
+                                        textAlign={'center'}
+                                        dangerouslySetInnerHTML={{__html:this.props.tokenConfig.buyInstructions}}>
+                                      </Text>
+                                    </Flex>
+                                  </DashboardCard>
+                                ) : null
+                              }
+                            </BuyModal>
                           </Flex>
                         ) : isStake ? (
                           <DashboardCard

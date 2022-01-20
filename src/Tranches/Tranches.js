@@ -828,11 +828,14 @@ class Tranches extends Component {
                   trancheType={this.state.trancheType}
                   availableTranches={this.props.availableTranches}
                   handleClick={(props) => this.selectTranche(props.protocol,props.token)}
+                  colsProps={{
+                    fontSize:['10px','14px'],
+                  }}
                   cols={[
                     {
                       title:'PROTOCOL', 
                       props:{
-                        width:[0.34, this.state.useTrancheType ? 0.15 : 0.14]
+                        width:[0.34, this.state.useTrancheType ? 0.15 : 0.13]
                       },
                       fields:[
                         {
@@ -858,7 +861,7 @@ class Tranches extends Component {
                     {
                       title:'TOKEN',
                       props:{
-                        width:[0.15, this.state.useTrancheType ? 0.14 : 0.13],
+                        width:[0.15, 0.13],
                       },
                       fields:[
                         {
@@ -915,9 +918,10 @@ class Tranches extends Component {
                     },
                     {
                       title:this.state.useTrancheType ? 'APY' : 'SENIOR APY',
+                      desc:this.functionsUtil.getGlobalConfig(['messages','apyTranches']),
                       visible:!this.state.useTrancheType || this.state.trancheType === 'AA',
                       props:{
-                        width:[this.state.useTrancheType ? 0.16 : 0.27,this.state.useTrancheType ? 0.09 : 0.12],
+                        width:[this.state.useTrancheType ? 0.16 : 0.27,this.state.useTrancheType ? 0.09 : 0.11],
                       },
                       parentProps:{
                         flexDirection:'column',
@@ -932,9 +936,10 @@ class Tranches extends Component {
                     },
                     {
                       title:this.state.useTrancheType ? 'APY' : 'JUNIOR APY',
+                      desc:this.functionsUtil.getGlobalConfig(['messages','apyTranches']),
                       visible:!this.state.useTrancheType || this.state.trancheType === 'BB',
                       props:{
-                        width:[this.state.useTrancheType ? 0.16 : 0.27,this.state.useTrancheType ? 0.09 : 0.12],
+                        width:[this.state.useTrancheType ? 0.16 : 0.27,this.state.useTrancheType ? 0.09 : 0.11],
                       },
                       parentProps:{
                         flexDirection:'column',
@@ -955,8 +960,9 @@ class Tranches extends Component {
                     {
                       mobile:false,
                       title:'APR RATIO',
+                      desc:this.functionsUtil.getGlobalConfig(['messages','aprRatio']),
                       props:{
-                        width:[0.15, this.state.useTrancheType ? 0.12 : 0.10],
+                        width:[0.15, 0.1],
                       },
                       fields:[
                         {
@@ -973,9 +979,10 @@ class Tranches extends Component {
                     },
                     {
                       mobile:false,
-                      title:'AUTO-FARMING',
+                      title:'AUTO-COMPOUNDING',
+                      desc:this.functionsUtil.getGlobalConfig(['messages','autoFarming']),
                       props:{
-                        width:[0.25,this.state.useTrancheType ? 0.14 : 0.14],
+                        width:[0.25,0.17],
                       },
                       fields:[
                         {
@@ -986,6 +993,7 @@ class Tranches extends Component {
                     {
                       mobile:false,
                       title:'STAKING REWARDS',
+                      desc:this.functionsUtil.getGlobalConfig(['messages','stakingRewards']),
                       props:{
                         width:[0.25,this.state.useTrancheType ? 0.15 : 0.13],
                       },

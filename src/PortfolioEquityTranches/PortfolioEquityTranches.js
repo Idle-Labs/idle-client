@@ -335,7 +335,9 @@ class PortfolioEquityTranches extends Component {
                 lastFilteredTx.tranchePrice = tranchePrice;
                 filteredBalances = [lastFilteredTx];
 
-                // console.log(this.functionsUtil.strToMoment(timeStamp*1000).format('DD/MM/YYYY HH:mm:ss'),token,trancheTokens.toFixed(5),tranchePrice.toFixed(5),newBalance.toFixed(5),filteredBalances);
+                // if (token === 'FEI'){
+                //   console.log(this.functionsUtil.strToMoment(timeStamp*1000).format('DD/MM/YYYY HH:mm:ss'),token,tranche,trancheTokens.toFixed(5),tranchePrice.toFixed(5),newBalance.toFixed(5),filteredBalances);
+                // }
               }
             } else {
               filteredBalances = [{
@@ -344,7 +346,9 @@ class PortfolioEquityTranches extends Component {
               }];
             }
           } else {
-            // console.log(this.functionsUtil.strToMoment(timeStamp*1000).format('DD/MM/YYYY HH:mm:ss'),timeStamp,token,tranche,lastTokenData,(lastTokenData ? this.functionsUtil.strToMoment(lastTokenData.timeStamp*1000).format('DD/MM/YYYY HH:mm:ss') : null),(lastTokenData ? lastTokenData.tranchePrice.toFixed(5) : null ));
+            // if (token === 'FEI'){
+            //   console.log(this.functionsUtil.strToMoment(timeStamp*1000).format('DD/MM/YYYY HH:mm:ss'),timeStamp,token,tranche,lastTokenData,(lastTokenData ? this.functionsUtil.strToMoment(lastTokenData.timeStamp*1000).format('DD/MM/YYYY HH:mm:ss') : null),(lastTokenData ? lastTokenData.tranchePrice.toFixed(5) : null ));
+            // }
             filteredBalances.forEach(tx => {
               switch (tx.action){
                 case 'Deposit':
@@ -375,7 +379,9 @@ class PortfolioEquityTranches extends Component {
             aggregatedBalance = aggregatedBalance.plus(lastTxBalance);
             tokensBalances[token] = tokensBalances[token].plus(lastTxBalance);
 
-            // console.log(this.functionsUtil.strToMoment(timeStamp*1000).format('DD/MM/YYYY HH:mm:ss'),token,tranche,trancheTokenBalance[token][tranche].toFixed(5),lastTx.tranchePrice.toFixed(5),lastTxBalance.toFixed(5));
+            // if (token === 'FEI'){
+            //   console.log(this.functionsUtil.strToMoment(timeStamp*1000).format('DD/MM/YYYY HH:mm:ss'),token,tranche,trancheTokenBalance[token][tranche].toFixed(5),lastTx.tranchePrice.toFixed(5),lastTxBalance.toFixed(5));
+            // }
           }
 
           foundBalances[token][tranche] = filteredBalances;

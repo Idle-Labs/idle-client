@@ -16,6 +16,7 @@ class TableCellHeader extends Component {
         fontSize={['10px',3]}
         lineHeight={'initial'}
         {...props}
+        {...props.colsProps}
       >
         {props.children}
       </Heading.h4>

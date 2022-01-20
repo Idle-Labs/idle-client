@@ -402,7 +402,7 @@ render() {
     fontSize:[3,'23px'],
   };
 
-  const tokenConfig = statsTokens[this.props.selectedToken];
+  const tokenConfig = statsTokens[this.props.selectedToken.toUpperCase()];
 
   // const disabledCharts = tokenConfig.disabledCharts || [];
 
@@ -502,7 +502,7 @@ render() {
             </Flex>
         </Box>
         {
-          !tokenConfig.enabled ? (
+          (!tokenConfig || !tokenConfig.enabled) ? (
             <Flex
                 width={1}
                 alignItems={'center'}

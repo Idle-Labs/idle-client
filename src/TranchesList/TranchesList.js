@@ -41,6 +41,7 @@ class TranchesList extends Component {
           {...this.props}
           cols={this.props.cols}
           isMobile={this.props.isMobile}
+          colsProps={this.props.colsProps}
         />
         <Flex id="tranches-list" flexDirection={'column'}>
           {
