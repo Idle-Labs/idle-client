@@ -847,7 +847,7 @@ class AssetField extends Component {
         );
       break;
       case 'icon':
-        const icon2 = tokenConfig && tokenConfig.icon ? tokenConfig.icon : `images/tokens/${this.props.token}.svg`;
+        const icon2 = tokenConfig && tokenConfig.icon ? tokenConfig.icon : (this.props.token==="FRAX3CRV")?`images/tokens/${this.props.token}.png`:`images/tokens/${this.props.token}.svg`;
         output = (
           <Image src={icon2} {...fieldProps} />
         );
