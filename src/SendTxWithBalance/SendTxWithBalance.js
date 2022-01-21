@@ -302,7 +302,11 @@ class SendTxWithBalance extends Component {
         params = this.props.getPermitTransactionParams(_amount,signedParameters);
       }
     } else {
-      params = this.props.getTransactionParams(_amount,this.state.fastBalanceSelector);
+      if (this.props.getTransactionParams_async){
+        params = await this.props.getTransactionParams_async(_amount,this.state.fastBalanceSelector);
+      } else {
+        params = this.props.getTransactionParams(_amount,this.state.fastBalanceSelector);
+      }
     }
 
     if (params){

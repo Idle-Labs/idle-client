@@ -100,11 +100,10 @@ class TrancheDetails extends Component {
       // this.functionsUtil.genericContractCall(this.props.trancheConfig.CDORewards.name,'usersStakeBlock',[this.props.account]),
       this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals),
       this.functionsUtil.loadTrancheFieldRaw('trancheApy',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
-      this.functionsUtil.loadTrancheFieldRaw('lastTranchePrice',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account)
+      this.functionsUtil.loadTrancheFieldRaw('trancheRealPrice',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account)
     ]);
 
     const userHasAvailableFunds = trancheBalance && trancheBalance.gt(0);
-
 
     const canUnstake = true; // !stakeCoolingPeriod || this.functionsUtil.BNify(userStakeBlock).plus(stakeCoolingPeriod).lt(blockNumber);
     const canWithdraw = true; // !cdoCoolingPeriod || !latestHarvestBlock || this.functionsUtil.BNify(latestHarvestBlock).plus(cdoCoolingPeriod).lt(blockNumber);
@@ -207,11 +206,14 @@ class TrancheDetails extends Component {
       case 'withdraw':
         approveEnabled = false;
         contractInfo = this.props.cdoConfig;
-        // tokenConfig = this.props.tokenConfig;
-        tokenConfig = this.props.trancheConfig;
-        balanceProp = this.state.trancheBalance;
-        // balanceProp = this.state.trancheBalance.times(this.state.tranchePrice);
-        // console.log('balanceProp',this.state.trancheBalance.toFixed(),this.state.tranchePrice.toFixed(),balanceProp.toFixed());
+        // tokenConfig = this.props.trancheConfig;
+        // balanceProp = this.state.trancheBalance;
+
+        tokenConfig = this.props.tokenConfig;
+        balanceProp = this.state.trancheBalance.times(this.state.tranchePrice);
+
+        // console.log('balanceProp',this.state.trancheBalance,this.state.tranchePrice,balanceProp);
+
         if (!this.state.canWithdraw){
           buttonDisabled = true;
           infoText = trancheDetails.description.cantWithdraw;
@@ -253,19 +255,40 @@ class TrancheDetails extends Component {
 
   }
 
-  getTransactionParams(amount){
+  getTransactionParams(amount,selectedPercentage){
     let methodName = null;
     let methodParams = null;
 
     if (this.props.trancheConfig.functions[this.state.selectedAction]){
       methodName = this.props.trancheConfig.functions[this.state.selectedAction];
 
-      if (this.state.selectedAction === 'stake'){
-        methodName = this.props.trancheConfig.functions[this.state.selectedStakeAction];
-      }
+      if (this.state.selectedAction === 'withdraw'){
+        let trancheTokenToRedeem = null;
+        if (selectedPercentage) {
+          trancheTokenToRedeem = this.functionsUtil.BNify(this.state.trancheBalance).times(this.functionsUtil.BNify(selectedPercentage).div(100));
+        } else {
+          trancheTokenToRedeem = this.functionsUtil.BNify(amount).div(this.functionsUtil.normalizeTokenAmount(this.state.tranchePrice,18));
+        }
 
-      methodParams = [amount];
+        // Check if idleTokens to redeem > idleToken balance
+        if (trancheTokenToRedeem.gt(this.functionsUtil.BNify(this.state.trancheBalance))) {
+          trancheTokenToRedeem = this.functionsUtil.BNify(this.state.trancheBalance);
+        }
+
+        // Normalize number
+        trancheTokenToRedeem = this.functionsUtil.normalizeTokenAmount(trancheTokenToRedeem, 18);
+
+        methodParams = [trancheTokenToRedeem];
+      } else {
+        if (this.state.selectedAction === 'stake'){
+          methodName = this.props.trancheConfig.functions[this.state.selectedStakeAction];
+        }
+
+        methodParams = [amount];
+      }
     }
+
+    // console.log('getTransactionParams',this.state.selectedAction,amount,this.functionsUtil.BNify(this.state.trancheBalance).toFixed(),selectedPercentage,methodParams);
 
     return {
       methodName,

@@ -4285,6 +4285,12 @@ class FunctionsUtil {
           output = this.BNify(output).div(this.BNify(100000));
         }
       break;
+      case 'trancheRealPrice':
+        output = await this.genericContractCall(tokenConfig.CDO.name, 'tranchePrice', [trancheConfig.address]);
+        if (output) {
+          output = this.fixTokenDecimals(output, trancheConfig.decimals);
+        }
+      break;
       case 'tranchePrice':
         output = await this.genericContractCall(tokenConfig.CDO.name, 'virtualPrice', [trancheConfig.address]);
         if (output) {
