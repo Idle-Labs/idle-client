@@ -8,13 +8,13 @@ import SmartNumber from '../SmartNumber/SmartNumber';
 import globalConfigs from '../configs/globalConfigs';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import DashboardCard from '../DashboardCard/DashboardCard';
-import AssetSelector from '../AssetSelector/AssetSelector';
 import GenericSelector from '../GenericSelector/GenericSelector';
 import RoundIconButton from '../RoundIconButton/RoundIconButton';
 import VariationNumber from '../VariationNumber/VariationNumber';
 import AllocationChart from '../AllocationChart/AllocationChart';
+import TrancheSelector from '../TrancheSelector/TrancheSelector';
 import DateRangeModal from '../utilities/components/DateRangeModal';
-import { Flex, Text, Heading, Box, Icon } from 'rimble-ui';
+import { Flex, Text, Heading, Box, Icon, Image } from 'rimble-ui';
 class StatsTranche extends Component {
 
   state = {
@@ -105,6 +105,14 @@ class StatsTranche extends Component {
     return null;
   }
 
+  selectTranche(trancheType){
+    // console.log('selectTranche',trancheType);
+    const trancheDetails = this.functionsUtil.getGlobalConfig(['tranches',trancheType]);
+    if (trancheDetails){
+      this.props.selectTrancheType(trancheDetails.route);
+    }
+  }
+   
   async loadParams() {
 
     if (!this.props.selectedToken || !this.props.tokenConfig){
@@ -256,7 +264,12 @@ class StatsTranche extends Component {
     if (!apiResults_aa || !apiResults_unfiltered_aa || !apiResults_aa.length || !apiResults_unfiltered_aa.length || !apiResults_bb || !apiResults_unfiltered_bb || !apiResults_bb.length || !apiResults_unfiltered_bb.length){
       return false;
     }
-
+    
+    const lastResult_aa = Object.values(apiResults_aa).pop();
+    const lastResult_bb = Object.values(apiResults_bb).pop();
+    let aum_aa= this.functionsUtil.fixTokenDecimals(lastResult_aa.contractValue,this.props.tokenConfig.decimals);
+    let aum_bb= this.functionsUtil.fixTokenDecimals(lastResult_bb.contractValue,this.props.tokenConfig.decimals);
+    let aum=aum_aa.plus(aum_bb);
     /*
     const firstResult = apiResults[0];
     const lastResult = Object.values(apiResults).pop();
@@ -276,7 +289,7 @@ class StatsTranche extends Component {
     const lastIdlePrice = this.functionsUtil.fixTokenDecimals(lastResult.idlePrice,this.props.tokenConfig.decimals);
 
     // Calculate AUM
-    let aum = idleTokens.times(lastIdlePrice);
+    
 
     // Convert Token balance
     aum = await this.functionsUtil.convertTokenBalance(aum,this.props.selectedToken,this.props.tokenConfig);
@@ -342,7 +355,6 @@ class StatsTranche extends Component {
     }
     */
     this.setStateSafe({
-      // aum,
       // apr,
       // days,
       // delta,
@@ -350,6 +362,7 @@ class StatsTranche extends Component {
       // rebalances,
       // govTokensPool,
       // unlentBalance,
+      aum,
       apiResults_aa,
       apiResults_bb,
       apiResults_unfiltered_aa,
@@ -381,6 +394,75 @@ class StatsTranche extends Component {
 
 
 render() {
+  const CustomOptionValue = props => {
+    const selectedOption = props.options.find( option => option.value === props.value );
+    if (!selectedOption){
+      return null;
+    }
+
+    return (
+      <Flex
+        width={1}
+        alignItems={'center'}
+        flexDirection={'row'}
+        justifyContent={'space-between'}
+      >
+        <Flex
+          alignItems={'center'}
+        >
+          <Image
+            mr={2}
+            src={selectedOption.icon}
+            size={this.props.isMobile ? '1.6em' : '1.8em'}
+          />
+          <Text
+            fontWeight={3}
+          >
+            {props.label}
+          </Text>
+        </Flex>
+      </Flex>
+    );
+  }
+
+  const CustomValueContainer = props => {
+    const selectProps = props.selectProps.options.find( option => option.value === props.selectProps.value.value );
+    // console.log('CustomValueContainer',props.selectProps.options,props.selectProps.value,selectProps);
+    if (!selectProps){
+      return null;
+    }
+    return (
+      <Flex
+        style={{
+          flex:'1'
+        }}
+        justifyContent={'space-between'}
+        {...props.innerProps}
+      >
+        <Flex
+          p={0}
+          width={1}
+          {...props.innerProps}
+          alignItems={'center'}
+          flexDirection={'row'}
+          style={{cursor:'pointer'}}
+          justifyContent={'flex-start'}
+        >
+          <Image
+            mr={2}
+            src={selectProps.icon}
+            size={this.props.isMobile ? '1.6em' : '1.8em'}
+          />
+          <Text
+            fontWeight={3}
+          >
+            {selectProps.label}
+          </Text>
+        </Flex>
+      </Flex>
+    );
+  }
+
   const networkId = this.functionsUtil.getRequiredNetworkId();
   const apyLong = this.functionsUtil.getGlobalConfig(['messages','apyLong']);
   const statsTokens = this.functionsUtil.getGlobalConfig(['stats','tokens']);
@@ -432,6 +514,7 @@ render() {
                 path={[this.functionsUtil.getGlobalConfig(['strategies',this.props.selectedStrategy,'title'])]}
               />
             </Flex>
+
             <Flex
               mt={[3,0]}
               width={[1,0.6]}
@@ -462,7 +545,7 @@ render() {
                 width={[1,0.3]}
                 flexDirection={'column'}
               >
-                <AssetSelector
+                <TrancheSelector
                   innerProps={{
                     p:1
                   }}
@@ -572,126 +655,245 @@ render() {
             <Box
               width={1}
             >
-              <DashboardCard
-                title={'Historical Performance'}
-                description={performanceTooltip}
-                cardProps={{
-                    mb:[3,4]
-                }}
+            <Flex
+              mb={[2,0]}
+              pr={[0,2]}
+              width={[1,1/4]}
+              flexDirection={'column'}
               >
-                <Flex
-                  mb={3}
-                  width={1}
-                  id={'chart-PRICE'}
-                >
-                  <StatsChart
-                    height={ 350 }
-                    {...this.state}
-                    parentId={'chart-PRICE'}
-                    theme={this.props.theme}
-                    chartMode={'PRICE_TRANCHE'}
-                    isMobile={this.props.isMobile}
-                    contracts={this.props.contracts}
-                    themeMode={this.props.themeMode}
-                    tokenConfig={this.props.tokenConfig}
-                    apiResults_aa={this.state.apiResults_aa}
-                    apiResults_bb={this.state.apiResults_bb}
-                    selectedToken={this.props.selectedToken}
-
+              <StatsCard
+                  title={'Asset Under Management'}
+                  label={ this.state.unlentBalance ? `Unlent funds: ${this.state.unlentBalance} ${this.props.selectedToken}` : this.props.selectedToken }
+                  labelTooltip={ this.state.unlentBalance ? this.functionsUtil.getGlobalConfig(['messages','cheapRedeem']) : null}
+              >
+                  <SmartNumber
+                  precision={2}
+                  type={'money'}
+                  {...valueProps}
+                  unitProps={unitProps}
+                  number={this.state.aum}
+                  flexProps={{
+                      alignItems:'baseline',
+                      justifyContent:'flex-start'
+                  }}
+                  unit={this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken,'conversionRateField']) ? '$' : null}
                   />
+              </StatsCard>
+            </Flex>
+            <DashboardCard
+              title={'Historical Performance'}
+              description={performanceTooltip}
+              cardProps={{
+                  mb:[3,4]
+              }}
+            >
+              <Flex
+                mb={3}
+                width={1}
+                id={'chart-PRICE'}
+              >
+                <StatsChart
+                  height={ 350 }
+                  {...this.state}
+                  parentId={'chart-PRICE'}
+                  theme={this.props.theme}
+                  chartMode={'PRICE_TRANCHE'}
+                  isMobile={this.props.isMobile}
+                  contracts={this.props.contracts}
+                  themeMode={this.props.themeMode}
+                  tokenConfig={this.props.tokenConfig}
+                  apiResults_aa={this.state.apiResults_aa}
+                  apiResults_bb={this.state.apiResults_bb}
+                  selectedToken={this.props.selectedToken}
+
+                />
+              </Flex>
+            </DashboardCard>
+            <Flex width={1} flexDirection={"row"}> 
+              <DashboardCard
+              cardProps={{
+                  mr:4,
+                  height:'fit-content',
+                  style:this.props.isMobile ? {width:'100%'} : {width:'32vw'}
+                        }}
+              >
+              <Flex id='chart-VOL' width={1}>
+                <Flex
+                mb={3}
+                width={1}
+                flexDirection={'column'}
+                alignItems={'flex-start'}
+                justifyContent={'center'}
+                >
+                <Heading.h4
+                    mb={2}
+                    ml={3}
+                    mt={3}
+                    fontWeight={4}
+                    fontSize={[2,3]}
+                    textAlign={'left'}
+                    color={'dark-gray'}
+                    lineHeight={'initial'}
+                >
+                    Volume AA
+                </Heading.h4>
+                <StatsChart
+                    height={300}
+                    {...this.state}
+                    chartMode={'VOL_TRANCHE'}
+                    parentId={'chart-VOL'}
+                    theme={this.props.theme}
+                    isMobile={this.props.isMobile}
+                    themeMode={this.props.themeMode}
+                    contracts={this.props.contracts}
+                    apiResults={this.state.apiResults_aa}
+                    idleVersion={this.state.idleVersion}
+                    tokenConfig={this.props.tokenConfig}
+                    apiResults_unfiltered={this.state.apiResults_unfiltered_aa}
+                />
                 </Flex>
+              </Flex>
               </DashboardCard>
               <DashboardCard
-                        cardProps={{
-                            mr:4,
-                            height:'fit-content',
-                            style:this.props.isMobile ? {width:'100%'} : {width:'32vw'}
-                        }}
-                        >
-                        <Flex id='chart-VOL' width={1}>
-                            <Flex
-                            mb={3}
-                            width={1}
-                            flexDirection={'column'}
-                            alignItems={'flex-start'}
-                            justifyContent={'center'}
-                            >
-                            <Heading.h4
-                                mb={2}
-                                ml={3}
-                                mt={3}
-                                fontWeight={4}
-                                fontSize={[2,3]}
-                                textAlign={'left'}
-                                color={'dark-gray'}
-                                lineHeight={'initial'}
-                            >
-                                Volume
-                            </Heading.h4>
-                            <StatsChart
-                                height={300}
-                                {...this.state}
-                                chartMode={'VOL_TRANCHE'}
-                                parentId={'chart-VOL'}
-                                theme={this.props.theme}
-                                isMobile={this.props.isMobile}
-                                themeMode={this.props.themeMode}
-                                contracts={this.props.contracts}
-                                apiResults={this.state.apiResults_aa}
-                                idleVersion={this.state.idleVersion}
-                                tokenConfig={this.props.tokenConfig}
-                                apiResults_unfiltered={this.state.apiResults_unfiltered_aa}
-                            />
-                            </Flex>
-                        </Flex>
-                        </DashboardCard>
-                        <DashboardCard
-                        cardProps={{
-                            mr:4,
-                            height:'fit-content',
-                            style:this.props.isMobile ? {width:'100%'} : {width:'32vw'}
-                        }}
-                        >
-                        <Flex
-                            width={1}
-                            id='chart-AUM'
-                        >
-                            <Flex
-                            mb={3}
-                            width={1}
-                            flexDirection={'column'}
-                            alignItems={'flex-start'}
-                            justifyContent={'center'}
-                            >
-                            <Heading.h4
-                                ml={3}
-                                mt={3}
-                                mb={2}
-                                fontWeight={4}
-                                fontSize={[2,3]}
-                                textAlign={'left'}
-                                color={'dark-gray'}
-                                lineHeight={'initial'}
-                            >
-                                Asset Under Management
-                            </Heading.h4>
-                            <StatsChart
-                                height={300}
-                                {...this.state}
-                                chartMode={'AUM_TRANCHE'}
-                                parentId={'chart-AUM'}
-                                theme={this.props.theme}
-                                isMobile={this.props.isMobile}
-                                themeMode={this.props.themeMode}
-                                contracts={this.props.contracts}
-                                apiResults_aa={this.state.apiResults_aa}
-                                apiResults_bb={this.state.apiResults_bb}
-                                idleVersion={this.state.idleVersion}
-                                tokenConfig={this.props.tokenConfig}
-                            />
-                            </Flex>
-                        </Flex>
-                        </DashboardCard>
+              cardProps={{
+                  mr:4,
+                  height:'fit-content',
+                  style:this.props.isMobile ? {width:'100%'} : {width:'32vw'}
+              }}
+              >
+              <Flex id='chart-VOL' width={1}>
+                  <Flex
+                  mb={3}
+                  width={1}
+                  flexDirection={'column'}
+                  alignItems={'flex-start'}
+                  justifyContent={'center'}
+                  >
+                  <Heading.h4
+                      mb={2}
+                      ml={3}
+                      mt={3}
+                      fontWeight={4}
+                      fontSize={[2,3]}
+                      textAlign={'left'}
+                      color={'dark-gray'}
+                      lineHeight={'initial'}
+                  >
+                      Volume BB
+                  </Heading.h4>
+                  <StatsChart
+                      height={300}
+                      {...this.state}
+                      chartMode={'VOL_TRANCHE'}
+                      parentId={'chart-VOL'}
+                      theme={this.props.theme}
+                      isMobile={this.props.isMobile}
+                      themeMode={this.props.themeMode}
+                      contracts={this.props.contracts}
+                      apiResults={this.state.apiResults_bb}
+                      idleVersion={this.state.idleVersion}
+                      tokenConfig={this.props.tokenConfig}
+                      apiResults_unfiltered={this.state.apiResults_unfiltered_bb}
+                  />
+                  </Flex>
+              </Flex>
+              </DashboardCard>
+              </Flex>
+              <Flex width={1} flexDirection={"row"}>
+              <DashboardCard
+              cardProps={{
+                  mr:4,
+                  height:'fit-content',
+                  style:this.props.isMobile ? {width:'100%'} : {width:'32vw'}
+              }}
+              >
+              <Flex id='chart-VOL' width={1}>
+                  <Flex
+                  mb={3}
+                  width={1}
+                  flexDirection={'column'}
+                  alignItems={'flex-start'}
+                  justifyContent={'center'}
+                  >
+                  <Heading.h4
+                      mb={2}
+                      ml={3}
+                      mt={3}
+                      fontWeight={4}
+                      fontSize={[2,3]}
+                      textAlign={'left'}
+                      color={'dark-gray'}
+                      lineHeight={'initial'}
+                  >
+                      Coverage
+                  </Heading.h4>
+                  <StatsChart
+                      height={300}
+                      {...this.state}
+                      chartMode={'COVERAGE_TRANCHE'}
+                      parentId={'chart-VOL'}
+                      theme={this.props.theme}
+                      isMobile={this.props.isMobile}
+                      themeMode={this.props.themeMode}
+                      contracts={this.props.contracts}
+                      apiResults_aa={this.state.apiResults_aa}
+                      apiResults_bb={this.state.apiResults_bb}
+                      idleVersion={this.state.idleVersion}
+                      tokenConfig={this.props.tokenConfig}
+                      apiResults_unfiltered_aa={this.state.apiResults_unfiltered_aa}
+                      apiResults_unfiltered_bb={this.state.apiResults_unfiltered_bb}
+                  />
+                  </Flex>
+              </Flex>
+              </DashboardCard>
+              <DashboardCard
+              cardProps={{
+                  mr:4,
+                  height:'fit-content',
+                  style:this.props.isMobile ? {width:'100%'} : {width:'32vw'}
+              }}
+              >
+              <Flex
+                  width={1}
+                  id='chart-AUM'
+              >
+                  <Flex
+                  mb={3}
+                  width={1}
+                  flexDirection={'column'}
+                  alignItems={'flex-start'}
+                  justifyContent={'center'}
+                  >
+                  <Heading.h4
+                      ml={3}
+                      mt={3}
+                      mb={2}
+                      fontWeight={4}
+                      fontSize={[2,3]}
+                      textAlign={'left'}
+                      color={'dark-gray'}
+                      lineHeight={'initial'}
+                  >
+                      Asset Under Management
+                  </Heading.h4>
+                  <StatsChart
+                      height={300}
+                      {...this.state}
+                      chartMode={'AUM_TRANCHE'}
+                      parentId={'chart-AUM'}
+                      theme={this.props.theme}
+                      isMobile={this.props.isMobile}
+                      themeMode={this.props.themeMode}
+                      contracts={this.props.contracts}
+                      apiResults_aa={this.state.apiResults_aa}
+                      apiResults_bb={this.state.apiResults_bb}
+                      idleVersion={this.state.idleVersion}
+                      tokenConfig={this.props.tokenConfig}
+                  />
+                  </Flex>
+              </Flex>
+              </DashboardCard>
+              </Flex>
               {
                 /*
                 <DashboardCard
