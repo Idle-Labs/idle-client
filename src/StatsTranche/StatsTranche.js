@@ -1,20 +1,16 @@
 import moment from 'moment';
 import StatsChart from '../Stats/StatsChart';
 import React, { Component } from 'react';
-import Rebalance from '../Rebalance/Rebalance';
 import StatsCard from '../StatsCard/StatsCard';
 import Breadcrumb from '../Breadcrumb/Breadcrumb';
 import SmartNumber from '../SmartNumber/SmartNumber';
 import globalConfigs from '../configs/globalConfigs';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import DashboardCard from '../DashboardCard/DashboardCard';
-import GenericSelector from '../GenericSelector/GenericSelector';
-import RoundIconButton from '../RoundIconButton/RoundIconButton';
-import VariationNumber from '../VariationNumber/VariationNumber';
-import AllocationChart from '../AllocationChart/AllocationChart';
 import TrancheSelector from '../TrancheSelector/TrancheSelector';
 import DateRangeModal from '../utilities/components/DateRangeModal';
-import { Flex, Text, Heading, Box, Icon, Image } from 'rimble-ui';
+import { Flex, Text, Heading, Box, Icon  } from 'rimble-ui';
+import RoundIconButton from '../RoundIconButton/RoundIconButton'
 class StatsTranche extends Component {
 
   state = {
@@ -93,7 +89,6 @@ class StatsTranche extends Component {
     await this.loadParams();
     await this.loadApiData();
   }
-
   componentWillUnmount(){
     this.componentUnmounted = true;
   }
@@ -264,7 +259,7 @@ class StatsTranche extends Component {
     if (!apiResults_aa || !apiResults_unfiltered_aa || !apiResults_aa.length || !apiResults_unfiltered_aa.length || !apiResults_bb || !apiResults_unfiltered_bb || !apiResults_bb.length || !apiResults_unfiltered_bb.length){
       return false;
     }
-    
+    console.log("RESULTS",apiResults_aa,apiResults_bb)
     const lastResult_aa = Object.values(apiResults_aa).pop();
     const lastResult_bb = Object.values(apiResults_bb).pop();
     let aum_aa= this.functionsUtil.fixTokenDecimals(lastResult_aa.contractValue,this.props.tokenConfig.decimals);
@@ -394,81 +389,8 @@ class StatsTranche extends Component {
 
 
 render() {
-  const CustomOptionValue = props => {
-    const selectedOption = props.options.find( option => option.value === props.value );
-    if (!selectedOption){
-      return null;
-    }
 
-    return (
-      <Flex
-        width={1}
-        alignItems={'center'}
-        flexDirection={'row'}
-        justifyContent={'space-between'}
-      >
-        <Flex
-          alignItems={'center'}
-        >
-          <Image
-            mr={2}
-            src={selectedOption.icon}
-            size={this.props.isMobile ? '1.6em' : '1.8em'}
-          />
-          <Text
-            fontWeight={3}
-          >
-            {props.label}
-          </Text>
-        </Flex>
-      </Flex>
-    );
-  }
-
-  const CustomValueContainer = props => {
-    const selectProps = props.selectProps.options.find( option => option.value === props.selectProps.value.value );
-    // console.log('CustomValueContainer',props.selectProps.options,props.selectProps.value,selectProps);
-    if (!selectProps){
-      return null;
-    }
-    return (
-      <Flex
-        style={{
-          flex:'1'
-        }}
-        justifyContent={'space-between'}
-        {...props.innerProps}
-      >
-        <Flex
-          p={0}
-          width={1}
-          {...props.innerProps}
-          alignItems={'center'}
-          flexDirection={'row'}
-          style={{cursor:'pointer'}}
-          justifyContent={'flex-start'}
-        >
-          <Image
-            mr={2}
-            src={selectProps.icon}
-            size={this.props.isMobile ? '1.6em' : '1.8em'}
-          />
-          <Text
-            fontWeight={3}
-          >
-            {selectProps.label}
-          </Text>
-        </Flex>
-      </Flex>
-    );
-  }
-
-  const networkId = this.functionsUtil.getRequiredNetworkId();
-  const apyLong = this.functionsUtil.getGlobalConfig(['messages','apyLong']);
   const statsTokens = this.functionsUtil.getGlobalConfig(['stats','tokens']);
-  const idleTokenAvailableNetworks = this.functionsUtil.getGlobalConfig(['govTokens','IDLE','availableNetworks']);
-  const idleTokenEnabled = this.functionsUtil.getGlobalConfig(['govTokens','IDLE','enabled']) && idleTokenAvailableNetworks.includes(networkId);
-
   const valueProps = {
     lineHeight:1,
     fontSize:[4,5],
@@ -479,9 +401,9 @@ render() {
   const unitProps = {
     ml:2,
     lineHeight:1,
-    fontWeight:[2,3],
+    fontWeight:[3,4],
     color:'statValue',
-    fontSize:[3,'23px'],
+    fontSize:[3,5],
   };
 
   const tokenConfig = statsTokens[this.props.selectedToken.toUpperCase()];
@@ -656,10 +578,10 @@ render() {
               width={1}
             >
             <Flex
-              mb={[2,0]}
+              mb={[2,4]}
               pr={[0,2]}
               width={[1,1/4]}
-              flexDirection={'column'}
+              flexDirection={'roww'}
               >
               <StatsCard
                   title={'Asset Under Management'}
@@ -709,7 +631,40 @@ render() {
                 />
               </Flex>
             </DashboardCard>
-            <Flex width={1} flexDirection={"row"}> 
+            <Flex
+              position={'relative'}
+              >
+              <Flex
+                  width={1}
+                  id={'carousel-container'}
+                  justifyContent={'flex-end'}
+              >
+                  <RoundIconButton
+                  buttonProps={{
+                      mr:3
+                  }}
+                  iconName={'ArrowBack'}
+                  disabled={this.state.carouselIndex === 0}
+                  handleClick={ e => this.handleCarousel('back') }
+                  />
+                  <RoundIconButton
+                  iconName={'ArrowForward'}
+                  handleClick={ e => this.handleCarousel('next') }
+                  disabled={this.state.carouselIndex === this.state.carouselMax}
+                  />
+              </Flex>
+              <Flex
+                  mt={5}
+                  height={'400px'}
+                  position={'absolute'}
+                  id={'carousel-cursor'}
+                  width={['444%','200%']}
+                  justifyContent={'flex-start'}
+                  left={this.state.carouselOffsetLeft}
+                  style={{
+                  transition:'left 0.3s ease-in-out'
+                  }}
+              >
               <DashboardCard
               cardProps={{
                   mr:4,
@@ -735,7 +690,7 @@ render() {
                     color={'dark-gray'}
                     lineHeight={'initial'}
                 >
-                    Volume AA
+                    {"Volume " + this.functionsUtil.getGlobalConfig(['tranches','AA','baseName'])}
                 </Heading.h4>
                 <StatsChart
                     height={300}
@@ -779,7 +734,7 @@ render() {
                       color={'dark-gray'}
                       lineHeight={'initial'}
                   >
-                      Volume BB
+                     {"Volume " + this.functionsUtil.getGlobalConfig(['tranches','BB','baseName'])}
                   </Heading.h4>
                   <StatsChart
                       height={300}
@@ -798,8 +753,6 @@ render() {
                   </Flex>
               </Flex>
               </DashboardCard>
-              </Flex>
-              <Flex width={1} flexDirection={"row"}>
               <DashboardCard
               cardProps={{
                   mr:4,
@@ -893,6 +846,7 @@ render() {
                   </Flex>
               </Flex>
               </DashboardCard>
+              </Flex>
               </Flex>
               {
                 /*

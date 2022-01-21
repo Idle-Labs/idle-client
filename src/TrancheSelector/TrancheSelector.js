@@ -26,12 +26,15 @@ class TrancheSelector extends Component {
 
   async onChange(token){
     let selectedProtocol;
-    Object.keys(this.props.availableTranches).map(protocol => {
+    Object.keys(this.props.availableTranches).map(protocol=> {
         Object.keys(this.props.availableTranches[protocol]).map(t => {
             if(token===t)
             selectedProtocol=protocol;
+            return 0;
             });
+            return 0;
         });
+        
         console.log("REAACHED HERE",selectedProtocol,token)
     await this.props.changeProtocolToken(selectedProtocol,token);
   }
@@ -46,11 +49,13 @@ class TrancheSelector extends Component {
                 label:t,
                 tokenConfig
                 });
+            return 0;
             });
-        });
+            return 0;
+          });
     const options=opt;
     console.log("MYY OPTIONS",options)
-    const defaultValue = this.props.selectedToken ? options.find(v => (v.value === this.props.selectedToken.toUpperCase())) : null;
+    const defaultValue = this.props.selectedToken ? options.find(v => (v.value.toUpperCase() === this.props.selectedToken.toUpperCase())) : null;
     const CustomOptionValue = props => {
       const token = props.value;
       const tokenConfig = props.data.tokenConfig;

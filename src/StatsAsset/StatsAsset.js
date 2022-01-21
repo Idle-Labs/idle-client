@@ -510,16 +510,7 @@ class StatsAsset extends Component {
       }
     
 
-    render() {
-      const networkId = this.functionsUtil.getRequiredNetworkId();
-      const idleTokenAvailableNetworks = this.functionsUtil.getGlobalConfig(['govTokens','IDLE','availableNetworks']);
-      const idleTokenEnabled = this.functionsUtil.getGlobalConfig(['govTokens','IDLE','enabled']) && idleTokenAvailableNetworks.includes(networkId);
-      
-      const refreshIdleSpeedConfig = this.functionsUtil.getGlobalConfig(['contract','methods','refreshIdleSpeed']);
-      const refreshIdleSpeedEnabled = refreshIdleSpeedConfig.enabled && refreshIdleSpeedConfig.availableNetworks.includes(networkId);
-
-      const apyLong = this.functionsUtil.getGlobalConfig(['messages','apyLong']);
-    
+    render() { 
       const statsTokens = this.functionsUtil.getGlobalConfig(['stats','tokens']);
       const valueProps = {
           lineHeight:1,
@@ -550,13 +541,11 @@ class StatsAsset extends Component {
         // const disabledCharts = tokenConfig.disabledCharts || [];
     
         const versionInfo = this.getVersionInfo(this.state.idleVersion);
-    
         let performanceTooltip = null;
         if (this.state.idleVersion && versionInfo){
             const showPerformanceTooltip = this.functionsUtil.getGlobalConfig(['stats','versions',this.state.idleVersion,'showPerformanceTooltip']);
             performanceTooltip = showPerformanceTooltip ? this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken,'performanceTooltip']) : null;
         }
-    
         const versionDefaultValue = versionsOptions.find( v => (v.value === this.state.idleVersion) );
     
         return (

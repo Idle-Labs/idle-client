@@ -532,8 +532,8 @@ class StatsChart extends Component {
                 xFormatted
               }
             };
-            const depositFormatted = this.functionsUtil.abbreviateNumber(data.data.deposits,2)+' '+this.props.selectedToken;
-            const redeemFormatted = this.functionsUtil.abbreviateNumber(data.data.redeems,2)+' '+this.props.selectedToken;
+            const depositFormatted = this.functionsUtil.abbreviateNumber(data.data.deposits,4)+' '+this.props.selectedToken;
+            const redeemFormatted = this.functionsUtil.abbreviateNumber(data.data.redeems,4)+' '+this.props.selectedToken;
             return (
               <CustomTooltip
                 point={point}
@@ -794,7 +794,7 @@ class StatsChart extends Component {
 
         maxChartValue = 0;
         chartData.push({
-          id:'AUM_AA',
+          id:'AUM Senior',
           color: tranchesConfig.AA.color.hex,
           data: apiResults_aa.map((d,i) => {
 
@@ -808,7 +808,7 @@ class StatsChart extends Component {
           })
         });
         chartData.push({
-          id:'AUM_BB',
+          id:'AUM Junior',
           color: tranchesConfig.BB.color.hex,
           data: apiResults_bb.map((d,i) => {
 
@@ -968,14 +968,12 @@ class StatsChart extends Component {
           id:'COVERAGE',
           color: tranchesConfig.AA.color.hex,
           data: apiResults_aa.map((d,i) => {
-
             const aum_aa = this.functionsUtil.fixTokenDecimals(d.contractValue,18);
             const x = moment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
-            const aum_bb=this.functionsUtil.fixTokenDecimals(apiResults_bb[i].contractValue,18)
-            const ratio=aum_aa.div(aum_bb);
+            const aum_bb=apiResults_bb[i]?(this.functionsUtil.fixTokenDecimals(apiResults_bb[i].contractValue,18)):this.functionsUtil.BNify(0);
+            const ratio=aum_aa>0?aum_bb.div(aum_aa):1;
             const coverage=ratio>1?100:ratio*100
             const y = parseFloat(coverage.toString());
-
             maxChartValue = Math.max(maxChartValue,y);
 
             return { x,y };
