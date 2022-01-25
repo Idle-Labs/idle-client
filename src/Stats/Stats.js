@@ -509,7 +509,6 @@ class Stats extends Component {
   selectTranche = async (strategy,protocol,token) => {
     await this.props.setStrategyToken(strategy,token,protocol);
     this.props.changeProtocolToken(protocol,token);
-    console.log("THIS CHECK", this.props.selectedStrategy)
   }
 
   handleCarousel = action => {

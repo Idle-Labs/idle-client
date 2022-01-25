@@ -86,6 +86,220 @@ class StatsChart extends Component {
     let axisBottomMaxValues = 12;
 
     switch (this.props.chartMode){
+
+      case 'APR_TRANCHE':
+
+        maxChartValue = 0;
+        chartData.push({
+          id:this.props.tokenConfig.AA.label,
+          color:tranchesConfig.AA.color.hex,
+          data:apiResults_aa.map((d,i) => {
+            const x = moment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
+            const y = parseFloat(this.functionsUtil.fixTokenDecimals(d.apr,18));
+            maxChartValue = Math.max(maxChartValue,y);
+            return { x, y };
+          })
+        });
+        chartData.push({
+          id:this.props.tokenConfig.BB.label,
+          color:tranchesConfig.BB.color.hex,
+          data:apiResults_bb.map((d,i) => {
+            const x = moment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
+            const y = parseFloat(this.functionsUtil.fixTokenDecimals(d.apr,18));
+            maxChartValue = Math.max(maxChartValue,y);
+            return { x, y };
+          })
+        });
+
+        /*
+        const csv = {};
+        chartData.forEach( protocolData => {
+          protocolData.data.forEach( d => {
+            if (!csv[d.x]){
+              csv[d.x] = {};
+            }
+            csv[d.x][protocolData.id] = d.y;
+          });
+        });
+
+        const csv_ordered = Object.keys(csv).sort().reduce(
+          (obj, key) => { 
+            obj[key] = csv[key]; 
+            return obj;
+          }, 
+          {}
+        );
+
+        const csv_array = [];
+        const csv_header = [];
+        csv_header.push('Date');
+        chartData.forEach( pData => csv_header.push(pData.id) );
+        csv_array.push(csv_header.join(','));
+
+        Object.keys(csv_ordered).forEach( date => {
+          const csv_row = [date];
+          chartData.forEach( cData => {
+            if (csv_ordered[date][cData.id]){
+              csv_row.push(parseFloat(csv_ordered[date][cData.id]).toFixed(4));
+            } else {
+              csv_row.push('0.0000');
+            }
+          });
+          csv_array.push(csv_row.join(','));
+        });
+
+        console.log('-------DEBUG-------');
+        console.log(csv_ordered);
+        console.log('-------START-------');
+        console.log(csv_array.join('\n'));
+        console.log('-------END-------');
+        */
+
+        // Set chart type
+        chartType = Line;
+
+        gridYStep = parseFloat(maxChartValue/maxGridLines);
+        gridYValues = [0];
+        for (let i=1;i<=5;i++){
+          gridYValues.push(i*gridYStep);
+        }
+
+        axisBottomIndex = 0;
+        axisBottomMaxValues = 6;
+        const Values = chartData[chartData.length-1].data.sort((a,b) => (moment(a.x,"YYYY/MM/DD HH:mm").isBefore(moment(b.x,"YYYY/MM/DD HH:mm")) ? -1 : 1));
+        daysCount = moment(Values[Values.length-1].x,"YYYY/MM/DD HH:mm").diff(moment(Values[0].x,"YYYY/MM/DD HH:mm"),'days');
+        daysFrequency = Math.max(1,Math.ceil(daysCount/axisBottomMaxValues));
+
+        // console.log('APR',chartValues,chartValues[0].x,chartValues[chartValues.length-1].x,daysCount,daysFrequency);
+
+        chartProps = {
+          xScale:{
+            type: 'time',
+            format: '%Y/%m/%d %H:%M',
+            // precision: 'hour',
+          },
+          xFormat:'time:%b %d %H:%M',
+          yFormat:value => parseFloat(value).toFixed(2)+'%',
+          yScale:{
+            type: 'linear',
+            stacked: false
+          },
+          axisLeft:{
+            legend: '',
+            tickSize: 0,
+            orient: 'left',
+            tickPadding: 10,
+            tickRotation: 0,
+            legendOffset: -70,
+            tickValues:gridYValues,
+            legendPosition: 'middle',
+            format:value => parseFloat(value).toFixed(1)+'%',
+          },
+          axisBottom: this.props.isMobile ? null : {
+            legend: '',
+            tickSize: 0,
+            tickPadding: 15,
+            legendOffset: 0,
+            orient: 'bottom',
+            format: (value) => {
+              if (axisBottomIndex++ % daysFrequency === 0){
+                return moment(value,'YYYY/MM/DD HH:mm').format('MMM DD')
+              }
+            },
+            tickValues: 'every day',
+            legendPosition: 'middle'
+          },
+          gridYValues,
+          pointSize:0,
+          useMesh:true,
+          animate:false,
+          pointLabel:"y",
+          curve:'linear',
+          enableArea:false,
+          enableSlices:'x',
+          enableGridX:false,
+          enableGridY:true,
+          pointBorderWidth:1,
+          colors:d => d.color,
+          pointLabelYOffset:-12,
+          legends:[
+            {
+              itemWidth: this.props.isMobile ? 70 : 80,
+              itemHeight: 18,
+              translateX: this.props.isMobile ? -35 : 0,
+              translateY: this.props.isMobile ? 40 : 65,
+              symbolSize: 10,
+              itemsSpacing: 0,
+              direction: 'row',
+              anchor: 'bottom-left',
+              symbolShape: 'circle',
+              itemTextColor: this.props.theme.colors.legend,
+              effects: [
+                {
+                  on: 'hover',
+                  style: {
+                    itemTextColor: this.props.themeMode === 'light' ? '#000' : '#fff'
+                  }
+                }
+              ]
+            }
+          ],
+          theme:{
+            axis: {
+              ticks: {
+                text: {
+                  fontSize: this.props.isMobile ? 12: 14,
+                  fontWeight:600,
+                  fill:this.props.theme.colors.legend,
+                  fontFamily: this.props.theme.fonts.sansSerif
+                }
+              }
+            },
+            grid: {
+              line: {
+                stroke: this.props.theme.colors.lineChartStroke, strokeDasharray: '10 6'
+              }
+            },
+            legends:{
+              text:{
+                fontWeight:500,
+                fill:this.props.theme.colors.legend,
+                textTransform:'capitalize',
+                fontFamily: this.props.theme.fonts.sansSerif,
+                fontSize: this.props.isMobile ? 12: 14
+              }
+            }
+          },
+          pointColor:{ from: 'color', modifiers: []},
+          margin: this.props.isMobile ? { top: 20, right: 20, bottom: 40, left: 65 } : { top: 20, right: 40, bottom: 70, left: 70 },
+          sliceTooltip:(slideData) => {
+            const { slice } = slideData;
+            const point = slice.points[0];
+            return (
+              <CustomTooltip
+                point={point}
+              >
+                {
+                typeof slice.points === 'object' && slice.points.length &&
+                  slice.points.map(point => {
+                    const protocolName = point.serieId;
+                    const protocolEarning = point.data.yFormatted;
+                    // const protocolApy = point.data.apy;
+                    return (
+                      <CustomTooltipRow
+                        key={point.id}
+                        color={point.color}
+                        label={protocolName}
+                        value={protocolEarning}
+                      />
+                    );
+                  })
+                }
+              </CustomTooltip>
+            );
+          }
+        };
+      break;
       case 'PRICE_TRANCHE':
         // let prevTokenPrice = null;
         maxChartValue = 0;

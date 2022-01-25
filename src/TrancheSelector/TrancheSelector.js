@@ -34,8 +34,6 @@ class TrancheSelector extends Component {
             });
             return 0;
         });
-        
-        console.log("REAACHED HERE",selectedProtocol,token)
     await this.props.changeProtocolToken(selectedProtocol,token);
   }
   loadComponents(){
@@ -54,7 +52,6 @@ class TrancheSelector extends Component {
             return 0;
           });
     const options=opt;
-    console.log("MYY OPTIONS",options)
     const defaultValue = this.props.selectedToken ? options.find(v => (v.value.toUpperCase() === this.props.selectedToken.toUpperCase())) : null;
     const CustomOptionValue = props => {
       const token = props.value;

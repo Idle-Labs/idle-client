@@ -244,7 +244,7 @@ class StatsTranche extends Component {
   loadApiData = async () => {
 
     if (!this.props.selectedToken || !this.props.selectedProtocol || !this.props.selectedStrategy || !this.props.tokenConfig){
-      console.log("FAILED HERE")
+     
       return false;
     }
 
@@ -259,7 +259,7 @@ class StatsTranche extends Component {
     if (!apiResults_aa || !apiResults_unfiltered_aa || !apiResults_aa.length || !apiResults_unfiltered_aa.length || !apiResults_bb || !apiResults_unfiltered_bb || !apiResults_bb.length || !apiResults_unfiltered_bb.length){
       return false;
     }
-    console.log("RESULTS",apiResults_aa,apiResults_bb)
+  
     const lastResult_aa = Object.values(apiResults_aa).pop();
     const lastResult_bb = Object.values(apiResults_bb).pop();
     let aum_aa= this.functionsUtil.fixTokenDecimals(lastResult_aa.contractValue,this.props.tokenConfig.decimals);
@@ -753,6 +753,52 @@ render() {
                   </Flex>
               </Flex>
               </DashboardCard>
+              <DashboardCard
+                cardProps={{
+                  mr:4,
+                  height:'fit-content',
+                  style:this.props.isMobile ? {width:'100%'} : {width:'32vw'}
+                }}
+                >
+                <Flex id='chart-APR' width={1}>
+                    <Flex
+                    mb={3}
+                    width={1}
+                    flexDirection={'column'}
+                    alignItems={'flex-start'}
+                    justifyContent={'center'}
+                    >
+                    <Heading.h4
+                        mb={2}
+                        ml={3}
+                        mt={3}
+                        fontWeight={4}
+                        fontSize={[2,3]}
+                        textAlign={'left'}
+                        color={'dark-gray'}
+                        lineHeight={'initial'}
+                    >
+                        APRs
+                    </Heading.h4>
+                    <StatsChart
+                        height={300}
+                        {...this.state}
+                        chartMode={'APR_TRANCHE'}
+                        parentId={'chart-APR'}
+                        theme={this.props.theme}
+                        isMobile={this.props.isMobile}
+                        themeMode={this.props.themeMode}
+                        contracts={this.props.contracts}
+                        apiResults_aa={this.state.apiResults_aa}
+                        apiResults_bb={this.state.apiResults_bb}
+                        idleVersion={this.state.idleVersion}
+                        tokenConfig={this.props.tokenConfig}
+                        apiResults_unfiltered_aa={this.state.apiResults_unfiltered_aa}
+                        apiResults_unfiltered_bb={this.state.apiResults_unfiltered_bb}
+                    />
+                    </Flex>
+                </Flex>
+                </DashboardCard>
               <DashboardCard
               cardProps={{
                   mr:4,

@@ -1725,10 +1725,11 @@ const globalConfigs = {
       subgraph: {
         tranches:{
           enabled:true,
-          endpoint:"https://api.studio.thegraph.com/query/12583/idle-tranches-test/v0.0.4",
+          endpoint:"https://api.thegraph.com/subgraphs/name/samster91/idle-tranches",
           entities:{
             trancheInfos:[
               'id',
+              'apr',
               'timeStamp',
               'blockNumber',
               'totalSupply',
