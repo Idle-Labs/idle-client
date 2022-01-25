@@ -2816,7 +2816,7 @@ class FunctionsUtil {
 
     const results = await this.makePostRequest(subgraphConfig.endpoint,postData);
     let subgraphData = this.getArrayPath(['data','data','trancheInfos'],results);
-    const lastTimestamp = subgraphData ? parseInt(subgraphData[subgraphData.length-1].timeStamp) : null;
+    const lastTimestamp = subgraphData && subgraphData.length>0 ? parseInt(subgraphData[subgraphData.length-1].timeStamp) : null;
 
     if (lastTimestamp && lastTimestamp>startTimestamp && lastTimestamp<endTimestamp && currTime-lastTimestamp>86400){
       const subgraphData_2 = await this.getSubgraphTrancheInfo(trancheAddress,lastTimestamp+1,endTimestamp,fields);
@@ -2824,7 +2824,6 @@ class FunctionsUtil {
         subgraphData = subgraphData.concat(subgraphData_2);
       }
     }
-
     return subgraphData;
   }
   makePostRequest = async (endpoint, postData={}, error_callback = false, config = null) => {
