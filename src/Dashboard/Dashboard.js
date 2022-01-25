@@ -691,8 +691,6 @@ class Dashboard extends Component {
     
         const routeParts = [];
 
-        console.log("Section",this.state.currentSection)
-        console.log("Strategy",this.props.selectedStrategy)
         // Add section
         if (this.state.currentSection.toLowerCase() !== this.props.selectedStrategy.toLowerCase()) {
           routeParts.push(this.state.currentSection);
