@@ -687,14 +687,10 @@ class Dashboard extends Component {
 
   changeProtocolToken(selectedProtocol, selectedToken) {
     selectedProtocol = selectedProtocol.toLowerCase();
-    console.log(this.props.availableTranches)
-    console.log("P&T",selectedProtocol,selectedToken)
     if (Object.keys(this.props.availableTranches).includes(selectedProtocol)&& Object.keys(this.props.availableTranches[selectedProtocol]).includes(selectedToken)) {
     
         const routeParts = [];
 
-        console.log("Section",this.state.currentSection)
-        console.log("Strategy",this.props.selectedStrategy)
         // Add section
         if (this.state.currentSection.toLowerCase() !== this.props.selectedStrategy.toLowerCase()) {
           routeParts.push(this.state.currentSection);
