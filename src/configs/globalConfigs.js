@@ -1740,6 +1740,7 @@ const globalConfigs = {
           entities:{
             trancheInfos:[
               'id',
+              'apr',
               'timeStamp',
               'blockNumber',
               'totalSupply',
