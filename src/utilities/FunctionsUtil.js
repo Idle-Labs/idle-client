@@ -6,6 +6,7 @@ import { Text } from "rimble-ui";
 import BigNumber from 'bignumber.js';
 import IdleGovToken from './IdleGovToken';
 import { toBuffer } from "ethereumjs-util";
+import ERC20 from '../abis/tokens/ERC20.json';
 import globalConfigs from '../configs/globalConfigs';
 import ENS, { getEnsAddress } from '@ensdomains/ensjs';
 import availableTokens from '../configs/availableTokens';
@@ -331,7 +332,7 @@ class FunctionsUtil {
           ] = await Promise.all([
             this.getContractBalance(trancheConfig.name,account),
             this.getTrancheUserInfo(tokenConfig, trancheConfig, account),
-            this.getTrancheStakedBalance(trancheConfig.CDORewards.name,account),
+            this.getTrancheStakedBalance(trancheConfig.CDORewards.name,account,null,trancheConfig.functions.stakedBalance),
           ]);
 
           // console.log(protocol,token,tranche,trancheConfig.name,account,this.BNify(trancheTokenBalance).toFixed(5),this.BNify(trancheStakedBalance).toFixed(5));
@@ -962,65 +963,129 @@ class FunctionsUtil {
     const stakingRewards = await this.loadTrancheFieldRaw('stakingRewards', {}, tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, tokenConfig, trancheConfig);
     const tokensDistribution = {};
     await this.asyncForEach(Object.keys(stakingRewards), async (token) => {
-      const eventFilters = {
-        from: tokenConfig.CDO.address,
-        to: trancheConfig.CDORewards.address
-      }
-      const transfers = await this.getContractEvents(token, 'Transfer', { fromBlock: tokenConfig.blockNumber, toBlock: 'latest', filter: eventFilters });
 
-      if (transfers && transfers.length > 0) {
-        const firstHarvest = transfers.length ? transfers[0] : null;
-        const latestHarvest = transfers[transfers.length - 1];
-        const firstBlock = firstHarvest ? firstHarvest.blockNumber : tokenConfig.blockNumber;
+      let firstHarvest = null;
+      let latestHarvest = null;
+      let tokenApr = this.BNify(0);
+      let tokenApy = this.BNify(0);
+      let lastAmount = this.BNify(0);
+      let totalAmount = this.BNify(0);
+      let distributionSpeedUnit = null;
+      let tokensPerDay = this.BNify(0);
+      let tokensPerYear = this.BNify(0);
+      let tokensPerBlock = this.BNify(0);
+      let tranchePoolSize = this.BNify(0);
+      let tokensPerSecond = this.BNify(0);
+      let distributionSpeed = this.BNify(0);
+      let convertedTokensPerYear = this.BNify(0);
 
-        const govTokenConfig = this.getGlobalConfig(['govTokens', token]);
-        const DAITokenConfig = {
-          address: this.getContractByName('DAI')._address
-        };
-        const [
-          prevBlockInfo,
-          lastBlockInfo,
-          conversionRate,
-          lastBlockPoolSize
+      const govTokenConfig = this.getGlobalConfig(['stats', 'tokens', token]);
+      const DAITokenConfig = {
+        address: this.getContractByName('DAI')._address
+      };
+      const conversionRate = await this.getUniswapConversionRate(DAITokenConfig, govTokenConfig);
+
+      const rewardsRateMethod = trancheConfig.functions.rewardsRate;
+      if (rewardsRateMethod){
+        [
+          tokensPerSecond,
+          totalAmount,
+          tranchePoolSize
         ] = await Promise.all([
-          this.getBlockInfo(firstBlock),
-          this.getBlockInfo(latestHarvest.blockNumber),
-          this.getUniswapConversionRate(DAITokenConfig, govTokenConfig),
-          this.genericContractCallCached(tokenConfig.CDO.name, 'getContractValue', [], {}, latestHarvest.blockNumber)
+          this.genericContractCall(trancheConfig.CDORewards.name,rewardsRateMethod),
+          this.genericContractCall(token,'balanceOf',[trancheConfig.CDORewards.address]),
+          this.loadTrancheFieldRaw('tranchePool', {}, tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, tokenConfig, trancheConfig)
         ]);
 
-        if (prevBlockInfo && lastBlockInfo) {
-          const poolSize = this.fixTokenDecimals(lastBlockPoolSize, tokenConfig.CDO.decimals);
-          const elapsedBlocks = latestHarvest.blockNumber - firstBlock;
-          const elapsedSeconds = lastBlockInfo.timestamp - prevBlockInfo.timestamp;
+        tokensPerSecond = this.fixTokenDecimals(tokensPerSecond,trancheConfig.CDORewards.decimals);
 
-          const lastAmount = this.fixTokenDecimals(latestHarvest.returnValues.value, govTokenConfig.decimals);
-          const totalAmount = transfers.reduce((total, t) => {
-            total = total.plus(this.fixTokenDecimals(t.returnValues.value, govTokenConfig.decimals));
-            return total;
-          }, this.BNify(0));
+        tokensPerDay = this.BNify(tokensPerSecond).times(86400);
+        tokensPerYear = this.BNify(tokensPerSecond).times(this.getGlobalConfig(['network', 'secondsPerYear']));
+        tokensPerBlock = tokensPerYear.div(this.getGlobalConfig(['network', 'blocksPerYear']));
+        convertedTokensPerYear = tokensPerYear.times(conversionRate);
+        tokenApr = convertedTokensPerYear.div(tranchePoolSize);
+        tokenApy = this.apr2apy(tokenApr.div(100)).times(100);
 
-          const tokensPerBlock = totalAmount.div(elapsedBlocks);
-          const tokensPerSecond = totalAmount.div(elapsedSeconds);
-          const tokensPerDay = tokensPerSecond.times(86400);
-          const tokensPerYear = tokensPerSecond.times(this.getGlobalConfig(['network', 'secondsPerYear']));
-          const convertedTokensPerYear = tokensPerYear.times(conversionRate);
-          const tokenApr = convertedTokensPerYear.div(poolSize);
-          const tokenApy = this.apr2apy(tokenApr);
+        distributionSpeed = tokensPerDay;
+        distributionSpeedUnit = '/day';
 
-          tokensDistribution[token] = {
-            lastAmount,
-            totalAmount,
-            apr: tokenApr,
-            apy: tokenApy,
-            tokensPerDay,
-            firstHarvest,
-            tokensPerYear,
-            latestHarvest,
-            tokensPerBlock,
-            tokensPerSecond,
-            convertedTokensPerYear
-          };
+        tokensDistribution[token] = {
+          lastAmount,
+          totalAmount,
+          tokensPerDay,
+          firstHarvest,
+          apr: tokenApr,
+          apy: tokenApy,
+          tokensPerYear,
+          latestHarvest,
+          tokensPerBlock,
+          tokensPerSecond,
+          distributionSpeed,
+          distributionSpeedUnit,
+          convertedTokensPerYear
+        };
+
+        // console.log('getTrancheRewardTokensInfo',tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, tokensDistribution);
+      } else {
+        const eventFilters = {
+          from: tokenConfig.CDO.address,
+          to: trancheConfig.CDORewards.address
+        }
+        const transfers = await this.getContractEvents(token, 'Transfer', { fromBlock: tokenConfig.blockNumber, toBlock: 'latest', filter: eventFilters });
+
+        if (transfers && transfers.length > 0) {
+          const firstHarvest = transfers.length ? transfers[0] : null;
+          const latestHarvest = transfers[transfers.length - 1];
+          const firstBlock = firstHarvest ? firstHarvest.blockNumber : tokenConfig.blockNumber;
+
+          const [
+            prevBlockInfo,
+            lastBlockInfo,
+            lastBlockPoolSize
+          ] = await Promise.all([
+            this.getBlockInfo(firstBlock),
+            this.getBlockInfo(latestHarvest.blockNumber),
+            this.genericContractCallCached(tokenConfig.CDO.name, 'getContractValue', [], {}, latestHarvest.blockNumber)
+          ]);
+
+          if (prevBlockInfo && lastBlockInfo) {
+            const poolSize = this.fixTokenDecimals(lastBlockPoolSize, tokenConfig.CDO.decimals);
+            const elapsedBlocks = latestHarvest.blockNumber - firstBlock;
+            const elapsedSeconds = lastBlockInfo.timestamp - prevBlockInfo.timestamp;
+
+            lastAmount = this.fixTokenDecimals(latestHarvest.returnValues.value, govTokenConfig.decimals);
+            totalAmount = transfers.reduce((total, t) => {
+              total = total.plus(this.fixTokenDecimals(t.returnValues.value, govTokenConfig.decimals));
+              return total;
+            }, this.BNify(0));
+
+            tokensPerBlock = totalAmount.div(elapsedBlocks);
+            tokensPerSecond = totalAmount.div(elapsedSeconds);
+            tokensPerDay = tokensPerSecond.times(86400);
+            tokensPerYear = tokensPerSecond.times(this.getGlobalConfig(['network', 'secondsPerYear']));
+            convertedTokensPerYear = tokensPerYear.times(conversionRate);
+            tokenApr = convertedTokensPerYear.div(poolSize);
+            tokenApy = this.apr2apy(tokenApr.div(100)).times(100);
+
+            distributionSpeed = lastAmount;
+            distributionSpeedUnit = ' (last harvest)';
+
+            tokensDistribution[token] = {
+              lastAmount,
+              totalAmount,
+              tokensPerDay,
+              firstHarvest,
+              apr: tokenApr,
+              apy: tokenApy,
+              tokensPerYear,
+              latestHarvest,
+              tokensPerBlock,
+              tokensPerSecond,
+              distributionSpeed,
+              distributionSpeedUnit,
+              convertedTokensPerYear
+            };
+          }
         }
       }
     });
@@ -4130,7 +4195,7 @@ class FunctionsUtil {
     }
     return selectedToken;
   }
-  getTrancheStakedBalance = async (contractName,walletAddr,decimals=null) => {
+  getTrancheStakedBalance = async (contractName,walletAddr,decimals=null,methodName='usersStakes') => {
     if (!walletAddr){
       return false;
     }
@@ -4142,7 +4207,7 @@ class FunctionsUtil {
       return this.BNify(cachedData);
     }
 
-    let stakedBalance = await this.genericContractCall(contractName, 'usersStakes', [walletAddr]);
+    let stakedBalance = await this.genericContractCall(contractName, methodName, [walletAddr]);
     if (stakedBalance) {
       if (decimals) {
         stakedBalance = this.fixTokenDecimals(stakedBalance, decimals);
@@ -4155,12 +4220,21 @@ class FunctionsUtil {
     }
     return this.BNify(0);
   }
-  getTrancheStakingRewards = async (account, trancheConfig) => {
+  getTrancheStakingRewards = async (account, trancheConfig, methodName='expectedUserReward') => {
     const stakingRewards = {};
     await this.asyncForEach(trancheConfig.CDORewards.stakingRewards, async (tokenConfig) => {
       const tokenGlobalConfig = this.getGlobalConfig(['stats', 'tokens', tokenConfig.token.toUpperCase()]);
       tokenConfig = { ...tokenConfig, ...tokenGlobalConfig };
-      const tokenAmount = await this.genericContractCallCached(trancheConfig.CDORewards.name, 'expectedUserReward', [account, tokenConfig.address]);
+
+      const stakingRewardsContract = this.getContractByName(trancheConfig.CDORewards.name);
+      const methodAbi = stakingRewardsContract._jsonInterface.find(f => f.name === methodName);
+
+      const methodParams = [account];
+      if (methodAbi.inputs.length>1){
+        methodParams.push(tokenConfig.address);
+      }
+
+      const tokenAmount = await this.genericContractCallCached(trancheConfig.CDORewards.name, methodName, methodParams);
       stakingRewards[tokenConfig.token] = this.fixTokenDecimals(tokenAmount, tokenConfig.decimals);
     });
 
@@ -4300,11 +4374,11 @@ class FunctionsUtil {
         output = formatValue ? 'N/A' : this.BNify(0);
         if (stakingEnabled){
           let [
-            staked1,
-            lastPrice1
+            lastPrice1,
+            staked1
           ] = await Promise.all([
-            this.getTrancheStakedBalance(trancheConfig.CDORewards.name, account, trancheConfig.CDORewards.decimals),
-            this.loadTrancheField(`tranchePrice`, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens)
+            this.loadTrancheField(`tranchePrice`, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens),
+            this.getTrancheStakedBalance(trancheConfig.CDORewards.name, account, trancheConfig.CDORewards.decimals,trancheConfig.functions.stakedBalance)
           ]);
 
           if (staked1 && lastPrice1) {
@@ -4424,14 +4498,19 @@ class FunctionsUtil {
         }
       break;
       case 'trancheApy':
+      case 'trancheApyWithTooltip':
+        let tokensApy = {};
         let trancheApy = null;
+        let apy = this.BNify(0);
         let trancheApyDecimals = 2;
+        let baseApy = this.BNify(0);
+
         output = this.BNify(0);
         [
           rewardsTokensInfo,
           trancheApy
         ] = await Promise.all([
-          show_idle_apy ? this.getTrancheRewardTokensInfo(tokenConfig,trancheConfig) : null,
+          this.getTrancheRewardTokensInfo(tokenConfig,trancheConfig),
           this.genericContractCallCached(tokenConfig.CDO.name, 'getApr', [trancheConfig.address])
         ]);
         // console.log('trancheApy',this.props.network.required,tokenConfig.CDO.name,trancheConfig.address,trancheApy);
@@ -4443,10 +4522,23 @@ class FunctionsUtil {
             apr = apr.times(100);
           }
 
-          let apy = this.apr2apy(apr.div(100)).times(100);
+          apy = this.apr2apy(apr.div(100)).times(100);
+          baseApy = apy;
 
-          if (rewardsTokensInfo && rewardsTokensInfo.IDLE && !this.BNify(rewardsTokensInfo.IDLE.apy).isNaN()){
-            apy = apy.plus(this.BNify(rewardsTokensInfo.IDLE.apy).times(100));
+          // console.log('trancheApy',tokenConfig.token,trancheApy.toString(),apr.toString(),apy.toString());
+
+          // tokensApy[tokenConfig.token] = baseApy;
+          
+          if (rewardsTokensInfo){
+            Object.keys(rewardsTokensInfo).forEach( token => {
+              const rewardTokenInfo = rewardsTokensInfo[token];
+              if (!this.BNify(rewardTokenInfo.apy).isNaN() && (token !== 'IDLE' || show_idle_apy)){
+                const tokenApy = this.BNify(rewardTokenInfo.apy);
+                apy = apy.plus(tokenApy);
+                // console.log('trancheApy',token,rewardTokenInfo,tokenApy.toString(),apy.toString());
+                tokensApy[token] = tokenApy;
+              }
+            });
           }
 
           if (apy.gt(9999)){
@@ -4462,9 +4554,19 @@ class FunctionsUtil {
             }
           }
         } else {
+          baseApy = output;
           if (formatValue){
             output = output.toFixed(trancheApyDecimals)+'%';
           }
+        }
+
+        if (field === 'trancheApyWithTooltip'){
+          const formattedApy = output;
+          output = {
+            baseApy,
+            tokensApy,
+            formattedApy
+          };
         }
       break;
       case 'realizedApy':
@@ -4502,15 +4604,12 @@ class FunctionsUtil {
           } else {
             output = rewardsTokensInfo.IDLE.lastAmount;
             if (formatValue) {
-              output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + ` IDLE <a href="${this.getEtherscanTransactionUrl(rewardsTokensInfo.IDLE.latestHarvest.transactionHash)}" rel="nofollow noopener noreferrer" target="_blank" class="link">(last harvest)</a>`
+              output = '+'+this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + ` IDLE <a href="${this.getEtherscanTransactionUrl(rewardsTokensInfo.IDLE.latestHarvest.transactionHash)}" rel="nofollow noopener noreferrer" target="_blank" class="link">(last harvest)</a>`
             }
           }
         }
-        // else {
-        //   if (formatValue) {
-        //     output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + ` IDLE/${idleGovTokenConfig.distributionFrequency}`
-        //   }
-        // }
+
+        // console.log('loadTrancheField',field,protocol,token,tranche,rewardsTokensInfo,output);
       break;
       case 'AAIDLEDistribution':
         output = this.abbreviateNumber('1234',decimals,maxPrecision,minPrecision)+` IDLE/day`;
@@ -4566,17 +4665,23 @@ class FunctionsUtil {
           this.genericContractCall(tokenConfig.CDO.name, 'getIncentiveTokens')
         ]);
 
-        const govTokens = field === 'govTokens' ? rewardsTokens : (field === 'autoFarming' && rewardsTokens ? rewardsTokens.filter(rewardTokenAddr => incentiveTokens && !incentiveTokens.map(addr => addr.toLowerCase()).includes(rewardTokenAddr.toLowerCase())) : incentiveTokens);
+        // Pick Senior Tranche by default
+        if (!trancheConfig){
+          trancheConfig = tokenConfig.AA;
+        }
+
+        const stakingRewards = trancheConfig ? trancheConfig.CDORewards.stakingRewards.map(tokenConfig => (tokenConfig.address.toLowerCase())) : null;
+        const govTokens = field === 'stakingRewards' && stakingRewards ? stakingRewards : (field === 'govTokens' ? rewardsTokens : (field === 'autoFarming' && rewardsTokens ? rewardsTokens.filter(rewardTokenAddr => incentiveTokens && !incentiveTokens.map(addr => addr.toLowerCase()).includes(rewardTokenAddr.toLowerCase())) : incentiveTokens));
 
         if (govTokens) {
-          govTokens.forEach(govTokenAddress => {
-            const govTokenConfig = this.getGovTokenConfigByAddress(govTokenAddress);
+          govTokens.forEach(tokenAddress => {
+            const govTokenConfig = this.getTokenConfigByAddress(tokenAddress);
             // Skip reward token if globally disabled
-            if (govTokenConfig && !govTokenConfig.enabled) {
+            if (!govTokenConfig || !govTokenConfig.enabled) {
               return;
             }
             // Skip reward token if not enabled for this specific tranche
-            const stakingRewardsTokenConfig = trancheConfig ? trancheConfig.CDORewards.stakingRewards.find(tokenConfig => tokenConfig.address.toLowerCase() === govTokenAddress.toLowerCase()) : null;
+            const stakingRewardsTokenConfig = trancheConfig ? trancheConfig.CDORewards.stakingRewards.find(tokenConfig => tokenConfig.address.toLowerCase() === tokenAddress.toLowerCase()) : null;
             if (stakingRewardsTokenConfig && !stakingRewardsTokenConfig.enabled) {
               return;
             }
@@ -4593,6 +4698,8 @@ class FunctionsUtil {
             }
           });
         }
+
+        // console.log('loadTrancheField',field,protocol,token,tranche,tokenConfig,trancheConfig,stakingRewards,govTokens,output);
       break;
       default:
       break;
@@ -5546,6 +5653,17 @@ class FunctionsUtil {
       const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
       if (cachedData && !this.BNify(cachedData).isNaN()) {
         return this.BNify(cachedData);
+      }
+    }
+
+    // Init token contract if not initialized yet
+    const tokenContract = this.getContractByName(contractName);
+    if (!tokenContract){
+      const tokenConfig = this.getGlobalConfig(['stats','tokens',contractName.toUpperCase()]);
+      if (tokenConfig){
+        await this.props.initContract(contractName, tokenConfig.address, ERC20);
+      } else {
+        return false;
       }
     }
 
@@ -7374,12 +7492,30 @@ class FunctionsUtil {
 
     return this.setCachedData(cachedDataKey, govTokensBalances);
   }
+  getTokenConfigByAddress = (address) => {
+    if (!address) {
+      return false;
+    }
+    const tokensConfigs = this.getGlobalConfig(['stats','tokens']);
+    let foundToken = Object.keys(tokensConfigs).find(token => {
+      const tokenConfig = tokensConfigs[token];
+      return tokenConfig.enabled && tokenConfig.address && tokenConfig.address.toLowerCase() === address.toLowerCase();
+    });
+    let foundTokenConfig = null;
+    if (foundToken){
+      foundTokenConfig = tokensConfigs[foundToken];
+      foundTokenConfig.token = foundToken;
+    } else {
+      foundTokenConfig = this.getGovTokenConfigByAddress(address);
+    }
+    return foundTokenConfig;
+  }
   getGovTokenConfigByAddress = (address) => {
     if (!address) {
       return false;
     }
     const govTokens = this.getGlobalConfig(['govTokens']);
-    return Object.values(govTokens).find(tokenConfig => (tokenConfig.enabled && tokenConfig.address.toLowerCase() === address.toLowerCase()));
+    return Object.values(govTokens).find(tokenConfig => (tokenConfig.enabled && tokenConfig.address && tokenConfig.address.toLowerCase() === address.toLowerCase()));
   }
   getGovTokensUserTotalBalance = async (account = null, availableTokens = null, convertToken = null, checkShowBalance = true) => {
 

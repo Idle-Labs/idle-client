@@ -2,6 +2,7 @@ import ERC20 from '../contracts/ERC20.json';
 import IdleCDO from '../contracts/IdleCDO.json';
 import IdleStrategy from '../contracts/IdleStrategy.json';
 import IdleCDOTrancheRewards from '../contracts/IdleCDOTrancheRewards.json';
+import TrancheStakingRewards from '../contracts/TrancheStakingRewards.json';
 const availableTranches = {
   idle:{
     DAI:{
@@ -26,12 +27,16 @@ const availableTranches = {
         tranche:'AA',
         functions:{
           stake:'stake',
+          claim:'claim',
           unstake:'unstake',
           deposit:'depositAA',
-          withdraw:'withdrawAA'
+          withdraw:'withdrawAA',
+          stakedBalance:'usersStakes',
+          rewards:'expectedUserReward'
         },
         CDORewards:{
           decimals:18,
+          unstakeWithBalance:true,
           abi:IdleCDOTrancheRewards,
           name:'IdleCDOTrancheRewards_idleDAIYield_AA',
           address:'0x9c3bC87693c65E740d8B2d5F0820E04A61D8375B',
@@ -55,12 +60,15 @@ const availableTranches = {
         tranche:'BB',
         functions:{
           stake:'stake',
+          claim:'claim',
           unstake:'unstake',
           deposit:'depositBB',
-          withdraw:'withdrawBB'
+          withdraw:'withdrawBB',
+          stakedBalance:'usersStakes'
         },
         CDORewards:{
           decimals:18,
+          unstakeWithBalance:true,
           abi:IdleCDOTrancheRewards,
           name:'IdleCDOTrancheRewards_idleDAIYield_BB',
           address:'0x4473bc90118b18be890af42d793b5252c4dc382d',
@@ -101,12 +109,16 @@ const availableTranches = {
         tranche:'AA',
         functions:{
           stake:'stake',
+          claim:'claim',
           unstake:'unstake',
           deposit:'depositAA',
-          withdraw:'withdrawAA'
+          withdraw:'withdrawAA',
+          stakedBalance:'usersStakes',
+          rewards:'expectedUserReward'
         },
         CDORewards:{
           decimals:18,
+          unstakeWithBalance:true,
           abi:IdleCDOTrancheRewards,
           name:'IdleCDOTrancheRewards_idleFEIYield_AA',
           address:'0x8fcD21253AaA7E228531291cC6f644d13B3cF0Ba',
@@ -130,13 +142,16 @@ const availableTranches = {
         tranche:'BB',
         functions:{
           stake:'stake',
+          claim:'claim',
           unstake:'unstake',
           deposit:'depositBB',
-          withdraw:'withdrawBB'
+          withdraw:'withdrawBB',
+          stakedBalance:'usersStakes'
         },
         CDORewards:{
           decimals:18,
           stakingRewards:[],
+          unstakeWithBalance:true,
           abi:IdleCDOTrancheRewards,
           name:'IdleCDOTrancheRewards_idleFEIYield_BB',
           address:'0x0000000000000000000000000000000000000000'
@@ -167,22 +182,34 @@ const availableTranches = {
         abi:IdleStrategy,
         name:'IdleStrategy_lido_stETH'
       },
+      buyInstructions:'To get stETH token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://stake.lido.fi">Lido ETH staking</a>.',
       AA:{
         abi:ERC20,
         decimals:18,
         tranche:'AA',
         functions:{
           stake:'stake',
-          unstake:'unstake',
+          unstake:'exit',
+          rewards:'earned',
+          claim:'getReward',
           deposit:'depositAA',
-          withdraw:'withdrawAA'
+          withdraw:'withdrawAA',
+          rewardsRate:'rewardRate',
+          stakedBalance:'balanceOf'
         },
         CDORewards:{
           decimals:18,
-          stakingRewards:[],
-          abi:IdleCDOTrancheRewards,
-          name:'IdleCDOTrancheRewards_lido_stETH_AA',
-          address:'0x0000000000000000000000000000000000000000'
+          unstakeWithBalance:false,
+          stakingRewards:[
+            {
+              token:'LDO',
+              enabled:false,
+              address:'0x5a98fcbea516cf06857215779fd812ca3bef1b32'
+            }
+          ],
+          abi:TrancheStakingRewards,
+          name:'TrancheStakingRewards_lido_stETH_AA',
+          address:'0xd7c1b48877a7dfa7d51cf1144c89c0a3f134f935'
         },
         blockNumber:13776954,
         name:'AA_lido_stETH',
@@ -196,13 +223,16 @@ const availableTranches = {
         tranche:'BB',
         functions:{
           stake:'stake',
+          claim:'claim',
           unstake:'unstake',
           deposit:'depositBB',
-          withdraw:'withdrawBB'
+          withdraw:'withdrawBB',
+          stakedBalance:'usersStakes'
         },
         CDORewards:{
           decimals:18,
           stakingRewards:[],
+          unstakeWithBalance:true,
           abi:IdleCDOTrancheRewards,
           name:'IdleCDOTrancheRewards_lido_stETH_BB',
           address:'0x0000000000000000000000000000000000000000'
@@ -241,13 +271,17 @@ const availableTranches = {
         tranche:'AA',
         functions:{
           stake:'stake',
+          claim:'claim',
           unstake:'unstake',
           deposit:'depositAA',
-          withdraw:'withdrawAA'
+          withdraw:'withdrawAA',
+          stakedBalance:'usersStakes',
+          rewards:'expectedUserReward'
         },
         CDORewards:{
           decimals:18,
           stakingRewards:[],
+          unstakeWithBalance:true,
           abi:IdleCDOTrancheRewards,
           name:'IdleCDOTrancheRewards_convex_frax3crv_AA',
           address:'0x0000000000000000000000000000000000000000'
@@ -264,13 +298,16 @@ const availableTranches = {
         tranche:'BB',
         functions:{
           stake:'stake',
+          claim:'claim',
           unstake:'unstake',
           deposit:'depositBB',
-          withdraw:'withdrawBB'
+          withdraw:'withdrawBB',
+          stakedBalance:'usersStakes'
         },
         CDORewards:{
           decimals:18,
           stakingRewards:[],
+          unstakeWithBalance:true,
           abi:IdleCDOTrancheRewards,
           name:'IdleCDOTrancheRewards_convex_frax3crv_BB',
           address:'0x0000000000000000000000000000000000000000'
@@ -307,13 +344,17 @@ const availableTranches = {
         tranche:'AA',
         functions:{
           stake:'stake',
+          claim:'claim',
           unstake:'unstake',
           deposit:'depositAA',
-          withdraw:'withdrawAA'
+          withdraw:'withdrawAA',
+          stakedBalance:'usersStakes',
+          rewards:'expectedUserReward'
         },
         CDORewards:{
           decimals:18,
           stakingRewards:[],
+          unstakeWithBalance:true,
           abi:IdleCDOTrancheRewards,
           name:'IdleCDOTrancheRewards_convex_mim3crv_AA',
           address:'0x0000000000000000000000000000000000000000'
@@ -330,13 +371,16 @@ const availableTranches = {
         tranche:'BB',
         functions:{
           stake:'stake',
+          claim:'claim',
           unstake:'unstake',
           deposit:'depositBB',
-          withdraw:'withdrawBB'
+          withdraw:'withdrawBB',
+          stakedBalance:'usersStakes'
         },
         CDORewards:{
           decimals:18,
           stakingRewards:[],
+          unstakeWithBalance:true,
           abi:IdleCDOTrancheRewards,
           name:'IdleCDOTrancheRewards_convex_mim3crv_BB',
           address:'0x0000000000000000000000000000000000000000'

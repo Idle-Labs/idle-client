@@ -107,7 +107,7 @@ class ExecuteTransaction extends Component {
       params = this.props.transactionParams;
     }
 
-    if (!params){
+    if (!params || !this.props.contractName){
       this.setState((prevState) => ({
         txStatus:null,
         processing: {
@@ -117,6 +117,8 @@ class ExecuteTransaction extends Component {
       }));
       return false;
     }
+
+    console.log('ExecuteTransaction',this.props.contractName,this.props.methodName,params);
 
     if (this.props.sendRawTransaction){
       this.functionsUtil.contractMethodSendWrapper(this.props.contractName,this.props.methodName,params,callback,callbackReceipt,null,true,params);

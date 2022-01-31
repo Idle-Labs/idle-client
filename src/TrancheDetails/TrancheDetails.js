@@ -86,7 +86,7 @@ class TrancheDetails extends Component {
       // this.functionsUtil.genericContractCall(this.props.trancheConfig.CDORewards.name,'coolingPeriod'),
       // this.functionsUtil.getTrancheRewardTokensInfo(this.props.tokenConfig,this.props.trancheConfig),
       // this.functionsUtil.genericContractCall(this.props.trancheConfig.CDORewards.name,'usersStakeBlock',[this.props.account]),
-      this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals),
+      this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals,this.props.trancheConfig.functions.stakedBalance),
       this.functionsUtil.loadTrancheFieldRaw('trancheApy',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
       this.functionsUtil.loadTrancheFieldRaw('lastTranchePrice',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account)
     ]);
@@ -525,7 +525,7 @@ class TrancheDetails extends Component {
               <TrancheField
                 {...this.props}
                 fieldInfo={{
-                  name:'trancheApy',
+                  name:'trancheApyWithTooltip',
                   props:{
                     decimals:2,
                     fontSize:[2,3],
@@ -545,14 +545,6 @@ class TrancheDetails extends Component {
                     alignItems={'center'}
                     flexDirection={'row'}
                   >
-                    <Text
-                      fontSize={1}
-                      fontWeight={2}
-                      lineHeight={'1'}
-                      color={'cellText'}
-                    >
-                      +
-                    </Text>
                     <TrancheField
                       {...this.props}
                       fieldInfo={{

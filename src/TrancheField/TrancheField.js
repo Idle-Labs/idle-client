@@ -1,16 +1,10 @@
-// import { Line } from '@nivo/line';
 import CountUp from 'react-countup';
 import React, { Component } from 'react';
 import AssetField from '../AssetField/AssetField';
 import CustomField from '../CustomField/CustomField';
-// import SmartNumber from '../SmartNumber/SmartNumber';
+import TooltipText from '../TooltipText/TooltipText';
 import FunctionsUtil from '../utilities/FunctionsUtil';
-// import GenericChart from '../GenericChart/GenericChart';
-// import CustomTooltip from '../CustomTooltip/CustomTooltip';
 import { Image, Text, Loader, Button, Flex, Icon, Tooltip } from "rimble-ui";
-// import VariationNumber from '../VariationNumber/VariationNumber';
-// import AllocationChart from '../AllocationChart/AllocationChart';
-// import CustomTooltipRow from '../CustomTooltip/CustomTooltipRow';
 
 class TrancheField extends Component {
 
@@ -104,7 +98,7 @@ class TrancheField extends Component {
       switch (fieldName){
         default:
           output = await this.functionsUtil.loadTrancheField(fieldName,fieldProps,this.props.protocol,this.props.token,this.props.tranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account,addGovTokens,formatValue,addTokenName);
-          if (output && setState){
+          if (output !== undefined && setState){
             this.setStateSafe({
               ready:true,
               [fieldName]:output
@@ -118,9 +112,8 @@ class TrancheField extends Component {
   }
 
   render(){
-    const fieldInfo = this.props.fieldInfo;
     let output = null;
-
+    const fieldInfo = this.props.fieldInfo;
     const showLoader = fieldInfo.showLoader === undefined || fieldInfo.showLoader;
     const loader = showLoader ? (<Loader size="20px" />) : null;
 
@@ -296,6 +289,34 @@ class TrancheField extends Component {
           </CountUp>
         ) : loader
       break;
+      case 'trancheApyWithTooltip':
+        if (this.state[fieldInfo.name]){
+          let tooltipMessage = [`${this.props.token}: ${this.state[fieldInfo.name].baseApy.toFixed(decimals)+'%'}`];
+          Object.keys(this.state[fieldInfo.name].tokensApy).forEach( govToken => {
+            const value = this.state[fieldInfo.name].tokensApy[govToken].toFixed(decimals);
+            tooltipMessage.push(`${govToken}: ${value}%`);
+            // return `${govToken}: ${value}%`;
+          });//.join("; ");
+          tooltipMessage = tooltipMessage.join('; ');
+          const formattedApy = this.state[fieldInfo.name].formattedApy;
+          if (Object.keys(this.state[fieldInfo.name].tokensApy).length>0){
+            output = (
+              <TooltipText
+                tooltipProps={{
+                  placement:"right"
+                }}
+                text={formattedApy}
+                textProps={fieldProps}
+                message={tooltipMessage}
+              />
+            );
+          } else {
+            output = (<Text {...fieldProps} dangerouslySetInnerHTML={{__html:formattedApy}}></Text>);
+          }
+        } else {
+          output = (this.state[fieldInfo.name] === undefined ? loader : null);
+        }
+      break;
       case 'govTokens':
       case 'autoFarming':
       case 'stakingRewards':
@@ -343,9 +364,10 @@ class TrancheField extends Component {
         if (this.state[fieldInfo.name] && this.state[fieldInfo.name]._isBigNumber){
           formattedValue = this.state[fieldInfo.name].toFixed(decimals);
         }
+
         output = this.state[fieldInfo.name] ? (
           <Text {...fieldProps} dangerouslySetInnerHTML={{__html:formattedValue}}></Text>
-        ) : loader
+        ) : (this.state[fieldInfo.name] === undefined ? loader : null)
       break;
     }
     return output;

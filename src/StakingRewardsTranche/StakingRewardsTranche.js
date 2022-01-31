@@ -52,10 +52,10 @@ class StakingRewardsTranche extends Component {
       rewardTokensInfo,
       trancheStakedAmount
     ] = await Promise.all([
-      this.functionsUtil.getTrancheStakingRewards(this.props.account,this.props.trancheConfig),
+      this.functionsUtil.getTrancheStakingRewards(this.props.account,this.props.trancheConfig,this.props.trancheConfig.functions.rewards),
       this.functionsUtil.getTokenBalance(this.props.trancheConfig.name,this.props.account,false),
       this.functionsUtil.getTrancheRewardTokensInfo(this.props.tokenConfig,this.props.trancheConfig),
-      this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals)
+      this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals,this.props.trancheConfig.functions.stakedBalance)
     ]);
 
     const trancheBalanceInfo = this.props.portfolio.tranchesBalance.find( p => p.token === this.props.token && p.protocol === this.props.protocol && p.tranche === this.props.tranche );
@@ -65,8 +65,9 @@ class StakingRewardsTranche extends Component {
       const tokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',rewardToken.toUpperCase()]);
       const rewardTokenInfo = rewardTokensInfo[rewardToken];
       const tokenBalance = await this.functionsUtil.getTokenBalance(rewardToken,this.props.account);
-      let distributionSpeed = rewardTokenInfo ? rewardTokenInfo.lastAmount : null;
       const tokenAmount = !this.functionsUtil.BNify(stakingRewards[rewardToken]).isNaN() ? this.functionsUtil.BNify(stakingRewards[rewardToken]) : this.functionsUtil.BNify(0);
+
+      let distributionSpeed = rewardTokenInfo ? rewardTokenInfo.distributionSpeed : null;
       if (trancheBalanceInfo && distributionSpeed){
         distributionSpeed = distributionSpeed.times(trancheBalanceInfo.poolShare);
       }
@@ -77,7 +78,7 @@ class StakingRewardsTranche extends Component {
         reedemable:tokenAmount.toFixed(8),
         trancheBalance:this.functionsUtil.integerValue(trancheBalance),
         tokenIcon:tokenConfig.icon || `images/tokens/${rewardToken}.svg`,
-        distributionSpeed:distributionSpeed ? distributionSpeed.toFixed(8)+` ${rewardToken} (last harvest)` : this.functionsUtil.BNify(0).toFixed(8)
+        distributionSpeed:distributionSpeed ? distributionSpeed.toFixed(8)+rewardTokenInfo.distributionSpeedUnit : this.functionsUtil.BNify(0).toFixed(8)
       });
     });
 
@@ -215,8 +216,8 @@ class StakingRewardsTranche extends Component {
                       },
                       value:'Claim',
                       action:'claim',
-                      methodName:'claim',
                       callback:this.claimCallback.bind(this),
+                      methodName:this.props.trancheConfig.functions.claim,
                       contractName:this.props.trancheConfig.CDORewards.name
                     }
                   }

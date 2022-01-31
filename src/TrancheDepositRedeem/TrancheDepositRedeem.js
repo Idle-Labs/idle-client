@@ -6,14 +6,15 @@ import TooltipText from '../TooltipText/TooltipText';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import BuyModal from '../utilities/components/BuyModal';
 import TrancheField from '../TrancheField/TrancheField';
-import { Flex, Text, Image, Box, Icon } from "rimble-ui";
 import DashboardCard from '../DashboardCard/DashboardCard';
 import ShareModal from '../utilities/components/ShareModal';
 // import StatsCardSmall from '../StatsCardSmall/StatsCardSmall';
 import CardIconButton from '../CardIconButton/CardIconButton';
 import GenericSelector from '../GenericSelector/GenericSelector';
+import { Flex, Text, Image, Box, Icon, Button } from "rimble-ui";
 import SendTxWithBalance from '../SendTxWithBalance/SendTxWithBalance';
 import LimitReachedModal from '../utilities/components/LimitReachedModal';
+import ExecuteTransaction from '../ExecuteTransaction/ExecuteTransaction';
 
 class TrancheDetails extends Component {
 
@@ -98,12 +99,10 @@ class TrancheDetails extends Component {
       // this.functionsUtil.genericContractCall(this.props.trancheConfig.CDORewards.name,'coolingPeriod'),
       // this.functionsUtil.getTrancheRewardTokensInfo(this.props.tokenConfig,this.props.trancheConfig),
       // this.functionsUtil.genericContractCall(this.props.trancheConfig.CDORewards.name,'usersStakeBlock',[this.props.account]),
-      this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals),
+      this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals,this.props.trancheConfig.functions.stakedBalance),
       this.functionsUtil.loadTrancheFieldRaw('trancheApy',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
       this.functionsUtil.loadTrancheFieldRaw('trancheRealPrice',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account)
     ]);
-
-    const userHasAvailableFunds = trancheBalance && trancheBalance.gt(0);
 
     const canUnstake = true; // !stakeCoolingPeriod || this.functionsUtil.BNify(userStakeBlock).plus(stakeCoolingPeriod).lt(blockNumber);
     const canWithdraw = true; // !cdoCoolingPeriod || !latestHarvestBlock || this.functionsUtil.BNify(latestHarvestBlock).plus(cdoCoolingPeriod).lt(blockNumber);
@@ -118,13 +117,16 @@ class TrancheDetails extends Component {
       trancheConfig:this.props.tokenConfig[trancheInfo.type]
     }));
 
+    const userHasAvailableFunds = trancheBalance && trancheBalance.gt(0);
     const selectedTrancheOption = availableTranches.find( trancheInfo => trancheInfo.value === this.props.selectedTranche );
     const selectedTranche = selectedTrancheOption.value;
 
     const stakingRewards = this.props.trancheConfig.CDORewards.stakingRewards.filter( t => t.enabled );
     let stakingEnabled = stakingRewards.length>0;
-    const stakeEnabled = stakingEnabled && userHasAvailableFunds;
+    const stakeEnabled = stakingEnabled;
     const unstakeEnabled = stakedBalance && this.functionsUtil.BNify(stakedBalance).gt(0);
+
+    // console.log('stakingRewards',stakingRewards,stakingEnabled,unstakeEnabled);
 
     if (!stakingEnabled && unstakeEnabled){
       stakingEnabled = true;
@@ -288,7 +290,7 @@ class TrancheDetails extends Component {
       }
     }
 
-    // console.log('getTransactionParams',this.state.selectedAction,amount,this.functionsUtil.BNify(this.state.trancheBalance).toFixed(),selectedPercentage,methodParams);
+    console.log('getTransactionParams',this.state.selectedAction,amount,this.functionsUtil.BNify(this.state.trancheBalance).toFixed(),selectedPercentage,methodParams);
 
     return {
       methodName,
@@ -734,7 +736,7 @@ class TrancheDetails extends Component {
                         <TrancheField
                           {...this.props}
                           fieldInfo={{
-                            name:'trancheApy',
+                            name:'trancheApyWithTooltip',
                             props:{
                               decimals:2,
                               fontSize:[2,3],
@@ -754,14 +756,6 @@ class TrancheDetails extends Component {
                               flexDirection={'row'}
                               alignItems={'flex-start'}
                             >
-                              <Text
-                                fontSize={1}
-                                fontWeight={2}
-                                lineHeight={'1'}
-                                color={'cellText'}
-                              >
-                                +
-                              </Text>
                               <TrancheField
                                 {...this.props}
                                 fieldInfo={{
@@ -908,9 +902,8 @@ class TrancheDetails extends Component {
                     }}
                     caption={'Deposit'}
                     width={[1,'32%']}
-                    imageSrc={'images/deposit.png'}
                     isMobile={this.props.isMobile}
-                    // subcaption={'stake LP Tokens'}
+                    imageSrc={'images/deposit.png'}
                     imageProps={{
                       mb:[0,2],
                       height:this.props.isMobile ? '42px' : '52px'
@@ -944,7 +937,6 @@ class TrancheDetails extends Component {
                     caption={'Withdraw'}
                     imageSrc={'images/upload.svg'}
                     isMobile={this.props.isMobile}
-                    // subcaption={'withdraw LP tokens'}
                     imageProps={{
                       mb:[0,2],
                       height:this.props.isMobile ? '42px' : '52px'
@@ -1040,7 +1032,7 @@ class TrancheDetails extends Component {
                 justifyContent={'center'}
               >
                 {
-                  isStake && !this.state.stakingEnabled ? (
+                  ((isStake && !this.state.stakingEnabled) || (isStake && this.state.selectedStakeAction === 'stake' && !this.state.stakeEnabled)) ? (
                     <DashboardCard
                       cardProps={{
                         p: 2,
@@ -1065,6 +1057,57 @@ class TrancheDetails extends Component {
                         >
                           Staking is not enabled for this Tranche.
                         </Text>
+                      </Flex>
+                    </DashboardCard>
+                  ) : isStake && this.state.selectedStakeAction === 'unstake' && !this.props.trancheConfig.CDORewards.unstakeWithBalance ? (
+                    <DashboardCard
+                      cardProps={{
+                        p: 2,
+                        pb: 3,
+                        mt: 3
+                      }}
+                    >
+                      <Flex
+                        alignItems={'center'}
+                        flexDirection={'column'}
+                      >
+                        <Icon
+                          size={'1.8em'}
+                          color={'cellText'}
+                          name={'MonetizationOn'}
+                        />
+                        <Text
+                          mt={1}
+                          mb={3}
+                          fontSize={[2,3]}
+                          color={'cellText'}
+                          textAlign={'center'}
+                        >
+                          You can unstake <strong>{this.state.stakedBalance.toFixed(8)} {this.state.tokenConfig.label}</strong>.
+                        </Text>
+                        <ExecuteTransaction
+                          params={[]}
+                          {...this.props}
+                          Component={Button}
+                          parentProps={{
+                            width:1,
+                            alignItems:'center',
+                            justifyContent:'center'
+                          }}
+                          componentProps={{
+                            fontSize:3,
+                            fontWeight:3,
+                            size:'medium',
+                            width:[1,1/3],
+                            borderRadius:4,
+                            value:'Unstake',
+                            mainColor:'redeem',
+                          }}
+                          action={'Unstake'}
+                          contractName={this.state.contractInfo.name}
+                          callback={this.transactionSucceeded.bind(this)}
+                          methodName={this.props.trancheConfig.functions.unstake}
+                        />
                       </Flex>
                     </DashboardCard>
                   ) : (

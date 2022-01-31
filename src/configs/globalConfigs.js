@@ -1084,6 +1084,17 @@ const globalConfigs = {
         },
         address: '0x4e3fbd56cd56c3e72c1403e103b45db9da5b9d2b'
       },
+      LDO: {
+        label: 'LDO',
+        decimals: 18,
+        enabled: true,
+        color: {
+          hex: '#3a3a3a',
+          rgb: [58, 58, 58],
+          hsl: ['0', '0%', '23%']
+        },
+        address: '0x5a98fcbea516cf06857215779fd812ca3bef1b32'
+      },
       CRV: {
         decimals: 18,
         enabled: true,
