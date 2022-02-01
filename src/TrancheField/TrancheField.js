@@ -252,7 +252,7 @@ class TrancheField extends Component {
         );
       break;
       case 'feesCounter':
-        output = this.state.ready && this.state.feesCounter.feesStart && this.state.feesCounter.feesEnd ? (
+        output = this.state.ready && this.state.feesCounter && this.state.feesCounter.feesStart && this.state.feesCounter.feesEnd ? (
           <CountUp
             delay={0}
             decimal={'.'}
