@@ -203,7 +203,7 @@ const availableTranches = {
           stakingRewards:[
             {
               token:'LDO',
-              enabled:false,
+              enabled:true,
               address:'0x5a98fcbea516cf06857215779fd812ca3bef1b32'
             }
           ],
