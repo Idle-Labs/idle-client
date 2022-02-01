@@ -58,14 +58,13 @@ class StatsChart extends Component {
       return false;
     }
     const maxGridLines = 4;
-    const tranchesConfig = this.functionsUtil.getGlobalConfig(['tranches']);
     const apiResults = this.props.apiResults;
     const apiResults_aa=this.props.apiResults_aa;
     const apiResults_bb=this.props.apiResults_bb;
     const apiResults_unfiltered = this.props.apiResults_unfiltered;
-    const totalItems = apiResults_aa ? apiResults_aa.length : apiResults.length;
     const protocols = Object.assign([],this.props.tokenConfig.protocols);
-    // const compoundProtocol = this.props.tokenConfig.protocols.find( p => (p.name === 'compound'));
+    const totalItems = apiResults_aa ? apiResults_aa.length : apiResults.length;
+    const tranchesConfig = this.functionsUtil.getGlobalConfig(['tranches']);
 
     const versionInfo = globalConfigs.stats.versions[this.props.idleVersion];
 
@@ -85,13 +84,16 @@ class StatsChart extends Component {
     let firstIdleBlock = null;
     let axisBottomMaxValues = 12;
 
+    const seniorTrancheName = this.functionsUtil.capitalize(tranchesConfig.AA.baseName);
+    const juniorTrancheName = this.functionsUtil.capitalize(tranchesConfig.BB.baseName);
+
     switch (this.props.chartMode){
 
       case 'APR_TRANCHE':
 
         maxChartValue = 0;
         chartData.push({
-          id:this.props.tokenConfig.AA.label,
+          id:`APR ${seniorTrancheName}`,
           color:tranchesConfig.AA.color.hex,
           data:apiResults_aa.map((d,i) => {
             const x = moment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
@@ -101,7 +103,7 @@ class StatsChart extends Component {
           })
         });
         chartData.push({
-          id:this.props.tokenConfig.BB.label,
+          id:`APR ${juniorTrancheName}`,
           color:tranchesConfig.BB.color.hex,
           data:apiResults_bb.map((d,i) => {
             const x = moment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
@@ -224,7 +226,7 @@ class StatsChart extends Component {
           pointLabelYOffset:-12,
           legends:[
             {
-              itemWidth: this.props.isMobile ? 70 : 80,
+              itemWidth: this.props.isMobile ? 110 : 120,
               itemHeight: 18,
               translateX: this.props.isMobile ? -35 : 0,
               translateY: this.props.isMobile ? 40 : 65,
@@ -382,13 +384,13 @@ class StatsChart extends Component {
 
         
         chartData.push({
-          id:this.props.tokenConfig.AA.label,
+          id:`Performance ${seniorTrancheName}`,
           color: tranchesConfig.AA.color.hex,
           data: chartDataAA
         });
 
         chartData.push({
-          id:this.props.tokenConfig.BB.label,
+          id:`Performance ${juniorTrancheName}`,
           color: tranchesConfig.BB.color.hex,
           data: chartDataBB
         });
@@ -1008,7 +1010,7 @@ class StatsChart extends Component {
 
         maxChartValue = 0;
         chartData.push({
-          id:'AUM Senior',
+          id:`AUM ${seniorTrancheName}`,
           color: tranchesConfig.AA.color.hex,
           data: apiResults_aa.map((d,i) => {
 
@@ -1022,7 +1024,7 @@ class StatsChart extends Component {
           })
         });
         chartData.push({
-          id:'AUM Junior',
+          id:`AUM ${juniorTrancheName}`,
           color: tranchesConfig.BB.color.hex,
           data: apiResults_bb.map((d,i) => {
 
@@ -1101,8 +1103,8 @@ class StatsChart extends Component {
           pointLabelYOffset:-12,
           legends:[
             {
-              itemWidth: this.props.isMobile ? 70 : 80,
               itemHeight: 18,
+              itemWidth: this.props.isMobile ? 90 : 100,
               translateX: this.props.isMobile ? -35 : 0,
               translateY: this.props.isMobile ? 40 : 65,
               symbolSize: 10,
@@ -1139,9 +1141,9 @@ class StatsChart extends Component {
             },
             legends:{
               text:{
-                fontSize: this.props.isMobile ? 12: 14,
-                fill:this.props.theme.colors.legend,
                 fontWeight:500,
+                fill:this.props.theme.colors.legend,
+                fontSize: this.props.isMobile ? 12: 14,
                 fontFamily: this.props.theme.fonts.sansSerif
               }
             }
@@ -1163,9 +1165,9 @@ class StatsChart extends Component {
                     return (
                       <CustomTooltipRow
                         key={point.id}
-                        label={protocolName}
                         color={point.color}
-                        value={`$${contractValue}`}
+                        label={protocolName}
+                        value={`${contractValue} ${this.props.selectedToken}`}
                       />
                     );
                   })
@@ -1177,164 +1179,164 @@ class StatsChart extends Component {
         break;
         case'COVERAGE_TRANCHE':
 
-        maxChartValue = 0;
-        chartData.push({
-          id:'COVERAGE',
-          color: tranchesConfig.AA.color.hex,
-          data: apiResults_aa.map((d,i) => {
-            const aum_aa = this.functionsUtil.fixTokenDecimals(d.contractValue,18);
-            const x = moment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
-            const aum_bb=apiResults_bb[i]?(this.functionsUtil.fixTokenDecimals(apiResults_bb[i].contractValue,18)):this.functionsUtil.BNify(0);
-            const ratio=aum_aa>0?aum_bb.div(aum_aa):1;
-            const coverage=ratio>1?100:ratio*100
-            const y = parseFloat(coverage.toString());
-            maxChartValue = Math.max(maxChartValue,y);
+          maxChartValue = 0;
+          chartData.push({
+            id:'Coverage',
+            color: tranchesConfig.AA.color.hex,
+            data: apiResults_aa.map((d,i) => {
+              const aum_aa = this.functionsUtil.fixTokenDecimals(d.contractValue,18);
+              const x = moment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
+              const aum_bb=apiResults_bb[i]?(this.functionsUtil.fixTokenDecimals(apiResults_bb[i].contractValue,18)):this.functionsUtil.BNify(0);
+              const ratio=aum_aa>0?aum_bb.div(aum_aa):1;
+              const coverage=ratio>1?100:ratio*100
+              const y = parseFloat(coverage.toString());
+              maxChartValue = Math.max(maxChartValue,y);
 
-            return { x,y };
-          })
-        });
+              return { x,y };
+            })
+          });
 
-        // Add allocation
+          // Add allocation
 
-        // Set chart type
-        chartType = Line;
+          // Set chart type
+          chartType = Line;
 
-        gridYStep = parseFloat(maxChartValue/maxGridLines);
-        gridYValues = [0];
-        for (let i=1;i<=5;i++){
-          gridYValues.push(i*gridYStep);
-        }
+          gridYStep = parseFloat(maxChartValue/maxGridLines);
+          gridYValues = [0];
+          for (let i=1;i<=5;i++){
+            gridYValues.push(i*gridYStep);
+          }
 
-        axisBottomIndex = 0;
-        axisBottomMaxValues = 6;
-        daysCount = moment(chartData[0].data[chartData[0].data.length-1].x,"YYYY/MM/DD HH:mm").diff(moment(chartData[0].data[0].x,"YYYY/MM/DD HH:mm"),'days');
-        daysFrequency = Math.max(1,Math.ceil(daysCount/axisBottomMaxValues));
+          axisBottomIndex = 0;
+          axisBottomMaxValues = 6;
+          daysCount = moment(chartData[0].data[chartData[0].data.length-1].x,"YYYY/MM/DD HH:mm").diff(moment(chartData[0].data[0].x,"YYYY/MM/DD HH:mm"),'days');
+          daysFrequency = Math.max(1,Math.ceil(daysCount/axisBottomMaxValues));
 
-        chartProps = {
-          xScale:{
-            type: 'time',
-            format: '%Y/%m/%d %H:%M',
-            // precision: 'hour',
-          },
-          xFormat:'time:%b %d %H:%M',
-          yFormat:v => parseFloat(v).toFixed(3)+'%',
-          yScale:{
-            type: 'linear',
-            stacked: false
-          },
-          axisLeft:{
-            legend: '',
-            tickSize: 0,
-            orient: 'left',
-            tickPadding: 10,
-            tickRotation: 0,
-            legendOffset: -70,
-            tickValues:gridYValues,
-            legendPosition: 'middle',
-            format: v => this.functionsUtil.abbreviateNumber(v,v<1 ? 3 :0),
-          },
-          axisBottom: this.props.isMobile ? null : {
-            legend: '',
-            tickSize: 0,
-            format: (value) => {
-              if (axisBottomIndex++ % daysFrequency === 0){
-                return moment(value,'YYYY/MM/DD HH:mm').format('MMM DD')
-              }
+          chartProps = {
+            xScale:{
+              type: 'time',
+              format: '%Y/%m/%d %H:%M',
+              // precision: 'hour',
             },
-            tickPadding: 15,
-            orient: 'bottom',
-            legendOffset: 0,
-            tickValues: 'every day',
-            legendPosition: 'middle'
-          },
-          gridYValues,
-          pointSize:0,
-          useMesh:true,
-          animate:false,
-          pointLabel:"y",
-          curve:'linear',
-          enableArea:false,
-          enableSlices:'x',
-          enableGridX:false,
-          enableGridY:true,
-          pointBorderWidth:1,
-          colors:d => d.color,
-          pointLabelYOffset:-12,
-          legends:[
-            {
-              itemWidth: this.props.isMobile ? 70 : 80,
-              itemHeight: 18,
-              translateX: this.props.isMobile ? -35 : 0,
-              translateY: this.props.isMobile ? 40 : 65,
-              symbolSize: 10,
-              itemsSpacing: 5,
-              direction: 'row',
-              anchor: 'bottom-left',
-              symbolShape: 'circle',
-              itemTextColor: this.props.theme.colors.legend,
-              effects: [
-                {
-                  on: 'hover',
-                  style: {
-                    itemTextColor: this.props.themeMode === 'light' ? '#000' : '#fff'
+            xFormat:'time:%b %d %H:%M',
+            yFormat:v => parseFloat(v).toFixed(3)+'%',
+            yScale:{
+              type: 'linear',
+              stacked: false
+            },
+            axisLeft:{
+              legend: '',
+              tickSize: 0,
+              orient: 'left',
+              tickPadding: 10,
+              tickRotation: 0,
+              legendOffset: -70,
+              tickValues:gridYValues,
+              legendPosition: 'middle',
+              format: v => this.functionsUtil.abbreviateNumber(v,v<1 ? 3 :0),
+            },
+            axisBottom: this.props.isMobile ? null : {
+              legend: '',
+              tickSize: 0,
+              format: (value) => {
+                if (axisBottomIndex++ % daysFrequency === 0){
+                  return moment(value,'YYYY/MM/DD HH:mm').format('MMM DD')
+                }
+              },
+              tickPadding: 15,
+              orient: 'bottom',
+              legendOffset: 0,
+              tickValues: 'every day',
+              legendPosition: 'middle'
+            },
+            gridYValues,
+            pointSize:0,
+            useMesh:true,
+            animate:false,
+            pointLabel:"y",
+            curve:'linear',
+            enableArea:false,
+            enableSlices:'x',
+            enableGridX:false,
+            enableGridY:true,
+            pointBorderWidth:1,
+            colors:d => d.color,
+            pointLabelYOffset:-12,
+            legends:[
+              {
+                itemWidth: this.props.isMobile ? 70 : 80,
+                itemHeight: 18,
+                translateX: this.props.isMobile ? -35 : 0,
+                translateY: this.props.isMobile ? 40 : 65,
+                symbolSize: 10,
+                itemsSpacing: 5,
+                direction: 'row',
+                anchor: 'bottom-left',
+                symbolShape: 'circle',
+                itemTextColor: this.props.theme.colors.legend,
+                effects: [
+                  {
+                    on: 'hover',
+                    style: {
+                      itemTextColor: this.props.themeMode === 'light' ? '#000' : '#fff'
+                    }
+                  }
+                ]
+              }
+            ],
+            theme:{
+              axis: {
+                ticks: {
+                  text: {
+                    fontSize: this.props.isMobile ? 12: 14,
+                    fontWeight:600,
+                    fill:this.props.theme.colors.legend,
+                    fontFamily: this.props.theme.fonts.sansSerif
                   }
                 }
-              ]
-            }
-          ],
-          theme:{
-            axis: {
-              ticks: {
-                text: {
+              },
+              grid: {
+                line: {
+                  stroke: this.props.theme.colors.lineChartStroke, strokeDasharray: '10 6'
+                }
+              },
+              legends:{
+                text:{
                   fontSize: this.props.isMobile ? 12: 14,
-                  fontWeight:600,
                   fill:this.props.theme.colors.legend,
+                  fontWeight:500,
                   fontFamily: this.props.theme.fonts.sansSerif
                 }
               }
             },
-            grid: {
-              line: {
-                stroke: this.props.theme.colors.lineChartStroke, strokeDasharray: '10 6'
-              }
-            },
-            legends:{
-              text:{
-                fontSize: this.props.isMobile ? 12: 14,
-                fill:this.props.theme.colors.legend,
-                fontWeight:500,
-                fontFamily: this.props.theme.fonts.sansSerif
-              }
+            pointColor:{ from: 'color', modifiers: []},
+            margin: this.props.isMobile ? { top: 20, right: 20, bottom: 40, left: 65 } : { top: 20, right: 40, bottom: 70, left: 70 },
+            sliceTooltip:(slideData) => {
+              const { slice } = slideData;
+              const point = slice.points[0];
+              return (
+                <CustomTooltip
+                  point={point}
+                >
+                  {
+                  typeof slice.points === 'object' && slice.points.length &&
+                    slice.points.map(point => {
+                      const protocolName = point.serieId;
+                      const contractValue = point.data.yFormatted;
+                      return (
+                        <CustomTooltipRow
+                          key={point.id}
+                          label={protocolName}
+                          color={point.color}
+                          value={`${contractValue}`}
+                        />
+                      );
+                    })
+                  }
+                </CustomTooltip>
+              );
             }
-          },
-          pointColor:{ from: 'color', modifiers: []},
-          margin: this.props.isMobile ? { top: 20, right: 20, bottom: 40, left: 65 } : { top: 20, right: 40, bottom: 70, left: 70 },
-          sliceTooltip:(slideData) => {
-            const { slice } = slideData;
-            const point = slice.points[0];
-            return (
-              <CustomTooltip
-                point={point}
-              >
-                {
-                typeof slice.points === 'object' && slice.points.length &&
-                  slice.points.map(point => {
-                    const protocolName = point.serieId;
-                    const contractValue = point.data.yFormatted;
-                    return (
-                      <CustomTooltipRow
-                        key={point.id}
-                        label={protocolName}
-                        color={point.color}
-                        value={`${contractValue}`}
-                      />
-                    );
-                  })
-                }
-              </CustomTooltip>
-            );
-          }
-        };
+          };
         break;
       /*
       case 'AUM_ALL':
