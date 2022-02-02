@@ -997,6 +997,7 @@ class FunctionsUtil {
           this.loadTrancheFieldRaw('tranchePool', {}, tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, tokenConfig, trancheConfig)
         ]);
 
+        tranchePoolSize = await this.convertTrancheTokenBalance(tranchePoolSize,tokenConfig);
         tokensPerSecond = this.fixTokenDecimals(tokensPerSecond,trancheConfig.CDORewards.decimals);
 
         tokensPerDay = this.BNify(tokensPerSecond).times(86400);
@@ -1004,7 +1005,7 @@ class FunctionsUtil {
         tokensPerBlock = tokensPerYear.div(this.getGlobalConfig(['network', 'blocksPerYear']));
         convertedTokensPerYear = tokensPerYear.times(conversionRate);
         tokenApr = convertedTokensPerYear.div(tranchePoolSize);
-        tokenApy = this.apr2apy(tokenApr.div(100)).times(100);
+        tokenApy = this.apr2apy(tokenApr).times(100);
 
         distributionSpeed = tokensPerDay;
         distributionSpeedUnit = '/day';
@@ -1049,7 +1050,7 @@ class FunctionsUtil {
           ]);
 
           if (prevBlockInfo && lastBlockInfo) {
-            const poolSize = this.fixTokenDecimals(lastBlockPoolSize, tokenConfig.CDO.decimals);
+            let poolSize = this.fixTokenDecimals(lastBlockPoolSize, tokenConfig.CDO.decimals);
             const elapsedBlocks = latestHarvest.blockNumber - firstBlock;
             const elapsedSeconds = lastBlockInfo.timestamp - prevBlockInfo.timestamp;
 
@@ -1059,13 +1060,15 @@ class FunctionsUtil {
               return total;
             }, this.BNify(0));
 
+            poolSize = await this.convertTrancheTokenBalance(poolSize,tokenConfig);
+
             tokensPerBlock = totalAmount.div(elapsedBlocks);
             tokensPerSecond = totalAmount.div(elapsedSeconds);
             tokensPerDay = tokensPerSecond.times(86400);
             tokensPerYear = tokensPerSecond.times(this.getGlobalConfig(['network', 'secondsPerYear']));
             convertedTokensPerYear = tokensPerYear.times(conversionRate);
             tokenApr = convertedTokensPerYear.div(poolSize);
-            tokenApy = this.apr2apy(tokenApr.div(100)).times(100);
+            tokenApy = this.apr2apy(tokenApr).times(100);
 
             distributionSpeed = lastAmount;
             distributionSpeedUnit = ' (last harvest)';
