@@ -578,7 +578,7 @@ class StrategyBox extends Component {
                   </Text>
                   <Tooltip
                     placement={'bottom'}
-                    message={this.functionsUtil.getGlobalConfig(['tranches','AA','description','deposit'])}
+                    message={this.functionsUtil.getGlobalConfig(['tranches','AA','description','apy'])}
                   >
                     <Icon
                       ml={1}
@@ -655,7 +655,7 @@ class StrategyBox extends Component {
                   </Text>
                   <Tooltip
                     placement={'bottom'}
-                    message={this.functionsUtil.getGlobalConfig(['tranches','BB','description','deposit'])}
+                    message={this.functionsUtil.getGlobalConfig(['tranches','BB','description','apy'])}
                   >
                     <Icon
                       ml={1}
@@ -734,19 +734,39 @@ class StrategyBox extends Component {
                 />
                 */
               }
-              <AssetField
-                fieldInfo={{
-                  name:'aprChart'
-                }}
-                chartProps={{
-                  lineWidth:2
-                }}
-                {...this.props}
-                tokenConfig={tokenConfig}
-                network={this.state.network}
-                token={this.state.selectedToken}
-                rowId={`${this.props.strategy}_performance_chart`}
-              />
+              {
+                strategyInfo.type === 'strategy' ? (
+                  <AssetField
+                    fieldInfo={{
+                      name:'aprChart'
+                    }}
+                    chartProps={{
+                      lineWidth:2
+                    }}
+                    {...this.props}
+                    tokenConfig={tokenConfig}
+                    network={this.state.network}
+                    token={this.state.selectedToken}
+                    rowId={`${this.props.strategy}_performance_chart`}
+                  />
+                ) : strategyInfo.type === 'tranche' && (
+                  <TrancheField
+                    fieldInfo={{
+                      name:'aprChart'
+                    }}
+                    chartProps={{
+                      lineWidth:2
+                    }}
+                    {...this.props}
+                    tokenConfig={tokenConfig}
+                    token={strategyInfo.token}
+                    network={this.state.network}
+                    tranche={strategyInfo.tranche}
+                    protocol={strategyInfo.protocol}
+                    rowId={`${this.props.strategy}_performance_chart`}
+                  />
+                )
+              }
             </Flex>
         }
         <Flex

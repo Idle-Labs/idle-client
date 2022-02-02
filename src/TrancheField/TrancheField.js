@@ -1,9 +1,13 @@
+import { Line } from '@nivo/line';
 import CountUp from 'react-countup';
 import React, { Component } from 'react';
 import AssetField from '../AssetField/AssetField';
 import CustomField from '../CustomField/CustomField';
 import TooltipText from '../TooltipText/TooltipText';
 import FunctionsUtil from '../utilities/FunctionsUtil';
+import GenericChart from '../GenericChart/GenericChart';
+import CustomTooltip from '../CustomTooltip/CustomTooltip';
+import CustomTooltipRow from '../CustomTooltip/CustomTooltipRow';
 import { Image, Text, Loader, Button, Flex, Icon, Tooltip } from "rimble-ui";
 
 class TrancheField extends Component {
@@ -93,9 +97,172 @@ class TrancheField extends Component {
     const formatValue = typeof this.props.formatValue !== 'undefined' ? this.props.formatValue : true;
     const addTokenName = typeof this.props.addTokenName !== 'undefined' ? this.props.addTokenName : true;
 
+    const tranchesConfig = this.functionsUtil.getGlobalConfig(['tranches']);
+    const seniorTrancheName = this.functionsUtil.capitalize(tranchesConfig.AA.baseName);
+    const juniorTrancheName = this.functionsUtil.capitalize(tranchesConfig.BB.baseName);
+
     let output = null;
     if (this.props.token){
       switch (fieldName){
+        case 'aprChart':
+          // Set start timestamp for v3 tokens
+          const endTimestamp = parseInt(Date.now()/1000);
+          const startTimestamp = endTimestamp-(7*24*60*60);
+
+          // Check for cached data
+          let aprChartData = [];
+          const cachedDataKey = `trancheAprChart_${this.props.tokenConfig.address}`;
+          const cachedData = this.functionsUtil.getCachedData(cachedDataKey);
+
+          if (cachedData !== null && cachedData[0] && cachedData[0].data && cachedData[0].data.length>0){
+            aprChartData = cachedData;
+          } else {
+            const [
+              apiResults_aa,
+              apiResults_bb
+            ] = await Promise.all([
+              this.functionsUtil.getSubgraphTrancheInfo(this.props.tokenConfig.AA.address,startTimestamp,endTimestamp),
+              this.functionsUtil.getSubgraphTrancheInfo(this.props.tokenConfig.BB.address,startTimestamp,endTimestamp)
+            ]);
+
+            let itemIndex = 0;
+            let maxChartValue = 0;
+            const totalItems_aa = apiResults_aa.length;
+            const totalItems_bb = apiResults_bb.length;
+
+            aprChartData.push({
+              color:tranchesConfig.AA.color.hex,
+              id:`${this.props.token} ${seniorTrancheName} APY`,
+              data:apiResults_aa.map((d,i) => {
+                const x = this.functionsUtil.strToMoment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
+                const y = parseFloat(this.functionsUtil.fixTokenDecimals(d.apr,18));
+                maxChartValue = Math.max(maxChartValue,y);
+                const itemPos = Math.floor(itemIndex++/totalItems_aa*100);
+                return { x, y, itemPos };
+              })
+            });
+
+            itemIndex = 0;
+            aprChartData.push({
+              color:tranchesConfig.BB.color.hex,
+              id:`${this.props.token} ${juniorTrancheName} APY`,
+              data:apiResults_bb.map((d,i) => {
+                const x = this.functionsUtil.strToMoment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
+                const y = parseFloat(this.functionsUtil.fixTokenDecimals(d.apr,18));
+                maxChartValue = Math.max(maxChartValue,y);
+                const itemPos = Math.floor(itemIndex++/totalItems_bb*100);
+                return { x, y, itemPos };
+              })
+            });
+
+            if (aprChartData.length && aprChartData[0].data.length>0){
+              this.functionsUtil.setCachedData(cachedDataKey,aprChartData);
+            }
+          }
+
+          // Add same value
+          if (aprChartData[0].data.length === 1){
+            const newPoint = Object.assign({},aprChartData[0].data[0]);
+            newPoint.x = this.functionsUtil.strToMoment(newPoint,"YYYY/MM/DD HH:mm").add(1,'hours').format("YYYY/MM/DD HH:mm")
+            aprChartData[0].data.push(newPoint);
+          }
+
+          let aprChartWidth = 0;
+          let aprChartHeight = 0;
+
+          const resizeAprChart = () => {
+            const aprChartRowElement = this.props.parentId && document.getElementById(this.props.parentId) ? document.getElementById(this.props.parentId) : document.getElementById(this.props.rowId);
+            if (aprChartRowElement){
+              const $aprChartRowElement = window.jQuery(aprChartRowElement);
+              aprChartWidth = $aprChartRowElement.innerWidth()-parseFloat($aprChartRowElement.css('padding-right'))-parseFloat($aprChartRowElement.css('padding-left'));
+              aprChartHeight = $aprChartRowElement.innerHeight();
+              if (aprChartWidth !== this.state.aprChartWidth || !this.state.aprChartHeight){
+                this.setStateSafe({
+                  aprChartWidth,
+                  aprChartHeight: this.state.aprChartHeight ? this.state.aprChartHeight : aprChartHeight
+                });
+              }
+            }
+          }
+
+          // Set chart width and Height and set listener
+          resizeAprChart();
+          window.removeEventListener('resize', resizeAprChart.bind(this));
+          window.addEventListener('resize', resizeAprChart.bind(this));
+
+          // Set chart type
+          const aprChartType = Line;
+
+          const aprChartProps = {
+            pointSize:0,
+            lineWidth:1,
+            useMesh:false,
+            axisLeft:null,
+            animate:false,
+            axisBottom:null,
+            enableArea:true,
+            areaOpacity:0.1,
+            curve:'monotoneX',
+            enableGridX:false,
+            enableGridY:false,
+            pointBorderWidth:2,
+            isInteractive:true,
+            colors:d => d.color,
+            enableSlices:this.props.isMobile ? false : 'x',
+            yFormat:value => parseFloat(value).toFixed(2)+'%',
+            fill:[
+              { match: { id: this.props.token } , id: 'gradientArea' },
+            ],
+            margin: { top: 10, right: 0, bottom: 0, left: 0 },
+            sliceTooltip:(slideData) => {
+              const { slice } = slideData;
+              const point = slice.points[0];
+              return (
+                <CustomTooltip
+                  point={point}
+                >
+                  {
+                  typeof slice.points === 'object' && slice.points.length &&
+                    slice.points.map(point => {
+                      const protocolName = point.serieId;
+                      const protocolEarning = point.data.yFormatted;
+                      // const protocolApy = point.data.apy;
+                      return (
+                        <CustomTooltipRow
+                          key={point.id}
+                          color={point.color}
+                          label={protocolName}
+                          value={protocolEarning}
+                        />
+                      );
+                    })
+                  }
+                </CustomTooltip>
+              );
+            }
+          };
+
+          if (this.props.chartProps){
+            // Replace props
+            if (this.props.chartProps && Object.keys(this.props.chartProps).length){
+              Object.keys(this.props.chartProps).forEach(p => {
+                aprChartProps[p] = this.props.chartProps[p];
+              });
+            }
+          }
+
+          if (setState){
+            this.setStateSafe({
+              ready:true,
+              aprChartType,
+              aprChartData,
+              aprChartProps,
+              aprChartWidth,
+              aprChartHeight
+            });
+          }
+          output = aprChartData;
+        break;
         default:
           output = await this.functionsUtil.loadTrancheField(fieldName,fieldProps,this.props.protocol,this.props.token,this.props.tranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account,addGovTokens,formatValue,addTokenName);
           if (output !== undefined && setState){
@@ -316,6 +483,17 @@ class TrancheField extends Component {
         } else {
           output = (this.state[fieldInfo.name] === undefined ? loader : null);
         }
+      break;
+      case 'aprChart':
+        output = this.state.aprChartData ? (
+          <GenericChart
+            {...this.state.aprChartProps}
+            type={this.state.aprChartType}
+            data={this.state.aprChartData}
+            width={this.state.aprChartWidth}
+            height={this.state.aprChartHeight}
+          />
+        ) : loader
       break;
       case 'govTokens':
       case 'autoFarming':

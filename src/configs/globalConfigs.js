@@ -684,6 +684,7 @@ const globalConfigs = {
         cantWithdraw: "To withdraw your funds you just need to wait at least 1 block from the latest harvest transaction.",
         long: "Senior Tranches provide a shielded access to optimized DeFi yields, thanks to an integrated funds' coverage given by Junior Tranches",
         deposit: "By depositing in the Senior Tranche in case of Smart-Contract breach your funds are covered by the funds deposited in the Junior Tranche.",
+        apy:"APY is based on (I) the current yield advertised by the underlying protocol, (II) the current distribution rate of governance tokens provided by underlying lending protocols (III) additional APY derived from staking",
       }
     },
     BB: {
@@ -713,6 +714,7 @@ const globalConfigs = {
         cantWithdraw: "To withdraw your funds you just need to wait at least 1 block from the latest harvest transaction.",
         long: "The Junior Tranches provide amplified optimized DeFi yields by carrying a higher grade of risks and protecting Senior Tranches",
         deposit: "By depositing in the Junior Tranche in case of Smart-Contract breach your funds will be used to cover eventual losses on the Senior Tranche.",
+        apy:"APY is based on (I) the current yield advertised by the underlying protocol, (II) the current distribution rate of governance tokens provided by underlying lending protocols (III) additional APY derived from staking",
       }
     }
   },
@@ -784,11 +786,11 @@ const globalConfigs = {
   landingStrategies: {
     tranches: {
       networkId: 1,
-      token: "FEI",
       visible: true,
+      token: "stETH",
       type: "tranche",
       enabledEnvs: [],
-      protocol: "idle",
+      protocol: "lido",
       color: "#f32121",
       comingSoon: false,
       addGovTokens: true,
