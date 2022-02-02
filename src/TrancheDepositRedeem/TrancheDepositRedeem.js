@@ -20,10 +20,13 @@ class TrancheDetails extends Component {
 
   state = {
     infoText:null,
+    modalApy:null,
+    trancheAPY:null,
     canUnstake:null,
     canWithdraw:null,
     activeModal:null,
     actionLabel:null,
+    modalAction:null,
     balanceProp:null,
     tokenConfig:null,
     contractInfo:null,
@@ -32,6 +35,7 @@ class TrancheDetails extends Component {
     stakeEnabled:true,
     stakedBalance:null,
     unstakeEnabled:true,
+    trancheBaseApy:null,
     trancheBalance:null,
     stakingEnabled:true,
     approveEnabled:null,
@@ -89,6 +93,7 @@ class TrancheDetails extends Component {
       // userStakeBlock,
       stakedBalance,
       trancheAPY,
+      trancheBaseApy,
       tranchePrice
     ] = await Promise.all([
       // this.functionsUtil.getBlockNumber(),
@@ -101,6 +106,7 @@ class TrancheDetails extends Component {
       // this.functionsUtil.genericContractCall(this.props.trancheConfig.CDORewards.name,'usersStakeBlock',[this.props.account]),
       this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals,this.props.trancheConfig.functions.stakedBalance),
       this.functionsUtil.loadTrancheFieldRaw('trancheApy',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
+      this.functionsUtil.loadTrancheFieldRaw('trancheBaseApy',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
       this.functionsUtil.loadTrancheFieldRaw('trancheRealPrice',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account)
     ]);
 
@@ -145,6 +151,7 @@ class TrancheDetails extends Component {
       stakeEnabled,
       tranchePrice,
       stakedBalance,
+      trancheBaseApy,
       stakingEnabled,
       trancheBalance,
       unstakeEnabled,
@@ -318,7 +325,11 @@ class TrancheDetails extends Component {
       case 'stake':
       case 'deposit':
         if (this.state.selectedAction === 'deposit' || this.state.selectedStakeAction === 'stake'){
+          const modalAction = this.state.selectedAction === 'deposit' ? 'deposited' : 'staked';
+          const modalApy = this.state.selectedAction === 'deposit' ? this.state.trancheBaseApy : this.state.trancheAPY;
           this.setState({
+            modalApy,
+            modalAction,
             activeModal:'share'
           });
         }
@@ -1257,8 +1268,8 @@ class TrancheDetails extends Component {
                 closeModal={this.resetModal}
                 tokenName={this.props.selectedToken}
                 isOpen={this.state.activeModal === 'share'}
-                text={`You have successfully deposited in Idle!<br />Enjoy <strong>${this.state.trancheAPY ? this.state.trancheAPY.toFixed(2) : '0.00'}% APY</strong> on your <strong>${this.props.selectedToken}</strong>!`}
-                tweet={`I'm earning ${this.state.trancheAPY ? this.state.trancheAPY.toFixed(2) : '0.00'}% APY on my ${this.props.selectedToken} with @idlefinance tranches! Go to ${this.functionsUtil.getGlobalConfig(['baseURL'])}${this.props.selectedSection.route} and start earning now from your idle tokens!`}
+                text={`You have successfully ${this.state.modalAction} in Idle!<br />Enjoy <strong>${this.state.modalApy ? this.state.modalApy.toFixed(2) : '0.00'}% APY</strong> on your <strong>${this.props.selectedToken}</strong>!`}
+                tweet={`I'm earning ${this.state.modalApy ? this.state.modalApy.toFixed(2) : '0.00'}% APY on my ${this.props.selectedToken} with @idlefinance tranches! Go to ${this.functionsUtil.getGlobalConfig(['baseURL'])}${this.props.selectedSection.route} and start earning now from your idle tokens!`}
               />
             </Flex>
           )
