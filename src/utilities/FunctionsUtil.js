@@ -4434,14 +4434,12 @@ class FunctionsUtil {
           deposited3
         ] = await Promise.all([
           this.loadTrancheFieldRaw(`earnings`, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens),
-          this.loadTrancheFieldRaw(`trancheApy`, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens),
+          this.loadTrancheFieldRaw(`trancheBaseApy`, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens),
           this.loadTrancheFieldRaw(`trancheDeposited`, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens),
         ]);
 
-
         if (deposited3 && earningsStart && trancheApy2) {
           const earningsEnd = deposited3.gt(0) ? deposited3.times(trancheApy2.div(100)).plus(earningsStart) : 0;
-
           output = {
             earningsEnd,
             earningsStart
@@ -4458,10 +4456,8 @@ class FunctionsUtil {
         ]);
 
         if (trancheFee && earningsCounter) {
-          const feesStart = earningsCounter.earningsStart.times(trancheFee);
           const feesEnd = earningsCounter.earningsEnd.times(trancheFee);
-
-          // console.log('feesCounter',feesStart.toString(),feesEnd.toString());
+          const feesStart = earningsCounter.earningsStart.times(trancheFee);
 
           output = {
             feesEnd,
@@ -4501,6 +4497,7 @@ class FunctionsUtil {
         }
       break;
       case 'trancheApy':
+      case 'trancheBaseApy':
       case 'trancheApyWithTooltip':
         let tokensApy = {};
         let trancheApy = null;
@@ -4529,10 +4526,9 @@ class FunctionsUtil {
           baseApy = apy;
 
           // console.log('trancheApy',tokenConfig.token,trancheApy.toString(),apr.toString(),apy.toString());
-
           // tokensApy[tokenConfig.token] = baseApy;
           
-          if (rewardsTokensInfo){
+          if (rewardsTokensInfo && field !== 'trancheBaseApy'){
             Object.keys(rewardsTokensInfo).forEach( token => {
               const rewardTokenInfo = rewardsTokensInfo[token];
               if (!this.BNify(rewardTokenInfo.apy).isNaN() && (token !== 'IDLE' || show_idle_apy)){
