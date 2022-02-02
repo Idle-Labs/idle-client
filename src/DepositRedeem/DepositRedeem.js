@@ -1482,7 +1482,7 @@ class DepositRedeem extends Component {
         justifyContent={'center'}
       >
         <Flex
-          width={[1, 0.36]}
+          width={[1, '35em']}
           alignItems={'stretch'}
           flexDirection={'column'}
           justifyContent={'center'}
