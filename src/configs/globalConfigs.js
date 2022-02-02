@@ -1123,9 +1123,9 @@ const globalConfigs = {
         enabled: true,
         label: 'MIM3CRV',
         color: {
-          hex: '#231b46',
-          rgb: [35, 27, 70],
-          hsl: ['251', '44%', '19%']
+          hex: '#9695f7',
+          rgb: [150, 149, 247],
+          hsl: ['241', '86%', '78%']
         },
         address: '0x5a6A4D54456819380173272A5E8E9B9904BdF41B'
       },
