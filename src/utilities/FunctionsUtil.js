@@ -579,13 +579,16 @@ class FunctionsUtil {
     const web3RpcKey = this.getGlobalConfig(['network', 'providers', provider, 'key']);
     const web3Rpc = this.getGlobalConfig(['network', 'providers', provider, 'rpc', requiredNetwork.id]) + web3RpcKey;
 
-    let currentWeb3 = null;
-    if (window.ethereum) {
-      currentWeb3 = new Web3(window.ethereum);
-    } else if (window.web3) {
-      currentWeb3 = new Web3(window.web3);
-    } else {
-      currentWeb3 = new Web3(new Web3.providers.HttpProvider(web3Rpc));
+    let currentWeb3 = this.props.web3;
+    
+    if (!currentWeb3){
+      if (window.ethereum) {
+        currentWeb3 = new Web3(window.ethereum);
+      } else if (window.web3) {
+        currentWeb3 = new Web3(window.web3);
+      } else {
+        currentWeb3 = new Web3(new Web3.providers.HttpProvider(web3Rpc));
+      }
     }
 
     return currentWeb3;
