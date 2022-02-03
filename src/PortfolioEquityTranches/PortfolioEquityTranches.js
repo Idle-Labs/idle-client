@@ -336,7 +336,7 @@ class PortfolioEquityTranches extends Component {
                 filteredBalances = [lastFilteredTx];
 
                 // if (token === 'FEI'){
-                //   console.log(this.functionsUtil.strToMoment(timeStamp*1000).format('DD/MM/YYYY HH:mm:ss'),token,tranche,trancheTokens.toFixed(5),tranchePrice.toFixed(5),newBalance.toFixed(5),filteredBalances);
+                  // console.log(this.functionsUtil.strToMoment(timeStamp*1000).format('DD/MM/YYYY HH:mm:ss'),token,tranche,trancheTokens.toFixed(5),tranchePrice.toFixed(5),newBalance.toFixed(5),filteredBalances);
                 // }
               }
             } else {
@@ -347,7 +347,7 @@ class PortfolioEquityTranches extends Component {
             }
           } else {
             // if (token === 'FEI'){
-            //   console.log(this.functionsUtil.strToMoment(timeStamp*1000).format('DD/MM/YYYY HH:mm:ss'),timeStamp,token,tranche,lastTokenData,(lastTokenData ? this.functionsUtil.strToMoment(lastTokenData.timeStamp*1000).format('DD/MM/YYYY HH:mm:ss') : null),(lastTokenData ? lastTokenData.tranchePrice.toFixed(5) : null ));
+              // console.log(this.functionsUtil.strToMoment(timeStamp*1000).format('DD/MM/YYYY HH:mm:ss'),timeStamp,token,tranche,lastTokenData,(lastTokenData ? this.functionsUtil.strToMoment(lastTokenData.timeStamp*1000).format('DD/MM/YYYY HH:mm:ss') : null),(lastTokenData ? lastTokenData.tranchePrice.toFixed(5) : null ));
             // }
             filteredBalances.forEach(tx => {
               switch (tx.action){
@@ -369,7 +369,7 @@ class PortfolioEquityTranches extends Component {
           if (lastTxBalance.gt(0)){
             // Convert token balance to USD
             const conversionRateField = this.functionsUtil.getTokenConversionRateField(token);
-            if (!this.props.chartToken && conversionRateField){
+            if (/*!this.props.chartToken && */conversionRateField){
               const tokenUsdConversionRate = lastTokenData && lastTokenData[conversionRateField] ? lastTokenData[conversionRateField] : (lastTokenDataUnfiltered && lastTokenDataUnfiltered[conversionRateField] ? lastTokenDataUnfiltered[conversionRateField] : null);
               if (tokenUsdConversionRate && this.functionsUtil.BNify(tokenUsdConversionRate).gt(0)){
                 lastTxBalance = lastTxBalance.times(tokenUsdConversionRate);
@@ -380,7 +380,7 @@ class PortfolioEquityTranches extends Component {
             tokensBalances[token] = tokensBalances[token].plus(lastTxBalance);
 
             // if (token === 'FEI'){
-            //   console.log(this.functionsUtil.strToMoment(timeStamp*1000).format('DD/MM/YYYY HH:mm:ss'),token,tranche,trancheTokenBalance[token][tranche].toFixed(5),lastTx.tranchePrice.toFixed(5),lastTxBalance.toFixed(5));
+              // console.log(this.functionsUtil.strToMoment(timeStamp*1000).format('DD/MM/YYYY HH:mm:ss'),token,tranche,trancheTokenBalance[token][tranche].toFixed(5),lastTx.tranchePrice.toFixed(5),lastTxBalance.toFixed(5));
             // }
           }
 
