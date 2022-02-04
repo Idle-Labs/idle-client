@@ -43,6 +43,7 @@ import CoverProtocol from '../CoverProtocol/CoverProtocol';
 import CurveDeposit from '../abis/curve/CurveDeposit.json';
 import VesterFactory from '../contracts/VesterFactory.json';
 import GovernorAlpha from '../contracts/GovernorAlpha.json';
+import GovernorBravo from '../contracts/GovernorBravo.json'
 import EcosystemFund from '../contracts/EcosystemFund.json';
 import Comptroller from '../abis/compound/Comptroller.json';
 import erc20Forwarder from '../contracts/erc20Forwarder.json';
@@ -270,6 +271,7 @@ const globalConfigs = {
         FeeTreasury,
         PriceOracle,
         GovernorAlpha,
+        GovernorBravo,
         EcosystemFund,
         IdleController
       }
@@ -291,7 +293,8 @@ const globalConfigs = {
     },
     contracts: {
       delegates: "IDLE",
-      governance: "GovernorAlpha"
+      governance: "GovernorAlpha",
+      governancev2: "GovernanceBravo"
     }
   },
   curve: {

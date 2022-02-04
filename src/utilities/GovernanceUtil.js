@@ -223,19 +223,19 @@ class GovernanceUtil {
   }
 
   queueProposal = async (proposalId,callback=null,callbackReceipt=null) => {
-    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
+    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governancev2']);
     await this.functionsUtil.contractMethodSendWrapper(contractName,'queue',[this.functionsUtil.toBN(proposalId)],callback,callbackReceipt);
   }
 
   executeProposal = async (proposalId,callback=null,callbackReceipt=null) => {
-    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
+    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governancev2']);
     await this.functionsUtil.contractMethodSendWrapper(contractName,'execute',[this.functionsUtil.toBN(proposalId)],callback,callbackReceipt);
   }
 
   proposeAndVoteFor = async (targets, values, signatures, calldatas, description) => {
     const batcher = new Batcher(this.props.web3,'0x741A4dCaD4f72B83bE9103a383911d78362611cf');
 
-    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
+    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governancev2']);
     const contract = this.functionsUtil.getContractByName(contractName);
 
     const txs = [
@@ -255,13 +255,13 @@ class GovernanceUtil {
   }
 
   propose = async (targets, values, signatures, calldatas, description, callback=null,callbackReceipt=null) => {
-    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
+    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governancev2']);
     return await this.props.contractMethodSendWrapper(contractName, 'propose', [targets, values, signatures, calldatas, description], null, callback, callbackReceipt);
   }
 
   castVote = async (proposalId,support,callback=null,callbackReceipt=null) => {
     proposalId = this.functionsUtil.toBN(proposalId);
-    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
+    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governancev2']);
     return await this.props.contractMethodSendWrapper(contractName, 'castVote', [proposalId, support], null, callback, callbackReceipt);
   }
 
@@ -379,6 +379,7 @@ class GovernanceUtil {
     }
 
     const govContractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
+    const govContractNameBravo = this.functionsUtil.getGlobalConfig(['governance','contracts','governancev2']);
     let [
       proposalThreshold,
       proposalMaxOperations
@@ -410,6 +411,7 @@ class GovernanceUtil {
 
     const fromBlock = this.functionsUtil.getGlobalConfig(['governance','startBlock']);
     const governanceContractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
+    const governanceContractNameBravo = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
 
     let votes = await this.functionsUtil.getContractPastEvents(governanceContractName,'VoteCast', {fromBlock, toBlock: 'latest'});
 
@@ -457,6 +459,7 @@ class GovernanceUtil {
     };
 
     const governanceContractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
+    const governanceContractNameV2 = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
     const proposalCount = await this.functionsUtil.genericContractCall(governanceContractName,'proposalCount');
 
     if (!proposalCount){
