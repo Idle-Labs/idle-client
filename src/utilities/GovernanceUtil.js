@@ -195,7 +195,7 @@ class GovernanceUtil {
       return cachedData;
     }
 
-    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
+    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance','v2']).name;
     let votingPeriod = await this.functionsUtil.genericContractCall(contractName,'votingPeriod');
     if (votingPeriod){
       votingPeriod = this.functionsUtil.BNify(votingPeriod);
@@ -223,19 +223,19 @@ class GovernanceUtil {
   }
 
   queueProposal = async (proposalId,callback=null,callbackReceipt=null) => {
-    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governancev2']);
+    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance','v2']).name;
     await this.functionsUtil.contractMethodSendWrapper(contractName,'queue',[this.functionsUtil.toBN(proposalId)],callback,callbackReceipt);
   }
 
   executeProposal = async (proposalId,callback=null,callbackReceipt=null) => {
-    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governancev2']);
+    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance','v2']).name;
     await this.functionsUtil.contractMethodSendWrapper(contractName,'execute',[this.functionsUtil.toBN(proposalId)],callback,callbackReceipt);
   }
 
   proposeAndVoteFor = async (targets, values, signatures, calldatas, description) => {
     const batcher = new Batcher(this.props.web3,'0x741A4dCaD4f72B83bE9103a383911d78362611cf');
 
-    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governancev2']);
+    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance','v2']).name;
     const contract = this.functionsUtil.getContractByName(contractName);
 
     const txs = [
@@ -255,13 +255,13 @@ class GovernanceUtil {
   }
 
   propose = async (targets, values, signatures, calldatas, description, callback=null,callbackReceipt=null) => {
-    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governancev2']);
+    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance','v2']).name;
     return await this.props.contractMethodSendWrapper(contractName, 'propose', [targets, values, signatures, calldatas, description], null, callback, callbackReceipt);
   }
 
   castVote = async (proposalId,support,callback=null,callbackReceipt=null) => {
     proposalId = this.functionsUtil.toBN(proposalId);
-    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governancev2']);
+    const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance','v2']).name;
     return await this.props.contractMethodSendWrapper(contractName, 'castVote', [proposalId, support], null, callback, callbackReceipt);
   }
 
@@ -378,8 +378,7 @@ class GovernanceUtil {
       return cachedData;
     }
 
-    const govContractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
-    const govContractNameBravo = this.functionsUtil.getGlobalConfig(['governance','contracts','governancev2']);
+    const govContractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance','v1']).name;
     let [
       proposalThreshold,
       proposalMaxOperations
@@ -409,30 +408,47 @@ class GovernanceUtil {
       return cachedData;
     }
 
-    const fromBlock = this.functionsUtil.getGlobalConfig(['governance','startBlock']);
-    const governanceContractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
-    const governanceContractNameBravo = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
-
-    let votes = await this.functionsUtil.getContractPastEvents(governanceContractName,'VoteCast', {fromBlock, toBlock: 'latest'});
-
-    if (votes){
-      votes = votes.map( e => {
-        const {
-            voter,
+    
+    const governanceContracts = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
+    let lastContract=null;
+    let fromBlock=null;
+    const allVotes=await Object.values(governanceContracts).map(async (governanceContract,index)=>{
+      const contractName=governanceContract.name;
+      const toBlock=governanceContract.toBlock;
+      if(!lastContract)
+      {
+        fromBlock = this.functionsUtil.getGlobalConfig(['governance','startBlock']);
+      }
+      else
+      {
+        fromBlock=lastContract.toBlock;
+      }
+      let votes = await this.functionsUtil.getContractPastEvents(contractName,'VoteCast', {fromBlock, toBlock});
+      if (votes){
+        votes = votes.map( e => {
+          const {
+              voter,
+              votes,
+              support,
+              proposalId
+          } = e.returnValues;
+  
+          return {
             votes,
+            voter,
             support,
             proposalId
-        } = e.returnValues;
-        return {
-          votes,
-          voter,
-          support,
-          proposalId
-        }
-      });
-    }
+          }
+        });
+      }
+      lastContract=governanceContract;
+      return votes
+    });
+    console.log("TE",allVotes,...allVotes);
+    const totalVotes={...allVotes}
+    console.log(...totalVotes)
 
-    return this.functionsUtil.setCachedData(cachedDataKey,votes);
+    return this.functionsUtil.setCachedData(cachedDataKey,totalVotes);
   }
 
   getProposals = async (voted_by=null,filter_by_state=null,startBlock=null) => {
@@ -458,236 +474,254 @@ class GovernanceUtil {
       return proposalStates[state];
     };
 
-    const governanceContractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
-    const governanceContractNameV2 = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
-    const proposalCount = await this.functionsUtil.genericContractCall(governanceContractName,'proposalCount');
-
-    if (!proposalCount){
-      return [];
-    }
-
-    const proposalGets = [];
-    const proposalStateGets = [];
-    for (const i of Array.from(Array(parseInt(proposalCount)),(n,i) => i+1)) {
-      proposalGets.push(this.functionsUtil.genericContractCall(governanceContractName,'proposals',[i]));
-      proposalStateGets.push(this.functionsUtil.genericContractCall(governanceContractName,'state',[i]));
-    }
-
-    const fromBlock = this.functionsUtil.getGlobalConfig(['governance','startBlock']);
-
-    let [
-      votes,
-      proposals,
-      proposalStates,
-      proposalQueuedEvents,
-      proposalCreatedEvents,
-      proposalCanceledEvents,
-      proposalExecutedEvents,
-    ] = await Promise.all([
-      this.getVotes(),
-      Promise.all(proposalGets),
-      Promise.all(proposalStateGets),
-      this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalQueued', {fromBlock, toBlock: 'latest'}),
-      this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalCreated', {fromBlock, toBlock: 'latest'}),
-      this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalCanceled', {fromBlock, toBlock: 'latest'}),
-      this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalExecuted', {fromBlock, toBlock: 'latest'}),
-    ]);
-
-    if (!proposals){
-      return false;
-    }
-
-    proposals.reverse();
-    proposalStates.reverse();
-    proposalQueuedEvents.reverse();
-    proposalCreatedEvents.reverse();
-    proposalCanceledEvents.reverse();
-    proposalExecutedEvents.reverse();
-
-    // await this.functionsUtil.asyncForEach(proposals, async (p,i) => {
-    await this.functionsUtil.asyncForEach(proposalCreatedEvents, async (createdEvent,i) => {
-      const p = proposals[i];
-
-      if (!p || !p.id){
-        return;
+    const governanceContracts = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
+    let lastContract=null;
+    let fromBlock=null;
+    let lastCount=null;
+    let currentCount=null;
+    let allProposals=Object.values(governanceContracts).forEach(async (governanceContract,index)=>{
+      
+      const governanceContractName=governanceContract.name;
+      const proposalCount = await this.functionsUtil.genericContractCall(governanceContractName,'proposalCount');
+      if (!proposalCount){
+        return [];
       }
+      if(!lastContract){
+        fromBlock = this.functionsUtil.getGlobalConfig(['governance','startBlock']);
+        currentCount=proposalCount;
+      }
+      else{
+        fromBlock = lastContract.toBlock;
+        currentCount=parseInt(proposalCount)-parseInt(lastCount);
+      }
+      lastContract=governanceContract;
+      lastCount=proposalCount;
 
-      const proposalId = parseInt(p.id);
-      const canceledEvent = proposalCanceledEvents.find( e => (parseInt(e.returnValues.id) === proposalId ) );
-      const executedEvent = proposalExecutedEvents.find( e => (parseInt(e.returnValues.id) === proposalId ) );
-      const queuedEvent = proposalQueuedEvents.find( e => (parseInt(e.returnValues.id) === proposalId ) );
-
-      const [
-        endBlockInfo,
-        queuedBlockInfo,
-        createdBlockInfo,
-        canceledBlockInfo,
-        executedBlockInfo,
+      const proposalGets = [];
+      const proposalStateGets = [];
+      for (const i of Array.from(Array(parseInt(currentCount)),(n,i) => i+1)) {
+        proposalGets.push(this.functionsUtil.genericContractCall(governanceContractName,'proposals',[i+parseInt(lastCount)]));
+        proposalStateGets.push(this.functionsUtil.genericContractCall(governanceContractName,'state',[i+parseInt(lastCount)]));
+      }
+      if(!proposalStateGets||!proposalGets){
+        return false
+      }
+      const toBlock = governanceContract.toBlock
+      let [
+        votes,
+        proposals,
+        proposalStates,
+        proposalQueuedEvents,
+        proposalCreatedEvents,
+        proposalCanceledEvents,
+        proposalExecutedEvents,
       ] = await Promise.all([
-        p.endBlock ? this.functionsUtil.getBlockInfo(p.endBlock) : null,
-        queuedEvent ? this.functionsUtil.getBlockInfo(queuedEvent.blockNumber) : null,
-        createdEvent ? this.functionsUtil.getBlockInfo(createdEvent.blockNumber) : null,
-        canceledEvent ? this.functionsUtil.getBlockInfo(canceledEvent.blockNumber) : null,
-        executedEvent ? this.functionsUtil.getBlockInfo(executedEvent.blockNumber) : null,
+        this.getVotes(),
+        Promise.all(proposalGets),
+        Promise.all(proposalStateGets),
+        this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalQueued', {fromBlock, toBlock}),
+        this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalCreated', {fromBlock, toBlock}),
+        this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalCanceled', {fromBlock, toBlock}),
+        this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalExecuted', {fromBlock, toBlock}),
       ]);
 
-      // Init states array
-      p.states = [];
-
-      // Create created state
-      const createdState = {
-        state: "Pending",
-        blockNumber: createdEvent.blockNumber,
-        end_time: createdBlockInfo.timestamp,
-        start_time: createdBlockInfo.timestamp,
-        trx_hash: createdEvent.transactionHash
-      };
-      p.states.push(createdState);
-
-      // Push active state
-      const activeState = {
-        end_time: null,
-        trx_hash: null,
-        state: "Active",
-        blockNumber: createdEvent.blockNumber,
-        start_time: createdState.start_time
-      };
-      p.states.push(activeState);
-
-      // Push canceled state
-      if (canceledEvent){
-        const canceledState = {
-          end_time: null,
-          state: "Canceled",
-          blockNumber: canceledEvent.blockNumber,
-          start_time: canceledBlockInfo.timestamp,
-          trx_hash: canceledEvent.transactionHash
-        }
-        // Update previous state end_time
-        p.states[p.states.length-1].end_time = canceledBlockInfo.timestamp;
-        p.states.push(canceledState);
-      } else {
-        // Push queued state
-        if (queuedEvent){
-          const succeededState = {
-            end_time: null,
-            trx_hash: null,
-            state: "Succeeded",
-            blockNumber: queuedEvent.blockNumber,
-            start_time: queuedBlockInfo.timestamp,
-          };
-
-          const queuedState = {
-            end_time: null,
-            state: "Queued",
-            blockNumber: queuedEvent.blockNumber,
-            trx_hash: queuedEvent.transactionHash,
-            start_time: queuedBlockInfo.timestamp,
-          };
-
-          // Update previous state end_time
-          p.states[p.states.length-1].end_time = queuedBlockInfo.timestamp;
-          // Push Succeeded state
-          p.states.push(succeededState);
-          // Push queued state
-          p.states.push(queuedState);
-        }
-
-        // Push executed state
-        if (executedEvent){
-          const executedState = {
-            end_time: null,
-            state: "Executed",
-            blockNumber: executedEvent.blockNumber,
-            start_time: executedBlockInfo.timestamp,
-            trx_hash: executedEvent.transactionHash
-          }
-          // Update previous state end_time
-          p.states[p.states.length-1].end_time = executedBlockInfo.timestamp;
-          p.states.push(executedState);
-        }
+      if (!proposals){
+        return false;
       }
 
-      // Check for defeated or expired
-      p.state = enumerateProposalState(proposalStates[i]);
-      const foundState = p.states.find( s => (s.state === p.state) );
-      if (!foundState){
-        const endState = {
-          state: p.state,
+      proposals.reverse();
+      proposalStates.reverse();
+      proposalQueuedEvents.reverse();
+      proposalCreatedEvents.reverse();
+      proposalCanceledEvents.reverse();
+      proposalExecutedEvents.reverse();
+
+      // await this.functionsUtil.asyncForEach(proposals, async (p,i) => {
+      await this.functionsUtil.asyncForEach(proposalCreatedEvents, async (createdEvent,i) => {
+        const p = proposals[i];
+
+        if (!p || !p.id){
+          return;
+        }
+
+        const proposalId = parseInt(p.id);
+        const canceledEvent = proposalCanceledEvents.find( e => (parseInt(e.returnValues.id) === proposalId ) );
+        const executedEvent = proposalExecutedEvents.find( e => (parseInt(e.returnValues.id) === proposalId ) );
+        const queuedEvent = proposalQueuedEvents.find( e => (parseInt(e.returnValues.id) === proposalId ) );
+
+        const [
+          endBlockInfo,
+          queuedBlockInfo,
+          createdBlockInfo,
+          canceledBlockInfo,
+          executedBlockInfo,
+        ] = await Promise.all([
+          p.endBlock ? this.functionsUtil.getBlockInfo(p.endBlock) : null,
+          queuedEvent ? this.functionsUtil.getBlockInfo(queuedEvent.blockNumber) : null,
+          createdEvent ? this.functionsUtil.getBlockInfo(createdEvent.blockNumber) : null,
+          canceledEvent ? this.functionsUtil.getBlockInfo(canceledEvent.blockNumber) : null,
+          executedEvent ? this.functionsUtil.getBlockInfo(executedEvent.blockNumber) : null,
+        ]);
+
+        // Init states array
+        p.states = [];
+
+        // Create created state
+        const createdState = {
+          state: "Pending",
+          blockNumber: createdEvent.blockNumber,
+          end_time: createdBlockInfo.timestamp,
+          start_time: createdBlockInfo.timestamp,
+          trx_hash: createdEvent.transactionHash
+        };
+        p.states.push(createdState);
+
+        // Push active state
+        const activeState = {
           end_time: null,
           trx_hash: null,
-          blockNumber: p.endBlock,
-          start_time: endBlockInfo.timestamp,
+          state: "Active",
+          blockNumber: createdEvent.blockNumber,
+          start_time: createdState.start_time
+        };
+        p.states.push(activeState);
+
+        // Push canceled state
+        if (canceledEvent){
+          const canceledState = {
+            end_time: null,
+            state: "Canceled",
+            blockNumber: canceledEvent.blockNumber,
+            start_time: canceledBlockInfo.timestamp,
+            trx_hash: canceledEvent.transactionHash
+          }
+          // Update previous state end_time
+          p.states[p.states.length-1].end_time = canceledBlockInfo.timestamp;
+          p.states.push(canceledState);
+        } else {
+          // Push queued state
+          if (queuedEvent){
+            const succeededState = {
+              end_time: null,
+              trx_hash: null,
+              state: "Succeeded",
+              blockNumber: queuedEvent.blockNumber,
+              start_time: queuedBlockInfo.timestamp,
+            };
+
+            const queuedState = {
+              end_time: null,
+              state: "Queued",
+              blockNumber: queuedEvent.blockNumber,
+              trx_hash: queuedEvent.transactionHash,
+              start_time: queuedBlockInfo.timestamp,
+            };
+
+            // Update previous state end_time
+            p.states[p.states.length-1].end_time = queuedBlockInfo.timestamp;
+            // Push Succeeded state
+            p.states.push(succeededState);
+            // Push queued state
+            p.states.push(queuedState);
+          }
+
+          // Push executed state
+          if (executedEvent){
+            const executedState = {
+              end_time: null,
+              state: "Executed",
+              blockNumber: executedEvent.blockNumber,
+              start_time: executedBlockInfo.timestamp,
+              trx_hash: executedEvent.transactionHash
+            }
+            // Update previous state end_time
+            p.states[p.states.length-1].end_time = executedBlockInfo.timestamp;
+            p.states.push(executedState);
+          }
         }
-        // Update previous state end_time
-        p.states[p.states.length-1].end_time = endBlockInfo.timestamp;
-        p.states.push(endState);
+
+        // Check for defeated or expired
+        p.state = enumerateProposalState(proposalStates[i]);
+        const foundState = p.states.find( s => (s.state === p.state) );
+        if (!foundState){
+          const endState = {
+            state: p.state,
+            end_time: null,
+            trx_hash: null,
+            blockNumber: p.endBlock,
+            start_time: endBlockInfo.timestamp,
+          }
+          // Update previous state end_time
+          p.states[p.states.length-1].end_time = endBlockInfo.timestamp;
+          p.states.push(endState);
+        }
+
+        p.votes = votes.filter( v => (parseInt(v.proposalId)===proposalId) );
+
+        const { description, signatures, targets, values, calldatas } = createdEvent.returnValues;
+        p.timestamp = createdBlockInfo ? createdBlockInfo.timestamp : null;
+
+
+        // Idle
+        p.title = description.split(/# |\n|↵/g)[0].replace(/^#/,'') || 'Untitled';
+        p.description = description.split(/\n|↵/g);
+        p.description.shift();
+        p.description = p.description.join("\n");
+        p.description = p.description.replace(/\n/g,"<br />")
+
+        // Overwrite proposal details
+        const proposalDetails = this.functionsUtil.getGlobalConfig(['governance','proposals',proposalId]);
+        if (proposalDetails){
+          Object.keys(proposalDetails).forEach( attr => {
+            p[attr] = proposalDetails[attr];
+          });
+        }
+
+        // Save proposal
+        proposals[i] = {
+          eta:p.eta,
+          actions:{
+            values,
+            targets,
+            calldatas,
+            signatures
+          },
+          id:proposalId,
+          title:p.title,
+          state:p.state,
+          votes:p.votes,
+          states:p.states,
+          executed:p.executed,
+          endBlock:p.endBlock,
+          canceled:p.canceled,
+          forVotes:p.forVotes,
+          proposer:p.proposer,
+          timestamp:p.timestamp,
+          startBlock:p.startBlock,
+          description:p.description,
+          againstVotes:p.againstVotes
+        };
+      });
+
+      this.functionsUtil.setCachedDataWithLocalStorage(cachedDataKey,proposals,3600);
+
+      // console.log('getProposals',filter_by_state,cachedData);
+
+      if (filter_by_state){
+        proposals = proposals.filter( p => (p && p.state && p.state.toLowerCase() === filter_by_state.toLowerCase() ) );
       }
 
-      p.votes = votes.filter( v => (parseInt(v.proposalId)===proposalId) );
-
-      const { description, signatures, targets, values, calldatas } = createdEvent.returnValues;
-      p.timestamp = createdBlockInfo ? createdBlockInfo.timestamp : null;
-
-
-      // Idle
-      p.title = description.split(/# |\n|↵/g)[0].replace(/^#/,'') || 'Untitled';
-      p.description = description.split(/\n|↵/g);
-      p.description.shift();
-      p.description = p.description.join("\n");
-      p.description = p.description.replace(/\n/g,"<br />")
-
-      // Overwrite proposal details
-      const proposalDetails = this.functionsUtil.getGlobalConfig(['governance','proposals',proposalId]);
-      if (proposalDetails){
-        Object.keys(proposalDetails).forEach( attr => {
-          p[attr] = proposalDetails[attr];
-        });
+      if (voted_by){
+        proposals = proposals.filter( p => (p && p.votes.find( v => (v.voter && v.voter.toLowerCase() === voted_by.toLowerCase()) )) );
       }
 
-      // Save proposal
-      proposals[i] = {
-        eta:p.eta,
-        actions:{
-          values,
-          targets,
-          calldatas,
-          signatures
-        },
-        id:proposalId,
-        title:p.title,
-        state:p.state,
-        votes:p.votes,
-        states:p.states,
-        executed:p.executed,
-        endBlock:p.endBlock,
-        canceled:p.canceled,
-        forVotes:p.forVotes,
-        proposer:p.proposer,
-        timestamp:p.timestamp,
-        startBlock:p.startBlock,
-        description:p.description,
-        againstVotes:p.againstVotes
-      };
-    });
-
-    this.functionsUtil.setCachedDataWithLocalStorage(cachedDataKey,proposals,3600);
-
-    // console.log('getProposals',filter_by_state,cachedData);
-
-    if (filter_by_state){
-      proposals = proposals.filter( p => (p && p.state && p.state.toLowerCase() === filter_by_state.toLowerCase() ) );
-    }
-
-    if (voted_by){
-      proposals = proposals.filter( p => (p && p.votes.find( v => (v.voter && v.voter.toLowerCase() === voted_by.toLowerCase()) )) );
-    }
-
-    if (startBlock){
-      proposals = proposals.filter( p => parseInt(p.startBlock)>=parseInt(startBlock) );
-    }
-    
-    return proposals;
+      if (startBlock){
+        proposals = proposals.filter( p => parseInt(p.startBlock)>=parseInt(startBlock) );
+      }
+     
+      return proposals;
+    }); 
+    return allProposals;
   }
 }
 
