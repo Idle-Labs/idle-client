@@ -293,8 +293,16 @@ const globalConfigs = {
     },
     contracts: {
       delegates: "IDLE",
-      governance: "GovernorAlpha",
-      governancev2: "GovernanceBravo"
+      governance: {
+        v1:{
+          name:"GovernorAlpha",
+          toBlock:"14057088"
+        },
+        v2:{
+          name:"GovernorBravo",
+          toBlock:"latest"
+        }
+      }
     }
   },
   curve: {
@@ -586,6 +594,10 @@ const globalConfigs = {
         abi: GovernorAlpha,
         address: '0x2256b25CFC8E35c3135664FD03E77595042fe31B' // MAIN
         // address:'0x782cB1dbd0bD4df95c2497819be3984EeA5c2c25' // KOVAN
+      },
+      GovernorBravo: {
+        abi: GovernorBravo,
+        address: '0x3D5Fc645320be0A085A32885F078F7121e5E5375'
       },
       Comptroller: {
         abi: Comptroller,
