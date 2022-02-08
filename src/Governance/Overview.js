@@ -33,7 +33,7 @@ class Overview extends Component {
 
   async componentWillMount(){
     this.loadUtils();
-    this.loadData();
+   await  this.loadData();
   }
 
   async componentDidUpdate(prevProps,prevState){
