@@ -28,7 +28,7 @@ class Proposals extends Component {
 
   async componentWillMount(){
     this.loadUtils();
-    this.loadData();
+    await this.loadData();
   }
 
   async componentDidUpdate(prevProps,prevState){
@@ -36,7 +36,7 @@ class Proposals extends Component {
 
     const contractsInitialized = this.props.contractsInitialized && prevProps.contractsInitialized !== this.props.contractsInitialized;
     if (contractsInitialized){
-      this.loadData();
+      await this.loadData();
     }
   }
 

@@ -275,7 +275,7 @@ class Dashboard extends Component {
   async componentWillMount() {
     this.props.setCurrentSection("governance");
     this.loadUtils();
-    this.loadMenu();
+    await this.loadMenu();
   }
 
   async componentDidMount() {

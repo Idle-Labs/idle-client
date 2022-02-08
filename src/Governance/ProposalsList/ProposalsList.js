@@ -94,7 +94,7 @@ class ProposalsList extends Component {
     const pageChanged = prevState.page !== this.state.page;
     const proposalsChanged = JSON.stringify(prevProps.proposals) !== JSON.stringify(this.props.proposals);
     if (pageChanged || proposalsChanged){
-      this.processList();
+      await this.processList();
     }
   }
 
