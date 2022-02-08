@@ -50,6 +50,7 @@ class Overview extends Component {
       this.governanceUtil.getProposals(),
       this.governanceUtil.getTotalSupply()
     ]);
+    console.log("overview",proposals)
 
     const votesDelegated = delegates.reduce( (votesDelegated,d) => {
       votesDelegated = votesDelegated+parseFloat(d.votes);
@@ -68,6 +69,7 @@ class Overview extends Component {
   }
 
   render() {
+    console.log("Propos",this.state.proposals)
     return (
       <Box
         width={1}

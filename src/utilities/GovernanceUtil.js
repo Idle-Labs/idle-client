@@ -378,7 +378,7 @@ class GovernanceUtil {
       return cachedData;
     }
 
-    const govContractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance','v1']).name;
+    const govContractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance','v2']).name;
     let [
       proposalThreshold,
       proposalMaxOperations
@@ -412,27 +412,30 @@ class GovernanceUtil {
     const governanceContracts = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
     let lastContract=null;
     let fromBlock=null;
-    const allVotes=await Object.values(governanceContracts).map(async (governanceContract,index)=>{
+    const votes=[];
+    Object.values(governanceContracts).forEach(async (governanceContract,index)=>{
       const contractName=governanceContract.name;
       const toBlock=governanceContract.toBlock;
       if(!lastContract)
       {
         fromBlock = this.functionsUtil.getGlobalConfig(['governance','startBlock']);
+        console.log("here",fromBlock,toBlock);
       }
       else
       {
         fromBlock=lastContract.toBlock;
       }
-      let votes = await this.functionsUtil.getContractPastEvents(contractName,'VoteCast', {fromBlock, toBlock});
-      if (votes){
-        votes = votes.map( e => {
+      lastContract=governanceContract;
+      let contractVotes = await this.functionsUtil.getContractPastEvents(contractName,'VoteCast', {fromBlock, toBlock});
+      
+      if (contractVotes){
+        contractVotes = contractVotes.map( e => {
           const {
               voter,
               votes,
               support,
               proposalId
           } = e.returnValues;
-  
           return {
             votes,
             voter,
@@ -440,15 +443,15 @@ class GovernanceUtil {
             proposalId
           }
         });
+      Object.values(contractVotes).forEach(vote=>{
+        votes.push(vote);
+      })
       }
-      lastContract=governanceContract;
-      return votes
+      console.log("votes",votes)
+     
     });
-    console.log("TE",allVotes,...allVotes);
-    const totalVotes={...allVotes}
-    console.log(...totalVotes)
-
-    return this.functionsUtil.setCachedData(cachedDataKey,totalVotes);
+   
+    return this.functionsUtil.setCachedData(cachedDataKey,votes);
   }
 
   getProposals = async (voted_by=null,filter_by_state=null,startBlock=null) => {
@@ -474,35 +477,41 @@ class GovernanceUtil {
       return proposalStates[state];
     };
 
-    const governanceContracts = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
-    let lastContract=null;
+    const governanceContracts =this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
+    const contracts=Object.values(governanceContracts)
     let fromBlock=null;
-    let lastCount=null;
     let currentCount=null;
-    let allProposals=Object.values(governanceContracts).forEach(async (governanceContract,index)=>{
+    const proposalCounts= await Object.values(governanceContracts).map(async (governanceContract)=>{
+      const proposalCount = await this.functionsUtil.genericContractCall(governanceContract.name,'proposalCount');
+      return proposalCount;
+    });
+    const allProposals=[];
+    Object.values(governanceContracts).forEach( async(governanceContract,index)=>{
       
+      console.log("contracts",contracts);
       const governanceContractName=governanceContract.name;
-      const proposalCount = await this.functionsUtil.genericContractCall(governanceContractName,'proposalCount');
+      const proposalCount=parseInt(await proposalCounts[index]);
+      const lastCount=parseInt(await proposalCounts[index-1])
+      console.log(index)
       if (!proposalCount){
         return [];
       }
-      if(!lastContract){
+      if(index===0){
         fromBlock = this.functionsUtil.getGlobalConfig(['governance','startBlock']);
         currentCount=proposalCount;
       }
       else{
-        fromBlock = lastContract.toBlock;
-        currentCount=parseInt(proposalCount)-parseInt(lastCount);
+        fromBlock = contracts[index-1].toBlock;
+        currentCount=proposalCount-lastCount;
       }
-      lastContract=governanceContract;
-      lastCount=proposalCount;
-
+      console.log("fromto",fromBlock,currentCount)
       const proposalGets = [];
       const proposalStateGets = [];
-      for (const i of Array.from(Array(parseInt(currentCount)),(n,i) => i+1)) {
-        proposalGets.push(this.functionsUtil.genericContractCall(governanceContractName,'proposals',[i+parseInt(lastCount)]));
-        proposalStateGets.push(this.functionsUtil.genericContractCall(governanceContractName,'state',[i+parseInt(lastCount)]));
+      for (const i of Array.from(Array(currentCount),(n,i) => i+1)) {
+        proposalGets.push(this.functionsUtil.genericContractCall(governanceContractName,'proposals',[i]));
+        proposalStateGets.push(this.functionsUtil.genericContractCall(governanceContractName,'state',[i]));
       }
+      console.log("gets",proposalGets);
       if(!proposalStateGets||!proposalGets){
         return false
       }
@@ -524,7 +533,7 @@ class GovernanceUtil {
         this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalCanceled', {fromBlock, toBlock}),
         this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalExecuted', {fromBlock, toBlock}),
       ]);
-
+      console.log("Oprop",proposals)
       if (!proposals){
         return false;
       }
@@ -719,9 +728,15 @@ class GovernanceUtil {
         proposals = proposals.filter( p => parseInt(p.startBlock)>=parseInt(startBlock) );
       }
      
-      return proposals;
+      Object.values(proposals).forEach(proposal=>{
+        console.log("foreach",proposal)
+        allProposals.push(proposal);
+        console.log(allProposals)
+      });
     }); 
-    return allProposals;
+    console.log("proposals",allProposals)
+    const proposals= allProposals;
+    return proposals;
   }
 }
 
