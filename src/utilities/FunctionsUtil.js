@@ -4520,11 +4520,6 @@ class FunctionsUtil {
         if (trancheApy){
           let apr = this.fixTokenDecimals(trancheApy,tokenConfig.CDO.decimals);
 
-          // Hot-fix for convex
-          if (protocol === 'convex'){
-            apr = apr.times(100);
-          }
-
           apy = this.apr2apy(apr.div(100)).times(100);
           baseApy = apy;
 

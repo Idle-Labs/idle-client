@@ -325,7 +325,7 @@ const availableTranches = {
       token:'MIM3CRV',
       protocol:'convex',
       blockNumber:13848124,
-      autoFarming:['CVX','CRV'],
+      autoFarming:['CVX','CRV','SPELL'],
       address:'0x5a6A4D54456819380173272A5E8E9B9904BdF41B',
       CDO:{
         abi:IdleCDO,

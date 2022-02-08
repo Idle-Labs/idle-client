@@ -1131,6 +1131,18 @@ const globalConfigs = {
         },
         address: '0x5a6A4D54456819380173272A5E8E9B9904BdF41B'
       },
+      SPELL: {
+        decimals: 18,
+        enabled: true,
+        label: 'SPELL',
+        icon: "images/tokens/SPELL.png",
+        color: {
+          hex: '#9695f7',
+          rgb: [150, 149, 247],
+          hsl: ['241', '86%', '78%']
+        },
+        address: '0x090185f2135308bad17527004364ebcc2d37e5f6'
+      },
       MATIC: {
         decimals: 18,
         enabled: true,
