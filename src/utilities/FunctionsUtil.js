@@ -6229,12 +6229,10 @@ class FunctionsUtil {
 
       const unires = await this.genericContractCall('UniswapRouter', 'getAmountsIn', [one.toFixed(), path], {}, blockNumber);
 
-      // console.log('getUniswapConversionRate',path,unires);
-
       if (unires) {
         const price = this.BNify(unires[0]).div(one);
         if (blockNumber !== 'latest'){
-          return this.setCachedDataWithLocalStorage(cachedDataKey, price);
+          return this.setCachedDataWithLocalStorage(cachedDataKey, price, null);
         }
         return price;
       }

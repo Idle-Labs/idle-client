@@ -191,16 +191,53 @@ class PortfolioEquityTranches extends Component {
         const tokenConfig = this.props.availableTranches[tokenBalanceConfig.protocol.toLowerCase()][token];
 
         const [
-          startTokenConversionRate,
-          lastTokenConversionRate,
           trancheAAInfos,
           trancheBBInfos
         ] = await Promise.all([
-          conversionRateField ? this.functionsUtil.getTokenConversionRateUniswap(tokenConfig,firstBlockNumber) : null,
-          conversionRateField ? this.functionsUtil.getTokenConversionRateUniswap(tokenConfig,lastBlockNumber) : null,
-          firstAATokenTx ? this.functionsUtil.getSubgraphTrancheInfo(tokenConfig.AA.address,firstAATokenTx.timeStamp,currTimestamp,['timeStamp','virtualPrice']) : [],
-          firstBBTokenTx ? this.functionsUtil.getSubgraphTrancheInfo(tokenConfig.BB.address,firstBBTokenTx.timeStamp,currTimestamp,['timeStamp','virtualPrice']) : [],
+          firstAATokenTx ? this.functionsUtil.getSubgraphTrancheInfo(tokenConfig.AA.address,firstAATokenTx.timeStamp,currTimestamp,['timeStamp','virtualPrice','blockNumber']) : [],
+          firstBBTokenTx ? this.functionsUtil.getSubgraphTrancheInfo(tokenConfig.BB.address,firstBBTokenTx.timeStamp,currTimestamp,['timeStamp','virtualPrice','blockNumber']) : [],
         ]);
+
+        const timeStamp_start = Math.min(firstAATokenTx ? firstAATokenTx.timeStamp : firstTokenTx.timeStamp,firstBBTokenTx ? firstBBTokenTx.timeStamp : firstTokenTx.timeStamp);
+
+        const trancheInfos = trancheAAInfos.concat(trancheBBInfos).sort((a, b) => (parseInt(a.timeStamp) > parseInt(b.timeStamp) ? 1 : -1));
+
+        const conversionRatesTimestamps = {};
+        if (conversionRateField){
+          const blocksTimestamps = {};
+          const conversionRateBlocksCalls = {};
+          for (let timeStamp=timeStamp_start;timeStamp<=currTimestamp;timeStamp+=this.props.frequencySeconds) {
+            const blockInfo = trancheInfos.reduce( (blockInfo,trancheInfo) => {
+              const distance = Math.abs(parseInt(trancheInfo.timeStamp)-parseInt(timeStamp));
+              if (blockInfo.distance === null || distance<blockInfo.distance){
+                blockInfo.distance = distance;
+                blockInfo.trancheInfo = trancheInfo;
+              }
+              return blockInfo;
+            },{
+              distance:null,
+              trancheInfo:null
+            });
+
+            if (!blocksTimestamps[blockInfo.trancheInfo.blockNumber]){
+              blocksTimestamps[blockInfo.trancheInfo.blockNumber] = [];
+            }
+            blocksTimestamps[blockInfo.trancheInfo.blockNumber].push(blockInfo.trancheInfo.timeStamp);
+
+            conversionRateBlocksCalls[blockInfo.trancheInfo.blockNumber] = this.functionsUtil.getTokenConversionRateUniswap(tokenConfig,blockInfo.trancheInfo.blockNumber);
+          }
+
+          const conversionRates = await Promise.all(Object.values(conversionRateBlocksCalls));
+
+          conversionRates.forEach( (conversionRate,index) => {
+            const blockNumber = Object.keys(conversionRateBlocksCalls)[index];
+            blocksTimestamps[blockNumber].forEach( timeStamp => {
+              const momentDate = this.functionsUtil.strToMoment(timeStamp*1000).format('YYYY-MM-DD');
+              conversionRatesTimestamps[momentDate] = conversionRate;
+            });
+          });
+
+        }
 
         // console.log(token,firstBlockNumber,lastBlockNumber,startTokenConversionRate ? startTokenConversionRate.toString() : null,lastTokenConversionRate ? lastTokenConversionRate.toString() : null);
 
@@ -215,12 +252,9 @@ class PortfolioEquityTranches extends Component {
               timeStamp:trancheInfo.timeStamp,
               tranchePrice:this.functionsUtil.BNify(trancheInfo.virtualPrice)
             };
-            if (conversionRateField){
-              if (index === trancheAAInfos.length-1){
-                tokenDataAA[conversionRateField] = lastTokenConversionRate;
-              } else {
-                tokenDataAA[conversionRateField] = startTokenConversionRate;
-              }
+            const momentDate = this.functionsUtil.strToMoment(trancheInfo.timeStamp*1000).format('YYYY-MM-DD');
+            if (conversionRateField && conversionRatesTimestamps[momentDate]){
+              tokenDataAA[conversionRateField] = conversionRatesTimestamps[momentDate];
             }
             tokensData[token].push(tokenDataAA);
           });
@@ -233,12 +267,9 @@ class PortfolioEquityTranches extends Component {
               timeStamp:trancheInfo.timeStamp,
               tranchePrice:this.functionsUtil.BNify(trancheInfo.virtualPrice)
             };
-            if (conversionRateField){
-              if (index === trancheBBInfos.length-1){
-                tokenDataBB[conversionRateField] = lastTokenConversionRate;
-              } else {
-                tokenDataBB[conversionRateField] = startTokenConversionRate;
-              }
+            const momentDate = this.functionsUtil.strToMoment(trancheInfo.timeStamp*1000).format('YYYY-MM-DD');
+            if (conversionRateField && conversionRatesTimestamps[momentDate]){
+              tokenDataBB[conversionRateField] = conversionRatesTimestamps[momentDate];
             }
             tokensData[token].push(tokenDataBB);
           });
