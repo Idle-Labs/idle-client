@@ -67,7 +67,7 @@ class ProposalsList extends Component {
   }
 
   async componentDidMount(){
-    this.loadUtils();
+    await this.loadUtils();
     this.processList();
   }
 
@@ -90,11 +90,12 @@ class ProposalsList extends Component {
   }
 
   async componentDidUpdate(prevProps, prevState) {
-    this.loadUtils();
+    await this.loadUtils();
     const pageChanged = prevState.page !== this.state.page;
-    const proposalsChanged = JSON.stringify(prevProps.proposals) !== JSON.stringify(this.props.proposals);
+    const proposalsChanged = prevProps.proposals !== this.props.proposals;
     if (pageChanged || proposalsChanged){
-      await this.processList();
+      
+      this.processList();
     }
   }
 
@@ -118,7 +119,6 @@ class ProposalsList extends Component {
     // Calculate max number of pages
     const totalRows = proposals.length;
     const totalPages = Math.ceil(totalRows/rowsPerPage);
-
     const processedRows = [];
 
     proposals.forEach((p, i) => {
