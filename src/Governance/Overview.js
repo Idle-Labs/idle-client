@@ -33,7 +33,7 @@ class Overview extends Component {
 
   async componentWillMount(){
     this.loadUtils();
-   await  this.loadData();
+    await this.loadData();
   }
 
   async componentDidUpdate(prevProps,prevState){
@@ -47,7 +47,7 @@ class Overview extends Component {
       totalSupply
     ] = await Promise.all([
       this.governanceUtil.getDelegates(),
-      this.governanceUtil.getProposals(),
+      await this.governanceUtil.getProposals(),
       this.governanceUtil.getTotalSupply()
     ]);
     console.log("overview",proposals)

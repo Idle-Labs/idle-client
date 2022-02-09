@@ -419,7 +419,6 @@ class GovernanceUtil {
       if(!lastContract)
       {
         fromBlock = this.functionsUtil.getGlobalConfig(['governance','startBlock']);
-        console.log("here",fromBlock,toBlock);
       }
       else
       {
@@ -447,8 +446,6 @@ class GovernanceUtil {
         votes.push(vote);
       })
       }
-      console.log("votes",votes)
-     
     });
    
     return this.functionsUtil.setCachedData(cachedDataKey,votes);
@@ -486,13 +483,11 @@ class GovernanceUtil {
       return proposalCount;
     });
     const allProposals=[];
-    Object.values(governanceContracts).forEach( async(governanceContract,index)=>{
+    const a = await Promise.all(Object.values(governanceContracts).map( async(governanceContract,index)=>{
       
-      console.log("contracts",contracts);
       const governanceContractName=governanceContract.name;
       const proposalCount=parseInt(await proposalCounts[index]);
       const lastCount=parseInt(await proposalCounts[index-1])
-      console.log(index)
       if (!proposalCount){
         return [];
       }
@@ -504,14 +499,12 @@ class GovernanceUtil {
         fromBlock = contracts[index-1].toBlock;
         currentCount=proposalCount-lastCount;
       }
-      console.log("fromto",fromBlock,currentCount)
       const proposalGets = [];
       const proposalStateGets = [];
       for (const i of Array.from(Array(currentCount),(n,i) => i+1)) {
         proposalGets.push(this.functionsUtil.genericContractCall(governanceContractName,'proposals',[i]));
         proposalStateGets.push(this.functionsUtil.genericContractCall(governanceContractName,'state',[i]));
       }
-      console.log("gets",proposalGets);
       if(!proposalStateGets||!proposalGets){
         return false
       }
@@ -533,10 +526,6 @@ class GovernanceUtil {
         this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalCanceled', {fromBlock, toBlock}),
         this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalExecuted', {fromBlock, toBlock}),
       ]);
-      console.log("Oprop",proposals)
-      if (!proposals){
-        return false;
-      }
 
       proposals.reverse();
       proposalStates.reverse();
@@ -712,6 +701,7 @@ class GovernanceUtil {
         };
       });
 
+      
       this.functionsUtil.setCachedDataWithLocalStorage(cachedDataKey,proposals,3600);
 
       // console.log('getProposals',filter_by_state,cachedData);
@@ -727,16 +717,11 @@ class GovernanceUtil {
       if (startBlock){
         proposals = proposals.filter( p => parseInt(p.startBlock)>=parseInt(startBlock) );
       }
-     
-      Object.values(proposals).forEach(proposal=>{
-        console.log("foreach",proposal)
+     Object.values(proposals).forEach(proposal=>{
         allProposals.push(proposal);
-        console.log(allProposals)
       });
-    }); 
-    console.log("proposals",allProposals)
-    const proposals= allProposals;
-    return proposals;
+    }));
+    return allProposals;
   }
 }
 
