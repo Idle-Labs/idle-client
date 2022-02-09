@@ -175,8 +175,7 @@ class PortfolioEquityTranches extends Component {
     }
 
     // let lastTimestamp = parseInt(this.functionsUtil.strToMoment(this.functionsUtil.strToMoment().format('YYYY-MM-DD')+' 00:00:00','YYYY-MM-DD HH:mm:ss')._d.getTime()/1000);
-
-    const lastBlockNumber = await this.functionsUtil.getBlockNumber();
+    // const lastBlockNumber = await this.functionsUtil.getBlockNumber();
 
     await this.functionsUtil.asyncForEach(Object.keys(tokensBalance),async (token) => {
       if (tokensBalance[token].length){
@@ -185,7 +184,7 @@ class PortfolioEquityTranches extends Component {
         const firstAATokenTx = tokensBalance[token].find( tx => tx.tranche==='AA' ) || null;
         const firstBBTokenTx = tokensBalance[token].find( tx => tx.tranche==='BB' ) || null;
 
-        const firstBlockNumber = firstTokenTx.blockNumber;
+        // const firstBlockNumber = firstTokenTx.blockNumber;
 
         const conversionRateField = this.functionsUtil.getTokenConversionRateField(token);
         const tokenConfig = this.props.availableTranches[tokenBalanceConfig.protocol.toLowerCase()][token];
@@ -239,7 +238,7 @@ class PortfolioEquityTranches extends Component {
 
         }
 
-        // console.log(token,firstBlockNumber,lastBlockNumber,startTokenConversionRate ? startTokenConversionRate.toString() : null,lastTokenConversionRate ? lastTokenConversionRate.toString() : null);
+        // console.log(token,startTokenConversionRate ? startTokenConversionRate.toString() : null,lastTokenConversionRate ? lastTokenConversionRate.toString() : null);
 
         if (!tokensData[token]){
           tokensData[token] = [];
