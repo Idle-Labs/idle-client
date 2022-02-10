@@ -211,7 +211,7 @@ class CastVote extends Component {
             voted with {this.functionsUtil.formatMoney(this.functionsUtil.fixTokenDecimals(this.state.userVote.votes,18).toFixed(0,1),0)} votes
           </Text>
         </Flex>
-      ) : (this.props.proposal.state === 'Active' || this.props.proposal.state === 'Pending') && (
+      ) : this.props.proposal.state === 'Active' && (
         <Box
           p={3}
           width={1}
