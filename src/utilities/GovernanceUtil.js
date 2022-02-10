@@ -262,6 +262,7 @@ class GovernanceUtil {
   castVote = async (proposalId,support,callback=null,callbackReceipt=null) => {
     proposalId = this.functionsUtil.toBN(proposalId);
     const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance','v2']).name;
+    console.log(contractName, 'castVote', [proposalId, support]);
     return await this.props.contractMethodSendWrapper(contractName, 'castVote', [proposalId, support], null, callback, callbackReceipt);
   }
 
@@ -474,41 +475,46 @@ class GovernanceUtil {
       return proposalStates[state];
     };
 
-    const governanceContracts =this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
-    const contracts=Object.values(governanceContracts)
+    const governanceContracts = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
+    const contracts = Object.values(governanceContracts);
+    
     let fromBlock=null;
-    let currentCount=null;
-    const proposalCounts= await Object.values(governanceContracts).map(async (governanceContract)=>{
+
+    // const proposalCounts= await Object.values(governanceContracts).map(async (governanceContract)=>{
+    const proposalCounts = await this.functionsUtil.asyncForEach(contracts,async (governanceContract)=>{
       const proposalCount = await this.functionsUtil.genericContractCall(governanceContract.name,'proposalCount');
       return proposalCount;
     });
     const allProposals=[];
-    const a = await Promise.all(Object.values(governanceContracts).map( async(governanceContract,index)=>{
+
+    await this.functionsUtil.asyncForEach(contracts, async(governanceContract,index) => {
       
-      const governanceContractName=governanceContract.name;
-      const proposalCount=parseInt(await proposalCounts[index]);
-      const lastCount=parseInt(await proposalCounts[index-1])
+      const governanceContractName = governanceContract.name;
+      const proposalCount = parseInt(await proposalCounts[index]);
+      const lastCount = parseInt(await proposalCounts[index-1]);
       if (!proposalCount){
         return [];
       }
       if(index===0){
         fromBlock = this.functionsUtil.getGlobalConfig(['governance','startBlock']);
-        currentCount=proposalCount;
       }
       else{
         fromBlock = contracts[index-1].toBlock;
-        currentCount=proposalCount-lastCount;
       }
+
       const proposalGets = [];
       const proposalStateGets = [];
-      for (const i of Array.from(Array(currentCount),(n,i) => i+1)) {
-        proposalGets.push(this.functionsUtil.genericContractCall(governanceContractName,'proposals',[i]));
-        proposalStateGets.push(this.functionsUtil.genericContractCall(governanceContractName,'state',[i]));
+      for (const i of Array.from(Array(proposalCount),(n,i) => i+1)) {
+        if (!index || i>lastCount){
+          proposalGets.push(this.functionsUtil.genericContractCall(governanceContractName,'proposals',[i]));
+          proposalStateGets.push(this.functionsUtil.genericContractCall(governanceContractName,'state',[i]));
+        }
       }
-      if(!proposalStateGets||!proposalGets){
-        return false
+
+      if(!proposalStateGets || !proposalGets){
+        return false;
       }
-      const toBlock = governanceContract.toBlock
+      const toBlock = governanceContract.toBlock;
       let [
         votes,
         proposals,
@@ -638,6 +644,8 @@ class GovernanceUtil {
           }
         }
 
+        // console.log(governanceContractName,i,proposalStates,proposalStates[i]);
+
         // Check for defeated or expired
         p.state = enumerateProposalState(proposalStates[i]);
         const foundState = p.states.find( s => (s.state === p.state) );
@@ -717,10 +725,11 @@ class GovernanceUtil {
       if (startBlock){
         proposals = proposals.filter( p => parseInt(p.startBlock)>=parseInt(startBlock) );
       }
-     Object.values(proposals).forEach(proposal=>{
+
+      Object.values(proposals).forEach(proposal=>{
         allProposals.push(proposal);
       });
-    }));
+    });
     return allProposals;
   }
 }
