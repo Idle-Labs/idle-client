@@ -6199,7 +6199,7 @@ class FunctionsUtil {
       return null;
     }
   }
-  getUniswapConversionRate = async (tokenConfigFrom, tokenConfigDest, blockNumber='latest') => {
+  getUniswapConversionRate = async (tokenConfigFrom, tokenConfigDest, blockNumber='latest', useWETH=true) => {
 
     if (tokenConfigDest.addressForPrice) {
       tokenConfigDest = Object.assign({}, tokenConfigDest);
@@ -6222,7 +6222,7 @@ class FunctionsUtil {
       const path = [];
       path.push(tokenConfigFrom.address);
       // Don't pass through weth if i'm converting weth
-      if (WETHAddr.toLowerCase() !== tokenConfigFrom.address.toLowerCase() && WETHAddr.toLowerCase() !== tokenConfigDest.address.toLowerCase()) {
+      if (useWETH && WETHAddr.toLowerCase() !== tokenConfigFrom.address.toLowerCase() && WETHAddr.toLowerCase() !== tokenConfigDest.address.toLowerCase()) {
         path.push(WETHAddr);
       }
       path.push(tokenConfigDest.address);
@@ -8109,12 +8109,22 @@ class FunctionsUtil {
     return this.BNify(0);
   }
   getTokenConversionRateUniswap = async (tokenConfig, blockNumber='latest') => {
-
     const DAITokenConfig = {
       address: this.getContractByName('DAI')._address
     };
-    const ToTokenConfig = tokenConfig.token ? this.getGlobalConfig(['stats', 'tokens', tokenConfig.token.toUpperCase()]) : tokenConfig.token;
-    const conversionRate = await this.getUniswapConversionRate(DAITokenConfig, ToTokenConfig, blockNumber);
+    const statsTokenConfig = tokenConfig.token ? this.getGlobalConfig(['stats', 'tokens', tokenConfig.token.toUpperCase()]) : null;
+
+    // Replace from token address
+    if (statsTokenConfig.addressForPriceFrom){
+      DAITokenConfig.address = statsTokenConfig.addressForPriceFrom;
+    }
+
+    const ToTokenConfig = statsTokenConfig || tokenConfig;
+
+    // Don't use WETH in the path
+    const useWETH = !statsTokenConfig.addressForPriceFrom;
+
+    const conversionRate = await this.getUniswapConversionRate(DAITokenConfig, ToTokenConfig, blockNumber, useWETH);
     if (!this.BNify(conversionRate).isNaN()) {
       return conversionRate;
     }
