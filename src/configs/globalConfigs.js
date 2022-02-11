@@ -1112,6 +1112,17 @@ const globalConfigs = {
         },
         address: '0x5a98fcbea516cf06857215779fd812ca3bef1b32'
       },
+      MTA: {
+        label: 'MTA',
+        decimals: 18,
+        enabled: true,
+        color: {
+          hex: '#000',
+          rgb: [0, 0, 0],
+          hsl: ['0', '0%', '0%']
+        },
+        address: '0xa3BeD4E1c75D00fa6f4E5E6922DB7261B5E9AcD2'
+      },
       CRV: {
         decimals: 18,
         enabled: true,
@@ -1145,6 +1156,75 @@ const globalConfigs = {
           hsl: ['241', '86%', '78%']
         },
         address: '0x5a6A4D54456819380173272A5E8E9B9904BdF41B'
+      },
+      ALUSD3CRV: {
+        decimals: 18,
+        enabled: true,
+        label: 'ALUSD3CRV',
+        icon: "images/tokens/ALUSD3CRV.png",
+        color: {
+          hex: '#333',
+          rgb: [51, 51, 51],
+          hsl: ['0, 0%, 20%']
+        },
+        address: '0x43b4FdFD4Ff969587185cDB6f0BD875c5Fc83f8c'
+      },
+      MUSD3CRV: {
+        decimals: 18,
+        enabled: true,
+        label: 'MUSD3CRV',
+        icon: "images/tokens/MUSD3CRV.png",
+        color: {
+          hex: '#333',
+          rgb: [51, 51, 51],
+          hsl: ['0, 0%, 20%']
+        },
+        address: '0x1AEf73d49Dedc4b1778d0706583995958Dc862e6'
+      },
+      MUSD: {
+        decimals: 18,
+        enabled: true,
+        label: 'mUSD',
+        color: {
+          hex: '#333',
+          rgb: [51, 51, 51],
+          hsl: ['0, 0%, 20%']
+        },
+        address: '0xe2f2a5c287993345a840db3b0845fbc70f5935a5'
+      },
+      ANGLE: {
+        decimals: 18,
+        enabled: true,
+        label: 'ANGLE',
+        color: {
+          hex: '#333',
+          rgb: [51, 51, 51],
+          hsl: ['0, 0%, 20%']
+        },
+        address: '0x31429d1856ad1377a8a0079410b297e1a9e214c2'
+      },
+      "3EUR": {
+        decimals: 18,
+        enabled: true,
+        label: '3EUR',
+        color: {
+          hex: '#333',
+          rgb: [51, 51, 51],
+          hsl: ['0, 0%, 20%']
+        },
+        address: '0xb9446c4Ef5EBE66268dA6700D26f96273DE3d571'
+      },
+      STECRV: {
+        decimals: 18,
+        enabled: true,
+        label: 'steCRV',
+        color: {
+          hex: '#00a3ff',
+          rgb: [0, 163, 255],
+          hsl: ['202', '100%', '50%']
+        },
+        conversionRateField: "stETHDAIPrice",
+        address: '0x06325440D014e39736583c165C2963BA99fAf14E'
       },
       SPELL: {
         decimals: 18,
@@ -1491,6 +1571,15 @@ const globalConfigs = {
         color: {
           rgb: [58, 58, 58],
           hsl: ['0', '0%', '23%']
+        }
+      },
+      mstable: {
+        legend: false,
+        enabled: true,
+        label: "mStable",
+        color: {
+          rgb: [0, 0, 0],
+          hsl: ['0', '0%', '0%']
         }
       },
       fuse: {
