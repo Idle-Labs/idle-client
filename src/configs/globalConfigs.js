@@ -1212,7 +1212,10 @@ const globalConfigs = {
           rgb: [51, 51, 51],
           hsl: ['0, 0%, 20%']
         },
-        address: '0xb9446c4Ef5EBE66268dA6700D26f96273DE3d571'
+        conversionRateField: "eurDAIPrice",
+        address: '0xb9446c4Ef5EBE66268dA6700D26f96273DE3d571',
+        addressForPrice: '0x1a7e4e63778b4f12a199c062f3efdd288afcbce8',
+        addressForPriceFrom: '0x956f47f50a910163d8bf957cf5846d573e7f87ca'
       },
       STECRV: {
         decimals: 18,
@@ -1224,7 +1227,8 @@ const globalConfigs = {
           hsl: ['202', '100%', '50%']
         },
         conversionRateField: "stETHDAIPrice",
-        address: '0x06325440D014e39736583c165C2963BA99fAf14E'
+        address: '0x06325440D014e39736583c165C2963BA99fAf14E',
+        addressForPrice: '0xae7ab96520de3a18e5e111b5eaab095312d7fe84'
       },
       SPELL: {
         decimals: 18,

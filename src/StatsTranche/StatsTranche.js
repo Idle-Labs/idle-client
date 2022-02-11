@@ -271,7 +271,7 @@ class StatsTranche extends Component {
 
     const aum_aa = this.functionsUtil.fixTokenDecimals(lastResult_aa.contractValue,this.props.tokenConfig.decimals);
     const aum_bb = this.functionsUtil.fixTokenDecimals(lastResult_bb.contractValue,this.props.tokenConfig.decimals);
-    const aum = await this.functionsUtil.convertTokenBalance(aum_aa.plus(aum_bb),this.props.selectedToken,this.props.tokenConfig);
+    const aum = await this.functionsUtil.convertTrancheTokenBalance(aum_aa.plus(aum_bb),this.props.tokenConfig);
 
     const firstAAPrice = this.functionsUtil.fixTokenDecimals(firstResult_aa.virtualPrice,this.props.tokenConfig.decimals);
     const lastAAPrice = this.functionsUtil.fixTokenDecimals(lastResult_aa.virtualPrice,this.props.tokenConfig.decimals);
