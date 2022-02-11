@@ -218,12 +218,13 @@ class PortfolioEquityTranches extends Component {
               trancheInfo:null
             });
 
-            if (!blocksTimestamps[blockInfo.trancheInfo.blockNumber]){
-              blocksTimestamps[blockInfo.trancheInfo.blockNumber] = [];
+            if (blockInfo && blockInfo.trancheInfo){
+              if (!blocksTimestamps[blockInfo.trancheInfo.blockNumber]){
+                blocksTimestamps[blockInfo.trancheInfo.blockNumber] = [];
+              }
+              blocksTimestamps[blockInfo.trancheInfo.blockNumber].push(blockInfo.trancheInfo.timeStamp);
+              conversionRateBlocksCalls[blockInfo.trancheInfo.blockNumber] = this.functionsUtil.getTokenConversionRateUniswap(tokenConfig,blockInfo.trancheInfo.blockNumber);
             }
-            blocksTimestamps[blockInfo.trancheInfo.blockNumber].push(blockInfo.trancheInfo.timeStamp);
-
-            conversionRateBlocksCalls[blockInfo.trancheInfo.blockNumber] = this.functionsUtil.getTokenConversionRateUniswap(tokenConfig,blockInfo.trancheInfo.blockNumber);
           }
 
           const conversionRates = await Promise.all(Object.values(conversionRateBlocksCalls));
