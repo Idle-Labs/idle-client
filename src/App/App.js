@@ -121,12 +121,14 @@ class App extends Component {
     const requiredNetworkId = this.state.network.required.id;
 
     const cachedData = { ...this.state.cachedData };
-    Object.keys(cachedData[requiredNetworkId]).forEach(key => {
-      const data = cachedData[requiredNetworkId][key];
-      if (data.expirationDate !== null) {
-        delete cachedData[requiredNetworkId][key];
-      }
-    });
+    if (cachedData[requiredNetworkId]){
+      Object.keys(cachedData[requiredNetworkId]).forEach(key => {
+        const data = cachedData[requiredNetworkId][key];
+        if (data.expirationDate !== null) {
+          delete cachedData[requiredNetworkId][key];
+        }
+      });
+    }
 
     const storedCachedData = clear_all ? {} : this.functionsUtil.getStoredItem('cachedData');
     if (storedCachedData && storedCachedData[requiredNetworkId]){
@@ -416,19 +418,6 @@ class App extends Component {
 
     if (window.localStorage) {
       this.functionsUtil.removeStoredItem('context');
-
-      // Clear all localStorage data except walletProvider and connectorName if version has changed
-      const version = this.functionsUtil.getStoredItem('version', false);
-      if (version !== globalConfigs.version) {
-        // Clear cached data
-        this.clearCachedData(() => {
-          // Reset Localstorage
-          this.functionsUtil.clearStoredData(['walletProvider', 'connectorName', 'themeMode', 'requiredNetwork']);
-          this.functionsUtil.setLocalStorage('version', globalConfigs.version);
-        }, true);
-      }
-
-      console.log(`Client Version: ${globalConfigs.version}`);
     }
 
     const themeMode = this.functionsUtil.getStoredItem('themeMode', false);
@@ -491,6 +480,24 @@ class App extends Component {
     window.removeEventListener('resize', this.handleWindowSizeChange);
   }
 
+  checkClientVersion(){
+    // Clear all localStorage data except walletProvider and connectorName if version has changed
+    const version = this.functionsUtil.getStoredItem('version', false);
+    const clientVersionChanged = version !== globalConfigs.version;
+    if (clientVersionChanged) {
+      console.log(`Client version updated from ${version} to ${globalConfigs.version}`);
+      const clearAllCache = this.functionsUtil.getGlobalConfig(['cache','clearAll']);
+      // Clear cached data
+      this.clearCachedData(() => {
+        // Reset Localstorage
+        this.functionsUtil.clearStoredData(['cachedData','walletProvider', 'connectorName', 'themeMode', 'requiredNetwork']);
+        this.functionsUtil.setLocalStorage('version', globalConfigs.version);
+      }, clearAllCache);
+    }
+
+    console.log(`Client Version: ${globalConfigs.version}`);
+  }
+
   componentDidUpdate(prevProps, prevState) {
     this.loadUtils();
 
@@ -503,6 +510,11 @@ class App extends Component {
         const themeMode = this.functionsUtil.getStoredItem('themeMode', false) || this.functionsUtil.getGlobalConfig(['dashboard', 'theme', 'mode']);
         this.setThemeMode(themeMode);
       }
+    }
+
+    const networkInitialized = !prevState.network && this.state.network;
+    if (networkInitialized){
+      this.checkClientVersion();
     }
 
     const tokenChanged = prevState.selectedToken !== this.state.selectedToken;

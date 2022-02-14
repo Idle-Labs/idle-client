@@ -3434,7 +3434,13 @@ class FunctionsUtil {
       if (item) {
         output = item;
         if (parse_json) {
-          output = JSON.parse(item);
+          try {
+            output = JSON.parse(item);
+          } catch (err) {
+            // Reset output and clear key
+            output = null;
+            this.removeStoredItem(key);
+          }
         }
       }
     }
@@ -3457,6 +3463,7 @@ class FunctionsUtil {
           storedKeysToRemove.push(storedKey);
         }
       }
+
       storedKeysToRemove.forEach((storedKey) => {
         this.removeStoredItem(storedKey)
       });
@@ -5878,7 +5885,16 @@ class FunctionsUtil {
       return blockInfo;
     }
 
-    return blockInfo ? this.setCachedDataWithLocalStorage(cachedDataKey, blockInfo, null) : null;
+    if (blockInfo){
+      const blockInfoToSave = {
+        hash:blockInfo.hash,
+        number:blockInfo.number,
+        timestamp:blockInfo.timestamp
+      };
+      return this.setCachedDataWithLocalStorage(cachedDataKey, blockInfoToSave, null);
+    }
+
+    return null;
   }
   getContractPastEvents = async (contractName, methodName, params = {}) => {
     if (!contractName) {
@@ -5971,7 +5987,7 @@ class FunctionsUtil {
     return output;
   }
   apr2apy = (apr) => {
-    return (this.BNify(1).plus(this.BNify(apr).div(365))).pow(365).minus(1);
+    return this.BNify((this.BNify(1).plus(this.BNify(apr).div(365))).pow(365).minus(1).toFixed(20));
   }
   getUnlentBalance = async (tokenConfig) => {
     let unlentBalance = await this.getProtocolBalance(tokenConfig.token, tokenConfig.idle.address);

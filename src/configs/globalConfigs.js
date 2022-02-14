@@ -79,13 +79,16 @@ const env = process.env;
 
 const globalConfigs = {
   appName: "Idle",
-  version: "v6.1",
+  version: "v6.2",
   baseToken: "ETH",
   baseURL: "https://idle.finance",
   forumURL: "https://gov.idle.finance",
   telegramURL: "https://t.me/idlefinance",
   discordURL: "https://discord.gg/mpySAJp",
   twitterURL: "https://twitter.com/idlefinance",
+  cache: {
+    clearAll:true
+  },
   theme: {
     darkModeEnabled: true
   },
