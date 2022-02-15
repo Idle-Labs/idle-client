@@ -631,12 +631,12 @@ const availableTranches = {
       CDO:{
         abi:IdleCDO,
         decimals:18,
-        name:'IdleCDO_convex_stETH',
+        name:'IdleCDO_convex_steCRV',
         address:'0x7ecfc031758190eb1cb303d8238d553b1d4bc8ef'
       },
       Strategy:{
         abi:IdleStrategy,
-        name:'IdleStrategy_convex_stETH'
+        name:'IdleStrategy_convex_steCRV'
       },
       buyInstructions:'To get steCRV token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://curve.fi/steth/deposit">stETH Curve Pool</a>.',
       AA:{
@@ -657,13 +657,13 @@ const availableTranches = {
           stakingRewards:[],
           unstakeWithBalance:true,
           abi:IdleCDOTrancheRewards,
-          name:'IdleCDOTrancheRewards_convex_stETH_AA',
+          name:'IdleCDOTrancheRewards_convex_steCRV',
           address:'0x0000000000000000000000000000000000000000'
         },
         blockNumber:14182975,
-        name:'AA_convex_stETH',
-        token:'AA_convex_stETH',
-        label:'convex stETH AA',
+        name:'AA_convex_steCRV',
+        token:'AA_convex_steCRV',
+        label:'convex steCRV AA',
         address:'0x060a53BCfdc0452F35eBd2196c6914e0152379A6'
       },
       BB:{
@@ -683,13 +683,13 @@ const availableTranches = {
           stakingRewards:[],
           unstakeWithBalance:true,
           abi:IdleCDOTrancheRewards,
-          name:'IdleCDOTrancheRewards_convex_stETH_BB',
+          name:'IdleCDOTrancheRewards_convex_steCRV',
           address:'0x0000000000000000000000000000000000000000'
         },
         blockNumber:14182975,
-        name:'BB_convex_stETH',
-        token:'BB_convex_stETH',
-        label:'convex stETH BB',
+        name:'BB_convex_steCRV',
+        token:'BB_convex_steCRV',
+        label:'convex steCRV BB',
         address:'0xd83246d2bCBC00e85E248A6e9AA35D0A1548968E'
       }
     },

@@ -1224,9 +1224,9 @@ const globalConfigs = {
         enabled: true,
         label: 'steCRV',
         color: {
-          hex: '#00a3ff',
-          rgb: [0, 163, 255],
-          hsl: ['202', '100%', '50%']
+          hex: '#637eea',
+          rgb: [99, 126, 234],
+          hsl: ['228', '76%', '65%']
         },
         conversionRateField: "stETHDAIPrice",
         address: '0x06325440D014e39736583c165C2963BA99fAf14E',
