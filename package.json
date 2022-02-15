@@ -169,6 +169,9 @@
       "react-app"
     ]
   },
+  "resolutions": {
+    "fs-extra": "7.0.0"
+  },
   "devDependencies": {
     "web3-batched-send": "^1.0.3"
   }
