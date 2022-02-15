@@ -326,9 +326,8 @@ const globalConfigs = {
     },
     rates: {
       path: ["apy", "day", "idle"],
-      endpoint: "https://www.curve.fi/raw-stats/apys.json"
+      endpoint: "https://stats.curve.fi/raw-stats/apys.json"
     },
-
     poolContract: {
       decimals: 18,
       abi: CurvePool,

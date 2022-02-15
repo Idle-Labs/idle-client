@@ -4511,35 +4511,40 @@ class FunctionsUtil {
       case 'trancheApyWithTooltip':
         let tokensApy = {};
         let trancheApy = null;
+        output = this.BNify(0);
         let apy = this.BNify(0);
         let trancheApyDecimals = 2;
         let baseApy = this.BNify(0);
+        let curveBaseApy = this.BNify(0);
 
-        output = this.BNify(0);
         [
           rewardsTokensInfo,
+          curveBaseApy,
           trancheApy
         ] = await Promise.all([
           this.getTrancheRewardTokensInfo(tokenConfig,trancheConfig),
+          tokenConfig.curveApyPath ? this.getCurveAPYs(tokenConfig.curveApyPath) : null,
           this.genericContractCallCached(tokenConfig.CDO.name, 'getApr', [trancheConfig.address])
         ]);
-        // console.log('trancheApy',this.props.network.required,tokenConfig.CDO.name,trancheConfig.address,trancheApy);
+
         if (trancheApy){
           let apr = this.fixTokenDecimals(trancheApy,tokenConfig.CDO.decimals);
 
           apy = this.apr2apy(apr.div(100)).times(100);
           baseApy = apy;
 
-          // console.log('trancheApy',tokenConfig.token,trancheApy.toString(),apr.toString(),apy.toString());
-          // tokensApy[tokenConfig.token] = baseApy;
-          
+          if (!this.BNify(curveBaseApy).isNaN()){
+            apy = apy.plus(curveBaseApy);
+            tokensApy['Curve vAPR'] = curveBaseApy;
+          }
+
+          // Add rewards tokens APRs
           if (rewardsTokensInfo && field !== 'trancheBaseApy'){
             Object.keys(rewardsTokensInfo).forEach( token => {
               const rewardTokenInfo = rewardsTokensInfo[token];
               if (!this.BNify(rewardTokenInfo.apy).isNaN() && (token !== 'IDLE' || show_idle_apy)){
                 const tokenApy = this.BNify(rewardTokenInfo.apy);
                 apy = apy.plus(tokenApy);
-                // console.log('trancheApy',token,rewardTokenInfo,tokenApy.toString(),apy.toString());
                 tokensApy[token] = tokenApy;
               }
             });
@@ -6351,6 +6356,34 @@ class FunctionsUtil {
       const unevenAmounts = await this.genericContractCall(curveSwapContract.name, 'remove_liquidity_imbalance', [amounts, max_burn_amount]);
       // this.customLog('getCurveUnevenTokenAmounts',amounts,max_burn_amount,unevenAmounts);
       return unevenAmounts;
+    }
+    return null;
+  }
+  getCurveAPYs = async (path=null) => {
+
+    // Check for cached data
+    const cachedDataKey = `getCurveAPY`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData && !this.BNify(cachedData).isNaN()) {
+      return this.BNify(cachedData);
+    }
+
+    const curveRatesInfo = this.getGlobalConfig(['curve', 'rates']);
+    if (curveRatesInfo) {
+      const results = await this.makeRequest(curveRatesInfo.endpoint);
+      if (results && results.data) {
+        if (path){
+          let curveApy = this.getArrayPath(path, results.data);
+          if (curveApy) {
+            curveApy = this.BNify(curveApy).times(100);
+            if (!this.BNify(curveApy).isNaN()) {
+              return this.setCachedDataWithLocalStorage(cachedDataKey, curveApy);
+            }
+          }
+        } else {
+          return results.data;
+        }
+      }
     }
     return null;
   }

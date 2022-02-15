@@ -245,6 +245,7 @@ const availableTranches = {
       }
     }
   },
+  /*
   mstable:{
     mUSD:{
       abi:ERC20,
@@ -320,6 +321,7 @@ const availableTranches = {
       }
     }
   },
+  */
   convex:{
     FRAX3CRV:{
       abi:ERC20,
@@ -328,6 +330,7 @@ const availableTranches = {
       protocol:'convex',
       blockNumber:13812864,
       autoFarming:['CVX','CRV'],
+      curveApyPath:['apy','day','frax'],
       address:'0xd632f22692FaC7611d2AA1C0D552930D43CAEd3B',
       CDO:{
         abi:IdleCDO,
@@ -400,6 +403,7 @@ const availableTranches = {
       token:'MIM3CRV',
       protocol:'convex',
       blockNumber:13848124,
+      curveApyPath:['apy','day','mim'],
       autoFarming:['CVX','CRV','SPELL'],
       address:'0x5a6A4D54456819380173272A5E8E9B9904BdF41B',
       CDO:{
@@ -467,6 +471,7 @@ const availableTranches = {
         address:'0x5346217536852CD30A5266647ccBB6f73449Cbd1'
       }
     },
+    /*
     ALUSD3CRV:{
       abi:ERC20,
       decimals:18,
@@ -613,6 +618,7 @@ const availableTranches = {
         address:'0xFb08404617B6afab0b19f6cEb2Ef9E07058D043C'
       }
     },
+    */
     steCRV:{
       abi:ERC20,
       decimals:18,
@@ -620,6 +626,7 @@ const availableTranches = {
       protocol:'convex',
       blockNumber:14182975,
       autoFarming:['CVX','CRV','LDO'],
+      curveApyPath:['apy','day','steth'],
       address:'0x06325440D014e39736583c165C2963BA99fAf14E',
       CDO:{
         abi:IdleCDO,
@@ -686,6 +693,7 @@ const availableTranches = {
         address:'0xd83246d2bCBC00e85E248A6e9AA35D0A1548968E'
       }
     },
+    /*
     "3EUR":{
       abi:ERC20,
       decimals:18,
@@ -759,6 +767,7 @@ const availableTranches = {
         address:'0x3061C652b49Ae901BBeCF622624cc9f633d01bbd'
       }
     }
+    */
   }
 };
 export default availableTranches;
