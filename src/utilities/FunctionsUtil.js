@@ -453,11 +453,13 @@ class FunctionsUtil {
 
     // Get staking rewards conversion rates
     await this.asyncForEach(Object.keys(portfolio.stakingRewards), async (rewardToken) => {
-      const rewardTokenConfig = this.getGlobalConfig(['govTokens',rewardToken.toUpperCase()]);
-      if (portfolio.stakingRewards[rewardToken].tokenAmount.gt(0)){
+      const rewardTokenConfig = this.getGlobalConfig(['govTokens',rewardToken]);
+      if (rewardTokenConfig.showBalance && portfolio.stakingRewards[rewardToken].tokenAmount.gt(0)){
         const rewardTokenConversionRate = await this.getTokenConversionRateUniswap(rewardTokenConfig);
         portfolio.stakingRewards[rewardToken].conversionRate = rewardTokenConversionRate;
         portfolio.stakingRewards[rewardToken].tokenAmountConverted = portfolio.stakingRewards[rewardToken].tokenAmount.times(rewardTokenConversionRate);
+
+        // console.log(rewardToken,portfolio.stakingRewards[rewardToken].tokenAmountConverted.toFixed(5));
 
         totalBalance = totalBalance.plus(portfolio.stakingRewards[rewardToken].tokenAmountConverted);
       }
