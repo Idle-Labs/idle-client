@@ -116,6 +116,8 @@ class PortfolioEquity extends Component {
           const tokenPrice = this.functionsUtil.BNify(tx.tokenPrice);
           const idleTokens = this.functionsUtil.BNify(tx.idleTokens);
 
+          // console.log(selectedToken,this.functionsUtil.strToMoment(tx.timeStamp*1000).format("DD-MM-YYYY HH:mm:ss"),tx.action,tokenAmount.toFixed(5),amountLent.toFixed(5),idleTokens.toFixed(5));
+
           if (!tokenPrice.isNaN() && !tokenPrice.isNaN()){
             tokensBalance[selectedToken].push({
               action,
@@ -207,15 +209,22 @@ class PortfolioEquity extends Component {
             const currentBalance = parseFloat(lastFilteredTx.balance);
 
             // Take idleToken price from API and calculate new balance
-            if (currentBalance>0 && timeStamp>firstTxTimestamp && lastTokenData){
-              const idleTokens = idleTokenBalance[token];
-              const idlePrice = this.functionsUtil.fixTokenDecimals(lastTokenData.idlePrice,tokenDecimals);
-              let newBalance = idleTokens.times(idlePrice);
+            if (currentBalance>0){
+              if (timeStamp>firstTxTimestamp && lastTokenData){
+                const idleTokens = idleTokenBalance[token];
+                const idlePrice = this.functionsUtil.fixTokenDecimals(lastTokenData.idlePrice,tokenDecimals);
+                let newBalance = idleTokens.times(idlePrice);
 
-              // Set new balance and tokenPrice
-              lastFilteredTx.balance = newBalance;
-              lastFilteredTx.tokenPrice = idlePrice;
-              filteredBalances = [lastFilteredTx];
+                // Set new balance and tokenPrice
+                lastFilteredTx.balance = newBalance;
+                lastFilteredTx.tokenPrice = idlePrice;
+                filteredBalances = [lastFilteredTx];
+              }
+            } else {
+              filteredBalances = [{
+                balance:this.functionsUtil.BNify(0),
+                tokenPrice:this.functionsUtil.BNify(0)
+              }];
             }
           } else {
             filteredBalances = [{
@@ -262,8 +271,9 @@ class PortfolioEquity extends Component {
           }
           
           tokensBalances[token] = lastTxBalance;
-
           aggregatedBalance = aggregatedBalance.plus(lastTxBalance);
+        } else {
+          tokensBalances[token] = this.functionsUtil.BNify(0);
         }
 
         foundBalances[token] = filteredBalances;

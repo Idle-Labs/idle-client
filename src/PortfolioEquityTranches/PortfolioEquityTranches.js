@@ -356,19 +356,22 @@ class PortfolioEquityTranches extends Component {
               const currentBalance = parseFloat(lastFilteredTx.balance);
 
               // Take tranchePrice from API and calculate new balance
-              if (currentBalance>0 && timeStamp>firstTxTimestamp && lastTokenData){
-                const trancheTokens = trancheTokenBalance[token][tranche];
-                const tranchePrice = this.functionsUtil.fixTokenDecimals(lastTokenData.tranchePrice,tokenDecimals);
-                let newBalance = trancheTokens.times(tranchePrice);
+              if (currentBalance>0){
+                if (timeStamp>firstTxTimestamp && lastTokenData){
+                  const trancheTokens = trancheTokenBalance[token][tranche];
+                  const tranchePrice = this.functionsUtil.fixTokenDecimals(lastTokenData.tranchePrice,tokenDecimals);
+                  let newBalance = trancheTokens.times(tranchePrice);
 
-                // Set new balance and tranchePrice
-                lastFilteredTx.balance = newBalance;
-                lastFilteredTx.tranchePrice = tranchePrice;
-                filteredBalances = [lastFilteredTx];
-
-                // if (token === 'FEI'){
-                  // console.log(this.functionsUtil.strToMoment(timeStamp*1000).format('DD/MM/YYYY HH:mm:ss'),token,tranche,trancheTokens.toFixed(5),tranchePrice.toFixed(5),newBalance.toFixed(5),filteredBalances);
-                // }
+                  // Set new balance and tranchePrice
+                  lastFilteredTx.balance = newBalance;
+                  lastFilteredTx.tranchePrice = tranchePrice;
+                  filteredBalances = [lastFilteredTx];
+                }
+              } else {
+                filteredBalances = [{
+                  balance:this.functionsUtil.BNify(0),
+                  tranchePrice:this.functionsUtil.BNify(0)
+                }];
               }
             } else {
               filteredBalances = [{
