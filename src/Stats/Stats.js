@@ -529,6 +529,9 @@ class Stats extends Component {
     const networkId = this.functionsUtil.getRequiredNetworkId();
     const idleTokenAvailableNetworks = this.functionsUtil.getGlobalConfig(['govTokens','IDLE','availableNetworks']);
     const idleTokenEnabled = this.functionsUtil.getGlobalConfig(['govTokens','IDLE','enabled']) && idleTokenAvailableNetworks.includes(networkId);
+
+    const tranchesConfig = this.functionsUtil.getGlobalConfig(['strategies','tranches']);
+    const tranchesEnabled = tranchesConfig.availableNetworks.includes(networkId);
     
     const refreshIdleSpeedConfig = this.functionsUtil.getGlobalConfig(['contract','methods','refreshIdleSpeed']);
     const refreshIdleSpeedEnabled = refreshIdleSpeedConfig.enabled && refreshIdleSpeedConfig.availableNetworks.includes(networkId);
@@ -820,225 +823,234 @@ class Stats extends Component {
             )
           }
 
-          <Title mb={[3,4]}>Tranches</Title>
-          <TranchesList
-              enabledProtocols={[]}
-              availableTranches={this.props.availableTranches}
-              handleClick={(props) => this.selectTranche('tranches',props.protocol,props.token)}
-              cols={[
-                {
-                  title:'PROTOCOL',
-                  props:{
-                    width:[0.25, 0.14]
-                  },
-                  fields:[
-                    {
-                      name:'protocolIcon',
-                      props:{
-                        mr:2,
-                        height:['1.4em','2em']
-                      }
-                    },
-                    {
-                      name:'protocolName'
-                    },
-                    {
-                      mobile:false,
-                      name:'experimentalBadge',
-                      props:{
-                        ml:1,
-                        height:'1.5em'
-                      }
-                    }
-                  ]
-                },
-                {
-                  title:'TOKEN',
-                  props:{
-                    width:[0.25, 0.14],
-                  },
-                  fields:[
-                    {
-                      name:'tokenIcon',
-                      props:{
-                        mr:2,
-                        height:['1.4em','2em']
-                      }
-                    },
-                    {
-                      mobile:false,
-                      name:'tokenName'
-                    }
-                  ]
-                },
-
-                /*
-                {
-                  title:'TYPE',
-                  props:{
-                    width:[0.29,0.13],
-                  },
-                  fields:[
-                    {
-                      name:'trancheTypeIcon',
-                      props:{
-                        flexProps:{
-                          mr:2
+          {
+            tranchesEnabled && (
+              <Box
+                width={1}
+              >
+                <Title mb={[3,4]}>Tranches</Title>
+                <TranchesList
+                    enabledProtocols={[]}
+                    availableTranches={this.props.availableTranches}
+                    handleClick={(props) => this.selectTranche('tranches',props.protocol,props.token)}
+                    cols={[
+                      {
+                        title:'PROTOCOL',
+                        props:{
+                          width:[0.25, 0.14]
                         },
-                        size:'1.4em'
-                      }
-                    },
-                    {
-                      name:'trancheType'
-                    }
-                  ],
-                  visible:this.state.useTrancheType
-                },
-                */
-                {
-                  title:'POOL',
-                  props:{
-                    width:[0.25, 0.14],
-                  },
-                  fields:[
-                    {
-                      name:'pool',
-                      props:{
-                        minPrecision:1,
-                        decimals:this.props.isMobile ? 0 : 2,
-                      }
-                    }
-                  ]
-                },
-                {
-                  title:'SENIOR APY',
-                  props:{
-                    width:[0.28, 0.14],
-                  },
-                  parentProps:{
-                    flexDirection:'column',
-                    alignItems:'flex-start',
-                  },
-                  fields:[
-                    {
-                      name:'seniorApy',
-                      showTooltip:true
-                    },
-                  ],
-                },
-                {
-                  title:'JUNIOR APY',
-                  props:{
-                    width:[0.28, 0.14],
-                  },
-                  parentProps:{
-                    flexDirection:'column',
-                    alignItems:'flex-start',
-                  },
-                  fields:[
-                    {
-                      name:'juniorApy',
-                      props:{
-                        flexProps:{
-                          mr:3
-                        }
+                        fields:[
+                          {
+                            name:'protocolIcon',
+                            props:{
+                              mr:2,
+                              height:['1.4em','2em']
+                            }
+                          },
+                          {
+                            name:'protocolName'
+                          },
+                          {
+                            mobile:false,
+                            name:'experimentalBadge',
+                            props:{
+                              ml:1,
+                              height:'1.5em'
+                            }
+                          }
+                        ]
                       },
-                      showTooltip:true
-                    },
-                  ],
-                },
-                {
-                  mobile:false,
-                  title:'APR RATIO',
-                  props:{
-                    width:[0.24, 0.13],
-                  },
-                  fields:[
-                    {
-                      name:'trancheAPRSplitRatio',
-                      props:{
-                        flexProps:{
-                          mr:2
+                      {
+                        title:'TOKEN',
+                        props:{
+                          width:[0.25, 0.14],
                         },
-                        height:['1.4em','2em']
-                      }
-                    },
+                        fields:[
+                          {
+                            name:'tokenIcon',
+                            props:{
+                              mr:2,
+                              height:['1.4em','2em']
+                            }
+                          },
+                          {
+                            mobile:false,
+                            name:'tokenName'
+                          }
+                        ]
+                      },
 
-                  ]
-                },
-                  /*
-                {
-                  mobile:false,
-                  title:'AUTO-FARMING',
-                  props:{
-                    width:[0.25,this.state.useTrancheType ? 0.14 : 0.14],
-                  },
-                  fields:[
-                    {
-                      name:'autoFarming'
-                    }
-                  ]
-                },
-          */
-                  /*
-                {
-                  mobile:false,
-                  title:'STAKING REWARDS',
-                  props:{
-                    width:[0.25,this.state.useTrancheType ? 0.15 : 0.13],
-                  },
-                  fields:[
-                    {
-                      name:'stakingRewards'
-                    }
-                  ]
-                },
-                /*
-                {
-                  mobile:true,
-                  title:'TOKENS',
-                  props:{
-                    width:[0.16,0.17],
-                  },
-                  fields:[
-                    {
-                      name:'govTokens'
-                    }
-                  ]
-                },
+                      /*
+                      {
+                        title:'TYPE',
+                        props:{
+                          width:[0.29,0.13],
+                        },
+                        fields:[
+                          {
+                            name:'trancheTypeIcon',
+                            props:{
+                              flexProps:{
+                                mr:2
+                              },
+                              size:'1.4em'
+                            }
+                          },
+                          {
+                            name:'trancheType'
+                          }
+                        ],
+                        visible:this.state.useTrancheType
+                      },
+                      */
+                      {
+                        title:'POOL',
+                        props:{
+                          width:[0.25, 0.14],
+                        },
+                        fields:[
+                          {
+                            name:'pool',
+                            props:{
+                              minPrecision:1,
+                              decimals:this.props.isMobile ? 0 : 2,
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        title:'SENIOR APY',
+                        props:{
+                          width:[0.28, 0.14],
+                        },
+                        parentProps:{
+                          flexDirection:'column',
+                          alignItems:'flex-start',
+                        },
+                        fields:[
+                          {
+                            name:'seniorApy',
+                            showTooltip:true
+                          },
+                        ],
+                      },
+                      {
+                        title:'JUNIOR APY',
+                        props:{
+                          width:[0.28, 0.14],
+                        },
+                        parentProps:{
+                          flexDirection:'column',
+                          alignItems:'flex-start',
+                        },
+                        fields:[
+                          {
+                            name:'juniorApy',
+                            props:{
+                              flexProps:{
+                                mr:3
+                              }
+                            },
+                            showTooltip:true
+                          },
+                        ],
+                      },
+                      {
+                        mobile:false,
+                        title:'APR RATIO',
+                        props:{
+                          width:[0.24, 0.13],
+                        },
+                        fields:[
+                          {
+                            name:'trancheAPRSplitRatio',
+                            props:{
+                              flexProps:{
+                                mr:2
+                              },
+                              height:['1.4em','2em']
+                            }
+                          },
+
+                        ]
+                      },
+                        /*
+                      {
+                        mobile:false,
+                        title:'AUTO-FARMING',
+                        props:{
+                          width:[0.25,this.state.useTrancheType ? 0.14 : 0.14],
+                        },
+                        fields:[
+                          {
+                            name:'autoFarming'
+                          }
+                        ]
+                      },
                 */
+                        /*
+                      {
+                        mobile:false,
+                        title:'STAKING REWARDS',
+                        props:{
+                          width:[0.25,this.state.useTrancheType ? 0.15 : 0.13],
+                        },
+                        fields:[
+                          {
+                            name:'stakingRewards'
+                          }
+                        ]
+                      },
+                      /*
+                      {
+                        mobile:true,
+                        title:'TOKENS',
+                        props:{
+                          width:[0.16,0.17],
+                        },
+                        fields:[
+                          {
+                            name:'govTokens'
+                          }
+                        ]
+                      },
+                      */
 
-                {
-                  title:'',
-                  mobile:false,
-                  props:{
-                    width:[0.29, 0.15],
-                  },
-                  parentProps:{
-                    width:1
-                  },
-                  fields:[
-                    {
-                      name:'button',
-                      label: 'View Stats',
-                      props:{
-                        width:1,
-                        fontSize:3,
-                        fontWeight:3,
-                        height:'45px',
-                        borderRadius:4,
-                        boxShadow:null,
-                        mainColor:'redeem',
-                        size: this.props.isMobile ? 'small' : 'medium',
-                        handleClick:(props) => this.selectTranche('tranches',props.protocol,props.token)
+                      {
+                        title:'',
+                        mobile:false,
+                        props:{
+                          width:[0.29, 0.15],
+                        },
+                        parentProps:{
+                          width:1
+                        },
+                        fields:[
+                          {
+                            name:'button',
+                            label: 'View Stats',
+                            props:{
+                              width:1,
+                              fontSize:3,
+                              fontWeight:3,
+                              height:'45px',
+                              borderRadius:4,
+                              boxShadow:null,
+                              mainColor:'redeem',
+                              size: this.props.isMobile ? 'small' : 'medium',
+                              handleClick:(props) => this.selectTranche('tranches',props.protocol,props.token)
+                            }
+                          }
+                        ]
                       }
-                    }
-                  ]
-                }
 
-              ]}
-              {...this.props}
-          />
+                    ]}
+                    {...this.props}
+                />
+              </Box>
+            )
+          }
+
           {
             idleTokenEnabled && refreshIdleSpeedEnabled && !this.state.showRefreshIdleSpeed ? (
               <Flex
