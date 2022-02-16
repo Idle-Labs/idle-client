@@ -174,6 +174,35 @@ class Tranches extends Component {
         };
       });
 
+      // Add Staking rewards to Portfolio Donut
+      Object.keys(portfolio.stakingRewards).forEach( token => {
+        const balanceValue = parseFloat(portfolio.stakingRewards[token].tokenAmountConverted.toFixed(4));
+        const tokenPercentage = portfolio.stakingRewards[token].tokenAmountConverted.div(portfolio.totalBalance).times(100);
+        const tokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase()]);
+        const govTokenConfig = this.functionsUtil.getGlobalConfig(['govTokens',token]);
+        if (govTokenConfig.showBalance){
+          portfolioDonutData.push({
+            id:token,
+            name:token,
+            label:token,
+            valueHoverProps:{
+              unit:'$',
+              unitPos:'left',
+              unitProps:{
+                mr:2,
+                fontWeight:4,
+                fontSize:[3,4]
+              }
+            },
+            valueHover:balanceValue,
+            value:Math.round(tokenPercentage),
+            description: `$ ${balanceValue} in ${token}`,
+            color:'hsl('+tokenConfig.color.hsl.join(',')+')',
+            image:tokenConfig && tokenConfig.icon ? tokenConfig.icon : `images/tokens/${token.toUpperCase()}.svg`,
+          });
+        }
+      });
+
       const allocationChartData = Object.keys(tranchesBalances).map((trancheName,i)=>{
         const trancheConfig = tranchesConfig[trancheName];
         const balanceInfo = tranchesBalances[trancheName];

@@ -302,6 +302,7 @@ class FunctionsUtil {
   getAccountPortfolioTranches = async (availableTranches = null, account = null) => {
     const portfolio = {
       transactions: [],
+      stakingRewards: {},
       tranchesBalance: [],
       avgAPY: this.BNify(0),
       totalBalance: this.BNify(0),
@@ -328,10 +329,12 @@ class FunctionsUtil {
           let [
             trancheTokenBalance,
             trancheUserInfo,
+            stakingRewards,
             trancheStakedBalance,
           ] = await Promise.all([
             this.getContractBalance(trancheConfig.name,account),
             this.getTrancheUserInfo(tokenConfig, trancheConfig, account),
+            this.getTrancheStakingRewards(account,trancheConfig,trancheConfig.functions.rewards),
             this.getTrancheStakedBalance(trancheConfig.CDORewards.name,account,null,trancheConfig.functions.stakedBalance),
           ]);
 
@@ -340,6 +343,19 @@ class FunctionsUtil {
           if (trancheUserInfo && trancheUserInfo.transactions){
             portfolio.transactions = [...portfolio.transactions, ...trancheUserInfo.transactions];
           }
+
+          // Get staking rewards amounts
+          Object.keys(stakingRewards).forEach( rewardToken => {
+            if (!portfolio.stakingRewards[rewardToken]){
+              portfolio.stakingRewards[rewardToken] = {
+                tokenAmount:this.BNify(0),
+                conversionRate:this.BNify(0),
+                tokenAmountConverted:this.BNify(0)
+              }
+            }
+            const tokenAmount = !this.BNify(stakingRewards[rewardToken]).isNaN() ? this.BNify(stakingRewards[rewardToken]) : this.BNify(0);
+            portfolio.stakingRewards[rewardToken].tokenAmount = portfolio.stakingRewards[rewardToken].tokenAmount.plus(tokenAmount);
+          });
 
           if ((trancheTokenBalance && this.BNify(trancheTokenBalance).gt(0)) || (trancheStakedBalance && this.BNify(trancheStakedBalance).gt(0))) {
             trancheTokenBalance = this.fixTokenDecimals(trancheTokenBalance,trancheConfig.decimals);
@@ -434,6 +450,18 @@ class FunctionsUtil {
     if (totalAmountLent.gt(0)) {
       totalEarningsPerc = totalEarnings.div(totalAmountLent).times(100);
     }
+
+    // Get staking rewards conversion rates
+    await this.asyncForEach(Object.keys(portfolio.stakingRewards), async (rewardToken) => {
+      const rewardTokenConfig = this.getGlobalConfig(['govTokens',rewardToken.toUpperCase()]);
+      if (portfolio.stakingRewards[rewardToken].tokenAmount.gt(0)){
+        const rewardTokenConversionRate = await this.getTokenConversionRateUniswap(rewardTokenConfig);
+        portfolio.stakingRewards[rewardToken].conversionRate = rewardTokenConversionRate;
+        portfolio.stakingRewards[rewardToken].tokenAmountConverted = portfolio.stakingRewards[rewardToken].tokenAmount.times(rewardTokenConversionRate);
+
+        totalBalance = totalBalance.plus(portfolio.stakingRewards[rewardToken].tokenAmountConverted);
+      }
+    });
 
     portfolio.avgAPY = avgAPY;
     portfolio.totalBalance = totalBalance;

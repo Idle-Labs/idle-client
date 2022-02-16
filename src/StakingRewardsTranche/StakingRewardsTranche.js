@@ -47,14 +47,14 @@ class StakingRewardsTranche extends Component {
     }
 
     const [
-      stakingRewards,
       trancheBalance,
       rewardTokensInfo,
+      stakingRewards,
       trancheStakedAmount
     ] = await Promise.all([
-      this.functionsUtil.getTrancheStakingRewards(this.props.account,this.props.trancheConfig,this.props.trancheConfig.functions.rewards),
       this.functionsUtil.getTokenBalance(this.props.trancheConfig.name,this.props.account,false),
       this.functionsUtil.getTrancheRewardTokensInfo(this.props.tokenConfig,this.props.trancheConfig),
+      this.functionsUtil.getTrancheStakingRewards(this.props.account,this.props.trancheConfig,this.props.trancheConfig.functions.rewards),
       this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals,this.props.trancheConfig.functions.stakedBalance)
     ]);
 

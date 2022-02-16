@@ -484,6 +484,25 @@ const globalConfigs = {
       address: "0xc00e94cb662c3520282e6f5717214004a7f26888" // MAIN
       // address:'0x61460874a7196d6a22d1ee4922473664b3e95270' // KOVAN
     },
+    LDO: {
+      abi: ERC20,
+      token: "LDO",
+      decimals: 18,
+      enabled: true,
+      showAUM: true, // Include balance in AUM
+      showAPR: true, // Include Apr
+      showPrice: true,
+      protocol: "lido",
+      showBalance: true, // Include balance in Portfolio Donut
+      disabledTokens: [],
+      aprTooltipMode: false,
+      availableNetworks: [1],
+      color: "hsl(9, 86%, 75%)",
+      distributionMode: "block",
+      distributionFrequency: "day",
+      address: "0x5a98fcbea516cf06857215779fd812ca3bef1b32" // MAIN
+      // address:'0x61460874a7196d6a22d1ee4922473664b3e95270' // KOVAN
+    },
     stkAAVE: {
       abi: aToken,
       decimals: 18,
@@ -1108,9 +1127,9 @@ const globalConfigs = {
         decimals: 18,
         enabled: true,
         color: {
-          hex: '#3a3a3a',
-          rgb: [58, 58, 58],
-          hsl: ['0', '0%', '23%']
+          hex: '#f69988',
+          rgb: [246, 153, 136],
+          hsl: ['9', '86%', '75%']
         },
         address: '0x5a98fcbea516cf06857215779fd812ca3bef1b32'
       },
@@ -1224,9 +1243,9 @@ const globalConfigs = {
         enabled: true,
         label: 'steCRV',
         color: {
-          hex: '#637eea',
-          rgb: [99, 126, 234],
-          hsl: ['228', '76%', '65%']
+          hex: '#81c8ff',
+          rgb: [129, 200, 255],
+          hsl: ['206', '100%', '75%']
         },
         conversionRateField: "stETHDAIPrice",
         address: '0x06325440D014e39736583c165C2963BA99fAf14E',
