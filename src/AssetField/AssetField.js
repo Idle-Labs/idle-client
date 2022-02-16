@@ -833,28 +833,29 @@ class AssetField extends Component {
     const decimals = fieldProps && fieldProps.decimals ? fieldProps.decimals : ( this.props.isMobile ? 2 : 3 );
     const minPrecision = fieldProps && fieldProps.minPrecision ? fieldProps.minPrecision : ( this.props.isMobile ? 3 : 4 );
 
+    const tokenIcon = tokenConfigStats && tokenConfigStats.icon ? tokenConfigStats.icon : (tokenConfig && tokenConfig.icon ? tokenConfig.icon : `images/tokens/${this.props.token}.svg`);
+
     switch (fieldInfo.name){
       case 'iconTooltip':
-        const icon1 = tokenConfig && tokenConfig.icon ? tokenConfig.icon : `images/tokens/${this.props.token}.svg`;
         output = (
           <Tooltip
             placement={'top'}
             message={this.props.token}
             {...fieldInfo.tooltipProps}
           >
-            <Image src={icon1} {...fieldProps} />
+            <Image src={tokenIcon} {...fieldProps} />
           </Tooltip>
         );
       break;
       case 'icon':
-        const icon2 = tokenConfigStats && tokenConfigStats.icon ? tokenConfigStats.icon : `images/tokens/${this.props.token}.svg`;
         output = (
-          <Image src={icon2} {...fieldProps} />
+          <Image src={tokenIcon} {...fieldProps} />
         );
       break;
       case 'tokenName':
+        const tokenName = tokenConfigStats && tokenConfigStats.label ? tokenConfigStats.label : this.props.token;
         output = (
-          <Text {...fieldProps}>{this.props.token}</Text>
+          <Text {...fieldProps}>{tokenName}</Text>
         );
       break;
       case 'strategyIcon':
