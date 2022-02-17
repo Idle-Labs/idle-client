@@ -2960,18 +2960,21 @@ class FunctionsUtil {
       return;
     const size=Object.keys(resultsFull.data.data.trancheInfos).length;
     //console.log(size)
-    let results=null;
-    if(size===40)
-      results=Object.values(resultsFull.data.data.trancheInfos).splice(20);
-    else
-      results=Object.values(resultsFull.data.data.trancheInfos)
+    
+    let results=Object.values(resultsFull.data.data.trancheInfos);
+    //console.log("results",results)
+    
+    if(results[0].timetamp!==results[size-1].timeStamp);
+      results=results.splice(size/2);
+
     results=results.filter(result=>result.Tranche.type==="BBTranche")
     let maxApr=this.toEth(results[0].apr);
     maxApr=parseFloat(maxApr);
     let maxTranche=null;
     results.forEach(result=>{
       const apr=parseFloat(this.toEth(result.apr))
-      console.log("Apr",apr,maxApr)
+      //console.log("Apr",apr,maxApr,result.Tranche.CDO.id)
+      
       if(apr>maxApr)
       {
         maxTranche=result;
@@ -2986,6 +2989,7 @@ class FunctionsUtil {
     Object.keys(this.props.availableTranches).forEach(protocol=>{
       Object.keys(this.props.availableTranches[protocol]).forEach(token=>{
         //console.log("PT1",protocol,token,this.props.availableTranches[protocol][token].CDO.address)
+        //console.log(this.props.availableTranches[protocol][token].CDO.address)
         
         if(this.props.availableTranches[protocol][token].CDO.address.toLowerCase()===maxTranche.Tranche.CDO.id.toLowerCase()){
           maxProtocol=protocol
@@ -2994,7 +2998,11 @@ class FunctionsUtil {
       })
     })
     //console.log("PT",maxProtocol,maxToken)
-    
+    if(!maxProtocol)  
+    {
+        maxProtocol="lido"
+        maxToken="stETH"
+    }
     let max={
       protocol:maxProtocol,
       maxToken:maxToken

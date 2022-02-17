@@ -33,7 +33,7 @@ class Base extends Component {
       "tranches"
     ]);
     const maxData=this.functionsUtil.getTrancheMax();
-    strategyInfo.token=maxData.token;
+    strategyInfo.token=maxData.maxToken;
     strategyInfo.protocol=maxData.protocol;
 
     const tokenConfig =

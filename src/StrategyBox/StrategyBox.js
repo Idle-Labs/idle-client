@@ -62,7 +62,7 @@ class StrategyBox extends Component {
 
     const contractsInitialized = !prevProps.contractsInitialized && this.props.contractsInitialized;
     if (contractsInitialized){
-      this.loadData();
+      await this.loadData();
     }
   }
 
@@ -83,12 +83,13 @@ class StrategyBox extends Component {
     
     switch (strategyInfo.type){
       case 'tranche':
-        const data = this.functionsUtil.getTrancheMax();
+        const data = await this.functionsUtil.getTrancheMax();
         //console.log("data",data);
-        
         strategyInfo.protocol=data.protocol;
-        strategyInfo.token=data.token;
-        selectedToken = data.token;
+        strategyInfo.token=data.maxToken;
+        //console.log(strategyInfo.protocol,strategyInfo.token)
+        
+        selectedToken = data.maxToken;
       break;
       default:
       case 'strategy':
