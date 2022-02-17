@@ -68,7 +68,7 @@ class StrategyBox extends Component {
 
   loadData = async () => {
 
-    const strategyInfo = this.functionsUtil.getGlobalConfig(['landingStrategies',this.props.strategy]);
+    let strategyInfo = this.functionsUtil.getGlobalConfig(['landingStrategies',this.props.strategy]);
 
     // console.log('loadData - contractsInitialized',this.props.contractsInitialized);
 
@@ -83,7 +83,12 @@ class StrategyBox extends Component {
     
     switch (strategyInfo.type){
       case 'tranche':
-        selectedToken = strategyInfo.token;
+        const data = this.functionsUtil.getTrancheMax();
+        //console.log("data",data);
+        
+        strategyInfo.protocol=data.protocol;
+        strategyInfo.token=data.token;
+        selectedToken = data.token;
       break;
       default:
       case 'strategy':
