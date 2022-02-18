@@ -11,7 +11,8 @@ class StrategyBox extends Component {
 
   state = {
     network:null,
-    selectedToken:null
+    selectedToken:null,
+    selectedProtocol:null,
   };
 
   // Utils
@@ -80,16 +81,15 @@ class StrategyBox extends Component {
     const tokensAprs = {};
     let highestValue = null;
     let selectedToken = null;
+    let selectedProtocol = null;
     
     switch (strategyInfo.type){
       case 'tranche':
         const data = await this.functionsUtil.getTrancheMax();
         //console.log("data",data);
-        strategyInfo.protocol=data.protocol;
-        strategyInfo.token=data.maxToken;
         //console.log(strategyInfo.protocol,strategyInfo.token)
-        
         selectedToken = data.maxToken;
+        selectedProtocol=data.protocol
       break;
       default:
       case 'strategy':
@@ -162,7 +162,8 @@ class StrategyBox extends Component {
     // console.log('loadData',strategyInfo.type,this.props.strategy,strategyInfo.strategy,selectedToken);
 
     this.setState({
-      selectedToken
+      selectedToken,
+      selectedProtocol
     });
   }
 
@@ -188,7 +189,9 @@ class StrategyBox extends Component {
   }
 
   render() {
+    
     const strategyInfo = this.functionsUtil.getGlobalConfig(['landingStrategies',this.props.strategy]);
+
     const networkInfo = this.functionsUtil.getGlobalConfig(['network','availableNetworks',strategyInfo.networkId]);
 
     // const chartColor = strategyInfo.chartColor ? strategyInfo.chartColor : null;
@@ -196,7 +199,7 @@ class StrategyBox extends Component {
     let tokenConfig = null;
     switch (strategyInfo.type){
       case 'tranche':
-        tokenConfig = this.props.availableTranches[strategyInfo.protocol][strategyInfo.token];
+        tokenConfig = this.props.availableTranches[this.state.selectedProtocol][this.state.selectedToken];
       break;
       default:
       case 'strategy':
