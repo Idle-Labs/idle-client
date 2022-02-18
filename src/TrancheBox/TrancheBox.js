@@ -20,10 +20,24 @@ class Base extends Component {
 
   async componentWillMount() {
     this.loadUtils();
+    await this.loadData();
   }
 
   async componentDidUpdate(prevProps, prevState) {
     this.loadUtils();
+    await this.loadData();
+  }
+
+  async loadData(){
+    let token=null;
+    let protocol=null;
+    const maxData=this.functionsUtil.getTrancheMax();
+    token=maxData.maxToken;
+    protocol=maxData.protocol;
+    this.setState({
+      token,
+      protocol
+    })
   }
 
   render() {
@@ -32,13 +46,10 @@ class Base extends Component {
       "strategies",
       "tranches"
     ]);
-    const maxData=this.functionsUtil.getTrancheMax();
-    strategyInfo.token=maxData.maxToken;
-    strategyInfo.protocol=maxData.protocol;
 
     const tokenConfig =
       this.props.tokenConfig ||
-      this.props.availableTranches[strategyInfo.protocol][strategyInfo.token];
+      this.props.availableTranches[this.state.protocol][this.state.token];
 
     return (
       <Box
@@ -118,9 +129,9 @@ class Base extends Component {
                     }}
                     {...this.props}
                     tokenConfig={tokenConfig}
-                    token={strategyInfo.token}
+                    token={this.state.token}
                     tranche={strategyInfo.tranche}
-                    protocol={strategyInfo.protocol}
+                    protocol={this.state.protocol}
                   />
                   <Text
                     my={1}
