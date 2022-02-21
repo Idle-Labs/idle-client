@@ -33,13 +33,13 @@ class Base extends Component {
     let protocol=null;
     const maxData=this.functionsUtil.getTrancheMax();
     if(maxData){
-    token=maxData.maxToken;
-    protocol=maxData.protocol;
-    this.setState({
-      token,
-      protocol
-    })
-  }
+      token=maxData.maxToken;
+      protocol=maxData.protocol;
+      this.setState({
+        token,
+        protocol
+      })
+    }
   }
 
   render() {
