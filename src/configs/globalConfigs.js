@@ -1184,9 +1184,9 @@ const globalConfigs = {
         label: 'ALUSD3CRV',
         icon: "images/tokens/ALUSD3CRV.png",
         color: {
-          hex: '#333',
-          rgb: [51, 51, 51],
-          hsl: ['0, 0%, 20%']
+          hex: '#ffbf93',
+          rgb: [255, 191, 147],
+          hsl: ['24, 100%, 79%']
         },
         address: '0x43b4FdFD4Ff969587185cDB6f0BD875c5Fc83f8c'
       },
