@@ -2930,7 +2930,11 @@ class FunctionsUtil {
   }
   getTrancheMax= async ()=>{
 
-    const w3=this.getCurrentWeb3();
+    const w3= await this.getCurrentWeb3();
+    if (!w3.eth.getBlockNumber()){
+    return
+    }
+
     const blockNumber=await w3.eth.getBlockNumber();
     const subgraphConfig = this.getGlobalConfig(['network','providers','subgraph','tranches']);
     //console.log("Bblock",blockNumber)
@@ -2974,7 +2978,7 @@ class FunctionsUtil {
     let maxTranche=null;
     results.forEach(result=>{
       const apr=parseFloat(this.toEth(result.apr))
-      console.log("Apr",apr,maxApr,result.Tranche.CDO.id)
+      //console.log("Apr",apr,maxApr,result.Tranche.CDO.id)
       
       if(apr>maxApr)
       {
@@ -2998,7 +3002,7 @@ class FunctionsUtil {
         }
       })
     })
-    console.log("PT",maxProtocol,maxToken)
+    //console.log("PT",maxProtocol,maxToken)
     if(!maxProtocol)  
     {
         maxProtocol="idle"

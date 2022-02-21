@@ -52,9 +52,9 @@ class StrategyBox extends Component {
 
     this.setState({
       network
-    }, () => {
+    }, async () => {
       this.loadUtils();
-      this.loadData();
+      await this.loadData();
     });
   }
 
@@ -62,33 +62,35 @@ class StrategyBox extends Component {
   }
 
   async componentDidUpdate(prevProps,prevState){
-    console.log("here")
     this.loadUtils();
 
     const contractsInitialized = !prevProps.contractsInitialized && this.props.contractsInitialized;
     const strategyChanged=(prevProps.strategy!==this.props.strategy)
-    if (contractsInitialized||strategyChanged){
-      console.log("props",prevProps.strategy,this.props.strategy)
+    if (contractsInitialized||strategyChanged)
       await this.loadData();
-    }
   }
 
   loadData = async () => {
 
     let strategyInfo = this.functionsUtil.getGlobalConfig(['landingStrategies',this.props.strategy]);
-
-    const data= await this.functionsUtil.getTrancheMax();
-    const protocol=data.protocol
-    const maxToken=data.maxToken
-    this.setState({
-      protocol,
-      maxToken
-    })
+    let protocol,maxToken
+    
+    if(strategyInfo.type==="tranche"){
+      const data= await this.functionsUtil.getTrancheMax();
+      if(data){
+        protocol=data.protocol
+        maxToken=data.maxToken
+      this.setState({
+        protocol,
+        maxToken
+      })
+    }
+    return 
+  }
     
     let selectedToken = null;
     // console.log('loadData - contractsInitialized',this.props.contractsInitialized);
 
-    console.log("reached here",strategyInfo.type)
     if (!this.props.contractsInitialized){
   
       return false;
@@ -99,11 +101,6 @@ class StrategyBox extends Component {
     let highestValue = null;
     
     switch (strategyInfo.type){
-      case 'tranche':
-        //console.log("data",data);
-        //console.log(strategyInfo.protocol,strategyInfo.token)
-       selectedToken=maxToken
-      break;
       default:
       case 'strategy':
         const availableTokens = this.props.availableStrategiesNetworks[strategyInfo.networkId][strategyInfo.strategy];
@@ -174,7 +171,6 @@ class StrategyBox extends Component {
 
     // console.log('loadData',strategyInfo.type,this.props.strategy,strategyInfo.strategy,selectedToken);
 
-    console.log("def",selectedToken)
     this.setState({
       selectedToken,
     });
