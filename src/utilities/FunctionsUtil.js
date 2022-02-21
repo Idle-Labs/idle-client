@@ -2930,12 +2930,16 @@ class FunctionsUtil {
   }
   getTrancheMax= async ()=>{
 
-    const w3= await this.getCurrentWeb3();
-    if (!w3.eth.getBlockNumber()){
-    return
+    let blockNumber=null
+    try{
+      blockNumber=await this.props.web3.eth.getBlockNumber();
+    }
+    catch(error)
+    {
+      console.log("Error",error)
+      return false;
     }
 
-    const blockNumber=await w3.eth.getBlockNumber();
     const subgraphConfig = this.getGlobalConfig(['network','providers','subgraph','tranches']);
     //console.log("Bblock",blockNumber)
     
