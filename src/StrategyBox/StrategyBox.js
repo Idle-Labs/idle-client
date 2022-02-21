@@ -14,8 +14,6 @@ class StrategyBox extends Component {
     network:null,
     selectedToken:null,
     protocol:null,
-    maxToken:null,
-    strategy:null
   };
 
   // Utils
@@ -64,7 +62,7 @@ class StrategyBox extends Component {
   async componentDidUpdate(prevProps,prevState){
     this.loadUtils();
 
-    const contractsInitialized = !prevProps.contractsInitialized && this.props.contractsInitialized;
+    const contractsInitialized = this.props.contractsInitialized && prevProps.contractsInitialized !== this.props.contractsInitialized;;
     const strategyChanged=(prevProps.strategy!==this.props.strategy)
     if (contractsInitialized||strategyChanged)
       await this.loadData();
@@ -73,34 +71,22 @@ class StrategyBox extends Component {
   loadData = async () => {
 
     let strategyInfo = this.functionsUtil.getGlobalConfig(['landingStrategies',this.props.strategy]);
-    let protocol,maxToken
-    
-    if(strategyInfo.type==="tranche"){
-      const data= await this.functionsUtil.getTrancheMax();
-      if(data){
-        protocol=data.protocol
-        maxToken=data.maxToken
-      this.setState({
-        protocol,
-        maxToken
-      })
-    }
-    return 
-  }
-    
     let selectedToken = null;
     // console.log('loadData - contractsInitialized',this.props.contractsInitialized);
 
     if (!this.props.contractsInitialized){
-  
       return false;
     }
-
+    let protocol=null;
     let aprs = {};
     const tokensAprs = {};
     let highestValue = null;
-    
     switch (strategyInfo.type){
+      case 'tranche':
+        const data= await this.functionsUtil.getTrancheMax();
+          protocol=data.protocol
+          selectedToken=data.maxToken
+      break;
       default:
       case 'strategy':
         const availableTokens = this.props.availableStrategiesNetworks[strategyInfo.networkId][strategyInfo.strategy];
@@ -168,12 +154,17 @@ class StrategyBox extends Component {
         }
       break;
     }
-
     // console.log('loadData',strategyInfo.type,this.props.strategy,strategyInfo.strategy,selectedToken);
-
-    this.setState({
-      selectedToken,
-    });
+    if(protocol){
+      this.setState({
+        selectedToken,
+        protocol
+      }); 
+    }
+    else
+      this.setState({
+        selectedToken
+      })
   }
 
   async goToStrategy(){
@@ -208,17 +199,16 @@ class StrategyBox extends Component {
     let tokenConfig = null;
     switch (strategyInfo.type){
       case 'tranche':
-        if(this.state.maxToken)
-          tokenConfig = availableTranches[this.state.protocol][this.state.maxToken];
+        if(this.state.protocol)
+          tokenConfig = availableTranches[this.state.protocol][this.state.selectedToken];
         else
-        tokenConfig = availableTranches[strategyInfo.protocol][strategyInfo.token];
+          tokenConfig = availableTranches[strategyInfo.protocol][strategyInfo.token];
       break;
       default:
       case 'strategy':
         tokenConfig = this.state.selectedToken ? this.props.availableStrategiesNetworks[strategyInfo.networkId][strategyInfo.strategy][this.state.selectedToken] : null;
       break;
     }
-
     // console.log('StrategyBox',strategyInfo.type,strategyInfo.strategy,this.state.selectedToken,strategyInfo.networkId,this.props.network.required,this.state.network.required);
 
     return (
