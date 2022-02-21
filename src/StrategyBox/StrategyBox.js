@@ -84,8 +84,8 @@ class StrategyBox extends Component {
     switch (strategyInfo.type){
       case 'tranche':
         const data= await this.functionsUtil.getTrancheMax();
-          protocol=data.protocol
-          selectedToken=data.maxToken
+        protocol=data.protocol
+        selectedToken=data.maxToken
       break;
       default:
       case 'strategy':
