@@ -2948,15 +2948,14 @@ class FunctionsUtil {
     //console.log(ctime,timestamp)
     
     const query=`{
-      trancheInfos(orderBy:"timeStamp", orderDirection:"asc", where:{timeStamp_gt:"${timestamp}"
-    }){
+      trancheInfos(orderBy:"timeStamp", orderDirection:"asc", where:{timeStamp_gt:"${timestamp}"}){
         timeStamp
         id
         apr
         Tranche{
-            CDO{
+          CDO{
             id
-          }
+            }
           type
         }
       }
@@ -2988,7 +2987,7 @@ class FunctionsUtil {
       {
         maxTranche=result;
         maxApr=apr;
-      //console.log("mApr")
+        //console.log("mApr")
     }
       
     })
@@ -3009,8 +3008,8 @@ class FunctionsUtil {
     //console.log("PT",maxProtocol,maxToken)
     if(!maxProtocol)  
     {
-        maxProtocol="idle"
-        maxToken="FEI"
+      maxProtocol="idle"
+      maxToken="FEI"
     }
     let max={
       protocol:maxProtocol,
