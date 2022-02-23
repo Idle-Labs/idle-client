@@ -10,6 +10,12 @@ class Base extends Component {
   // Utils
   functionsUtil = null;
 
+  state = {
+    token:null,
+    protocol:null,
+    tokenConfig:null
+  };
+
   loadUtils() {
     if (this.functionsUtil) {
       this.functionsUtil.setProps(this.props);
@@ -20,38 +26,43 @@ class Base extends Component {
 
   async componentWillMount() {
     this.loadUtils();
-    await this.loadData();
+    this.loadData();
   }
 
   async componentDidUpdate(prevProps, prevState) {
     this.loadUtils();
-    await this.loadData();
+    const contractsInitialized = this.props.contractsInitialized && prevProps.contractsInitialized !== this.props.contractsInitialized;
+    if (contractsInitialized){
+      this.loadData();
+    }
   }
 
   async loadData(){
     let token=null;
     let protocol=null;
-    const maxData=this.functionsUtil.getTrancheMax();
-    if(maxData){
-      token=maxData.maxToken;
-      protocol=maxData.protocol;
-      this.setState({
-        token,
-        protocol
-      })
+
+    const bestTrancheInfo = await this.functionsUtil.getBestTranche();
+    if(bestTrancheInfo){
+      token = bestTrancheInfo.token;
+      protocol = bestTrancheInfo.protocol;
+    } else {
+      const strategyInfo = this.functionsUtil.getGlobalConfig(["strategies","tranches"]);
+      token = strategyInfo.token;
+      protocol = strategyInfo.protocol;
     }
+    
+    const tokenConfig = this.props.availableTranches[protocol][token];
+
+    return this.setState({
+      token,
+      protocol,
+      tokenConfig
+    });
   }
 
   render() {
     const trancheDetails = this.props.trancheDetails;
-    const strategyInfo = this.functionsUtil.getGlobalConfig([
-      "strategies",
-      "tranches"
-    ]);
-
-    const tokenConfig =
-      this.props.tokenConfig ||
-      this.props.availableTranches[this.state.protocol][this.state.token];
+    const tokenConfig = this.props.tokenConfig || this.state.tokenConfig;
 
     return (
       <Box
@@ -130,9 +141,9 @@ class Base extends Component {
                       }
                     }}
                     {...this.props}
-                    tokenConfig={tokenConfig}
                     token={this.state.token}
-                    tranche={strategyInfo.tranche}
+                    tokenConfig={tokenConfig}
+                    tranche={this.props.tranche}
                     protocol={this.state.protocol}
                   />
                   <Text
@@ -143,7 +154,7 @@ class Base extends Component {
                     textAlign={"left"}
                     color={"cellText"}
                   >
-                    Current APY (variable)
+                    Current APY for {this.state.token}
                   </Text>
                 </Flex>
                 <Text

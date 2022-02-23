@@ -27,7 +27,6 @@ class StrategyBox extends Component {
       if (this.state.network){
         newProps.network = this.state.network;
       }
-      // console.log('network',strategyInfo.networkId,newProps.network);
 
       this.functionsUtil.setProps(newProps);
     } else {
@@ -63,29 +62,30 @@ class StrategyBox extends Component {
     this.loadUtils();
 
     const contractsInitialized = this.props.contractsInitialized && prevProps.contractsInitialized !== this.props.contractsInitialized;;
-    const strategyChanged=(prevProps.strategy!==this.props.strategy)
-    if (contractsInitialized||strategyChanged)
+    const strategyChanged = (prevProps.strategy!==this.props.strategy)
+    if (contractsInitialized || strategyChanged){
       await this.loadData();
+    }
   }
 
   loadData = async () => {
 
-    let strategyInfo = this.functionsUtil.getGlobalConfig(['landingStrategies',this.props.strategy]);
-    let selectedToken = null;
-    // console.log('loadData - contractsInitialized',this.props.contractsInitialized);
-
     if (!this.props.contractsInitialized){
       return false;
     }
-    let protocol=null;
+
     let aprs = {};
+    let protocol = null;
     const tokensAprs = {};
     let highestValue = null;
+    let selectedToken = null;
+    let strategyInfo = this.functionsUtil.getGlobalConfig(['landingStrategies',this.props.strategy]);
+
     switch (strategyInfo.type){
       case 'tranche':
-        const data= await this.functionsUtil.getTrancheMax();
-        protocol=data.protocol
-        selectedToken=data.maxToken
+        const bestTrancheInfo = await this.functionsUtil.getBestTranche();
+        protocol = bestTrancheInfo.protocol;
+        selectedToken = bestTrancheInfo.token;
       break;
       default:
       case 'strategy':
@@ -154,17 +154,11 @@ class StrategyBox extends Component {
         }
       break;
     }
-    // console.log('loadData',strategyInfo.type,this.props.strategy,strategyInfo.strategy,selectedToken);
-    if(protocol){
-      this.setState({
-        selectedToken,
-        protocol
-      }); 
-    }
-    else
-      this.setState({
-        selectedToken
-      })
+
+    this.setState({
+      protocol,
+      selectedToken
+    });
   }
 
   async goToStrategy(){
@@ -191,25 +185,20 @@ class StrategyBox extends Component {
   render() {
     
     const strategyInfo = this.functionsUtil.getGlobalConfig(['landingStrategies',this.props.strategy]);
-    
     const networkInfo = this.functionsUtil.getGlobalConfig(['network','availableNetworks',strategyInfo.networkId]);
 
-    // const chartColor = strategyInfo.chartColor ? strategyInfo.chartColor : null;
-    // const networkTokenInfo = this.functionsUtil.getGlobalConfig(['stats','tokens',networkInfo.baseToken]);
     let tokenConfig = null;
     switch (strategyInfo.type){
       case 'tranche':
-        if(this.state.protocol)
+        if(this.state.protocol && this.state.selectedToken){
           tokenConfig = availableTranches[this.state.protocol][this.state.selectedToken];
-        else
-          tokenConfig = availableTranches[strategyInfo.protocol][strategyInfo.token];
+        }
       break;
       default:
       case 'strategy':
         tokenConfig = this.state.selectedToken ? this.props.availableStrategiesNetworks[strategyInfo.networkId][strategyInfo.strategy][this.state.selectedToken] : null;
       break;
     }
-    // console.log('StrategyBox',strategyInfo.type,strategyInfo.strategy,this.state.selectedToken,strategyInfo.networkId,this.props.network.required,this.state.network.required);
 
     return (
       <DashboardCard
@@ -615,11 +604,11 @@ class StrategyBox extends Component {
                     },
                   }}
                   {...this.props}
+                  tranche={'AA'}
                   tokenConfig={tokenConfig}
-                  token={strategyInfo.token}
                   network={this.state.network}
-                  tranche={strategyInfo.tranche}
-                  protocol={strategyInfo.protocol}
+                  protocol={this.state.protocol}
+                  token={this.state.selectedToken}
                 />
                 <TrancheField
                   fieldInfo={{
@@ -637,12 +626,12 @@ class StrategyBox extends Component {
                     },
                   }}
                   {...this.props}
+                  tranche={'AA'}
                   tokenConfig={tokenConfig}
-                  token={strategyInfo.token}
                   network={this.state.network}
-                  trancheConfig={tokenConfig.AA}
-                  tranche={strategyInfo.tranche}
-                  protocol={strategyInfo.protocol}
+                  protocol={this.state.protocol}
+                  token={this.state.selectedToken}
+                  trancheConfig={tokenConfig ? tokenConfig.AA : null}
                 />
               </Flex>
               <Flex
@@ -692,11 +681,11 @@ class StrategyBox extends Component {
                     },
                   }}
                   {...this.props}
+                  tranche={'BB'}
                   tokenConfig={tokenConfig}
-                  token={strategyInfo.token}
                   network={this.state.network}
-                  tranche={strategyInfo.tranche}
-                  protocol={strategyInfo.protocol}
+                  protocol={this.state.protocol}
+                  token={this.state.selectedToken}
                 />
                 <TrancheField
                   fieldInfo={{
@@ -714,12 +703,12 @@ class StrategyBox extends Component {
                     },
                   }}
                   {...this.props}
+                  tranche={'BB'}
                   tokenConfig={tokenConfig}
-                  token={strategyInfo.token}
                   network={this.state.network}
-                  trancheConfig={tokenConfig.BB}
-                  tranche={strategyInfo.tranche}
-                  protocol={strategyInfo.protocol}
+                  protocol={this.state.protocol}
+                  token={this.state.selectedToken}
+                  trancheConfig={tokenConfig ? tokenConfig.BB : null}
                 />
               </Flex>
             </Flex>
@@ -769,11 +758,11 @@ class StrategyBox extends Component {
                       lineWidth:2
                     }}
                     {...this.props}
+                    tranche={null}
                     tokenConfig={tokenConfig}
-                    token={strategyInfo.token}
                     network={this.state.network}
-                    tranche={strategyInfo.tranche}
-                    protocol={strategyInfo.protocol}
+                    protocol={this.state.protocol}
+                    token={this.state.selectedToken}
                     rowId={`${this.props.strategy}_performance_chart`}
                   />
                 )

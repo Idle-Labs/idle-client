@@ -92,6 +92,7 @@ class TrancheWelcome extends Component {
               {Object.keys(tranchesDetails).map((trancheType, index) => (
                 <TrancheBox
                   {...this.props}
+                  tranche={trancheType}
                   key={`tranche_${index}`}
                   tokenConfig={this.props.tokenConfig}
                   trancheDetails={tranchesDetails[trancheType]}
