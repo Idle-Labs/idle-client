@@ -2898,96 +2898,79 @@ class FunctionsUtil {
     }
     return subgraphData;
   }
-  getTrancheMax= async ()=>{
+  getBestTranche = async ()=>{
 
-    let blockNumber=null
-    try{
-      blockNumber=await this.props.web3.eth.getBlockNumber();
+    const cachedDataKey = `getBestTranche`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData !== null) {
+      return cachedData;
     }
-    catch(error)
-    {
-      console.log("Error",error)
-      return false;
-    }
-
-    const subgraphConfig = this.getGlobalConfig(['network','providers','subgraph','tranches']);
-    //console.log("Bblock",blockNumber)
     
-    const ctime=await this.props.web3.eth.getBlock(blockNumber);
-    const timestamp=ctime.timestamp-7200;
-    //console.log(ctime,timestamp)
+    const blockInfo = await this.getBlockInfo();
+    const timestamp = blockInfo.timestamp-7200;
     
     const query=`{
       trancheInfos(orderBy:"timeStamp", orderDirection:"asc", where:{timeStamp_gt:"${timestamp}"}){
-        timeStamp
         id
         apr
+        timeStamp
         Tranche{
+          id
           CDO{
             id
-            }
+          }
           type
         }
       }
-    }`
-    const postData={
-      query:query
-    }
-    const resultsFull = await this.makePostRequest(subgraphConfig.endpoint,postData);
-    if(!resultsFull)
-      return;
-    const size=Object.keys(resultsFull.data.data.trancheInfos).length;
-    //console.log(size)
-    
-    let results=Object.values(resultsFull.data.data.trancheInfos);
-    //console.log("results",results)
-    
-    if(results[0].timetamp!==results[size-1].timeStamp);
-      results=results.splice(size/2);
+    }`;
 
-    results=results.filter(result=>result.Tranche.type==="BBTranche")
-    let maxApr=this.toEth(results[0].apr);
-    maxApr=parseFloat(maxApr);
-    let maxTranche=null;
-    results.forEach(result=>{
-      const apr=parseFloat(this.toEth(result.apr))
-      //console.log("Apr",apr,maxApr,result.Tranche.CDO.id)
-      
-      if(apr>maxApr)
-      {
-        maxTranche=result;
-        maxApr=apr;
-        //console.log("mApr")
+    const postData={
+      query
+    };
+
+    const subgraphConfig = this.getGlobalConfig(['network','providers','subgraph','tranches']);
+    let results = await this.makePostRequest(subgraphConfig.endpoint,postData);
+
+    if(!results || !this.getArrayPath(['data','data','trancheInfos'],results)){
+      return false;
     }
+    
+    results = this.getArrayPath(['data','data','trancheInfos'],results);
+    const size = results.length;
       
-    })
-    let maxProtocol=null;
-    let maxToken=null;
-    //console.log("maxID",maxTranche.Tranche.CDO.id)
-    Object.keys(this.props.availableTranches).forEach(protocol=>{
-      Object.keys(this.props.availableTranches[protocol]).forEach(token=>{
-        //console.log("PT1",protocol,token,this.props.availableTranches[protocol][token].CDO.address)
-        //console.log(this.props.availableTranches[protocol][token].CDO.address)
-        
-        if(this.props.availableTranches[protocol][token].CDO.address.toLowerCase()===maxTranche.Tranche.CDO.id.toLowerCase()){
-          maxProtocol=protocol
-          maxToken=token;
+    // Get only latest results
+    if(results[0].timetamp !== results[size-1].timeStamp){
+      results = results.splice(Math.ceil(size/2));
+    }
+
+    const output = {
+      token:null,
+      protocol:null,
+      apr:this.BNify(0)
+    };
+    const bbTranches = results.filter( result => (result.Tranche.type==="BBTranche"));
+
+    Object.keys(this.props.availableTranches).forEach( protocol => {
+      Object.keys(this.props.availableTranches[protocol]).forEach( token => {
+
+        const availableTrancheInfo = this.props.availableTranches[protocol][token];
+        const trancheInfo = bbTranches.find( tInfo => tInfo.Tranche.id.toLowerCase() === availableTrancheInfo.BB.address.toLowerCase() );
+
+        if (!output.apr || (trancheInfo && this.BNify(trancheInfo.apr).gt(output.apr))){
+          output.token = token;
+          output.protocol = protocol;
+          output.apr = trancheInfo.apr;
         }
       })
-    })
-    //console.log("PT",maxProtocol,maxToken)
-    if(!maxProtocol)  
-    {
-      maxProtocol="idle"
-      maxToken="FEI"
+    });
+
+    if (!output.token){
+      const trancheStrategyConfig = this.getGlobalConfig(['strategies','tranches']);
+      output.token = trancheStrategyConfig.token;
+      output.protocol = trancheStrategyConfig.protocol;
     }
-    let max={
-      protocol:maxProtocol,
-      maxToken:maxToken
-    }
-    //console.log("Filtered",results,maxTranche)
-    
-    return max;
+
+    return this.setCachedDataWithLocalStorage(cachedDataKey, output, 1800);
   }
   makePostRequest = async (endpoint, postData={}, error_callback = false, config = null) => {
     const data = await axios
