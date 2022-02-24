@@ -2484,7 +2484,7 @@ const globalConfigs = {
       enabled: true,
       icon: "Storage",
       claimEnabled: true,
-      depositEnabled: true,
+      depositEnabled: false,
       availableNetworks: [1],
       route: "batch-deposit",
       label: "Batch Deposit",

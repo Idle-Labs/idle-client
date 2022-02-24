@@ -297,7 +297,7 @@ class TrancheDetails extends Component {
       }
     }
 
-    console.log('getTransactionParams',this.state.selectedAction,amount,this.functionsUtil.BNify(this.state.trancheBalance).toFixed(),selectedPercentage,methodParams);
+    // console.log('getTransactionParams',this.state.selectedAction,amount,this.functionsUtil.BNify(this.state.trancheBalance).toFixed(),selectedPercentage,methodParams);
 
     return {
       methodName,

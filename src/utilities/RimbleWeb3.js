@@ -723,12 +723,8 @@ class RimbleTransaction extends React.Component {
     //   console.log('createContract',this.state.network,web3Provider);
     // }
 
-    if (!web3Provider){
+    if (!web3Provider || !abi){
       return null;
-    }
-
-    if (!abi){
-      abi = [];
     }
 
     // Create contract on initialized web3 provider with given abi and address

@@ -393,7 +393,7 @@ class Migrate extends Component {
           (getTokenPrice ? this.functionsUtil.genericContractCall(oldContractName,'tokenPrice') : null)
         ]);
 
-        // console.log('Migration',oldContractName,migrationContractApproved,this.props.selectedToken,oldContractBalance ? oldContractBalance.toString() : null,oldTokenPrice ? oldTokenPrice.toString() : null);
+        // console.log('Migration',oldContractName,oldContract,migrationContractApproved,this.props.selectedToken,this.props.account,oldContractBalance ? oldContractBalance.toString() : null,oldTokenPrice ? oldTokenPrice.toString() : null);
 
         if (oldContractBalance){
           // Convert old idleTokens
