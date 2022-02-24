@@ -321,6 +321,11 @@ class TrancheDetails extends Component {
 
   transactionSucceeded(){
     this.loadData();
+
+    if (typeof this.props.transactionSucceeded === 'function'){
+      this.props.transactionSucceeded();
+    }
+
     switch (this.state.selectedAction){
       case 'stake':
       case 'deposit':

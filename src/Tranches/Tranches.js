@@ -360,6 +360,7 @@ class Tranches extends Component {
               userHasFunds={this.state.userHasFunds}
               selectedToken={this.state.selectedToken}
               trancheDetails={this.state.trancheDetails}
+              loadPortfolio={this.loadPortfolio.bind(this)}
               selectedProtocol={this.state.selectedProtocol}
               availableTranches={this.props.availableTranches}
               selectTrancheType={this.selectTrancheType.bind(this)}

@@ -114,6 +114,7 @@ class TranchePage extends Component {
                           selectedTranche={trancheType}
                           cdoConfig={this.props.tokenConfig.CDO}
                           showSelectButton={!this.props.trancheType}
+                          transactionSucceeded={this.props.loadPortfolio}
                           selectTrancheType={this.props.selectTrancheType}
                           trancheConfig={this.props.tokenConfig[trancheType]}
                         />
