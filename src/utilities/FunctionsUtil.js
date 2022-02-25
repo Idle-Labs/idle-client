@@ -2930,7 +2930,7 @@ class FunctionsUtil {
   }
   getBestTranche = async (trancheType=null)=>{
 
-    const cachedDataKey = `getBestTranche`;
+    const cachedDataKey = `getBestTranche_${trancheType}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData !== null) {
       return cachedData;
