@@ -59,6 +59,7 @@ class FlashNews extends Component {
         }
       ],
       137: [
+        /*
         {
           icon: stakingPolygonConfig.icon,
           name: stakingPolygonConfig.label,
@@ -68,12 +69,13 @@ class FlashNews extends Component {
             url: this.functionsUtil.getDashboardSectionUrl(`tools/${stakingPolygonConfig.route}`)
           }
         }
+        */
       ]
     };
 
     const currentNetworkId = this.functionsUtil.getRequiredNetworkId();
     const activeFlashNews = flashNews[currentNetworkId];
-    const activeNews = activeFlashNews[Math.floor(Math.random() * activeFlashNews.length)];
+    const activeNews = activeFlashNews.length ? activeFlashNews[Math.floor(Math.random() * activeFlashNews.length)] : null;
     this.setState({
       activeNews
     });
