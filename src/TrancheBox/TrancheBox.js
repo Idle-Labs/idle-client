@@ -41,7 +41,7 @@ class Base extends Component {
     let token=null;
     let protocol=null;
 
-    const bestTrancheInfo = await this.functionsUtil.getBestTranche();
+    const bestTrancheInfo = await this.functionsUtil.getBestTranche(this.props.trancheDetails.type);
     if(bestTrancheInfo){
       token = bestTrancheInfo.token;
       protocol = bestTrancheInfo.protocol;

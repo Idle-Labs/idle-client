@@ -2928,7 +2928,7 @@ class FunctionsUtil {
     }
     return subgraphData;
   }
-  getBestTranche = async ()=>{
+  getBestTranche = async (trancheType=null)=>{
 
     const cachedDataKey = `getBestTranche`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
@@ -2973,31 +2973,46 @@ class FunctionsUtil {
       results = results.splice(Math.ceil(size/2));
     }
 
-    const output = {
-      token:null,
-      protocol:null,
-      apr:this.BNify(0)
-    };
-    const bbTranches = results.filter( result => (result.Tranche.type==="BBTranche"));
+    const trancheTypes = Object.keys(this.getGlobalConfig(['tranches']));
+    const trancheStrategyConfig = this.getGlobalConfig(['strategies','tranches']);
 
+    let output = {};
+    trancheTypes.forEach( type => {
+      output[type] = {
+        token:null,
+        protocol:null,
+        apr:this.BNify(0)
+      };
+    });
+    
+    // const tranches = results.filter( result => (result.Tranche.type==="BBTranche"));
     Object.keys(this.props.availableTranches).forEach( protocol => {
       Object.keys(this.props.availableTranches[protocol]).forEach( token => {
 
         const availableTrancheInfo = this.props.availableTranches[protocol][token];
-        const trancheInfo = bbTranches.find( tInfo => tInfo.Tranche.id.toLowerCase() === availableTrancheInfo.BB.address.toLowerCase() );
 
-        if (!output.apr || (trancheInfo && this.BNify(trancheInfo.apr).gt(output.apr))){
-          output.token = token;
-          output.protocol = protocol;
-          output.apr = trancheInfo.apr;
-        }
+        trancheTypes.forEach( type => {
+          const trancheInfo = results.find( tInfo => tInfo.Tranche.id.toLowerCase() === availableTrancheInfo[type].address.toLowerCase() );
+
+          if (!output[type].apr || (trancheInfo && this.BNify(trancheInfo.apr).gt(output[type].apr))){
+            output[type].token = token;
+            output[type].protocol = protocol;
+            output[type].apr = trancheInfo.apr;
+          }
+        });
+
       })
     });
 
-    if (!output.token){
-      const trancheStrategyConfig = this.getGlobalConfig(['strategies','tranches']);
-      output.token = trancheStrategyConfig.token;
-      output.protocol = trancheStrategyConfig.protocol;
+    trancheTypes.forEach( type => {
+      if (!output[type].token){
+        output[type].token = trancheStrategyConfig.token;
+        output[type].protocol = trancheStrategyConfig.protocol;
+      }
+    });
+
+    if (trancheType && output[trancheType]){
+      output = output[trancheType];
     }
 
     return this.setCachedDataWithLocalStorage(cachedDataKey, output, 1800);

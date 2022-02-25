@@ -12,8 +12,9 @@ class StrategyBox extends Component {
 
   state = {
     network:null,
-    selectedToken:null,
     protocol:null,
+    bestTranche:null,
+    selectedToken:null,
   };
 
   // Utils
@@ -83,7 +84,7 @@ class StrategyBox extends Component {
 
     switch (strategyInfo.type){
       case 'tranche':
-        const bestTrancheInfo = await this.functionsUtil.getBestTranche();
+        const bestTrancheInfo = await this.functionsUtil.getBestTranche('BB');
         protocol = bestTrancheInfo.protocol;
         selectedToken = bestTrancheInfo.token;
       break;
