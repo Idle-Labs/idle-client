@@ -26,7 +26,7 @@ class FlashNews extends Component {
 
     const stakingConfig = this.functionsUtil.getGlobalConfig(["tools", "stake"]);
     const nexusMutualConfig = this.functionsUtil.getGlobalConfig(["tools", "nexusMutual"]);
-    const stakingPolygonConfig = this.functionsUtil.getGlobalConfig(["tools", "stakePolygon"]);
+    // const stakingPolygonConfig = this.functionsUtil.getGlobalConfig(["tools", "stakePolygon"]);
 
     const flashNews = {
       1: [
