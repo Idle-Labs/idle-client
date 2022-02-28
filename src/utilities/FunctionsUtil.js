@@ -310,6 +310,7 @@ class FunctionsUtil {
       totalAmountLent: this.BNify(0),
       totalEarningsPerc: this.BNify(0),
     };
+    console.log('1')
 
     availableTranches = availableTranches ? availableTranches : this.props.availableTranches;
     account = account ? account : this.props.account;
@@ -446,6 +447,7 @@ class FunctionsUtil {
         totalBalance = totalBalance.plus(trancheInfo.tokenBalance);
       }
     });
+    console.log('portfolio', portfolio.tranchesBalance)
 
     if (totalAmountLent.gt(0)) {
       totalEarningsPerc = totalEarnings.div(totalAmountLent).times(100);

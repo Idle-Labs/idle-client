@@ -34,7 +34,9 @@ class TranchesList extends Component {
     if (!enabledProtocols || !enabledProtocols.length){
       enabledProtocols = Object.keys(this.props.availableTranches);
     }
-    let enabledTokens=this.props.enabledTokens;
+    const depositedTokens=this.props.depositedTokens;
+    const list=Object.values(depositedTokens).map(token=>token.token)
+    console.log("Exp,list")
     return (
       <Flex id="tranches-list-container" width={1} flexDirection={'column'}>
         <TableHeader
@@ -51,11 +53,10 @@ class TranchesList extends Component {
                 return null;
               }
              
-                
+                const tranche = this.props.trancheType || null;
               return Object.keys(protocolConfig).map( token => {
-                const tranche = enabledTokens[token]?enabledTokens[token]:this.props.trancheType||null;
                 return(
-                (!enabledTokens||enabledTokens.includes(token))&&
+                (!this.props.isDeposit||list.includes(token))&&
                   <TableRow
                     {...this.props}
                     token={token}
