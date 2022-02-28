@@ -128,8 +128,10 @@ class Tranches extends Component {
     if (portfolio){
       const tranchesTokens = [];
       const tranchesBalances = [];
+      
       const portfolioLoaded = true;
       const tranchesConfig = this.functionsUtil.getGlobalConfig(['tranches']);
+      console.log("portfolio",portfolio,portfolio.tranchesBalances)
 
       portfolio.tranchesBalance.forEach( trancheInfo => {
         if (!tranchesBalances[trancheInfo.tranche]){
@@ -138,6 +140,7 @@ class Tranches extends Component {
             balance:this.functionsUtil.BNify(0)
           };
         }
+        
         tranchesBalances[trancheInfo.tranche].weight = tranchesBalances[trancheInfo.tranche].weight.plus(trancheInfo.trancheWeight);
         tranchesBalances[trancheInfo.tranche].balance = tranchesBalances[trancheInfo.tranche].balance.plus(trancheInfo.tokenBalance);
 
@@ -147,8 +150,8 @@ class Tranches extends Component {
         tranchesTokens[trancheInfo.token] = tranchesTokens[trancheInfo.token].plus(trancheInfo.tokenBalance);
       });
 
-      const depositedTokens = Object.keys(tranchesTokens);
-      console.log("log",tranchesTokens);
+      const depositedTokens = Object.keys(tranchesTokens);      
+      console.log("portfolio",portfolio)
 
       const portfolioDonutData = Object.keys(tranchesTokens).map( token => {
         const balanceValue = parseFloat(tranchesTokens[token].toFixed(4));
@@ -232,7 +235,7 @@ class Tranches extends Component {
         portfolioLoaded,
         depositedTokens,
         portfolioDonutData,
-        allocationChartData
+        allocationChartData,
       });
     }
   }
@@ -307,6 +310,7 @@ class Tranches extends Component {
     if (this.state.selectedToken){
       breadcrumbPath.push(this.state.selectedToken);
     }
+    //console.log("dep2",this.state.depositedTokens)
 
     return (
       <Box
@@ -843,8 +847,9 @@ class Tranches extends Component {
                 )
               }
               {
+                this.state.depositedTokens.length!==0&&
                 
-                <Flex
+                (<Flex
                 width={1}
                 mb={[3,4]}
                 id={"migrate-assets"}
@@ -867,8 +872,10 @@ class Tranches extends Component {
                 <TranchesList
                   enabledProtocols={[]}
                   trancheType={this.state.trancheType}
+                  depositedTokens={this.state.portfolio.tranchesBalance}
                   availableTranches={this.props.availableTranches}
                   handleClick={(props) => this.selectTranche(props.protocol,props.token)}
+                  isDeposit={"true"}
                   colsProps={{
                     fontSize:['10px','14px'],
                   }}
@@ -1089,7 +1096,7 @@ class Tranches extends Component {
                   {...this.props}
                 />
               </Flex>
-              }
+              )}
               <Flex
                 width={1}
                 mb={[3,4]}
