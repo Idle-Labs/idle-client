@@ -1229,9 +1229,9 @@ const globalConfigs = {
         enabled: true,
         label: '3EUR',
         color: {
-          hex: '#333',
-          rgb: [51, 51, 51],
-          hsl: ['0, 0%, 20%']
+          hex: '#cc9768',
+          rgb: [204, 151, 104],
+          hsl: ['28', '50%', '60%']
         },
         conversionRateField: "eurDAIPrice",
         address: '0xb9446c4Ef5EBE66268dA6700D26f96273DE3d571',

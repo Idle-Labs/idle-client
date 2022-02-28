@@ -618,6 +618,79 @@ const availableTranches = {
         address:'0xa0E8C9088afb3Fa0F40eCDf8B551071C34AA1aa4'
       }
     },
+    "3EUR":{
+      abi:ERC20,
+      decimals:18,
+      token:'3EUR',
+      protocol:'convex',
+      blockNumber:14177892,
+      autoFarming:['CVX','CRV','ANGLE'],
+      address:'0xb9446c4Ef5EBE66268dA6700D26f96273DE3d571',
+      CDO:{
+        abi:IdleCDO,
+        decimals:18,
+        name:'IdleCDO_convex_3eur',
+        address:'0x858F5A3a5C767F8965cF7b77C51FD178C4A92F05'
+      },
+      Strategy:{
+        abi:IdleStrategy,
+        name:'IdleStrategy_convex_3eur'
+      },
+      buyInstructions:'To get 3EUR token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://curve.fi/factory/66/deposit">3EUR Curve Pool</a>.',
+      AA:{
+        abi:ERC20,
+        decimals:18,
+        tranche:'AA',
+        functions:{
+          stake:'stake',
+          claim:'claim',
+          unstake:'unstake',
+          deposit:'depositAA',
+          withdraw:'withdrawAA',
+          stakedBalance:'usersStakes',
+          rewards:'expectedUserReward'
+        },
+        CDORewards:{
+          decimals:18,
+          stakingRewards:[],
+          unstakeWithBalance:true,
+          abi:IdleCDOTrancheRewards,
+          name:'IdleCDOTrancheRewards_convex_3eur_AA',
+          address:'0x0000000000000000000000000000000000000000'
+        },
+        blockNumber:14177892,
+        name:'AA_convex_3eur',
+        token:'AA_convex_3eur',
+        label:'convex 3eur AA',
+        address:'0x158e04225777BBEa34D2762b5Df9eBD695C158D2'
+      },
+      BB:{
+        abi:ERC20,
+        decimals:18,
+        tranche:'BB',
+        functions:{
+          stake:'stake',
+          claim:'claim',
+          unstake:'unstake',
+          deposit:'depositBB',
+          withdraw:'withdrawBB',
+          stakedBalance:'usersStakes'
+        },
+        CDORewards:{
+          decimals:18,
+          stakingRewards:[],
+          unstakeWithBalance:true,
+          abi:IdleCDOTrancheRewards,
+          name:'IdleCDOTrancheRewards_convex_3eur_BB',
+          address:'0x0000000000000000000000000000000000000000'
+        },
+        blockNumber:14177892,
+        name:'BB_convex_3eur',
+        token:'BB_convex_3eur',
+        label:'convex 3eur BB',
+        address:'0x3061C652b49Ae901BBeCF622624cc9f633d01bbd'
+      }
+    }
     /*
     MUSD3CRV:{
       abi:ERC20,
@@ -690,79 +763,6 @@ const availableTranches = {
         token:'BB_convex_musd3crv',
         label:'convex musd3crv BB',
         address:'0xFb08404617B6afab0b19f6cEb2Ef9E07058D043C'
-      }
-    },
-    "3EUR":{
-      abi:ERC20,
-      decimals:18,
-      token:'3EUR',
-      protocol:'convex',
-      blockNumber:14177892,
-      autoFarming:['CVX','CRV','ANGLE'],
-      address:'0xb9446c4Ef5EBE66268dA6700D26f96273DE3d571',
-      CDO:{
-        abi:IdleCDO,
-        decimals:18,
-        name:'IdleCDO_convex_3eur',
-        address:'0x858F5A3a5C767F8965cF7b77C51FD178C4A92F05'
-      },
-      Strategy:{
-        abi:IdleStrategy,
-        name:'IdleStrategy_convex_3eur'
-      },
-      buyInstructions:'To get 3EUR token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://curve.fi/factory/66/deposit">3EUR Curve Pool</a>.',
-      AA:{
-        abi:ERC20,
-        decimals:18,
-        tranche:'AA',
-        functions:{
-          stake:'stake',
-          claim:'claim',
-          unstake:'unstake',
-          deposit:'depositAA',
-          withdraw:'withdrawAA',
-          stakedBalance:'usersStakes',
-          rewards:'expectedUserReward'
-        },
-        CDORewards:{
-          decimals:18,
-          stakingRewards:[],
-          unstakeWithBalance:true,
-          abi:IdleCDOTrancheRewards,
-          name:'IdleCDOTrancheRewards_convex_3eur_AA',
-          address:'0x0000000000000000000000000000000000000000'
-        },
-        blockNumber:14177892,
-        name:'AA_convex_3eur',
-        token:'AA_convex_3eur',
-        label:'convex 3eur AA',
-        address:'0x158e04225777BBEa34D2762b5Df9eBD695C158D2'
-      },
-      BB:{
-        abi:ERC20,
-        decimals:18,
-        tranche:'BB',
-        functions:{
-          stake:'stake',
-          claim:'claim',
-          unstake:'unstake',
-          deposit:'depositBB',
-          withdraw:'withdrawBB',
-          stakedBalance:'usersStakes'
-        },
-        CDORewards:{
-          decimals:18,
-          stakingRewards:[],
-          unstakeWithBalance:true,
-          abi:IdleCDOTrancheRewards,
-          name:'IdleCDOTrancheRewards_convex_3eur_BB',
-          address:'0x0000000000000000000000000000000000000000'
-        },
-        blockNumber:14177892,
-        name:'BB_convex_3eur',
-        token:'BB_convex_3eur',
-        label:'convex 3eur BB',
-        address:'0x3061C652b49Ae901BBeCF622624cc9f633d01bbd'
       }
     }
     */
