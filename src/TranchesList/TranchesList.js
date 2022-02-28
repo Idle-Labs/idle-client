@@ -35,8 +35,7 @@ class TranchesList extends Component {
       enabledProtocols = Object.keys(this.props.availableTranches);
     }
     const depositedTokens=this.props.depositedTokens;
-    const list=Object.values(depositedTokens).map(token=>token.token)
-    console.log("Exp,list")
+    console.log('dps',depositedTokens)
     return (
       <Flex id="tranches-list-container" width={1} flexDirection={'column'}>
         <TableHeader
@@ -45,18 +44,44 @@ class TranchesList extends Component {
           isMobile={this.props.isMobile}
           colsProps={this.props.colsProps}
         />
+       {
+         this.props.isDeposit?
+       (
+         depositedTokens &&
         <Flex id="tranches-list" flexDirection={'column'}>
+          {
+           
+               depositedTokens.map( token => {
+                const protocolConfig=this.props.availableTranches[token.protocol][token.token]
+                return(
+                  <TableRow
+                    {...this.props}
+                    token={token.token}
+                    tranche={token.tranche}
+                    protocol={token.protocol}
+                    rowId={`tranche-col-${token.protocol}`}
+                    tokenConfig={protocolConfig[token]}
+                    cardId={`tranche-card-${token.protocol}`}
+                    key={`tranche-${token.protocol}-${token.token+token.tranche}`}
+                    fieldComponent={this.props.fieldComponent || TrancheField}
+                  />
+                  )
+               })
+            
+          }
+        </Flex>
+       ):
+       (
+         <Flex id="tranches-list" flexDirection={'column'}>
           {
             enabledProtocols.map(protocol => {
               const protocolConfig = this.props.availableTranches[protocol];
               if (!protocolConfig){
                 return null;
               }
-             
                 const tranche = this.props.trancheType || null;
               return Object.keys(protocolConfig).map( token => {
                 return(
-                (!this.props.isDeposit||list.includes(token))&&
                   <TableRow
                     {...this.props}
                     token={token}
@@ -73,6 +98,8 @@ class TranchesList extends Component {
             })
           }
         </Flex>
+        )
+        }
       </Flex>
     );
   }
