@@ -4,7 +4,6 @@ import React, { Component } from 'react';
 import StatsCard from '../StatsCard/StatsCard';
 import Breadcrumb from '../Breadcrumb/Breadcrumb';
 import SmartNumber from '../SmartNumber/SmartNumber';
-import globalConfigs from '../configs/globalConfigs';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import DashboardCard from '../DashboardCard/DashboardCard';
 import { Flex, Text, Heading, Box, Icon  } from 'rimble-ui';
