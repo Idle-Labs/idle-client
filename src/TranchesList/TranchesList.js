@@ -35,7 +35,6 @@ class TranchesList extends Component {
       enabledProtocols = Object.keys(this.props.availableTranches);
     }
     const depositedTokens=this.props.depositedTokens;
-    console.log('dps',depositedTokens)
     return (
       <Flex id="tranches-list-container" width={1} flexDirection={'column'}>
         <TableHeader
@@ -50,9 +49,10 @@ class TranchesList extends Component {
          depositedTokens &&
         <Flex id="tranches-list" flexDirection={'column'}>
           {
-           
+            
                depositedTokens.map( token => {
                 const protocolConfig=this.props.availableTranches[token.protocol][token.token]
+                console.log("Tranche",protocolConfig)
                 return(
                   <TableRow
                     {...this.props}
