@@ -882,7 +882,7 @@ class Tranches extends Component {
                     {
                       title:'PROTOCOL', 
                       props:{
-                        width:[0.34, this.state.useTrancheType ? 0.15 : 0.13]
+                        width:[0.34,0.15]
                       },
                       fields:[
                         {
@@ -924,8 +924,27 @@ class Tranches extends Component {
                         }
                       ]
                     },
+                    {
+                      title:'EARNINGS',
+                      props:{
+                        width:[0.15, 0.13],
+                      },
+                      fields:[
+                        {
+                          name:'earningsCounter',
+                          props:{
+                            mr:2,
+                            height:['1.4em','2em']
+                          }
+                        },
+                        {
+                          mobile:false,
+                          name:'tokenName'
+                        }
+                      ]
+                    },
                     
-                    /*
+                    
                     {
                       title:'TYPE',
                       props:{
@@ -947,7 +966,7 @@ class Tranches extends Component {
                       ],
                       visible:this.state.useTrancheType
                     },
-                    */
+                    
                     {
                       title:'POOL',
                       props:{
@@ -962,47 +981,6 @@ class Tranches extends Component {
                           }
                         }
                       ]
-                    },
-                    {
-                      title:this.state.useTrancheType ? 'APY' : 'SENIOR APY',
-                      desc:this.functionsUtil.getGlobalConfig(['messages','apyTranches']),
-                      visible:!this.state.useTrancheType || this.state.trancheType === 'AA',
-                      props:{
-                        width:[this.state.useTrancheType ? 0.16 : 0.27,this.state.useTrancheType ? 0.09 : 0.11],
-                      },
-                      parentProps:{
-                        flexDirection:'column',
-                        alignItems:'flex-start',
-                      },
-                      fields:[
-                        {
-                          name:'seniorApy',
-                          showTooltip:true
-                        },
-                      ],
-                    },
-                    {
-                      title:this.state.useTrancheType ? 'APY' : 'JUNIOR APY',
-                      desc:this.functionsUtil.getGlobalConfig(['messages','apyTranches']),
-                      visible:!this.state.useTrancheType || this.state.trancheType === 'BB',
-                      props:{
-                        width:[this.state.useTrancheType ? 0.16 : 0.27,this.state.useTrancheType ? 0.09 : 0.11],
-                      },
-                      parentProps:{
-                        flexDirection:'column',
-                        alignItems:'flex-start',
-                      },
-                      fields:[
-                        {
-                          name:'juniorApy',
-                          props:{
-                            flexProps:{
-                              mr:3
-                            }
-                          },
-                          showTooltip:true
-                        },
-                      ],
                     },
                     {
                       mobile:false,
