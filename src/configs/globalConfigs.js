@@ -87,6 +87,7 @@ const globalConfigs = {
   discordURL: "https://discord.gg/mpySAJp",
   twitterURL: "https://twitter.com/idlefinance",
   cache: {
+    TTL:180,
     clearAll:true
   },
   theme: {

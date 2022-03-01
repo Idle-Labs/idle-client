@@ -153,9 +153,9 @@ class StatsTranche extends Component {
 
   setDateRange = (ranges,quickSelection=null) => {
 
-    const minStartTime = moment(globalConfigs.stats.tokens[this.props.selectedToken].startTimestamp);
+    const minStartTime = this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken.toUpperCase(),'startTimestamp']);
 
-    let startTimestampObj = moment(ranges.startDate).isSameOrAfter(minStartTime) ? moment(ranges.startDate) : minStartTime;
+    let startTimestampObj = minStartTime ? (moment(ranges.startDate).isSameOrAfter(minStartTime) ? moment(ranges.startDate) : minStartTime) : moment(ranges.startDate);
     let endTimestampObj = moment(ranges.endDate);
 
     if (startTimestampObj.isSame(endTimestampObj)){

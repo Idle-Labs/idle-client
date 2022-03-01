@@ -998,6 +998,8 @@ class FunctionsUtil {
     await this.asyncForEach(Object.keys(stakingRewards), async (token) => {
 
       let firstHarvest = null;
+      let prevBlockInfo = null;
+      let lastBlockInfo = null;
       let latestHarvest = null;
       let tokenApr = this.BNify(0);
       let tokenApy = this.BNify(0);
@@ -1006,9 +1008,11 @@ class FunctionsUtil {
       let distributionSpeedUnit = null;
       let tokensPerDay = this.BNify(0);
       let tokensPerYear = this.BNify(0);
+      let conversionRate = this.BNify(0);
       let tokensPerBlock = this.BNify(0);
       let tranchePoolSize = this.BNify(0);
       let tokensPerSecond = this.BNify(0);
+      let lastBlockPoolSize = this.BNify(0);
       let distributionSpeed = this.BNify(0);
       let convertedTokensPerYear = this.BNify(0);
 
@@ -1016,17 +1020,18 @@ class FunctionsUtil {
       const DAITokenConfig = {
         address: this.getContractByName('DAI')._address
       };
-      const conversionRate = await this.getUniswapConversionRate(DAITokenConfig, govTokenConfig);
 
       const rewardsRateMethod = trancheConfig.functions.rewardsRate;
       if (rewardsRateMethod){
         [
+          conversionRate,
           tokensPerSecond,
           totalAmount,
           tranchePoolSize
         ] = await Promise.all([
-          this.genericContractCall(trancheConfig.CDORewards.name,rewardsRateMethod),
-          this.genericContractCall(token,'balanceOf',[trancheConfig.CDORewards.address]),
+          this.getUniswapConversionRate(DAITokenConfig, govTokenConfig),
+          this.genericContractCallCached(trancheConfig.CDORewards.name,rewardsRateMethod),
+          this.genericContractCallCached(token,'balanceOf',[trancheConfig.CDORewards.address]),
           this.loadTrancheFieldRaw('tranchePool', {}, tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, tokenConfig, trancheConfig)
         ]);
 
@@ -1071,14 +1076,15 @@ class FunctionsUtil {
           const firstHarvest = transfers.length ? transfers[0] : null;
           const latestHarvest = transfers[transfers.length - 1];
           const firstBlock = firstHarvest ? firstHarvest.blockNumber : tokenConfig.blockNumber;
-
-          const [
+          [
             prevBlockInfo,
             lastBlockInfo,
+            conversionRate,
             lastBlockPoolSize
           ] = await Promise.all([
             this.getBlockInfo(firstBlock),
             this.getBlockInfo(latestHarvest.blockNumber),
+            this.getUniswapConversionRate(DAITokenConfig, govTokenConfig),
             this.genericContractCallCached(tokenConfig.CDO.name, 'getContractValue', [], {}, latestHarvest.blockNumber)
           ]);
 
@@ -4790,8 +4796,8 @@ class FunctionsUtil {
           rewardsTokens,
           incentiveTokens
         ] = await Promise.all([
-          this.genericContractCall(strategyConfig.name, 'getRewardTokens'),
-          this.genericContractCall(tokenConfig.CDO.name, 'getIncentiveTokens')
+          this.genericContractCallCached(strategyConfig.name, 'getRewardTokens'),
+          this.genericContractCallCached(tokenConfig.CDO.name, 'getIncentiveTokens')
         ]);
 
         // Pick Senior Tranche by default
@@ -5294,12 +5300,10 @@ class FunctionsUtil {
   getIdleTokenPrice = async (tokenConfig, blockNumber = 'latest', timestamp = false) => {
 
     const cachedDataKey = `idleTokenPrice_${tokenConfig.idle.token}_${blockNumber}`;
-    // if (blockNumber !== 'latest'){
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData && !this.BNify(cachedData).isNaN()) {
       return this.BNify(cachedData);
     }
-    // }
 
     let decimals = tokenConfig.decimals;
 
@@ -5359,13 +5363,7 @@ class FunctionsUtil {
       tokenPrice = this.BNify(1);
     }
 
-    // if (blockNumber !== 'latest'){
-    this.setCachedDataWithLocalStorage(cachedDataKey, tokenPrice);
-    // }
-
-    // this.customLog('getIdleTokenPrice',tokenPrice.toString());
-
-    return tokenPrice;
+    return this.setCachedDataWithLocalStorage(cachedDataKey, tokenPrice);
   }
   clearCachedData = (clear_all = false) => {
     if (this.props.clearCachedData && typeof this.props.clearCachedData === 'function') {
@@ -6002,13 +6000,11 @@ class FunctionsUtil {
   getBlockInfo = async (blockNumber='latest') => {
     const cachedDataKey = `getBlockInfo_${blockNumber}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
-    if (cachedData && blockNumber !== 'latest') {
+    if (cachedData) {
       return cachedData;
     }
+    
     const blockInfo = await this.props.web3.eth.getBlock(blockNumber);
-    if (blockNumber === 'latest'){
-      return blockInfo;
-    }
 
     if (blockInfo){
       const blockInfoToSave = {
@@ -6016,7 +6012,8 @@ class FunctionsUtil {
         number:blockInfo.number,
         timestamp:blockInfo.timestamp
       };
-      return this.setCachedDataWithLocalStorage(cachedDataKey, blockInfoToSave, null);
+      const TTL  = blockNumber === 'latest' ? this.getGlobalConfig(['cache','TTL']) : null;
+      return this.setCachedDataWithLocalStorage(cachedDataKey, blockInfoToSave, TTL);
     }
 
     return null;
@@ -6349,11 +6346,9 @@ class FunctionsUtil {
 
     // Check for cached data
     const cachedDataKey = `uniswapConversionRate_${tokenConfigFrom.address}_${tokenConfigDest.address}_${blockNumber}`;
-    if (blockNumber !== 'latest'){
-      const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
-      if (cachedData && !this.BNify(cachedData).isNaN()) {
-        return this.BNify(cachedData);
-      }
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData && !this.BNify(cachedData).isNaN()) {
+      return this.BNify(cachedData);
     }
 
     try {
@@ -6372,10 +6367,8 @@ class FunctionsUtil {
 
       if (unires) {
         const price = this.BNify(unires[0]).div(one);
-        if (blockNumber !== 'latest'){
-          return this.setCachedDataWithLocalStorage(cachedDataKey, price, null);
-        }
-        return price;
+        const TTL = blockNumber === 'latest' ? this.getGlobalConfig(['cache','TTL']) : null;
+        return this.setCachedDataWithLocalStorage(cachedDataKey, price, TTL);
       }
       return null;
     } catch (error) {
