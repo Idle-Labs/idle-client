@@ -248,7 +248,12 @@ class Tranches extends Component {
     }
     this.props.goToSection(route);
   }
-  selectTrancheAndType(trancheRoute,protocol,token){
+  selectTrancheAndType(type,protocol,token){
+    let trancheRoute=null
+    if (type==="AA")
+     trancheRoute="senior"
+    else
+       trancheRoute="junior"
     let route = `${this.props.selectedSection.route}/${trancheRoute}`
     const tokenConfig = this.props.availableTranches[protocol] && this.props.availableTranches[protocol][token] ? this.props.availableTranches[protocol][token] : null;
     if(tokenConfig){
@@ -874,7 +879,7 @@ class Tranches extends Component {
                   trancheType={this.state.trancheType}
                   depositedTokens={this.state.portfolio.tranchesBalance}
                   availableTranches={this.props.availableTranches}
-                  handleClick={(props) => this.selectTranche(props.protocol,props.token)}
+                  handleClick={(props) => this.selectTrancheAndType(props.tranche,props.protocol,props.token)}
                   isDeposit={"true"}
                   colsProps={{
                     fontSize:['10px','14px'],
@@ -925,26 +930,6 @@ class Tranches extends Component {
                         }
                       ]
                     },
-                    {
-                      title:'EARNINGS',
-                      props:{
-                        width:[0.15, 0.13],
-                      },
-                      fields:[
-                        {
-                          name:'earningsCounter',
-                          props:{
-                            mr:2,
-                            height:['1.4em','2em']
-                          }
-                        },
-                        {
-                          mobile:false,
-                          name:'tokenName'
-                        }
-                      ]
-                    },
-                    
                     
                     {
                       title:'TYPE',
@@ -965,84 +950,27 @@ class Tranches extends Component {
                           name:'trancheType'
                         }
                       ],
-                      visible:this.state.useTrancheType
                     },
-                    
                     {
-                      title:'POOL',
+                      title:'EARNINGS',
                       props:{
-                        width:[0.25, this.state.useTrancheType ? 0.1 : 0.09],
+                        width:[0.29,0.13],
                       },
                       fields:[
                         {
-                          name:this.state.useTrancheType ? `${this.state.trancheDetails.baseName}PoolNoLabel` : 'pool',
-                          props:{
-                            minPrecision:1,
-                            decimals:this.props.isMobile ? 0 : 2,
-                          }
-                        }
-                      ]
-                    },
-                    {
-                      mobile:false,
-                      title:'APR RATIO',
-                      desc:this.functionsUtil.getGlobalConfig(['messages','aprRatio']),
-                      props:{
-                        width:[0.15, 0.1],
-                      },
-                      fields:[
-                        {
-                          name:'trancheAPRSplitRatio',
+                          name:'earnings',
                           props:{
                             flexProps:{
                               mr:2
                             },
-                            height:['1.4em','2em']
+                            size:'1.4em'
                           }
                         },
-                        
-                      ]
-                    },
-                    {
-                      mobile:false,
-                      title:'AUTO-COMPOUNDING',
-                      desc:this.functionsUtil.getGlobalConfig(['messages','autoFarming']),
-                      props:{
-                        width:[0.25,0.17],
-                      },
-                      fields:[
                         {
-                          name:'autoFarming'
+                          name:'earnings'
                         }
-                      ]
+                      ],
                     },
-                    {
-                      mobile:false,
-                      title:'STAKING REWARDS',
-                      desc:this.functionsUtil.getGlobalConfig(['messages','stakingRewards']),
-                      props:{
-                        width:[0.25,this.state.useTrancheType ? 0.15 : 0.13],
-                      },
-                      fields:[
-                        {
-                          name:'stakingRewards'
-                        }
-                      ]
-                    },
-                    /*
-                    {
-                      mobile:true,
-                      title:'TOKENS',
-                      props:{
-                        width:[0.16,0.17],
-                      },
-                      fields:[
-                        {
-                          name:'govTokens'
-                        }
-                      ]
-                    },
-                    */
                     {
                       title:'',
                       mobile:false,
@@ -1065,7 +993,7 @@ class Tranches extends Component {
                             boxShadow:null,
                             mainColor:'deposit',
                             size: this.props.isMobile ? 'small' : 'medium',
-                            handleClick:(props) => this.selectTrancheType(props.protocol,props.token,)
+                            handleClick:(props) => this.selectTrancheAndType(props.tranche,props.protocol,props.token)
                           }
                         }
                       ]
