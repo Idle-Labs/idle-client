@@ -931,20 +931,18 @@ class Tranches extends Component {
                     {
                       title:'TYPE',
                       props:{
-                        width:[0.29,0.13],
+                        width:[0.29,0.16],
                       },
                       fields:[
+                        
                         {
-                          name:'trancheTypeIcon',
+                          name:'trancheType',
                           props:{
                             flexProps:{
-                              mr:2
+                              mr:1
                             },
                             size:'1.4em'
                           }
-                        },
-                        {
-                          name:'trancheType'
                         }
                       ],
                     },
@@ -958,11 +956,12 @@ class Tranches extends Component {
                           name:'tranchePool',
                           props:{
                             flexProps:{
-                              mr:2
+                              mr:1
                             },
-                            size:'2em'
+                            size:'1.4em',
+                            addTokenName:false
                           }
-                        },
+                        }
                       ],
                     },
                     {
@@ -975,9 +974,10 @@ class Tranches extends Component {
                           name:'trancheDeposited',
                           props:{
                             flexProps:{
-                              mr:2
+                              mr:1
                             },
-                            size:'2em'
+                            size:'1.4em',
+                            addTokenName:false
                           }
                         },
                       ],
@@ -992,9 +992,10 @@ class Tranches extends Component {
                           name:'earnings',
                           props:{
                             flexProps:{
-                              mr:2
+                              mr:1
                             },
-                            size:'2em'
+                            size:'2em',
+                            addTokenName:false
                           }
                         },
                       ],
@@ -1002,7 +1003,7 @@ class Tranches extends Component {
                     {
                       title:'FARMING',
                       props:{
-                        width:[0.29,0.2],
+                        width:[0.29,0.17],
                       },
                       fields:[
                         {
@@ -1020,7 +1021,7 @@ class Tranches extends Component {
                       title:'',
                       mobile:false,
                       props:{
-                        width:[0.29, 0.15],
+                        width:[0.29, 0.2],
                       },
                       parentProps:{
                         width:1
