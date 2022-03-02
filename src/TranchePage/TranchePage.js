@@ -1,8 +1,9 @@
 import Title from '../Title/Title';
-import { Box, Flex } from "rimble-ui";
 import React, { Component } from 'react';
+import { Box, Flex, Icon, Text } from "rimble-ui";
 import GenericFaqs from '../GenericFaqs/GenericFaqs';
 import FunctionsUtil from '../utilities/FunctionsUtil';
+import DashboardCard from '../DashboardCard/DashboardCard';
 import TrancheDetails from '../TrancheDetails/TrancheDetails';
 // import TrancheWelcome from '../TrancheWelcome/TrancheWelcome';
 import TrancheHarvests from '../TrancheHarvests/TrancheHarvests';
@@ -82,6 +83,47 @@ class TranchePage extends Component {
         >
           {this.functionsUtil.capitalize(this.props.selectedProtocol)} - {this.props.selectedToken} - {this.props.trancheDetails ? this.props.trancheDetails.name : 'Tranches'} 
         </Title>
+        {
+          this.props.selectedProtocol === 'lido' && this.props.selectedToken === 'stETH' && (
+            <Flex
+              width={1}
+              alignItems={'center'}
+              justifyContent={'center'}
+            >
+              <DashboardCard
+                cardProps={{
+                  p: 2,
+                  mb: 3,
+                  width: 1,
+                  maxWidth:['100%',this.props.trancheDetails ? '42em' : '100%']
+                }}
+                isActive={true}
+                isInteractive={false}
+              >
+                <Flex
+                  alignItems={"center"}
+                  justifyContent={"center"}
+                  flexDirection={["column", "row"]}
+                >
+                  <Icon
+                    mr={1}
+                    size={"1.2em"}
+                    name={'InfoOutline'}
+                    color={"flashColor"}
+                  />
+                  <Text
+                    fontWeight={500}
+                    fontSize={"15px"}
+                    color={"flashColor"}
+                    textAlign={"center"}
+                  >
+                    LDO rewards will be resumed in 48 hours!
+                  </Text>
+                </Flex>
+              </DashboardCard>
+            </Flex>
+          )
+        }
         {
           /*
           !this.props.trancheType ? (
