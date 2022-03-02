@@ -1021,7 +1021,7 @@ class Tranches extends Component {
                       title:'',
                       mobile:false,
                       props:{
-                        width:[0.29, 0.2],
+                        width:[0.29, 0.18],
                       },
                       parentProps:{
                         width:1
