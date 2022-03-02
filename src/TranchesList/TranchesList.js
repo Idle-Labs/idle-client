@@ -56,6 +56,7 @@ class TranchesList extends Component {
                   <TableRow
                     {...this.props}
                     token={token.token}
+                    addTokenName={false}
                     tranche={token.tranche}
                     protocol={token.protocol}
                     rowId={`tranche-col-${token.protocol}`}
