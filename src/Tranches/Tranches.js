@@ -947,7 +947,7 @@ class Tranches extends Component {
                     {
                       title:'TRANCHE',
                       props:{
-                        width:[0.29,0.22],
+                        width:[0.29,0.18],
                       },
                       fields:[
                         {
@@ -985,7 +985,7 @@ class Tranches extends Component {
                     {
                       title:'DEPOSITED',
                       props:{
-                        width:[0.29,0.12],
+                        width:[0.29,0.1],
                       },
                       fields:[
                         {
@@ -1002,7 +1002,7 @@ class Tranches extends Component {
                     {
                       title:'EARNINGS',
                       props:{
-                        width:[0.29,0.16],
+                        width:[0.29,0.22],
                         textAlign:'center'
                       },
                       parentProps:{
@@ -1012,12 +1012,6 @@ class Tranches extends Component {
                       fields:[
                         {
                           name:'earnings',
-                          props:{
-                            flexProps:{
-                              mr:1
-                            },
-                            size:'2em',
-                          }
                         },
                         {
                           name:'earningsPerc',
@@ -1051,7 +1045,7 @@ class Tranches extends Component {
                       title:'',
                       mobile:false,
                       props:{
-                        width:[0.29, 0.18],
+                        width:[0.29, 0.19],
                       },
                       parentProps:{
                         width:1
