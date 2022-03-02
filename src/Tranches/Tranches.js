@@ -1001,7 +1001,12 @@ class Tranches extends Component {
                     {
                       title:'EARNINGS',
                       props:{
-                        width:[0.29,0.11],
+                        width:[0.29,0.13],
+                        textAlign:'center'
+                      },
+                      parentProps:{
+                        alignItems:'center',
+                        flexDirection:'column'
                       },
                       fields:[
                         {
