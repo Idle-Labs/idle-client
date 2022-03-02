@@ -951,9 +951,43 @@ class Tranches extends Component {
                       ],
                     },
                     {
+                      title:'POOL',
+                      props:{
+                        width:[0.29,0.2],
+                      },
+                      fields:[
+                        {
+                          name:'tranchePool',
+                          props:{
+                            flexProps:{
+                              mr:2
+                            },
+                            size:'2em'
+                          }
+                        },
+                      ],
+                    },
+                    {
+                      title:'DEPOSITED',
+                      props:{
+                        width:[0.29,0.2],
+                      },
+                      fields:[
+                        {
+                          name:'trancheDeposited',
+                          props:{
+                            flexProps:{
+                              mr:2
+                            },
+                            size:'2em'
+                          }
+                        },
+                      ],
+                    },
+                    {
                       title:'EARNINGS',
                       props:{
-                        width:[0.29,0.13],
+                        width:[0.29,0.2],
                       },
                       fields:[
                         {
@@ -962,12 +996,26 @@ class Tranches extends Component {
                             flexProps:{
                               mr:2
                             },
-                            size:'1.4em'
+                            size:'2em'
                           }
                         },
+                      ],
+                    },
+                    {
+                      title:'FARMING',
+                      props:{
+                        width:[0.29,0.2],
+                      },
+                      fields:[
                         {
-                          name:'earnings'
-                        }
+                          name:'autoFarming',
+                          props:{
+                            flexProps:{
+                              mr:2
+                            },
+                            size:'2em'
+                          }
+                        },
                       ],
                     },
                     {
