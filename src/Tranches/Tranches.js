@@ -931,14 +931,14 @@ class Tranches extends Component {
                     {
                       title:'APY',
                       props:{
-                        width:[0.18, 0.08],
+                        width:[0.18, 0.1],
                       },
                       fields:[
                         {
-                          name:'trancheApyWithTooltip',
+                          name:'trancheApy',
                           props:{
                             mr:2,
-                            height:['1.4em','2em']
+                            size:'1.4em'
                           }
                         },
                       ]
@@ -985,7 +985,7 @@ class Tranches extends Component {
                     {
                       title:'DEPOSITED',
                       props:{
-                        width:[0.29,0.14],
+                        width:[0.29,0.12],
                       },
                       fields:[
                         {
@@ -1002,7 +1002,7 @@ class Tranches extends Component {
                     {
                       title:'EARNINGS',
                       props:{
-                        width:[0.29,0.13],
+                        width:[0.29,0.16],
                         textAlign:'center'
                       },
                       parentProps:{
