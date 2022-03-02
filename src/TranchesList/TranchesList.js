@@ -51,8 +51,8 @@ class TranchesList extends Component {
           {
             
                depositedTokens.map( token => {
-                const protocolConfig=this.props.availableTranches[token.protocol][token.token]
-                console.log("Tranche",protocolConfig)
+                const tokenConfig=this.props.availableTranches[token.protocol][token.token]
+                console.log("Tranche",tokenConfig)
                 return(
                   <TableRow
                     {...this.props}
@@ -60,7 +60,8 @@ class TranchesList extends Component {
                     tranche={token.tranche}
                     protocol={token.protocol}
                     rowId={`tranche-col-${token.protocol}`}
-                    tokenConfig={protocolConfig[token]}
+                    tokenConfig={tokenConfig}
+                    trancheConfig={token.tranche==="AA"?tokenConfig.AA:tokenConfig.BB}
                     cardId={`tranche-card-${token.protocol}`}
                     key={`tranche-${token.protocol}-${token.token+token.tranche}`}
                     fieldComponent={this.props.fieldComponent || TrancheField}
