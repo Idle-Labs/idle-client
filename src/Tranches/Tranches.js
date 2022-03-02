@@ -911,7 +911,7 @@ class Tranches extends Component {
                     {
                       title:'TOKEN',
                       props:{
-                        width:[0.15, 0.13],
+                        width:[0.18, 0.15],
                       },
                       fields:[
                         {
@@ -927,14 +927,37 @@ class Tranches extends Component {
                         }
                       ]
                     },
-                    
                     {
-                      title:'TYPE',
+                      title:'APY',
                       props:{
-                        width:[0.29,0.16],
+                        width:[0.18, 0.08],
                       },
                       fields:[
-                        
+                        {
+                          name:'trancheApyWithTooltip',
+                          props:{
+                            mr:2,
+                            height:['1.4em','2em']
+                          }
+                        },
+                      ]
+                    },
+                    
+                    {
+                      title:'TRANCHE',
+                      props:{
+                        width:[0.29,0.22],
+                      },
+                      fields:[
+                        {
+                          name:'trancheTypeIcon',
+                          props:{
+                            flexProps:{
+                              mr:1
+                            },
+                            size:'1.4em'
+                          }
+                        },
                         {
                           name:'trancheType',
                           props:{
@@ -949,7 +972,7 @@ class Tranches extends Component {
                     {
                       title:'POOL',
                       props:{
-                        width:[0.29,0.2],
+                        width:[0.29,0.14],
                       },
                       fields:[
                         {
@@ -959,7 +982,6 @@ class Tranches extends Component {
                               mr:1
                             },
                             size:'1.4em',
-                            addTokenName:false
                           }
                         }
                       ],
@@ -967,7 +989,7 @@ class Tranches extends Component {
                     {
                       title:'DEPOSITED',
                       props:{
-                        width:[0.29,0.2],
+                        width:[0.29,0.14],
                       },
                       fields:[
                         {
@@ -977,7 +999,6 @@ class Tranches extends Component {
                               mr:1
                             },
                             size:'1.4em',
-                            addTokenName:false
                           }
                         },
                       ],
@@ -985,7 +1006,7 @@ class Tranches extends Component {
                     {
                       title:'EARNINGS',
                       props:{
-                        width:[0.29,0.2],
+                        width:[0.29,0.11],
                       },
                       fields:[
                         {
@@ -995,9 +1016,17 @@ class Tranches extends Component {
                               mr:1
                             },
                             size:'2em',
-                            addTokenName:false
                           }
                         },
+                        {
+                          name:'earningsPerc',
+                          showLoader:false,
+                          showDirection:false,
+                          props:{
+                            fontSize:0,
+                            decimals:3
+                          }
+                        }
                       ],
                     },
                     {
@@ -1029,7 +1058,7 @@ class Tranches extends Component {
                       fields:[
                         {
                           name:'button',
-                          label: 'Deposit',
+                          label: 'Manage',
                           props:{
                             width:1,
                             fontSize:3,
@@ -1037,7 +1066,7 @@ class Tranches extends Component {
                             height:'45px',
                             borderRadius:4,
                             boxShadow:null,
-                            mainColor:'deposit',
+                            mainColor:'redeem',
                             size: this.props.isMobile ? 'small' : 'medium',
                             handleClick:(props) => this.selectTrancheAndType(props.tranche,props.protocol,props.token)
                           }
