@@ -131,7 +131,6 @@ class Tranches extends Component {
       
       const portfolioLoaded = true;
       const tranchesConfig = this.functionsUtil.getGlobalConfig(['tranches']);
-      console.log("portfolio",portfolio,portfolio.tranchesBalances)
 
       portfolio.tranchesBalance.forEach( trancheInfo => {
         if (!tranchesBalances[trancheInfo.tranche]){
@@ -151,7 +150,6 @@ class Tranches extends Component {
       });
 
       const depositedTokens = Object.keys(tranchesTokens);      
-      console.log("portfolio",portfolio)
 
       const portfolioDonutData = Object.keys(tranchesTokens).map( token => {
         const balanceValue = parseFloat(tranchesTokens[token].toFixed(4));

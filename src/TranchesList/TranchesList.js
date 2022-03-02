@@ -52,7 +52,6 @@ class TranchesList extends Component {
             
                depositedTokens.map( token => {
                 const tokenConfig=this.props.availableTranches[token.protocol][token.token]
-                console.log("Tranche",tokenConfig)
                 return(
                   <TableRow
                     {...this.props}
