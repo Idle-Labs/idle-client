@@ -264,7 +264,6 @@ class TrancheField extends Component {
           output = aprChartData;
         break;
         default:
-          console.log("Account",this.props.tokenConfig,this.props.trancheConfig)
           output = await this.functionsUtil.loadTrancheField(fieldName,fieldProps,this.props.protocol,this.props.token,this.props.tranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account,addGovTokens,formatValue,addTokenName);
           if (output !== undefined && setState){
             this.setStateSafe({
