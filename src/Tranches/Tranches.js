@@ -953,19 +953,14 @@ class Tranches extends Component {
                           name:'trancheTypeIcon',
                           props:{
                             flexProps:{
-                              mr:1
+                              mr:2
                             },
                             size:'1.4em'
                           }
                         },
                         {
                           name:'trancheType',
-                          props:{
-                            flexProps:{
-                              mr:1
-                            },
-                            size:'1.4em'
-                          }
+
                         }
                       ],
                     },
