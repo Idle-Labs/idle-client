@@ -195,7 +195,8 @@ const availableTranches = {
           deposit:'depositAA',
           withdraw:'withdrawAA',
           rewardsRate:'rewardRate',
-          stakedBalance:'balanceOf'
+          stakedBalance:'balanceOf',
+          periodFinish:'periodFinish'
         },
         CDORewards:{
           decimals:18,

@@ -958,7 +958,7 @@ class FunctionsUtil {
         from: tokenConfig.CDO.address,
         to: trancheConfig.CDORewards.address
       }
-      const transfers = await this.getContractEvents(token, 'Transfer', { fromBlock: tokenConfig.blockNumber, toBlock: 'latest', filter: eventFilters });
+      const transfers = await this.getContractEvents(token, 'Transfer',tokenConfig.blockNumber,'latest', {filter: eventFilters });
 
       if (transfers && transfers.length>0){
         stakingDistributions[token] = transfers;
@@ -982,7 +982,7 @@ class FunctionsUtil {
       const eventFilters = {
         to: tokenConfig.CDO.address
       }
-      const transfers = await this.getContractEvents(token, 'Transfer', { fromBlock: tokenConfig.blockNumber, toBlock: 'latest', filter: eventFilters });
+      const transfers = await this.getContractEvents(token, 'Transfer',tokenConfig.blockNumber,'latest', {filter: eventFilters });
 
       if (transfers && transfers.length > 0) {
         harvestsList[token] = transfers;
@@ -1003,10 +1003,11 @@ class FunctionsUtil {
       let latestHarvest = null;
       let tokenApr = this.BNify(0);
       let tokenApy = this.BNify(0);
+      let distributionEnded = null;
       let lastAmount = this.BNify(0);
       let totalAmount = this.BNify(0);
-      let distributionSpeedUnit = null;
       let tokensPerDay = this.BNify(0);
+      let distributionSpeedUnit = null;
       let tokensPerYear = this.BNify(0);
       let conversionRate = this.BNify(0);
       let tokensPerBlock = this.BNify(0);
@@ -1022,30 +1023,41 @@ class FunctionsUtil {
       };
 
       const rewardsRateMethod = trancheConfig.functions.rewardsRate;
+      const periodFinishMethod = trancheConfig.functions.periodFinish;
+
+      if (periodFinishMethod){
+        const periodFinish = await this.genericContractCall(trancheConfig.CDORewards.name,periodFinishMethod);
+        if (periodFinish){
+          distributionEnded = parseInt(periodFinish)<=parseInt(Date.now()/1000);
+        }
+      }
+
       if (rewardsRateMethod){
-        [
-          conversionRate,
-          tokensPerSecond,
-          totalAmount,
-          tranchePoolSize
-        ] = await Promise.all([
-          this.getUniswapConversionRate(DAITokenConfig, govTokenConfig),
-          this.genericContractCallCached(trancheConfig.CDORewards.name,rewardsRateMethod),
-          this.genericContractCallCached(token,'balanceOf',[trancheConfig.CDORewards.address]),
-          this.loadTrancheFieldRaw('tranchePool', {}, tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, tokenConfig, trancheConfig)
-        ]);
 
-        tranchePoolSize = await this.convertTrancheTokenBalance(tranchePoolSize,tokenConfig);
-        tokensPerSecond = this.fixTokenDecimals(tokensPerSecond,trancheConfig.CDORewards.decimals);
+        if (!distributionEnded){
+          [
+            conversionRate,
+            tokensPerSecond,
+            totalAmount,
+            tranchePoolSize
+          ] = await Promise.all([
+            this.getUniswapConversionRate(DAITokenConfig, govTokenConfig),
+            this.genericContractCallCached(trancheConfig.CDORewards.name,rewardsRateMethod),
+            this.genericContractCallCached(token,'balanceOf',[trancheConfig.CDORewards.address]),
+            this.loadTrancheFieldRaw('tranchePool', {}, tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, tokenConfig, trancheConfig)
+          ]);
 
-        tokensPerDay = this.BNify(tokensPerSecond).times(86400);
-        tokensPerYear = this.BNify(tokensPerSecond).times(this.getGlobalConfig(['network', 'secondsPerYear']));
-        tokensPerBlock = tokensPerYear.div(this.getGlobalConfig(['network', 'blocksPerYear']));
-        convertedTokensPerYear = tokensPerYear.times(conversionRate);
-        tokenApr = convertedTokensPerYear.div(tranchePoolSize);
-        tokenApy = this.apr2apy(tokenApr).times(100);
+          tranchePoolSize = await this.convertTrancheTokenBalance(tranchePoolSize,tokenConfig);
+          tokensPerSecond = this.fixTokenDecimals(tokensPerSecond,trancheConfig.CDORewards.decimals);
+          tokensPerDay = this.BNify(tokensPerSecond).times(86400);
+          tokensPerYear = this.BNify(tokensPerSecond).times(this.getGlobalConfig(['network', 'secondsPerYear']));
+          tokensPerBlock = tokensPerYear.div(this.getGlobalConfig(['network', 'blocksPerYear']));
+          convertedTokensPerYear = tokensPerYear.times(conversionRate);
+          tokenApr = convertedTokensPerYear.div(tranchePoolSize);
+          tokenApy = this.apr2apy(tokenApr).times(100);
+          distributionSpeed = tokensPerDay;
+        }
 
-        distributionSpeed = tokensPerDay;
         distributionSpeedUnit = '/day';
 
         tokensDistribution[token] = {
@@ -1070,7 +1082,8 @@ class FunctionsUtil {
           from: tokenConfig.CDO.address,
           to: trancheConfig.CDORewards.address
         }
-        const transfers = await this.getContractEvents(token, 'Transfer', { fromBlock: tokenConfig.blockNumber, toBlock: 'latest', filter: eventFilters });
+        // const transfers = await this.getContractEvents(token, 'Transfer', { fromBlock: tokenConfig.blockNumber, toBlock: 'latest', filter: eventFilters });
+        const transfers = await this.getContractEvents(token, 'Transfer', tokenConfig.blockNumber, 'latest', { filter: eventFilters });
 
         if (transfers && transfers.length > 0) {
           const firstHarvest = transfers.length ? transfers[0] : null;
@@ -1155,8 +1168,8 @@ class FunctionsUtil {
       underlying_transfers,
       trancheToken_transfers
     ] = await Promise.all([
-      this.getContractEvents(tokenConfig.token, 'Transfer', { fromBlock: trancheConfig.blockNumber, toBlock: 'latest', filter: underlyingEventsFilters }),
-      this.getContractEvents(trancheConfig.name, 'Transfer', { fromBlock: trancheConfig.blockNumber, toBlock: 'latest', filter: { from: ['0x0000000000000000000000000000000000000000', this.props.account], to: ['0x0000000000000000000000000000000000000000', this.props.account] } })
+      this.getContractEvents(tokenConfig.token, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: underlyingEventsFilters }),
+      this.getContractEvents(trancheConfig.name, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: { from: ['0x0000000000000000000000000000000000000000', this.props.account], to: ['0x0000000000000000000000000000000000000000', this.props.account] } })
     ]);
 
     // console.log('getAmountDepositedTranche',trancheConfig.name,'underlying_transfers',underlying_transfers,'trancheToken_transfers',trancheToken_transfers);
@@ -3706,8 +3719,27 @@ class FunctionsUtil {
     };
   }
 
-  getContractEvents = async (contractName, eventName, params = {}) => {
-    return await this.getContractPastEvents(contractName, eventName, params);
+  // getContractEvents = async (contractName, eventName, params = {}) => {
+  //   return await this.getContractPastEvents(contractName, eventName, params);
+  // }
+
+  getContractEvents = async (contractName, eventName, fromBlock=0, toBlock='latest', params = {}) => {
+
+    const blocksPerCall = 100000;
+    const lastBlockNumber = toBlock === 'latest' ? await this.props.web3.eth.getBlockNumber() : toBlock;
+    fromBlock = fromBlock || lastBlockNumber-blocksPerCall;
+
+    const calls = [];
+    for (var blockNumber = fromBlock; blockNumber < lastBlockNumber; blockNumber+=blocksPerCall) {
+      const toBlock = Math.min(blockNumber+blocksPerCall,lastBlockNumber);
+      calls.push(this.getContractPastEvents(contractName, eventName, {fromBlock: blockNumber, toBlock, ...params}));
+    }
+
+    const all_past_events = await Promise.all(calls);
+    return all_past_events.reduce( (events,d) => {
+      events = events.concat(d);
+      return events;
+    },[]);
   }
 
   estimateMethodGasUsage = async (contractName, methodName, methodParams = [], account = null) => {
@@ -5543,8 +5575,8 @@ class FunctionsUtil {
       coverBoughtEvents,
       claimSubmittedEvents,
     ] = await Promise.all([
-      this.getContractEvents(feeDistributorConfig.name, 'CoverBought', { fromBlock, toBlock: 'latest', filter: { buyer: account } }),
-      this.getContractEvents(feeDistributorConfig.name, 'ClaimSubmitted', { fromBlock, toBlock: 'latest', filter: { buyer: account } })
+      this.getContractEvents(feeDistributorConfig.name, 'CoverBought', fromBlock, 'latest', {filter: { buyer: account } }),
+      this.getContractEvents(feeDistributorConfig.name, 'ClaimSubmitted', fromBlock, 'latest', {filter: { buyer: account } })
     ]);
 
     const nexusMutualCoverages = [];
@@ -5558,7 +5590,7 @@ class FunctionsUtil {
         incidentEvents
       ] = await Promise.all([
         this.genericContractCall(feeDistributorConfig.name, 'getCover', [coverId]),
-        this.getContractEvents(incidentsInfo.name, 'IncidentAdded', { fromBlock: cover.blockNumber, toBlock: 'latest', filter: { productId: cover.contractAddress } })
+        this.getContractEvents(incidentsInfo.name, 'IncidentAdded', cover.blockNumber, 'latest', { filter: { productId: cover.contractAddress } })
       ]);
 
       if (!coverDetails) {

@@ -117,7 +117,7 @@ class TranchePage extends Component {
                     color={"flashColor"}
                     textAlign={"center"}
                   >
-                    LDO rewards will be resumed in 48 hours!
+                    LDO rewards will be resumed on Sunday 6th of March!
                   </Text>
                 </Flex>
               </DashboardCard>

@@ -286,9 +286,9 @@ class IdleStaking extends Component {
       this.props.account ? this.functionsUtil.genericContractCall(this.props.contractInfo.name,'locked',[this.props.account]) : null,
       this.props.account ? this.functionsUtil.getContractBalance(this.props.contractInfo.name,this.props.account) : this.functionsUtil.BNify(0),
       this.props.account ? this.functionsUtil.genericContractCall(this.props.tokenConfig.feeDistributor.name,'claim',[this.props.account]) : this.functionsUtil.BNify(0),
-      this.functionsUtil.getContractEvents(this.props.tokenConfig.feeDistributor.name,'Claimed',{fromBlock: this.props.tokenConfig.feeDistributor.fromBlock, toBlock:'latest'}),
+      this.functionsUtil.getContractEvents(this.props.tokenConfig.feeDistributor.name,'Claimed',this.props.tokenConfig.feeDistributor.fromBlock,'latest'),
       // this.functionsUtil.getContractEvents(this.props.tokenConfig.feeDistributor.name,'CheckpointToken',{fromBlock: this.props.tokenConfig.feeDistributor.fromBlock, toBlock:'latest'}),
-      this.props.account ? this.functionsUtil.getContractEvents(this.props.contractInfo.name,'Deposit',{fromBlock: this.props.contractInfo.fromBlock, toBlock:'latest',filter:{provider:this.props.account}}) : []
+      this.props.account ? this.functionsUtil.getContractEvents(this.props.contractInfo.name,'Deposit',this.props.contractInfo.fromBlock,'latest',{filter:{provider:this.props.account}}) : []
     ]);
 
     const rewardTokenConfig = this.functionsUtil.getGlobalConfig(['govTokens',this.props.contractInfo.rewardToken]);

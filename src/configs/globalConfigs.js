@@ -1109,6 +1109,7 @@ const globalConfigs = {
           rgb: [0, 163, 255],
           hsl: ['202', '100%', '50%']
         },
+        icon: "images/tokens/stETH.svg",
         conversionRateField: "stETHDAIPrice",
         address: '0xae7ab96520de3a18e5e111b5eaab095312d7fe84'
       },
@@ -1243,6 +1244,7 @@ const globalConfigs = {
         decimals: 18,
         enabled: true,
         label: 'steCRV',
+        icon: "images/tokens/steCRV.svg",
         color: {
           hex: '#81c8ff',
           rgb: [129, 200, 255],
