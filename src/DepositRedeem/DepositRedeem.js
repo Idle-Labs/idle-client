@@ -3172,7 +3172,7 @@ class DepositRedeem extends Component {
           ) : showPolygonBridge && (
             <Flex
               mt={3}
-              width={[1,0.36]}
+              width={[1,'35em']}
               alignItems={'stretch'}
               flexDirection={'column'}
               justifyContent={'center'}

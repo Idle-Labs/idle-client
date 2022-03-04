@@ -804,10 +804,6 @@ class RimbleTransaction extends React.Component {
       }
 
       if (!account){
-        // const wallets = await Promise.race([
-        //     this.state.web3.eth.getAccounts(),
-        //     new Promise((resolve) => setTimeout(resolve, 300))
-        // ]);
         const wallets = await this.state.web3.eth.getAccounts();
 
         if (wallets && wallets.length){
@@ -878,10 +874,10 @@ class RimbleTransaction extends React.Component {
           account,
           // web3SocketProvider,
           accountInizialized: true
+        },()=>{
+          // After account is complete, get the balance
+          this.getAccountBalance();
         });
-
-        // After account is complete, get the balance
-        this.getAccountBalance();
 
         // TODO subscribe for account changes, no polling
         // set a state flag which indicates if the subscribe handler has been
@@ -939,7 +935,7 @@ class RimbleTransaction extends React.Component {
         this.getTokenDecimals()
       ]);
 
-      // console.log('getAccountBalance',parseFloat(accountBalance));
+      console.log('getAccountBalance',this.state.web3,this.state.account,accountBalance,accountBalanceToken,tokenDecimals);
 
       if (accountBalance) {
 
@@ -988,7 +984,7 @@ class RimbleTransaction extends React.Component {
         this.functionsUtil.customLog('accountBalanceToken is not set:',accountBalanceToken);
       }
     } catch (error) {
-      this.functionsUtil.customLogError("Failed to get account balance.", error);
+      console.log("Failed to get account balance.", error);
     }
   }
 
