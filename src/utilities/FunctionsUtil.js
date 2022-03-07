@@ -993,6 +993,11 @@ class FunctionsUtil {
     return harvestsList;
   }
   getTrancheRewardTokensInfo = async (tokenConfig, trancheConfig) => {
+    const cachedDataKey = `getTrancheRewardTokensInfo_${tokenConfig}_${trancheConfig}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData !== null) {
+      return cachedData;
+    }
     const stakingRewards = await this.loadTrancheFieldRaw('stakingRewards', {}, tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, tokenConfig, trancheConfig);
     const tokensDistribution = {};
     await this.asyncForEach(Object.keys(stakingRewards), async (token) => {
@@ -1134,7 +1139,7 @@ class FunctionsUtil {
 
     // console.log('tokensDistribution',tokensDistribution);
 
-    return tokensDistribution;
+    return  this.setCachedDataWithLocalStorage(cachedDataKey, tokensDistribution, 1800);
   }
   getTrancheUserInfo = async (tokenConfig, trancheConfig, account) => {
     account = account || this.props.account;
