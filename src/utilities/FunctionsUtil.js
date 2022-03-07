@@ -993,11 +993,14 @@ class FunctionsUtil {
     return harvestsList;
   }
   getTrancheRewardTokensInfo = async (tokenConfig, trancheConfig) => {
-    const cachedDataKey = `getTrancheRewardTokensInfo_${tokenConfig}_${trancheConfig}`;
+    const cachedDataKey = `getTrancheRewardTokensInfo_${trancheConfig.name}`;
+    console.log("cacheKey",cachedDataKey)
     const cachedData = this.getCachedData(cachedDataKey);
     if (cachedData !== null) {
+      console.log("Found Cache")
       return cachedData;
     }
+      console.log("Didnt Find")
     const stakingRewards = await this.loadTrancheFieldRaw('stakingRewards', {}, tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, tokenConfig, trancheConfig);
     const tokensDistribution = {};
     await this.asyncForEach(Object.keys(stakingRewards), async (token) => {
@@ -1137,9 +1140,11 @@ class FunctionsUtil {
       }
     });
 
-    // console.log('tokensDistribution',tokensDistribution);
-
-    return  this.setCachedData(cachedDataKey, tokensDistribution, 1800);
+    console.log('tokensDistribution',tokensDistribution);
+    const abc = await this.setCachedData(cachedDataKey,tokensDistribution);
+    const def = await this.getCachedData(cachedDataKey)
+    console.log("HERE",abc,def)
+    return  abc;
   }
   getTrancheUserInfo = async (tokenConfig, trancheConfig, account) => {
     account = account || this.props.account;
@@ -2944,10 +2949,8 @@ class FunctionsUtil {
     const cachedDataKey = `getBestTranche_${trancheType}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData !== null) {
-      console.log("Found Cache")
       return cachedData;
     }
-      console.log("Didnt Find Cache")
     const blockInfo = await this.getBlockInfo();
     const timestamp = blockInfo.timestamp-7200;
     
@@ -5410,6 +5413,7 @@ class FunctionsUtil {
     let cachedData = null;
     key = key.toLowerCase();
     // Get cache from current session
+    console.log("cachedas",this.props.cachedData)
     if (this.props.cachedData && this.props.cachedData[key]) {
       cachedData = this.props.cachedData[key];
       // Get cache from local storage
