@@ -996,6 +996,7 @@ class FunctionsUtil {
     const cachedDataKey = `getTrancheRewardTokensInfo_${trancheConfig.name}`;
     console.log("cacheKey",cachedDataKey)
     const cachedData = this.getCachedData(cachedDataKey);
+    console.log("ccc",cachedData)
     if (cachedData !== null) {
       console.log("Found Cache")
       return cachedData;
@@ -5411,11 +5412,13 @@ class FunctionsUtil {
   }
   getCachedData = (key, defaultValue = null, useLocalStorage = false) => {
     let cachedData = null;
+    console.log("AXZ",key)
     key = key.toLowerCase();
     // Get cache from current session
     console.log("cachedas",this.props.cachedData)
     if (this.props.cachedData && this.props.cachedData[key]) {
       cachedData = this.props.cachedData[key];
+      console.log("AAAAA",cachedData)
       // Get cache from local storage
     } else if (useLocalStorage) {
       cachedData = this.getStoredItem('cachedData');
