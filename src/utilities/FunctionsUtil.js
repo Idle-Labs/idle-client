@@ -200,7 +200,10 @@ class FunctionsUtil {
   }
 
   switchEthereumChain = (chainId) => {
-    const web3 = this.getCurrentWeb3();
+    const web3 = this.getInjectedWeb3();
+
+    console.log('switchEthereumChain',chainId,web3.utils,typeof web3.currentProvider.request);
+
     if (!web3 || !web3.utils || !web3.currentProvider || typeof web3.currentProvider.request !== 'function') {
       return false;
     }
@@ -223,9 +226,9 @@ class FunctionsUtil {
   }
 
   addEthereumChain = (chainId) => {
-    const web3 = this.getCurrentWeb3();
+    const web3 = this.getInjectedWeb3();
 
-    // console.log('addEthereumChain',chainId,web3.utils,typeof web3.currentProvider.request);
+    console.log('addEthereumChain',chainId,web3.utils,typeof web3.currentProvider.request);
 
     if (!web3 || !web3.utils || !web3.currentProvider || typeof web3.currentProvider.request !== 'function') {
       return false;
@@ -601,6 +604,16 @@ class FunctionsUtil {
     // debugger;
 
     return portfolio;
+  }
+  getInjectedWeb3 = () => {
+    let currentWeb3 = null;
+    if (window.ethereum) {
+      currentWeb3 = new Web3(window.ethereum);
+    } else if (window.web3) {
+      currentWeb3 = new Web3(window.web3);
+    }
+
+    return currentWeb3;
   }
   getCurrentWeb3 = () => {
     const requiredNetwork = this.getRequiredNetwork();
@@ -3724,8 +3737,8 @@ class FunctionsUtil {
   // }
 
   getContractEvents = async (contractName, eventName, fromBlock=0, toBlock='latest', params = {}) => {
-
-    const blocksPerCall = 100000;
+    const requiredNetwork = this.getRequiredNetwork();
+    const blocksPerCall = requiredNetwork.blocksPerCall || 10000;
     const lastBlockNumber = toBlock === 'latest' ? await this.props.web3.eth.getBlockNumber() : toBlock;
     fromBlock = fromBlock || lastBlockNumber-blocksPerCall;
 
@@ -4393,11 +4406,16 @@ class FunctionsUtil {
   }
   getTrancheStakingRewards = async (account, trancheConfig, methodName='expectedUserReward') => {
     const stakingRewards = {};
+
     await this.asyncForEach(trancheConfig.CDORewards.stakingRewards, async (tokenConfig) => {
       const tokenGlobalConfig = this.getGlobalConfig(['stats', 'tokens', tokenConfig.token.toUpperCase()]);
       tokenConfig = { ...tokenConfig, ...tokenGlobalConfig };
 
       const stakingRewardsContract = this.getContractByName(trancheConfig.CDORewards.name);
+      if (!stakingRewardsContract){
+        return;
+      }
+
       const methodAbi = stakingRewardsContract._jsonInterface.find(f => f.name === methodName);
 
       const methodParams = [account];

@@ -113,12 +113,12 @@ class RimbleTransaction extends React.Component {
 
   loadUtils(){
     const props = Object.assign({},this.props);
+    props.web3 = this.state.web3;
+    props.account = this.state.account;
     props.contracts = this.state.contracts;
     if (this.functionsUtil){
-      props.account = this.state.account;
       this.functionsUtil.setProps(props);
     } else {
-      props.account = this.state.account;
       this.functionsUtil = new FunctionsUtil(props);
     }
   }
@@ -270,7 +270,7 @@ class RimbleTransaction extends React.Component {
 
     const currentNetworkChanged = this.state.networkInitialized && prevState.network.current.id !== this.state.network.current.id;
     if (currentNetworkChanged){
-      // console.log('requiredNetworkChanged',this.state.networkInitialized,JSON.stringify(prevState.network),JSON.stringify(this.state.network));
+      // console.log('currentNetworkChanged',this.state.networkInitialized,JSON.stringify(prevState.network),JSON.stringify(this.state.network));
       this.initWeb3();
     }
 
@@ -546,16 +546,15 @@ class RimbleTransaction extends React.Component {
 
       // After setting the web3 provider, check network
       try {
-        // if (!this.state.networkInitialized){
-        //   await this.checkNetwork();
-        // }
+        // console.log('checkNetwork_call');
+        // Check network after injected web3 loaded
+        const isGnosisSafe = this.props.connectors.gnosis.safeLoaded && !!this.props.connectors.gnosis.provider.safe;
+        if (!this.state.network.isCorrectNetwork && isGnosisSafe){
+          await this.checkNetwork();
+        }
 
         if (this.state.network.isSupportedNetwork){
-
-          // if (!this.state.contractsInitialized){
-            await this.initializeContracts();
-          // }
-
+          await this.initializeContracts();
           if (context.active && context.connectorName===connectorName && context.account){
             // Login with biconomy
             if (this.state.biconomy){
@@ -925,17 +924,25 @@ class RimbleTransaction extends React.Component {
 
   getAccountBalance = async (increaseAmount) => {
 
+    if (!this.state.web3){
+      return false;
+    }
+
     increaseAmount = increaseAmount ? this.functionsUtil.BNify(increaseAmount) : null;
 
     try {
 
-      let [accountBalance,accountBalanceToken,tokenDecimals] = await Promise.all([
+      let [
+        accountBalance,
+        accountBalanceToken,
+        tokenDecimals
+      ] = await Promise.all([
         this.state.web3.eth.getBalance(this.state.account), // Get ETH balance
         this.getTokenBalance(this.state.account), // Get token balance
         this.getTokenDecimals()
       ]);
 
-      console.log('getAccountBalance',this.state.web3,this.state.account,accountBalance,accountBalanceToken,tokenDecimals);
+      // console.log('getAccountBalance',this.state.web3,this.state.account,accountBalance,accountBalanceToken,tokenDecimals);
 
       if (accountBalance) {
 
@@ -984,7 +991,7 @@ class RimbleTransaction extends React.Component {
         this.functionsUtil.customLog('accountBalanceToken is not set:',accountBalanceToken);
       }
     } catch (error) {
-      console.log("Failed to get account balance.", error);
+      this.functionsUtil.customLog("Failed to get account balance.", error);
     }
   }
 
@@ -1244,6 +1251,8 @@ class RimbleTransaction extends React.Component {
    getCurrentNetwork = async (networkId=null) => {
      const currentWeb3 = this.functionsUtil.getCurrentWeb3();
 
+     // console.log('getCurrentNetwork',this.state.web3,currentWeb3);
+
      networkId = parseInt(networkId) || await currentWeb3.eth.net.getId();
      const networkName = this.functionsUtil.getGlobalConfig(['network','availableNetworks',networkId,'name']) || await currentWeb3.eth.net.getNetworkType();
 
@@ -1281,7 +1290,10 @@ class RimbleTransaction extends React.Component {
     const currentNetworkChanged = network.current.id && network.current.id !== this.state.network.current.id;
     const requiredNetworkChanged = network.required.id && network.required.id !== this.state.network.required.id;
 
-    if (!this.state.network.current.id || currentNetworkChanged || requiredNetworkChanged || !this.state.networkInitialized){
+    const updateNetwork = !this.state.network.current.id || currentNetworkChanged || requiredNetworkChanged || !this.state.networkInitialized;
+
+    // console.log('checkNetwork','networkId:'+networkId,', curr: '+this.state.network.current.id,', netID: '+network.current.id,', required: '+network.required.id,', correct: '+network.isCorrectNetwork,', update: '+updateNetwork);
+    if (updateNetwork){
       this.setState({
         network,
         networkInitialized

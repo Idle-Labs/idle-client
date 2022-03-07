@@ -348,7 +348,7 @@ class App extends Component {
     requiredNetwork = parseInt(requiredNetwork);
     if (globalConfigs.network.enabledNetworks.includes(requiredNetwork)){
       this.functionsUtil.setLocalStorage('requiredNetwork',requiredNetwork);
-      // console.log('setRequiredNetwork',requiredNetwork);
+      // console.log('setRequiredNetwork',requiredNetwork,forceChangeChain);
       if (forceChangeChain || (this.state.currentSection && this.state.currentSection !== 'landing')){
         this.functionsUtil.addEthereumChain(requiredNetwork);
       }

@@ -1466,7 +1466,7 @@ class DepositRedeem extends Component {
     const showActionFlow = !redeemGovTokens && canPerformAction;
 
     const showBuyFlow = this.state.componentMounted && currentNetwork.provider === 'infura' && (!showDepositCurve || this.state.showBuyFlow) && !this.state.depositCurveEnabled && this.state.tokenApproved && !this.state.contractPaused && (!this.state.migrationEnabled || this.state.skipMigration) && this.state.action === 'deposit' && !isDepositDisabled && !this.state.canDeposit && !this.state.showETHWrapperEnabled;
-    const showPolygonBridge = this.state.componentMounted && this.state.action === 'deposit' && !this.state.canDeposit && currentNetwork.provider === 'polygon';
+    const showPolygonBridge = this.props.account && this.state.componentMounted && this.state.action === 'deposit' && !this.state.canDeposit && currentNetwork.provider === 'polygon';
     const showPolygonBridgeBanner = !showPolygonBridge && currentNetwork.provider === 'polygon' && polygonNetworkId && polygonBridgeInfo.enabled && this.state.action === 'deposit';
 
     const buyToken = this.functionsUtil.BNify(this.props.accountBalance).gt(0) ? this.props.selectedToken : this.functionsUtil.getBaseToken();

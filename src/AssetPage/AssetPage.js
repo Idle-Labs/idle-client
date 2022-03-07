@@ -141,7 +141,7 @@ class AssetPage extends Component {
 
   render() {
 
-    // const currentNetwork = this.functionsUtil.getRequiredNetwork();
+    const currentNetwork = this.functionsUtil.getRequiredNetwork();
     const nexusMutualConfig = this.functionsUtil.getGlobalConfig(['tools','nexusMutual']);
 
     return (
@@ -249,7 +249,7 @@ class AssetPage extends Component {
                 />
               </Flex>
               {
-                this.state.userHasFunds && nexusMutualConfig.enabled && Object.keys(nexusMutualConfig.props.availableTokens).includes(this.props.tokenConfig.idle.token) && (
+                this.state.userHasFunds && nexusMutualConfig.enabled && nexusMutualConfig.availableNetworks.includes(currentNetwork.id) && Object.keys(nexusMutualConfig.props.availableTokens).includes(this.props.tokenConfig.idle.token) && (
                   <Flex
                     width={1}
                     id={'active-coverages'}
