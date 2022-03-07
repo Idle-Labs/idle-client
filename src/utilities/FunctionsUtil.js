@@ -994,7 +994,7 @@ class FunctionsUtil {
   }
   getTrancheRewardTokensInfo = async (tokenConfig, trancheConfig) => {
     const cachedDataKey = `getTrancheRewardTokensInfo_${tokenConfig}_${trancheConfig}`;
-    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    const cachedData = this.getCachedData(cachedDataKey);
     if (cachedData !== null) {
       return cachedData;
     }
@@ -1139,7 +1139,7 @@ class FunctionsUtil {
 
     // console.log('tokensDistribution',tokensDistribution);
 
-    return  this.setCachedDataWithLocalStorage(cachedDataKey, tokensDistribution, 1800);
+    return  this.setCachedData(cachedDataKey, tokensDistribution, 1800);
   }
   getTrancheUserInfo = async (tokenConfig, trancheConfig, account) => {
     account = account || this.props.account;
@@ -2944,9 +2944,10 @@ class FunctionsUtil {
     const cachedDataKey = `getBestTranche_${trancheType}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData !== null) {
+      console.log("Found Cache")
       return cachedData;
     }
-    
+      console.log("Didnt Find Cache")
     const blockInfo = await this.getBlockInfo();
     const timestamp = blockInfo.timestamp-7200;
     
