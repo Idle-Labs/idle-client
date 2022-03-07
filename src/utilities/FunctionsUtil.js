@@ -202,7 +202,7 @@ class FunctionsUtil {
   switchEthereumChain = (chainId) => {
     const web3 = this.getInjectedWeb3();
 
-    console.log('switchEthereumChain',chainId,web3.utils,typeof web3.currentProvider.request);
+    // console.log('switchEthereumChain',chainId,web3.utils,typeof web3.currentProvider.request);
 
     if (!web3 || !web3.utils || !web3.currentProvider || typeof web3.currentProvider.request !== 'function') {
       return false;
@@ -228,7 +228,7 @@ class FunctionsUtil {
   addEthereumChain = (chainId) => {
     const web3 = this.getInjectedWeb3();
 
-    console.log('addEthereumChain',chainId,web3.utils,typeof web3.currentProvider.request);
+    // console.log('addEthereumChain',chainId,web3.utils,typeof web3.currentProvider.request);
 
     if (!web3 || !web3.utils || !web3.currentProvider || typeof web3.currentProvider.request !== 'function') {
       return false;
@@ -1089,13 +1089,12 @@ class FunctionsUtil {
           convertedTokensPerYear
         };
 
-        // console.log('getTrancheRewardTokensInfo',tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, tokensDistribution);
       } else {
         const eventFilters = {
           from: tokenConfig.CDO.address,
           to: trancheConfig.CDORewards.address
         }
-        // const transfers = await this.getContractEvents(token, 'Transfer', { fromBlock: tokenConfig.blockNumber, toBlock: 'latest', filter: eventFilters });
+
         const transfers = await this.getContractEvents(token, 'Transfer', tokenConfig.blockNumber, 'latest', { filter: eventFilters });
 
         if (transfers && transfers.length > 0) {
@@ -3739,12 +3738,22 @@ class FunctionsUtil {
   getContractEvents = async (contractName, eventName, fromBlock=0, toBlock='latest', params = {}) => {
     const requiredNetwork = this.getRequiredNetwork();
     const blocksPerCall = requiredNetwork.blocksPerCall || 10000;
-    const lastBlockNumber = toBlock === 'latest' ? await this.props.web3.eth.getBlockNumber() : toBlock;
-    fromBlock = fromBlock || lastBlockNumber-blocksPerCall;
+    const lastBlockNumber = toBlock === 'latest' ? await this.props.web3.eth.getBlockNumber() : parseInt(toBlock);
+    fromBlock = parseInt(fromBlock) || lastBlockNumber-blocksPerCall;
 
     const calls = [];
+
+    if (!parseInt(fromBlock) || !parseInt(lastBlockNumber)){
+      return calls;
+    }
+
+    // console.log('getContractEvents',contractName, eventName, fromBlock, lastBlockNumber, blocksPerCall, params);
+
     for (var blockNumber = fromBlock; blockNumber < lastBlockNumber; blockNumber+=blocksPerCall) {
-      const toBlock = Math.min(blockNumber+blocksPerCall,lastBlockNumber);
+      let toBlock = Math.min(blockNumber+blocksPerCall,lastBlockNumber);
+      if (toBlock === lastBlockNumber){
+        toBlock = 'latest';
+      }
       calls.push(this.getContractPastEvents(contractName, eventName, {fromBlock: blockNumber, toBlock, ...params}));
     }
 
@@ -5453,14 +5462,15 @@ class FunctionsUtil {
   getCachedData = (key, defaultValue = null, useLocalStorage = false) => {
     let cachedData = null;
     key = key.toLowerCase();
+    const requiredNetworkId = this.getRequiredNetworkId();
     // Get cache from current session
-    if (this.props.cachedData && this.props.cachedData[key]) {
-      cachedData = this.props.cachedData[key];
+    if (this.props.cachedData && this.props.cachedData[requiredNetworkId] && this.props.cachedData[requiredNetworkId][key]) {
+      cachedData = this.props.cachedData[requiredNetworkId][key];
       // Get cache from local storage
     } else if (useLocalStorage) {
       cachedData = this.getStoredItem('cachedData');
-      if (cachedData && cachedData[key]) {
-        cachedData = cachedData[key];
+      if (cachedData && cachedData[requiredNetworkId] && cachedData[requiredNetworkId][key]) {
+        cachedData = cachedData[requiredNetworkId][key];
       } else {
         cachedData = null;
       }
@@ -6080,9 +6090,21 @@ class FunctionsUtil {
       return null;
     }
 
-    // console.log('getContractPastEvents',contractName,methodName);
+    const cachedDataKey = `getContractPastEvents_${contractName}_${methodName}_${JSON.stringify(params)}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
 
-    return await contract.getPastEvents(methodName, params);
+    if (cachedData) {
+      return cachedData;
+    }
+
+    // Store forever for past block
+    let TTL = this.getGlobalConfig(['cache','TTL']);
+    if (params.toBlock && params.toBlock !== 'latest') {
+      TTL = null;
+    }
+
+    const events = await contract.getPastEvents(methodName, params);
+    return this.setCachedDataWithLocalStorage(cachedDataKey, events, TTL);
   }
 
   genericContractCallCached = async (contractName, methodName, params = [], callParams = {}, blockNumber = 'latest', TTL = 180) => {

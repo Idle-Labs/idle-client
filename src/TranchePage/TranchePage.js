@@ -1,12 +1,12 @@
 import Title from '../Title/Title';
 import React, { Component } from 'react';
-import { Box, Flex, Icon, Text } from "rimble-ui";
 import GenericFaqs from '../GenericFaqs/GenericFaqs';
+import { Box, Flex/*, Icon, Text*/ } from "rimble-ui";
 import FunctionsUtil from '../utilities/FunctionsUtil';
-import DashboardCard from '../DashboardCard/DashboardCard';
+// import DashboardCard from '../DashboardCard/DashboardCard';
 import TrancheDetails from '../TrancheDetails/TrancheDetails';
 // import TrancheWelcome from '../TrancheWelcome/TrancheWelcome';
-import TrancheHarvests from '../TrancheHarvests/TrancheHarvests';
+// import TrancheHarvests from '../TrancheHarvests/TrancheHarvests';
 import TransactionsList from '../TransactionsList/TransactionsList';
 import TrancheDepositRedeem from '../TrancheDepositRedeem/TrancheDepositRedeem';
 import FundsOverviewTranche from '../FundsOverviewTranche/FundsOverviewTranche';
@@ -214,6 +214,7 @@ class TranchePage extends Component {
             />
         }
         {
+          /*
           this.state.componentLoaded && this.props.account && this.props.trancheType && (
             <TrancheHarvests
               {...this.props}
@@ -224,6 +225,7 @@ class TranchePage extends Component {
               trancheConfig={this.props.tokenConfig[this.props.trancheType]}
             />
           )
+          */
         }
         {
           this.props.account && this.state.transactions && this.state.transactions.length>0 && 

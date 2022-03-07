@@ -66,14 +66,8 @@ class TrancheDetails extends Component {
     }
 
     const [
-      // blockNumber,
       tokenBalance,
       trancheBalance,
-      // cdoCoolingPeriod,
-      // latestHarvestBlock,
-      // stakeCoolingPeriod,
-      // rewardsTokensInfo,
-      // userStakeBlock,
       stakedBalance,
       trancheAPY,
       tranchePrice
@@ -81,11 +75,6 @@ class TrancheDetails extends Component {
       // this.functionsUtil.getBlockNumber(),
       this.functionsUtil.getTokenBalance(this.props.selectedToken,this.props.account),
       this.functionsUtil.getTokenBalance(this.props.trancheConfig.name,this.props.account),
-      // this.functionsUtil.genericContractCall(this.props.tokenConfig.CDO.name,'coolingPeriod'),
-      // this.functionsUtil.genericContractCall(this.props.tokenConfig.CDO.name,'latestHarvestBlock'),
-      // this.functionsUtil.genericContractCall(this.props.trancheConfig.CDORewards.name,'coolingPeriod'),
-      // this.functionsUtil.getTrancheRewardTokensInfo(this.props.tokenConfig,this.props.trancheConfig),
-      // this.functionsUtil.genericContractCall(this.props.trancheConfig.CDORewards.name,'usersStakeBlock',[this.props.account]),
       this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals,this.props.trancheConfig.functions.stakedBalance),
       this.functionsUtil.loadTrancheFieldRaw('trancheApy',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
       this.functionsUtil.loadTrancheFieldRaw('lastTranchePrice',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account)

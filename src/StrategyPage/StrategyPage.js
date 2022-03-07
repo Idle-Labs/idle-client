@@ -6,9 +6,9 @@ import AssetsList from '../AssetsList/AssetsList';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import DashboardCard from '../DashboardCard/DashboardCard';
 import PortfolioDonut from '../PortfolioDonut/PortfolioDonut';
-import ActiveCoverages from '../ActiveCoverages/ActiveCoverages';
 import GenericSelector from '../GenericSelector/GenericSelector';
 import PortfolioEquity from '../PortfolioEquity/PortfolioEquity';
+// import ActiveCoverages from '../ActiveCoverages/ActiveCoverages';
 import TransactionsList from '../TransactionsList/TransactionsList';
 import EarningsEstimation from '../EarningsEstimation/EarningsEstimation';
 import { Flex, Box, Heading, Text, Tooltip, Icon, Loader } from "rimble-ui";
@@ -252,8 +252,8 @@ class StrategyPage extends Component {
     const govTokens = this.functionsUtil.getGlobalConfig(['govTokens']);
     const apyLong = this.functionsUtil.getGlobalConfig(['messages','apyLong']);
     const yieldFarming = this.functionsUtil.getGlobalConfig(['messages','yieldFarming']);
-    const nexusMutualConfig = this.functionsUtil.getGlobalConfig(['tools','nexusMutual']);
     const batchDepositConfig = this.functionsUtil.getGlobalConfig(['tools','batchDeposit']);
+    // const nexusMutualConfig = this.functionsUtil.getGlobalConfig(['tools','nexusMutual']);
     const polygonBridgeConfig = this.functionsUtil.getGlobalConfig(['tools','polygonBridge']);
     const strategyName = this.functionsUtil.getGlobalConfig(['strategies',this.props.selectedStrategy,'title']);
     const toolsToShow = ['addFunds','nexusMutual','tokenSwap'].filter( toolName => {
@@ -766,6 +766,7 @@ class StrategyPage extends Component {
                 )
               }
               {
+                /*
                 nexusMutualConfig.enabled && nexusMutualConfig.availableNetworks.includes(currentNetwork.id) && this.state.portfolio && this.state.portfolio.totalBalance.gt(0) && (
                   <Flex
                     width={1}
@@ -781,6 +782,7 @@ class StrategyPage extends Component {
                     />
                   </Flex>
                 )
+                */
               }
               {
                 this.state.batchedDeposits && (
