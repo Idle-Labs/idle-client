@@ -84,6 +84,7 @@ class TranchePage extends Component {
           {this.functionsUtil.capitalize(this.props.selectedProtocol)} - {this.props.selectedToken} - {this.props.trancheDetails ? this.props.trancheDetails.name : 'Tranches'} 
         </Title>
         {
+          /*
           this.props.selectedProtocol === 'lido' && this.props.selectedToken === 'stETH' && (
             <Flex
               width={1}
@@ -123,6 +124,7 @@ class TranchePage extends Component {
               </DashboardCard>
             </Flex>
           )
+          */
         }
         {
           /*
