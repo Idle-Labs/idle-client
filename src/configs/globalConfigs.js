@@ -1721,7 +1721,7 @@ const globalConfigs = {
         provider: 'infura',
         network: 'mainnet',
         explorer: 'etherscan',
-        blocksPerCall: 9999999,
+        blocksPerCall: 1000000,
         chainName: 'Ethereum Mainnet',
       },
       42: {
@@ -1730,7 +1730,7 @@ const globalConfigs = {
         baseToken: 'ETH',
         provider: 'infura',
         explorer: 'etherscan',
-        blocksPerCall: 9999999,
+        blocksPerCall: 1000000,
         chainName: 'Ethereum Testnet Kovan',
       },
       3: {
@@ -1739,7 +1739,7 @@ const globalConfigs = {
         baseToken: 'ETH',
         provider: 'infura',
         explorer: 'etherscan',
-        blocksPerCall: 9999999,
+        blocksPerCall: 1000000,
         chainName: 'Ethereum Testnet Ropsten',
       },
       4: {
@@ -1748,7 +1748,7 @@ const globalConfigs = {
         baseToken: 'ETH',
         provider: 'infura',
         explorer: 'etherscan',
-        blocksPerCall: 9999999,
+        blocksPerCall: 1000000,
         chainName: 'Ethereum Testnet Rinkeby',
       },
       137: {
@@ -1759,7 +1759,7 @@ const globalConfigs = {
         baseToken: 'MATIC',
         explorer: 'polygon',
         provider: 'polygon',
-        blocksPerCall: 3500,
+        blocksPerCall: 1000000,
         chainName: 'Matic(Polygon) Mainnet',
       },
       5: {
@@ -1770,7 +1770,7 @@ const globalConfigs = {
         network: 'testnet',
         provider: 'infura',
         explorer: 'etherscan',
-        blocksPerCall: 9999999,
+        blocksPerCall: 1000000,
         chainName: 'Ethereum Testnet Görli',
       },
       1337: {
@@ -1779,7 +1779,7 @@ const globalConfigs = {
         color: '#4474f1',
         provider: 'infura',
         explorer: 'etherscan',
-        blocksPerCall: 9999999,
+        blocksPerCall: 1000000,
         chainName: 'Ethereum Mainnet',
       },
       80001: {
@@ -1790,7 +1790,7 @@ const globalConfigs = {
         baseToken: 'MATIC',
         explorer: 'polygon',
         provider: 'polygon',
-        blocksPerCall: 3499,
+        blocksPerCall: 1000000,
         chainName: 'Matic Testnet Mumbai',
       }
     },
