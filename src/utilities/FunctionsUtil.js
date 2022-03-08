@@ -329,6 +329,7 @@ class FunctionsUtil {
         const tokenConfig = protocolConfig[token];
         await this.asyncForEach(Object.keys(tranches), async (tranche) => {
           const trancheConfig = tokenConfig[tranche];
+
           let [
             trancheTokenBalance,
             trancheUserInfo,
@@ -340,8 +341,6 @@ class FunctionsUtil {
             this.getTrancheStakingRewards(account,trancheConfig,trancheConfig.functions.rewards),
             this.getTrancheStakedBalance(trancheConfig.CDORewards.name,account,null,trancheConfig.functions.stakedBalance),
           ]);
-
-          // console.log(protocol,token,tranche,trancheConfig.name,account,this.BNify(trancheTokenBalance).toFixed(5),this.BNify(trancheStakedBalance).toFixed(5));
 
           if (trancheUserInfo && trancheUserInfo.transactions){
             portfolio.transactions = [...portfolio.transactions, ...trancheUserInfo.transactions];
@@ -1163,11 +1162,11 @@ class FunctionsUtil {
   }
   getTrancheUserInfo = async (tokenConfig, trancheConfig, account) => {
     account = account || this.props.account;
-    const cachedDataKey = `amountDepositedTranche_${tokenConfig.token}_${trancheConfig.token}_${account}`;
-    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
-    if (cachedData && !this.BNify(cachedData).isNaN()) {
-      return this.BNify(cachedData);
-    }
+    // const cachedDataKey = `amountDepositedTranche_${tokenConfig.token}_${trancheConfig.token}_${account}`;
+    // const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    // if (cachedData && !this.BNify(cachedData).isNaN()) {
+    //   return this.BNify(cachedData);
+    // }
 
     const defaultEventsConfig = { to: 'to', from: 'from', value: 'value' };
     const underlyingEventsConfig = this.getGlobalConfig(['events', tokenConfig.token, 'fields']) || defaultEventsConfig;
@@ -1176,15 +1175,19 @@ class FunctionsUtil {
     underlyingEventsFilters[underlyingEventsConfig.to] = [this.props.account, tokenConfig.CDO.address];
     underlyingEventsFilters[underlyingEventsConfig.from] = [this.props.account, tokenConfig.CDO.address];
 
+    // console.log('getTrancheUserInfo_1',trancheConfig.name,trancheConfig.blockNumber,'underlyingEventsFilters',underlyingEventsFilters);
+
     let [
       underlying_transfers,
-      trancheToken_transfers
+      trancheToken_redeems,
+      trancheToken_deposits
     ] = await Promise.all([
       this.getContractEvents(tokenConfig.token, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: underlyingEventsFilters }),
-      this.getContractEvents(trancheConfig.name, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: { from: ['0x0000000000000000000000000000000000000000', this.props.account], to: ['0x0000000000000000000000000000000000000000', this.props.account] } })
+      this.getContractEvents(trancheConfig.name, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: { from: [this.props.account], to: ['0x0000000000000000000000000000000000000000'] } }),
+      this.getContractEvents(trancheConfig.name, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: { from: ['0x0000000000000000000000000000000000000000'], to: [this.props.account] } })
     ]);
 
-    // console.log('getAmountDepositedTranche',trancheConfig.name,'underlying_transfers',underlying_transfers,'trancheToken_transfers',trancheToken_transfers);
+    // console.log('getTrancheUserInfo_2',trancheConfig.name,trancheConfig.blockNumber,'underlying_transfers',underlying_transfers,'trancheToken_transfers',trancheToken_transfers);
 
     const transactions = [];
     let firstDepositTx = null;
@@ -1195,7 +1198,7 @@ class FunctionsUtil {
 
     // Order token transfers
     underlying_transfers = underlying_transfers.sort((a, b) => (parseInt(a.blockNumber) > parseInt(b.blockNumber) ? 1 : -1));
-    trancheToken_transfers = trancheToken_transfers.sort((a, b) => (parseInt(a.blockNumber) > parseInt(b.blockNumber) ? 1 : -1));
+    const trancheToken_transfers = trancheToken_deposits.concat(trancheToken_redeems).sort((a, b) => (parseInt(a.blockNumber) > parseInt(b.blockNumber) ? 1 : -1));
 
     const blocksInfo = {};
 
@@ -3747,8 +3750,6 @@ class FunctionsUtil {
       return calls;
     }
 
-    // console.log('getContractEvents',contractName, eventName, fromBlock, lastBlockNumber, blocksPerCall, params);
-
     for (var blockNumber = fromBlock; blockNumber < lastBlockNumber; blockNumber+=blocksPerCall) {
       let toBlock = Math.min(blockNumber+blocksPerCall,lastBlockNumber);
       if (toBlock === lastBlockNumber){
@@ -6092,7 +6093,6 @@ class FunctionsUtil {
 
     const cachedDataKey = `getContractPastEvents_${contractName}_${methodName}_${JSON.stringify(params)}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
-
     if (cachedData) {
       return cachedData;
     }
@@ -6104,6 +6104,7 @@ class FunctionsUtil {
     }
 
     const events = await contract.getPastEvents(methodName, params);
+
     return this.setCachedDataWithLocalStorage(cachedDataKey, events, TTL);
   }
 
