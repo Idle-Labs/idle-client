@@ -1171,18 +1171,24 @@ class FunctionsUtil {
     const defaultEventsConfig = { to: 'to', from: 'from', value: 'value' };
     const underlyingEventsConfig = this.getGlobalConfig(['events', tokenConfig.token, 'fields']) || defaultEventsConfig;
 
-    const underlyingEventsFilters = {};
-    underlyingEventsFilters[underlyingEventsConfig.to] = [this.props.account, tokenConfig.CDO.address];
-    underlyingEventsFilters[underlyingEventsConfig.from] = [this.props.account, tokenConfig.CDO.address];
+    const underlyingEventsFilters_deposits = {};
+    underlyingEventsFilters_deposits[underlyingEventsConfig.to] = [tokenConfig.CDO.address];
+    underlyingEventsFilters_deposits[underlyingEventsConfig.from] = [this.props.account];
+
+    const underlyingEventsFilters_redeems = {};
+    underlyingEventsFilters_redeems[underlyingEventsConfig.to] = [this.props.account];
+    underlyingEventsFilters_redeems[underlyingEventsConfig.from] = [tokenConfig.CDO.address];
 
     // console.log('getTrancheUserInfo_1',trancheConfig.name,trancheConfig.blockNumber,'underlyingEventsFilters',underlyingEventsFilters);
 
     let [
-      underlying_transfers,
+      underlying_redeems,
+      underlying_deposits,
       trancheToken_redeems,
       trancheToken_deposits
     ] = await Promise.all([
-      this.getContractEvents(tokenConfig.token, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: underlyingEventsFilters }),
+      this.getContractEvents(tokenConfig.token, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: underlyingEventsFilters_redeems }),
+      this.getContractEvents(tokenConfig.token, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: underlyingEventsFilters_deposits }),
       this.getContractEvents(trancheConfig.name, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: { from: [this.props.account], to: ['0x0000000000000000000000000000000000000000'] } }),
       this.getContractEvents(trancheConfig.name, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: { from: ['0x0000000000000000000000000000000000000000'], to: [this.props.account] } })
     ]);
@@ -1197,7 +1203,7 @@ class FunctionsUtil {
     let amountDepositedConverted = this.BNify(0);
 
     // Order token transfers
-    underlying_transfers = underlying_transfers.sort((a, b) => (parseInt(a.blockNumber) > parseInt(b.blockNumber) ? 1 : -1));
+    const underlying_transfers = underlying_deposits.concat(underlying_redeems).sort((a, b) => (parseInt(a.blockNumber) > parseInt(b.blockNumber) ? 1 : -1));
     const trancheToken_transfers = trancheToken_deposits.concat(trancheToken_redeems).sort((a, b) => (parseInt(a.blockNumber) > parseInt(b.blockNumber) ? 1 : -1));
 
     const blocksInfo = {};

@@ -1720,8 +1720,8 @@ const globalConfigs = {
         color: '#4474f1',
         provider: 'infura',
         network: 'mainnet',
-        blocksPerCall: 9999,
         explorer: 'etherscan',
+        blocksPerCall: 9999999,
         chainName: 'Ethereum Mainnet',
       },
       42: {
@@ -1729,8 +1729,8 @@ const globalConfigs = {
         color: '#9064ff',
         baseToken: 'ETH',
         provider: 'infura',
-        blocksPerCall: 9999,
         explorer: 'etherscan',
+        blocksPerCall: 9999999,
         chainName: 'Ethereum Testnet Kovan',
       },
       3: {
@@ -1738,8 +1738,8 @@ const globalConfigs = {
         color: '#ff4a8d',
         baseToken: 'ETH',
         provider: 'infura',
-        blocksPerCall: 9999,
         explorer: 'etherscan',
+        blocksPerCall: 9999999,
         chainName: 'Ethereum Testnet Ropsten',
       },
       4: {
@@ -1747,8 +1747,8 @@ const globalConfigs = {
         color: '#f6c343',
         baseToken: 'ETH',
         provider: 'infura',
-        blocksPerCall: 9999,
         explorer: 'etherscan',
+        blocksPerCall: 9999999,
         chainName: 'Ethereum Testnet Rinkeby',
       },
       137: {
@@ -1769,8 +1769,8 @@ const globalConfigs = {
         version: 'mumbai',
         network: 'testnet',
         provider: 'infura',
-        blocksPerCall: 9999,
         explorer: 'etherscan',
+        blocksPerCall: 9999999,
         chainName: 'Ethereum Testnet Görli',
       },
       1337: {
@@ -1778,8 +1778,8 @@ const globalConfigs = {
         baseToken: 'ETH',
         color: '#4474f1',
         provider: 'infura',
-        blocksPerCall: 9999,
         explorer: 'etherscan',
+        blocksPerCall: 9999999,
         chainName: 'Ethereum Mainnet',
       },
       80001: {
