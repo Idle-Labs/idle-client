@@ -5418,7 +5418,7 @@ class FunctionsUtil {
     console.log("cachedas",this.props.cachedData)
     if (this.props.cachedData && this.props.cachedData[key]) {
       cachedData = this.props.cachedData[key];
-      console.log("AAAAA",cachedData)
+      console.log("AAAAA",cached)
       // Get cache from local storage
     } else if (useLocalStorage) {
       cachedData = this.getStoredItem('cachedData');
