@@ -2968,7 +2968,7 @@ class FunctionsUtil {
     }
     return subgraphData;
   }
-  getBestTranche = async (trancheType=null)=>{
+  getBestTranche = async (trancheType=null,maxApy=null)=>{
 
     const cachedDataKey = `getBestTranche_${trancheType}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
@@ -3019,9 +3019,9 @@ class FunctionsUtil {
     let output = {};
     trancheTypes.forEach( type => {
       output[type] = {
+        apr:null,
         token:null,
         protocol:null,
-        apr:this.BNify(0)
       };
     });
     
@@ -3033,8 +3033,7 @@ class FunctionsUtil {
 
         trancheTypes.forEach( type => {
           const trancheInfo = results.find( tInfo => tInfo.Tranche.id.toLowerCase() === availableTrancheInfo[type].address.toLowerCase() );
-
-          if (!output[type].apr || (trancheInfo && this.BNify(trancheInfo.apr).gt(output[type].apr))){
+          if (!output[type].apr || (trancheInfo && this.BNify(trancheInfo.apr).gt(output[type].apr) && (!maxApy || this.apr2apy(this.fixTokenDecimals(trancheInfo.apr,18).div(100)).times(100).lt(maxApy)) )){
             output[type].token = token;
             output[type].protocol = protocol;
             output[type].apr = trancheInfo.apr;
@@ -4504,22 +4503,22 @@ class FunctionsUtil {
         }
       break;
       case 'seniorPoolNoLabel':
-        output = await this.loadTrancheField('tranchePool', fieldProps, protocol, token, tranche, tokenConfig, tokenConfig.AA, account, addGovTokens, formatValue, false);
+        output = await this.loadTrancheField('tranchePool', fieldProps, protocol, token, 'AA', tokenConfig, tokenConfig.AA, account, addGovTokens, formatValue, false);
       break;
       case 'juniorPoolNoLabel':
-        output = await this.loadTrancheField('tranchePool', fieldProps, protocol, token, tranche, tokenConfig, tokenConfig.BB, account, addGovTokens, formatValue, false);
+        output = await this.loadTrancheField('tranchePool', fieldProps, protocol, token, 'BB', tokenConfig, tokenConfig.BB, account, addGovTokens, formatValue, false);
       break;
       case 'seniorPool':
-        output = await this.loadTrancheField('tranchePool', fieldProps, protocol, token, tranche, tokenConfig, tokenConfig.AA, account, addGovTokens);
+        output = await this.loadTrancheField('tranchePool', fieldProps, protocol, token, 'AA', tokenConfig, tokenConfig.AA, account, addGovTokens);
       break;
       case 'juniorPool':
-        output = await this.loadTrancheField('tranchePool', fieldProps, protocol, token, tranche, tokenConfig, tokenConfig.BB, account, addGovTokens);
+        output = await this.loadTrancheField('tranchePool', fieldProps, protocol, token, 'BB', tokenConfig, tokenConfig.BB, account, addGovTokens);
       break;
       case 'seniorApy':
-        output = await this.loadTrancheField('trancheApy', fieldProps, protocol, token, tranche, tokenConfig, tokenConfig.AA, account, addGovTokens);
+        output = await this.loadTrancheField('trancheApy', fieldProps, protocol, token, 'AA', tokenConfig, tokenConfig.AA, account, addGovTokens);
       break;
       case 'juniorApy':
-        output = await this.loadTrancheField('trancheApy', fieldProps, protocol, token, tranche, tokenConfig, tokenConfig.BB, account, addGovTokens);
+        output = await this.loadTrancheField('trancheApy', fieldProps, protocol, token, 'BB', tokenConfig, tokenConfig.BB, account, addGovTokens);
       break;
       case 'tranchePool':
         let [

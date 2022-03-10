@@ -135,7 +135,7 @@ class TrancheField extends Component {
               id:`${this.props.token} ${seniorTrancheName} APY`,
               data:apiResults_aa.map((d,i) => {
                 const x = this.functionsUtil.strToMoment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
-                const y = parseFloat(this.functionsUtil.fixTokenDecimals(d.apr,18));
+                const y = parseFloat(this.functionsUtil.apr2apy(this.functionsUtil.fixTokenDecimals(d.apr,18).div(100)).times(100));
                 maxChartValue = Math.max(maxChartValue,y);
                 const itemPos = Math.floor(itemIndex++/totalItems_aa*100);
                 return { x, y, itemPos };
@@ -148,7 +148,7 @@ class TrancheField extends Component {
               id:`${this.props.token} ${juniorTrancheName} APY`,
               data:apiResults_bb.map((d,i) => {
                 const x = this.functionsUtil.strToMoment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
-                const y = parseFloat(this.functionsUtil.fixTokenDecimals(d.apr,18));
+                const y = parseFloat(this.functionsUtil.apr2apy(this.functionsUtil.fixTokenDecimals(d.apr,18).div(100)).times(100));
                 maxChartValue = Math.max(maxChartValue,y);
                 const itemPos = Math.floor(itemIndex++/totalItems_bb*100);
                 return { x, y, itemPos };

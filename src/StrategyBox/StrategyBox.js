@@ -84,7 +84,7 @@ class StrategyBox extends Component {
 
     switch (strategyInfo.type){
       case 'tranche':
-        const bestTrancheInfo = await this.functionsUtil.getBestTranche('BB');
+        const bestTrancheInfo = await this.functionsUtil.getBestTranche('BB',9999);
         protocol = bestTrancheInfo.protocol;
         selectedToken = bestTrancheInfo.token;
       break;

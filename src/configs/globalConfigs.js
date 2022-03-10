@@ -1398,7 +1398,7 @@ const globalConfigs = {
         },
         address: "0xc00e94cb662c3520282e6f5717214004a7f26888"
       },
-      stkAAVE: {
+      STKAAVE: {
         decimals: 18,
         enabled: true,
         color: {
