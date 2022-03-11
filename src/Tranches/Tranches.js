@@ -28,6 +28,8 @@ class Tranches extends Component {
     userHasFunds:false,
     depositedTokens:[],
     remainingTokens:[],
+    depositedTranches:{},
+    remainingTranches:{},
     trancheDetails:null,
     useTrancheType:false,
     portfolioLoaded:false,
@@ -253,6 +255,8 @@ class Tranches extends Component {
       // console.log('loadPortfolio - userHasFunds',portfolio,userHasFunds);
 
       this.setState({
+        depositedTranches,
+        remainingTranches,
         portfolio,
         userHasFunds,
         transactions,
@@ -877,8 +881,8 @@ class Tranches extends Component {
               }
               {
                 this.state.depositedTokens.length!==0&&
-                
-                (<Flex
+                (
+                  <Flex
                 width={1}
                 mb={[3,4]}
                 id={"migrate-assets"}
@@ -901,10 +905,8 @@ class Tranches extends Component {
                 <TranchesList
                   enabledProtocols={[]}
                   trancheType={this.state.trancheType}
-                  depositedTokens={this.state.portfolio.tranchesBalance}
-                  availableTranches={this.props.availableTranches}
-                  handleClick={(props) => this.selectTrancheAndType(props.tranche,props.protocol,props.token)}
-                  isDeposit={"true"}
+                  availableTranches={this.state.depositedTranches}
+                  handleClick={(props) => this.selectTranche(props.protocol,props.token)}
                   colsProps={{
                     fontSize:['10px','14px'],
                   }}
@@ -912,7 +914,7 @@ class Tranches extends Component {
                     {
                       title:'PROTOCOL', 
                       props:{
-                        width:[0.34,0.15]
+                        width:[0.34, this.state.useTrancheType ? 0.15 : 0.13]
                       },
                       fields:[
                         {
@@ -938,7 +940,7 @@ class Tranches extends Component {
                     {
                       title:'TOKEN',
                       props:{
-                        width:[0.18, 0.15],
+                        width:[0.15, 0.13],
                       },
                       fields:[
                         {
@@ -954,26 +956,12 @@ class Tranches extends Component {
                         }
                       ]
                     },
-                    {
-                      title:'APY',
-                      props:{
-                        width:[0.18, 0.1],
-                      },
-                      fields:[
-                        {
-                          name:'trancheApy',
-                          props:{
-                            mr:2,
-                            size:'1.4em'
-                          }
-                        },
-                      ]
-                    },
                     
+                    /*
                     {
-                      title:'TRANCHE',
+                      title:'TYPE',
                       props:{
-                        width:[0.29,0.18],
+                        width:[0.29,0.13],
                       },
                       fields:[
                         {
@@ -986,92 +974,133 @@ class Tranches extends Component {
                           }
                         },
                         {
-                          name:'trancheType',
-
+                          name:'trancheType'
                         }
                       ],
+                      visible:this.state.useTrancheType
                     },
+                    */
                     {
                       title:'POOL',
                       props:{
-                        width:[0.29,0.14],
+                        width:[0.25, this.state.useTrancheType ? 0.1 : 0.09],
                       },
                       fields:[
                         {
-                          name:'tranchePool',
+                          name:this.state.useTrancheType ? `${this.state.trancheDetails.baseName}PoolNoLabel` : 'pool',
                           props:{
-                            flexProps:{
-                              mr:1
-                            },
-                            size:'1.4em',
+                            minPrecision:1,
+                            decimals:this.props.isMobile ? 0 : 2,
                           }
                         }
-                      ],
+                      ]
                     },
                     {
-                      title:'DEPOSITED',
+                      title:this.state.useTrancheType ? 'APY' : 'SENIOR APY',
+                      desc:this.functionsUtil.getGlobalConfig(['messages','apyTranches']),
+                      visible:!this.state.useTrancheType || this.state.trancheType === 'AA',
                       props:{
-                        width:[0.29,0.1],
-                      },
-                      fields:[
-                        {
-                          name:'trancheDeposited',
-                          props:{
-                            flexProps:{
-                              mr:1
-                            },
-                            size:'1.4em',
-                          }
-                        },
-                      ],
-                    },
-                    {
-                      title:'EARNINGS',
-                      props:{
-                        width:[0.29,0.22],
-                        textAlign:'center'
+                        width:[this.state.useTrancheType ? 0.16 : 0.27,this.state.useTrancheType ? 0.09 : 0.11],
                       },
                       parentProps:{
-                        alignItems:'center',
-                        flexDirection:'column'
+                        flexDirection:'column',
+                        alignItems:'flex-start',
                       },
                       fields:[
                         {
-                          name:'earnings',
+                          name:'seniorApy',
+                          showTooltip:true
                         },
-                        {
-                          name:'earningsPerc',
-                          showLoader:false,
-                          showDirection:false,
-                          props:{
-                            fontSize:0,
-                            decimals:3
-                          }
-                        }
                       ],
                     },
                     {
-                      title:'FARMING',
+                      title:this.state.useTrancheType ? 'APY' : 'JUNIOR APY',
+                      desc:this.functionsUtil.getGlobalConfig(['messages','apyTranches']),
+                      visible:!this.state.useTrancheType || this.state.trancheType === 'BB',
                       props:{
-                        width:[0.29,0.17],
+                        width:[this.state.useTrancheType ? 0.16 : 0.27,this.state.useTrancheType ? 0.09 : 0.11],
+                      },
+                      parentProps:{
+                        flexDirection:'column',
+                        alignItems:'flex-start',
                       },
                       fields:[
                         {
-                          name:'autoFarming',
+                          name:'juniorApy',
+                          props:{
+                            flexProps:{
+                              mr:3
+                            }
+                          },
+                          showTooltip:true
+                        },
+                      ],
+                    },
+                    {
+                      mobile:false,
+                      title:'APR RATIO',
+                      desc:this.functionsUtil.getGlobalConfig(['messages','aprRatio']),
+                      props:{
+                        width:[0.15, 0.1],
+                      },
+                      fields:[
+                        {
+                          name:'trancheAPRSplitRatio',
                           props:{
                             flexProps:{
                               mr:2
                             },
-                            size:'2em'
+                            height:['1.4em','2em']
                           }
                         },
-                      ],
+                        
+                      ]
                     },
+                    {
+                      mobile:false,
+                      title:'AUTO-COMPOUNDING',
+                      desc:this.functionsUtil.getGlobalConfig(['messages','autoFarming']),
+                      props:{
+                        width:[0.25,0.17],
+                      },
+                      fields:[
+                        {
+                          name:'autoFarming'
+                        }
+                      ]
+                    },
+                    {
+                      mobile:false,
+                      title:'STAKING REWARDS',
+                      desc:this.functionsUtil.getGlobalConfig(['messages','stakingRewards']),
+                      props:{
+                        width:[0.25,this.state.useTrancheType ? 0.15 : 0.13],
+                      },
+                      fields:[
+                        {
+                          name:'stakingRewards'
+                        }
+                      ]
+                    },
+                    /*
+                    {
+                      mobile:true,
+                      title:'TOKENS',
+                      props:{
+                        width:[0.16,0.17],
+                      },
+                      fields:[
+                        {
+                          name:'govTokens'
+                        }
+                      ]
+                    },
+                    */
                     {
                       title:'',
                       mobile:false,
                       props:{
-                        width:[0.29, 0.19],
+                        width:[0.29, 0.15],
                       },
                       parentProps:{
                         width:1
@@ -1079,7 +1108,7 @@ class Tranches extends Component {
                       fields:[
                         {
                           name:'button',
-                          label: 'Manage',
+                          label: 'Deposit',
                           props:{
                             width:1,
                             fontSize:3,
@@ -1087,9 +1116,9 @@ class Tranches extends Component {
                             height:'45px',
                             borderRadius:4,
                             boxShadow:null,
-                            mainColor:'redeem',
+                            mainColor:'deposit',
                             size: this.props.isMobile ? 'small' : 'medium',
-                            handleClick:(props) => this.selectTrancheAndType(props.tranche,props.protocol,props.token)
+                            handleClick:(props) => this.selectTranche(props.protocol,props.token)
                           }
                         }
                       ]
@@ -1122,7 +1151,7 @@ class Tranches extends Component {
                 <TranchesList
                   enabledProtocols={[]}
                   trancheType={this.state.trancheType}
-                  availableTranches={this.props.availableTranches}
+                  availableTranches={this.state.depositedTokens.length!==0?this.state.remainingTranches:this.state.depositedTranches}
                   handleClick={(props) => this.selectTranche(props.protocol,props.token)}
                   colsProps={{
                     fontSize:['10px','14px'],
