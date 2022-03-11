@@ -27,6 +27,7 @@ class Tranches extends Component {
     selectedToken:null,
     userHasFunds:false,
     depositedTokens:[],
+    remainingTokens:[],
     trancheDetails:null,
     useTrancheType:false,
     portfolioLoaded:false,
@@ -129,6 +130,8 @@ class Tranches extends Component {
       const tranchesTokens = [];
       const tranchesBalances = [];
       
+      const remainingTranches = {};
+      const depositedTranches={};
       const portfolioLoaded = true;
       const tranchesConfig = this.functionsUtil.getGlobalConfig(['tranches']);
 
@@ -149,7 +152,30 @@ class Tranches extends Component {
         tranchesTokens[trancheInfo.token] = tranchesTokens[trancheInfo.token].plus(trancheInfo.tokenBalance);
       });
 
-      const depositedTokens = Object.keys(tranchesTokens);      
+      const depositedTokens = Object.keys(tranchesTokens);
+      console.log("dep",tranchesTokens)
+
+      Object.keys(this.props.availableTranches).forEach(protocol=>{
+        console.log("protocol",protocol)
+        Object.keys(this.props.availableTranches[protocol]).forEach(tranche=>
+          {
+            console.log("data",depositedTokens,tranche)
+          if(depositedTokens.includes(tranche))
+            {
+              depositedTranches[protocol]={}
+              depositedTranches[protocol][tranche]=this.props.availableTranches[protocol][tranche]
+              console.log("re",depositedTranches)
+          }
+          else{
+            remainingTranches[protocol]={}
+            remainingTranches[protocol][tranche]=this.props.availableTranches[protocol][tranche]
+            console.log("reM",remainingTranches)
+          }
+        })
+
+      })
+      console.log("remaining",remainingTranches)
+      
 
       const portfolioDonutData = Object.keys(tranchesTokens).map( token => {
         const balanceValue = parseFloat(tranchesTokens[token].toFixed(4));
