@@ -155,29 +155,27 @@ class Tranches extends Component {
       });
 
       const depositedTokens = Object.keys(tranchesTokens);
-      console.log("dep",tranchesTokens)
-
+      
       Object.keys(this.props.availableTranches).forEach(protocol=>{
-        console.log("protocol",protocol)
         Object.keys(this.props.availableTranches[protocol]).forEach(tranche=>
           {
-            console.log("data",depositedTokens,tranche)
           if(depositedTokens.includes(tranche))
             {
-              depositedTranches[protocol]={}
+              if(!depositedTranches[protocol])
+                depositedTranches[protocol]={}
+
+              depositedTranches[protocol][tranche]={}
               depositedTranches[protocol][tranche]=this.props.availableTranches[protocol][tranche]
-              console.log("re",depositedTranches)
           }
           else{
-            remainingTranches[protocol]={}
+            if(!remainingTranches[protocol])
+              remainingTranches[protocol]={}
+            remainingTranches[protocol][tranche]={}
             remainingTranches[protocol][tranche]=this.props.availableTranches[protocol][tranche]
-            console.log("reM",remainingTranches)
           }
         })
 
       })
-      console.log("remaining",remainingTranches)
-      
 
       const portfolioDonutData = Object.keys(tranchesTokens).map( token => {
         const balanceValue = parseFloat(tranchesTokens[token].toFixed(4));
@@ -904,7 +902,6 @@ class Tranches extends Component {
                 <TranchesList
                   enabledProtocols={[]}
                   trancheType={this.state.trancheType}
-                  availableTranches={this.state.depositedTranches}
                   handleClick={(props) => this.selectTranche(props.protocol,props.token)}
                   colsProps={{
                     fontSize:['10px','14px'],
@@ -1124,6 +1121,7 @@ class Tranches extends Component {
                     }
                   ]}
                   {...this.props}
+                  availableTranches={this.state.depositedTranches}
                 />
               </Flex>
               )}
@@ -1150,7 +1148,6 @@ class Tranches extends Component {
                 <TranchesList
                   enabledProtocols={[]}
                   trancheType={this.state.trancheType}
-                  availableTranches={this.state.depositedTokens.length!==0?this.state.remainingTranches:this.state.depositedTranches}
                   handleClick={(props) => this.selectTranche(props.protocol,props.token)}
                   colsProps={{
                     fontSize:['10px','14px'],
@@ -1370,6 +1367,8 @@ class Tranches extends Component {
                     }
                   ]}
                   {...this.props}
+                  availableTranches={this.state.depositedTokens.length!==0?this.state.remainingTranches:this.state.depositedTranches}
+
                 />
               </Flex>
               {
