@@ -1104,7 +1104,7 @@ class Tranches extends Component {
                       fields:[
                         {
                           name:'button',
-                          label: 'Deposit',
+                          label: 'Manage',
                           props:{
                             width:1,
                             fontSize:3,
@@ -1112,7 +1112,7 @@ class Tranches extends Component {
                             height:'45px',
                             borderRadius:4,
                             boxShadow:null,
-                            mainColor:'deposit',
+                            mainColor:'redeem',
                             size: this.props.isMobile ? 'small' : 'medium',
                             handleClick:(props) => this.selectTranche(props.protocol,props.token)
                           }
