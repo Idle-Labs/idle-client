@@ -1126,7 +1126,7 @@ class Tranches extends Component {
                 />
               </Flex>
               )}
-              {Object.keys(this.state.remainingTranches).length!==0&&
+              {(Object.keys(this.state.remainingTranches).length!==0||!this.state.account)&&
                 (
                 <Flex
                 width={1}
@@ -1370,7 +1370,7 @@ class Tranches extends Component {
                     }
                   ]}
                   {...this.props}
-                  availableTranches={this.state.depositedTokens.length!==0?this.state.remainingTranches:this.state.depositedTranches}
+                  availableTranches={this.state.depositedTokens.length!==0?this.state.remainingTranches:this.props.availableTranches}
 
                 />
               </Flex>
