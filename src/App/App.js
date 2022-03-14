@@ -40,7 +40,7 @@ class App extends Component {
     connecting: false,
     tokenConfig: null,
     genericError: null,
-    customAddress: "0xd889Acb680D5eDbFeE593d2b7355a666248bAB9b",
+    customAddress: null,
     connectorName: null,
     selectedToken: null,
     selectedTheme: theme,
