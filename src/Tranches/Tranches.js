@@ -1369,7 +1369,7 @@ class Tranches extends Component {
                     }
                   ]}
                   {...this.props}
-                  availableTranches={this.state.depositedTokens.length!==0?this.state.remainingTranches:this.state.depositedTranches}
+                  availableTranches={this.state.depositedTokens.length!==0?this.state.remainingTranches:this.props.availableTranches}
 
                 />
               </Flex>
