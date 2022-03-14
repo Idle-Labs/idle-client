@@ -1125,7 +1125,7 @@ class Tranches extends Component {
                 />
               </Flex>
               )}
-              {Object.keys(this.state.remainingTranches).length!==0&&
+              {(Object.keys(this.state.remainingTranches).length!==0||!this.state.account)&&
                 (
                 <Flex
                 width={1}
