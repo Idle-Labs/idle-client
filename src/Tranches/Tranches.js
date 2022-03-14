@@ -1126,7 +1126,9 @@ class Tranches extends Component {
                 />
               </Flex>
               )}
-              <Flex
+              {Object.keys(this.state.remainingTranches).length!==0&&
+                (
+                <Flex
                 width={1}
                 mb={[3,4]}
                 id={"migrate-assets"}
@@ -1372,6 +1374,8 @@ class Tranches extends Component {
 
                 />
               </Flex>
+              )
+              }
               {
                 this.props.account && this.state.userHasFunds && 
                   <Flex
