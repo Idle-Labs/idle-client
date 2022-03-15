@@ -1753,21 +1753,17 @@ class FunctionsUtil {
       const etherscanApiUrl = etherscanInfo.endpoints[requiredNetwork];
 
       // Get base endpoint cached transactions
-      baseEndpoint = `${etherscanApiUrl}?strategy=${selectedStrategy}&apikey=${etherscanInfo.keys[0]}&module=account&action=tokentx&address=${account}&startblock=${firstIdleBlockNumber}&endblock=${endBlockNumber}&sort=asc`;
+      baseEndpoint = `${etherscanApiUrl}?strategy=${selectedStrategy}&module=account&action=tokentx&address=${account}&startblock=${firstIdleBlockNumber}&endblock=${endBlockNumber}&sort=asc`;
       baseTxs = this.getCachedRequest(baseEndpoint);
-
-      if (debug) {
-        console.log('DEBUG - CACHED - baseTxs', baseTxs);
-      }
 
       // Check if the latest blockNumber is actually the latest one
       if (baseTxs && baseTxs.data.result && Object.values(baseTxs.data.result).length) {
 
-        const lastCachedTx = Object.values(baseTxs.data.result).pop();
-        const lastCachedBlockNumber = lastCachedTx && lastCachedTx.blockNumber ? parseInt(lastCachedTx.blockNumber) + 1 : firstBlockNumber;
+        const cachedBlockNumbers = Object.values(baseTxs.data.result).map(tx => (parseInt(tx.blockNumber)));
+        const lastCachedBlockNumber = Math.max(...cachedBlockNumbers);
 
         const etherscanEndpointLastBlock = `${etherscanApiUrl}?strategy=${selectedStrategy}&module=account&action=tokentx&address=${account}&startblock=${lastCachedBlockNumber}&endblock=${endBlockNumber}&sort=asc`;
-        // let latestTxs = await this.makeCachedRequest(etherscanEndpointLastBlock,15);
+        
         let latestTxs = await this.makeEtherscanApiRequest(etherscanEndpointLastBlock, etherscanInfo.keys, 15);
 
         if (latestTxs && latestTxs.data.result && latestTxs.data.result.length) {
@@ -1805,7 +1801,10 @@ class FunctionsUtil {
       }
 
       if (!txs) {
-        // Make request
+        // Make request without caching
+        txs = await this.makeEtherscanApiRequest(baseEndpoint, etherscanInfo.keys, 0);
+
+        /*
         txs = await this.makeRequest(baseEndpoint);
 
         // console.log('makeRequest 1',account,baseEndpoint,txs,txs.data.message,txs.data.status,parseInt(txs.data.status));
@@ -1835,6 +1834,7 @@ class FunctionsUtil {
           this.addKeyToCachedDataWithLocalStorage('cachedRequests', baseEndpoint, dataToCache);
           // this.setCachedDataWithLocalStorage('cachedRequests',cachedRequests);
         }
+        */
       }
 
       if (txs && txs.data && txs.data.result) {
@@ -1870,6 +1870,7 @@ class FunctionsUtil {
         result: txsToStore
       }
     };
+
     this.saveCachedRequest(endpoint, false, cachedRequest);
   }
   getEtherscanTxs = async (account = false, firstBlockNumber = 0, endBlockNumber = 'latest', enabledTokens = [], debug = false) => {
@@ -3084,7 +3085,7 @@ class FunctionsUtil {
       return axios(config);
     }
   }
-  makeEtherscanApiRequest = async (endpoint, keys = [], TTL = 120, apiKeyIndex = 0) => {
+  makeEtherscanApiRequest = async (endpoint, keys = [], TTL = 180, apiKeyIndex = 0) => {
     const timestamp = parseInt(Date.now() / 1000);
 
     // Check if already exists
@@ -3097,17 +3098,18 @@ class FunctionsUtil {
     const apiKey = keys[apiKeyIndex];
     const data = await this.makeRequest(endpoint + '&apikey=' + apiKey);
 
-    // console.log('makeEtherscanApiRequest',endpoint+'&apikey='+apiKey,apiKeyIndex+'/'+keys.length,data,(data.data ? data.data.message : null),apiKeyIndex<keys.length-1);
+    // console.log('makeEtherscanApiRequest',endpoint+'&apikey='+apiKey,apiKeyIndex+'/'+keys.length,(data.data ? data.data.message : null),apiKeyIndex<keys.length-1);
 
-    if (data && data.data && data.data.message === 'OK') {
-      const dataToCache = {
-        data:{
-          data:data.data
-        },
-        timestamp
-      };
-      // this.setCachedDataWithLocalStorage('cachedRequests',cachedRequests);
-      this.addKeyToCachedDataWithLocalStorage('cachedRequests', endpoint, dataToCache);
+    if (data && data.data && (data.data.message.match(/^OK/) || data.data.message === "No transactions found")) {
+      if (TTL>0){
+        const dataToCache = {
+          data:{
+            data:data.data
+          },
+          timestamp
+        };
+        this.addKeyToCachedDataWithLocalStorage('cachedRequests', endpoint, dataToCache);
+      }
       return data;
     } else if (apiKeyIndex < keys.length - 1) {
       return await this.makeEtherscanApiRequest(endpoint, keys, TTL, apiKeyIndex + 1);

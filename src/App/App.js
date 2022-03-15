@@ -164,7 +164,11 @@ class App extends Component {
     const requiredNetworkId = this.state.network.required.id;
     const cachedKeyFound = this.state.cachedData[requiredNetworkId] ? this.state.cachedData[requiredNetworkId][key] : null;
 
-    const update_key = !cachedKeyFound || ((cachedKeyFound.expirationDate !== null && cachedKeyFound.expirationDate <= currentTime) || JSON.stringify(cachedKeyFound.data) !== JSON.stringify(data));
+    let storedCachedData = this.functionsUtil.getStoredItem('cachedData',true,{});
+    const storedKeyFound = storedCachedData[requiredNetworkId] ? storedCachedData[requiredNetworkId][key] : null;
+
+    const update_stored_key = useLocalStorage && (!storedKeyFound || ((storedKeyFound.expirationDate !== null && storedKeyFound.expirationDate <= currentTime) || JSON.stringify(storedKeyFound.data) !== JSON.stringify(data)));
+    const update_key = !cachedKeyFound || ((cachedKeyFound.expirationDate !== null && cachedKeyFound.expirationDate <= currentTime) || JSON.stringify(cachedKeyFound.data) !== JSON.stringify(data)) || update_stored_key;
 
     let output = false;
 
@@ -173,7 +177,6 @@ class App extends Component {
 
       // Save cached data in local storage
       if (useLocalStorage) {
-        let storedCachedData = this.functionsUtil.getStoredItem('cachedData');
         if (!storedCachedData) {
           storedCachedData = {};
           storedCachedData[requiredNetworkId] = {};
@@ -191,8 +194,6 @@ class App extends Component {
             }
           }
         };
-
-        // console.log('setCachedData',key,JSON.stringify(storedCachedData).length,data);
         
         this.functionsUtil.setLocalStorage('cachedData',storedCachedData,true);
       }
