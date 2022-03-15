@@ -87,7 +87,7 @@ const globalConfigs = {
   discordURL: "https://discord.gg/mpySAJp",
   twitterURL: "https://twitter.com/idlefinance",
   cache: {
-    TTL:180,
+    TTL:300,
     clearAll:true
   },
   theme: {
@@ -1407,6 +1407,7 @@ const globalConfigs = {
           hsl: ["314", "41%", "51%"]
         },
         startTimestamp: "2021-04-30",
+        icon: "images/tokens/stkAAVE.svg",
         conversionRateField: "aaveDAIPrice",
         chart: {
           labelTextColorModifiers: ["darker", 4]

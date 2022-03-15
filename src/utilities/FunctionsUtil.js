@@ -1431,11 +1431,11 @@ class FunctionsUtil {
   }
   getRequiredNetworkId = () => {
     const defaultNetwork = this.getGlobalConfig(['network', 'requiredNetwork']);
-    return this.props.network && this.props.network.required ? this.props.network.required.id || defaultNetwork : defaultNetwork;
+    return this.props.network && this.props.network.required ? parseInt(this.props.network.required.id) || parseInt(defaultNetwork) : parseInt(defaultNetwork);
   }
   getCurrentNetworkId = () => {
     const defaultNetwork = this.getGlobalConfig(['network', 'requiredNetwork']);
-    return this.props.network && this.props.network.current ? this.props.network.current.id || defaultNetwork : defaultNetwork;
+    return this.props.network && this.props.network.current ? parseInt(this.props.network.current.id) || parseInt(defaultNetwork) : parseInt(defaultNetwork);
   }
   getPolygonBridgeTxs = async (account = false, enabledTokens = []) => {
 
@@ -1703,7 +1703,9 @@ class FunctionsUtil {
           const timestamp = parseInt(Date.now() / 1000);
           // const cachedRequests_polygon = this.getCachedDataWithLocalStorage('cachedRequests_polygon',{});
           const dataToCache = {
-            data: txs,
+            data: {
+              data:txs.data
+            },
             timestamp
           };
           this.addKeyToCachedDataWithLocalStorage('cachedRequests_polygon', baseEndpoint, dataToCache);
@@ -1825,7 +1827,9 @@ class FunctionsUtil {
           const timestamp = parseInt(Date.now() / 1000);
           // const cachedRequests = this.getCachedDataWithLocalStorage('cachedRequests',{});
           const dataToCache = {
-            data: txs,
+            data: {
+              data:txs.data
+            },
             timestamp
           };
           this.addKeyToCachedDataWithLocalStorage('cachedRequests', baseEndpoint, dataToCache);
@@ -3077,8 +3081,7 @@ class FunctionsUtil {
     if (data) {
       return data;
     } else {
-      let result= axios(config)
-      return result
+      return axios(config);
     }
   }
   makeEtherscanApiRequest = async (endpoint, keys = [], TTL = 120, apiKeyIndex = 0) => {
@@ -3098,7 +3101,9 @@ class FunctionsUtil {
 
     if (data && data.data && data.data.message === 'OK') {
       const dataToCache = {
-        data,
+        data:{
+          data:data.data
+        },
         timestamp
       };
       // this.setCachedDataWithLocalStorage('cachedRequests',cachedRequests);
@@ -3121,10 +3126,12 @@ class FunctionsUtil {
       return (cachedRequests[key].data && return_data ? cachedRequests[key].data.data : cachedRequests[key].data);
     }
 
-    const data = await this.makeRequest(endpoint, false, config);
+    let data = await this.makeRequest(endpoint, false, config);
 
     const dataToCache = {
-      data,
+      data:{
+        data:data.data
+      },
       timestamp
     };
     this.addKeyToCachedDataWithLocalStorage('cachedRequests', key, dataToCache);
@@ -3143,7 +3150,9 @@ class FunctionsUtil {
 
     const data = await this.makePostRequest(endpoint, postData, false, config);
     const dataToCache = {
-      data,
+      data:{
+        data:data.data
+      },
       timestamp
     };
     this.addKeyToCachedDataWithLocalStorage('cachedRequests', key, dataToCache);
@@ -3642,7 +3651,7 @@ class FunctionsUtil {
         window.localStorage.setItem(key, value);
         return true;
       } catch (error) {
-        // this.customLog('setLocalStorage',error);
+        console.error('setLocalStorage',error);
         window.localStorage.removeItem(key);
       }
     }
@@ -4469,7 +4478,7 @@ class FunctionsUtil {
     const show_idle_apy = internal_view && parseInt(internal_view) === 1;
     
     // Create Tranche Strategy contract
-    const idleStrategyAddress = await this.genericContractCallCached(tokenConfig.CDO.name, 'strategy');
+    const idleStrategyAddress = await this.genericContractCallCachedTTL(tokenConfig.CDO.name, 'strategy', 3600);
     if (idleStrategyAddress) {
       await this.props.initContract(strategyConfig.name, idleStrategyAddress, strategyConfig.abi);
     }
@@ -4557,19 +4566,19 @@ class FunctionsUtil {
         }
       break;
       case 'trancheFee':
-        output = await this.genericContractCallCached(tokenConfig.CDO.name, 'fee');
+        output = await this.genericContractCallCachedTTL(tokenConfig.CDO.name, 'fee', 3600);
         if (output) {
           output = this.BNify(output).div(this.BNify(100000));
         }
       break;
       case 'trancheRealPrice':
-        output = await this.genericContractCall(tokenConfig.CDO.name, 'tranchePrice', [trancheConfig.address]);
+        output = await this.genericContractCallCached(tokenConfig.CDO.name, 'tranchePrice', [trancheConfig.address]);
         if (output) {
           output = this.fixTokenDecimals(output, trancheConfig.decimals);
         }
       break;
       case 'tranchePrice':
-        output = await this.genericContractCall(tokenConfig.CDO.name, 'virtualPrice', [trancheConfig.address]);
+        output = await this.genericContractCallCached(tokenConfig.CDO.name, 'virtualPrice', [trancheConfig.address]);
         if (output) {
           output = this.fixTokenDecimals(output, trancheConfig.decimals);
         }
@@ -4815,12 +4824,12 @@ class FunctionsUtil {
         output = this.abbreviateNumber('1234',decimals,maxPrecision,minPrecision)+` IDLE/day`;
       break;
       case 'trancheAPRSplitRatio':
-        output = await this.genericContractCall(tokenConfig.CDO.name,'trancheAPRSplitRatio');
+        output = await this.genericContractCallCachedTTL(tokenConfig.CDO.name,'trancheAPRSplitRatio',3600);
         output= output/1000;
         output= output.toString()+"/"+(100-output).toString();
       break;
       case 'trancheAPRRatio':
-        output = await this.genericContractCall(tokenConfig.CDO.name,'trancheAPRSplitRatio');
+        output = await this.genericContractCallCachedTTL(tokenConfig.CDO.name,'trancheAPRSplitRatio',3600);
         output = this.BNify(output).div(1000);
         if (tranche === 'BB'){
           output = this.BNify(100).minus(output);
@@ -4835,7 +4844,7 @@ class FunctionsUtil {
       case 'statusBadge':
       case 'trancheLimit':
       case 'experimentalBadge':
-        output = await this.genericContractCall(tokenConfig.CDO.name,'limit');
+        output = await this.genericContractCallCachedTTL(tokenConfig.CDO.name,'limit',3600);
         if (output){
           output = this.fixTokenDecimals(output, tokenConfig.CDO.decimals);
 
@@ -4861,8 +4870,8 @@ class FunctionsUtil {
           rewardsTokens,
           incentiveTokens
         ] = await Promise.all([
-          this.genericContractCallCached(strategyConfig.name, 'getRewardTokens'),
-          this.genericContractCallCached(tokenConfig.CDO.name, 'getIncentiveTokens')
+          this.genericContractCallCachedTTL(strategyConfig.name, 'getRewardTokens',3600),
+          this.genericContractCallCachedTTL(tokenConfig.CDO.name, 'getIncentiveTokens',3600)
         ]);
 
         // Pick Senior Tranche by default
@@ -4892,7 +4901,7 @@ class FunctionsUtil {
         // Add hard-coded tokens
         if (tokenConfig[field] && typeof tokenConfig[field].forEach === 'function'){
           tokenConfig[field].forEach( govToken => {
-            const govTokenConfig = this.getGlobalConfig(['stats','tokens',govToken]);
+            const govTokenConfig = this.getGlobalConfig(['stats','tokens',govToken.toUpperCase()]);
             if (govTokenConfig){
               output[govToken] = govTokenConfig;
             }
@@ -5449,7 +5458,7 @@ class FunctionsUtil {
     return data;
   }
   addKeyToCachedDataWithLocalStorage = (parent_key, key, data, TTL = 180) => {
-    if (this.props.setCachedData && typeof this.props.setCachedData === 'function') {
+    if (this.props.setCachedData && typeof this.props.setCachedData === 'function' && JSON.stringify(data).length<=3000000) {
       const cachedData = this.getCachedDataWithLocalStorage(parent_key, {});
       cachedData[key] = data;
       this.props.setCachedData(parent_key, cachedData, TTL, true);
@@ -5474,16 +5483,15 @@ class FunctionsUtil {
       cachedData = this.props.cachedData[requiredNetworkId][key];
       // Get cache from local storage
     } else if (useLocalStorage) {
-      cachedData = this.getStoredItem('cachedData');
-      if (cachedData && cachedData[requiredNetworkId] && cachedData[requiredNetworkId][key]) {
-        cachedData = cachedData[requiredNetworkId][key];
-      } else {
-        cachedData = null;
+      const allCachedData = this.getStoredItem('cachedData');
+      if (allCachedData && allCachedData[requiredNetworkId] && allCachedData[requiredNetworkId][key]) {
+        cachedData = allCachedData[requiredNetworkId][key];
       }
     }
 
-    const cachedDataValid = cachedData && cachedData.data && (cachedData.expirationDate === null || cachedData.expirationDate >= parseInt(Date.now() / 1000));
+    const cachedDataValid = cachedData && cachedData.data && (cachedData.expirationDate === null || parseInt(cachedData.expirationDate) >= parseInt(Date.now()/1000));
 
+    // console.log(`getCachedDataWithLocalStorage - ${requiredNetworkId} - ${key}`,cachedData,cachedDataValid);
     // if (!cachedDataValid){
     //   console.log('getCachedData - NOT VALID - ',key,(cachedData ? cachedData.expirationDate-parseInt(Date.now()/1000) : null));
     // }
@@ -6113,6 +6121,25 @@ class FunctionsUtil {
     return this.setCachedDataWithLocalStorage(cachedDataKey, events, TTL);
   }
 
+  genericContractCallCachedTTL = async (contractName, methodName, TTL = 180, params = [], callParams = {}, blockNumber = 'latest',) => {
+    const cachedDataKey = `genericContractCall_${contractName}_${methodName}_${JSON.stringify(params)}_${JSON.stringify(callParams)}_${blockNumber}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData) {
+      return cachedData;
+    }
+
+    // Store forever for past block
+    if (blockNumber !== 'latest') {
+      TTL = null;
+    }
+
+    // console.log(`genericContractCallCached - ${cachedDataKey}`,cachedData);
+
+    const result = await this.genericContractCall(contractName, methodName, params, callParams, blockNumber);
+
+    return this.setCachedDataWithLocalStorage(cachedDataKey, result, TTL);
+  }
+
   genericContractCallCached = async (contractName, methodName, params = [], callParams = {}, blockNumber = 'latest', TTL = 180) => {
     const cachedDataKey = `genericContractCall_${contractName}_${methodName}_${JSON.stringify(params)}_${JSON.stringify(callParams)}_${blockNumber}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
@@ -6124,6 +6151,8 @@ class FunctionsUtil {
     if (blockNumber !== 'latest') {
       TTL = null;
     }
+
+    // console.log(`genericContractCallCached - ${cachedDataKey}`,cachedData);
 
     const result = await this.genericContractCall(contractName, methodName, params, callParams, blockNumber);
 
@@ -6572,7 +6601,7 @@ class FunctionsUtil {
             }
           }
         } else {
-          return results.data;
+          return this.setCachedDataWithLocalStorage(cachedDataKey, results.data);
         }
       }
     }

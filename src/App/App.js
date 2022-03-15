@@ -160,11 +160,11 @@ class App extends Component {
     }
 
     key = key.toLowerCase();
-    const currentTime = parseInt(Date.now() / 1000);
+    const currentTime = parseInt(Date.now()/1000);
     const requiredNetworkId = this.state.network.required.id;
     const cachedKeyFound = this.state.cachedData[requiredNetworkId] ? this.state.cachedData[requiredNetworkId][key] : null;
 
-    const update_key = !cachedKeyFound || ((cachedKeyFound.expirationDate !== null && cachedKeyFound.expirationDate >= currentTime) || JSON.stringify(cachedKeyFound.data) !== JSON.stringify(data));
+    const update_key = !cachedKeyFound || ((cachedKeyFound.expirationDate !== null && cachedKeyFound.expirationDate <= currentTime) || JSON.stringify(cachedKeyFound.data) !== JSON.stringify(data));
 
     let output = false;
 
@@ -191,6 +191,8 @@ class App extends Component {
             }
           }
         };
+
+        // console.log('setCachedData',key,JSON.stringify(storedCachedData).length,data);
         
         this.functionsUtil.setLocalStorage('cachedData',storedCachedData,true);
       }
