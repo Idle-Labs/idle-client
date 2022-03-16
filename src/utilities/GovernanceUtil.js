@@ -477,14 +477,14 @@ class GovernanceUtil {
 
     const governanceContracts = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
     const contracts = Object.values(governanceContracts);
-    
-    let fromBlock=null;
 
     // const proposalCounts= await Object.values(governanceContracts).map(async (governanceContract)=>{
     const proposalCounts = await this.functionsUtil.asyncForEach(contracts,async (governanceContract)=>{
       const proposalCount = await this.functionsUtil.genericContractCall(governanceContract.name,'proposalCount');
       return proposalCount;
     });
+
+    let fromBlock=null;
     const allProposals=[];
 
     await this.functionsUtil.asyncForEach(contracts, async(governanceContract,index) => {
@@ -709,10 +709,9 @@ class GovernanceUtil {
         };
       });
 
-      
-      this.functionsUtil.setCachedDataWithLocalStorage(cachedDataKey,proposals,3600);
-
-      // console.log('getProposals',filter_by_state,cachedData);
+      Object.values(proposals).forEach(proposal=>{
+        allProposals.push(proposal);
+      });
 
       if (filter_by_state){
         proposals = proposals.filter( p => (p && p.state && p.state.toLowerCase() === filter_by_state.toLowerCase() ) );
@@ -725,11 +724,12 @@ class GovernanceUtil {
       if (startBlock){
         proposals = proposals.filter( p => parseInt(p.startBlock)>=parseInt(startBlock) );
       }
-
-      Object.values(proposals).forEach(proposal=>{
-        allProposals.push(proposal);
-      });
     });
+  
+    if (allProposals.lenght){
+      this.functionsUtil.setCachedDataWithLocalStorage(cachedDataKey,allProposals,1800);
+    }
+
     return allProposals;
   }
 }
