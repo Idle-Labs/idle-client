@@ -457,6 +457,7 @@ class GovernanceUtil {
     // Check for cached data
     const cachedDataKey = `getProposals`;
     let cachedData = this.functionsUtil.getCachedDataWithLocalStorage(cachedDataKey);
+    console.log("cached Data",cachedData)
     if (cachedData){
       if (filter_by_state){
         cachedData = cachedData.filter( p => (p && p.state && p.state.toLowerCase() === filter_by_state.toLowerCase() ) );
@@ -469,7 +470,7 @@ class GovernanceUtil {
       }
       return cachedData;
     }
-
+    
     const enumerateProposalState = (state) => {
       const proposalStates = ['Pending', 'Active', 'Canceled', 'Defeated', 'Succeeded', 'Queued', 'Expired', 'Executed'];
       return proposalStates[state];
@@ -485,7 +486,7 @@ class GovernanceUtil {
       const proposalCount = await this.functionsUtil.genericContractCall(governanceContract.name,'proposalCount');
       return proposalCount;
     });
-    const allProposals=[];
+    let allProposals=[];
 
     await this.functionsUtil.asyncForEach(contracts, async(governanceContract,index) => {
       
@@ -710,26 +711,29 @@ class GovernanceUtil {
       });
 
       
-      this.functionsUtil.setCachedDataWithLocalStorage(cachedDataKey,proposals,3600);
-
+      
       // console.log('getProposals',filter_by_state,cachedData);
 
-      if (filter_by_state){
-        proposals = proposals.filter( p => (p && p.state && p.state.toLowerCase() === filter_by_state.toLowerCase() ) );
-      }
-
-      if (voted_by){
-        proposals = proposals.filter( p => (p && p.votes.find( v => (v.voter && v.voter.toLowerCase() === voted_by.toLowerCase()) )) );
-      }
-
-      if (startBlock){
-        proposals = proposals.filter( p => parseInt(p.startBlock)>=parseInt(startBlock) );
-      }
+      
 
       Object.values(proposals).forEach(proposal=>{
         allProposals.push(proposal);
       });
     });
+    this.functionsUtil.setCachedDataWithLocalStorage(cachedDataKey,allProposals,3600);
+
+    if (filter_by_state){
+      allProposals = allProposals.filter( p => (p && p.state && p.state.toLowerCase() === filter_by_state.toLowerCase() ) );
+    }
+
+    if (voted_by){
+      allProposals = allProposals.filter( p => (p && p.votes.find( v => (v.voter && v.voter.toLowerCase() === voted_by.toLowerCase()) )) );
+    }
+
+    if (startBlock){
+      allProposals = allProposals.filter( p => parseInt(p.startBlock)>=parseInt(startBlock) );
+    }
+
     return allProposals;
   }
 }
