@@ -1366,7 +1366,7 @@ class Tranches extends Component {
                       }
                     ]}
                     {...this.props}
-                    availableTranches={this.state.remainingTranches}
+                    availableTranches={this.props.account?this.state.remainingTranches:this.props.availableTranches}
 
                   />
                 </Flex>
