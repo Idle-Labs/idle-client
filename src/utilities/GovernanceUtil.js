@@ -262,6 +262,7 @@ class GovernanceUtil {
   castVote = async (proposalId,support,callback=null,callbackReceipt=null) => {
     proposalId = this.functionsUtil.toBN(proposalId);
     const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance','v2']).name;
+    console.log(contractName, 'castVote', [proposalId, support]);
     return await this.props.contractMethodSendWrapper(contractName, 'castVote', [proposalId, support], null, callback, callbackReceipt);
   }
 
@@ -468,7 +469,6 @@ class GovernanceUtil {
       }
       return cachedData;
     }
-    
     const enumerateProposalState = (state) => {
       const proposalStates = ['Pending', 'Active', 'Canceled', 'Defeated', 'Succeeded', 'Queued', 'Expired', 'Executed'];
       return proposalStates[state];
