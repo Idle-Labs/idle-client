@@ -455,7 +455,7 @@ class GovernanceUtil {
   getProposals = async (voted_by=null,filter_by_state=null,startBlock=null) => {
 
     // Check for cached data
-    const cachedDataKey = `getProposals`;
+    const cachedDataKey = `get_Proposals`;
     let cachedData = this.functionsUtil.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData){
       if (filter_by_state){
