@@ -408,7 +408,6 @@ class GovernanceUtil {
     if (cachedData){
       return cachedData;
     }
-
     
     const governanceContracts = this.functionsUtil.getGlobalConfig(['governance','contracts','governance']);
     let lastContract=null;
@@ -427,7 +426,6 @@ class GovernanceUtil {
       }
       lastContract=governanceContract;
       let contractVotes = await this.functionsUtil.getContractPastEvents(contractName,'VoteCast', {fromBlock, toBlock});
-      
       if (contractVotes){
         contractVotes = contractVotes.map( e => {
           const {
@@ -443,9 +441,9 @@ class GovernanceUtil {
             proposalId
           }
         });
-      Object.values(contractVotes).forEach(vote=>{
-        votes.push(vote);
-      })
+        Object.values(contractVotes).forEach(vote=>{
+          votes.push(vote);
+        })
       }
     });
    
@@ -484,8 +482,8 @@ class GovernanceUtil {
       return proposalCount;
     });
 
-    let fromBlock=null;
-    const allProposals=[];
+    let fromBlock = null;
+    let allProposals = [];
 
     await this.functionsUtil.asyncForEach(contracts, async(governanceContract,index) => {
       
@@ -683,8 +681,7 @@ class GovernanceUtil {
           });
         }
 
-        // Save proposal
-        proposals[i] = {
+        const proposal = {
           eta:p.eta,
           actions:{
             values,
@@ -707,27 +704,34 @@ class GovernanceUtil {
           description:p.description,
           againstVotes:p.againstVotes
         };
+
+        // Save proposal
+        proposals[i] = proposal;
       });
 
       Object.values(proposals).forEach(proposal=>{
-        allProposals.push(proposal);
+        if (proposal){
+          allProposals.push(proposal);
+        }
       });
-
-      if (filter_by_state){
-        proposals = proposals.filter( p => (p && p.state && p.state.toLowerCase() === filter_by_state.toLowerCase() ) );
-      }
-
-      if (voted_by){
-        proposals = proposals.filter( p => (p && p.votes.find( v => (v.voter && v.voter.toLowerCase() === voted_by.toLowerCase()) )) );
-      }
-
-      if (startBlock){
-        proposals = proposals.filter( p => parseInt(p.startBlock)>=parseInt(startBlock) );
-      }
     });
+
+    allProposals = allProposals.sort((a, b) => (a.id < b.id ? 1 : -1));
   
-    if (allProposals.lenght){
+    if (allProposals.length){
       this.functionsUtil.setCachedDataWithLocalStorage(cachedDataKey,allProposals,1800);
+    }
+
+    if (filter_by_state){
+      allProposals = allProposals.filter( p => (p && p.state && p.state.toLowerCase() === filter_by_state.toLowerCase() ) );
+    }
+
+    if (voted_by){
+      allProposals = allProposals.filter( p => (p && p.votes.find( v => (v.voter && v.voter.toLowerCase() === voted_by.toLowerCase()) )) );
+    }
+
+    if (startBlock){
+      allProposals = allProposals.filter( p => parseInt(p.startBlock)>=parseInt(startBlock) );
     }
 
     return allProposals;
