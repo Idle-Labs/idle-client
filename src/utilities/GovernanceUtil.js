@@ -262,7 +262,6 @@ class GovernanceUtil {
   castVote = async (proposalId,support,callback=null,callbackReceipt=null) => {
     proposalId = this.functionsUtil.toBN(proposalId);
     const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance','v2']).name;
-    console.log(contractName, 'castVote', [proposalId, support]);
     return await this.props.contractMethodSendWrapper(contractName, 'castVote', [proposalId, support], null, callback, callbackReceipt);
   }
 
@@ -457,7 +456,6 @@ class GovernanceUtil {
     // Check for cached data
     const cachedDataKey = `getProposals`;
     let cachedData = this.functionsUtil.getCachedDataWithLocalStorage(cachedDataKey);
-    console.log("cached Data",cachedData)
     if (cachedData){
       if (filter_by_state){
         cachedData = cachedData.filter( p => (p && p.state && p.state.toLowerCase() === filter_by_state.toLowerCase() ) );

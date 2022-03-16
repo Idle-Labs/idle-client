@@ -57,7 +57,7 @@ class Overview extends Component {
     },0);
 
     const dataLoaded = true;
-    console.log("proposals",proposals)
+    
     this.setState({
       delegates,
       proposals,
