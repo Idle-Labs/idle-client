@@ -454,19 +454,23 @@ class GovernanceUtil {
 
   getProposals = async (voted_by=null,filter_by_state=null,startBlock=null) => {
 
+    if (!this.props.networkInitialized){
+      return;
+    }
     // Check for cached data
     const cachedDataKey = `get_Proposals`;
     let cachedData = this.functionsUtil.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData){
-      if (filter_by_state){
-        cachedData = cachedData.filter( p => (p && p.state && p.state.toLowerCase() === filter_by_state.toLowerCase() ) );
-      }
-      if (voted_by){
-        cachedData = cachedData.filter( p => (p && p.votes.find( v => (v.voter && v.voter.toLowerCase() === voted_by.toLowerCase()) )) );
-      }
-      if (startBlock){
-        cachedData = cachedData.filter( p => parseInt(p.startBlock)>=parseInt(startBlock) );
-      }
+      if(cachedData.length)
+        if (filter_by_state){
+          cachedData = cachedData.filter( p => (p && p.state && p.state.toLowerCase() === filter_by_state.toLowerCase() ) );
+        }
+        if (voted_by){
+          cachedData = cachedData.filter( p => (p && p.votes.find( v => (v.voter && v.voter.toLowerCase() === voted_by.toLowerCase()) )) );
+        }
+        if (startBlock){
+          cachedData = cachedData.filter( p => parseInt(p.startBlock)>=parseInt(startBlock) );
+        }
       return cachedData;
     }
     const enumerateProposalState = (state) => {
