@@ -1584,16 +1584,17 @@ class FunctionsUtil {
           tokenConfig.address = tokenConfig.childToken.address;
           if (!enabledTokens || !enabledTokens.length || enabledTokens.includes(tokenConfig.token)) {
             const polygonTx = this.normalizePolygonTx(tx, tokenConfig);
-            // console.log('polygonTx',polygonTx);
             if (polygonTx.action === 'Withdraw') {
-              const tx_state_id = this.props.web3.utils ? parseInt(this.props.web3.utils.hexToNumberString(polygonTx.logs[polygonTx.logs.length - 1].topics[1])) : 0;
               polygonTx.exited = false;
               polygonTx.networkId = polygonNetworkId;
               polygonTx.bridgeType = tokenConfig.bridgeType;
-              // polygonTx.included = this.props.maticPOSClient.isCheckPointed(polygonTx.hash);
-              polygonTx.included = last_state_id && tx_state_id ? last_state_id >= tx_state_id : false;
-              const erc20RootToken = this.props.maticPOSClient.erc20(tokenConfig.rootToken.address,true);
-              polygonTx.exited = await erc20RootToken.isWithdrawExited(polygonTx.hash);
+              polygonTx.included = await this.props.maticPOSClient.isCheckPointed(polygonTx.hash);
+              polygonTx.exited = false;
+
+              if (tokenConfig.rootToken && polygonTx.included){
+                const erc20RootToken = this.props.maticPOSClient.erc20(tokenConfig.rootToken.address,true);
+                polygonTx.exited = await erc20RootToken.isWithdrawExited(polygonTx.hash);
+              }
               
               txs.push(polygonTx);
             }

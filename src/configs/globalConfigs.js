@@ -2318,6 +2318,10 @@ const globalConfigs = {
             decimals: 18,
             enabled: true,
             bridgeType: 'pos',
+            rootToken:{
+              name:'ETH',
+              address:'0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+            },
             childToken: {
               abi: ChildERC20,
               name: 'maticWETH',

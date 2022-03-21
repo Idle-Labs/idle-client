@@ -1,3 +1,4 @@
+import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import RoundButton from '../RoundButton/RoundButton';
@@ -38,9 +39,10 @@ class PolygonBridge extends Component {
     contractApproved:false,
     defaultTransaction:null,
     approveDescription:null,
-    selectedTransaction:null,
     balanceSelectorInfo:null,
-    transactionSucceeded:null
+    selectedTransaction:null,
+    transactionSucceeded:null,
+    selectedTransactionHash:null,
   };
 
   // Utils
@@ -176,8 +178,7 @@ class PolygonBridge extends Component {
   }
 
   async getExitTransactionParams(){
-    const txHash = this.state.selectedTransaction;
-
+    const txHash = this.state.selectedTransactionHash;
 
     const logEventSignature = this.props.toolProps.genericParams.erc20LogEventSignature;
     const exitCalldata = await this.props.maticPOSClient.exitUtil.buildPayloadForExit(txHash,logEventSignature,false);
@@ -194,9 +195,11 @@ class PolygonBridge extends Component {
     });
   }
 
-  async selectTransaction(selectedTransaction){
+  async selectTransaction(selectedTransactionHash){
+    const selectedTransaction = this.state.polygonTxs.find( tx => tx.hash.toLowerCase() === selectedTransactionHash.toLowerCase() );
     this.setState({
-      selectedTransaction
+      selectedTransaction,
+      selectedTransactionHash
     });
   }
 
@@ -327,7 +330,7 @@ class PolygonBridge extends Component {
       break;
       case 'Exit':
         newState.availableNetworks = [1,5];
-        newState.txsToExit = this.state.polygonTxs.filter( tx => tx.included && tx.action === 'Withdraw' && !tx.exited && tx.tokenSymbol.toUpperCase() === this.state.selectedToken.toUpperCase() ).map( tx => {
+        newState.txsToExit = this.state.polygonTxs.filter( tx => tx.action === 'Withdraw' && !tx.exited && tx.tokenSymbol.toUpperCase() === this.state.selectedToken.toUpperCase() ).map( tx => {
           const label = this.functionsUtil.strToMoment(tx.timeStamp*1000).format('DD-MM-YYYY HH:mm')+' - '+tx.value.toFixed(6)+' '+tx.token;
           return {
             label,
@@ -337,7 +340,8 @@ class PolygonBridge extends Component {
         });
 
         newState.defaultTransaction = newState.txsToExit.length>0 ? newState.txsToExit[0] : null;
-        newState.selectedTransaction = newState.defaultTransaction ? newState.defaultTransaction.data.hash : null;
+        newState.selectedTransaction = newState.defaultTransaction;
+        newState.selectedTransactionHash = newState.defaultTransaction ? newState.defaultTransaction.data.hash : null;
       break;
       default:
       break;
@@ -708,84 +712,77 @@ class PolygonBridge extends Component {
                                               defaultValue={this.state.defaultTransaction}
                                             />
                                             {
-                                              this.state.selectedTransaction && (
-                                                <ExecuteTransaction
-                                                  action={'Exit'}
-                                                  Component={Button}
-                                                  parentProps={{
-                                                    mt:3,
-                                                    alignItems:'center',
-                                                    justifyContent:'center'
-                                                  }}
-                                                  componentProps={{
-                                                    fontWeight:3,
-                                                    width:[1,1/3],
-                                                    size:'medium',
-                                                    height:'45px',
-                                                    fontSize:[2,3],
-                                                    boxShadow:null,
-                                                    borderRadius:4,
-                                                    mainColor:'redeem',
-                                                    value:'Exit Transaction',
-                                                  }}
-                                                  params={[]}
-                                                  methodName={'exit'}
-                                                  sendRawTransaction={true}
-                                                  contractName={'RootChainManager'}
-                                                  callback={this.exitCallback.bind(this)}
-                                                  getTransactionParamsAsync={this.getExitTransactionParams.bind(this)}
-                                                  {...this.props}
-                                                >
-                                                  <Flex
-                                                    flexDirection={'row'}
-                                                    alignItems={'center'}
-                                                    justifyContent={'center'}
+                                              this.state.selectedTransaction && 
+                                                !this.state.selectedTransaction.included ? (
+                                                  <IconBox
+                                                    cardProps={{
+                                                      mt:3,
+                                                      width:1
+                                                    }}
+                                                    icon={'AccessTime'}
+                                                    text={'This transaction has not been included in the checkpoint yet.<br />Please wait up to 2-3 hours to be able to complete the withdrawal.'}
+                                                  />
+                                                ) : (
+                                                  <ExecuteTransaction
+                                                    action={'Exit'}
+                                                    Component={Button}
+                                                    parentProps={{
+                                                      mt:3,
+                                                      alignItems:'center',
+                                                      justifyContent:'center'
+                                                    }}
+                                                    componentProps={{
+                                                      fontWeight:3,
+                                                      width:[1,1/3],
+                                                      size:'medium',
+                                                      height:'45px',
+                                                      fontSize:[2,3],
+                                                      boxShadow:null,
+                                                      borderRadius:4,
+                                                      mainColor:'redeem',
+                                                      value:'Exit Transaction',
+                                                    }}
+                                                    params={[]}
+                                                    methodName={'exit'}
+                                                    sendRawTransaction={true}
+                                                    contractName={'RootChainManager'}
+                                                    callback={this.exitCallback.bind(this)}
+                                                    getTransactionParamsAsync={this.getExitTransactionParams.bind(this)}
+                                                    {...this.props}
                                                   >
-                                                    <Icon
-                                                      mr={1}
-                                                      name={'Done'}
-                                                      size={'1.4em'}
-                                                      color={this.props.theme.colors.transactions.status.completed}
-                                                    />
-                                                    <Text
-                                                      fontWeight={500}
-                                                      fontSize={'15px'}
-                                                      color={'copyColor'}
-                                                      textAlign={'center'}
+                                                    <Flex
+                                                      flexDirection={'row'}
+                                                      alignItems={'center'}
+                                                      justifyContent={'center'}
                                                     >
-                                                      Transaction successfully exited!
-                                                    </Text>
-                                                  </Flex>
-                                                </ExecuteTransaction>
-                                              )
+                                                      <Icon
+                                                        mr={1}
+                                                        name={'Done'}
+                                                        size={'1.4em'}
+                                                        color={this.props.theme.colors.transactions.status.completed}
+                                                      />
+                                                      <Text
+                                                        fontWeight={500}
+                                                        fontSize={'15px'}
+                                                        color={'copyColor'}
+                                                        textAlign={'center'}
+                                                      >
+                                                        Transaction successfully exited!
+                                                      </Text>
+                                                    </Flex>
+                                                  </ExecuteTransaction>
+                                                )
                                             }
                                           </Box>
                                         ) : (
-                                          <DashboardCard
+                                          <IconBox
                                             cardProps={{
-                                              p:3,
+                                              mt:3,
                                               width:1
                                             }}
-                                          >
-                                            <Flex
-                                              alignItems={'center'}
-                                              flexDirection={'column'}
-                                            >
-                                              <Icon
-                                                size={'1.8em'}
-                                                name={'Warning'}
-                                                color={'cellText'}
-                                              />
-                                              <Text
-                                                mt={1}
-                                                fontSize={2}
-                                                color={'cellText'}
-                                                textAlign={'center'}
-                                              >
-                                                You cannot exit any transaction yet.
-                                              </Text>
-                                            </Flex>
-                                          </DashboardCard>
+                                            icon={'Warning'}
+                                            text={'You cannot exit any transaction yet.'}
+                                          />
                                         )
                                       }
                                     </Box>
