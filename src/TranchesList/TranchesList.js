@@ -49,26 +49,24 @@ class TranchesList extends Component {
          depositedTokens &&
         <Flex id="tranches-list" flexDirection={'column'}>
           {
-            
-               depositedTokens.map( token => {
-                const tokenConfig=this.props.availableTranches[token.protocol][token.token]
-                return(
-                  <TableRow
-                    {...this.props}
-                    token={token.token}
-                    addTokenName={false}
-                    tranche={token.tranche}
-                    protocol={token.protocol}
-                    rowId={`tranche-col-${token.protocol}`}
-                    tokenConfig={tokenConfig}
-                    trancheConfig={token.tranche==="AA"?tokenConfig.AA:tokenConfig.BB}
-                    cardId={`tranche-card-${token.protocol}`}
-                    key={`tranche-${token.protocol}-${token.token+token.tranche}`}
-                    fieldComponent={this.props.fieldComponent || TrancheField}
-                  />
-                  )
-               })
-            
+            depositedTokens.map( token => {
+              const tokenConfig = this.props.availableTranches[token.protocol][token.token];
+              return (
+                <TableRow
+                  {...this.props}
+                  token={token.token}
+                  addTokenName={false}
+                  tranche={token.tranche}
+                  protocol={token.protocol}
+                  tokenConfig={tokenConfig}
+                  rowId={`tranche-col-${token.protocol}`}
+                  cardId={`tranche-card-${token.protocol}`}
+                  fieldComponent={this.props.fieldComponent || TrancheField}
+                  key={`tranche-${token.protocol}-${token.token+token.tranche}`}
+                  trancheConfig={token.tranche==="AA"?tokenConfig.AA:tokenConfig.BB}
+                />
+              )
+            })
           }
         </Flex>
        ):
@@ -80,7 +78,7 @@ class TranchesList extends Component {
               if (!protocolConfig){
                 return null;
               }
-                const tranche = this.props.trancheType || null;
+              const tranche = this.props.trancheType || null;
               return Object.keys(protocolConfig).map( token => {
                 return(
                   <TableRow

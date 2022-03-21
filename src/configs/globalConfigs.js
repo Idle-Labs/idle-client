@@ -1,3 +1,4 @@
+import Gauges from "../Gauges/Gauges";
 import Staking from "../Staking/Staking";
 import DAI from '../abis/tokens/DAI.json';
 import IDLE from '../contracts/IDLE.json';
@@ -51,12 +52,15 @@ import BalancerPool from '../abis/balancer/BalancerPool.json';
 import IdleController from '../contracts/IdleController.json';
 import TokenMigration from '../TokenMigration/TokenMigration';
 import BatchMigration from '../BatchMigration/BatchMigration';
+import LiquidityGauge from '../contracts/LiquidityGauge.json';
+import GaugeController from '../contracts/GaugeController.json';
 import IdleBatchedMint from '../contracts/IdleBatchedMint.json';
 import { RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
 import IdleProxyMinter from '../contracts/IdleProxyMinter.json';
 import ERC20Predicate from '../abis/polygon/ERC20Predicate.json';
 import EtherPredicate from '../abis/polygon/EtherPredicate.json';
 import DepositManager from '../abis/polygon/DepositManager.json';
+import GaugeDistributor from '../contracts/GaugeDistributor.json';
 import IdleRebalancerV3 from '../contracts/IdleRebalancerV3.json';
 import LiquidityGaugeV2 from '../abis/curve/LiquidityGaugeV2.json';
 import DeployB2BVesting from '../DeployB2BVesting/DeployB2BVesting';
@@ -644,6 +648,14 @@ const globalConfigs = {
       BalancerExchangeProxy: {
         abi: BalancerExchangeProxy,
         address: '0x3E66B66Fd1d0b02fDa6C811Da9E0547970DB2f21'
+      },
+      GaugeController:{
+        abi:GaugeController,
+        address:'0xaC69078141f76A1e257Ee889920d02Cc547d632f'
+      },
+      GaugeDistributor:{
+        abi:GaugeDistributor,
+        address:'0x074306BC6a6Fc1bD02B425dd41D742ADf36Ca9C6'
       }
     }
   },
@@ -2051,6 +2063,52 @@ const globalConfigs = {
     }
   ],
   tools: {
+    gauges: {
+      enabled: true,
+      label: "Gauges",
+      route: "gauges",
+      subComponent: Gauges,
+      availableNetworks: [1],
+      image: 'images/vote.svg',
+      desc: "Allocate your voting power into your preferred Gauge and earn rewards",
+      props: {
+        WEIGHT_VOTE_DELAY:864000,
+        veToken:{
+          abi: stkIDLE,
+          decimals: 18,
+          token: "stkIDLE",
+          address: "0xaac13a116ea7016689993193fce4badc8038136f" // Mainnet
+        },
+        availableGauges:{
+          ALUSD3CRV:{
+            protocol:'convex',
+            abi:LiquidityGauge,
+            name: "LiquidityGauge_aa_convex_alusd3crv",
+            token: "LiquidityGauge_aa_convex_alusd3crv",
+            address:'0x21dDA17dFF89eF635964cd3910d167d562112f57',
+            trancheToken:{
+              abi: ERC20,
+              name: 'AA_convex_alusd3crv',
+              token: 'AA_convex_alusd3crv',
+              address: '0x790E38D85a364DD03F682f5EcdC88f8FF7299908'
+            }
+          },
+          stETH:{
+            protocol:'lido',
+            abi:LiquidityGauge,
+            name: "LiquidityGauge_aa_lido_steth",
+            token: "LiquidityGauge_aa_lido_steth",
+            address:'0x675eC042325535F6e176638Dd2d4994F645502B9',
+            trancheToken:{
+              abi: ERC20,
+              name: 'AA_lido_stETH',
+              token: 'AA_lido_stETH',
+              address: '0x2688fc68c4eac90d9e5e1b94776cf14eade8d877'
+            }
+          },
+        }
+      }
+    },
     stake: {
       enabled: true,
       icon: "Layers",
@@ -2242,8 +2300,8 @@ const globalConfigs = {
       route: 'polygon-bridge',
       availableNetworks: [1, 137],
       subComponent: PolygonBridge,
-      image: 'images/protocols/polygon.svg',
       label: 'Ethereum ⇔ Polygon Bridge',
+      image: 'images/protocols/polygon.svg',
       desc: 'Transfer your tokens from Ethereum to Polygon and vice versa with Plasma and PoS Bridge.',
       props: {
         contracts: {

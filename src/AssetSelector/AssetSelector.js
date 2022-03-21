@@ -224,7 +224,7 @@ class AssetSelector extends Component {
     this.loadUtils();
 
     const selectedTokenChanged = prevProps.selectedToken !== this.props.selectedToken;
-    const availableTokensChanged = JSON.stringify(Object.keys(prevProps.availableTokens)) !== JSON.stringify(Object.keys(this.props.availableTokens));
+    const availableTokensChanged = JSON.stringify(prevProps.availableTokens) !== JSON.stringify(this.props.availableTokens);
     if (availableTokensChanged || selectedTokenChanged){
       this.loadComponents();
     }

@@ -160,17 +160,17 @@ class Tranches extends Component {
         Object.keys(this.props.availableTranches[protocol]).forEach( tranche=> {
           if(depositedTokens.includes(tranche)) {
               if(!depositedTranches[protocol]){
-                depositedTranches[protocol]={}
+                depositedTranches[protocol]={};
               }
               depositedTranches[protocol][tranche]={}
-              depositedTranches[protocol][tranche]=this.props.availableTranches[protocol][tranche]
+              depositedTranches[protocol][tranche]=this.props.availableTranches[protocol][tranche];
           }
           else{
             if(!remainingTranches[protocol]){
-              remainingTranches[protocol]={}
+              remainingTranches[protocol]={};
             }
-            remainingTranches[protocol][tranche]={}
-            remainingTranches[protocol][tranche]=this.props.availableTranches[protocol][tranche]
+            remainingTranches[protocol][tranche]={};
+            remainingTranches[protocol][tranche]=this.props.availableTranches[protocol][tranche];
           }
         })
       })

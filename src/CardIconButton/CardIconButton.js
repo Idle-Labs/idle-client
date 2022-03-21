@@ -29,7 +29,28 @@ class CardIconButton extends Component {
           flexDirection={"row"}
           justifyContent={this.props.align ? this.props.align : "center"}
         >
-          {this.props.image ? (
+          {this.props.image ? this.props.iconBgColor ? (
+              <Flex
+                mr={this.props.isSidebar ? 0 : 2}
+                p={this.props.isSidebar ? 0 : ["4px", "7px"]}
+                borderRadius={"50%"}
+                alignItems={"center"}
+                justifyContent={"center"}
+                backgroundColor={
+                  this.props.iconBgColor
+                    ? this.props.iconBgColor
+                    : this.props.theme.colors.transactions.actionBg.redeem
+                }
+              >
+                <Image
+                  align={"center"}
+                  src={this.props.image}
+                  height={this.props.isMobile ? "1.2em" : "1.4em"}
+                  width={this.props.isMobile ? "1.2em" : "1.4em"}
+                  {...this.props.imageProps}
+                />
+              </Flex>
+            ) : (
             <Image
               align={"center"}
               src={this.props.image}

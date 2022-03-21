@@ -213,7 +213,7 @@ class CurveRedeem extends Component {
     const unevenAmounts = [];
     const redeemableBalance = curveTokenBalance ? curveTokenBalance.times(curveTokenPrice) : this.functionsUtil.BNify(0);
 
-    const availableTokens = this.functionsUtil.getCurveAvailableTokens();;
+    const availableTokens = this.functionsUtil.getCurveAvailableTokens();
     const selectedToken = Object.keys(availableTokens)[0];
 
     this.setState({

@@ -3604,14 +3604,14 @@ class FunctionsUtil {
     return this.props.tokenConfig.protocols.find(c => c.address.toLowerCase() === addr.toLowerCase());
   }
   integerValue = value => {
-    return this.BNify(value).integerValue(BigNumber.ROUND_FLOOR).toFixed();
+    return this.BNify(value).integerValue(BigNumber.ROUND_FLOOR).toFixed(0);
   }
   normalizeTokenDecimals = tokenDecimals => {
     return this.BNify(`1e${tokenDecimals}`);
   }
   normalizeTokenAmount = (tokenBalance, tokenDecimals, round = true) => {
     const normalizedTokenDecimals = this.normalizeTokenDecimals(tokenDecimals);
-    return this.BNify(tokenBalance).times(normalizedTokenDecimals).integerValue(BigNumber.ROUND_FLOOR).toFixed();
+    return this.BNify(tokenBalance).times(normalizedTokenDecimals).integerValue(BigNumber.ROUND_FLOOR).toFixed(0);
   }
   fixTokenDecimals = (tokenBalance, tokenDecimals, exchangeRate = null) => {
     if (!tokenDecimals) {
