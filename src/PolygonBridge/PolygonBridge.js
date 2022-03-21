@@ -340,8 +340,8 @@ class PolygonBridge extends Component {
         });
 
         newState.defaultTransaction = newState.txsToExit.length>0 ? newState.txsToExit[0] : null;
-        newState.selectedTransaction = newState.defaultTransaction;
-        newState.selectedTransactionHash = newState.defaultTransaction ? newState.defaultTransaction.data.hash : null;
+        newState.selectedTransaction = newState.defaultTransaction ? newState.defaultTransaction.data : null;
+        newState.selectedTransactionHash = newState.selectedTransaction ? newState.selectedTransaction.hash : null;
       break;
       default:
       break;
