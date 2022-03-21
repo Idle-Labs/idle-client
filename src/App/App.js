@@ -795,6 +795,7 @@ class App extends Component {
                         initSimpleID,
                         permitClient,
                         tokenDecimals,
+                        maticPOSClient,
                         accountBalance,
                         needsPreflight,
                         validateAccount,
@@ -850,6 +851,7 @@ class App extends Component {
                                         transactions={transactions}
                                         buyToken={this.state.buyToken}
                                         logout={this.logout.bind(this)}
+                                        maticPOSClient={maticPOSClient}
                                         accountBalance={accountBalance}
                                         themeMode={this.state.themeMode}
                                         theme={this.state.selectedTheme}

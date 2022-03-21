@@ -6,9 +6,10 @@ import NetworkUtil from "./NetworkUtil";
 import { Biconomy } from "@biconomy/mexa";
 import * as Sentry from '@sentry/browser';
 import FunctionsUtil from './FunctionsUtil';
-import MaticJs from '@maticnetwork/maticjs';
 import globalConfigs from '../configs/globalConfigs';
+import { POSClient, use } from '@maticnetwork/maticjs';
 import ConnectionModalUtil from "./ConnectionModalsUtil";
+import { Web3ClientPlugin } from '@maticnetwork/maticjs-web3';
 // import detectEthereumProvider from '@metamask/detect-provider';
 import { IFrameEthereumProvider } from '@ledgerhq/iframe-provider';
 import ConnectionErrorModal from './components/ConnectionErrorModal';
@@ -29,6 +30,7 @@ const RimbleTransactionContext = React.createContext({
   permitClient: {},
   web3Providers: {},
   accountBalance: {},
+  maticPOSClient: {},
   initWeb3: () => {},
   accountValidated: {},
   maticPlasmaClient :{},
@@ -325,6 +327,11 @@ class RimbleTransaction extends React.Component {
       });
     }
 
+    const accountChanged = prevState.account !== this.state.account;
+    if (accountChanged){
+      this.initMaticPosClient();
+    }
+
     if (localStorage){
       const context = JSON.parse(localStorage.getItem('context'));
       if (!context || (this.props.context.active !== context.active || this.props.context.connectorName !== context.connectorName)){
@@ -337,6 +344,62 @@ class RimbleTransaction extends React.Component {
       // console.log('selectedNetworkChanged',JSON.stringify(prevProps.config.requiredNetwork),this.props.config.requiredNetwork);
       this.handleNetworkChanged();
     }
+  }
+
+  initMaticPosClient = async () => {
+    let maticPOSClient = null;
+    let maticPlasmaClient = null;
+
+    // const infuraConfig = globalConfigs.network.providers.infura;
+    const networkId = this.state.network.required.id;
+    const polygonConfig = globalConfigs.network.providers.polygon;
+
+    const currentNetwork = this.functionsUtil.getGlobalConfig(['network','availableNetworks',networkId]);
+    const polygonNetworkId = currentNetwork.provider === 'polygon' ? networkId : this.functionsUtil.getGlobalConfig(['network','providers','polygon','networkPairs',networkId]);
+
+    const availableNetworks = this.functionsUtil.getGlobalConfig(['network','availableNetworks']);
+    const networkConfig = availableNetworks[networkId];
+
+    if (polygonConfig && polygonConfig.enabled && polygonConfig.rpc && Object.keys(polygonConfig.rpc).includes(parseInt(polygonNetworkId).toString())){
+      const web3PolygonRpc = polygonConfig.rpc[polygonNetworkId]+this.functionsUtil.getGlobalConfig(['network','providers','polygon','key']);
+      const web3InfuraRpc = this.functionsUtil.getGlobalConfig(['network','providers','infura','rpc',networkId])+this.functionsUtil.getGlobalConfig(['network','providers','infura','key']);
+
+      const maticProvider = new Web3(new Web3.providers.HttpProvider(web3PolygonRpc));
+      const parentProvider = new Web3(new Web3.providers.HttpProvider(web3InfuraRpc));
+      // console.log('parentProvider',web3InfuraRpc);
+
+      // install web3 plugin
+      use(Web3ClientPlugin);
+
+      maticPOSClient = new POSClient();
+
+      const maticPOSClientConfig = {
+        parent: {
+          provider: parentProvider,
+          defaultConfig: {
+            from : this.state.account
+          }
+        },
+        child: {
+          provider: maticProvider,
+          defaultConfig: {
+            from : this.state.account
+          }
+        },
+        network: networkConfig.network,
+        version: networkConfig.version
+      };
+
+      await maticPOSClient.init(maticPOSClientConfig);
+    }
+
+    window.maticPOSClient = maticPOSClient;
+    window.maticPlasmaClient = maticPlasmaClient;
+
+    this.setState({
+      maticPOSClient,
+      maticPlasmaClient
+    });
   }
 
   // Initialize a web3 provider
@@ -375,7 +438,17 @@ class RimbleTransaction extends React.Component {
       return acc;
     },{});
 
+    let web3Polygon = null;
     const web3Infura = new Web3(new Web3.providers.HttpProvider(web3InfuraRpc));
+
+    const polygonConfig = globalConfigs.network.providers.polygon;
+    const currentNetwork = this.functionsUtil.getGlobalConfig(['network','availableNetworks',networkId]);
+    const polygonNetworkId = currentNetwork.provider === 'polygon' ? networkId : this.functionsUtil.getGlobalConfig(['network','providers','polygon','networkPairs',networkId]);
+    if (polygonConfig && polygonConfig.enabled && polygonConfig.rpc && Object.keys(polygonConfig.rpc).includes(parseInt(polygonNetworkId).toString())){
+      const web3PolygonRpc = polygonConfig.rpc[polygonNetworkId]+this.functionsUtil.getGlobalConfig(['network','providers','polygon','key']);
+      web3Polygon = new Web3(new Web3.providers.HttpProvider(web3PolygonRpc));
+      window.web3Polygon = web3Polygon;
+    }
 
     let web3 = useWeb3Provider ? context.library : null;
 
@@ -483,48 +556,6 @@ class RimbleTransaction extends React.Component {
 
     // console.log('initWeb3',connectorName,web3,context,web3Provider/*,web3Provider===context.library.currentProvider*/);
 
-    let web3Polygon = null;
-    let maticPOSClient = null;
-    let maticPlasmaClient = null;
-
-    // const infuraConfig = globalConfigs.network.providers.infura;
-    const polygonConfig = globalConfigs.network.providers.polygon;
-
-    const currentNetwork = this.functionsUtil.getGlobalConfig(['network','availableNetworks',networkId]);
-    const polygonNetworkId = currentNetwork.provider === 'polygon' ? networkId : this.functionsUtil.getGlobalConfig(['network','providers','polygon','networkPairs',networkId]);
-
-    if (polygonConfig && polygonConfig.enabled && polygonConfig.rpc && Object.keys(polygonConfig.rpc).includes(parseInt(polygonNetworkId).toString())){
-      const web3PolygonRpc = polygonConfig.rpc[polygonNetworkId]+this.functionsUtil.getGlobalConfig(['network','providers','polygon','key']);
-      web3Polygon = new Web3(new Web3.providers.HttpProvider(web3PolygonRpc));
-
-      const maticProvider = new Web3(new Web3.providers.HttpProvider(web3PolygonRpc));
-      const parentProvider = new Web3(new Web3.providers.HttpProvider(web3InfuraRpc));
-      // console.log('maticProvider',web3PolygonRpc);
-      // console.log('parentProvider',web3InfuraRpc);
-
-      const maticPOSClientConfig = {
-        maticProvider,
-        parentProvider,
-        network: networkConfig.network,
-        version: networkConfig.version
-      };
-      maticPOSClient = new MaticJs.MaticPOSClient(maticPOSClientConfig);
-
-      // console.log('maticPOSClientConfig',networkConfig,maticPOSClientConfig);
-
-      const maticPlasmaClientConfig = {
-        maticProvider,
-        parentProvider,
-        network: networkConfig.network,
-        version: networkConfig.version
-      };
-      maticPlasmaClient = new MaticJs(maticPlasmaClientConfig);
-    }
-
-    window.web3Polygon = web3Polygon;
-    window.maticPOSClient = maticPOSClient;
-    window.maticPlasmaClient = maticPlasmaClient;
-
     const web3Callback = async (initWeb3Index) => {
 
       // console.log('web3Callback - CHECK INDEX',initWeb3Index,this.state.initWeb3Index,initWeb3Index === this.state.initWeb3Index);
@@ -610,8 +641,6 @@ class RimbleTransaction extends React.Component {
       web3Polygon,
       initWeb3Index,
       web3Providers,
-      maticPOSClient,
-      maticPlasmaClient
     },() => {
       // this.checkNetwork();
     });
@@ -1845,6 +1874,7 @@ class RimbleTransaction extends React.Component {
     CrispClient: null,
     permitClient:null,
     tokenDecimals:null,
+    maticPOSClient: null,
     accountBalance: null,
     contractsNetworks: {},
     web3Subscription: null,

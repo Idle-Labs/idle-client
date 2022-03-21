@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
-import { Flex, Box, Text, Icon } from "rimble-ui";
 import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import BuyModal from '../utilities/components/BuyModal';
+import { Button, Flex, Box, Text, Icon } from "rimble-ui";
 // import TokenWrapper from '../TokenWrapper/TokenWrapper';
 import AssetSelector from '../AssetSelector/AssetSelector';
 import DashboardCard from '../DashboardCard/DashboardCard';
@@ -177,9 +177,13 @@ class PolygonBridge extends Component {
 
   async getExitTransactionParams(){
     const txHash = this.state.selectedTransaction;
-    const exitCalldata = await this.props.maticPOSClient.exitERC20(txHash, { from:this.props.account, encodeAbi: true })
-    if (exitCalldata && exitCalldata.data){
-      return exitCalldata.data;
+
+
+    const logEventSignature = this.props.toolProps.genericParams.erc20LogEventSignature;
+    const exitCalldata = await this.props.maticPOSClient.exitUtil.buildPayloadForExit(txHash,logEventSignature,false);
+    
+    if (exitCalldata){
+      return [exitCalldata];
     }
     return null;
   }
@@ -323,7 +327,7 @@ class PolygonBridge extends Component {
       break;
       case 'Exit':
         newState.availableNetworks = [1,5];
-        newState.txsToExit = this.state.polygonTxs.filter( tx => tx.included && tx.action === 'Withdraw' && !tx.exited && tx.tokenSymbol === this.state.selectedToken ).map( tx => {
+        newState.txsToExit = this.state.polygonTxs.filter( tx => tx.included && tx.action === 'Withdraw' && !tx.exited && tx.tokenSymbol.toUpperCase() === this.state.selectedToken.toUpperCase() ).map( tx => {
           const label = this.functionsUtil.strToMoment(tx.timeStamp*1000).format('DD-MM-YYYY HH:mm')+' - '+tx.value.toFixed(6)+' '+tx.token;
           return {
             label,
@@ -707,19 +711,21 @@ class PolygonBridge extends Component {
                                               this.state.selectedTransaction && (
                                                 <ExecuteTransaction
                                                   action={'Exit'}
-                                                  Component={RoundButton}
+                                                  Component={Button}
                                                   parentProps={{
                                                     mt:3,
                                                     alignItems:'center',
                                                     justifyContent:'center'
                                                   }}
                                                   componentProps={{
-                                                    buttonProps:{
-                                                      value:'Exit',
-                                                      width:[1,1/3],
-                                                      size:'medium',
-                                                      mainColor:'redeem'
-                                                    },
+                                                    fontWeight:3,
+                                                    width:[1,1/3],
+                                                    size:'medium',
+                                                    height:'45px',
+                                                    fontSize:[2,3],
+                                                    boxShadow:null,
+                                                    borderRadius:4,
+                                                    mainColor:'redeem',
                                                     value:'Exit Transaction',
                                                   }}
                                                   params={[]}

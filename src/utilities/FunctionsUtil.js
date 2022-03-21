@@ -1590,14 +1590,11 @@ class FunctionsUtil {
               polygonTx.exited = false;
               polygonTx.networkId = polygonNetworkId;
               polygonTx.bridgeType = tokenConfig.bridgeType;
+              // polygonTx.included = this.props.maticPOSClient.isCheckPointed(polygonTx.hash);
               polygonTx.included = last_state_id && tx_state_id ? last_state_id >= tx_state_id : false;
-              try {
-                await this.props.maticPOSClient.exitERC20(polygonTx.hash, { from: this.props.account, encodeAbi: true });
-              } catch (error) {
-                if (error.toString().match('EXIT_ALREADY_PROCESSED')) {
-                  polygonTx.exited = true;
-                }
-              }
+              const erc20RootToken = this.props.maticPOSClient.erc20(tokenConfig.rootToken.address,true);
+              polygonTx.exited = await erc20RootToken.isWithdrawExited(polygonTx.hash);
+              
               txs.push(polygonTx);
             }
           }
