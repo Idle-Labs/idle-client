@@ -39,6 +39,7 @@ import IdleTokenV4 from "../contracts/IdleTokenV4.json";
 import BatchDeposit from "../BatchDeposit/BatchDeposit";
 import ChildERC20 from '../abis/polygon/ChildERC20.json';
 import EarlyRewards from '../contracts/EarlyRewards.json';
+import MultiRewards from '../contracts/MultiRewards.json';
 import PolygonBridge from '../PolygonBridge/PolygonBridge';
 import CoverProtocol from '../CoverProtocol/CoverProtocol';
 import CurveDeposit from '../abis/curve/CurveDeposit.json';
@@ -73,6 +74,7 @@ import IdleDepositForwarder from "../contracts/IdleDepositForwarder.json";
 import ProtocolDataProvider from '../abis/aave/ProtocolDataProvider.json';
 import SushiLiquidityPool from "../abis/sushiswap/SushiLiquidityPool.json";
 import NexusMutualIncidents from "../abis/nexus/NexusMutualIncidents.json";
+import GaugeDistributorProxy from '../contracts/GaugeDistributorProxy.json';
 import StakingFeeDistributor from "../contracts/StakingFeeDistributor.json";
 import NexusMutualDistributor from "../abis/nexus/NexusMutualDistributor.json";
 import BalancerExchangeProxy from "../abis/balancer/BalancerExchangeProxy.json";
@@ -655,6 +657,10 @@ const globalConfigs = {
       },
       GaugeDistributor:{
         abi:GaugeDistributor,
+        address:'0x1276A8ee84900bD8CcA6e9b3ccB99FF4771Fe329'
+      },
+      GaugeDistributorProxy:{
+        abi:GaugeDistributorProxy,
         address:'0x074306BC6a6Fc1bD02B425dd41D742ADf36Ca9C6'
       }
     }
@@ -2079,10 +2085,16 @@ const globalConfigs = {
           token: "stkIDLE",
           address: "0xaac13a116ea7016689993193fce4badc8038136f" // Mainnet
         },
+        contracts:{
+          MultiRewards:{
+            abi:MultiRewards
+          }
+        },
         availableGauges:{
           ALUSD3CRV:{
             protocol:'convex',
             abi:LiquidityGauge,
+            rewardTokens:['IDLE'],
             name: "LiquidityGauge_aa_convex_alusd3crv",
             token: "LiquidityGauge_aa_convex_alusd3crv",
             address:'0x21dDA17dFF89eF635964cd3910d167d562112f57',
@@ -2096,6 +2108,7 @@ const globalConfigs = {
           stETH:{
             protocol:'lido',
             abi:LiquidityGauge,
+            rewardTokens:['IDLE'],
             name: "LiquidityGauge_aa_lido_steth",
             token: "LiquidityGauge_aa_lido_steth",
             address:'0x675eC042325535F6e176638Dd2d4994F645502B9',
@@ -2104,6 +2117,90 @@ const globalConfigs = {
               name: 'AA_lido_stETH',
               token: 'AA_lido_stETH',
               address: '0x2688fc68c4eac90d9e5e1b94776cf14eade8d877'
+            }
+          },
+          FRAX3CRV:{
+            protocol:'convex',
+            abi:LiquidityGauge,
+            rewardTokens:['IDLE'],
+            name: "LiquidityGauge_aa_convex_frax3crv",
+            token: "LiquidityGauge_aa_convex_frax3crv",
+            address:'0x7ca919Cf060D95B3A51178d9B1BCb1F324c8b693',
+            trancheToken:{
+              abi: ERC20,
+              name: 'AA_convex_frax3crv',
+              token: 'AA_convex_frax3crv',
+              address: '0x15794da4dcf34e674c18bbfaf4a67ff6189690f5'
+            }
+          },
+          MIM3CRV:{
+            protocol:'convex',
+            abi:LiquidityGauge,
+            rewardTokens:['IDLE'],
+            name: "LiquidityGauge_aa_convex_mim3crv",
+            token: "LiquidityGauge_aa_convex_mim3crv",
+            address:'0x8cC001dd6C9f8370dB99c1e098e13215377Ecb95',
+            trancheToken:{
+              abi: ERC20,
+              name: 'AA_convex_mim3crv',
+              token: 'AA_convex_mim3crv',
+              address: '0xFC96989b3Df087C96C806318436B16e44c697102'
+            }
+          },
+          "3EUR":{
+            protocol:'convex',
+            abi:LiquidityGauge,
+            rewardTokens:['IDLE'],
+            name: "LiquidityGauge_aa_convex_3eur",
+            token: "LiquidityGauge_aa_convex_3eur",
+            address:'0xDfB27F2fd160166dbeb57AEB022B9EB85EA4611C',
+            trancheToken:{
+              abi: ERC20,
+              name: 'AA_convex_3eur',
+              token: 'AA_convex_3eur',
+              address: '0x158e04225777BBEa34D2762b5Df9eBD695C158D2'
+            }
+          },
+          steCRV:{
+            protocol:'convex',
+            abi:LiquidityGauge,
+            rewardTokens:['IDLE'],
+            name: "LiquidityGauge_aa_convex_steCRV",
+            token: "LiquidityGauge_aa_convex_steCRV",
+            address:'0x30a047d720f735Ad27ad384Ec77C36A4084dF63E',
+            trancheToken:{
+              abi: ERC20,
+              name: 'AA_convex_steCRV',
+              token: 'AA_convex_steCRV',
+              address: '0x060a53BCfdc0452F35eBd2196c6914e0152379A6'
+            }
+          },
+          MUSD3CRV:{
+            protocol:'convex',
+            abi:LiquidityGauge,
+            rewardTokens:['IDLE'],
+            name: "LiquidityGauge_aa_convex_musd3crv",
+            token: "LiquidityGauge_aa_convex_musd3crv",
+            address:'0xAbd5e3888ffB552946Fc61cF4C816A73feAee42E',
+            trancheToken:{
+              abi: ERC20,
+              name: 'AA_convex_musd3crv',
+              token: 'AA_convex_musd3crv',
+              address: '0x4585F56B06D098D4EDBFc5e438b8897105991c6A'
+            }
+          },
+          mUSD:{
+            protocol:'mstable',
+            abi:LiquidityGauge,
+            rewardTokens:['IDLE'],
+            name: "LiquidityGauge_aa_mstable_musd",
+            token: "LiquidityGauge_aa_mstable_musd",
+            address:'0x41653c7AF834F895Db778B1A31EF4F68Be48c37c',
+            trancheToken:{
+              abi: ERC20,
+              name: 'AA_mstable_musd',
+              token: 'AA_mstable_musd',
+              address: '0xfC558914b53BE1DfAd084fA5Da7f281F798227E7'
             }
           },
         }

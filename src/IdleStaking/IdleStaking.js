@@ -369,6 +369,7 @@ class IdleStaking extends Component {
     });
 
     const maxApr = totalRewards.div(tokenTotalSupply).times(365.2425).div(totalRewardsDays);
+
     stats.push({
       title:'APR (1 year staking)',
       value:maxApr.div(4).times(100).toFixed(2)+'%'

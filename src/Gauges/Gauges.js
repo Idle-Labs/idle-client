@@ -3,11 +3,12 @@ import React, { Component } from 'react';
 import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import TranchesList from '../TranchesList/TranchesList';
-import { Flex, Box, Text, Icon, Heading } from "rimble-ui";
 import AssetSelector from '../AssetSelector/AssetSelector';
 import DashboardCard from '../DashboardCard/DashboardCard';
 import CardIconButton from '../CardIconButton/CardIconButton';
+import { Flex, Box, Text, Icon, Heading, Button } from "rimble-ui";
 import SendTxWithBalance from '../SendTxWithBalance/SendTxWithBalance';
+import ExecuteTransaction from '../ExecuteTransaction/ExecuteTransaction';
 
 class Gauges extends Component {
 
@@ -22,14 +23,20 @@ class Gauges extends Component {
     contractInfo:null,
     lastUserVote:null,
     selectedToken:null,
+    claimedTokens:null,
+    rewardsTokens:null,
     veTokenBalance:null,
     approveEnabled:null,
+    claimSucceded:false,
+    claimToken:'default',
     buttonDisabled:false,
     availableGauges:null,
+    claimableTokens:null,
     votingPowerUsed:null,
     availableTokens:null,
     stakeAction:'deposit',
     selectedAction:'vote',
+    distributionRate:null,
     approveDescription:null,
     balanceSelectorInfo:null,
     trancheTokenBalance:null,
@@ -50,7 +57,6 @@ class Gauges extends Component {
   async componentWillMount(){
     this.loadUtils();
     this.loadData();
-    this.loadGauges();
   }
 
   async componentDidUpdate(prevProps,prevState){
@@ -61,7 +67,8 @@ class Gauges extends Component {
     const selectedActionChanged = prevState.selectedAction !== this.state.selectedAction;
     if (selectedTokenChanged || selectedActionChanged || stakeActionChanged){
       this.setState({
-        infoBox:null
+        infoBox:null,
+        claimSucceded:false
       },() => {
         this.loadTokenData();
       })
@@ -88,11 +95,11 @@ class Gauges extends Component {
       selectedToken,
       availableTokens
     },() => {
-      this.loadTokenData();
+      this.loadTokenData(true);
     });
   }
 
-  async loadTokenData(){
+  async loadTokenData(loadGauges=false){
     const veTokenConfig = this.props.toolProps.veToken;
     const gaugeConfig = this.props.toolProps.availableGauges[this.state.selectedToken];
 
@@ -117,19 +124,35 @@ class Gauges extends Component {
 
     let [
       blockInfo,
+      rewardsTokens,
+      distributionRate,
       stakedBalance,
       veTokenBalance,
       trancheTokenBalance,
+      claimableTokens,
       votingPowerUsed,
       lastUserVote
     ] = await Promise.all([
       this.functionsUtil.getBlockInfo(),
+      this.functionsUtil.getGaugeRewardsTokens(gaugeConfig),
+      this.functionsUtil.genericContractCall('GaugeDistributor','rate'),
       this.functionsUtil.getTokenBalance(gaugeConfig.name,this.props.account),
       this.functionsUtil.getTokenBalance(veTokenConfig.token,this.props.account),
       this.functionsUtil.getTokenBalance(trancheTokenConfig.token,this.props.account),
+      this.functionsUtil.genericContractCall(gaugeConfig.name,'claimable_tokens',[this.props.account]),
       this.functionsUtil.genericContractCall('GaugeController','vote_user_power',[this.props.account]),
       this.functionsUtil.genericContractCall('GaugeController','last_user_vote',[this.props.account,gaugeConfig.address])
     ]);
+
+    console.log('rewardsTokens',rewardsTokens);
+
+    if (claimableTokens){
+      claimableTokens = this.functionsUtil.fixTokenDecimals(claimableTokens,18);
+    }
+
+    if (distributionRate){
+      distributionRate = this.functionsUtil.fixTokenDecimals(distributionRate,18).times(86400);
+    }
 
     let canVote = true;
     let unlockDate = null;
@@ -163,6 +186,7 @@ class Gauges extends Component {
       case 'stake':
         switch (this.state.stakeAction){
           case 'deposit':
+            approveEnabled = true;
             contractInfo = gaugeConfig;
             tokenConfig = trancheTokenConfig;
             balanceProp = trancheTokenBalance;
@@ -170,6 +194,7 @@ class Gauges extends Component {
             approveDescription = `Approve the Gauge contract to deposit your <strong>${trancheTokenConfig.token}</strong> tokens`;
           break;
           case 'claim':
+            approveEnabled = false;
             contractInfo = this.functionsUtil.getGlobalConfig(['contracts',1,'GaugeDistributor']);
           break;
           case 'withdraw':
@@ -187,7 +212,7 @@ class Gauges extends Component {
       break;
     }
 
-    // console.log('loadTokenData',this.state.selectedAction,veTokenBalance.toFixed(),trancheTokenBalance.toFixed(),balanceProp.toFixed(),tokenConfig,contractInfo);
+    // console.log('loadTokenData',this.state.selectedAction,this.state.selectedToken,claimableTokens.toString(),approveEnabled);
 
     this.setState({
       canVote,
@@ -197,13 +222,20 @@ class Gauges extends Component {
       balanceProp,
       contractInfo,
       lastUserVote,
+      rewardsTokens,
       stakedBalance,
       approveEnabled,
       veTokenBalance,
       votingPowerUsed,
+      claimableTokens,
+      distributionRate,
       approveDescription,
       balanceSelectorInfo,
       trancheTokenBalance
+    },() => {
+      if (loadGauges || !this.state.availableGauges){
+        this.loadGauges();
+      }
     });
   }
 
@@ -214,10 +246,39 @@ class Gauges extends Component {
       if (!availableGauges[gaugeConfig.protocol]){
         availableGauges[gaugeConfig.protocol] = {};
       }
-      const gaugeWeight = await this.functionsUtil.genericContractCall('GaugeController','get_gauge_weight',[gaugeConfig.address]);
-      availableGauges[gaugeConfig.protocol][gaugeToken] = this.props.availableTranches[gaugeConfig.protocol][gaugeToken];
-      availableGauges[gaugeConfig.protocol][gaugeToken].weight = this.functionsUtil.fixTokenDecimals(gaugeWeight,18).times(100).toFixed(2)+'%';
-      console.log('Gauge Weight',gaugeConfig.protocol,gaugeToken,gaugeWeight);
+
+      const liquidityGaugeContract = this.functionsUtil.getContractByName(gaugeConfig.name);
+      if (!liquidityGaugeContract && gaugeConfig.abi){
+        await this.props.initContract(gaugeConfig.name,gaugeConfig.address,gaugeConfig.abi);
+      }
+
+      let [
+        rewardsTokens,
+        gaugeTotalSupply,
+        stakedBalance,
+        gaugeWeight
+      ] = await Promise.all([
+        this.functionsUtil.getGaugeRewardsTokens(gaugeConfig),
+        this.functionsUtil.getTokenTotalSupply(gaugeConfig.name),
+        this.functionsUtil.getTokenBalance(gaugeConfig.name,this.props.account),
+        this.functionsUtil.genericContractCall('GaugeController','gauge_relative_weight',[gaugeConfig.address])
+      ]);
+
+      const trancheConfig = this.props.availableTranches[gaugeConfig.protocol][gaugeToken];
+
+      if (trancheConfig){
+        gaugeWeight = this.functionsUtil.fixTokenDecimals(gaugeWeight,18);
+        gaugeTotalSupply = this.functionsUtil.fixTokenDecimals(gaugeTotalSupply,18);
+        const gaugeDistributionRate = this.state.distributionRate.times(gaugeWeight);
+
+        availableGauges[gaugeConfig.protocol][gaugeToken] = trancheConfig;
+        availableGauges[gaugeConfig.protocol][gaugeToken].rewardsTokens = rewardsTokens;
+        availableGauges[gaugeConfig.protocol][gaugeToken].stakedBalance = stakedBalance;
+        availableGauges[gaugeConfig.protocol][gaugeToken].totalSupply = gaugeTotalSupply;
+        availableGauges[gaugeConfig.protocol][gaugeToken].weight = gaugeWeight.times(100).toFixed(2)+'%';
+        availableGauges[gaugeConfig.protocol][gaugeToken].distributionRate = `${gaugeDistributionRate.toFixed(4)} IDLE/day`;
+        // console.log('Gauge Weight',gaugeConfig.protocol,gaugeToken,gaugeWeight,gaugeTotalSupply.toString(),stakedBalance.toString(),rewardsTokens);
+      }
     });
 
     this.setState({
@@ -229,6 +290,14 @@ class Gauges extends Component {
     this.setState({
       selectedToken
     });
+  }
+
+  setClaimToken(claimToken){
+    if (claimToken !== this.state.claimToken){
+      this.setState({
+        claimToken
+      });
+    }
   }
 
   setSelectedAction(selectedAction){
@@ -253,9 +322,12 @@ class Gauges extends Component {
 
   async transactionSucceeded(tx,amount,params){
 
-    console.log('transactionSucceeded',tx,amount,params);
+    // console.log('transactionSucceeded',tx,amount,params);
 
     let infoBox = null;
+    let claimedTokens = null;
+    let claimSucceded = false;
+
     switch (this.state.selectedAction){
       case 'vote':
         const votingWeight = this.functionsUtil.BNify(params.methodParams[1]).div(100).toFixed(2);
@@ -280,7 +352,8 @@ class Gauges extends Component {
             };
           break;
           case 'claim':
-            
+            claimSucceded = true;
+            claimedTokens = this.state.claimableTokens;
           break;
           case 'withdraw':
             const withdrawnAmount = this.functionsUtil.fixTokenDecimals(params.methodParams[0],18);
@@ -300,11 +373,12 @@ class Gauges extends Component {
       break;
     }
 
-    this.loadGauges();
-    this.loadTokenData();
+    this.loadTokenData(true);
 
     this.setState({
-      infoBox
+      infoBox,
+      claimedTokens,
+      claimSucceded
     });
   }
 
@@ -340,10 +414,10 @@ class Gauges extends Component {
   getTransactionParams(amount){
     let methodName = null;
     let methodParams = [];
+    const gaugeAddress = this.props.toolProps.availableGauges[this.state.selectedToken].address;
     switch (this.state.selectedAction){
       case 'vote':
         methodName = 'vote_for_gauge_weights';
-        const gaugeAddress = this.props.toolProps.availableGauges[this.state.selectedToken].address;
         methodParams = [gaugeAddress,this.state.votingWeight];
       break;
       case 'stake':
@@ -352,8 +426,6 @@ class Gauges extends Component {
           case 'deposit':
             methodName = 'deposit';
             methodParams = [amount];
-          break;
-          case 'claim':
           break;
           case 'withdraw':
             methodName = 'withdraw';
@@ -367,7 +439,7 @@ class Gauges extends Component {
       break;
     }
 
-    console.log('getTransactionParams',methodName,methodParams);
+    // console.log('getTransactionParams',methodName,methodParams);
 
     return {
       methodName,
@@ -523,6 +595,66 @@ class Gauges extends Component {
             )
           }
           {
+            this.state.stakeAction === 'claim' && Object.keys(this.state.rewardsTokens).length>1 && (
+              <Box
+                mb={2}
+                width={1}
+              >
+                <Text mb={1}>
+                  Choose claim method:
+                </Text>
+                <Flex
+                  alignItems={'center'}
+                  flexDirection={'row'}
+                  justifyContent={'space-between'}
+                >
+                  <CardIconButton
+                    {...this.props}
+                    textProps={{
+                      fontSize:[1,2],
+                      fontWeight:500
+                    }}
+                    cardProps={{
+                      px:3,
+                      py:2,
+                      width:0.49
+                    }}
+                    imageProps={{
+                      mr:2,
+                      width:'1.8em',
+                      height:'1.8em'
+                    }}
+                    text={'Claim IDLE'}
+                    image={'images/tokens/IDLE.svg'}
+                    isActive={ this.state.claimToken === 'default' }
+                    handleClick={ e => this.setClaimToken('default') }
+                  />
+                  <CardIconButton
+                    {...this.props}
+                    textProps={{
+                      fontSize:[1,2],
+                      fontWeight:500
+                    }}
+                    cardProps={{
+                      px:3,
+                      py:2,
+                      width:0.49
+                    }}
+                    imageProps={{
+                      mr:2,
+                      width:'1.8em',
+                      height:'1.8em'
+                    }}
+                    text={'Claim Rewards'}
+                    handleClick={ e => this.setClaimToken('additional') }
+                    isActive={ this.state.claimToken === 'additional' }
+                    image={this.functionsUtil.getTokenIcon(Object.keys(this.state.rewardsTokens)[1])}
+                  />
+                </Flex>
+              </Box>
+            )
+          }
+          {
             this.state.selectedAction === 'vote' && !this.state.canVote ? (
               <IconBox
                 cardProps={{
@@ -531,7 +663,7 @@ class Gauges extends Component {
                 icon={'AccessTime'}
                 text={`Please wait until <strong>${this.state.unlockDate} UTC</strong> to allocate your voting power to this Gauge.`}
               />
-            ) : (this.state.selectedAction === 'vote' || this.state.stakeAction !== 'claim') && this.state.tokenConfig && (
+            ) : (this.state.selectedAction === 'vote' || this.state.stakeAction !== 'claim') && this.state.tokenConfig ? (
               <SendTxWithBalance
                 error={null}
                 {...this.props}
@@ -588,7 +720,85 @@ class Gauges extends Component {
                   </Flex>
                 </DashboardCard>
               </SendTxWithBalance>
-            )
+            ) : this.state.stakeAction === 'claim' &&
+              this.state.claimSucceded ? (
+                <IconBox
+                  cardProps={{
+                    mt:1
+                  }}
+                  icon={'DoneAll'}
+                  iconProps={{
+                    size:this.props.isMobile ? '1.8em' : '2.3em',
+                    color:this.props.theme.colors.transactions.status.completed
+                  }}
+                  text={`You have successfully claimed <strong>${this.state.claimedTokens.toFixed(8)} IDLE</strong>.`}
+                />
+              ) : (this.state.claimableTokens && this.state.claimableTokens.gt(0)) ? (
+                <Flex
+                  width={1}
+                  flexDirection={'column'}
+                >
+                  <DashboardCard
+                    cardProps={{
+                      p:3,
+                      mt:1,
+                      mb:1
+                    }}
+                  >
+                    <Flex
+                      alignItems={'center'}
+                      flexDirection={'column'}
+                    >
+                      <Icon
+                        color={'cellText'}
+                        name={'MonetizationOn'}
+                        size={this.props.isMobile ? '1.8em' : '2.3em'}
+                      />
+                      <Text
+                        mt={1}
+                        mb={3}
+                        fontSize={[2,3]}
+                        color={'cellText'}
+                        textAlign={'center'}
+                      >
+                        You can claim <strong>{this.state.claimableTokens.toFixed(8)} IDLE</strong>.
+                      </Text>
+                      <ExecuteTransaction
+                        params={[]}
+                        {...this.props}
+                        Component={Button}
+                        parentProps={{
+                          width:1,
+                          alignItems:'center',
+                          justifyContent:'center'
+                        }}
+                        componentProps={{
+                          fontSize:3,
+                          fontWeight:3,
+                          size:'medium',
+                          width:[1,1/3],
+                          value:'Claim',
+                          borderRadius:4,
+                          mainColor:'redeem',
+                        }}
+                        action={'Claim'}
+                        methodName={'distribute'}
+                        contractName={'GaugeDistributorProxy'}
+                        callback={this.transactionSucceeded.bind(this)}
+                        getTransactionParams={ e => [this.props.toolProps.availableGauges[this.state.selectedToken].address] }
+                      />
+                    </Flex>
+                  </DashboardCard>
+                </Flex>
+              ) : (
+                <IconBox
+                  icon={'MoneyOff'}
+                  iconProps={{
+                    size:this.props.isMobile ? '1.8em' : '2.3em'
+                  }}
+                  text={`You don't have any IDLE to claim for this Gauge.`}
+                />
+              )
           }
         </Flex>
         {
@@ -666,20 +876,42 @@ class Gauges extends Component {
                     ]
                   },
                   {
-                    title:'POOL',
+                    title:'REWARDS TOKENS',
+                    props:{
+                      width:[0.25, 0.14],
+                    },
+                    fields:[
+                      {
+                        name:'custom',
+                        type:'tokensList',
+                        path:['tokenConfig','rewardsTokens'],
+                        props:{
+                          
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    title:'TOTAL SUPPLY',
                     props:{
                       width:[0.25, 0.11],
                     },
                     fields:[
                       {
-                        name:'pool',
+                        type:'number',
+                        name:'custom',
+                        path:['tokenConfig','totalSupply'],
                         props:{
+                          flexProps:{
+                            justifyContent:'flex-start'
+                          },
                           minPrecision:1,
                           decimals:this.props.isMobile ? 0 : 2,
                         }
                       }
                     ]
                   },
+                  /*
                   {
                     title:'SENIOR APY',
                     desc:this.functionsUtil.getGlobalConfig(['messages','apyTranches']),
@@ -697,46 +929,42 @@ class Gauges extends Component {
                       },
                     ],
                   },
+                  */
                   {
-                    title:'JUNIOR APY',
-                    desc:this.functionsUtil.getGlobalConfig(['messages','apyTranches']),
+                    title:'DEPOSITED',
                     props:{
-                      width:[0.27,0.14],
-                    },
-                    parentProps:{
-                      flexDirection:'column',
-                      alignItems:'flex-start',
+                      width:[0.27,0.10],
                     },
                     fields:[
                       {
-                        name:'juniorApy',
+                        type:'number',
+                        name:'custom',
+                        path:['tokenConfig','stakedBalance'],
                         props:{
                           flexProps:{
-                            mr:3
-                          }
-                        },
-                        showTooltip:true
+                            justifyContent:'flex-start'
+                          },
+                          minPrecision:1,
+                          decimals:this.props.isMobile ? 0 : 2,
+                        }
                       },
                     ],
                   },
                   {
                     mobile:false,
-                    title:'APR RATIO',
-                    desc:this.functionsUtil.getGlobalConfig(['messages','aprRatio']),
+                    title:'DISTRIBUTION RATE',
                     props:{
-                      width:[0.15, 0.12],
+                      width:[0.15, 0.16],
                     },
                     fields:[
                       {
-                        name:'trancheAPRSplitRatio',
+                        type:'text',
+                        name:'custom',
+                        path:['tokenConfig','distributionRate'],
                         props:{
-                          flexProps:{
-                            mr:2
-                          },
-                          height:['1.4em','2em']
+                          
                         }
-                      },
-                      
+                      }
                     ]
                   },
                   {

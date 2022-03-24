@@ -42,21 +42,20 @@ class SendTxWithBalance extends Component {
   }
 
   async componentDidMount(){
-    await this.loadData();
+    this.loadData();
   }
 
   async componentDidUpdate(prevProps,prevState){
     this.loadUtils();
 
-    const actionChanged = prevProps.action !== this.props.action;
     const accountChanged = prevProps.account !== this.props.account;
     const tokenBalanceChanged = prevProps.tokenBalance !== this.props.tokenBalance;
     const permitEnabledChanged = prevState.permitEnabled !== this.state.permitEnabled;
     const approveEnabledChanged = prevProps.approveEnabled !== this.props.approveEnabled;
     const contractChanged = JSON.stringify(prevProps.contractInfo) !== JSON.stringify(this.props.contractInfo);
     const tokenConfigChanged = JSON.stringify(prevProps.tokenConfig) !== JSON.stringify(this.props.tokenConfig);
-    if (actionChanged || accountChanged || tokenBalanceChanged || contractChanged || approveEnabledChanged || tokenConfigChanged || permitEnabledChanged){
-      await this.loadData();
+    if (accountChanged || tokenBalanceChanged || contractChanged || approveEnabledChanged || tokenConfigChanged || permitEnabledChanged){
+      this.loadData();
     }
 
     const contractApprovedChanged = prevState.contractApproved !== this.state.contractApproved;
@@ -66,6 +65,7 @@ class SendTxWithBalance extends Component {
       }
     }
 
+    const actionChanged = prevProps.action !== this.props.action;
     const fastBalanceSelectorChanged = this.state.fastBalanceSelector !== prevState.fastBalanceSelector;
     if (fastBalanceSelectorChanged || actionChanged){
       this.setInputValue();
@@ -370,21 +370,23 @@ class SendTxWithBalance extends Component {
   async loadData(){
     const inputValue = null;
     const fastBalanceSelector = null;
-    const approveEnabled = this.props.approveEnabled !== false;
+    const approveEnabled = !!this.props.approveEnabled;
+
 
     if (this.props.contractInfo){
       await this.props.initContract(this.props.contractInfo.name,this.props.contractInfo.address,this.props.contractInfo.abi);
     }
-    // console.log('initContract',this.props.contractInfo);
 
-    const contractApproved = await this.checkContractApproved();
+    const contractApproved = approveEnabled ? await this.checkContractApproved() : true;
 
-    this.setState({
+    const newState = {
       inputValue,
       approveEnabled,
       contractApproved,
       fastBalanceSelector
-    });
+    };
+
+    this.setState(newState);
   }
 
   approveCallback = () => {

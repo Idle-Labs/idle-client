@@ -1,165 +1,423 @@
 [
   {
-    "name": "Distributed",
     "inputs": [
       {
-        "name": "recipient",
-        "type": "address",
-        "indexed": true
+        "internalType": "contract IERC20",
+        "name": "_idle",
+        "type": "address"
       },
       {
-        "name": "gauge",
-        "type": "address",
-        "indexed": false
+        "internalType": "address",
+        "name": "_treasury",
+        "type": "address"
       },
       {
-        "name": "distributed",
-        "type": "uint256",
-        "indexed": false
+        "internalType": "address",
+        "name": "_emergencyAdmin",
+        "type": "address"
       }
     ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
     "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
     "type": "event"
   },
   {
-    "stateMutability": "nonpayable",
-    "type": "constructor",
+    "anonymous": false,
     "inputs": [
       {
-        "name": "_distributor",
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "time",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "rate",
+        "type": "uint256"
+      }
+    ],
+    "name": "UpdateDistributionParameters",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "oldProxy",
         "type": "address"
       },
       {
-        "name": "_controller",
+        "indexed": false,
+        "internalType": "address",
+        "name": "newProxy",
         "type": "address"
       }
     ],
-    "outputs": []
+    "name": "UpdateDistributorProxy",
+    "type": "event"
   },
   {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "distribute",
+    "anonymous": false,
     "inputs": [
       {
-        "name": "gauge_addr",
-        "type": "address"
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "rate",
+        "type": "uint256"
       }
     ],
-    "outputs": [],
-    "gas": 112051
+    "name": "UpdatePendingRate",
+    "type": "event"
   },
   {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "distribute_many",
-    "inputs": [
-      {
-        "name": "gauge_addrs",
-        "type": "address[8]"
-      }
-    ],
-    "outputs": [],
-    "gas": 495727
-  },
-  {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "distribute_for",
-    "inputs": [
-      {
-        "name": "gauge_addr",
-        "type": "address"
-      },
-      {
-        "name": "_for",
-        "type": "address"
-      }
-    ],
-    "outputs": [],
-    "gas": 114593
-  },
-  {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "toggle_approve_distribute",
-    "inputs": [
-      {
-        "name": "distributing_user",
-        "type": "address"
-      }
-    ],
-    "outputs": [],
-    "gas": 37994
-  },
-  {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "distributor",
     "inputs": [],
+    "name": "EPOCH_DURATION",
     "outputs": [
       {
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "gas": 2508
-  },
-  {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "controller",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "gas": 2538
-  },
-  {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "distributed",
-    "inputs": [
-      {
-        "name": "arg0",
-        "type": "address"
-      },
-      {
-        "name": "arg1",
-        "type": "address"
-      }
-    ],
-    "outputs": [
-      {
+        "internalType": "uint256",
         "name": "",
         "type": "uint256"
       }
     ],
-    "gas": 2998
+    "stateMutability": "view",
+    "type": "function"
   },
   {
+    "inputs": [],
+    "name": "INITIAL_DISTRIBUTION_DELAY",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
-    "type": "function",
-    "name": "allowed_to_distribute_for",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "INITIAL_RATE",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "ONE_WEEK",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "availableToDistribute",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
-        "name": "arg0",
+        "internalType": "address",
+        "name": "to",
         "type": "address"
       },
       {
-        "name": "arg1",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
       }
     ],
+    "name": "distribute",
     "outputs": [
       {
+        "internalType": "bool",
         "name": "",
         "type": "bool"
       }
     ],
-    "gas": 3028
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "distributed",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "distributorProxy",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "emergencyAdmin",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "emergencyWithdraw",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "epochNumber",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "epochStartingDistributed",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "futureEpochTimeWrite",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "_futureEpochTime",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pendingRate",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "rate",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "ratePerEpoch",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "proxy",
+        "type": "address"
+      }
+    ],
+    "name": "setDistributorProxy",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "emergencyAdmin_",
+        "type": "address"
+      }
+    ],
+    "name": "setEmergencyAdmin",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "newRate",
+        "type": "uint256"
+      }
+    ],
+    "name": "setPendingRate",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "startEpochTime",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "startEpochTimeWrite",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "_startEpochTime",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "updateDistributionParameters",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   }
 ]

@@ -4480,6 +4480,32 @@ class FunctionsUtil {
     }
     return this.BNify(0);
   }
+  getGaugeRewardsTokens = async (gaugeConfig) => {
+    const rewardTokens = gaugeConfig.rewardTokens ? gaugeConfig.rewardTokens : [];
+
+    // Add multiRewards tokens
+    const rewardContractAddress = await this.genericContractCallCached(gaugeConfig.name,'reward_contract');
+    if (/*true || */rewardContractAddress && rewardContractAddress !== '0x0000000000000000000000000000000000000000'){
+      const multiRewardsContractName = `${gaugeConfig.name}_multireward_${rewardContractAddress}`;
+      const MultirewardsAbi = this.getGlobalConfig(['tools','gauges','props','contracts','MultiRewards','abi']);
+      await this.props.initContract(multiRewardsContractName, rewardContractAddress, MultirewardsAbi);
+      const multiRewardsTokens = await this.genericContractCallCached(multiRewardsContractName,'rewardTokens');
+      // const multiRewardsTokens = ['0x5a98fcbea516cf06857215779fd812ca3bef1b32'];
+      if (multiRewardsTokens){
+        multiRewardsTokens.forEach( tokenAddress => {
+          const tokenConfig = this.getTokenConfigByAddress(tokenAddress);
+          if (tokenConfig){
+            rewardTokens.push(tokenConfig.token);
+          }
+        });
+      }
+    }
+
+    return rewardTokens ? rewardTokens.reduce( (rewardTokens,rewardToken) => {
+      rewardTokens[rewardToken] = this.getGlobalConfig(['stats','tokens',rewardToken.toUpperCase()]);
+      return rewardTokens;
+    },{}) : null;
+  }
   getTrancheStakingRewards = async (account, trancheConfig, methodName='expectedUserReward') => {
     const stakingRewards = {};
 
@@ -7806,6 +7832,10 @@ class FunctionsUtil {
     });
 
     return this.setCachedData(cachedDataKey, govTokensBalances);
+  }
+  getTokenIcon = (token) => {
+    const tokenConfigStats = this.getGlobalConfig(['stats','tokens',token.toUpperCase()]);
+    return tokenConfigStats && tokenConfigStats.icon ? tokenConfigStats.icon : `images/tokens/${token}.svg`;
   }
   getTokenConfigByAddress = (address) => {
     if (!address) {

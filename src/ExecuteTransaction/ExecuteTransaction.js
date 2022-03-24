@@ -107,7 +107,7 @@ class ExecuteTransaction extends Component {
       params = this.props.transactionParams;
     }
 
-    // console.log('execute',this.props.contractName,this.props.methodName,params);
+    console.log('execute',this.props.contractName,this.props.methodName,params);
 
     if (!params || !this.props.contractName){
       this.setState((prevState) => ({
