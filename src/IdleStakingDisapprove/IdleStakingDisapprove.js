@@ -80,8 +80,9 @@ class IdleStakingDisapprove extends Component {
   }
 
   render() {
+    const viewOnly = this.props.connectorName === 'custom';
     const stkIdleConfig = this.functionsUtil.getGlobalConfig(['tools','stake','props','availableTokens','IDLE','contract']);
-    return (this.state.disapproveAllowance || this.state.transactionSucceeded) ? (
+    return !viewOnly && (this.state.disapproveAllowance || this.state.transactionSucceeded) ? (
       <Flex
         p={2}
         my={2}
