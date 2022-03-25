@@ -84,7 +84,7 @@ export default {
     statValue: "#959595",
     boxBorder: "#eeeeee",
     cellTitle: "#a3a4a5",
-    cellText: "#a6a6a6",
+    cellText: "#8e8d8d",
     divider: "#d8d8d8",
     divider2: "#EBEBEB",
     counter: "#5d5d5d",
