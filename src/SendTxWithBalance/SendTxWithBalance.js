@@ -194,8 +194,11 @@ class SendTxWithBalance extends Component {
       };
 
       // console.log('Approve',this.props.tokenConfig.token,this.props.contractInfo.address);
-
-      this.functionsUtil.enableERC20(this.props.tokenConfig.token,this.props.contractInfo.address,callbackApprove,callbackReceiptApprove);
+      if (this.props.approveMaxAllowance && !this.functionsUtil.BNify(this.props.approveMaxAllowance).isNaN()){
+        this.functionsUtil.enableERC20MaxAllowance(this.props.tokenConfig.token,this.props.contractInfo.address,this.props.approveMaxAllowance,callbackApprove,callbackReceiptApprove);
+      } else {
+        this.functionsUtil.enableERC20(this.props.tokenConfig.token,this.props.contractInfo.address,callbackApprove,callbackReceiptApprove);
+      }
 
       this.setState((prevState) => ({
         processing: {
@@ -358,6 +361,9 @@ class SendTxWithBalance extends Component {
     }
     
     const contractApproved = await this.functionsUtil.checkTokenApproved(this.props.tokenConfig.token,this.props.contractInfo.address,this.props.account);
+
+    // console.log('checkContractApproved',this.props.tokenConfig.token,this.props.contractInfo.address,this.props.account,contractApproved);
+
     return contractApproved;
   }
 

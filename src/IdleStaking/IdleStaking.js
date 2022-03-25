@@ -11,6 +11,7 @@ import CardIconButton from '../CardIconButton/CardIconButton';
 import { Flex, Box, Text, Icon, Input, Button } from "rimble-ui";
 import SendTxWithBalance from '../SendTxWithBalance/SendTxWithBalance';
 import ExecuteTransaction from '../ExecuteTransaction/ExecuteTransaction';
+import IdleStakingDisapprove from "../IdleStakingDisapprove/IdleStakingDisapprove";
 
 class IdleStaking extends Component {
 
@@ -75,6 +76,7 @@ class IdleStaking extends Component {
     distributedRewards:null,
     selectedLockPeriod:null,
     approveDescription:null,
+    approveMaxAllowance:null,
     balanceSelectorInfo:null,
     lockPeriodTimestamp:null,
     transactionSucceeded:false,
@@ -643,13 +645,16 @@ class IdleStaking extends Component {
         newState.approveEnabled = true;
         newState.balanceProp = newState.tokenBalance;
         newState.approveDescription = `Approve the Staking contract to stake your ${this.props.selectedToken} tokens`;
+        newState.approveMaxAllowance = this.functionsUtil.normalizeTokenAmount(newState.tokenBalance,this.props.tokenConfig.decimals);
       break;
       case 'Increase Lock':
         newState.permitEnabled = false;
-        newState.approveEnabled = false;
         newState.approveDescription = '';
         newState.balanceProp = newState.tokenBalance;
+        newState.approveEnabled = this.state.increaseAction === 'amount';
         newState.lockPeriodInput = this.functionsUtil.strToMoment(newState.lockedEnd*1000).format('YYYY-MM-DD');
+        newState.approveDescription = `Approve the Staking contract to stake your ${this.props.selectedToken} tokens`;
+        newState.approveMaxAllowance = this.functionsUtil.normalizeTokenAmount(newState.tokenBalance,this.props.tokenConfig.decimals);
       break;
       case 'Withdraw':
         newState.permitEnabled = false;
@@ -692,6 +697,13 @@ class IdleStaking extends Component {
       <Box
         width={1}
       >
+      {
+        this.props.isDashboard && (
+          <IdleStakingDisapprove
+            {...this.props}
+          />
+        )
+      }
       {
         this.props.tokenConfig && this.props.tokenConfig.poolLink && (
           <Box
@@ -1256,6 +1268,7 @@ class IdleStaking extends Component {
                         approveEnabled={this.state.approveEnabled}
                         callback={this.transactionSucceeded.bind(this)}
                         approveDescription={this.state.approveDescription}
+                        approveMaxAllowance={this.state.approveMaxAllowance}
                         balanceSelectorInfo={this.state.balanceSelectorInfo}
                         changeInputCallback={this.changeInputCallback.bind(this)}
                         contractApproved={this.contractApprovedCallback.bind(this)}

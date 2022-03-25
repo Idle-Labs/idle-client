@@ -4357,6 +4357,21 @@ class FunctionsUtil {
       }
     });
   }
+  enableERC20MaxAllowance = (contractName, address, allowance, callback, callback_receipt) => {
+    console.log('enableERC20MaxAllowance',contractName, address, allowance);
+    this.props.contractMethodSendWrapper(contractName, 'approve', [
+      address,
+      this.integerValue(allowance) // Approve for a specific allowance
+    ], null, (tx) => {
+      if (typeof callback === 'function') {
+        callback(tx);
+      }
+    }, (tx) => {
+      if (typeof callback_receipt === 'function') {
+        callback_receipt(tx);
+      }
+    });
+  }
   enableERC20 = (contractName, address, callback, callback_receipt) => {
     this.props.contractMethodSendWrapper(contractName, 'approve', [
       address,
