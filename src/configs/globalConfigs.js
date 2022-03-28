@@ -1018,7 +1018,8 @@ const globalConfigs = {
       }
     },
     config: {
-      headers: env.REACT_APP_IDLE_KEY ? { Authorization: `Bearer ${env.REACT_APP_IDLE_KEY}` } : {}
+      headers: env.REACT_APP_IDLE_KEY ? { Authorization: `Bearer ${env.REACT_APP_IDLE_KEY}` } : {},
+      timeout:10000
     },
     versions: {
       /*
