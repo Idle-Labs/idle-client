@@ -3114,7 +3114,7 @@ class FunctionsUtil {
     }
     return null;
   }
-  makeCachedRequest = async (endpoint, TTL = 60, return_data = false, alias = false, config = null) => {
+  makeCachedRequest = async (endpoint, TTL = 60, return_data = false, alias = false, config = null, error_callback = false) => {
     const key = alias ? alias : endpoint;
     const timestamp = parseInt(Date.now() / 1000);
 
@@ -3126,7 +3126,7 @@ class FunctionsUtil {
       return (cachedRequests[key].data && return_data ? cachedRequests[key].data.data : cachedRequests[key].data);
     }
 
-    let data = await this.makeRequest(endpoint, false, config);
+    let data = await this.makeRequest(endpoint, error_callback, config);
 
     const dataToCache = {
       data:{
@@ -8154,9 +8154,11 @@ class FunctionsUtil {
     let totalAUM = this.BNify(0);
 
     await this.asyncForEach(networkIds, async (networkId) => {
-      let tvls = await this.makeCachedRequest(endpointInfo.endpoint[networkId], endpointInfo.TTL, true, false, config);
-      if (!tvls) {
-        tvls = await this.getAggregatedStats_chain();
+      let tvls = null;
+      try {
+        tvls = await this.makeCachedRequest(endpointInfo.endpoint[networkId], endpointInfo.TTL, true, false, config);
+      } catch (err){
+        // console.log('getAggregatedStats - ERROR', err);
       }
 
       if (tvls) {
@@ -8165,6 +8167,16 @@ class FunctionsUtil {
       }
     });
 
+    if (!totalAUM || this.BNify(totalAUM).isNaN() || this.BNify(totalAUM).lte(0)){
+      avgAPY = this.BNify(0);
+      totalAUM = this.BNify(0);
+      let tvls = await this.getAggregatedStats_chain();
+      if (tvls) {
+        avgAPY = avgAPY.plus(this.BNify(tvls.avgAPY).times(this.BNify(tvls.totalTVL)));
+        totalAUM = totalAUM.plus(this.BNify(tvls.totalTVL));
+      }
+    }
+
     avgAPY = avgAPY.div(totalAUM);
 
     return {
@@ -8172,10 +8184,12 @@ class FunctionsUtil {
       totalAUM
     };
   }
-  getAggregatedStats_chain = async (addGovTokens = true) => {
+  getAggregatedStats_chain = async (addGovTokens = true, networkId = null) => {
+
+    networkId = networkId || this.getRequiredNetworkId();
 
     // Check for cached data
-    const cachedDataKey = `getAggregatedStats_${addGovTokens}`;
+    const cachedDataKey = `getAggregatedStats_${addGovTokens}_${networkId}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData && (cachedData.avgAPR && !this.BNify(cachedData.avgAPR).isNaN()) && (cachedData.avgAPY && !this.BNify(cachedData.avgAPY).isNaN()) && (cachedData.totalAUM && !this.BNify(cachedData.totalAUM).isNaN())) {
       return {
@@ -8191,70 +8205,74 @@ class FunctionsUtil {
     const DAITokenConfig = {
       address: this.getContractByName('DAI')._address
     };
-    await this.asyncForEach(Object.keys(this.props.availableStrategies), async (strategy) => {
-      const isRisk = strategy === 'risk';
-      const availableTokens = this.props.availableStrategies[strategy];
-      await this.asyncForEach(Object.keys(availableTokens), async (token) => {
-        const tokenConfig = availableTokens[token];
-        const tokenAllocation = await this.getTokenAllocation(tokenConfig, false, addGovTokens);
-        const tokenAprs = await this.getTokenAprs(tokenConfig, tokenAllocation, addGovTokens);
-        if (tokenAllocation && tokenAllocation.totalAllocationWithUnlent && !tokenAllocation.totalAllocationWithUnlent.isNaN()) {
-          const tokenAUM = await this.convertTokenBalance(tokenAllocation.totalAllocationWithUnlent, token, tokenConfig, isRisk);
-          totalAUM = totalAUM.plus(tokenAUM);
-          // console.log(tokenConfig.idle.token+'V4',tokenAUM.toFixed());
-          if (tokenAprs && tokenAprs.avgApr && !tokenAprs.avgApr.isNaN()) {
-            avgAPR = avgAPR.plus(tokenAUM.times(tokenAprs.avgApr));
-            avgAPY = avgAPY.plus(tokenAUM.times(tokenAprs.avgApy));
-          }
-        }
 
-        // Add Gov Tokens
-        const govTokens = this.getTokenGovTokens(tokenConfig);
-        if (govTokens) {
-          await this.asyncForEach(Object.keys(govTokens).filter(govToken => (govTokens[govToken].showAUM)), async (govToken) => {
-            const govTokenConfig = govTokens[govToken];
-            const [
-              tokenBalance,
-              tokenConversionRate
-            ] = await Promise.all([
-              this.getProtocolBalance(govToken, tokenConfig.idle.address),
-              this.getUniswapConversionRate(DAITokenConfig, govTokenConfig)
-            ]);
-
-            if (tokenBalance && tokenConversionRate) {
-              const tokenBalanceConverted = this.fixTokenDecimals(tokenBalance, govTokenConfig.decimals).times(this.BNify(tokenConversionRate));
-              if (tokenBalanceConverted && !tokenBalanceConverted.isNaN()) {
-                // console.log(tokenConfig.idle.token+'V4 - COMP',tokenBalanceConverted.toFixed());
-                totalAUM = totalAUM.plus(tokenBalanceConverted);
-              }
+    await this.asyncForEach(Object.keys(this.props.availableStrategiesNetworks), async (networkId) => {
+      const strategies = this.props.availableStrategiesNetworks[networkId];
+      await this.asyncForEach(Object.keys(strategies), async (strategy) => {
+        const isRisk = strategy === 'risk';
+        const availableTokens = strategies[strategy];
+        await this.asyncForEach(Object.keys(availableTokens), async (token) => {
+          const tokenConfig = availableTokens[token];
+          const tokenAllocation = await this.getTokenAllocation(tokenConfig, false, addGovTokens);
+          const tokenAprs = await this.getTokenAprs(tokenConfig, tokenAllocation, addGovTokens);
+          if (tokenAllocation && tokenAllocation.totalAllocationWithUnlent && !tokenAllocation.totalAllocationWithUnlent.isNaN()) {
+            const tokenAUM = await this.convertTokenBalance(tokenAllocation.totalAllocationWithUnlent, token, tokenConfig, isRisk);
+            totalAUM = totalAUM.plus(tokenAUM);
+            // console.log(tokenConfig.idle.token+'V4',tokenAUM.toFixed());
+            if (tokenAprs && tokenAprs.avgApr && !tokenAprs.avgApr.isNaN()) {
+              avgAPR = avgAPR.plus(tokenAUM.times(tokenAprs.avgApr));
+              avgAPY = avgAPY.plus(tokenAUM.times(tokenAprs.avgApy));
             }
-          });
-        }
+          }
 
-        // Get old token allocation
-        if (tokenConfig.migration && tokenConfig.migration.oldContract) {
-          const oldTokenConfig = Object.assign({}, tokenConfig);
-          oldTokenConfig.protocols = Object.values(tokenConfig.protocols);
-          oldTokenConfig.idle = Object.assign({}, tokenConfig.migration.oldContract);
+          // Add Gov Tokens
+          const govTokens = this.getTokenGovTokens(tokenConfig);
+          if (govTokens) {
+            await this.asyncForEach(Object.keys(govTokens).filter(govToken => (govTokens[govToken].showAUM)), async (govToken) => {
+              const govTokenConfig = govTokens[govToken];
+              const [
+                tokenBalance,
+                tokenConversionRate
+              ] = await Promise.all([
+                this.getProtocolBalance(govToken, tokenConfig.idle.address),
+                this.getUniswapConversionRate(DAITokenConfig, govTokenConfig)
+              ]);
 
-          // Replace protocols with old protocols
-          if (oldTokenConfig.migration.oldProtocols) {
-            oldTokenConfig.migration.oldProtocols.forEach(oldProtocol => {
-              const foundProtocol = oldTokenConfig.protocols.find(p => (p.name === oldProtocol.name));
-              if (foundProtocol) {
-                const protocolPos = oldTokenConfig.protocols.indexOf(foundProtocol);
-                oldTokenConfig.protocols[protocolPos] = oldProtocol;
+              if (tokenBalance && tokenConversionRate) {
+                const tokenBalanceConverted = this.fixTokenDecimals(tokenBalance, govTokenConfig.decimals).times(this.BNify(tokenConversionRate));
+                if (tokenBalanceConverted && !tokenBalanceConverted.isNaN()) {
+                  // console.log(tokenConfig.idle.token+'V4 - COMP',tokenBalanceConverted.toFixed());
+                  totalAUM = totalAUM.plus(tokenBalanceConverted);
+                }
               }
             });
           }
 
-          const oldTokenAllocation = await this.getTokenAllocation(oldTokenConfig, false, false);
-          if (oldTokenAllocation && oldTokenAllocation.totalAllocation && !oldTokenAllocation.totalAllocation.isNaN()) {
-            const oldTokenTotalAllocation = await this.convertTokenBalance(oldTokenAllocation.totalAllocation, token, oldTokenConfig, isRisk);
-            totalAUM = totalAUM.plus(oldTokenTotalAllocation);
-            // console.log(oldTokenConfig.idle.name,oldTokenTotalAllocation.toFixed(5));
+          // Get old token allocation
+          if (tokenConfig.migration && tokenConfig.migration.oldContract) {
+            const oldTokenConfig = Object.assign({}, tokenConfig);
+            oldTokenConfig.protocols = Object.values(tokenConfig.protocols);
+            oldTokenConfig.idle = Object.assign({}, tokenConfig.migration.oldContract);
+
+            // Replace protocols with old protocols
+            if (oldTokenConfig.migration.oldProtocols) {
+              oldTokenConfig.migration.oldProtocols.forEach(oldProtocol => {
+                const foundProtocol = oldTokenConfig.protocols.find(p => (p.name === oldProtocol.name));
+                if (foundProtocol) {
+                  const protocolPos = oldTokenConfig.protocols.indexOf(foundProtocol);
+                  oldTokenConfig.protocols[protocolPos] = oldProtocol;
+                }
+              });
+            }
+
+            const oldTokenAllocation = await this.getTokenAllocation(oldTokenConfig, false, false);
+            if (oldTokenAllocation && oldTokenAllocation.totalAllocation && !oldTokenAllocation.totalAllocation.isNaN()) {
+              const oldTokenTotalAllocation = await this.convertTokenBalance(oldTokenAllocation.totalAllocation, token, oldTokenConfig, isRisk);
+              totalAUM = totalAUM.plus(oldTokenTotalAllocation);
+              // console.log(oldTokenConfig.idle.name,oldTokenTotalAllocation.toFixed(5));
+            }
           }
-        }
+        });
       });
     });
 

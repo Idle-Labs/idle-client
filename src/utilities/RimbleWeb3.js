@@ -360,6 +360,8 @@ class RimbleTransaction extends React.Component {
     const availableNetworks = this.functionsUtil.getGlobalConfig(['network','availableNetworks']);
     const networkConfig = availableNetworks[networkId];
 
+    console.log('initMaticPosClient',networkId,polygonConfig);
+
     if (polygonConfig && polygonConfig.enabled && polygonConfig.rpc && Object.keys(polygonConfig.rpc).includes(parseInt(polygonNetworkId).toString())){
       const web3PolygonRpc = polygonConfig.rpc[polygonNetworkId]+this.functionsUtil.getGlobalConfig(['network','providers','polygon','key']);
       const web3InfuraRpc = this.functionsUtil.getGlobalConfig(['network','providers','infura','rpc',networkId])+this.functionsUtil.getGlobalConfig(['network','providers','infura','key']);
@@ -645,11 +647,12 @@ class RimbleTransaction extends React.Component {
       // this.checkNetwork();
     });
 
+    const currentNetworkId = this.state.network.current.id;
     const biconomyInfo = globalConfigs.network.providers.biconomy;
 
-    // console.log('initWeb3',connectorName,this.state.network,context,useWeb3Provider,web3Provider,web3Host,originalWeb3,web3,this.state.web3,web3!==this.state.web3);
+    // console.log('check biconomy enabled',this.state.network,currentNetworkId,biconomyInfo.supportedNetworks.includes(currentNetworkId));
 
-    if (connectorName !== 'Infura' && biconomyInfo && biconomyInfo.enabled && biconomyInfo.supportedNetworks.includes(networkId) && (!walletProvider || !biconomyInfo.disabledWallets.includes(walletProvider.toLowerCase()))){
+    if (connectorName !== 'Infura' && biconomyInfo && biconomyInfo.enabled && biconomyInfo.supportedNetworks.includes(currentNetworkId) && (!walletProvider || !biconomyInfo.disabledWallets.includes(walletProvider.toLowerCase()))){
 
       const biconomyWeb3Provider = web3Provider ? web3Provider : new Web3.providers.HttpProvider(web3Host);
       if (this.state.biconomy === null || this.state.biconomy.currentProvider !== biconomyWeb3Provider ){

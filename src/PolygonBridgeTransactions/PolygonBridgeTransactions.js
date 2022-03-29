@@ -36,13 +36,14 @@ class PolygonBridgeTransactions extends Component {
     this.loadUtils();
 
     const accountChanged = prevProps.account !== this.props.account;
-    if (accountChanged){
+    const maticPOSClientChanged = prevProps.maticPOSClient !== this.props.maticPOSClient;
+    if (accountChanged || maticPOSClientChanged){
       this.loadData();
     }
   }
 
   async loadData(){
-    if (!this.props.account){
+    if (!this.props.account || !this.props.maticPOSClient){
       return false;
     }
 
