@@ -70,6 +70,19 @@
   },
   {
     "inputs": [],
+    "name": "latestHarvestBlock",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "latestHarvestBlock",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "getRewardTokens",
     "outputs": [
       {

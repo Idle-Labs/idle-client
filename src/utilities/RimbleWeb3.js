@@ -360,15 +360,12 @@ class RimbleTransaction extends React.Component {
     const availableNetworks = this.functionsUtil.getGlobalConfig(['network','availableNetworks']);
     const networkConfig = availableNetworks[networkId];
 
-    console.log('initMaticPosClient',networkId,polygonConfig);
-
     if (polygonConfig && polygonConfig.enabled && polygonConfig.rpc && Object.keys(polygonConfig.rpc).includes(parseInt(polygonNetworkId).toString())){
       const web3PolygonRpc = polygonConfig.rpc[polygonNetworkId]+this.functionsUtil.getGlobalConfig(['network','providers','polygon','key']);
       const web3InfuraRpc = this.functionsUtil.getGlobalConfig(['network','providers','infura','rpc',networkId])+this.functionsUtil.getGlobalConfig(['network','providers','infura','key']);
 
       const maticProvider = new Web3(new Web3.providers.HttpProvider(web3PolygonRpc));
       const parentProvider = new Web3(new Web3.providers.HttpProvider(web3InfuraRpc));
-      // console.log('parentProvider',web3InfuraRpc);
 
       // install web3 plugin
       use(Web3ClientPlugin);

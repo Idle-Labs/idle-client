@@ -1001,8 +1001,45 @@ class FunctionsUtil {
       }
     });
 
-    // console.log('getTrancheHarvests',stakingRewards,autoFarming,harvestsList);
     return harvestsList;
+  }
+  getTrancheLastHarvest = async (tokenConfig) => {
+    const strategyConfig = tokenConfig.Strategy;
+    
+    // Create Tranche Strategy contract
+    const idleStrategyAddress = await this.genericContractCallCachedTTL(tokenConfig.CDO.name, 'strategy', 3600);
+    if (idleStrategyAddress) {
+      await this.props.initContract(strategyConfig.name, idleStrategyAddress, strategyConfig.abi);
+      const latestHarvestBlock = await this.genericContractCall(strategyConfig.name,'latestHarvestBlock');
+      if (latestHarvestBlock){
+        const eventFilters = {
+          to: idleStrategyAddress
+        };
+        const [
+          blockInfo,
+          transfers,
+        ] = await Promise.all([
+          this.getBlockInfo(latestHarvestBlock),
+          this.getContractEvents(tokenConfig.token, 'Transfer', latestHarvestBlock, parseInt(latestHarvestBlock)+1, {filter: eventFilters })
+        ]);
+
+        if (transfers && transfers.length) {
+          const totalAmount = transfers.reduce( (amount,t) => {
+            amount = amount.plus(this.BNify(t.returnValues.value));
+            return amount;
+          },this.BNify(0));
+
+          return {
+            amount:totalAmount,
+            timestamp:blockInfo.timestamp,
+            blockNumber:latestHarvestBlock,
+            transactionHash:transfers[0].transactionHash
+          };
+        }
+      }
+    }
+
+    return null;
   }
   getTrancheRewardTokensInfo = async (tokenConfig, trancheConfig) => {
     const stakingRewards = await this.loadTrancheFieldRaw('stakingRewards', {}, tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, tokenConfig, trancheConfig);
@@ -3752,21 +3789,21 @@ class FunctionsUtil {
   //   return await this.getContractPastEvents(contractName, eventName, params);
   // }
 
-  getContractEvents = async (contractName, eventName, fromBlock=0, toBlock='latest', params = {}) => {
+  getContractEvents = async (contractName, eventName, startBlock=0, endBlock='latest', params = {}) => {
     const requiredNetwork = this.getRequiredNetwork();
     const blocksPerCall = requiredNetwork.blocksPerCall || 10000;
-    const lastBlockNumber = toBlock === 'latest' ? await this.props.web3.eth.getBlockNumber() : parseInt(toBlock);
-    fromBlock = parseInt(fromBlock) || lastBlockNumber-blocksPerCall;
+    const lastBlockNumber = endBlock === 'latest' ? await this.props.web3.eth.getBlockNumber() : parseInt(endBlock);
+    startBlock = parseInt(startBlock) || lastBlockNumber-blocksPerCall;
 
     const calls = [];
 
-    if (!parseInt(fromBlock) || !parseInt(lastBlockNumber)){
+    if (!parseInt(startBlock) || !parseInt(lastBlockNumber)){
       return calls;
     }
 
-    for (var blockNumber = fromBlock; blockNumber < lastBlockNumber; blockNumber+=blocksPerCall) {
+    for (var blockNumber = startBlock; blockNumber < lastBlockNumber; blockNumber+=blocksPerCall) {
       let toBlock = Math.min(blockNumber+blocksPerCall,lastBlockNumber);
-      if (toBlock === lastBlockNumber){
+      if (toBlock === lastBlockNumber && endBlock === 'latest'){
         toBlock = 'latest';
       }
       calls.push(this.getContractPastEvents(contractName, eventName, {fromBlock: blockNumber, toBlock, ...params}));
@@ -6102,7 +6139,8 @@ class FunctionsUtil {
         timestamp:blockInfo.timestamp
       };
       const TTL  = blockNumber === 'latest' ? this.getGlobalConfig(['cache','TTL']) : null;
-      return this.setCachedDataWithLocalStorage(cachedDataKey, blockInfoToSave, TTL);
+      this.setCachedDataWithLocalStorage(cachedDataKey, blockInfoToSave, TTL);
+      return blockInfo;
     }
 
     return null;
@@ -6147,8 +6185,6 @@ class FunctionsUtil {
     if (blockNumber !== 'latest') {
       TTL = null;
     }
-
-    // console.log(`genericContractCallCached - ${cachedDataKey}`,cachedData);
 
     const result = await this.genericContractCall(contractName, methodName, params, callParams, blockNumber);
 

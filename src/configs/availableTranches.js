@@ -21,6 +21,10 @@ const availableTranches = {
         abi:IdleStrategy,
         name:'IdleStrategy_idleDAIYield'
       },
+      description:'This strategy accrue additional interest after an harvest is done. The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
+      messages:{
+        withdraw:'The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
+      },
       AA:{
         abi:ERC20,
         decimals:18,
@@ -182,7 +186,9 @@ const availableTranches = {
         abi:IdleStrategy,
         name:'IdleStrategy_lido_stETH'
       },
-      buyInstructions:'To get stETH token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://stake.lido.fi">Lido ETH staking</a>.',
+      messages:{
+        buyInstructions:'To get stETH token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://stake.lido.fi">Lido ETH staking</a>.',
+      },
       AA:{
         abi:ERC20,
         decimals:18,
@@ -343,7 +349,11 @@ const availableTranches = {
         abi:IdleStrategy,
         name:'IdleStrategy_convex_frax3crv'
       },
-      buyInstructions:'To get FRAX3CRV token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://curve.fi/frax/deposit">FRAX Curve Pool</a>.',
+      description:'This strategy accrue interest only after an harvest is done. The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
+      messages:{
+        withdraw:'The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
+        buyInstructions:'To get FRAX3CRV token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://curve.fi/frax/deposit">FRAX Curve Pool</a>.',
+      },
       AA:{
         abi:ERC20,
         decimals:18,
@@ -417,7 +427,11 @@ const availableTranches = {
         abi:IdleStrategy,
         name:'IdleStrategy_convex_mim3crv'
       },
-      buyInstructions:'To get MIM3CRV token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://curve.fi/mim/deposit">MIM Curve Pool</a>.',
+      description:'This strategy accrue interest only after an harvest is done. The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
+      messages:{
+        withdraw:'The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
+        buyInstructions:'To get MIM3CRV token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://curve.fi/mim/deposit">MIM Curve Pool</a>.',
+      },
       AA:{
         abi:ERC20,
         decimals:18,
@@ -491,7 +505,11 @@ const availableTranches = {
         abi:IdleStrategy,
         name:'IdleStrategy_convex_steCRV'
       },
-      buyInstructions:'To get steCRV token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://curve.fi/steth/deposit">stETH Curve Pool</a>.',
+      description:'This strategy accrue interest only after an harvest is done. The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
+      messages:{
+        withdraw:'The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
+        buyInstructions:'To get steCRV token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://curve.fi/steth/deposit">stETH Curve Pool</a>.',
+      },
       AA:{
         abi:ERC20,
         decimals:18,
@@ -564,7 +582,11 @@ const availableTranches = {
         abi:IdleStrategy,
         name:'IdleStrategy_convex_alusd3crv'
       },
-      buyInstructions:'To get ALUSD3CRV token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://curve.fi/alusd/deposit">ALUSD Curve Pool</a>.',
+      description:'This strategy accrue interest only after an harvest is done. The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
+      messages:{
+        withdraw:'The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
+        buyInstructions:'To get ALUSD3CRV token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://curve.fi/alusd/deposit">ALUSD Curve Pool</a>.',
+      },
       AA:{
         abi:ERC20,
         decimals:18,
@@ -637,7 +659,11 @@ const availableTranches = {
         abi:IdleStrategy,
         name:'IdleStrategy_convex_3eur'
       },
-      buyInstructions:'To get 3EUR token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://curve.fi/factory/66/deposit">3EUR Curve Pool</a>.',
+      description:'This strategy accrue interest only after an harvest is done. The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
+      messages:{
+        withdraw:'The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
+        buyInstructions:'To get 3EUR token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://curve.fi/factory/66/deposit">3EUR Curve Pool</a>.',
+      },
       AA:{
         abi:ERC20,
         decimals:18,
@@ -711,7 +737,11 @@ const availableTranches = {
         abi:IdleStrategy,
         name:'IdleStrategy_convex_musd3crv'
       },
-      buyInstructions:'To get MUSD3CRV token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://curve.fi/musd/deposit">MUSD Curve Pool</a>.',
+      description:'This strategy accrue interest only after an harvest is done. The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
+      messages:{
+        withdraw:'The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
+        buyInstructions:'To get MUSD3CRV token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://curve.fi/musd/deposit">MUSD Curve Pool</a>.',
+,      }
       AA:{
         abi:ERC20,
         decimals:18,

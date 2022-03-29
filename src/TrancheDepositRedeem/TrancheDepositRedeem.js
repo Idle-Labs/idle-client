@@ -1,4 +1,5 @@
 import IconBox from '../IconBox/IconBox';
+import ExtLink from '../ExtLink/ExtLink';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import ImageButton from '../ImageButton/ImageButton';
@@ -28,6 +29,7 @@ class TrancheDetails extends Component {
     actionLabel:null,
     modalAction:null,
     balanceProp:null,
+    lastHarvest:null,
     tokenConfig:null,
     contractInfo:null,
     tranchePrice:null,
@@ -84,6 +86,7 @@ class TrancheDetails extends Component {
 
     const [
       // blockNumber,
+      lastHarvest,
       tokenBalance,
       trancheBalance,
       stakedBalance,
@@ -92,6 +95,7 @@ class TrancheDetails extends Component {
       trancheBaseApy
     ] = await Promise.all([
       // this.functionsUtil.getBlockNumber(),
+      this.functionsUtil.getTrancheLastHarvest(this.props.tokenConfig),
       this.functionsUtil.getTokenBalance(this.props.selectedToken,this.props.account),
       this.functionsUtil.getTokenBalance(this.props.trancheConfig.name,this.props.account),
       this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals,this.props.trancheConfig.functions.stakedBalance),
@@ -137,6 +141,7 @@ class TrancheDetails extends Component {
       trancheAPY,
       canUnstake,
       canWithdraw,
+      lastHarvest,
       tokenBalance,
       stakeEnabled,
       tranchePrice,
@@ -165,7 +170,7 @@ class TrancheDetails extends Component {
 
     let actionLabel = this.state.selectedAction;
     const trancheDetails = this.functionsUtil.getGlobalConfig(['tranches',this.props.selectedTranche]);
-    let infoText = trancheDetails.description[this.state.selectedAction];
+    let infoText = this.functionsUtil.getArrayPath(['messages',this.state.selectedAction],this.props.tokenConfig) || trancheDetails.description[this.state.selectedAction];
 
     switch (this.state.selectedAction){
       case 'deposit':
@@ -886,6 +891,103 @@ class TrancheDetails extends Component {
                       </Flex>
                     </Flex>
                   </Flex>
+                  {
+                    this.props.tokenConfig.description && (
+                      <Flex
+                        pt={2}
+                        mb={2}
+                        width={1}
+                        flexDirection={'column'}
+                        borderTop={`1px solid ${this.props.theme.colors.divider}`}
+                      >
+                        <Text
+                          fontSize={[1,2]}
+                          color={'cellText'}
+                          fontWeight={[2,3]}
+                        >
+                          Strategy Description
+                        </Text>
+                        <Flex
+                          mt={1}
+                          alignItems={'center'}
+                          flexDirection={'row'}
+                        >
+                          <Text
+                            fontWeight={2}
+                            fontSize={'15px'}
+                            textAlign={'justify'}
+                          >
+                            {this.props.tokenConfig.description}
+                          </Text>
+                        </Flex>
+                        {
+                          this.state.lastHarvest && (
+                            <Flex
+                              pt={2}
+                              mt={2}
+                              flexDirection={'column'}
+                              alignItems={'flex-start'}
+                              borderTop={`1px solid ${this.props.theme.colors.divider}`}
+                            >
+                              <Flex
+                                alignItems={'center'}
+                                flexDirection={'row'}
+                              >
+                                <Text
+                                  mr={1}
+                                  fontSize={'15px'}
+                                  color={'cellText'}
+                                  fontWeight={[2,3]}
+                                >
+                                  Last harvest date:
+                                </Text>
+                                <ExtLink
+                                  href={this.functionsUtil.getEtherscanTransactionUrl(this.state.lastHarvest.transactionHash)}
+                                >
+                                  <Flex
+                                    alignItems={'center'}
+                                    flexDirection={'row'}
+                                  >
+                                    <Text
+                                      fontWeight={2}
+                                      fontSize={'15px'}
+                                    >
+                                      {this.functionsUtil.strToMoment(this.state.lastHarvest.timestamp*1000).utc().format("MMM DD YYYY HH:mm")} UTC
+                                    </Text>
+                                    <Icon
+                                      ml={1}
+                                      size={'1.1em'}
+                                      name={'OpenInNew'}
+                                      color={'copyColor'}
+                                    />
+                                  </Flex>
+                                </ExtLink>
+                              </Flex>
+                              <Flex
+                                mt={1}
+                                flexDirection={'row'}
+                              >
+                                <Text
+                                  mr={1}
+                                  fontSize={'15px'}
+                                  color={'cellText'}
+                                  fontWeight={[2,3]}
+                                >
+                                  Last harvest amount:
+                                </Text>
+                                <Text
+                                  fontWeight={2}
+                                  fontSize={'15px'}
+                                >
+                                  {this.functionsUtil.fixTokenDecimals(this.state.lastHarvest.amount,this.props.tokenConfig.decimals).toFixed(8)} {this.props.tokenConfig.token}
+                                </Text>
+                              </Flex>
+                            </Flex>
+                          )
+                        }
+                      </Flex>
+                    )
+                  }
                 </DashboardCard>
               </Box>
               <Box
@@ -1152,7 +1254,7 @@ class TrancheDetails extends Component {
                               buyToken={this.props.selectedToken}
                             >
                               {
-                                this.props.tokenConfig.buyInstructions ? (
+                                this.props.tokenConfig.messages && this.props.tokenConfig.messages.buyInstructions ? (
                                   <DashboardCard
                                     cardProps={{
                                       p: 2,
@@ -1181,7 +1283,7 @@ class TrancheDetails extends Component {
                                         mt={1}
                                         color={'cellText'}
                                         textAlign={'center'}
-                                        dangerouslySetInnerHTML={{__html:this.props.tokenConfig.buyInstructions}}>
+                                        dangerouslySetInnerHTML={{__html:this.props.tokenConfig.messages.buyInstructions}}>
                                       </Text>
                                     </Flex>
                                   </DashboardCard>
