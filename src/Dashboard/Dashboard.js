@@ -990,11 +990,11 @@ class Dashboard extends Component {
                         match={{ params: {} }}
                         urlParams={this.state.params}
                         changeToken={this.changeToken.bind(this)}
-                        changeProtocolToken={this.changeProtocolToken.bind(this)}
                         goToSection={this.goToSection.bind(this)}
                         selectedSection={this.state.selectedSection}
                         selectedSubsection={this.state.selectedSubsection}
                         openTooltipModal={this.openTooltipModal.bind(this)}
+                        changeProtocolToken={this.changeProtocolToken.bind(this)}
                         {...this.state.pageComponentProps}
                       />
                     }

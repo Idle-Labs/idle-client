@@ -2990,6 +2990,7 @@ class FunctionsUtil {
     if (endTimestamp){
       queryParams.where.timeStamp_lte = endTimestamp;
     }
+    
     fields = fields || subgraphConfig.entities.trancheInfos;
     const subgraphQuery = this.buildSubgraphQuery('trancheInfos',fields,queryParams);
     const postData = {
@@ -3047,6 +3048,10 @@ class FunctionsUtil {
     
     results = this.getArrayPath(['data','data','trancheInfos'],results);
     const size = results.length;
+
+    if (!size){
+      return false;
+    }
       
     // Get only latest results
     if(results[0].timetamp !== results[size-1].timeStamp){
@@ -4480,29 +4485,46 @@ class FunctionsUtil {
     }
     return this.BNify(0);
   }
-  getGaugeRewardsTokens = async (gaugeConfig) => {
+  getGaugeRewardsTokens = async (gaugeConfig, account=null) => {
+    const rewardTokensBalances = {};
     const rewardTokens = gaugeConfig.rewardTokens ? gaugeConfig.rewardTokens : [];
+
+    if (rewardTokens.length){
+      const claimableTokens = account ? await this.genericContractCall(gaugeConfig.name,'claimable_tokens',[account]) : this.BNify(0);
+      rewardTokensBalances[rewardTokens[0]] = this.BNify(claimableTokens);
+    }
 
     // Add multiRewards tokens
     const rewardContractAddress = await this.genericContractCallCached(gaugeConfig.name,'reward_contract');
-    if (/*true || */rewardContractAddress && rewardContractAddress !== '0x0000000000000000000000000000000000000000'){
+    if (rewardContractAddress && rewardContractAddress !== '0x0000000000000000000000000000000000000000'){
       const multiRewardsContractName = `${gaugeConfig.name}_multireward_${rewardContractAddress}`;
-      const MultirewardsAbi = this.getGlobalConfig(['tools','gauges','props','contracts','MultiRewards','abi']);
+
+      const multiRewardsConfig = this.getGlobalConfig(['tools','gauges','props','contracts','MultiRewards']);
+
+      const MultirewardsAbi = multiRewardsConfig.abi;
       await this.props.initContract(multiRewardsContractName, rewardContractAddress, MultirewardsAbi);
-      const multiRewardsTokens = await this.genericContractCallCached(multiRewardsContractName,'rewardTokens');
-      // const multiRewardsTokens = ['0x5a98fcbea516cf06857215779fd812ca3bef1b32'];
-      if (multiRewardsTokens){
-        multiRewardsTokens.forEach( tokenAddress => {
-          const tokenConfig = this.getTokenConfigByAddress(tokenAddress);
-          if (tokenConfig){
-            rewardTokens.push(tokenConfig.token);
+
+      const tokenIndexes = Array.from(Array(multiRewardsConfig.maxRewards).keys());
+      await this.asyncForEach(tokenIndexes,async (tokenIndex) => {
+        try {
+          const rewardTokenAddress = await this.genericContractCallCached(multiRewardsContractName,'rewardTokens',[tokenIndex]);
+          if (rewardTokenAddress){
+            const tokenConfig = this.getTokenConfigByAddress(rewardTokenAddress);
+            if (tokenConfig){
+              const rewardTokenBalance = account ? await this.genericContractCall(gaugeConfig.name,'claimable_reward_write',[account,rewardTokenAddress]) : this.BNify(0);
+              rewardTokensBalances[tokenConfig.token] = this.BNify(rewardTokenBalance);
+              rewardTokens.push(tokenConfig.token);
+            }
           }
-        });
-      }
+        } catch (err) {
+
+        }
+      });
     }
 
     return rewardTokens ? rewardTokens.reduce( (rewardTokens,rewardToken) => {
-      rewardTokens[rewardToken] = this.getGlobalConfig(['stats','tokens',rewardToken.toUpperCase()]);
+      rewardTokens[rewardToken] = this.getGlobalConfig(['stats','tokens',rewardToken.toUpperCase()]) || {};
+      rewardTokens[rewardToken].balance = rewardTokensBalances[rewardToken] || this.BNify(0);
       return rewardTokens;
     },{}) : null;
   }
@@ -7834,6 +7856,9 @@ class FunctionsUtil {
     return this.setCachedData(cachedDataKey, govTokensBalances);
   }
   getTokenIcon = (token) => {
+    if (!token){
+      return null;
+    }
     const tokenConfigStats = this.getGlobalConfig(['stats','tokens',token.toUpperCase()]);
     return tokenConfigStats && tokenConfigStats.icon ? tokenConfigStats.icon : `images/tokens/${token}.svg`;
   }

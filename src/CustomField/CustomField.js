@@ -68,6 +68,20 @@ class CustomField extends Component {
     const fieldPath = fieldInfo.path;
     let customValue = fieldPath ? this.functionsUtil.getArrayPath(fieldPath,this.props.row) : null;
 
+    // Add custom field extra props
+    if (fieldPath){
+      const customFieldName = Object.values(fieldPath).pop();
+      if (this.props.row[`${customFieldName}Props`]){
+        const customFieldProps = this.props.row[`${customFieldName}Props`];
+        // Replace props
+        if (customFieldProps && Object.keys(customFieldProps).length){
+          Object.keys(customFieldProps).forEach(p => {
+            fieldProps[p] = customFieldProps[p];
+          });
+        }
+      }
+    }
+
     switch (fieldType){
       case 'image':
         CustomComponent = Image;
@@ -109,6 +123,11 @@ class CustomField extends Component {
         componentHasChildren = true;
         customValue = fieldInfo.label || fieldProps.label;
         fieldProps.onClick=() => fieldProps.handleClick(this.props)
+      break;
+      case 'html':
+        output = (<Text {...fieldProps} dangerouslySetInnerHTML={{
+          __html: customValue
+        }} />);
       break;
       case 'tokensList':
         output = customValue && Object.keys(customValue).length>0 ? (
@@ -156,20 +175,6 @@ class CustomField extends Component {
 
     if (!customValue){
       return null;
-    }
-
-    // Add custom field extra props
-    if (fieldPath){
-      const customFieldName = Object.values(fieldPath).pop();
-      if (this.props.row[`${customFieldName}Props`]){
-        const customFieldProps = this.props.row[`${customFieldName}Props`];
-        // Replace props
-        if (customFieldProps && Object.keys(customFieldProps).length){
-          Object.keys(customFieldProps).forEach(p => {
-            fieldProps[p] = customFieldProps[p];
-          });
-        }
-      }
     }
 
     return CustomComponent ? (componentHasChildren ? (<CustomComponent {...fieldProps}>{customValue}</CustomComponent>) : (<CustomComponent {...fieldProps} />) ) : output;

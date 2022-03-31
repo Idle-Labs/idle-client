@@ -2087,6 +2087,7 @@ const globalConfigs = {
         },
         contracts:{
           MultiRewards:{
+            maxRewards:3,
             abi:MultiRewards
           }
         },
@@ -2112,6 +2113,11 @@ const globalConfigs = {
             name: "LiquidityGauge_aa_lido_steth",
             token: "LiquidityGauge_aa_lido_steth",
             address:'0x675eC042325535F6e176638Dd2d4994F645502B9',
+            multiRewards:{
+              rewardTokens:['LDO'],
+              name:'multiRewards_aa_lido_stETH',
+              address:'0xA357AF9430e4504419A7A05e217D4A490Ecec6FA',
+            },
             trancheToken:{
               abi: ERC20,
               name: 'AA_lido_stETH',

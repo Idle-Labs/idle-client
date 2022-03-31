@@ -490,7 +490,6 @@ class SendTxWithBalance extends Component {
                 )
               }
               <Box
-                mt={2}
                 width={1}
               >
                 {
