@@ -170,6 +170,7 @@ class TrancheDetails extends Component {
 
     let actionLabel = this.state.selectedAction;
     const trancheDetails = this.functionsUtil.getGlobalConfig(['tranches',this.props.selectedTranche]);
+    const gaugeConfig = this.functionsUtil.getGlobalConfig(['tools','gauges','props','availableGauges',this.props.selectedToken]);
     let infoText = this.functionsUtil.getArrayPath(['messages',this.state.selectedAction],this.props.tokenConfig) || trancheDetails.description[this.state.selectedAction];
 
     switch (this.state.selectedAction){
@@ -178,6 +179,10 @@ class TrancheDetails extends Component {
         contractInfo = this.props.cdoConfig;
         tokenConfig = this.props.tokenConfig;
         balanceProp = this.state.tokenBalance;
+        
+        if (gaugeConfig && gaugeConfig.trancheToken.token.toLowerCase() === this.props.tokenConfig[this.props.selectedTranche].token.toLowerCase() && this.state.trancheBalance.gt(0)){
+          infoText = `Stake your ${gaugeConfig.trancheToken.token} in the Liquidity Gauge and get rewarded!`;
+        }
       break;
       case 'stake':
         actionLabel = this.state.selectedStakeAction;

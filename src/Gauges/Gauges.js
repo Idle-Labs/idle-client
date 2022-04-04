@@ -38,11 +38,16 @@ class Gauges extends Component {
     availableTokens:null,
     stakeAction:'deposit',
     selectedAction:'vote',
+    gaugeTotalSupply:null,
     distributionRate:null,
+    gaugeWorkingSupply:null,
+    veTokenTotalSupply:null,
     approveDescription:null,
     balanceSelectorInfo:null,
     trancheTokenBalance:null,
     availableVotingPower:null,
+    gaugePeriodTimestamp:null,
+    gaugeWorkingBalances:null,
     claimableRewardsTokens:null
   };
 
@@ -112,6 +117,43 @@ class Gauges extends Component {
     });
   }
 
+  calculateGaugeBoost(stakedBalance=null) {
+
+    if (this.functionsUtil.BNify(stakedBalance).isNaN()){
+      stakedBalance = this.functionsUtil.BNify(0);
+    }
+
+    stakedBalance = this.functionsUtil.BNify(stakedBalance).plus(this.state.stakedBalance);
+
+    let l = this.functionsUtil.BNify(this.functionsUtil.normalizeTokenAmount(stakedBalance,18));
+    let voting_balance = this.functionsUtil.BNify(this.functionsUtil.normalizeTokenAmount(this.state.veTokenBalance,18));
+    let voting_total = this.functionsUtil.BNify(this.state.veTokenTotalSupply);
+    // let period_timestamp = this.functionsUtil.BNify(this.state.gaugePeriodTimestamp);
+    let working_balances = this.functionsUtil.BNify(this.state.gaugeWorkingBalances);
+    let working_supply = this.functionsUtil.BNify(this.state.gaugeWorkingSupply);
+    let L = this.functionsUtil.BNify(this.state.gaugeTotalSupply).plus(l);
+    
+    let TOKENLESS_PRODUCTION = this.functionsUtil.BNify(40);
+    let lim = l.times(TOKENLESS_PRODUCTION).div(100);
+    lim = lim.plus(L.times(voting_balance).div(voting_total).times((this.functionsUtil.BNify(100).minus(TOKENLESS_PRODUCTION)).div(100)));
+    lim = Math.min(l, lim);
+    
+    let old_bal = working_balances;
+    let noboost_lim = TOKENLESS_PRODUCTION.times(l).div(100);
+    let noboost_supply = working_supply.plus(noboost_lim).minus(old_bal);
+    let _working_supply = working_supply.plus(lim).minus(old_bal);
+
+    let boost = this.functionsUtil.BNify(lim).div(_working_supply).div(noboost_lim.div(noboost_supply));
+
+    if (!boost || boost.isNaN()){
+      boost = this.functionsUtil.BNify(1);
+    }
+
+    // console.log('calculateGaugeBoost',voting_balance.toFixed(),voting_total.toFixed(),l.toFixed(),L.toFixed(),lim.toFixed(),_working_supply.toFixed(),noboost_lim.toFixed(),noboost_supply.toFixed(),boost.toFixed());
+
+    return boost;
+  }
+
   async loadGaugeData(){
     const veTokenConfig = this.props.toolProps.veToken;
     const gaugeConfig = this.props.toolProps.availableGauges[this.state.selectedToken];
@@ -137,23 +179,35 @@ class Gauges extends Component {
 
     let [
       blockInfo,
+      gaugeTotalSupply,
+      veTokenTotalSupply,
       distributionRate,
       stakedBalance,
       rewardsTokens,
+      gaugeWorkingSupply,
       veTokenBalance,
+      gaugePeriodTimestamp,
       trancheTokenBalance,
       votingPowerUsed,
+      gaugeWorkingBalances,
       lastUserVote
     ] = await Promise.all([
       this.functionsUtil.getBlockInfo(),
+      this.functionsUtil.getTokenTotalSupply(gaugeConfig.name),
+      this.functionsUtil.getTokenTotalSupply(veTokenConfig.token),
       this.functionsUtil.genericContractCall('GaugeDistributor','rate'),
       this.functionsUtil.getTokenBalance(gaugeConfig.name,this.props.account),
       this.functionsUtil.getGaugeRewardsTokens(gaugeConfig,this.props.account),
+      this.functionsUtil.genericContractCall(gaugeConfig.name,'working_supply'),
       this.functionsUtil.getTokenBalance(veTokenConfig.token,this.props.account),
+      this.functionsUtil.genericContractCall(gaugeConfig.name,'period_timestamp',[0]),
       this.functionsUtil.getTokenBalance(trancheTokenConfig.token,this.props.account),
       this.functionsUtil.genericContractCall('GaugeController','vote_user_power',[this.props.account]),
+      this.functionsUtil.genericContractCall(gaugeConfig.name,'working_balances',[this.props.account]),
       this.functionsUtil.genericContractCall('GaugeController','last_user_vote',[this.props.account,gaugeConfig.address])
     ]);
+
+    // console.log('distributionRate',distributionRate);
 
     const claimableRewardsTokens = Object.keys(rewardsTokens).filter( token => token !== 'IDLE' ).reduce( (claimableRewards,token) => {
       const tokenConfig = rewardsTokens[token];
@@ -180,8 +234,13 @@ class Gauges extends Component {
       veTokenBalance,
       votingPowerUsed,
       claimableTokens,
+      gaugeTotalSupply,
       distributionRate,
+      gaugeWorkingSupply,
+      veTokenTotalSupply,
       trancheTokenBalance,
+      gaugeWorkingBalances,
+      gaugePeriodTimestamp,
       claimableRewardsTokens
     },() => {
       this.loadTokenData(true);
@@ -235,6 +294,13 @@ class Gauges extends Component {
             balanceProp = this.state.trancheTokenBalance;
             noFundsText = `You don't have any <strong>${tokenConfig.token}</strong> in your wallet to deposit.`;
             approveDescription = `Approve the Gauge contract to deposit your <strong>${trancheTokenConfig.token}</strong> tokens`;
+
+            const boost = this.calculateGaugeBoost(0);
+            balanceSelectorInfo = {
+              color:`copyColor`,
+              tooltip:this.functionsUtil.getGlobalConfig(['messages','gaugeBoost']),
+              text:`Boost: <span style="color:${this.props.theme.colors.transactions.status.completed}">${boost.toFixed(2)}x</span>`,
+            };
           break;
           case 'claim':
             approveEnabled = false;
@@ -302,6 +368,8 @@ class Gauges extends Component {
           this.functionsUtil.getGaugeRewardsTokens(gaugeConfig,this.props.account),
           this.functionsUtil.genericContractCall('GaugeController','gauge_relative_weight',[gaugeConfig.address])
         ]);
+
+        // console.log(gaugeConfig.name,gaugeWeight);
 
         const claimableRewardsTokens = Object.keys(rewardsTokens).reduce( (claimableRewards,token) => {
           const tokenConfig = rewardsTokens[token];
@@ -441,6 +509,8 @@ class Gauges extends Component {
   async changeInputCallback(inputValue=null){
     let infoBox = null;
     let votingWeight = null;
+    let balanceSelectorInfo = null;
+
     inputValue = this.functionsUtil.BNify(inputValue);
     switch (this.state.selectedAction){
       case 'vote':
@@ -449,12 +519,23 @@ class Gauges extends Component {
           votingWeight = this.state.veTokenBalance.gt(0) ? this.functionsUtil.integerValue(inputValue.div(this.state.veTokenBalance).times(10000)) : this.functionsUtil.BNify(0);
           infoBox = {
             icon:'Info',
-            text:`You are allocating ${votingPowerPercentage}% of your voting power to this Gauge`
+            text:`You are allocating <strong>${votingPowerPercentage}%</strong> of your voting power to this Gauge`
           };
         }
       break;
       case 'stake':
-
+        switch (this.state.stakeAction){
+          case 'deposit':
+            const boost = this.calculateGaugeBoost(inputValue);
+            balanceSelectorInfo = {
+              color:`copyColor`,
+              tooltip:this.functionsUtil.getGlobalConfig(['messages','gaugeBoost']),
+              text:`Boost: <span style="color:${this.props.theme.colors.transactions.status.completed}">${boost.toFixed(2)}x</span>`,
+            };
+          break;
+          default:
+          break;
+        }
       break;
       default:
       break;
@@ -463,7 +544,8 @@ class Gauges extends Component {
     this.setState({
       infoBox,
       inputValue,
-      votingWeight
+      votingWeight,
+      balanceSelectorInfo
     });
   }
 

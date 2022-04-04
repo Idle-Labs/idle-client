@@ -6,8 +6,8 @@ import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import TxProgressBar from '../TxProgressBar/TxProgressBar';
 import DashboardCard from '../DashboardCard/DashboardCard';
-import { Flex, Box, Text, Icon, Link, Input, Checkbox } from "rimble-ui";
 import FastBalanceSelector from '../FastBalanceSelector/FastBalanceSelector';
+import { Flex, Box, Text, Icon, Link, Input, Checkbox, Tooltip } from "rimble-ui";
 
 class SendTxWithBalance extends Component {
 
@@ -662,9 +662,25 @@ class SendTxWithBalance extends Component {
                                   textOverflow:'ellipsis'
                                 }}
                                 color={this.props.balanceSelectorInfo.color ? this.props.balanceSelectorInfo.color : 'copyColor'}
-                              >
-                                {this.props.balanceSelectorInfo.text}
-                              </Text>
+                                dangerouslySetInnerHTML={{
+                                  __html: this.props.balanceSelectorInfo.text
+                                }}
+                              />
+                              {
+                                this.props.balanceSelectorInfo.tooltip && (
+                                  <Tooltip
+                                    placement={'top'}
+                                    message={this.props.balanceSelectorInfo.tooltip}
+                                  >
+                                    <Icon
+                                      ml={1}
+                                      size={'1em'}
+                                      color={'cellTitle'}
+                                      name={"InfoOutline"}
+                                    />
+                                  </Tooltip>
+                                )
+                              }
                             </Flex>
                           )
                         }
