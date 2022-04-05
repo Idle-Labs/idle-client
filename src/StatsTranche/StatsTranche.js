@@ -251,8 +251,9 @@ class StatsTranche extends Component {
       return false;
     }
 
+    const harvestData = this.functionsUtil.getTrancheLastHarvest
     const startTimestamp = this.state.minDate ? parseInt(this.functionsUtil.strToMoment(this.functionsUtil.strToMoment(this.state.minDate).format('DD/MM/YYYY 00:00:00'),'DD/MM/YYYY HH:mm:ss')._d.getTime()/1000) : null;
-    const endTimestamp = this.state.maxDate ? parseInt(this.functionsUtil.strToMoment(this.functionsUtil.strToMoment(this.state.maxDate).format('DD/MM/YYYY 23:59:59'),'DD/MM/YYYY HH:mm:ss')._d.getTime()/1000) : null;
+    const endTimestamp = harvestData.timestamp;
 
     let apiResults_unfiltered_aa = await this.functionsUtil.getSubgraphTrancheInfo(this.props.tokenConfig.AA.address,startTimestamp,endTimestamp);
     let apiResults_unfiltered_bb = await this.functionsUtil.getSubgraphTrancheInfo(this.props.tokenConfig.BB.address,startTimestamp,endTimestamp);
