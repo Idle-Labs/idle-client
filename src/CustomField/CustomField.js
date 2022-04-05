@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import AssetField from '../AssetField/AssetField';
 import SmartNumber from '../SmartNumber/SmartNumber';
 import FunctionsUtil from '../utilities/FunctionsUtil';
-import { Text, Icon, Image, Button, Link, Flex } from "rimble-ui";
+import { Text, Icon, Image, Button, Link, Flex, Loader } from "rimble-ui";
 
 class CustomField extends Component {
 
@@ -66,6 +66,7 @@ class CustomField extends Component {
     let componentHasChildren = false;
     const fieldType = fieldInfo.type;
     const fieldPath = fieldInfo.path;
+    const showLoader = !!fieldInfo.showLoader;
     let customValue = fieldPath ? this.functionsUtil.getArrayPath(fieldPath,this.props.row) : null;
 
     // Add custom field extra props
@@ -88,7 +89,7 @@ class CustomField extends Component {
         fieldProps.src = customValue;
       break;
       case 'number':
-        customValue = this.functionsUtil.BNify(customValue).toString();
+        customValue = customValue ? this.functionsUtil.BNify(customValue).toString() : null;
         CustomComponent = SmartNumber;
         fieldProps.number = customValue;
       break;
@@ -173,8 +174,8 @@ class CustomField extends Component {
       break;
     }
 
-    if (!customValue){
-      return null;
+    if (!customValue && showLoader){
+      return (<Loader size="20px" />);
     }
 
     return CustomComponent ? (componentHasChildren ? (<CustomComponent {...fieldProps}>{customValue}</CustomComponent>) : (<CustomComponent {...fieldProps} />) ) : output;

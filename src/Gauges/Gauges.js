@@ -65,6 +65,7 @@ class Gauges extends Component {
   async componentWillMount(){
     this.loadUtils();
     this.loadData();
+    this.loadEmptyGauges();
   }
 
   async componentDidUpdate(prevProps,prevState){
@@ -271,11 +272,11 @@ class Gauges extends Component {
       case 'vote':
         approveEnabled = false;
         tokenConfig = veTokenConfig;
-        const veTokenBalanceUsed = this.state.veTokenBalance.times(this.state.votingPowerUsed);
-        balanceProp = this.state.veTokenBalance.minus(veTokenBalanceUsed);
+        const veTokenBalanceUsed = this.functionsUtil.BNify(this.state.veTokenBalance).times(this.state.votingPowerUsed);
+        balanceProp = this.functionsUtil.BNify(this.state.veTokenBalance).minus(veTokenBalanceUsed);
         balanceSelectorInfo = {
           color:`copyColor`,
-          text:`Allocated power: ${this.state.votingPowerUsed.times(100).toFixed(2)}%`
+          text:`Allocated power: ${this.functionsUtil.BNify(this.state.votingPowerUsed).times(100).toFixed(2)}%`
         };
         contractInfo = this.functionsUtil.getGlobalConfig(['contracts',1,'GaugeController']);
         noFundsText = `Stake your ${this.functionsUtil.getGlobalConfig(['governance','props','tokenName'])} tokens to allocate your voting power to a Gauge.`;
@@ -336,6 +337,34 @@ class Gauges extends Component {
       if (loadGauges || !this.state.availableGauges){
         this.loadGauges();
       }
+    });
+  }
+
+  async loadEmptyGauges(){
+    const availableGauges = {};
+    Object.keys(this.props.toolProps.availableGauges).forEach( gaugeToken => {
+      const gaugeConfig = this.props.toolProps.availableGauges[gaugeToken];
+      const trancheConfig = this.props.availableTranches[gaugeConfig.protocol] ? this.props.availableTranches[gaugeConfig.protocol][gaugeToken] : null;
+
+      if (!trancheConfig){
+        return;
+      }
+
+      if (!availableGauges[gaugeConfig.protocol]){
+        availableGauges[gaugeConfig.protocol] = {};
+      }
+
+      availableGauges[gaugeConfig.protocol][gaugeToken] = trancheConfig;
+      availableGauges[gaugeConfig.protocol][gaugeToken].weight = null;
+      availableGauges[gaugeConfig.protocol][gaugeToken].totalSupply = null;
+      availableGauges[gaugeConfig.protocol][gaugeToken].rewardsTokens = null;
+      availableGauges[gaugeConfig.protocol][gaugeToken].stakedBalance = null;
+      availableGauges[gaugeConfig.protocol][gaugeToken].claimableTokens = null;
+      availableGauges[gaugeConfig.protocol][gaugeToken].distributionRate = null;
+    });
+
+    this.setState({
+      availableGauges
     });
   }
 
@@ -1134,6 +1163,7 @@ class Gauges extends Component {
                       {
                         type:'text',
                         name:'custom',
+                        showLoader:true,
                         path:['tokenConfig','weight']
                       }
                     ]
@@ -1147,6 +1177,7 @@ class Gauges extends Component {
                       {
                         type:'number',
                         name:'custom',
+                        showLoader:true,
                         path:['tokenConfig','totalSupply'],
                         props:{
                           decimals:2,
@@ -1187,6 +1218,7 @@ class Gauges extends Component {
                       {
                         type:'number',
                         name:'custom',
+                        showLoader:true,
                         path:['tokenConfig','stakedBalance'],
                         props:{
                           flexProps:{
@@ -1206,6 +1238,7 @@ class Gauges extends Component {
                     fields:[
                       {
                         name:'custom',
+                        showLoader:true,
                         type:'tokensList',
                         path:['tokenConfig','rewardsTokens'],
                         props:{
@@ -1224,6 +1257,7 @@ class Gauges extends Component {
                       {
                         type:'text',
                         name:'custom',
+                        showLoader:true,
                         path:['tokenConfig','distributionRate'],
                         props:{
                           
@@ -1240,6 +1274,7 @@ class Gauges extends Component {
                     fields:[
                       {
                         type:'html',
+                        showLoader:true,
                         props:{
                           fontSize:1,
                           lineHeight:1.3,

@@ -4562,9 +4562,18 @@ class FunctionsUtil {
           if (rewardTokenAddress){
             const tokenConfig = this.getTokenConfigByAddress(rewardTokenAddress);
             if (tokenConfig){
-              const rewardTokenBalance = account ? await this.genericContractCall(gaugeConfig.name,'claimable_reward_write',[account,rewardTokenAddress]) : this.BNify(0);
-              rewardTokensBalances[tokenConfig.token] = this.BNify(rewardTokenBalance);
-              rewardTokens.push(tokenConfig.token);
+              const [
+                rewardData,
+                rewardTokenBalance
+              ] = await Promise.all([
+                this.genericContractCall(multiRewardsContractName,'rewardData',[rewardTokenAddress]),
+                account ? this.genericContractCall(gaugeConfig.name,'claimable_reward_write',[account,rewardTokenAddress]) : this.BNify(0),
+              ]);
+
+              if (rewardData && this.BNify(rewardData.rewardRate).gt(0)){
+                rewardTokensBalances[tokenConfig.token] = this.BNify(rewardTokenBalance);
+                rewardTokens.push(tokenConfig.token);
+              }
             }
           }
         } catch (err) {
