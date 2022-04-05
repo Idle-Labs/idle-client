@@ -2990,7 +2990,7 @@ class FunctionsUtil {
     if (endTimestamp){
       queryParams.where.timeStamp_lte = endTimestamp;
     }
-    
+
     fields = fields || subgraphConfig.entities.trancheInfos;
     const subgraphQuery = this.buildSubgraphQuery('trancheInfos',fields,queryParams);
     const postData = {
@@ -4484,6 +4484,57 @@ class FunctionsUtil {
       }
     }
     return this.BNify(0);
+  }
+  calculateGaugeBoost = async (gaugeName,stakedBalance,account) => {
+
+    account = account ? account : this.props.account;
+    const veTokenConfig = this.getGlobalConfig(['tools','gauges','props','veToken']);
+    const gaugeConfig = this.getGlobalConfig(['tools','gauges','props','availableGauges',gaugeName]);
+    if (!gaugeConfig || !account){
+      return false;
+    }
+
+    const aggcalls = await Promise.all([
+      this.getTokenBalance(veTokenConfig.token,account,false),
+      this.getTokenTotalSupply(veTokenConfig.token),
+      this.genericContractCallCached(gaugeConfig.name,'period_timestamp',[0]),
+      this.genericContractCallCached(gaugeConfig.name,'working_balances',[account]),
+      this.genericContractCallCached(gaugeConfig.name,'working_supply'),
+      this.genericContractCallCached(gaugeConfig.name,'totalSupply'),
+      this.getTokenBalance(gaugeConfig.name,account)
+    ]);
+
+    let decoded = aggcalls.map(n => this.BNify(n));
+
+    if (this.BNify(stakedBalance).isNaN()){
+      stakedBalance = this.BNify(0);
+    }
+    stakedBalance = this.BNify(stakedBalance).plus(decoded[6]);
+
+    let l = this.BNify(this.normalizeTokenAmount(stakedBalance,18));
+    let voting_balance = decoded[0];
+    let voting_total = decoded[1];
+    let period_timestamp = decoded[2];
+    let working_balances = decoded[3];
+    let working_supply = decoded[4];
+    let L = decoded[5].plus(l);
+    
+    let TOKENLESS_PRODUCTION = this.BNify(40);
+    let lim = l.times(TOKENLESS_PRODUCTION).div(100);
+
+    lim = lim.plus(L.times(voting_balance).div(voting_total).times((this.BNify(100).minus(TOKENLESS_PRODUCTION)).div(100)));
+    lim = Math.min(l, lim);
+    
+    let old_bal = working_balances;
+    let noboost_lim = TOKENLESS_PRODUCTION.times(l).div(100);
+    let noboost_supply = working_supply.plus(noboost_lim).minus(old_bal);
+    let _working_supply = working_supply.plus(lim).minus(old_bal);
+
+    const boost = this.BNify(lim).div(_working_supply).div(noboost_lim.div(noboost_supply));
+
+    console.log('calculateGaugeBoost',gaugeName,voting_balance.toFixed(),voting_total.toFixed(),l.toFixed(),L.toFixed(),lim.toFixed(),_working_supply.toFixed(),noboost_lim.toFixed(),noboost_supply.toFixed(),boost.toFixed());
+
+    return boost;
   }
   getGaugeRewardsTokens = async (gaugeConfig, account=null) => {
     const rewardTokensBalances = {};
