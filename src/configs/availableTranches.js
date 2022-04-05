@@ -252,6 +252,7 @@ const availableTranches = {
       }
     }
   },
+  /*
   mstable:{
     mUSD:{
       abi:ERC20,
@@ -327,6 +328,7 @@ const availableTranches = {
       }
     }
   },
+  */
   convex:{
     FRAX3CRV:{
       abi:ERC20,
