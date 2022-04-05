@@ -717,8 +717,7 @@ const availableTranches = {
         label:'convex 3eur BB',
         address:'0x3061C652b49Ae901BBeCF622624cc9f633d01bbd'
       }
-    }
-    /*
+    },
     MUSD3CRV:{
       abi:ERC20,
       decimals:18,
@@ -741,7 +740,7 @@ const availableTranches = {
       messages:{
         withdraw:'The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
         buyInstructions:'To get MUSD3CRV token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://curve.fi/musd/deposit">MUSD Curve Pool</a>.',
-,      }
+      },
       AA:{
         abi:ERC20,
         decimals:18,
@@ -796,7 +795,7 @@ const availableTranches = {
         address:'0xFb08404617B6afab0b19f6cEb2Ef9E07058D043C'
       }
     }
-    */
   }
 };
+
 export default availableTranches;
