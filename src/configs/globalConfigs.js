@@ -781,6 +781,12 @@ const globalConfigs = {
       iconInactive: "images/sidebar/best-off.svg",
       iconInactiveDark: "images/sidebar/best-off-dark.svg",
     },
+    gauges: {
+      icon: "images/sidebar/gauges-on.svg",
+      iconDark: "images/sidebar/gauges-on-dark.svg",
+      iconInactive: "images/sidebar/gauges-off.svg",
+      iconInactiveDark: "images/sidebar/gauges-off-dark.svg",
+    },
     tranches: {
       icon: "images/sidebar/tranches-on.svg",
       iconDark: "images/sidebar/tranches-on-dark.svg",
@@ -2078,6 +2084,7 @@ const globalConfigs = {
       subComponent: Gauges,
       availableNetworks: [1],
       image: 'images/vote.svg',
+      imageInactive: 'images/vote-inactive.svg',
       desc: "Allocate your voting power into your preferred Gauge and earn rewards",
       props: {
         WEIGHT_VOTE_DELAY:864000,

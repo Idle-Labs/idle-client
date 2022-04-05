@@ -147,6 +147,31 @@ class Dashboard extends Component {
       );
     }
 
+    // Add Gauges
+    const gaugesConfig = this.functionsUtil.getGlobalConfig(['tools', 'gauges']);
+    if (gaugesConfig.enabled && (!gaugesConfig.availableNetworks || gaugesConfig.availableNetworks.includes(currentNetwork.id))) {
+      menu.push(
+        {
+          submenu: [],
+          label: 'Gauges',
+          selected: false,
+          color: 'dark-gray',
+          route: '/dashboard/gauges',
+          image: extraicons['gauges'].icon,
+          bgColor: this.props.theme.colors.primary,
+          imageDark: extraicons['gauges'].iconDark,
+          imageInactive: extraicons['gauges'].iconInactive,
+          imageInactiveDark: extraicons['gauges'].iconInactiveDark,
+          component: Utils,
+          componentProps: {
+            showBreadCrumb: false,
+            toolProps: gaugesConfig.props,
+            selectedSubsection: gaugesConfig
+          },
+        }
+      );
+    }
+
     const statsInfo = this.functionsUtil.getGlobalConfig(['stats']);
     if (!statsInfo.availableNetworks || statsInfo.availableNetworks.includes(currentNetwork.id)) {
       menu.push(
