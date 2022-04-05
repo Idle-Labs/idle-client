@@ -4487,17 +4487,18 @@ class FunctionsUtil {
   }
   calculateGaugeBoost = async (gaugeName,stakedBalance,account) => {
 
+    let boost = this.BNify(1);
+
     account = account ? account : this.props.account;
     const veTokenConfig = this.getGlobalConfig(['tools','gauges','props','veToken']);
     const gaugeConfig = this.getGlobalConfig(['tools','gauges','props','availableGauges',gaugeName]);
     if (!gaugeConfig || !account){
-      return false;
+      return boost;
     }
 
     const aggcalls = await Promise.all([
       this.getTokenBalance(veTokenConfig.token,account,false),
       this.getTokenTotalSupply(veTokenConfig.token),
-      this.genericContractCallCached(gaugeConfig.name,'period_timestamp',[0]),
       this.genericContractCallCached(gaugeConfig.name,'working_balances',[account]),
       this.genericContractCallCached(gaugeConfig.name,'working_supply'),
       this.genericContractCallCached(gaugeConfig.name,'totalSupply'),
@@ -4509,15 +4510,14 @@ class FunctionsUtil {
     if (this.BNify(stakedBalance).isNaN()){
       stakedBalance = this.BNify(0);
     }
-    stakedBalance = this.BNify(stakedBalance).plus(decoded[6]);
+    stakedBalance = this.BNify(stakedBalance).plus(decoded[5]);
 
     let l = this.BNify(this.normalizeTokenAmount(stakedBalance,18));
     let voting_balance = decoded[0];
     let voting_total = decoded[1];
-    let period_timestamp = decoded[2];
-    let working_balances = decoded[3];
-    let working_supply = decoded[4];
-    let L = decoded[5].plus(l);
+    let working_balances = decoded[2];
+    let working_supply = decoded[3];
+    let L = decoded[4].plus(l);
     
     let TOKENLESS_PRODUCTION = this.BNify(40);
     let lim = l.times(TOKENLESS_PRODUCTION).div(100);
@@ -4530,7 +4530,7 @@ class FunctionsUtil {
     let noboost_supply = working_supply.plus(noboost_lim).minus(old_bal);
     let _working_supply = working_supply.plus(lim).minus(old_bal);
 
-    const boost = this.BNify(lim).div(_working_supply).div(noboost_lim.div(noboost_supply));
+    boost = this.BNify(lim).div(_working_supply).div(noboost_lim.div(noboost_supply));
 
     console.log('calculateGaugeBoost',gaugeName,voting_balance.toFixed(),voting_total.toFixed(),l.toFixed(),L.toFixed(),lim.toFixed(),_working_supply.toFixed(),noboost_lim.toFixed(),noboost_supply.toFixed(),boost.toFixed());
 

@@ -2085,6 +2085,7 @@ const globalConfigs = {
           abi: stkIDLE,
           decimals: 18,
           token: "stkIDLE",
+          rewardToken: "IDLE",
           address: "0xaac13a116ea7016689993193fce4badc8038136f" // Mainnet
         },
         contracts:{
@@ -2221,7 +2222,7 @@ const globalConfigs = {
       route: "staking",
       subComponent: Staking,
       availableNetworks: [1],
-      desc: "Stake your IDLE / Sushi Swap LP tokens and earn $IDLE rewards",
+      desc: "Stake your IDLE tokens and earn $IDLE rewards",
       props: {
         availableTokens: {
           IDLE: {
