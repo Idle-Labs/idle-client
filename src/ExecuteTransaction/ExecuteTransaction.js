@@ -1,5 +1,6 @@
 import { Flex } from "rimble-ui";
 import React, { Component } from 'react';
+import ConnectBox from '../ConnectBox/ConnectBox';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import TxProgressBar from '../TxProgressBar/TxProgressBar';
 
@@ -134,7 +135,11 @@ class ExecuteTransaction extends Component {
         {...this.props.parentProps}
       >
         {
-          this.state.txStatus === 'success' && this.props.children ?
+          !this.props.account ? (
+           <ConnectBox
+             {...this.props}
+           />
+         ) : this.state.txStatus === 'success' && this.props.children ?
             this.props.children
           : this.state.processing && this.state.processing.loading ? (
             <TxProgressBar

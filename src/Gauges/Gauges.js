@@ -1,5 +1,6 @@
 import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
+import ConnectBox from '../ConnectBox/ConnectBox';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
@@ -424,8 +425,9 @@ class Gauges extends Component {
           }
           // console.log(gaugeConfig.name,stakedBalance.toFixed(),gaugeTotalSupply.toFixed());
           // console.log(gaugeConfig.name,'veTokenShare',veTokenShare.toFixed(8),'gaugeUserShare',gaugeUserShare.toFixed(8),'userBaseDistribution',userBaseDistribution.toFixed(8),'userBoostedDistribution',userBoostedDistribution.toFixed(8),'gaugeDistributionRate',gaugeDistributionRate.toFixed(8));
+        } else {
+          stakedBalance = this.functionsUtil.BNify(0);
         }
-
 
         const claimableTokens = Object.keys(claimableRewardsTokens).length ? Object.keys(claimableRewardsTokens).map( token => {
           const tokenBalance = claimableRewardsTokens[token];
@@ -444,7 +446,7 @@ class Gauges extends Component {
           return text;
         }).join('<br />') : '-';
 
-        const distributionRate = Object.keys(claimableRewardsTokens).length ? Object.keys(claimableRewardsTokens).map( token => {
+        const distributionRate = Object.keys(rewardsTokens).length ? Object.keys(rewardsTokens).map( token => {
           if (token.toLowerCase() === veTokenConfig.rewardToken.toLowerCase()){
             return `${gaugeDistributionRate.toFixed(4)} ${token}/day`;
           } else {
@@ -1012,6 +1014,10 @@ class Gauges extends Component {
                             </Flex>
                           </DashboardCard>
                         </Flex>
+                      ) : !this.props.account ? (
+                        <ConnectBox
+                          {...this.props}
+                        />
                       ) : (
                         <IconBox
                           cardProps={{
@@ -1081,6 +1087,10 @@ class Gauges extends Component {
                             </Flex>
                           </DashboardCard>
                         </Flex>
+                      ) : !this.props.account ? (
+                        <ConnectBox
+                          {...this.props}
+                        />
                       ) : (
                         <IconBox
                           cardProps={{
