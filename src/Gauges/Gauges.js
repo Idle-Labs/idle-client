@@ -349,7 +349,7 @@ class Gauges extends Component {
         availableGauges[gaugeConfig.protocol] = {};
       }
 
-      const trancheConfig = this.props.availableTranches[gaugeConfig.protocol][gaugeToken];
+      const trancheConfig = this.props.availableTranches[gaugeConfig.protocol] ? this.props.availableTranches[gaugeConfig.protocol][gaugeToken] : null;
 
       if (trancheConfig){
 
