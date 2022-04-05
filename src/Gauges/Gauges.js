@@ -957,7 +957,11 @@ class Gauges extends Component {
                         }}
                       />
                     ) : this.state.claimToken === 'default' ?
-                      (this.state.claimableTokens && this.state.claimableTokens.gt(0)) ? (
+                      !this.props.account ? (
+                        <ConnectBox
+                          {...this.props}
+                        />
+                      ) : (this.state.claimableTokens && this.state.claimableTokens.gt(0)) ? (
                         <Flex
                           mt={2}
                           width={1}
@@ -1014,10 +1018,6 @@ class Gauges extends Component {
                             </Flex>
                           </DashboardCard>
                         </Flex>
-                      ) : !this.props.account ? (
-                        <ConnectBox
-                          {...this.props}
-                        />
                       ) : (
                         <IconBox
                           cardProps={{
@@ -1031,7 +1031,11 @@ class Gauges extends Component {
                         />
                       )
                     : this.state.claimToken === 'additional' &&
-                      (this.state.claimableRewardsTokens && Object.keys(this.state.claimableRewardsTokens).length>0) ? (
+                      !this.props.account ? (
+                        <ConnectBox
+                          {...this.props}
+                        />
+                      ) : (this.state.claimableRewardsTokens && Object.keys(this.state.claimableRewardsTokens).length>0) ? (
                         <Flex
                           mt={2}
                           width={1}
@@ -1087,10 +1091,6 @@ class Gauges extends Component {
                             </Flex>
                           </DashboardCard>
                         </Flex>
-                      ) : !this.props.account ? (
-                        <ConnectBox
-                          {...this.props}
-                        />
                       ) : (
                         <IconBox
                           cardProps={{
