@@ -1228,6 +1228,7 @@ const globalConfigs = {
         decimals: 18,
         enabled: true,
         label: 'mUSD',
+        icon: "images/tokens/mUSD.svg",
         color: {
           hex: '#333',
           rgb: [51, 51, 51],
