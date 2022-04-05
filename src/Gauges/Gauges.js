@@ -389,18 +389,15 @@ class Gauges extends Component {
 
         let [
           gaugeTotalSupply,
-          rewardsTokens,
           stakedBalance,
+          rewardsTokens,
           gaugeWeight,
         ] = await Promise.all([
           this.functionsUtil.getTokenTotalSupply(gaugeConfig.name),
+          this.functionsUtil.getTokenBalance(gaugeConfig.name,this.props.account),
           this.functionsUtil.getGaugeRewardsTokens(gaugeConfig,this.props.account),
-          this.functionsUtil.getTokenBalance(gaugeConfig.name,this.props.account,false),
           this.functionsUtil.genericContractCall('GaugeController','gauge_relative_weight',[gaugeConfig.address])
         ]);
-
-        // const gaugeBoost = await this.functionsUtil.calculateGaugeBoost(gaugeConfig.name,stakedBalance,this.props.account);
-        // console.log(gaugeConfig.name,gaugeBoost.toFixed());
 
         const claimableRewardsTokens = Object.keys(rewardsTokens).reduce( (claimableRewards,token) => {
           const tokenConfig = rewardsTokens[token];
@@ -410,37 +407,59 @@ class Gauges extends Component {
           return claimableRewards;
         },{});
 
-        const gaugeUserShare = stakedBalance.div(gaugeTotalSupply);
+        let gaugeUserShare = null;
+        let userBoostedDistribution = null;
         gaugeWeight = this.functionsUtil.fixTokenDecimals(gaugeWeight,18);
         gaugeTotalSupply = this.functionsUtil.fixTokenDecimals(gaugeTotalSupply,18);
         const gaugeDistributionRate = this.state.distributionRate.times(gaugeWeight);
 
-        const veTokenShare = this.functionsUtil.BNify(this.functionsUtil.normalizeTokenAmount(this.state.veTokenBalance,18)).div(this.state.veTokenTotalSupply);
-        const userBaseDistribution = gaugeDistributionRate.times(gaugeUserShare);
-
-        const boostMultiplier = veTokenShare.times(1.5).plus(1);
-        let userBoostedDistribution = boostMultiplier.times(userBaseDistribution);
-        if (userBoostedDistribution.gt(gaugeDistributionRate)){
-          userBoostedDistribution = gaugeDistributionRate;
+        if (this.props.account){
+          gaugeUserShare = stakedBalance.div(gaugeTotalSupply);
+          const veTokenShare = this.functionsUtil.BNify(this.functionsUtil.normalizeTokenAmount(this.state.veTokenBalance,18)).div(this.state.veTokenTotalSupply);
+          const userBaseDistribution = gaugeDistributionRate.times(gaugeUserShare);
+          const boostMultiplier = veTokenShare.times(1.5).plus(1);
+          userBoostedDistribution = boostMultiplier.times(userBaseDistribution);
+          if (userBoostedDistribution.gt(gaugeDistributionRate)){
+            userBoostedDistribution = gaugeDistributionRate;
+          }
+          // console.log(gaugeConfig.name,stakedBalance.toFixed(),gaugeTotalSupply.toFixed());
+          // console.log(gaugeConfig.name,'veTokenShare',veTokenShare.toFixed(8),'gaugeUserShare',gaugeUserShare.toFixed(8),'userBaseDistribution',userBaseDistribution.toFixed(8),'userBoostedDistribution',userBoostedDistribution.toFixed(8),'gaugeDistributionRate',gaugeDistributionRate.toFixed(8));
         }
-        // console.log(gaugeConfig.name,'veTokenShare',veTokenShare.toFixed(8),'gaugeUserShare',gaugeUserShare.toFixed(8),'userBaseDistribution',userBaseDistribution.toFixed(8),'userBoostedDistribution',userBoostedDistribution.toFixed(8),'gaugeDistributionRate',gaugeDistributionRate.toFixed(8));
+
 
         const claimableTokens = Object.keys(claimableRewardsTokens).length ? Object.keys(claimableRewardsTokens).map( token => {
           const tokenBalance = claimableRewardsTokens[token];
           let text = `${tokenBalance.toFixed(4)} ${token}`;
-          if (token.toLowerCase() === veTokenConfig.rewardToken.toLowerCase()){
-            text += ` (~${userBoostedDistribution.toFixed(4)}/day)`;
+          if (this.props.account){
+            if (!this.functionsUtil.BNify(userBoostedDistribution).isNaN() && token.toLowerCase() === veTokenConfig.rewardToken.toLowerCase()){
+              text += ` (~${userBoostedDistribution.toFixed(4)}/day)`;
+            } else if (rewardsTokens[token].rate){
+              let userDistributionRate = rewardsTokens[token].rate.times(gaugeUserShare);
+              if (userDistributionRate.gt(rewardsTokens[token].rate)){
+                userDistributionRate = rewardsTokens[token].rate;
+              }
+              text += ` (~${userDistributionRate.toFixed(4)}/day)`;
+            }
           }
           return text;
         }).join('<br />') : '-';
 
+        const distributionRate = Object.keys(claimableRewardsTokens).length ? Object.keys(claimableRewardsTokens).map( token => {
+          if (token.toLowerCase() === veTokenConfig.rewardToken.toLowerCase()){
+            return `${gaugeDistributionRate.toFixed(4)} ${token}/day`;
+          } else {
+            const tokenDistributionRate = rewardsTokens[token].rate;
+            return `${tokenDistributionRate.toFixed(4)} ${token}/day`;
+          }
+        }).join('<br />') : '-';
+
         availableGauges[gaugeConfig.protocol][gaugeToken] = trancheConfig;
         availableGauges[gaugeConfig.protocol][gaugeToken].rewardsTokens = rewardsTokens;
+        availableGauges[gaugeConfig.protocol][gaugeToken].stakedBalance = stakedBalance;
         availableGauges[gaugeConfig.protocol][gaugeToken].totalSupply = gaugeTotalSupply;
         availableGauges[gaugeConfig.protocol][gaugeToken].claimableTokens = claimableTokens;
+        availableGauges[gaugeConfig.protocol][gaugeToken].distributionRate = distributionRate; //`${gaugeDistributionRate.toFixed(4)} IDLE/day`;
         availableGauges[gaugeConfig.protocol][gaugeToken].weight = gaugeWeight.times(100).toFixed(2)+'%';
-        availableGauges[gaugeConfig.protocol][gaugeToken].distributionRate = `${gaugeDistributionRate.toFixed(4)} IDLE/day`;
-        availableGauges[gaugeConfig.protocol][gaugeToken].stakedBalance = this.functionsUtil.fixTokenDecimals(stakedBalance,18);
       }
     });
 
@@ -913,7 +932,7 @@ class Gauges extends Component {
                                   mt:3,
                                   width:[1,1/2]
                                 }}
-                                handleClick={e => this.props.goToSection(`tools/${this.functionsUtil.getGlobalConfig(['tools','stake','route'])}`)}
+                                handleClick={e => this.props.goToSection(`stake`)}
                               >
                                 Stake
                               </RoundButton>
@@ -1098,7 +1117,7 @@ class Gauges extends Component {
                   fontSize={[2,4]}
                   fontWeight={[3,4]}
                 >
-                  Gauges Weights
+                  Available Gauges
                 </Heading.h4>
               </Flex>
               <TranchesList
@@ -1251,17 +1270,18 @@ class Gauges extends Component {
                     mobile:false,
                     title:'DISTRIBUTION RATE',
                     props:{
-                      width:[0.15, 0.14],
+                      width:[0.15, 0.13],
                     },
                     fields:[
                       {
-                        type:'text',
+                        type:'html',
                         name:'custom',
                         showLoader:true,
-                        path:['tokenConfig','distributionRate'],
                         props:{
-                          
-                        }
+                          fontSize:1,
+                          lineHeight:1.3,
+                        },
+                        path:['tokenConfig','distributionRate'],
                       }
                     ]
                   },
@@ -1269,7 +1289,7 @@ class Gauges extends Component {
                     mobile:false,
                     title:'CLAIMABLE REWARDS',
                     props:{
-                      width:[0.25,0.16],
+                      width:[0.25,0.17],
                     },
                     fields:[
                       {

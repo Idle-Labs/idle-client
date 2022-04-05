@@ -4537,6 +4537,7 @@ class FunctionsUtil {
     return boost;
   }
   getGaugeRewardsTokens = async (gaugeConfig, account=null) => {
+    const rewardTokensRate = {};
     const rewardTokensBalances = {};
     const rewardTokens = gaugeConfig.rewardTokens ? gaugeConfig.rewardTokens : [];
 
@@ -4567,12 +4568,13 @@ class FunctionsUtil {
                 rewardTokenBalance
               ] = await Promise.all([
                 this.genericContractCall(multiRewardsContractName,'rewardData',[rewardTokenAddress]),
-                account ? this.genericContractCall(gaugeConfig.name,'claimable_reward_write',[account,rewardTokenAddress]) : this.BNify(0),
+                account ? this.genericContractCall(gaugeConfig.name,'claimable_reward_write',[account,rewardTokenAddress]) : this.BNify(0)
               ]);
 
               if (rewardData && this.BNify(rewardData.rewardRate).gt(0)){
-                rewardTokensBalances[tokenConfig.token] = this.BNify(rewardTokenBalance);
                 rewardTokens.push(tokenConfig.token);
+                rewardTokensBalances[tokenConfig.token] = this.BNify(rewardTokenBalance);
+                rewardTokensRate[tokenConfig.token] = this.fixTokenDecimals(rewardData.rewardRate,18).times(86400);
               }
             }
           }
@@ -4584,6 +4586,7 @@ class FunctionsUtil {
 
     return rewardTokens ? rewardTokens.reduce( (rewardTokens,rewardToken) => {
       rewardTokens[rewardToken] = this.getGlobalConfig(['stats','tokens',rewardToken.toUpperCase()]) || {};
+      rewardTokens[rewardToken].rate = rewardTokensRate[rewardToken] || this.BNify(0);
       rewardTokens[rewardToken].balance = rewardTokensBalances[rewardToken] || this.BNify(0);
       return rewardTokens;
     },{}) : null;
