@@ -251,7 +251,7 @@ class StatsTranche extends Component {
       return false;
     }
 
-    const harvestData = this.functionsUtil.getTrancheLastHarvest
+    const harvestData = this.functionsUtil.getTrancheLastHarvest(this.props.tokenConfig);
     const startTimestamp = this.state.minDate ? parseInt(this.functionsUtil.strToMoment(this.functionsUtil.strToMoment(this.state.minDate).format('DD/MM/YYYY 00:00:00'),'DD/MM/YYYY HH:mm:ss')._d.getTime()/1000) : null;
     const endTimestamp = harvestData.timestamp;
 
@@ -263,7 +263,7 @@ class StatsTranche extends Component {
     if (!apiResults_aa || !apiResults_unfiltered_aa || !apiResults_aa.length || !apiResults_unfiltered_aa.length || !apiResults_bb || !apiResults_unfiltered_bb || !apiResults_bb.length || !apiResults_unfiltered_bb.length){
       return false;
     }
-  
+
     const firstResult_aa = Object.values(apiResults_aa)[0];
     const firstResult_bb = Object.values(apiResults_bb)[0];
     const lastResult_aa = Object.values(apiResults_aa).pop();
