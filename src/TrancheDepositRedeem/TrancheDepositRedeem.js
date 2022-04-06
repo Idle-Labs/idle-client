@@ -180,7 +180,7 @@ class TrancheDetails extends Component {
         tokenConfig = this.props.tokenConfig;
         balanceProp = this.state.tokenBalance;
         
-        if (gaugeConfig && gaugeConfig.trancheToken.token.toLowerCase() === this.props.tokenConfig[this.props.selectedTranche].token.toLowerCase() && this.state.trancheBalance.gt(0)){
+        if (gaugeConfig && gaugeConfig.trancheToken.token.toLowerCase() === this.props.tokenConfig[this.props.selectedTranche].token.toLowerCase() && this.state.trancheBalance && this.state.trancheBalance.gt(0)){
           infoText = `Stake your ${gaugeConfig.trancheToken.token} in the Liquidity Gauge and get rewarded!`;
         }
       break;
@@ -219,7 +219,7 @@ class TrancheDetails extends Component {
         // balanceProp = this.state.trancheBalance;
 
         tokenConfig = this.props.tokenConfig;
-        balanceProp = this.state.trancheBalance.times(this.state.tranchePrice);
+        balanceProp = this.state.trancheBalance ? this.state.trancheBalance.times(this.state.tranchePrice) : null;
 
         // console.log('balanceProp',this.state.trancheBalance,this.state.tranchePrice,balanceProp);
 
@@ -995,6 +995,32 @@ class TrancheDetails extends Component {
                   }
                 </DashboardCard>
               </Box>
+              {
+                this.props.selectedToken === 'stETH' && this.props.selectedTranche === 'AA' && (
+                  <IconBox
+                    cardProps={{
+                      p:2,
+                      mt:2,
+                      mb:2,
+                      width:1,
+                    }}
+                    isActive={true}
+                    isInteractive={false}
+                    iconProps={{
+                      size:'1.8em',
+                      color:'flashColor'
+                    }}
+                    icon={'AssignmentLate'}
+                    textProps={{
+                      fontWeight:500,
+                      color:'flashColor',
+                      textAlign:'center',
+                      fontSize:['13px','15px']
+                    }}
+                    text={`With the <a href="https://medium.com/idle-finance/introducing-stkidle-gauges-a-new-stakers-centric-paradigm-for-pyts-and-lps-8c0ef167232e" target="_blank" rel="nofollow noopener noreferrer" class="link">IDLE Gauges release</a>,  LDO rewards are going to be distributed via a different staking contract on <strong>Thursday 14 April 2022 16:30:00 GMT</strong>. Please make sure to unstake your stETH from the current staking contract and deposit in the <a href="${this.functionsUtil.getDashboardSectionUrl(`gauges/stETH`)}" class="link">stETH Gauge</a> contract to continue receiving the LDO rewards, alongside the IDLE distribution from Gauges`}
+                  />
+                )
+              }
               <Box
                 width={1}
               >

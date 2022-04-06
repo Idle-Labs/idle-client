@@ -1171,6 +1171,16 @@ class RimbleTransaction extends React.Component {
       });
     }
 
+    const gaugesAvailableNetworks = this.functionsUtil.getGlobalConfig(['tools','gauges','availableNetworks']);
+    const gauges = this.functionsUtil.getGlobalConfig(['tools','gauges','props','availableGauges']);
+    Object.keys(gauges).forEach(gaugeToken => {
+      const gaugeConfig = gauges[gaugeToken];
+      if (gaugesAvailableNetworks.includes(requiredNetworkId)){
+        contracts.push(this.initContractWithoutSet(gaugeConfig.name,gaugeConfig.address,gaugeConfig.abi));
+      }
+      contractsNetworks[1].push(this.initContractWithoutSet(gaugeConfig.name,gaugeConfig.address,gaugeConfig.abi,1));
+    });
+
     const newContracts = Object.assign([],this.state.contracts);
     contracts.forEach( contractInfo => {
       if (contractInfo){

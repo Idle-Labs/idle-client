@@ -83,6 +83,7 @@ class Notifications extends Component {
   async loadNotifications() {
 
     // Get stored lastOpenTimestamp for notifications
+    const currTime = Date.now();
     const currentNetwork = this.functionsUtil.getRequiredNetwork();
     const isMainnet = currentNetwork.id === 1;
     const governanceConfig = this.functionsUtil.getGlobalConfig(['governance']);
@@ -130,8 +131,6 @@ class Notifications extends Component {
         });
       }
     }
-
-    const currTime = Date.now();
 
     // Add snapshot proposals
     const snapshotProposalBaseUrl = this.functionsUtil.getGlobalConfig(['network', 'providers', 'snapshot', 'urls', 'proposals']);

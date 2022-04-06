@@ -2065,6 +2065,18 @@ const globalConfigs = {
     }
   },
   notifications: [
+    /*
+    {
+      enabled: true,
+      end: 1649980799000,
+      start: 1649256804107,
+      date: "Apr 06, 2022 16:18 UTC",
+      image: "/images/tokens/LDO.svg",
+      title: "LDO rewards migration to Gauges",
+      hash: "/dashboard/tranches/senior/lido/stETH",
+      text: "The LDO rewards distribution is migrating from stETH senior tranche to stETH Gauge"
+    },
+    */
     {
       enabled: false,
       end: 1612282726374,

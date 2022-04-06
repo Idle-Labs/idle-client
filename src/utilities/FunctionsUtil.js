@@ -4635,6 +4635,7 @@ class FunctionsUtil {
     const stakingEnabled = stakingRewardsEnabled && stakingRewardsEnabled.length>0 ? true : false;
     const tokenName = this.getGlobalConfig(['stats', 'tokens', token.toUpperCase(), 'label']) || this.capitalize(token);
 
+    const gaugeConfig = this.getGlobalConfig(['tools','gauges','props','availableGauges',token]);
     // console.log('loadTrancheField',protocol,token,tranche,stakingRewards,stakingEnabled);
 
     const strategyConfig = tokenConfig.Strategy;
@@ -4748,21 +4749,29 @@ class FunctionsUtil {
       break;
       case 'trancheStaked':
         output = formatValue ? 'N/A' : this.BNify(0);
-        if (stakingEnabled){
-          let [
-            lastPrice1,
-            staked1
-          ] = await Promise.all([
-            this.loadTrancheField(`tranchePrice`, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens),
-            this.getTrancheStakedBalance(trancheConfig.CDORewards.name, account, trancheConfig.CDORewards.decimals,trancheConfig.functions.stakedBalance)
-          ]);
+        let [
+          gaugeBalance,
+          lastPrice1,
+          staked1
+        ] = await Promise.all([
+          gaugeConfig ? this.getTokenBalance(gaugeConfig.name, account) : null,
+          this.loadTrancheField(`tranchePrice`, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens),
+          stakingEnabled ? this.getTrancheStakedBalance(trancheConfig.CDORewards.name, account, trancheConfig.CDORewards.decimals,trancheConfig.functions.stakedBalance) : null
+        ]);
 
-          if (staked1 && lastPrice1) {
-            output = this.BNify(staked1).times(lastPrice1);
-            // console.log('trancheStaked',staked1.toString(),lastPrice1.toString(),output.toString());
-            if (formatValue) {
-              output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');
-            }
+        let totalStaked = this.BNify(0);
+        if (staked1){
+          totalStaked = totalStaked.plus(staked1);
+        }
+        if (gaugeBalance){
+          totalStaked = totalStaked.plus(gaugeBalance);
+        }
+
+        if (totalStaked.gt(0) && lastPrice1) {
+          output = this.BNify(totalStaked).times(lastPrice1);
+          // console.log('trancheStaked',staked1,gaugeBalance,lastPrice1.toString(),output.toString());
+          if (formatValue) {
+            output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');
           }
         }
       break;

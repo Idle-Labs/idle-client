@@ -280,7 +280,7 @@ class Gauges extends Component {
           text:`Allocated power: ${this.functionsUtil.BNify(this.state.votingPowerUsed).times(100).toFixed(2)}%`
         };
         contractInfo = this.functionsUtil.getGlobalConfig(['contracts',1,'GaugeController']);
-        noFundsText = `Stake your ${this.functionsUtil.getGlobalConfig(['governance','props','tokenName'])} tokens to allocate your voting power to a Gauge.`;
+        noFundsText = `Stake your ${this.functionsUtil.getGlobalConfig(['governance','props','tokenName'])} tokens to allocate your voting power to this Gauge and boost the daily rewards you receive.`;
 
         const nextUnlockTime = this.state.lastUserVote ? parseInt(this.state.lastUserVote)+this.props.toolProps.WEIGHT_VOTE_DELAY : null;
         canVote = !nextUnlockTime || this.state.blockInfo.timestamp>=nextUnlockTime;
