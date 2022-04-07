@@ -1017,7 +1017,7 @@ class TrancheDetails extends Component {
                       textAlign:'center',
                       fontSize:['13px','15px']
                     }}
-                    text={`With the <a href="https://medium.com/idle-finance/introducing-stkidle-gauges-a-new-stakers-centric-paradigm-for-pyts-and-lps-8c0ef167232e" target="_blank" rel="nofollow noopener noreferrer" class="link">IDLE Gauges release</a>,  LDO rewards are going to be distributed via a different staking contract on <strong>Thursday 14 April 2022 16:30:00 GMT</strong>. Please make sure to unstake your stETH from the current staking contract and deposit in the <a href="${this.functionsUtil.getDashboardSectionUrl(`gauges/stETH`)}" class="link">stETH Gauge</a> contract to continue receiving the LDO rewards, alongside the IDLE distribution from Gauges`}
+                    text={`With the <a href="https://medium.com/idle-finance/introducing-stkidle-gauges-a-new-stakers-centric-paradigm-for-pyts-and-lps-8c0ef167232e" target="_blank" rel="nofollow noopener noreferrer" class="link">IDLE Gauges release</a>, LDO rewards are going to be distributed via a different staking contract on <strong>Thursday 14 April 2022 16:30:00 GMT</strong>. Please make sure to unstake your stETH from the current staking contract after that date and deposit in the <a href="${this.functionsUtil.getDashboardSectionUrl(`gauges/stETH`)}" class="link">stETH Gauge</a> contract to continue receiving the LDO rewards, alongside the IDLE distribution from Gauges`}
                   />
                 )
               }
