@@ -293,6 +293,23 @@ class GovernanceUtil {
     },[]);
   }
 
+  getDelegateDelegators = async (delegate,delegateChanges=null) => {
+    delegateChanges = delegateChanges || await this.getDelegatesChanges();
+
+    const latest_delegators = {};
+    delegateChanges.reverse().forEach( d => {
+      const values = d.returnValues;
+      if (!values.delegator || latest_delegators[values.delegator]){
+        return;
+      }
+      latest_delegators[values.delegator] = values.toDelegate;
+    });
+
+    return Object.keys(latest_delegators).filter( delegator => {
+      return latest_delegators[delegator].toLowerCase() === delegate.toLowerCase();
+    });
+  }
+
   getDelegatesVotesChanges = async () => {
 
     const lastBlockNumber = await this.props.web3.eth.getBlockNumber();
@@ -327,10 +344,12 @@ class GovernanceUtil {
     const [
       all_votes,
       totalSupply,
+      delegateChanges,
       delegations,
     ] = await Promise.all([
       this.getVotes(),
       this.getTotalSupply(),
+      this.getDelegatesChanges(),
       this.getDelegatesVotesChanges()
     ]);
 
@@ -341,12 +360,15 @@ class GovernanceUtil {
     });
 
     let delegates = [];
-    Object.keys(delegateAccounts).forEach((account) => {
-      const votes = +delegateAccounts[account];
-      if (votes === 0) return;
+    // Object.keys(delegateAccounts).forEach((delegate) => {
+    await this.functionsUtil.asyncForEach(Object.keys(delegateAccounts), async (delegate) => {
+      const votes = +delegateAccounts[delegate]/1e18;
+      const delegators = await this.getDelegateDelegators(delegate,delegateChanges);
+      // if (votes === 0) return;
       delegates.push({
-        votes: votes/1e18,
-        delegate: account
+        votes,
+        delegate,
+        delegators
       });
     });
 

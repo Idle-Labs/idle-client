@@ -41,6 +41,9 @@ class DelegateField extends Component {
       case 'votes':
         value = this.functionsUtil.formatMoney(this.functionsUtil.BNify(value).toFixed(2,1),2);
       break;
+      case 'delegators':
+        value = delegate.delegators.length;
+      break;
       case 'delegate':
         const ensName = await this.functionsUtil.getENSName(value);
         value = ensName || value;

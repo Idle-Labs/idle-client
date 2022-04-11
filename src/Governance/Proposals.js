@@ -11,6 +11,7 @@ import ProposalDetails from './ProposalDetails/ProposalDetails';
 class Proposals extends Component {
   state = {
     proposals:null,
+    delegates:null,
     addProposal:false,
     selectedProposal:null
   };
@@ -47,6 +48,7 @@ class Proposals extends Component {
     }
 
     const proposals = await this.governanceUtil.getProposals();
+    const delegates = await this.governanceUtil.getDelegates();
 
     const { match: { params } } = this.props;
       
@@ -66,6 +68,7 @@ class Proposals extends Component {
 
     this.setState({
       proposals,
+      delegates,
       addProposal,
       selectedProposal
     });
@@ -150,6 +153,7 @@ class Proposals extends Component {
             >
               <ProposalDetails
                 {...this.props}
+                delegates={this.state.delegates}
                 loadData={this.loadData.bind(this)}
                 proposal={this.state.selectedProposal}
               />
@@ -180,6 +184,7 @@ class Proposals extends Component {
                 <ProposalsList
                   {...this.props}
                   proposals={this.state.proposals}
+                  delegates={this.state.delegates}
                   cols={[
                     {
                       title: '#',

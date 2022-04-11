@@ -138,7 +138,7 @@ class Leaderboard extends Component {
                     {
                       title:'ADDRESS',
                       props:{
-                        width:[0.60,0.50],
+                        width:[0.60,0.38],
                       },
                       fields:[
                         {
@@ -154,9 +154,25 @@ class Leaderboard extends Component {
                       ]
                     },
                     {
+                      mobile:false,
+                      title:'DELEGATORS',
+                      props:{
+                        width:[0.27,0.15],
+                        textAlign:'center',
+                      },
+                      fields:[
+                        {
+                          name:'delegators',
+                          parentProps:{
+                            alignItems:'center'
+                          }
+                        }
+                      ]
+                    },
+                    {
                       title:'VOTES',
                       props:{
-                        width:[0.27,0.12],
+                        width:[0.27,0.10],
                       },
                       fields:[
                         {
@@ -168,7 +184,8 @@ class Leaderboard extends Component {
                       mobile:false,
                       title:'VOTE WEIGHT',
                       props:{
-                        width:[0.15,0.15],
+                        width:[0.15,0.13],
+                        textAlign:'center',
                       },
                       fields:[
                         {
@@ -183,7 +200,8 @@ class Leaderboard extends Component {
                       mobile:false,
                       title:'PROPOSALS VOTED',
                       props:{
-                        width:[0.15,0.15],
+                        width:[0.15,0.14],
+                        textAlign:'center',
                       },
                       fields:[
                         {
