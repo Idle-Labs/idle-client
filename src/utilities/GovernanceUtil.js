@@ -262,7 +262,7 @@ class GovernanceUtil {
   castVote = async (proposalId,support,callback=null,callbackReceipt=null) => {
     proposalId = this.functionsUtil.toBN(proposalId);
     const contractName = this.functionsUtil.getGlobalConfig(['governance','contracts','governance','v2']).name;
-    console.log(contractName, 'castVote', [proposalId, support]);
+    // console.log(contractName, 'castVote', [proposalId, support]);
     return await this.props.contractMethodSendWrapper(contractName, 'castVote', [proposalId, support], null, callback, callbackReceipt);
   }
 
@@ -293,8 +293,39 @@ class GovernanceUtil {
     },[]);
   }
 
-  getDelegateDelegators = async (delegate,delegateChanges=null) => {
+  getLatestDelegators = async (delegateChanges=null) => {
     delegateChanges = delegateChanges || await this.getDelegatesChanges();
+    
+    delegateChanges.sort((a, b) => {
+      return a.blockNumber < b.blockNumber ? 1 : -1;
+    })
+
+    const latestDelegators = {};
+    await this.functionsUtil.asyncForEach(delegateChanges, async (d) => {
+      const values = d.returnValues;
+      if (!values.delegator || latestDelegators[values.delegator]){
+        return;
+      }
+      latestDelegators[values.delegator] = {
+        votes:0,
+        delegator:values.delegator,
+        toDelegate:values.toDelegate
+      };
+
+      const votes = await this.getTokensBalance(values.delegator);
+      latestDelegators[values.delegator].votes = +votes/1e18;
+
+      // console.log(values.delegator,+votes/1e18,values.toDelegate);
+    });
+
+    // console.log('getLatestDelegators',latestDelegators);
+
+    return latestDelegators;
+  }
+
+  getDelegateDelegators = async (delegate,delegateChanges=null,delegatesVotesChanges=null) => {
+    delegateChanges = delegateChanges || await this.getDelegatesChanges();
+    delegatesVotesChanges = delegatesVotesChanges || await this.getDelegatesVotesChanges();
 
     const latest_delegators = {};
     delegateChanges.reverse().forEach( d => {
@@ -302,12 +333,24 @@ class GovernanceUtil {
       if (!values.delegator || latest_delegators[values.delegator]){
         return;
       }
-      latest_delegators[values.delegator] = values.toDelegate;
+      const voteChangedTx = delegatesVotesChanges.find( tx => tx.transactionHash.toLowerCase() === d.transactionHash.toLowerCase() && tx.returnValues.delegate.toLowerCase() === delegate.toLowerCase() );
+      const delegatorBalance = voteChangedTx ? this.functionsUtil.BNify(voteChangedTx.returnValues.newBalance).minus(voteChangedTx.returnValues.previousBalance) : null;
+      const votes = delegatorBalance ? +delegatorBalance/1e18 : 0;
+
+      // console.log('delegator',values.delegator,'delegate',values.toDelegate,'delegate hash',d.transactionHash,'voteChanged hash',voteChangedTx ? voteChangedTx.transactionHash : null,'prevBalance',voteChangedTx ? +voteChangedTx.returnValues.previousBalance/1e18 : null,'newBalance',voteChangedTx ? +voteChangedTx.returnValues.newBalance/1e18 : null,'votes',votes);
+
+      latest_delegators[values.delegator] = {
+        votes,
+        delegator:values.delegator,
+        toDelegate:values.toDelegate
+      };
     });
 
-    return Object.keys(latest_delegators).filter( delegator => {
-      return latest_delegators[delegator].toLowerCase() === delegate.toLowerCase();
-    });
+    return Object.values(latest_delegators).filter( delegatorInfo => {
+      return delegatorInfo.toDelegate.toLowerCase() === delegate.toLowerCase();
+    })/*.sort((a, b) => {
+      return a.votes < b.votes ? 1 : -1;
+    })*/;
   }
 
   getDelegatesVotesChanges = async () => {
@@ -352,6 +395,8 @@ class GovernanceUtil {
       this.getDelegatesChanges(),
       this.getDelegatesVotesChanges()
     ]);
+      
+    const latestDelegators = await this.getLatestDelegators(delegateChanges);
 
     const delegateAccounts = {};
     delegations.forEach(e => {
@@ -359,12 +404,17 @@ class GovernanceUtil {
       delegateAccounts[delegate] = newBalance;
     });
 
+    // console.log('getDelegatesVotesChanges',delegations,'delegateChanges',delegateChanges);
+
     let delegates = [];
-    // Object.keys(delegateAccounts).forEach((delegate) => {
     await this.functionsUtil.asyncForEach(Object.keys(delegateAccounts), async (delegate) => {
+      const delegators = Object.values(latestDelegators).filter( delegatorInfo => {
+        return delegatorInfo.toDelegate.toLowerCase() === delegate.toLowerCase() && parseFloat(delegatorInfo.votes)>0;
+      }).sort((a, b) => {
+        return a.votes < b.votes ? 1 : -1;
+      });
+
       const votes = +delegateAccounts[delegate]/1e18;
-      const delegators = await this.getDelegateDelegators(delegate,delegateChanges);
-      // if (votes === 0) return;
       delegates.push({
         votes,
         delegate,

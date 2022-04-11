@@ -786,67 +786,134 @@ class ProposalDetails extends Component {
                   >
                     {
                       forVotesAddrs.map( (voteInfo,voteIndex) => {
+                        const delegateInfo = this.props.delegates.find( d => d.delegate.toLowerCase() === voteInfo.voter.toLowerCase() );
                         const votes = this.functionsUtil.formatMoney(this.functionsUtil.BNify(voteInfo.votes).div(1e18).toFixed(4,1),4);
                         return (
                           <Flex
                             py={2}
                             width={1}
-                            alignItems={'center'}
-                            flexDirection={'row'}
+                            alignItems={'stretch'}
+                            flexDirection={'column'}
                             key={`vote_for_${voteIndex}`}
-                            justifyContent={'space-between'}
                             borderBottom={`1px solid ${this.props.theme.colors['near-white']}`}
                           >
                             <Flex
+                              width={1}
                               alignItems={'center'}
                               flexDirection={'row'}
-                              justifyContent={'flex-start'}
+                              justifyContent={'space-between'}
                             >
-                              <Blockie
-                                opts={{
-                                  size: 7,
-                                  color: "#dfe",
-                                  bgcolor: "#a71",
-                                  spotcolor: "#000",
-                                  seed: voteInfo.voter,
-                                }}
-                              />
-                              <Link
-                                ml={2}
+                              <Flex
+                                alignItems={'center'}
+                                flexDirection={'row'}
+                                justifyContent={'flex-start'}
+                              >
+                                <Blockie
+                                  opts={{
+                                    size: 7,
+                                    color: "#dfe",
+                                    bgcolor: "#a71",
+                                    spotcolor: "#000",
+                                    seed: voteInfo.voter,
+                                  }}
+                                />
+                                <Link
+                                  ml={2}
+                                  fontSize={1}
+                                  fontWeight={2}
+                                  target={'_blank'}
+                                  textAlign={'left'}
+                                  color={'dark-gray'}
+                                  lineHeight={'initial'}
+                                  hoverColor={'primary'}
+                                  rel={'nofollow noopener noreferrer'}
+                                  href={`/#/governance/leaderboard/${voteInfo.voter}`}
+                                >
+                                  {
+                                    this.props.isMobile ? (
+                                      <ShortHash
+                                        fontSize={1}
+                                        fontWeight={2}
+                                        {...this.props}
+                                        textAlign={'left'}
+                                        color={'dark-gray'}
+                                        hash={voteInfo.voter}
+                                        lineHeight={'initial'}
+                                      />
+                                    ) : voteInfo.voter
+                                  }
+                                </Link>
+                              </Flex>
+                              <Text
                                 fontSize={1}
                                 fontWeight={2}
-                                target={'_blank'}
                                 textAlign={'left'}
-                                color={'statValue'}
+                                color={'dark-gray'}
                                 lineHeight={'initial'}
-                                hoverColor={'primary'}
-                                rel={'nofollow noopener noreferrer'}
-                                href={`/#/governance/leaderboard/${voteInfo.voter}`}
                               >
-                                {
-                                  this.props.isMobile ? (
-                                    <ShortHash
-                                      fontSize={1}
-                                      fontWeight={2}
-                                      {...this.props}
-                                      textAlign={'left'}
-                                      color={'statValue'}
-                                      hash={voteInfo.voter}
-                                      lineHeight={'initial'}
-                                    />
-                                  ) : voteInfo.voter
-                                }
-                              </Link>
+                                {votes}
+                              </Text>
                             </Flex>
-                            <Text
-                              fontSize={1}
-                              fontWeight={2}
-                              textAlign={'left'}
-                              color={'statValue'}
-                              lineHeight={'initial'}
-                            >
-                              {votes}
-                            </Text>
+                            {
+                              delegateInfo && delegateInfo.delegators && delegateInfo.delegators.length>1 && (
+                                <Flex
+                                  mt={1}
+                                  ml={4}
+                                  px={2}
+                                  py={1}
+                                  width={'auto'}
+                                  flexDirection={'column'}
+                                  backgroundColor={'cardBgHover'}
+                                  borderLeft={`1px solid ${this.props.theme.colors.cardBorder}`}
+                                >
+                                  {
+                                    delegateInfo.delegators.map( (delegatorInfo,delegatorIndex) => (
+                                      <Flex
+                                        width={1}
+                                        justifyContent={'space-between'}
+                                        key={`delegator_${delegatorIndex}`}
+                                      >
+                                        <Link
+                                          fontSize={1}
+                                          fontWeight={2}
+                                          target={'_blank'}
+                                          textAlign={'left'}
+                                          color={'statValue'}
+                                          key={delegatorIndex}
+                                          lineHeight={'initial'}
+                                          hoverColor={'primary'}
+                                          rel={'nofollow noopener noreferrer'}
+                                          href={this.functionsUtil.getEtherscanAddressUrl(delegatorInfo.delegator)}
+                                        >
+                                          {
+                                            this.props.isMobile ? (
+                                              <ShortHash
+                                                fontSize={1}
+                                                fontWeight={2}
+                                                {...this.props}
+                                                hash={delegatorInfo.delegator}
+                                                textAlign={'left'}
+                                                color={'statValue'}
+                                                lineHeight={'initial'}
+                                              />
+                                            ) : delegatorInfo.delegator
+                                          }
+                                        </Link>
+                                        <Text
+                                          fontSize={1}
+                                          fontWeight={2}
+                                          textAlign={'left'}
+                                          color={'statValue'}
+                                          lineHeight={'initial'}
+                                        >
+                                          {this.functionsUtil.formatMoney(this.functionsUtil.BNify(delegatorInfo.votes).toFixed(4,1),4)}
+                                        </Text>
+                                      </Flex>
+                                    ))
+                                  }
+                                </Flex>
+                              )
+                            }
                           </Flex>
                         )
                       })
@@ -898,55 +965,123 @@ class ProposalDetails extends Component {
                 >
                   {
                     againstVotesAddrs.map( (voteInfo,voteIndex) => {
+                      const delegateInfo = this.props.delegates.find( d => d.delegate.toLowerCase() === voteInfo.voter.toLowerCase() );
                       const votes = this.functionsUtil.formatMoney(this.functionsUtil.BNify(voteInfo.votes).div(1e18).toFixed(4,1),4);
                       return (
                         <Flex
                           py={2}
                           width={1}
-                          alignItems={'center'}
-                          flexDirection={'row'}
+                          alignItems={'stretch'}
+                          flexDirection={'column'}
                           justifyContent={'space-between'}
                           key={`vote_against_${voteIndex}`}
                           borderBottom={`1px solid ${this.props.theme.colors['near-white']}`}
                         >
                           <Flex
+                            width={1}
                             alignItems={'center'}
                             flexDirection={'row'}
-                            justifyContent={'flex-start'}
+                            justifyContent={'space-between'}
                           >
-                            <Blockie
-                              opts={{
-                                size: 7,
-                                color: "#dfe",
-                                bgcolor: "#a71",
-                                spotcolor: "#000",
-                                seed: voteInfo.voter,
-                              }}
-                            />
-                            <Link
-                              ml={2}
+                            <Flex
+                              alignItems={'center'}
+                              flexDirection={'row'}
+                              justifyContent={'flex-start'}
+                            >
+                              <Blockie
+                                opts={{
+                                  size: 7,
+                                  color: "#dfe",
+                                  bgcolor: "#a71",
+                                  spotcolor: "#000",
+                                  seed: voteInfo.voter,
+                                }}
+                              />
+                              <Link
+                                ml={2}
+                                fontSize={1}
+                                fontWeight={2}
+                                target={'_blank'}
+                                textAlign={'left'}
+                                color={'dark-gray'}
+                                lineHeight={'initial'}
+                                hoverColor={'primary'}
+                                rel={'nofollow noopener noreferrer'}
+                                href={`/#/governance/leaderboard/${voteInfo.voter}`}
+                              >
+                                {voteInfo.voter}
+                              </Link>
+                            </Flex>
+                            <Text
                               fontSize={1}
                               fontWeight={2}
-                              target={'_blank'}
                               textAlign={'left'}
-                              color={'statValue'}
+                              color={'dark-gray'}
                               lineHeight={'initial'}
-                              hoverColor={'primary'}
-                              rel={'nofollow noopener noreferrer'}
-                              href={`/#/governance/leaderboard/${voteInfo.voter}`}
                             >
-                              {voteInfo.voter}
-                            </Link>
+                              {votes}
+                            </Text>
                           </Flex>
-                          <Text
-                            fontSize={1}
-                            fontWeight={2}
-                            textAlign={'left'}
-                            color={'statValue'}
-                            lineHeight={'initial'}
-                          >
-                            {votes}
-                          </Text>
+                          {
+                            delegateInfo && delegateInfo.delegators && delegateInfo.delegators.length>1 && (
+                              <Flex
+                                mt={1}
+                                ml={4}
+                                px={2}
+                                py={1}
+                                width={'auto'}
+                                flexDirection={'column'}
+                                backgroundColor={'cardBgHover'}
+                                borderLeft={`1px solid ${this.props.theme.colors.cardBorder}`}
+                              >
+                                {
+                                  delegateInfo.delegators.map( (delegatorInfo,delegatorIndex) => (
+                                    <Flex
+                                      width={1}
+                                      justifyContent={'space-between'}
+                                      key={`delegator_${delegatorIndex}`}
+                                    >
+                                      <Link
+                                        fontSize={1}
+                                        fontWeight={2}
+                                        target={'_blank'}
+                                        textAlign={'left'}
+                                        color={'statValue'}
+                                        key={delegatorIndex}
+                                        lineHeight={'initial'}
+                                        hoverColor={'primary'}
+                                        rel={'nofollow noopener noreferrer'}
+                                        href={this.functionsUtil.getEtherscanAddressUrl(delegatorInfo.delegator)}
+                                      >
+                                        {
+                                          this.props.isMobile ? (
+                                            <ShortHash
+                                              fontSize={1}
+                                              fontWeight={2}
+                                              {...this.props}
+                                              hash={delegatorInfo.delegator}
+                                              textAlign={'left'}
+                                              color={'statValue'}
+                                              lineHeight={'initial'}
+                                            />
+                                          ) : delegatorInfo.delegator
+                                        }
+                                      </Link>
+                                      <Text
+                                        fontSize={1}
+                                        fontWeight={2}
+                                        textAlign={'left'}
+                                        color={'statValue'}
+                                        lineHeight={'initial'}
+                                      >
+                                        {this.functionsUtil.formatMoney(this.functionsUtil.BNify(delegatorInfo.votes).toFixed(4,1),4)}
+                                      </Text>
+                                    </Flex>
+                                  ))
+                                }
+                              </Flex>
+                            )
+                          }
                         </Flex>
                       )
                     })
