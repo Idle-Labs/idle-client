@@ -2228,6 +2228,20 @@ const globalConfigs = {
               address: '0x4585F56B06D098D4EDBFc5e438b8897105991c6A'
             }
           },
+          PBTCCRV:{
+            protocol:'convex',
+            abi:LiquidityGauge,
+            rewardTokens:['IDLE'],
+            name: "LiquidityGauge_aa_convex_pbtccrv",
+            token: "LiquidityGauge_aa_convex_pbtccrv",
+            address:'0x2bea05307b42707be6cce7a16d700a06ff93a29d',
+            trancheToken:{
+              abi: ERC20,
+              name: 'AA_convex_pbtccrv',
+              token: 'AA_convex_pbtccrv',
+              address: '0x4657B96D587c4d46666C244B40216BEeEA437D0d'
+            }
+          },
           mUSD:{
             protocol:'mstable',
             abi:LiquidityGauge,

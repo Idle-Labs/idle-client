@@ -1264,11 +1264,11 @@ class Gauges extends Component {
                         showLoader:true,
                         path:['tokenConfig','totalSupply'],
                         props:{
-                          decimals:2,
                           minPrecision:1,
                           flexProps:{
                             justifyContent:'flex-start'
                           },
+                          decimals:this.props.isMobile ? 2 : 4
                         }
                       }
                     ]
@@ -1305,11 +1305,11 @@ class Gauges extends Component {
                         showLoader:true,
                         path:['tokenConfig','stakedBalance'],
                         props:{
+                          minPrecision:1,
                           flexProps:{
                             justifyContent:'flex-start'
                           },
-                          minPrecision:1,
-                          decimals:this.props.isMobile ? 0 : 2,
+                          decimals:this.props.isMobile ? 2 : 4
                         }
                       },
                     ],

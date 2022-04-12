@@ -252,7 +252,6 @@ const availableTranches = {
       }
     }
   },
-  /*
   mstable:{
     mUSD:{
       abi:ERC20,
@@ -328,7 +327,6 @@ const availableTranches = {
       }
     }
   },
-  */
   convex:{
     FRAX3CRV:{
       abi:ERC20,
@@ -816,7 +814,7 @@ const availableTranches = {
       description:'This strategy accrue interest only after an harvest is done. The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
       messages:{
         withdraw:'The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
-        buyInstructions:'To get PBTCCRV token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://curve.fi/pbtc/deposit">PBTC Curve Pool</a>.',
+        buyInstructions:'To get PBTCCRV token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://curve.fi/factory/99/deposit">PBTC Curve Pool</a>.',
       },
       AA:{
         abi:ERC20,
