@@ -1023,7 +1023,8 @@ class FunctionsUtil {
     if (idleStrategyAddress) {
       await this.props.initContract(strategyConfig.name, idleStrategyAddress, strategyConfig.abi);
       const latestHarvestBlock = await this.genericContractCall(strategyConfig.name,'latestHarvestBlock');
-      if (latestHarvestBlock){
+      console.log('getTrancheLastHarvest',tokenConfig.CDO.name,latestHarvestBlock);
+      if (parseInt(latestHarvestBlock)>0){
         const eventFilters = {
           to: idleStrategyAddress
         };
@@ -1032,7 +1033,7 @@ class FunctionsUtil {
           transfers,
         ] = await Promise.all([
           this.getBlockInfo(latestHarvestBlock),
-          this.getContractEvents(tokenConfig.token, 'Transfer', latestHarvestBlock, parseInt(latestHarvestBlock)+1, {filter: eventFilters })
+          this.getContractEvents(tokenConfig.token, 'Transfer', parseInt(latestHarvestBlock), parseInt(latestHarvestBlock)+1, {filter: eventFilters })
         ]);
 
         if (transfers && transfers.length) {
@@ -1228,7 +1229,7 @@ class FunctionsUtil {
     underlyingEventsFilters_redeems[underlyingEventsConfig.to] = [this.props.account];
     underlyingEventsFilters_redeems[underlyingEventsConfig.from] = [tokenConfig.CDO.address];
 
-    // console.log('getTrancheUserInfo_1',trancheConfig.name,trancheConfig.blockNumber,'underlyingEventsFilters',underlyingEventsFilters);
+    // console.log('getTrancheUserInfo',tokenConfig.token,underlyingEventsFilters_deposits,underlyingEventsFilters_redeems);
 
     let [
       underlying_redeems,

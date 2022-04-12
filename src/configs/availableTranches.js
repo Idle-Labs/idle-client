@@ -794,6 +794,83 @@ const availableTranches = {
         label:'convex musd3crv BB',
         address:'0xFb08404617B6afab0b19f6cEb2Ef9E07058D043C'
       }
+    },
+    PBTCCRV:{
+      abi:ERC20,
+      decimals:18,
+      token:'PBTCCRV',
+      protocol:'convex',
+      blockNumber:14570195,
+      autoFarming:['CVX','CRV'],
+      address:'0xC9467E453620f16b57a34a770C6bceBECe002587',
+      CDO:{
+        abi:IdleCDO,
+        decimals:18,
+        name:'IdleCDO_convex_pbtccrv',
+        address:'0xf324Dca1Dc621FCF118690a9c6baE40fbD8f09b7'
+      },
+      Strategy:{
+        abi:IdleStrategy,
+        name:'IdleStrategy_convex_pbtccrv'
+      },
+      description:'This strategy accrue interest only after an harvest is done. The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
+      messages:{
+        withdraw:'The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
+        buyInstructions:'To get PBTCCRV token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://curve.fi/pbtc/deposit">PBTC Curve Pool</a>.',
+      },
+      AA:{
+        abi:ERC20,
+        decimals:18,
+        tranche:'AA',
+        functions:{
+          stake:'stake',
+          claim:'claim',
+          unstake:'unstake',
+          deposit:'depositAA',
+          withdraw:'withdrawAA',
+          stakedBalance:'usersStakes',
+          rewards:'expectedUserReward'
+        },
+        CDORewards:{
+          decimals:18,
+          stakingRewards:[],
+          unstakeWithBalance:true,
+          abi:IdleCDOTrancheRewards,
+          name:'IdleCDOTrancheRewards_convex_pbtccrv_AA',
+          address:'0x0000000000000000000000000000000000000000'
+        },
+        blockNumber:14570195,
+        name:'AA_convex_pbtccrv',
+        token:'AA_convex_pbtccrv',
+        label:'convex pbtccrv AA',
+        address:'0x4657B96D587c4d46666C244B40216BEeEA437D0d'
+      },
+      BB:{
+        abi:ERC20,
+        decimals:18,
+        tranche:'BB',
+        functions:{
+          stake:'stake',
+          claim:'claim',
+          unstake:'unstake',
+          deposit:'depositBB',
+          withdraw:'withdrawBB',
+          stakedBalance:'usersStakes'
+        },
+        CDORewards:{
+          decimals:18,
+          stakingRewards:[],
+          unstakeWithBalance:true,
+          abi:IdleCDOTrancheRewards,
+          name:'IdleCDOTrancheRewards_convex_pbtccrv_BB',
+          address:'0x0000000000000000000000000000000000000000'
+        },
+        blockNumber:14570195,
+        name:'BB_convex_pbtccrv',
+        token:'BB_convex_pbtccrv',
+        label:'convex pbtccrv BB',
+        address:'0x3872418402d1e967889aC609731fc9E11f438De5'
+      }
     }
   }
 };

@@ -1230,6 +1230,17 @@ const globalConfigs = {
         },
         address: '0x1AEf73d49Dedc4b1778d0706583995958Dc862e6'
       },
+      PBTCCRV: {
+        decimals: 18,
+        enabled: true,
+        label: 'PBTCCRV',
+        color: {
+          hex: '#ff6665',
+          rgb: [255, 102, 101],
+          hsl: ['0', '100%', '70%']
+        },
+        address: '0xC9467E453620f16b57a34a770C6bceBECe002587'
+      },
       MUSD: {
         decimals: 18,
         enabled: true,
