@@ -2221,6 +2221,11 @@ const globalConfigs = {
             name: "LiquidityGauge_aa_convex_musd3crv",
             token: "LiquidityGauge_aa_convex_musd3crv",
             address:'0xAbd5e3888ffB552946Fc61cF4C816A73feAee42E',
+            multiRewards:{
+              rewardTokens:['MUSD'],
+              name:'multiRewards_aa_convex_musd3crv',
+              address:'0x7f366a2b4c4380fd9746cf10b4ded562c890b0b1',
+            },
             trancheToken:{
               abi: ERC20,
               name: 'AA_convex_musd3crv',
@@ -2235,6 +2240,11 @@ const globalConfigs = {
             name: "LiquidityGauge_aa_convex_pbtccrv",
             token: "LiquidityGauge_aa_convex_pbtccrv",
             address:'0x2bea05307b42707be6cce7a16d700a06ff93a29d',
+            multiRewards:{
+              rewardTokens:['PNT'],
+              name:'multiRewards_aa_convex_pbtccrv',
+              address:'0x7d4091D8b28d09b4135905213DE105C45d7F459d',
+            },
             trancheToken:{
               abi: ERC20,
               name: 'AA_convex_pbtccrv',
