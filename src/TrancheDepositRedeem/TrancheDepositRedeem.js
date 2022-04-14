@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import ImageButton from '../ImageButton/ImageButton';
 import TooltipText from '../TooltipText/TooltipText';
+import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import BuyModal from '../utilities/components/BuyModal';
 import TrancheField from '../TrancheField/TrancheField';
@@ -30,6 +31,7 @@ class TrancheDetails extends Component {
     modalAction:null,
     balanceProp:null,
     lastHarvest:null,
+    gaugeConfig:null,
     tokenConfig:null,
     contractInfo:null,
     tranchePrice:null,
@@ -186,8 +188,14 @@ class TrancheDetails extends Component {
       break;
       case 'stake':
         actionLabel = this.state.selectedStakeAction;
+        if (this.state.stakingEnabled){
+          infoText = trancheDetails.description[this.state.selectedStakeAction];
+        } else {
+          infoText = null;
+        }
         switch (this.state.selectedStakeAction){
           case 'stake':
+            infoText = null;
             approveEnabled = true;
             tokenConfig = this.props.trancheConfig;
             balanceProp = this.state.trancheBalance;
@@ -205,11 +213,6 @@ class TrancheDetails extends Component {
           break;
           default:
           break;
-        }
-        if (this.state.stakingEnabled){
-          infoText = trancheDetails.description[this.state.selectedStakeAction];
-        } else {
-          infoText = null;
         }
       break;
       case 'withdraw':
@@ -247,6 +250,7 @@ class TrancheDetails extends Component {
       infoBox,
       infoText,
       actionLabel,
+      gaugeConfig,
       tokenConfig,
       balanceProp,
       contractInfo,
@@ -1175,7 +1179,7 @@ class TrancheDetails extends Component {
                     <DashboardCard
                       cardProps={{
                         p: 2,
-                        mt: 3
+                        mt: 2
                       }}
                     >
                       <Flex
@@ -1198,6 +1202,24 @@ class TrancheDetails extends Component {
                         </Text>
                       </Flex>
                     </DashboardCard>
+                  ) : isStake && this.state.selectedStakeAction === 'stake' && this.state.gaugeConfig ? (
+                    <IconBox
+                      cardProps={{
+                        mt: 2
+                      }}
+                      icon={'LightbulbOutline'}
+                      text={`To earn additional staking rewards deposit your tranche token in the <a href="${this.functionsUtil.getDashboardSectionUrl(`gauges/${this.props.selectedToken}`)}" class="link">${this.props.selectedToken} Gauge</a>.`}
+                    >
+                      <RoundButton
+                        buttonProps={{
+                          mt:2,
+                          width:[1,1/2]
+                        }}
+                        handleClick={e => this.props.goToSection(`gauges/${this.props.selectedToken}`)}
+                      >
+                        Go to Gauge
+                      </RoundButton>
+                    </IconBox>
                   ) : isStake && this.state.selectedStakeAction === 'unstake' && !this.props.trancheConfig.CDORewards.unstakeWithBalance ? (
                     <DashboardCard
                       cardProps={{
