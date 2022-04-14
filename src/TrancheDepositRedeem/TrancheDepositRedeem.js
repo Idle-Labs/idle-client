@@ -196,7 +196,7 @@ class TrancheDetails extends Component {
         switch (this.state.selectedStakeAction){
           case 'stake':
             // Disable staking deposit if gaugeConfig is set
-            if (gaugeConfig){
+            if (gaugeConfig || !this.state.stakeEnabled){
               infoText = null;
             }
             approveEnabled = true;
