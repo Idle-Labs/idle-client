@@ -1023,7 +1023,7 @@ class FunctionsUtil {
     if (idleStrategyAddress) {
       await this.props.initContract(strategyConfig.name, idleStrategyAddress, strategyConfig.abi);
       const latestHarvestBlock = await this.genericContractCall(strategyConfig.name,'latestHarvestBlock');
-      console.log('getTrancheLastHarvest',tokenConfig.CDO.name,latestHarvestBlock);
+      // console.log('getTrancheLastHarvest',tokenConfig.CDO.name,latestHarvestBlock);
       if (parseInt(latestHarvestBlock)>0){
         const eventFilters = {
           to: idleStrategyAddress

@@ -195,7 +195,10 @@ class TrancheDetails extends Component {
         }
         switch (this.state.selectedStakeAction){
           case 'stake':
-            infoText = null;
+            // Disable staking deposit if gaugeConfig is set
+            if (gaugeConfig){
+              infoText = null;
+            }
             approveEnabled = true;
             tokenConfig = this.props.trancheConfig;
             balanceProp = this.state.trancheBalance;
