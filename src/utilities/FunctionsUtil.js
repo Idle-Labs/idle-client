@@ -4553,7 +4553,7 @@ class FunctionsUtil {
     // const currentGaugeTimestamp = await this.genericContractCall('GaugeController','time_weight',[gaugeConfig.address]);
     const blockInfo = await this.getBlockInfo();
     const nextGaugeTimestamp = parseInt(blockInfo.timestamp/604800)*604800+604800;
-    const gaugeType = await this.genericContractCall('GaugeController','gauge_types',[gaugeConfig.address]);
+    // const gaugeType = await this.genericContractCall('GaugeController','gauge_types',[gaugeConfig.address]);
     let [
       // totalWeight,
       // gaugeTypeWeight,

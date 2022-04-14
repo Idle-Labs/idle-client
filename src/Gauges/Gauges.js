@@ -428,8 +428,8 @@ class Gauges extends Component {
 
         if (this.props.account){
           gaugeUserShare = stakedBalance.div(gaugeTotalSupply);
-          const veTokenShare = this.functionsUtil.BNify(this.functionsUtil.normalizeTokenAmount(this.state.veTokenBalance,18)).div(this.state.veTokenTotalSupply);
-          const userBaseDistribution = gaugeDistributionRate.times(gaugeUserShare);
+          // const veTokenShare = this.functionsUtil.BNify(this.functionsUtil.normalizeTokenAmount(this.state.veTokenBalance,18)).div(this.state.veTokenTotalSupply);
+          // const userBaseDistribution = gaugeDistributionRate.times(gaugeUserShare);
 
           const userBoostedShare = this.functionsUtil.BNify(userWorkingBalance).div(gaugeWorkingSupply);
           userBoostedDistribution = gaugeDistributionRate.times(userBoostedShare);
