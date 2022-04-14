@@ -325,19 +325,28 @@ class FunctionsUtil {
 
     await this.asyncForEach(Object.keys(availableTranches), async (protocol) => {
       const protocolConfig = availableTranches[protocol];
+
       await this.asyncForEach(Object.keys(protocolConfig), async (token) => {
         const tokenConfig = protocolConfig[token];
+
         await this.asyncForEach(Object.keys(tranches), async (tranche) => {
           const trancheConfig = tokenConfig[tranche];
+          
+          let gaugeConfig = this.getGlobalConfig(['tools','gauges','props','availableGauges',token]);
+          if (gaugeConfig && gaugeConfig.trancheToken.token.toLowerCase() !== trancheConfig.token.toLowerCase()){
+            gaugeConfig = null;
+          }
 
           let [
             trancheTokenBalance,
             trancheUserInfo,
+            gaugeStakedBalance,
             stakingRewards,
             trancheStakedBalance,
           ] = await Promise.all([
             this.getContractBalance(trancheConfig.name,account),
             this.getTrancheUserInfo(tokenConfig, trancheConfig, account),
+            gaugeConfig ? this.getContractBalance(gaugeConfig.name, account) : this.BNify(0),
             this.getTrancheStakingRewards(account,trancheConfig,trancheConfig.functions.rewards),
             this.getTrancheStakedBalance(trancheConfig.CDORewards.name,account,null,trancheConfig.functions.stakedBalance),
           ]);
@@ -359,9 +368,12 @@ class FunctionsUtil {
             portfolio.stakingRewards[rewardToken].tokenAmount = portfolio.stakingRewards[rewardToken].tokenAmount.plus(tokenAmount);
           });
 
-          if ((trancheTokenBalance && this.BNify(trancheTokenBalance).gt(0)) || (trancheStakedBalance && this.BNify(trancheStakedBalance).gt(0))) {
+          // console.log('trancheTokenBalance',trancheTokenBalance.toString(),'trancheStakedBalance',trancheStakedBalance.toString());
+
+          if ((trancheTokenBalance && this.BNify(trancheTokenBalance).gt(0)) || (trancheStakedBalance && this.BNify(trancheStakedBalance).gt(0)) || (gaugeStakedBalance && this.BNify(gaugeStakedBalance).gt(0))) {
+            gaugeStakedBalance = this.fixTokenDecimals(gaugeStakedBalance,trancheConfig.decimals);
             trancheTokenBalance = this.fixTokenDecimals(trancheTokenBalance,trancheConfig.decimals);
-            trancheStakedBalance = this.fixTokenDecimals(trancheStakedBalance,trancheConfig.decimals);
+            trancheStakedBalance = this.fixTokenDecimals(trancheStakedBalance,trancheConfig.decimals).plus(gaugeStakedBalance);
             trancheTokenBalance = trancheTokenBalance.plus(trancheStakedBalance);
 
             // console.log(protocol,token,tranche,'trancheTokenBalance',trancheTokenBalance.toFixed(5));
@@ -4523,7 +4535,7 @@ class FunctionsUtil {
     let lim = l.times(TOKENLESS_PRODUCTION).div(100);
 
     lim = lim.plus(L.times(voting_balance).div(voting_total).times((this.BNify(100).minus(TOKENLESS_PRODUCTION)).div(100)));
-    lim = Math.min(l, lim);
+    lim = this.BNify(Math.min(l, lim));
     
     let old_bal = working_balances;
     let noboost_lim = TOKENLESS_PRODUCTION.times(l).div(100);
@@ -4532,9 +4544,34 @@ class FunctionsUtil {
 
     boost = this.BNify(lim).div(_working_supply).div(noboost_lim.div(noboost_supply));
 
-    console.log('calculateGaugeBoost',gaugeName,voting_balance.toFixed(),voting_total.toFixed(),l.toFixed(),L.toFixed(),lim.toFixed(),_working_supply.toFixed(),noboost_lim.toFixed(),noboost_supply.toFixed(),boost.toFixed());
+    // console.log('calculateGaugeBoost',gaugeName,voting_balance.div(1e18).toFixed(),voting_total.div(1e18).toFixed(),l.div(1e18).toFixed(),L.div(1e18).toFixed(),lim.div(1e18).toFixed(),_working_supply.div(1e18).toFixed(),noboost_lim.div(1e18).toFixed(),noboost_supply.div(1e18).toFixed(),boost.toFixed());
 
     return boost;
+  }
+  getGaugeNextWeight = async (gaugeConfig) => {
+    // const currentGaugeTimestamp = await this.genericContractCall('GaugeController','time_weight',[gaugeConfig.address]);
+    const blockInfo = await this.getBlockInfo();
+    const nextGaugeTimestamp = parseInt(blockInfo.timestamp/604800)*604800+604800;
+    const gaugeType = await this.genericContractCall('GaugeController','gauge_types',[gaugeConfig.address]);
+    let [
+      // totalWeight,
+      // gaugeTypeWeight,
+      // gaugePointWeight,
+      gaugeWeight
+    ] = await Promise.all([
+      // this.genericContractCall('GaugeController','points_total',[nextGaugeTimestamp]),
+      // this.genericContractCall('GaugeController','points_type_weight',[gaugeType,nextGaugeTimestamp]),
+      // this.genericContractCall('GaugeController','points_weight',[gaugeConfig.address,nextGaugeTimestamp]),
+      this.genericContractCall('GaugeController','gauge_relative_weight',[gaugeConfig.address,nextGaugeTimestamp])
+    ]);
+    // console.log('getGaugeNextWeight',gaugeConfig.name,gaugeType,nextGaugeTimestamp,totalWeight,gaugeTypeWeight,gaugePointWeight,gaugeWeight);
+
+    gaugeWeight = this.BNify(gaugeWeight);
+    if (gaugeWeight.isNaN()){
+      gaugeWeight = this.BNify(0);
+    }
+
+    return gaugeWeight;
   }
   getGaugeRewardsTokens = async (gaugeConfig, account=null) => {
     const rewardTokensRate = {};

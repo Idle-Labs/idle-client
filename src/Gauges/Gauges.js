@@ -109,7 +109,10 @@ class Gauges extends Component {
       return obj;
     }, {});
 
-    const selectedToken = this.props.urlParams.param2 && Object.keys(availableTokens).includes(this.props.urlParams.param2) ? this.props.urlParams.param2 : Object.keys(availableTokens)[0];
+    const tokenUrlParam = this.props.urlParams.param2 || this.props.urlParams.param1;
+    const selectedToken = tokenUrlParam && Object.keys(availableTokens).includes(tokenUrlParam) ? tokenUrlParam : Object.keys(availableTokens)[0];
+
+    // console.log(this.props.urlParams,Object.keys(availableTokens).includes(this.props.urlParams.param2),selectedToken);
 
     this.setState({
       selectedToken,
@@ -138,7 +141,7 @@ class Gauges extends Component {
     let TOKENLESS_PRODUCTION = this.functionsUtil.BNify(40);
     let lim = l.times(TOKENLESS_PRODUCTION).div(100);
     lim = lim.plus(L.times(voting_balance).div(voting_total).times((this.functionsUtil.BNify(100).minus(TOKENLESS_PRODUCTION)).div(100)));
-    lim = Math.min(l, lim);
+    lim = this.functionsUtil.BNify(Math.min(l, lim));
     
     let old_bal = working_balances;
     let noboost_lim = TOKENLESS_PRODUCTION.times(l).div(100);
@@ -151,7 +154,7 @@ class Gauges extends Component {
       boost = this.functionsUtil.BNify(1);
     }
 
-    // console.log('calculateGaugeBoost',voting_balance.toFixed(),voting_total.toFixed(),l.toFixed(),L.toFixed(),lim.toFixed(),_working_supply.toFixed(),noboost_lim.toFixed(),noboost_supply.toFixed(),boost.toFixed());
+    // console.log('calculateGaugeBoost',voting_balance.div(1e18).toFixed(),voting_total.div(1e18).toFixed(),l.div(1e18).toFixed(),L.div(1e18).toFixed(),lim.div(1e18).toFixed(),_working_supply.div(1e18).toFixed(),noboost_lim.div(1e18).toFixed(),noboost_supply.div(1e18).toFixed(),boost.toFixed());
 
     return boost;
   }
@@ -357,6 +360,7 @@ class Gauges extends Component {
 
       availableGauges[gaugeConfig.protocol][gaugeToken] = trancheConfig;
       availableGauges[gaugeConfig.protocol][gaugeToken].weight = null;
+      availableGauges[gaugeConfig.protocol][gaugeToken].nextWeight = null;
       availableGauges[gaugeConfig.protocol][gaugeToken].totalSupply = null;
       availableGauges[gaugeConfig.protocol][gaugeToken].rewardsTokens = null;
       availableGauges[gaugeConfig.protocol][gaugeToken].stakedBalance = null;
@@ -371,6 +375,7 @@ class Gauges extends Component {
 
   async loadGauges(){
 
+    const gaugesOrderKeys = {};
     const availableGauges = {};
     const veTokenConfig = this.props.toolProps.veToken;
     await this.functionsUtil.asyncForEach(Object.keys(this.props.toolProps.availableGauges), async (gaugeToken) => {
@@ -389,14 +394,20 @@ class Gauges extends Component {
         }
 
         let [
+          gaugeNextWeight,
           gaugeTotalSupply,
           stakedBalance,
           rewardsTokens,
+          gaugeWorkingSupply,
+          userWorkingBalance,
           gaugeWeight,
         ] = await Promise.all([
+          this.functionsUtil.getGaugeNextWeight(gaugeConfig),
           this.functionsUtil.getTokenTotalSupply(gaugeConfig.name),
           this.functionsUtil.getTokenBalance(gaugeConfig.name,this.props.account),
           this.functionsUtil.getGaugeRewardsTokens(gaugeConfig,this.props.account),
+          this.functionsUtil.genericContractCall(gaugeConfig.name,'working_supply'),
+          this.functionsUtil.genericContractCall(gaugeConfig.name,'working_balances',[this.props.account]),
           this.functionsUtil.genericContractCall('GaugeController','gauge_relative_weight',[gaugeConfig.address])
         ]);
 
@@ -411,6 +422,7 @@ class Gauges extends Component {
         let gaugeUserShare = null;
         let userBoostedDistribution = null;
         gaugeWeight = this.functionsUtil.fixTokenDecimals(gaugeWeight,18);
+        gaugeNextWeight = this.functionsUtil.fixTokenDecimals(gaugeNextWeight,18);
         gaugeTotalSupply = this.functionsUtil.fixTokenDecimals(gaugeTotalSupply,18);
         const gaugeDistributionRate = this.state.distributionRate.times(gaugeWeight);
 
@@ -418,13 +430,14 @@ class Gauges extends Component {
           gaugeUserShare = stakedBalance.div(gaugeTotalSupply);
           const veTokenShare = this.functionsUtil.BNify(this.functionsUtil.normalizeTokenAmount(this.state.veTokenBalance,18)).div(this.state.veTokenTotalSupply);
           const userBaseDistribution = gaugeDistributionRate.times(gaugeUserShare);
-          const boostMultiplier = veTokenShare.times(1.5).plus(1);
-          userBoostedDistribution = boostMultiplier.times(userBaseDistribution);
+
+          const userBoostedShare = this.functionsUtil.BNify(userWorkingBalance).div(gaugeWorkingSupply);
+          userBoostedDistribution = gaugeDistributionRate.times(userBoostedShare);
           if (userBoostedDistribution.gt(gaugeDistributionRate)){
             userBoostedDistribution = gaugeDistributionRate;
           }
           // console.log(gaugeConfig.name,stakedBalance.toFixed(),gaugeTotalSupply.toFixed());
-          // console.log(gaugeConfig.name,'veTokenShare',veTokenShare.toFixed(8),'gaugeUserShare',gaugeUserShare.toFixed(8),'userBaseDistribution',userBaseDistribution.toFixed(8),'userBoostedDistribution',userBoostedDistribution.toFixed(8),'gaugeDistributionRate',gaugeDistributionRate.toFixed(8));
+          // console.log(gaugeConfig.name,'veTokenShare',veTokenShare.toFixed(8),'gaugeUserShare',gaugeUserShare.toFixed(8),'gaugeUserBoostedShare',userBoostedShare.toFixed(8),'userBaseDistribution',userBaseDistribution.toFixed(8),'userBoostedDistribution',userBoostedDistribution.toFixed(8),'gaugeDistributionRate',gaugeDistributionRate.toFixed(8));
         } else {
           stakedBalance = this.functionsUtil.BNify(0);
         }
@@ -460,13 +473,37 @@ class Gauges extends Component {
         availableGauges[gaugeConfig.protocol][gaugeToken].stakedBalance = stakedBalance;
         availableGauges[gaugeConfig.protocol][gaugeToken].totalSupply = gaugeTotalSupply;
         availableGauges[gaugeConfig.protocol][gaugeToken].claimableTokens = claimableTokens;
-        availableGauges[gaugeConfig.protocol][gaugeToken].distributionRate = distributionRate; //`${gaugeDistributionRate.toFixed(4)} IDLE/day`;
+        availableGauges[gaugeConfig.protocol][gaugeToken].distributionRate = distributionRate;
         availableGauges[gaugeConfig.protocol][gaugeToken].weight = gaugeWeight.times(100).toFixed(2)+'%';
+        availableGauges[gaugeConfig.protocol][gaugeToken].nextWeight = gaugeNextWeight.times(100).toFixed(2)+'%';
+
+        gaugesOrderKeys[`${gaugeWeight.times(100).toFixed(2)}_${gaugeConfig.protocol}_${gaugeToken}`] = {
+          gaugeToken,
+          gaugeConfig
+        };
       }
     });
 
+    const gaugesOrderedKeys = Object.keys(gaugesOrderKeys).sort().reverse().reduce(
+      (obj, key) => { 
+        obj[key] = gaugesOrderKeys[key]; 
+        return obj;
+      }, 
+      {}
+    );
+
+
+    const availableGaugesSorted = {};
+    Object.values(gaugesOrderedKeys).forEach( g => {
+      if (!availableGaugesSorted[g.gaugeConfig.protocol]){
+        availableGaugesSorted[g.gaugeConfig.protocol] = {};
+      }
+      availableGaugesSorted[g.gaugeConfig.protocol][g.gaugeToken] = availableGauges[g.gaugeConfig.protocol][g.gaugeToken];
+    });
+
+    // console.log('availableGauges',availableGaugesSorted,gaugesOrderedKeys);
     this.setState({
-      availableGauges
+      availableGauges:availableGaugesSorted
     });
   }
 
@@ -883,8 +920,11 @@ class Gauges extends Component {
                       cardProps={{
                         mt:1
                       }}
-                      icon={'AccessTime'}
-                      text={`Please wait until <strong>${this.state.unlockDate} UTC</strong> to allocate your voting power to this Gauge.`}
+                      icon={'DoneAll'}
+                      iconProps={{
+                        color:'tick'
+                      }}
+                      text={`Your vote has been succesfully broadcasted and will remain registered until you change it.<br />Wait until <strong>${this.state.unlockDate} UTC</strong> to update your vote for this gauge.`}
                     />
                   ) : (this.state.selectedAction === 'vote' || this.state.stakeAction !== 'claim') && this.state.tokenConfig ? (
                     <SendTxWithBalance
@@ -1140,7 +1180,7 @@ class Gauges extends Component {
                   {
                     title:'PROTOCOL', 
                     props:{
-                      width:[0.35, 0.14]
+                      width:[0.35, 0.12]
                     },
                     fields:[
                       {
@@ -1166,7 +1206,7 @@ class Gauges extends Component {
                   {
                     title:'TOKEN',
                     props:{
-                      width:[0.16, 0.14],
+                      width:[0.16, 0.13],
                     },
                     fields:[
                       {
@@ -1184,9 +1224,9 @@ class Gauges extends Component {
                   },
                   {
                     mobile:false,
-                    title:'GAUGE WEIGHT',
+                    title:'WEIGHT',
                     props:{
-                      width:[0.25,0.11],
+                      width:[0.25,0.07],
                     },
                     fields:[
                       {
@@ -1198,9 +1238,24 @@ class Gauges extends Component {
                     ]
                   },
                   {
+                    mobile:false,
+                    title:'NEXT WEIGHT',
+                    props:{
+                      width:[0.25,0.1],
+                    },
+                    fields:[
+                      {
+                        type:'text',
+                        name:'custom',
+                        showLoader:true,
+                        path:['tokenConfig','nextWeight']
+                      }
+                    ]
+                  },
+                  {
                     title:'TOTAL SUPPLY',
                     props:{
-                      width:[0.26, 0.10],
+                      width:[0.26, 0.1],
                     },
                     fields:[
                       {
@@ -1241,7 +1296,7 @@ class Gauges extends Component {
                     mobile:false,
                     title:'DEPOSITED',
                     props:{
-                      width:[0.27,0.09],
+                      width:[0.27,0.08],
                     },
                     fields:[
                       {
@@ -1260,9 +1315,9 @@ class Gauges extends Component {
                     ],
                   },
                   {
-                    title:this.props.isMobile ? 'REWARDS' : 'REWARDS TOKENS',
+                    title:'REWARDS',
                     props:{
-                      width:[0.23, 0.12],
+                      width:[0.23, 0.08],
                     },
                     fields:[
                       {
@@ -1280,7 +1335,7 @@ class Gauges extends Component {
                     mobile:false,
                     title:'DISTRIBUTION RATE',
                     props:{
-                      width:[0.15, 0.13],
+                      width:[0.15, 0.14],
                     },
                     fields:[
                       {
@@ -1299,7 +1354,7 @@ class Gauges extends Component {
                     mobile:false,
                     title:'CLAIMABLE REWARDS',
                     props:{
-                      width:[0.25,0.17],
+                      width:[0.25,0.18],
                     },
                     fields:[
                       {
