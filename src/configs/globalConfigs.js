@@ -2252,6 +2252,7 @@ const globalConfigs = {
               address: '0x4657B96D587c4d46666C244B40216BEeEA437D0d'
             }
           },
+          /*
           mUSD:{
             protocol:'mstable',
             abi:LiquidityGauge,
@@ -2266,6 +2267,7 @@ const globalConfigs = {
               address: '0xfC558914b53BE1DfAd084fA5Da7f281F798227E7'
             }
           },
+          */
         }
       }
     },
