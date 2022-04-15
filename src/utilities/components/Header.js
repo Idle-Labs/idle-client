@@ -72,7 +72,7 @@ class Header extends React.Component {
             color={'white'}
             textAlign={'center'}
           >
-            IDLE Governance Token is now live!
+            stkIDLE Gauges are now live at full throttle with $IDLE rewards!
           </Text>
           <ExtLink
             pr={2}
@@ -88,9 +88,9 @@ class Header extends React.Component {
               alignItems:'flex-end'
             }}
             backgroundColor={'#0037ff'}
-            href={'https://idlefinance.medium.com/idle-governance-is-live-9b55e8f407d7'}
+            href={'https://medium.com/idle-finance/introducing-stkidle-gauges-a-new-stakers-centric-paradigm-for-pyts-and-lps-8c0ef167232e'}
           >
-            Read More
+            Discover More
             <Icon
               ml={1}
               size={'1.3em'}
