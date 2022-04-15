@@ -1103,7 +1103,7 @@ class Gauges extends Component {
                                 color={'cellText'}
                                 textAlign={'center'}
                               >
-                                You can claim {Object.keys(this.state.claimableRewardsTokens).map( token => (<strong>{this.state.claimableRewardsTokens[token].toFixed(8)} {token}</strong>) )}.
+                                You can claim {Object.keys(this.state.claimableRewardsTokens).map( (token,index) => (<strong key={`reward_${index}`}>{this.state.claimableRewardsTokens[token].toFixed(8)} {token}</strong>) )}.
                               </Text>
                               <ExecuteTransaction
                                 params={[]}

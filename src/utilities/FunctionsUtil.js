@@ -333,7 +333,7 @@ class FunctionsUtil {
           const trancheConfig = tokenConfig[tranche];
           
           let gaugeConfig = this.getGlobalConfig(['tools','gauges','props','availableGauges',token]);
-          if (gaugeConfig && gaugeConfig.trancheToken.token.toLowerCase() !== trancheConfig.token.toLowerCase()){
+          if (gaugeConfig && gaugeConfig.trancheToken && gaugeConfig.trancheToken.token.toLowerCase() !== trancheConfig.token.toLowerCase()){
             gaugeConfig = null;
           }
 
@@ -1053,6 +1053,32 @@ class FunctionsUtil {
     }
 
     return null;
+  }
+  getGovTokenApr = async (govToken, poolTokenConfig, poolSupply, tokensPerSecond) => {
+    const govTokenConfig = this.getTokenConfig(govToken);
+    const DAITokenConfig = {
+      address: this.getContractByName('DAI')._address
+    };
+
+    let conversionRate = this.BNify(1);
+
+    [
+      conversionRate,
+      poolSupply
+    ] = await Promise.all([
+      this.getUniswapConversionRate(DAITokenConfig, govTokenConfig),
+      this.convertTokenBalance(poolSupply,poolTokenConfig.token,poolTokenConfig)
+    ]);
+
+    const tokensPerYear = this.BNify(tokensPerSecond).times(this.getGlobalConfig(['network', 'secondsPerYear']));
+    const convertedTokensPerYear = tokensPerYear.times(conversionRate);
+    const tokenApr = convertedTokensPerYear.div(poolSupply).times(100);
+    const tokenApy = this.apr2apy(tokenApr.div(100)).times(100);
+    
+    return {
+      apr:tokenApr,
+      apy:tokenApy,
+    };
   }
   getTrancheRewardTokensInfo = async (tokenConfig, trancheConfig) => {
     const stakingRewards = await this.loadTrancheFieldRaw('stakingRewards', {}, tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, tokenConfig, trancheConfig);
@@ -4575,13 +4601,16 @@ class FunctionsUtil {
     return gaugeWeight;
   }
   getGaugeRewardsTokens = async (gaugeConfig, account=null) => {
-    const rewardTokensRate = {};
-    const rewardTokensBalances = {};
+    const rewardTokenInfo = {};
     const rewardTokens = gaugeConfig.rewardTokens ? gaugeConfig.rewardTokens : [];
 
     if (rewardTokens.length){
       const claimableTokens = account ? await this.genericContractCall(gaugeConfig.name,'claimable_tokens',[account]) : this.BNify(0);
-      rewardTokensBalances[rewardTokens[0]] = this.BNify(claimableTokens);
+      rewardTokenInfo[rewardTokens[0]] = {
+        apr:null,
+        rate:this.BNify(0),
+        balance:this.BNify(claimableTokens)
+      };
     }
 
     // Add multiRewards tokens
@@ -4610,9 +4639,30 @@ class FunctionsUtil {
               ]);
 
               if (rewardData && this.BNify(rewardData.rewardRate).gt(0)){
+                const cdoConfig = this.props.availableTranches[gaugeConfig.protocol][gaugeConfig.underlyingToken];
+                const trancheConfig = cdoConfig.AA;
+
+                const [
+                  gaugeTotalSupply,
+                  trancheTokenPrice
+                ] = await Promise.all([
+                  this.getTokenTotalSupply(gaugeConfig.name),
+                  this.genericContractCallCached(cdoConfig.CDO.name, 'virtualPrice', [trancheConfig.address])
+                ]);
+
+                const tokensPerSecond = this.fixTokenDecimals(rewardData.rewardRate,18);
+                const gaugeUnderlyingTokenConfig = this.getTokenConfig(gaugeConfig.underlyingToken);
+                const gaugeTotalSupplyUnderlying = this.fixTokenDecimals(gaugeTotalSupply,18).times(this.fixTokenDecimals(trancheTokenPrice,18));
+
+                // console.log('gaugeTotalSupplyUnderlying',tokenConfig.token,gaugeTotalSupplyUnderlying,gaugeUnderlyingTokenConfig);
+
                 rewardTokens.push(tokenConfig.token);
-                rewardTokensBalances[tokenConfig.token] = this.BNify(rewardTokenBalance);
-                rewardTokensRate[tokenConfig.token] = this.fixTokenDecimals(rewardData.rewardRate,18).times(86400);
+                const rewardTokenApr = await this.getGovTokenApr(tokenConfig.token,gaugeUnderlyingTokenConfig,gaugeTotalSupplyUnderlying,tokensPerSecond);
+                rewardTokenInfo[tokenConfig.token] = {
+                  balance:this.BNify(rewardTokenBalance),
+                  rate:tokensPerSecond.times(86400),
+                  ...rewardTokenApr
+                };
               }
             }
           }
@@ -4624,8 +4674,14 @@ class FunctionsUtil {
 
     return rewardTokens ? rewardTokens.reduce( (rewardTokens,rewardToken) => {
       rewardTokens[rewardToken] = this.getGlobalConfig(['stats','tokens',rewardToken.toUpperCase()]) || {};
-      rewardTokens[rewardToken].rate = rewardTokensRate[rewardToken] || this.BNify(0);
-      rewardTokens[rewardToken].balance = rewardTokensBalances[rewardToken] || this.BNify(0);
+
+      if (!rewardTokenInfo[rewardToken]){
+        rewardTokenInfo[rewardToken] = {
+          rate:this.BNify(0),
+          balance:this.BNify(0)
+        };
+      }
+      rewardTokens[rewardToken] = {...rewardTokens[rewardToken],...rewardTokenInfo[rewardToken]};
       return rewardTokens;
     },{}) : null;
   }
@@ -4673,8 +4729,11 @@ class FunctionsUtil {
     const stakingEnabled = stakingRewardsEnabled && stakingRewardsEnabled.length>0 ? true : false;
     const tokenName = this.getGlobalConfig(['stats', 'tokens', token.toUpperCase(), 'label']) || this.capitalize(token);
 
-    const gaugeConfig = this.getGlobalConfig(['tools','gauges','props','availableGauges',token]);
-    // console.log('loadTrancheField',protocol,token,tranche,stakingRewards,stakingEnabled);
+    let gaugeConfig = this.getGlobalConfig(['tools','gauges','props','availableGauges',token]);
+    if (gaugeConfig && trancheConfig && gaugeConfig.trancheToken && gaugeConfig.trancheToken.token.toLowerCase() !== trancheConfig.token.toLowerCase()){
+      gaugeConfig = null;
+    }
+    // console.log('loadTrancheField',protocol,token,tranche,field);
 
     const strategyConfig = tokenConfig.Strategy;
     const show_idle_apy = internal_view && parseInt(internal_view) === 1;
@@ -4925,14 +4984,17 @@ class FunctionsUtil {
         let apy = this.BNify(0);
         let trancheApyDecimals = 2;
         let baseApy = this.BNify(0);
+        let gaugeRewardsTokens = null;
         let curveBaseApy = this.BNify(0);
 
         [
           rewardsTokensInfo,
+          gaugeRewardsTokens,
           curveBaseApy,
           trancheApy
         ] = await Promise.all([
           this.getTrancheRewardTokensInfo(tokenConfig,trancheConfig),
+          gaugeConfig ? this.getGaugeRewardsTokens(gaugeConfig) : null,
           tokenConfig.curveApyPath ? this.getCurveAPYs(tokenConfig.curveApyPath) : null,
           this.genericContractCallCached(tokenConfig.CDO.name, 'getApr', [trancheConfig.address])
         ]);
@@ -4954,6 +5016,18 @@ class FunctionsUtil {
               const rewardTokenInfo = rewardsTokensInfo[token];
               if (!this.BNify(rewardTokenInfo.apy).isNaN() && (token !== 'IDLE' || show_idle_apy)){
                 const tokenApy = this.BNify(rewardTokenInfo.apy);
+                apy = apy.plus(tokenApy);
+                tokensApy[token] = tokenApy;
+              }
+            });
+          }
+
+          // Add gauge multirewards tokens APRs
+          if (gaugeRewardsTokens && field !== 'trancheBaseApy'){
+            Object.keys(gaugeRewardsTokens).forEach( token => {
+              const gaugeRewardTokenInfo = gaugeRewardsTokens[token];
+              if (!this.BNify(gaugeRewardTokenInfo.apy).isNaN() && (token !== 'IDLE' || show_idle_apy)){
+                const tokenApy = this.BNify(gaugeRewardTokenInfo.apy);
                 apy = apy.plus(tokenApy);
                 tokensApy[token] = tokenApy;
               }
@@ -6393,10 +6467,11 @@ class FunctionsUtil {
     blockNumber = blockNumber !== 'latest' && blockNumber && !isNaN(blockNumber) ? parseInt(blockNumber) : blockNumber;
 
     try {
-      // console.log(`genericContractCall - ${contractName} - ${methodName} - [${params.join(',')}]`);
       const value = await contract.methods[methodName](...params).call(callParams, blockNumber).catch(error => {
         this.customLog(`${contractName} contract method ${methodName} error: `, error);
       });
+      
+      // console.log(`genericContractCall - ${contractName} - ${methodName} - [${params.join(',')}] - ${value}`);
       // if (!value){
       //   console.log('genericContractCall - NULL - ',contractName,methodName,params);
       // }
@@ -7971,6 +8046,9 @@ class FunctionsUtil {
     }
     const tokenConfigStats = this.getGlobalConfig(['stats','tokens',token.toUpperCase()]);
     return tokenConfigStats && tokenConfigStats.icon ? tokenConfigStats.icon : `images/tokens/${token}.svg`;
+  }
+  getTokenConfig = (token) => {
+    return this.getGlobalConfig(['stats','tokens',token.toUpperCase()]);
   }
   getTokenConfigByAddress = (address) => {
     if (!address) {
