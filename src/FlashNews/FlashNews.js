@@ -1,6 +1,6 @@
 import ExtLink from "../ExtLink/ExtLink";
 import React, { Component } from 'react';
-import { Flex, Icon, Text } from "rimble-ui";
+import { Flex, Icon, Text, Image } from "rimble-ui";
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import DashboardCard from "../DashboardCard/DashboardCard";
 
@@ -24,8 +24,8 @@ class FlashNews extends Component {
   async componentDidMount(){
     this.loadUtils();
 
+    const gaugesConfg = this.functionsUtil.getGlobalConfig(["tools", "gauges"]);
     const stakingConfig = this.functionsUtil.getGlobalConfig(["tools", "stake"]);
-    const nexusMutualConfig = this.functionsUtil.getGlobalConfig(["tools", "nexusMutual"]);
     // const stakingPolygonConfig = this.functionsUtil.getGlobalConfig(["tools", "stakePolygon"]);
 
     const flashNews = {
@@ -49,12 +49,12 @@ class FlashNews extends Component {
           }
         },
         {
-          icon: nexusMutualConfig.icon,
-          name: nexusMutualConfig.label,
-          text: `Protect your funds against smart-contract attacks with Nexus Mutual.`,
+          name: gaugesConfg.label,
+          image: gaugesConfg.image,
+          text: `stkIDLE Gauges are now live at full throttle with $IDLE rewards!`,
           link: {
-            text: `Get Covered`,
-            url: this.functionsUtil.getDashboardSectionUrl(`tools/${this.functionsUtil.getGlobalConfig(["tools", "nexusMutual", "route"])}`)
+            text: `Go to Gauges`,
+            url: this.functionsUtil.getDashboardSectionUrl(`gauges`)
           }
         }
       ],
@@ -101,12 +101,23 @@ class FlashNews extends Component {
           justifyContent={"center"}
           flexDirection={["column", "row"]}
         >
-          <Icon
-            mr={1}
-            size={"1.2em"}
-            color={"flashColor"}
-            name={this.state.activeNews.icon}
-          />
+          {
+            this.state.activeNews.icon ? (
+              <Icon
+                mr={1}
+                size={"1.2em"}
+                color={"flashColor"}
+                name={this.state.activeNews.icon}
+              />
+            ) : this.state.activeNews.image && (
+              <Image
+                mr={1}
+                width={"1.2em"}
+                heght={"1.2em"}
+                src={this.state.activeNews.image}
+              />
+            )
+          }
           <Text
             fontWeight={500}
             fontSize={"15px"}
