@@ -78,6 +78,7 @@ import GaugeDistributorProxy from '../contracts/GaugeDistributorProxy.json';
 import StakingFeeDistributor from "../contracts/StakingFeeDistributor.json";
 import NexusMutualDistributor from "../abis/nexus/NexusMutualDistributor.json";
 import BalancerExchangeProxy from "../abis/balancer/BalancerExchangeProxy.json";
+import GaugesBoostCalculator from "../GaugesBoostCalculator/GaugesBoostCalculator";
 import IdleConverterPersonalSignV4 from "../contracts/IdleConverterPersonalSignV4.json";
 import MinimalInitializableProxyFactory from "../contracts/MinimalInitializableProxyFactory.json";
 
@@ -2309,6 +2310,18 @@ const globalConfigs = {
           },
           */
         }
+      }
+    },
+    gaugesCalculator:{
+      icon: "Tune",
+      enabled: true,
+      route: "gauges-calculator",
+      availableNetworks: [1],
+      label: "Gauges Boost Calculator",
+      subComponent: GaugesBoostCalculator,
+      desc: "Calculate your boost for each Gauge based on your voting power",
+      props: {
+
       }
     },
     stake: {

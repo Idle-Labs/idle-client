@@ -4524,24 +4524,32 @@ class FunctionsUtil {
     }
     return this.BNify(0);
   }
-  calculateGaugeBoost = async (gaugeName,stakedBalance,account) => {
+  calculateGaugeBoost = async (gaugeToken,stakedBalance,veTokenBalance=null,account=null) => {
 
     let boost = this.BNify(1);
 
-    account = account ? account : this.props.account;
     const veTokenConfig = this.getGlobalConfig(['tools','gauges','props','veToken']);
-    const gaugeConfig = this.getGlobalConfig(['tools','gauges','props','availableGauges',gaugeName]);
-    if (!gaugeConfig || !account){
-      return boost;
+    const gaugeConfig = this.getGlobalConfig(['tools','gauges','props','availableGauges',gaugeToken]);
+    if (!gaugeConfig){
+      return {
+        boost,
+        workingBalance:this.BNify(0)
+      };
+    }
+
+    // Init veToken contract
+    const veTokenContract = this.getContractByName(veTokenConfig.token);
+    if (!veTokenContract){
+      await this.props.initContract(veTokenConfig.token, veTokenConfig.address, veTokenConfig.abi);
     }
 
     const aggcalls = await Promise.all([
-      this.getTokenBalance(veTokenConfig.token,account,false),
+      veTokenBalance ? this.normalizeTokenAmount(veTokenBalance,18) : (account ? this.getTokenBalance(veTokenConfig.token,account,false) : this.BNify(0)),
       this.getTokenTotalSupply(veTokenConfig.token),
-      this.genericContractCallCached(gaugeConfig.name,'working_balances',[account]),
+      account ? this.genericContractCallCached(gaugeConfig.name,'working_balances',[account]) : this.BNify(0),
       this.genericContractCallCached(gaugeConfig.name,'working_supply'),
       this.genericContractCallCached(gaugeConfig.name,'totalSupply'),
-      this.getTokenBalance(gaugeConfig.name,account)
+      account ? this.getTokenBalance(gaugeConfig.name,account) : this.BNify(0)
     ]);
 
     let decoded = aggcalls.map(n => this.BNify(n));
@@ -4571,9 +4579,10 @@ class FunctionsUtil {
 
     boost = this.BNify(lim).div(_working_supply).div(noboost_lim.div(noboost_supply));
 
-    // console.log('calculateGaugeBoost',gaugeName,voting_balance.div(1e18).toFixed(),voting_total.div(1e18).toFixed(),l.div(1e18).toFixed(),L.div(1e18).toFixed(),lim.div(1e18).toFixed(),_working_supply.div(1e18).toFixed(),noboost_lim.div(1e18).toFixed(),noboost_supply.div(1e18).toFixed(),boost.toFixed());
-
-    return boost;
+    return {
+      boost,
+      workingBalance:lim
+    };
   }
   getGaugeNextWeight = async (gaugeConfig) => {
     // const currentGaugeTimestamp = await this.genericContractCall('GaugeController','time_weight',[gaugeConfig.address]);
@@ -8720,7 +8729,7 @@ class FunctionsUtil {
     if (!conversionRateField) {
       conversionRateField = this.getTokenConversionRateField(tokenConfig.token);
       if (!conversionRateField) {
-        return null;
+        return this.BNify(1);
       }
     }
 
@@ -8755,7 +8764,7 @@ class FunctionsUtil {
       return await this.getTokenConversionRate(tokenConfig, isRisk, conversionRateField, count + 1);
     }
 
-    return null;
+    return this.BNify(1);
   }
 
   getTokenScore = async (tokenConfig, isRisk) => {
