@@ -1064,6 +1064,7 @@ class App extends Component {
                                             setThemeMode={this.setThemeMode.bind(this)}
                                             availableTokens={this.state.availableTokens}
                                             closeBuyModal={this.closeBuyModal.bind(this)}
+                                            makeMulticall={this.makeMulticall.bind(this)}
                                             setCachedData={this.setCachedData.bind(this)}
                                             selectedStrategy={this.state.selectedStrategy}
                                             userRejectedValidation={userRejectedValidation}
@@ -1121,6 +1122,7 @@ class App extends Component {
                                   handleMenuClick={this.selectTab.bind(this)}
                                   setConnector={this.setConnector.bind(this)}
                                   availableTokens={this.state.availableTokens}
+                                  makeMulticall={this.makeMulticall.bind(this)}
                                   closeBuyModal={this.closeBuyModal.bind(this)}
                                   userRejectedValidation={userRejectedValidation}
                                   accountValidationPending={accountValidationPending}
@@ -1196,6 +1198,7 @@ class App extends Component {
                                               setThemeMode={this.setThemeMode.bind(this)}
                                               processCustomParam={this.processCustomParam}
                                               availableTokens={this.state.availableTokens}
+                                              makeMulticall={this.makeMulticall.bind(this)}
                                               setCachedData={this.setCachedData.bind(this)}
                                               updateSelectedTab={this.selectTab.bind(this)}
                                               toastMessageProps={this.state.toastMessageProps}

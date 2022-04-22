@@ -77,7 +77,8 @@ class Gauges extends Component {
       this.setState({
         infoBox:null,
         gaugeConfig:null,
-        claimSucceded:false
+        claimSucceded:false,
+        claimToken:'default'
       },() => {
         this.loadGaugeData();
       })
