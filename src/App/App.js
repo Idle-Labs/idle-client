@@ -28,8 +28,16 @@ const Landing = React.lazy(() => import("../Landing/Landing"));
 const Dashboard = React.lazy(() => import("../Dashboard/Dashboard"));
 const Governance = React.lazy(() => import("../Governance/Governance"));
 
+let multiCalls = {};
+let multiCallsMax = 15;
+let multiCallsBatchId = 0;
+const multiCallsResults = {};
+let multiCallsTimeoutId = null;
+let multiCallsExecutionInterval = 2000;
+
 class App extends Component {
   state = {
+    web3:null,
     network: null,
     cachedData: {},
     buyToken: null,
@@ -64,10 +72,14 @@ class App extends Component {
   // Utils
   functionsUtil = null;
   loadUtils() {
+    const newProps = {
+      ...this.props,
+      web3:this.state.web3
+    };
     if (this.functionsUtil) {
-      this.functionsUtil.setProps(this.props);
+      this.functionsUtil.setProps(newProps);
     } else {
-      this.functionsUtil = new FunctionsUtil(this.props);
+      this.functionsUtil = new FunctionsUtil(newProps);
     }
     // window.functionsUtil = this.functionsUtil;
   }
@@ -218,6 +230,76 @@ class App extends Component {
     }
 
     return output;
+  }
+
+  makeMulticall = async (callData) => {
+    const callDataHash = JSON.stringify(callData);
+    if (!multiCalls[multiCallsBatchId]){
+      multiCalls[multiCallsBatchId] = {};
+    }
+    multiCalls[multiCallsBatchId][callDataHash] = callData;
+
+    // console.log('makeMulticall',multiCallsBatchId,callDataHash);
+
+    window.clearTimeout(multiCallsTimeoutId);
+    if (Object.values(multiCalls[multiCallsBatchId]).length>=multiCallsMax){
+      this.executeMulticalls(multiCallsBatchId);
+    } else {
+      multiCallsTimeoutId = setTimeout(() => {
+        this.executeMulticalls(multiCallsBatchId);
+      },multiCallsExecutionInterval);
+    }
+
+    const checkMulticallData = async (resultHash) => {
+      return new Promise( (resolve, reject) => {
+        (function attempt(){
+          if (typeof multiCallsResults[resultHash] !== 'undefined'){
+            if (multiCallsResults[resultHash] === 'REJECTED'){
+              console.log('REJECTED',resultHash);
+              resolve(multiCallsResults[resultHash]);
+              delete multiCallsResults[resultHash];
+            } else {
+              console.log('RESOLVE',resultHash,multiCallsResults[resultHash]);
+              return resolve(multiCallsResults[resultHash]);
+            }
+          } else {
+            // console.log('checkMulticallData_NOT-FOUND',resultHash);
+            window.setTimeout(()=>{
+              attempt();
+            },100);
+          }
+        })();
+      });
+    }
+
+    const data = await checkMulticallData(callDataHash);
+    return data;
+  }
+
+  executeMulticalls = async (executeBatchId) => {
+
+    if (!this.state.web3){
+      await this.function.asyncTimeout(100);
+      return await this.executeMulticalls(executeBatchId);
+    }
+
+    multiCallsBatchId++;
+    const results = await this.functionsUtil.makeMulticall(Object.values(multiCalls[executeBatchId]));
+    console.log('executeMulticalls',multiCalls[executeBatchId],results);
+    
+    if (results){
+      results.forEach( (r,i) => {
+        const callDataHash = Object.keys(multiCalls[executeBatchId])[i];
+        multiCallsResults[callDataHash] = r;
+        // console.log('save result',i,callDataHash,multiCallsResults[callDataHash]);
+      });
+    } else {
+      Object.keys(multiCalls[executeBatchId]).forEach( callDataHash => {
+        multiCallsResults[callDataHash] = 'REJECTED';
+      });
+    }
+
+    delete multiCalls[executeBatchId];
   }
 
   setCallbackAfterLogin = (callbackAfterLogin) => {
@@ -619,6 +701,14 @@ class App extends Component {
     });
   }
 
+  setWeb3(web3) {
+    this.setState({
+      web3
+    }, () => {
+      this.loadUtils();
+    });
+  }
+
   setConnector(connectorName, walletProvider) {
 
     let connectorInfo = globalConfigs.connectors[connectorName.toLowerCase()];
@@ -759,6 +849,7 @@ class App extends Component {
                     cachedData={this.state.cachedData}
                     tokenConfig={this.state.tokenConfig}
                     availableTranches={availableTranches}
+                    callbackWeb3={this.setWeb3.bind(this)}
                     setNetwork={this.setNetwork.bind(this)}
                     customAddress={this.state.customAddress}
                     selectedToken={this.state.selectedToken}
@@ -886,6 +977,7 @@ class App extends Component {
                                         setConnector={this.setConnector.bind(this)}
                                         setThemeMode={this.setThemeMode.bind(this)}
                                         availableTokens={this.state.availableTokens}
+                                        makeMulticall={this.makeMulticall.bind(this)}
                                         closeBuyModal={this.closeBuyModal.bind(this)}
                                         setCachedData={this.setCachedData.bind(this)}
                                         selectedStrategy={this.state.selectedStrategy}

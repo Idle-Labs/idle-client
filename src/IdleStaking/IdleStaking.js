@@ -292,7 +292,7 @@ class IdleStaking extends Component {
       // this.functionsUtil.getContractEvents(this.props.tokenConfig.feeDistributor.name,'CheckpointToken',{fromBlock: this.props.tokenConfig.feeDistributor.fromBlock, toBlock:'latest'}),
       this.props.account ? this.functionsUtil.getContractEvents(this.props.contractInfo.name,'Deposit',this.props.contractInfo.fromBlock,'latest',{filter:{provider:this.props.account}}) : []
     ]);
-
+    
     const rewardTokenConfig = this.functionsUtil.getGlobalConfig(['govTokens',this.props.contractInfo.rewardToken]);
 
     let distributedRewards = [];

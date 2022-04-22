@@ -7,6 +7,7 @@ import BigNumber from 'bignumber.js';
 import IdleGovToken from './IdleGovToken';
 import { toBuffer } from "ethereumjs-util";
 import ERC20 from '../abis/tokens/ERC20.json';
+import { id as keccak256 } from 'ethers/utils/hash';
 import globalConfigs from '../configs/globalConfigs';
 import ENS, { getEnsAddress } from '@ensdomains/ensjs';
 import availableTokens from '../configs/availableTokens';
@@ -4511,7 +4512,7 @@ class FunctionsUtil {
       return this.BNify(cachedData);
     }
 
-    let stakedBalance = await this.genericContractCall(contractName, methodName, [walletAddr]);
+    let stakedBalance = await this.genericContractCallNoMulticall(contractName, methodName, [walletAddr]);
     if (stakedBalance) {
       if (decimals) {
         stakedBalance = this.fixTokenDecimals(stakedBalance, decimals);
@@ -4635,7 +4636,7 @@ class FunctionsUtil {
       const tokenIndexes = Array.from(Array(multiRewardsConfig.maxRewards).keys());
       await this.asyncForEach(tokenIndexes,async (tokenIndex) => {
         try {
-          const rewardTokenAddress = await this.genericContractCallCached(multiRewardsContractName,'rewardTokens',[tokenIndex]);
+          const rewardTokenAddress = await this.genericContractCallCachedNoMulticall(multiRewardsContractName,'rewardTokens',[tokenIndex]);
           if (rewardTokenAddress){
             const tokenConfig = this.getTokenConfigByAddress(rewardTokenAddress);
             if (tokenConfig){
@@ -4862,7 +4863,7 @@ class FunctionsUtil {
         ] = await Promise.all([
           gaugeConfig ? this.getTokenBalance(gaugeConfig.name, account) : null,
           this.loadTrancheField(`tranchePrice`, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens),
-          stakingEnabled ? this.getTrancheStakedBalance(trancheConfig.CDORewards.name, account, trancheConfig.CDORewards.decimals,trancheConfig.functions.stakedBalance) : null
+          this.getTrancheStakedBalance(trancheConfig.CDORewards.name, account, trancheConfig.CDORewards.decimals,trancheConfig.functions.stakedBalance)
         ]);
 
         let totalStaked = this.BNify(0);
@@ -5163,8 +5164,8 @@ class FunctionsUtil {
           rewardsTokens,
           incentiveTokens
         ] = await Promise.all([
-          this.genericContractCallCachedTTL(strategyConfig.name, 'getRewardTokens',3600),
-          this.genericContractCallCachedTTL(tokenConfig.CDO.name, 'getIncentiveTokens',3600)
+          this.genericContractCallCachedTTL(strategyConfig.name, 'getRewardTokens', 3600, [], {}, 'latest', false),
+          this.genericContractCallCachedTTL(tokenConfig.CDO.name, 'getIncentiveTokens', 3600, [], {}, 'latest', false)
         ]);
 
         // Pick Senior Tranche by default
@@ -6415,7 +6416,7 @@ class FunctionsUtil {
     return this.setCachedDataWithLocalStorage(cachedDataKey, events, TTL);
   }
 
-  genericContractCallCachedTTL = async (contractName, methodName, TTL = 180, params = [], callParams = {}, blockNumber = 'latest',) => {
+  genericContractCallCachedTTL = async (contractName, methodName, TTL = 180, params = [], callParams = {}, blockNumber = 'latest', useMultiCall = true) => {
     const cachedDataKey = `genericContractCall_${contractName}_${methodName}_${JSON.stringify(params)}_${JSON.stringify(callParams)}_${blockNumber}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData) {
@@ -6427,12 +6428,12 @@ class FunctionsUtil {
       TTL = null;
     }
 
-    const result = await this.genericContractCall(contractName, methodName, params, callParams, blockNumber);
+    const result = await this.genericContractCall(contractName, methodName, params, callParams, blockNumber, useMultiCall);
 
     return this.setCachedDataWithLocalStorage(cachedDataKey, result, TTL);
   }
 
-  genericContractCallCached = async (contractName, methodName, params = [], callParams = {}, blockNumber = 'latest', TTL = 180) => {
+  genericContractCallCachedNoMulticall = async (contractName, methodName, params = [], callParams = {}, blockNumber = 'latest', TTL = 180) => {
     const cachedDataKey = `genericContractCall_${contractName}_${methodName}_${JSON.stringify(params)}_${JSON.stringify(callParams)}_${blockNumber}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData) {
@@ -6446,7 +6447,26 @@ class FunctionsUtil {
 
     // console.log(`genericContractCallCached - ${cachedDataKey}`,cachedData);
 
-    const result = await this.genericContractCall(contractName, methodName, params, callParams, blockNumber);
+    const result = await this.genericContractCall(contractName, methodName, params, callParams, blockNumber, false);
+
+    return this.setCachedDataWithLocalStorage(cachedDataKey, result, TTL);
+  }
+
+  genericContractCallCached = async (contractName, methodName, params = [], callParams = {}, blockNumber = 'latest', TTL = 180, useMultiCall = true) => {
+    const cachedDataKey = `genericContractCall_${contractName}_${methodName}_${JSON.stringify(params)}_${JSON.stringify(callParams)}_${blockNumber}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData) {
+      return cachedData;
+    }
+
+    // Store forever for past block
+    if (blockNumber !== 'latest') {
+      TTL = null;
+    }
+
+    // console.log(`genericContractCallCached - ${cachedDataKey}`,cachedData);
+
+    const result = await this.genericContractCall(contractName, methodName, params, callParams, blockNumber, useMultiCall);
 
     return this.setCachedDataWithLocalStorage(cachedDataKey, result, TTL);
   }
@@ -6455,7 +6475,141 @@ class FunctionsUtil {
     return await this.genericContractCallCached(contractName, methodName, params, callParams, blockNumber, TTL);
   }
 
-  genericContractCall = async (contractName, methodName, params = [], callParams = {}, blockNumber = 'latest', count = 0) => {
+  prepareMulticallData = (calls) => {
+
+    if (!this.props.web3){
+      return false;
+    }
+
+    const strip0x = (str) => {
+      return str.replace(/^0x/, '');
+    }
+
+    // console.log('prepareMulticallData',this.props.web3,this.props);
+
+    const values = [
+      calls.map(({ target, method, args, returnTypes }) => [
+        target,
+        keccak256(method).substr(0, 10) +
+          (args && args.length > 0
+            ? strip0x(this.props.web3.eth.abi.encodeParameters(args.map(a => a[1]), args.map(a => a[0])))
+            : '')
+      ])
+    ];
+    const calldata = this.props.web3.eth.abi.encodeParameters(
+      [
+        {
+          components: [{ type: 'address' }, { type: 'bytes' }],
+          name: 'data',
+          type: 'tuple[]'
+        }
+      ],
+      values
+    );
+
+    return '0x252dba42'+strip0x(calldata);
+  }
+
+  makeMulticall = async (calls) => {
+    const calldata = this.prepareMulticallData(calls);
+
+    if (!calldata){
+      return null;
+    }
+
+    try {
+      const results = await this.props.web3.eth.call({
+          to:'0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+          data: calldata
+      });
+      const decodedParams = this.props.web3.eth.abi.decodeParameters(['uint256', 'bytes[]'], results);
+
+      console.log('makeMulticall',calls,results,decodedParams);
+
+      if (decodedParams && typeof decodedParams[1] !== 'undefined'){
+        return decodedParams[1].map( (d,i) => {
+          const returnTypes = calls[i].returnTypes;
+          const returnFields = calls[i].returnFields;
+          const output = Object.values(this.props.web3.eth.abi.decodeParameters(returnTypes,d));
+          if (returnTypes.length === 1){
+            return output[0];
+          }
+          const values = output.splice(0,returnTypes.length);
+          return values.reduce( (acc,v,j) => {
+            acc[j] = v;
+            acc[returnFields[j]] = v;
+            return acc;
+          },{});
+        });
+      }
+    } catch (err) {
+      return null;
+    }
+
+    return null;
+  }
+
+  testMulticall = async () => {
+    const calls = [
+      {"method":"tranchePrice(address)","args":[["0x2688fc68c4eac90d9e5e1b94776cf14eade8d877","address"]],"returnTypes":["uint256"],"target":"0x34dcd573c5de4672c8248cd12a99f875ca112ad8"},
+      {"method":"claimable_tokens(address)","args":[["0xF1363D3D55d9e679cC6aa0a0496fD85BDfCF7464","address"]],"returnTypes":["uint256"],"target":"0x675eC042325535F6e176638Dd2d4994F645502B9"}
+    ];
+
+    const data = await this.makeMulticall(calls);
+    console.log(data);
+  }
+
+  genericContractCall = async (contractName, methodName, params = [], callParams = {}, blockNumber = 'latest', useMultiCall = true) => {
+
+    if (!contractName) {
+      return null;
+    }
+
+    const contract = this.getContractByName(contractName);
+
+    if (!contract) {
+      this.customLog('Wrong contract name', contractName);
+      return null;
+    }
+
+    if (!contract.methods[methodName]) {
+      this.customLog('Wrong method name', methodName);
+      return null;
+    }
+
+    blockNumber = blockNumber !== 'latest' && blockNumber && !isNaN(blockNumber) ? parseInt(blockNumber) : blockNumber;
+
+    if (blockNumber !== 'latest' || !useMultiCall){
+      return await this.genericContractCallNoMulticall(contractName, methodName, params, callParams, blockNumber);
+    } else {
+      const methodAbi = contract._jsonInterface.find(f => f.name === methodName && f.inputs.length === params.length);
+      if (!methodAbi){
+        return null;
+      }
+      const methodInputs = methodAbi.inputs.map( i => i.type );
+      const returnTypes = methodAbi.outputs.map( i => i.type );
+      const returnFields = methodAbi.outputs.map( i => i.name );
+
+      if (contract._address === "0x0000000000000000000000000000000000000000"){
+        return null;
+      }
+
+      const callData = {
+        returnFields,
+        returnTypes,
+        target:contract._address,
+        method:methodName+'('+methodInputs.join(',')+')',
+        args:params.map( (p,i) => [p].concat(methodInputs[i]) )
+      };
+      const output = await this.props.makeMulticall(callData);
+      if (output === 'REJECTED'){
+        return await this.genericContractCallNoMulticall(contractName, methodName, params, callParams, blockNumber);
+      }
+      return output;
+    }
+  }
+
+  genericContractCallNoMulticall = async (contractName, methodName, params = [], callParams = {}, blockNumber = 'latest') => {
 
     if (!contractName) {
       return null;
@@ -6489,10 +6643,6 @@ class FunctionsUtil {
     } catch (error) {
       // console.log('genericContractCall ERROR - ',contractName,methodName,params);
       this.customLog("genericContractCall error", error);
-      // if (count<=3){
-      //   await this.asyncTimeout(1000);
-      //   return await this.genericContractCall(contractName, methodName, params, callParams, blockNumber, count+1);
-      // }
     }
   }
   asyncForEach = async (array, callback, async = true) => {
@@ -6724,7 +6874,7 @@ class FunctionsUtil {
       }
       path.push(tokenConfigDest.address);
 
-      const res = await this.genericContractCall('SushiswapRouter', 'getAmountsIn', [one.toFixed(), path]);
+      const res = await this.genericContractCallNoMulticall('SushiswapRouter', 'getAmountsIn', [one.toFixed(), path]);
 
       // console.log('getSushiswapConversionRate',path,res);
 
@@ -6763,7 +6913,7 @@ class FunctionsUtil {
       }
       path.push(tokenConfigDest.address);
 
-      const unires = await this.genericContractCall('UniswapRouter', 'getAmountsIn', [one.toFixed(), path], {}, blockNumber);
+      const unires = await this.genericContractCallNoMulticall('UniswapRouter', 'getAmountsIn', [one.toFixed(), path], {}, blockNumber);
 
       if (unires) {
         const price = this.BNify(unires[0]).div(one);
@@ -8134,7 +8284,7 @@ class FunctionsUtil {
       return cachedData;
     }
 
-    const govTokenAddress = await this.genericContractCall(token, 'govTokens', [govTokenIndex]);
+    const govTokenAddress = await this.genericContractCallNoMulticall(token, 'govTokens', [govTokenIndex]);
     return this.setCachedDataWithLocalStorage(cachedDataKey, govTokenAddress, null);
   }
   getGovTokensUserAmounts = async (token, account) => {

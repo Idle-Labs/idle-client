@@ -20,6 +20,7 @@ import Timelock from '../contracts/Timelock.json';
 import CurveZap from '../abis/curve/CurveZap.json';
 import CovToken from '../abis/cover/CovToken.json';
 import B2BVester from '../contracts/B2BVester.json';
+import Multicall from '../contracts/Multicall.json';
 import IdleStaking from '../IdleStaking/IdleStaking';
 // import CurveSwap from '../abis/curve/CurveSwap.json';
 import CurvePool from "../abis/curve/CurvePool.json";
@@ -664,6 +665,10 @@ const globalConfigs = {
       GaugeDistributorProxy:{
         abi:GaugeDistributorProxy,
         address:'0x074306BC6a6Fc1bD02B425dd41D742ADf36Ca9C6'
+      },
+      Multicall:{
+        abi:Multicall,
+        address:'0xeefba1e63905ef1d7acba5a8513c70307c1ce441'
       }
     }
   },
@@ -736,7 +741,7 @@ const globalConfigs = {
       description: {
         withdraw: "You can withdraw your funds at any time from the tranche.",
         stake: "Stake your tranche tokens to earn additional rewards and boost the APY.",
-        unstake: "By unstaking your tranche tokens you will no more get additional rewards.",
+        unstake: "By unstaking your tranche tokens you will also get the accrued rewards.",
         cantUnstake: "To unstake your funds you just need to wait 10 blocks after your last stake transaction.",
         cantWithdraw: "To withdraw your funds you just need to wait at least 1 block from the latest harvest transaction.",
         long: "Senior Tranches provide a shielded access to optimized DeFi yields, thanks to an integrated funds' coverage given by Junior Tranches",
@@ -766,7 +771,7 @@ const globalConfigs = {
       description: {
         withdraw: "You can withdraw your funds at any time from the tranche.",
         stake: "Stake your tranche tokens to earn additional rewards and boost the APY.",
-        unstake: "By unstaking your tranche tokens you will no more get additional rewards.",
+        unstake: "By unstaking your tranche tokens you will also get the accrued rewards.",
         cantUnstake: "To unstake your funds you just need to wait 10 blocks after your last stake transaction.",
         cantWithdraw: "To withdraw your funds you just need to wait at least 1 block from the latest harvest transaction.",
         long: "The Junior Tranches provide amplified optimized DeFi yields by carrying a higher grade of risks and protecting Senior Tranches",

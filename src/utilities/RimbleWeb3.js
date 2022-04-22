@@ -570,6 +570,10 @@ class RimbleTransaction extends React.Component {
         this.props.setCallbackAfterLogin(null);
       }
 
+      if (typeof this.props.callbackWeb3 === 'function'){
+        this.props.callbackWeb3(this.state.web3);
+      }
+
       // console.log('web3Callback',this.state.network,this.state.biconomy,this.state.web3);
 
       // console.log(this.functionsUtil.strToMoment().format('HH:mm:ss'),'initWeb3 - web3Callback');
