@@ -29,11 +29,23 @@ const Dashboard = React.lazy(() => import("../Dashboard/Dashboard"));
 const Governance = React.lazy(() => import("../Governance/Governance"));
 
 let multiCalls = {};
-let multiCallsMax = 15;
+let multiCallsMax = 10;
 let multiCallsBatchId = 0;
+const multiCallsStats = {
+  arrivedCount:0,
+  rejectedCount:0,
+  missingHashes:{},
+  processedCount:0,
+  rejectedHashes:{}
+};
 const multiCallsResults = {};
 let multiCallsTimeoutId = null;
-let multiCallsExecutionInterval = 2000;
+let multiCallsExecutionInterval = 1500;
+
+
+window.multiCalls = multiCalls;
+window.multiCallsStats = multiCallsStats;
+window.multiCallsResults = multiCallsResults;
 
 class App extends Component {
   state = {
@@ -233,13 +245,22 @@ class App extends Component {
   }
 
   makeMulticall = async (callData) => {
+    const callBatchId = multiCallsBatchId;
     const callDataHash = JSON.stringify(callData);
+
     if (!multiCalls[multiCallsBatchId]){
       multiCalls[multiCallsBatchId] = {};
     }
     multiCalls[multiCallsBatchId][callDataHash] = callData;
 
-    // console.log('makeMulticall',multiCallsBatchId,callDataHash);
+    multiCallsStats.arrivedCount++;
+
+    if (!multiCallsStats.missingHashes[multiCallsBatchId]){
+      multiCallsStats.missingHashes[multiCallsBatchId] = {};
+    }
+    multiCallsStats.missingHashes[multiCallsBatchId][callDataHash] = multiCallsBatchId;
+
+    console.log('makeMulticall',multiCallsBatchId,callDataHash);
 
     window.clearTimeout(multiCallsTimeoutId);
     if (Object.values(multiCalls[multiCallsBatchId]).length>=multiCallsMax){
@@ -250,56 +271,77 @@ class App extends Component {
       },multiCallsExecutionInterval);
     }
 
-    const checkMulticallData = async (resultHash) => {
+    const checkMulticallData = async (batchId,resultHash) => {
       return new Promise( (resolve, reject) => {
-        (function attempt(){
-          if (typeof multiCallsResults[resultHash] !== 'undefined'){
-            if (multiCallsResults[resultHash] === 'REJECTED'){
-              console.log('REJECTED',resultHash);
-              resolve(multiCallsResults[resultHash]);
-              delete multiCallsResults[resultHash];
+        (function attempt(count=0,maxCount=150){
+          if ((multiCallsResults[batchId] && typeof multiCallsResults[batchId][resultHash] !== 'undefined') || count>=maxCount){
+
+            // Handle rejection
+            if (multiCallsResults[batchId][resultHash] === 'REJECTED' || (count>=maxCount && (!multiCallsResults[batchId] || typeof multiCallsResults[batchId][resultHash] === 'undefined'))){
+              console.log('REJECTED',batchId,resultHash);
+
+              // Add hash to rejected hashes
+              multiCallsStats.rejectedCount++;
+              if (!multiCallsStats.rejectedHashes[resultHash]){
+                multiCallsStats.rejectedHashes[resultHash] = 0;
+              }
+              multiCallsStats.rejectedHashes[resultHash]++;
+
+              resolve('REJECTED');
             } else {
-              console.log('RESOLVE',resultHash,multiCallsResults[resultHash]);
-              return resolve(multiCallsResults[resultHash]);
+              console.log('RESOLVED',batchId,resultHash);
+              resolve(multiCallsResults[batchId][resultHash]);
             }
+
+            // Increment processed count
+            multiCallsStats.processedCount++;
+
+            // Remove hash from missing hashes
+            delete multiCallsStats.missingHashes[batchId][resultHash];
           } else {
             // console.log('checkMulticallData_NOT-FOUND',resultHash);
             window.setTimeout(()=>{
-              attempt();
+              attempt(count+1);
             },100);
           }
-        })();
+        })(0);
       });
     }
 
-    const data = await checkMulticallData(callDataHash);
+    const data = await checkMulticallData(callBatchId,callDataHash);
     return data;
   }
 
   executeMulticalls = async (executeBatchId) => {
 
-    if (!this.state.web3){
-      await this.function.asyncTimeout(100);
+    if (/*!this.functionsUtil.props.web3 && */!this.state.web3){
+      await this.functionsUtil.asyncTimeout(100);
       return await this.executeMulticalls(executeBatchId);
     }
 
+    console.log('executeMulticalls_START',executeBatchId,multiCalls[executeBatchId]);
+
     multiCallsBatchId++;
-    const results = await this.functionsUtil.makeMulticall(Object.values(multiCalls[executeBatchId]));
-    console.log('executeMulticalls',multiCalls[executeBatchId],results);
+    const results = await this.functionsUtil.makeMulticall(Object.values(multiCalls[executeBatchId]),this.state.web3);
+
+    multiCallsResults[executeBatchId] = {};
     
-    if (results){
+    if (results) {
       results.forEach( (r,i) => {
         const callDataHash = Object.keys(multiCalls[executeBatchId])[i];
-        multiCallsResults[callDataHash] = r;
-        // console.log('save result',i,callDataHash,multiCallsResults[callDataHash]);
+        multiCallsResults[executeBatchId][callDataHash] = r;
+        console.log('SAVE',executeBatchId,callDataHash,multiCallsResults[executeBatchId][callDataHash]);
       });
+      // delete multiCalls[executeBatchId][callDataHash];
     } else {
       Object.keys(multiCalls[executeBatchId]).forEach( callDataHash => {
-        multiCallsResults[callDataHash] = 'REJECTED';
+        multiCallsResults[executeBatchId][callDataHash] = 'REJECTED';
       });
+      // delete multiCalls[executeBatchId];
     }
 
-    delete multiCalls[executeBatchId];
+    // delete multiCalls[executeBatchId];
+    console.log('executeMulticalls_END',executeBatchId,multiCalls[executeBatchId],results);
   }
 
   setCallbackAfterLogin = (callbackAfterLogin) => {

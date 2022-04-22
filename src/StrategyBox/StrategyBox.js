@@ -216,7 +216,7 @@ class StrategyBox extends Component {
         isVisible={ typeof this.props.isVisible !== 'undefined' ? this.props.isVisible : true }
       >
         <Flex
-          className={[styles.ribbon,styles[networkInfo.provider]]}
+          className={[styles.ribbon,styles[networkInfo.name.toLowerCase()]]}
         >
           <Flex
             alignItems={'center'}
@@ -236,7 +236,7 @@ class StrategyBox extends Component {
             >
               <Image
                 height={'1em'}
-                src={`images/networks/${networkInfo.provider}.svg`}
+                src={`images/networks/${networkInfo.name.toLowerCase()}.svg`}
               />
             </Flex>
             <Text

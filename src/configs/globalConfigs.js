@@ -676,8 +676,7 @@ const globalConfigs = {
     DAI: {
       zeroExInstant: {
         orderSource: "https://api.0x.org/sra/",
-        assetData:
-          "0xf47261b00000000000000000000000006b175474e89094c44da98b954eedeac495271d0f",
+        assetData:"0xf47261b00000000000000000000000006b175474e89094c44da98b954eedeac495271d0f",
         affiliateInfo: {
           feeRecipient: "0x4215606a720477178AdFCd5A59775C63138711e8",
           feePercentage: 0.0025
@@ -687,8 +686,7 @@ const globalConfigs = {
     USDC: {
       zeroExInstant: {
         orderSource: "https://api.0x.org/sra/",
-        assetData:
-          "0xf47261b0000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        assetData:"0xf47261b0000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
         affiliateInfo: {
           feeRecipient: "0x4215606a720477178AdFCd5A59775C63138711e8",
           feePercentage: 0.0025
@@ -697,15 +695,13 @@ const globalConfigs = {
     }
   },
   tranchflash: {
-    name: "perpetual yield tranches",
     subtitle: "Make yield your own.",
-    desc: "Choose the benefits of high-yield or low-risk, while enjoying the flexibility of Tranches. This comes with auto-compounding for accrued governance tokens and no locking period.",
     arrows: "images/idlearrows.svg",
-    juniorinfo:
-      "<b>Junior Tranches</b><br>Higher risk, leveraged for variable rate rewards",
-    seniorinfo:
-      "<b>Senior Tranches</b><br>Lower risk, built-in coverage for variable rate rewards",
+    name: "perpetual yield tranches",
     helpcircle: "images/help-circle.svg",
+    juniorinfo:"<b>Junior Tranches</b><br>Higher risk, leveraged for variable rate rewards",
+    seniorinfo:"<b>Senior Tranches</b><br>Lower risk, built-in coverage for variable rate rewards",
+    desc: "Choose the benefits of high-yield or low-risk, while enjoying the flexibility of Tranches. This comes with auto-compounding for accrued governance tokens and no locking period.",
     questions: [
       {
         desc: "How it Works?",
@@ -1795,8 +1791,8 @@ const globalConfigs = {
         name: 'Ethereum',
         baseToken: 'ETH',
         color: '#4474f1',
-        provider: 'infura',
         network: 'mainnet',
+        provider: 'infura',
         explorer: 'etherscan',
         blocksPerCall: 1000000,
         chainName: 'Ethereum Mainnet',
@@ -1877,9 +1873,18 @@ const globalConfigs = {
     secondsPerYear: 31536000,
     requiredConfirmations: 1,
     enabledNetworks: [1, 137],
+    defaultProvider: 'infura',
     firstBlockNumber: 8119247,
     accountBalanceMinimum: 0, // in ETH for gas fees
     providers: {
+      alchemy:{
+        key: env.REACT_APP_ALCHEMY_KEY,
+        rpc:{
+          42:'https://eth-kovan.alchemyapi.io/v2/',
+          1:'https://eth-mainnet.alchemyapi.io/v2/',
+          137:'https://eth-mainnet.alchemyapi.io/v2/'
+        }
+      },
       infura: {
         key: env.REACT_APP_INFURA_KEY,
         rpc: {
@@ -1894,7 +1899,8 @@ const globalConfigs = {
       polygon: {
         enabled: true,
         // key:env.REACT_APP_POLYGON_KEY,
-        key: env.REACT_APP_INFURA_KEY,
+        // key: env.REACT_APP_INFURA_KEY,
+        key: env.REACT_APP_ALCHEMY_KEY,
         baseUrl: {
           137: 'https://polygonscan.com',
           80001: 'https://explorer-mumbai.maticvigil.com'
@@ -1918,6 +1924,11 @@ const globalConfigs = {
           5: 'https://polygon-mainnet.infura.io/v3/',
           137: 'https://polygon-mainnet.infura.io/v3/',
           80001: 'https://polygon-mainnet.infura.io/v3/'
+
+          // 1: 'https://polygon-mainnet.g.alchemyapi.io/v2/',
+          // 5: 'https://polygon-mainnet.g.alchemyapi.io/v2/',
+          // 137: 'https://polygon-mainnet.g.alchemyapi.io/v2/',
+          // 80001: 'https://polygon-mainnet.g.alchemyapi.io/v2/'
 
           // 1:'https://matic-mainnet.chainstacklabs.com/',
           // 137:'https://matic-mainnet.chainstacklabs.com/',

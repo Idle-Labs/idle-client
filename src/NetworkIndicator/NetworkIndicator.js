@@ -41,6 +41,7 @@ class NetworkIndicator extends Component {
         value: networkId,
         config: networkConfig,
         label: networkConfig.name,
+        network: networkConfig.name.toLowerCase(),
       }
     });
 
@@ -74,7 +75,7 @@ class NetworkIndicator extends Component {
   render() {
 
     const CustomOptionValue = props => {
-      const imageSrc = `images/networks/${props.data.config.provider}.svg`;
+      const imageSrc = `images/networks/${props.data.network}.svg`;
       return (
         <Flex
           width={1}
@@ -106,7 +107,7 @@ class NetworkIndicator extends Component {
     const CustomValueContainer = props => {
       const selectProps = props.selectProps.value || props.data;
       const label = selectProps.label;
-      const imageSrc = `images/networks/${selectProps.config.provider}.svg`;
+      const imageSrc = `images/networks/${selectProps.network}.svg`;
       return (
         <Flex
           style={{

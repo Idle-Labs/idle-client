@@ -15,8 +15,8 @@
   border-top-color: transparent;
   border-left-color: transparent;
 }
-.ribbon.infura::before,
-.ribbon.infura::after{
+.ribbon.ethereum::before,
+.ribbon.ethereum::after{
 	border: 5px solid #136193;
 }
 .ribbon.polygon::before,
@@ -44,7 +44,7 @@
   text-shadow: 0 1px 1px rgba(0,0,0,.2);
   /*box-shadow: 0 5px 10px rgba(0,0,0,.1);*/
 }
-.ribbon.infura .content{
+.ribbon.ethereum .content{
   	background-color: #4474f1;
 }
 .ribbon.polygon .content{

@@ -4736,7 +4736,7 @@ class FunctionsUtil {
     const internal_view = this.getQueryStringParameterByName('internal_view');
     const stakingRewards = tokenConfig && tranche ? tokenConfig[tranche].CDORewards.stakingRewards : [];
     const stakingRewardsEnabled = stakingRewards.length>0 ? stakingRewards.filter( t => t.enabled ) : null;
-    const stakingEnabled = stakingRewardsEnabled && stakingRewardsEnabled.length>0 ? true : false;
+    // const stakingEnabled = stakingRewardsEnabled && stakingRewardsEnabled.length>0 ? true : false;
     const tokenName = this.getGlobalConfig(['stats', 'tokens', token.toUpperCase(), 'label']) || this.capitalize(token);
 
     let gaugeConfig = this.getGlobalConfig(['tools','gauges','props','availableGauges',token]);
@@ -6475,9 +6475,11 @@ class FunctionsUtil {
     return await this.genericContractCallCached(contractName, methodName, params, callParams, blockNumber, TTL);
   }
 
-  prepareMulticallData = (calls) => {
+  prepareMulticallData = (calls,web3=null) => {
 
-    if (!this.props.web3){
+    web3 = this.props.web3 || web3;
+
+    if (!web3){
       return false;
     }
 
@@ -6492,11 +6494,11 @@ class FunctionsUtil {
         target,
         keccak256(method).substr(0, 10) +
           (args && args.length > 0
-            ? strip0x(this.props.web3.eth.abi.encodeParameters(args.map(a => a[1]), args.map(a => a[0])))
+            ? strip0x(web3.eth.abi.encodeParameters(args.map(a => a[1]), args.map(a => a[0])))
             : '')
       ])
     ];
-    const calldata = this.props.web3.eth.abi.encodeParameters(
+    const calldata = web3.eth.abi.encodeParameters(
       [
         {
           components: [{ type: 'address' }, { type: 'bytes' }],
@@ -6510,27 +6512,30 @@ class FunctionsUtil {
     return '0x252dba42'+strip0x(calldata);
   }
 
-  makeMulticall = async (calls) => {
-    const calldata = this.prepareMulticallData(calls);
+  makeMulticall = async (calls,web3=null) => {
+
+    web3 = this.props.web3 || web3;
+
+    const calldata = this.prepareMulticallData(calls,web3);
 
     if (!calldata){
       return null;
     }
 
     try {
-      const results = await this.props.web3.eth.call({
+      const results = await web3.eth.call({
           to:'0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
           data: calldata
       });
-      const decodedParams = this.props.web3.eth.abi.decodeParameters(['uint256', 'bytes[]'], results);
+      const decodedParams = web3.eth.abi.decodeParameters(['uint256', 'bytes[]'], results);
 
-      console.log('makeMulticall',calls,results,decodedParams);
+      // console.log('makeMulticall',calls,results,decodedParams);
 
       if (decodedParams && typeof decodedParams[1] !== 'undefined'){
         return decodedParams[1].map( (d,i) => {
           const returnTypes = calls[i].returnTypes;
           const returnFields = calls[i].returnFields;
-          const output = Object.values(this.props.web3.eth.abi.decodeParameters(returnTypes,d));
+          const output = Object.values(web3.eth.abi.decodeParameters(returnTypes,d));
           if (returnTypes.length === 1){
             return output[0];
           }
@@ -6586,23 +6591,33 @@ class FunctionsUtil {
       if (!methodAbi){
         return null;
       }
-      const methodInputs = methodAbi.inputs.map( i => i.type );
+      const inputTypes = methodAbi.inputs.map( i => i.type );
       const returnTypes = methodAbi.outputs.map( i => i.type );
       const returnFields = methodAbi.outputs.map( i => i.name );
 
-      if (contract._address === "0x0000000000000000000000000000000000000000"){
+      if (contract._address === '0x0000000000000000000000000000000000000000'){
         return null;
       }
 
+      const args = params.map( (p,i) => {
+        const inputType = inputTypes[i];
+        if (inputType === 'address' && !this.checkAddress(p)){
+          p = '0x0000000000000000000000000000000000000000';
+        }
+        return [p].concat(inputType);
+      });
+
       const callData = {
+        args,
         returnFields,
         returnTypes,
         target:contract._address,
-        method:methodName+'('+methodInputs.join(',')+')',
-        args:params.map( (p,i) => [p].concat(methodInputs[i]) )
+        method:methodName+'('+inputTypes.join(',')+')',
       };
+
       const output = await this.props.makeMulticall(callData);
       if (output === 'REJECTED'){
+        console.log(`genericContractCall - Fallback - ${contractName} - ${methodName}`);
         return await this.genericContractCallNoMulticall(contractName, methodName, params, callParams, blockNumber);
       }
       return output;

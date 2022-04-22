@@ -419,14 +419,17 @@ class RimbleTransaction extends React.Component {
 
     // console.log(this.functionsUtil.strToMoment().format('HH:mm:ss'),'initWeb3 - START',networkId,walletProvider);
 
+    const defaultProvider = this.functionsUtil.getGlobalConfig(['network','defaultProvider']);
     const availableNetworks = this.functionsUtil.getGlobalConfig(['network','availableNetworks']);
     const networkConfig = availableNetworks[networkId];
-    const provider = networkConfig ? networkConfig.provider : 'infura';
+    const provider = networkConfig ? networkConfig.provider : defaultProvider;
     const web3RpcKey = this.functionsUtil.getGlobalConfig(['network','providers',provider,'key']);
     const web3Rpc = this.functionsUtil.getGlobalConfig(['network','providers',provider,'rpc',networkId])+web3RpcKey;
 
+    // console.log('initWeb3',web3Rpc);
+
     const useWeb3Provider = this.state.network.isCorrectNetwork;
-    const web3InfuraRpc = this.functionsUtil.getGlobalConfig(['network','providers','infura','rpc',networkId])+this.functionsUtil.getGlobalConfig(['network','providers','infura','key']);
+    const web3InfuraRpc = this.functionsUtil.getGlobalConfig(['network','providers',defaultProvider,'rpc',networkId])+this.functionsUtil.getGlobalConfig(['network','providers',defaultProvider,'key']);
 
     const enabledNetworks = this.functionsUtil.getGlobalConfig(['network','enabledNetworks']);
     const web3Providers = Object.keys(availableNetworks).filter( netId => enabledNetworks.includes(parseInt(netId)) ).reduce( (acc,netId) => {
@@ -1033,6 +1036,8 @@ class RimbleTransaction extends React.Component {
     if (!this.state.web3 || !this.props.availableStrategies){
       return false;
     }
+
+    // console.log('initializeContracts',this.state.web3Providers);
 
     // console.log(this.functionsUtil.strToMoment().format('HH:mm:ss'),'initializeContracts - START',this.state.network.required.id,this.props.availableStrategies,this.props.availableStrategiesNetworks);
 
