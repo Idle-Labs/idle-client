@@ -230,6 +230,7 @@ class PolygonBridge extends Component {
     const newState = {};
     const isETH = this.state.selectedToken==='WETH';
     const bridgeType = this.state.tokenConfig.bridgeType;
+    const currentNetwork = this.functionsUtil.getRequiredNetwork();
     switch (this.state.selectedAction){
       case 'Deposit':
         newState.steps = [];
@@ -274,9 +275,8 @@ class PolygonBridge extends Component {
         newState.approveDescription = '';
         newState.availableNetworks = [137,80001];
         newState.contractInfo = this.state.tokenConfig.childToken;
-        newState.balanceProp = await this.functionsUtil.getTokenBalance(this.state.tokenConfig.childToken.name,this.props.account);
+        newState.balanceProp = newState.availableNetworks.includes(currentNetwork.id) ? await this.functionsUtil.getTokenBalance(this.state.tokenConfig.childToken.name,this.props.account) : this.functionsUtil.BNify(0);
 
-        const currentNetwork = this.functionsUtil.getRequiredNetwork();
         const maticNetwork = currentNetwork.name;
         const mainNetworkId = this.functionsUtil.getGlobalConfig(['network','providers','polygon','networkPairs',currentNetwork.id]);
         const mainNetworkName = this.functionsUtil.getGlobalConfig(['network','availableNetworks',mainNetworkId,'name']);

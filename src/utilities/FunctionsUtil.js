@@ -1546,7 +1546,7 @@ class FunctionsUtil {
     if (covalentInfo.enabled && covalentInfo.endpoints[polygonNetworkId]) {
       const covalentApiUrl = covalentInfo.endpoints[polygonNetworkId];
       const polygonAvailableTokens = this.getGlobalConfig(['tools', 'polygonBridge', 'props', 'availableTokens']);
-      const polygonEndpoint = `${covalentApiUrl}address/${account}/transactions_v2/?block-signed-at-asc=true&skip=0&key=${covalentInfo.key}`;
+      const polygonEndpoint = `${covalentApiUrl}address/${account}/transactions_v2/?block-signed-at-asc=false&skip=0&key=${covalentInfo.key}&page-size=500`;
 
       const ethereumNetworkId = this.getGlobalConfig(['network', 'providers', 'polygon', 'networkPairs', polygonNetworkId]);
       const etherscanApiUrl = etherscanInfo.endpoints[ethereumNetworkId];
@@ -1668,6 +1668,8 @@ class FunctionsUtil {
               polygonTx.included = await this.props.maticPOSClient.isCheckPointed(polygonTx.hash);
               polygonTx.exited = false;
 
+              // console.log('polygonTx',polygonTx);
+
               if (tokenConfig.rootToken && polygonTx.included){
                 const erc20RootToken = this.props.maticPOSClient.erc20(tokenConfig.rootToken.address,true);
                 polygonTx.exited = await erc20RootToken.isWithdrawExited(polygonTx.hash);
@@ -1708,7 +1710,7 @@ class FunctionsUtil {
       const covalentApiUrl = covalentInfo.endpoints[requiredNetwork];
 
       // Get base endpoint cached transactions
-      baseEndpoint = `${covalentApiUrl}address/${account}/transactions_v2/?block-signed-at-asc=true&key=${covalentInfo.key}`;
+      baseEndpoint = `${covalentApiUrl}address/${account}/transactions_v2/?block-signed-at-asc=true&key=${covalentInfo.key}&page-size=500`;
       baseTxs = this.getCachedRequest(baseEndpoint);
 
       // Check if the latest blockNumber is actually the latest one
@@ -1718,7 +1720,7 @@ class FunctionsUtil {
         const lastCachedTx = Object.values(baseTxs.data.data.items).pop();
         const lastCachedBlockNumber = lastCachedTx && lastCachedTx.block_height ? parseInt(lastCachedTx.block_height) + 1 : 0;
 
-        const covalentEndpointLastBlock = `${covalentApiUrl}address/${account}/transactions_v2/?block-signed-at-asc=true&skip=${cachedRows}`;
+        const covalentEndpointLastBlock = `${covalentApiUrl}address/${account}/transactions_v2/?block-signed-at-asc=true&skip=${cachedRows}&page-size=500`;
         let latestTxs = await this.makeCachedRequest(covalentEndpointLastBlock, 15);
 
         if (latestTxs && latestTxs.data.data.items && latestTxs.data.data.items.length) {
@@ -4512,7 +4514,7 @@ class FunctionsUtil {
       return this.BNify(cachedData);
     }
 
-    let stakedBalance = await this.genericContractCallNoMulticall(contractName, methodName, [walletAddr]);
+    let stakedBalance = await this.genericContractCall(contractName, methodName, [walletAddr]);
     if (stakedBalance) {
       if (decimals) {
         stakedBalance = this.fixTokenDecimals(stakedBalance, decimals);
@@ -4734,8 +4736,8 @@ class FunctionsUtil {
     const minPrecision = (fieldProps && parseInt(fieldProps.minPrecision)>0) ? fieldProps.minPrecision : (this.props.isMobile ? 3 : 4);
 
     const internal_view = this.getQueryStringParameterByName('internal_view');
-    const stakingRewards = tokenConfig && tranche ? tokenConfig[tranche].CDORewards.stakingRewards : [];
-    const stakingRewardsEnabled = stakingRewards.length>0 ? stakingRewards.filter( t => t.enabled ) : null;
+    // const stakingRewards = tokenConfig && tranche ? tokenConfig[tranche].CDORewards.stakingRewards : [];
+    // const stakingRewardsEnabled = stakingRewards.length>0 ? stakingRewards.filter( t => t.enabled ) : null;
     // const stakingEnabled = stakingRewardsEnabled && stakingRewardsEnabled.length>0 ? true : false;
     const tokenName = this.getGlobalConfig(['stats', 'tokens', token.toUpperCase(), 'label']) || this.capitalize(token);
 
@@ -6416,6 +6418,10 @@ class FunctionsUtil {
     return this.setCachedDataWithLocalStorage(cachedDataKey, events, TTL);
   }
 
+  genericContractCallCachedTTLNoMulticall = async (contractName, methodName, TTL = 180, params = [], callParams = {}, blockNumber = 'latest') => {
+    return await this.genericContractCallCachedTTL(contractName, methodName, TTL, params, callParams, blockNumber, false);
+  }
+
   genericContractCallCachedTTL = async (contractName, methodName, TTL = 180, params = [], callParams = {}, blockNumber = 'latest', useMultiCall = true) => {
     const cachedDataKey = `genericContractCall_${contractName}_${methodName}_${JSON.stringify(params)}_${JSON.stringify(callParams)}_${blockNumber}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
@@ -6524,8 +6530,8 @@ class FunctionsUtil {
 
     try {
       const results = await web3.eth.call({
-          to:'0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
-          data: calldata
+        data: calldata,
+        to:'0xeefba1e63905ef1d7acba5a8513c70307c1ce441'
       });
       const decodedParams = web3.eth.abi.decodeParameters(['uint256', 'bytes[]'], results);
 
@@ -6548,6 +6554,7 @@ class FunctionsUtil {
         });
       }
     } catch (err) {
+      console.log('makeMulticall',err);
       return null;
     }
 
@@ -6584,7 +6591,7 @@ class FunctionsUtil {
 
     blockNumber = blockNumber !== 'latest' && blockNumber && !isNaN(blockNumber) ? parseInt(blockNumber) : blockNumber;
 
-    if (blockNumber !== 'latest' || !useMultiCall){
+    if (blockNumber !== 'latest' || !useMultiCall || (this.props.network && this.props.network.required.id !== this.props.network.current.id)){
       return await this.genericContractCallNoMulticall(contractName, methodName, params, callParams, blockNumber);
     } else {
       const methodAbi = contract._jsonInterface.find(f => f.name === methodName && f.inputs.length === params.length);
@@ -6615,10 +6622,14 @@ class FunctionsUtil {
         method:methodName+'('+inputTypes.join(',')+')',
       };
 
-      const output = await this.props.makeMulticall(callData);
+      let output = await this.props.multiCall.makeMulticall(callData);
       if (output === 'REJECTED'){
-        console.log(`genericContractCall - Fallback - ${contractName} - ${methodName}`);
-        return await this.genericContractCallNoMulticall(contractName, methodName, params, callParams, blockNumber);
+        // console.log(`genericContractCall - Fallback - ${this.props.network.required.id}/${this.props.network.current.id}/${this.props.isCorrectNetwork} - ${contractName} - ${methodName}`,output);
+        output = await this.genericContractCallNoMulticall(contractName, methodName, params, callParams, blockNumber);
+        if (output){
+          const callHash = JSON.stringify(callData);
+          this.props.multiCall.addResolvedHash(callHash);
+        }
       }
       return output;
     }
@@ -6649,7 +6660,7 @@ class FunctionsUtil {
         this.customLog(`${contractName} contract method ${methodName} error: `, error);
       });
       
-      // console.log(`genericContractCall - ${contractName} - ${methodName} - [${params.join(',')}] - ${value}`);
+      // console.log(`genericContractCallNoMulticall - ${contractName} - ${methodName} - ${blockNumber} - [${params.join(',')}] - ${value}`);
       // if (!value){
       //   console.log('genericContractCall - NULL - ',contractName,methodName,params);
       // }

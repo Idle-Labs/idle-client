@@ -1045,7 +1045,7 @@ const globalConfigs = {
       }
     },
     config: {
-      timeout:15000,
+      // timeout:60000,
       headers: env.REACT_APP_IDLE_KEY ? { Authorization: `Bearer ${env.REACT_APP_IDLE_KEY}` } : {},
     },
     versions: {
@@ -1899,8 +1899,8 @@ const globalConfigs = {
       polygon: {
         enabled: true,
         // key:env.REACT_APP_POLYGON_KEY,
-        // key: env.REACT_APP_INFURA_KEY,
-        key: env.REACT_APP_ALCHEMY_KEY,
+        key: env.REACT_APP_INFURA_KEY,
+        // key: env.REACT_APP_ALCHEMY_KEY,
         baseUrl: {
           137: 'https://polygonscan.com',
           80001: 'https://explorer-mumbai.maticvigil.com'

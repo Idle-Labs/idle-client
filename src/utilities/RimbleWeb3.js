@@ -1093,6 +1093,11 @@ class RimbleTransaction extends React.Component {
           return;
         }
         availableNetworks.forEach( networkId => {
+
+          if (govTokenConfig.availableNetworks && !govTokenConfig.availableNetworks.includes(networkId)){
+            return;
+          }
+
           // Initialize govToken contracts
           const contractAddress = govTokenConfig.addresses && govTokenConfig.addresses[networkId] ? govTokenConfig.addresses[networkId] : govTokenConfig.address;
           this.functionsUtil.customLog('initializeContracts, init contract', token, contractAddress);

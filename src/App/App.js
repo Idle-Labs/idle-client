@@ -6,6 +6,7 @@ import themeDark from "../theme-dark";
 import connectors from "./connectors";
 import Web3Provider from "web3-react";
 import { Web3Consumer } from "web3-react";
+import Multicall from '../utilities/Multicall';
 import CookieConsent from "react-cookie-consent";
 import RimbleWeb3 from "../utilities/RimbleWeb3";
 import FlexLoader from "../FlexLoader/FlexLoader";
@@ -27,25 +28,6 @@ import { ThemeProvider, Box, Text, Link, Image, Flex } from "rimble-ui";
 const Landing = React.lazy(() => import("../Landing/Landing"));
 const Dashboard = React.lazy(() => import("../Dashboard/Dashboard"));
 const Governance = React.lazy(() => import("../Governance/Governance"));
-
-let multiCalls = {};
-let multiCallsMax = 10;
-let multiCallsBatchId = 0;
-const multiCallsStats = {
-  arrivedCount:0,
-  rejectedCount:0,
-  missingHashes:{},
-  processedCount:0,
-  rejectedHashes:{}
-};
-const multiCallsResults = {};
-let multiCallsTimeoutId = null;
-let multiCallsExecutionInterval = 1500;
-
-
-window.multiCalls = multiCalls;
-window.multiCallsStats = multiCallsStats;
-window.multiCallsResults = multiCallsResults;
 
 class App extends Component {
   state = {
@@ -82,18 +64,35 @@ class App extends Component {
   };
 
   // Utils
+  multiCall = null;
   functionsUtil = null;
   loadUtils() {
     const newProps = {
       ...this.props,
       web3:this.state.web3
     };
+
     if (this.functionsUtil) {
       this.functionsUtil.setProps(newProps);
     } else {
       this.functionsUtil = new FunctionsUtil(newProps);
     }
-    // window.functionsUtil = this.functionsUtil;
+
+
+    if (!this.multiCall){
+      this.multiCall = new Multicall();
+    }
+
+    if (this.state.network){
+      const requiredNetworkId = this.state.network.required.id;
+      this.multiCall.setNetwork(requiredNetworkId);
+    }
+
+    if (this.state.web3){
+      this.multiCall.setWeb3(this.state.web3);
+    }
+
+    window.multiCall = this.multiCall;
   }
 
   closeToastMessage = (e) => {
@@ -242,106 +241,6 @@ class App extends Component {
     }
 
     return output;
-  }
-
-  makeMulticall = async (callData) => {
-    const callBatchId = multiCallsBatchId;
-    const callDataHash = JSON.stringify(callData);
-
-    if (!multiCalls[multiCallsBatchId]){
-      multiCalls[multiCallsBatchId] = {};
-    }
-    multiCalls[multiCallsBatchId][callDataHash] = callData;
-
-    multiCallsStats.arrivedCount++;
-
-    if (!multiCallsStats.missingHashes[multiCallsBatchId]){
-      multiCallsStats.missingHashes[multiCallsBatchId] = {};
-    }
-    multiCallsStats.missingHashes[multiCallsBatchId][callDataHash] = multiCallsBatchId;
-
-    console.log('makeMulticall',multiCallsBatchId,callDataHash);
-
-    window.clearTimeout(multiCallsTimeoutId);
-    if (Object.values(multiCalls[multiCallsBatchId]).length>=multiCallsMax){
-      this.executeMulticalls(multiCallsBatchId);
-    } else {
-      multiCallsTimeoutId = setTimeout(() => {
-        this.executeMulticalls(multiCallsBatchId);
-      },multiCallsExecutionInterval);
-    }
-
-    const checkMulticallData = async (batchId,resultHash) => {
-      return new Promise( (resolve, reject) => {
-        (function attempt(count=0,maxCount=150){
-          if ((multiCallsResults[batchId] && typeof multiCallsResults[batchId][resultHash] !== 'undefined') || count>=maxCount){
-
-            // Handle rejection
-            if (multiCallsResults[batchId][resultHash] === 'REJECTED' || (count>=maxCount && (!multiCallsResults[batchId] || typeof multiCallsResults[batchId][resultHash] === 'undefined'))){
-              console.log('REJECTED',batchId,resultHash);
-
-              // Add hash to rejected hashes
-              multiCallsStats.rejectedCount++;
-              if (!multiCallsStats.rejectedHashes[resultHash]){
-                multiCallsStats.rejectedHashes[resultHash] = 0;
-              }
-              multiCallsStats.rejectedHashes[resultHash]++;
-
-              resolve('REJECTED');
-            } else {
-              console.log('RESOLVED',batchId,resultHash);
-              resolve(multiCallsResults[batchId][resultHash]);
-            }
-
-            // Increment processed count
-            multiCallsStats.processedCount++;
-
-            // Remove hash from missing hashes
-            delete multiCallsStats.missingHashes[batchId][resultHash];
-          } else {
-            // console.log('checkMulticallData_NOT-FOUND',resultHash);
-            window.setTimeout(()=>{
-              attempt(count+1);
-            },100);
-          }
-        })(0);
-      });
-    }
-
-    const data = await checkMulticallData(callBatchId,callDataHash);
-    return data;
-  }
-
-  executeMulticalls = async (executeBatchId) => {
-
-    if (/*!this.functionsUtil.props.web3 && */!this.state.web3){
-      await this.functionsUtil.asyncTimeout(100);
-      return await this.executeMulticalls(executeBatchId);
-    }
-
-    console.log('executeMulticalls_START',executeBatchId,multiCalls[executeBatchId]);
-
-    multiCallsBatchId++;
-    const results = await this.functionsUtil.makeMulticall(Object.values(multiCalls[executeBatchId]),this.state.web3);
-
-    multiCallsResults[executeBatchId] = {};
-    
-    if (results) {
-      results.forEach( (r,i) => {
-        const callDataHash = Object.keys(multiCalls[executeBatchId])[i];
-        multiCallsResults[executeBatchId][callDataHash] = r;
-        console.log('SAVE',executeBatchId,callDataHash,multiCallsResults[executeBatchId][callDataHash]);
-      });
-      // delete multiCalls[executeBatchId][callDataHash];
-    } else {
-      Object.keys(multiCalls[executeBatchId]).forEach( callDataHash => {
-        multiCallsResults[executeBatchId][callDataHash] = 'REJECTED';
-      });
-      // delete multiCalls[executeBatchId];
-    }
-
-    // delete multiCalls[executeBatchId];
-    console.log('executeMulticalls_END',executeBatchId,multiCalls[executeBatchId],results);
   }
 
   setCallbackAfterLogin = (callbackAfterLogin) => {
@@ -537,8 +436,8 @@ class App extends Component {
     // Suppress warnings and errors in production
     const isProduction = window.location.origin.toLowerCase().includes(globalConfigs.baseURL.toLowerCase());
     if (isProduction) {
-      window.console.error = () => { };
       window.console.warn = () => { };
+      window.console.error = () => { };
     }
 
     window.jQuery = jQuery;
@@ -740,6 +639,8 @@ class App extends Component {
     this.setState({
       network,
       availableStrategies:null
+    },() => {
+      this.loadUtils();
     });
   }
 
@@ -978,6 +879,7 @@ class App extends Component {
                                         web3Infura={web3Infura}
                                         web3Polygon={web3Polygon}
                                         initAccount={initAccount}
+                                        multiCall={this.multiCall}
                                         permitClient={permitClient}
                                         initSimpleID={initSimpleID}
                                         initContract={initContract}
@@ -1019,7 +921,6 @@ class App extends Component {
                                         setConnector={this.setConnector.bind(this)}
                                         setThemeMode={this.setThemeMode.bind(this)}
                                         availableTokens={this.state.availableTokens}
-                                        makeMulticall={this.makeMulticall.bind(this)}
                                         closeBuyModal={this.closeBuyModal.bind(this)}
                                         setCachedData={this.setCachedData.bind(this)}
                                         selectedStrategy={this.state.selectedStrategy}
@@ -1067,6 +968,7 @@ class App extends Component {
                                             web3Infura={web3Infura}
                                             web3Polygon={web3Polygon}
                                             initAccount={initAccount}
+                                            multiCall={this.multiCall}
                                             initSimpleID={initSimpleID}
                                             initContract={initContract}
                                             checkNetwork={checkNetwork}
@@ -1106,7 +1008,6 @@ class App extends Component {
                                             setThemeMode={this.setThemeMode.bind(this)}
                                             availableTokens={this.state.availableTokens}
                                             closeBuyModal={this.closeBuyModal.bind(this)}
-                                            makeMulticall={this.makeMulticall.bind(this)}
                                             setCachedData={this.setCachedData.bind(this)}
                                             selectedStrategy={this.state.selectedStrategy}
                                             userRejectedValidation={userRejectedValidation}
@@ -1137,6 +1038,7 @@ class App extends Component {
                                   isMobile={isMobile}
                                   contracts={contracts}
                                   initAccount={initAccount}
+                                  multiCall={this.multiCall}
                                   initContract={initContract}
                                   buyToken={this.state.buyToken}
                                   accountBalance={accountBalance}
@@ -1164,7 +1066,6 @@ class App extends Component {
                                   handleMenuClick={this.selectTab.bind(this)}
                                   setConnector={this.setConnector.bind(this)}
                                   availableTokens={this.state.availableTokens}
-                                  makeMulticall={this.makeMulticall.bind(this)}
                                   closeBuyModal={this.closeBuyModal.bind(this)}
                                   userRejectedValidation={userRejectedValidation}
                                   accountValidationPending={accountValidationPending}
@@ -1213,6 +1114,7 @@ class App extends Component {
                                               isMobile={isMobile}
                                               simpleID={simpleID}
                                               contracts={contracts}
+                                              multiCall={this.multiCall}
                                               initContract={initContract}
                                               innerWidth={this.state.width}
                                               logout={this.logout.bind(this)}
@@ -1240,7 +1142,6 @@ class App extends Component {
                                               setThemeMode={this.setThemeMode.bind(this)}
                                               processCustomParam={this.processCustomParam}
                                               availableTokens={this.state.availableTokens}
-                                              makeMulticall={this.makeMulticall.bind(this)}
                                               setCachedData={this.setCachedData.bind(this)}
                                               updateSelectedTab={this.selectTab.bind(this)}
                                               toastMessageProps={this.state.toastMessageProps}
