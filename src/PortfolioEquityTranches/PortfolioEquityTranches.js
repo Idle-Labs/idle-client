@@ -164,8 +164,9 @@ class PortfolioEquityTranches extends Component {
     let minChartValue = null;
     let maxChartValue = null;
     let aggregatedBalance = null;
-    const aggregatedBalancesKeys = {};
     const tokensBalancesPerDate = {};
+    const aggregatedBalancesKeys = {};
+    const walletProvider = this.functionsUtil.getWalletProvider();
     const currTimestamp = parseInt(this.functionsUtil.strToMoment(this.functionsUtil.strToMoment().format('YYYY-MM-DD')+' 23:59:59','YYYY-MM-DD HH:mm:ss')._d.getTime()/1000);
 
     const trancheTokenBalance = {};
@@ -190,9 +191,11 @@ class PortfolioEquityTranches extends Component {
         const tokenConfig = this.props.availableTranches[tokenBalanceConfig.protocol.toLowerCase()][token];
 
         const [
+          lastConversionRate,
           trancheAAInfos,
           trancheBBInfos
         ] = await Promise.all([
+          this.functionsUtil.getTokenConversionRateUniswap(tokenConfig),
           firstAATokenTx ? this.functionsUtil.getSubgraphTrancheInfo(tokenConfig.AA.address,firstAATokenTx.timeStamp,currTimestamp,['timeStamp','virtualPrice','blockNumber']) : [],
           firstBBTokenTx ? this.functionsUtil.getSubgraphTrancheInfo(tokenConfig.BB.address,firstBBTokenTx.timeStamp,currTimestamp,['timeStamp','virtualPrice','blockNumber']) : [],
         ]);
@@ -223,13 +226,18 @@ class PortfolioEquityTranches extends Component {
                 blocksTimestamps[blockInfo.trancheInfo.blockNumber] = [];
               }
               blocksTimestamps[blockInfo.trancheInfo.blockNumber].push(blockInfo.trancheInfo.timeStamp);
-              conversionRateBlocksCalls[blockInfo.trancheInfo.blockNumber] = this.functionsUtil.getTokenConversionRateUniswap(tokenConfig,blockInfo.trancheInfo.blockNumber);
+
+              // Gnosis cannot fetch past blocks data
+              conversionRateBlocksCalls[blockInfo.trancheInfo.blockNumber] = walletProvider === 'gnosis' ? new Promise(resolve => resolve(lastConversionRate)) : this.functionsUtil.getTokenConversionRateUniswap(tokenConfig,blockInfo.trancheInfo.blockNumber);
             }
           }
 
           const conversionRates = await Promise.all(Object.values(conversionRateBlocksCalls));
 
           conversionRates.forEach( (conversionRate,index) => {
+            if (this.functionsUtil.BNify(conversionRate).isNaN()){
+              conversionRate = lastConversionRate;
+            }
             const blockNumber = Object.keys(conversionRateBlocksCalls)[index];
             blocksTimestamps[blockNumber].forEach( timeStamp => {
               const momentDate = this.functionsUtil.strToMoment(timeStamp*1000).format('YYYY-MM-DD');

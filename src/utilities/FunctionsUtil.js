@@ -324,6 +324,9 @@ class FunctionsUtil {
 
     const tranches = this.getGlobalConfig(['tranches']);
 
+    // Load user transactions first
+    const userTransactions = await this.getEtherscanUserTrancheTxs(account);
+
     await this.asyncForEach(Object.keys(availableTranches), async (protocol) => {
       const protocolConfig = availableTranches[protocol];
 
@@ -346,7 +349,7 @@ class FunctionsUtil {
             trancheStakedBalance,
           ] = await Promise.all([
             this.getContractBalance(trancheConfig.name,account),
-            this.getTrancheUserInfo(tokenConfig, trancheConfig, account),
+            this.getTrancheUserInfo(tokenConfig, trancheConfig, account, userTransactions),
             gaugeConfig ? this.getContractBalance(gaugeConfig.name, account) : this.BNify(0),
             this.getTrancheStakingRewards(account,trancheConfig,trancheConfig.functions.rewards),
             this.getTrancheStakedBalance(trancheConfig.CDORewards.name,account,null,trancheConfig.functions.stakedBalance),
@@ -975,6 +978,179 @@ class FunctionsUtil {
     return null;
   }
 
+  getTrancheUserTransactionsEvents = async (account, tokenConfig, trancheConfig) => {
+    const defaultEventsConfig = { to: 'to', from: 'from', value: 'value' };
+    const underlyingEventsConfig = this.getGlobalConfig(['events', tokenConfig.token, 'fields']) || defaultEventsConfig;
+
+    const underlyingEventsFilters_deposits = {};
+    underlyingEventsFilters_deposits[underlyingEventsConfig.to] = [tokenConfig.CDO.address];
+    underlyingEventsFilters_deposits[underlyingEventsConfig.from] = [this.props.account];
+
+    const underlyingEventsFilters_redeems = {};
+    underlyingEventsFilters_redeems[underlyingEventsConfig.to] = [this.props.account];
+    underlyingEventsFilters_redeems[underlyingEventsConfig.from] = [tokenConfig.CDO.address];
+
+    let [
+      underlying_redeems,
+      underlying_deposits,
+      trancheToken_redeems,
+      trancheToken_deposits
+    ] = await Promise.all([
+      this.getContractEvents(tokenConfig.token, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: underlyingEventsFilters_redeems }),
+      this.getContractEvents(tokenConfig.token, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: underlyingEventsFilters_deposits }),
+      this.getContractEvents(trancheConfig.name, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: { from: [this.props.account], to: ['0x0000000000000000000000000000000000000000'] } }),
+      this.getContractEvents(trancheConfig.name, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: { from: ['0x0000000000000000000000000000000000000000'], to: [this.props.account] } })
+    ]);
+
+    if (underlying_redeems){
+      underlying_redeems.forEach( tx => {
+        tx.type = 'underlyingRedeem';
+        tx.contractAddress = tokenConfig.address.toLowerCase();
+      });
+    } else {
+      underlying_redeems = [];
+    }
+
+    if (underlying_deposits){
+      underlying_deposits.forEach( tx => {
+        tx.type = 'underlyingDeposit';
+        tx.contractAddress = tokenConfig.address.toLowerCase();
+      });
+    } else {
+      underlying_deposits = [];
+    }
+
+    if (trancheToken_deposits){
+      trancheToken_deposits.forEach( tx => {
+        tx.type = 'trancheDeposit';
+        tx.contractAddress = trancheConfig.address.toLowerCase();
+      });
+    } else {
+      trancheToken_deposits = [];
+    }
+
+    if (trancheToken_redeems){
+      trancheToken_redeems.forEach( tx => {
+        tx.type = 'trancheRedeem';
+        tx.contractAddress = trancheConfig.address.toLowerCase();
+      });
+    } else {
+      trancheToken_redeems = [];
+    }
+
+    return underlying_redeems.concat(underlying_deposits).concat(trancheToken_deposits).concat(trancheToken_redeems);
+  }
+
+  getEtherscanUserTrancheTxs = async (account,tokenConfig_filter=null,trancheConfig_filter=null) => {
+
+    account = account || this.props.account;
+    if (!account){
+      return false;
+    }
+
+    const requiredNetworkId = this.getRequiredNetworkId();
+    const etherscanInfo = this.getGlobalConfig(['network', 'providers', 'etherscan']);
+    const etherscanApiUrl = etherscanInfo.endpoints[requiredNetworkId];
+
+    const tokenConfigs = [];
+    let firstTrancheBlock = null;
+
+    Object.keys(this.props.availableTranches).forEach( protocol => {
+      Object.keys(this.props.availableTranches[protocol]).forEach( token => {
+        const tokenConfig = this.props.availableTranches[protocol][token];
+        if (!tokenConfig_filter){
+          tokenConfigs.push(tokenConfig);
+        }
+        firstTrancheBlock = firstTrancheBlock ? Math.min(firstTrancheBlock,tokenConfig.blockNumber) : tokenConfig.blockNumber;
+      });
+    });
+
+    if (tokenConfig_filter){
+      tokenConfigs.push(tokenConfig_filter);
+    }
+
+    const tranchesConfig = trancheConfig_filter ? [trancheConfig_filter.tranche] : this.getGlobalConfig(['tranches']);
+
+    // console.log('getEtherscanUserTrancheTxs','firstTrancheBlock',firstTrancheBlock,tokenConfig_filter,trancheConfig_filter);
+
+    const endpoint = `${etherscanApiUrl}?module=account&action=tokentx&address=${account}&startblock=${firstTrancheBlock}&endblock=latest&sort=asc`;
+    const etherscanTxlist = await this.makeEtherscanApiRequest(endpoint, etherscanInfo.keys);
+    if (etherscanTxlist && etherscanTxlist.data && etherscanTxlist.data.result && typeof etherscanTxlist.data.result.filter === 'function') {
+      return etherscanTxlist.data.result.filter(tx => {
+        return tokenConfigs.some( tokenConfig => {
+          const trancheTokenAddresses = Object.keys(tranchesConfig).map( trancheType => (tokenConfig[trancheType].address.toLowerCase()) );
+
+          const defaultEventsConfig = { to: 'to', from: 'from', value: 'value' };
+          const underlyingEventsConfig = this.getGlobalConfig(['events', tokenConfig.token, 'fields']) || defaultEventsConfig;
+          
+          const isUnderlyingDeposit = tx.from.toLowerCase() === account.toLowerCase() && tx.contractAddress.toLowerCase() === tokenConfig.address.toLowerCase() && tx.to.toLowerCase() === tokenConfig.CDO.address.toLowerCase();
+          const isUnderlyingRedeem = tx.from.toLowerCase() === tokenConfig.CDO.address.toLowerCase() && tx.contractAddress.toLowerCase() === tokenConfig.address.toLowerCase() && tx.to.toLowerCase() === account.toLowerCase();
+          const isTrancheDeposit = tx.from.toLowerCase() === '0x0000000000000000000000000000000000000000' && trancheTokenAddresses.includes(tx.contractAddress.toLowerCase()) && tx.to.toLowerCase() === account.toLowerCase();
+          const isTrancheRedeem = tx.from.toLowerCase() === account.toLowerCase() && trancheTokenAddresses.includes(tx.contractAddress.toLowerCase()) && tx.to.toLowerCase() === '0x0000000000000000000000000000000000000000';
+
+          let type = null;
+          if (isUnderlyingDeposit){
+            type = 'underlyingDeposit';
+          } else if (isUnderlyingRedeem){
+            type = 'underlyingRedeem';
+          } else if (isTrancheDeposit){
+            type = 'trancheDeposit';
+          } else if (isTrancheRedeem){
+            type = 'trancheRedeem';
+          }
+
+          tx.type = type;
+          tx.returnValues = {};
+          tx.returnValues.to = tx.to;
+          tx.transactionHash = tx.hash;
+          tx.returnValues.from = tx.from;
+          tx.returnValues.value = tx.value;
+          tx.returnValues[underlyingEventsConfig.to] = tx.to;
+          tx.returnValues[underlyingEventsConfig.from] = tx.from;
+          tx.returnValues[underlyingEventsConfig.value] = tx.value;
+
+          return isUnderlyingDeposit || isUnderlyingRedeem || isTrancheDeposit || isTrancheRedeem;
+        });
+      });
+    }
+
+    return null;
+  }
+
+  getEtherscanTokenTransfers = async (tokenName,walletAddr,fromAddress,contractAddress,toAddress,fromBlock=0,toBlock='latest') => {
+    const requiredNetworkId = this.getRequiredNetworkId();
+    const etherscanInfo = this.getGlobalConfig(['network', 'providers', 'etherscan']);
+    const etherscanApiUrl = etherscanInfo.endpoints[requiredNetworkId];
+    const endpoint = `${etherscanApiUrl}?module=account&action=tokentx&address=${walletAddr}&contractaddress=${contractAddress}&startblock=${fromBlock}&endblock=${toBlock}&sort=asc`;
+    const etherscanTxlist = await this.makeEtherscanApiRequest(endpoint, etherscanInfo.keys, 0);
+
+    const defaultEventsConfig = { to: 'to', from: 'from', value: 'value' };
+    const underlyingEventsConfig = this.getGlobalConfig(['events', tokenName, 'fields']) || defaultEventsConfig;
+    if (etherscanTxlist && etherscanTxlist.data && etherscanTxlist.data.result && typeof etherscanTxlist.data.result.filter === 'function') {
+
+      const transferEvents = etherscanTxlist.data.result.filter(tx => (tx.from.toLowerCase() === fromAddress.toLowerCase() && tx.to.toLowerCase() === toAddress.toLowerCase()));
+      
+      transferEvents.forEach( tx => {
+        tx.returnValues = {};
+        tx.returnValues.to = tx.to;
+        tx.transactionHash = tx.hash;
+        tx.returnValues.from = tx.from;
+        tx.returnValues.value = tx.value;
+        tx.returnValues[underlyingEventsConfig.to] = tx.to;
+        tx.returnValues[underlyingEventsConfig.from] = tx.from;
+        tx.returnValues[underlyingEventsConfig.value] = tx.value;
+      });
+
+      return transferEvents;
+    }
+
+    const eventFilters = {
+      from: fromAddress,
+      to: toAddress
+    }
+    return await this.getContractEvents(tokenName, 'Transfer', fromBlock, toBlock, { filter: eventFilters });
+  }
+
   getTrancheStakingRewardsDistributions = async (tokenConfig,trancheConfig) => {
     const stakingDistributions = {};
     const stakingRewards = await this.loadTrancheFieldRaw('stakingRewards',{},tokenConfig.protocol,tokenConfig.token,trancheConfig.tranche,tokenConfig,trancheConfig);
@@ -1036,6 +1212,8 @@ class FunctionsUtil {
           this.getBlockInfo(latestHarvestBlock),
           this.getContractEvents(tokenConfig.token, 'Transfer', parseInt(latestHarvestBlock), parseInt(latestHarvestBlock)+1, {filter: eventFilters })
         ]);
+
+        console.log('getTrancheLastHarvest',tokenConfig.token,parseInt(latestHarvestBlock), parseInt(latestHarvestBlock)+1,eventFilters,transfers);
 
         if (transfers && transfers.length) {
           const totalAmount = transfers.reduce( (amount,t) => {
@@ -1166,12 +1344,8 @@ class FunctionsUtil {
         };
 
       } else {
-        const eventFilters = {
-          from: tokenConfig.CDO.address,
-          to: trancheConfig.CDORewards.address
-        }
 
-        const transfers = await this.getContractEvents(token, 'Transfer', tokenConfig.blockNumber, 'latest', { filter: eventFilters });
+        const transfers = await this.getEtherscanTokenTransfers(token, tokenConfig.CDO.address, tokenConfig.CDO.address, govTokenConfig.address, trancheConfig.CDORewards.address, tokenConfig.blockNumber);
 
         if (transfers && transfers.length > 0) {
           const firstHarvest = transfers.length ? transfers[0] : null;
@@ -1237,8 +1411,12 @@ class FunctionsUtil {
 
     return tokensDistribution;
   }
-  getTrancheUserInfo = async (tokenConfig, trancheConfig, account) => {
+  getTrancheUserInfo = async (tokenConfig, trancheConfig, account=null, userTransactions=null) => {
     account = account || this.props.account;
+
+    if (!account){
+      return false;
+    }
     // const cachedDataKey = `amountDepositedTranche_${tokenConfig.token}_${trancheConfig.token}_${account}`;
     // const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     // if (cachedData && !this.BNify(cachedData).isNaN()) {
@@ -1248,27 +1426,18 @@ class FunctionsUtil {
     const defaultEventsConfig = { to: 'to', from: 'from', value: 'value' };
     const underlyingEventsConfig = this.getGlobalConfig(['events', tokenConfig.token, 'fields']) || defaultEventsConfig;
 
-    const underlyingEventsFilters_deposits = {};
-    underlyingEventsFilters_deposits[underlyingEventsConfig.to] = [tokenConfig.CDO.address];
-    underlyingEventsFilters_deposits[underlyingEventsConfig.from] = [this.props.account];
+    userTransactions = userTransactions || await this.getEtherscanUserTrancheTxs(account, tokenConfig, trancheConfig);
 
-    const underlyingEventsFilters_redeems = {};
-    underlyingEventsFilters_redeems[underlyingEventsConfig.to] = [this.props.account];
-    underlyingEventsFilters_redeems[underlyingEventsConfig.from] = [tokenConfig.CDO.address];
+    if (!userTransactions){
+      userTransactions = await this.getTrancheUserTransactionsEvents(account, tokenConfig, trancheConfig);
+    }
 
-    // console.log('getTrancheUserInfo',tokenConfig.token,underlyingEventsFilters_deposits,underlyingEventsFilters_redeems);
+    // Filter user transactions
+    userTransactions = userTransactions.filter( tx => ([tokenConfig.address.toLowerCase(),trancheConfig.address.toLowerCase()].includes(tx.contractAddress.toLowerCase())) );
 
-    let [
-      underlying_redeems,
-      underlying_deposits,
-      trancheToken_redeems,
-      trancheToken_deposits
-    ] = await Promise.all([
-      this.getContractEvents(tokenConfig.token, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: underlyingEventsFilters_redeems }),
-      this.getContractEvents(tokenConfig.token, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: underlyingEventsFilters_deposits }),
-      this.getContractEvents(trancheConfig.name, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: { from: [this.props.account], to: ['0x0000000000000000000000000000000000000000'] } }),
-      this.getContractEvents(trancheConfig.name, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: { from: ['0x0000000000000000000000000000000000000000'], to: [this.props.account] } })
-    ]);
+    // console.log('getTrancheUserInfo',this.props.account,tokenConfig.token,trancheConfig.tranche,userTransactions);
+
+    // console.log('underlying_deposits',this.props.account,tokenConfig.address,tokenConfig.CDO.address,trancheConfig.blockNumber,underlying_deposits);
 
     // console.log('getTrancheUserInfo_2',trancheConfig.name,trancheConfig.blockNumber,'underlying_transfers',underlying_transfers,'trancheToken_transfers',trancheToken_transfers);
 
@@ -1280,8 +1449,8 @@ class FunctionsUtil {
     let amountDepositedConverted = this.BNify(0);
 
     // Order token transfers
-    const underlying_transfers = underlying_deposits.concat(underlying_redeems).sort((a, b) => (parseInt(a.blockNumber) > parseInt(b.blockNumber) ? 1 : -1));
-    const trancheToken_transfers = trancheToken_deposits.concat(trancheToken_redeems).sort((a, b) => (parseInt(a.blockNumber) > parseInt(b.blockNumber) ? 1 : -1));
+    const underlying_transfers = userTransactions.filter( tx => ['underlyingDeposit','underlyingRedeem'].includes(tx.type) ).sort((a, b) => (parseInt(a.blockNumber) > parseInt(b.blockNumber) ? 1 : -1));
+    const trancheToken_transfers = userTransactions.filter( tx => ['trancheDeposit','trancheRedeem'].includes(tx.type) ).sort((a, b) => (parseInt(a.blockNumber) > parseInt(b.blockNumber) ? 1 : -1));
 
     const blocksInfo = {};
 
@@ -3180,7 +3349,7 @@ class FunctionsUtil {
     const apiKey = keys[apiKeyIndex];
     const data = await this.makeRequest(endpoint + '&apikey=' + apiKey);
 
-    // console.log('makeEtherscanApiRequest',endpoint+'&apikey='+apiKey,apiKeyIndex+'/'+keys.length,(data.data ? data.data.message : null),apiKeyIndex<keys.length-1);
+    // console.log('makeEtherscanApiRequest',endpoint+'&apikey='+apiKey,apiKeyIndex+'/'+keys.length,TTL,(data.data ? data.data.message : null),apiKeyIndex<keys.length-1);
 
     if (data && data.data && (data.data.message.match(/^OK/) || data.data.message === "No transactions found")) {
       if (TTL>0){
@@ -3857,6 +4026,8 @@ class FunctionsUtil {
     }
 
     const all_past_events = await Promise.all(calls);
+    console.log('getContractEvents',contractName,eventName,startBlock,endBlock,params,all_past_events);
+
     return all_past_events.reduce( (events,d) => {
       events = events.concat(d);
       return events;

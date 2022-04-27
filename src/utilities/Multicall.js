@@ -30,7 +30,7 @@ class Multicall {
   maxProcessingBatches = null;
   multiCallsExecutionInterval = 500;
 
-  timeLog = (...props) => { return;/* console.log(moment().format('HH:mm:ss'), ...props);*/ }
+  timeLog = (...props) => { console.log(moment().format('HH:mm:ss'), ...props); }
 
   constructor(selectedNetwork=null,web3=null,multiCallsMax=null,multiCallsExecutionInterval=null) {
     if (selectedNetwork){
@@ -93,7 +93,7 @@ class Multicall {
     }
     this.multiCallsStats.missingHashes[this.multiCallsBatchId][callDataHash] = this.multiCallsBatchId;
 
-    this.timeLog('makeMulticall',this.multiCallsBatchId,callDataHash);
+    // this.timeLog('makeMulticall',this.multiCallsBatchId,callDataHash);
 
     if (!this.multiCallsTimeoutIds[this.multiCallsBatchId]){
       this.multiCallsTimeoutIds[this.multiCallsBatchId] = 0;
@@ -129,14 +129,14 @@ class Multicall {
 
             // Handle rejection
             if (this.multiCallsResults[batchId][resultHash] === 'REJECTED'){
-              this.timeLog('REJECTED',batchId,resultHash);
+              // this.timeLog('REJECTED',batchId,resultHash);
 
               // Add hash to rejected hashes
               this.addRejectedHash(resultHash);
 
               resolve('REJECTED');
             } else {
-              this.timeLog('RESOLVED',batchId,resultHash);
+              // this.timeLog('RESOLVED',batchId,resultHash);
               this.addResolvedHash(resultHash);
               resolve(this.multiCallsResults[batchId][resultHash]);
             }
@@ -208,7 +208,7 @@ class Multicall {
     // Take maximum processing batches
     this.multiCallsStats.maxProcessingBatches = Math.max(this.multiCallsStats.maxProcessingBatches,this.processingBatches);
     
-    this.timeLog('executeBatch_START',executeBatchId,this.processingBatches,this.multiCalls[executeBatchId]);
+    // this.timeLog('executeBatch_START',executeBatchId,this.processingBatches,this.multiCalls[executeBatchId]);
 
     if (!this.multiCallsStats.startDate){
       this.multiCallsStats.startDate = new Date();
@@ -241,7 +241,7 @@ class Multicall {
       results.forEach( (r,i) => {
         const callDataHash = Object.keys(this.multiCalls[executeBatchId])[i];
         this.multiCallsResults[executeBatchId][callDataHash] = r;
-        this.timeLog('SAVE',executeBatchId,callDataHash,this.multiCallsResults[executeBatchId][callDataHash]);
+        // this.timeLog('SAVE',executeBatchId,callDataHash,this.multiCallsResults[executeBatchId][callDataHash]);
       });
       // delete this.multiCalls[executeBatchId][callDataHash];
     } else {
@@ -260,7 +260,7 @@ class Multicall {
     this.multiCallsStats.totalElapsedTime = parseFloat(this.multiCallsStats.endDate.getTime()/1000)-parseFloat(this.multiCallsStats.startDate.getTime()/1000);
 
     // delete this.multiCalls[executeBatchId];
-    this.timeLog('executeBatch_END',executeBatchId,this.processingBatches,this.multiCalls[executeBatchId],results);
+    // this.timeLog('executeBatch_END',executeBatchId,this.processingBatches,this.multiCalls[executeBatchId],results);
   }
 
   prepareMulticallData = (calls,web3=null) => {
