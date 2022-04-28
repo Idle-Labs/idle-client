@@ -4026,7 +4026,7 @@ class FunctionsUtil {
     }
 
     const all_past_events = await Promise.all(calls);
-    console.log('getContractEvents',contractName,eventName,startBlock,endBlock,params,all_past_events);
+    // console.log('getContractEvents',contractName,eventName,startBlock,endBlock,params,all_past_events);
 
     return all_past_events.reduce( (events,d) => {
       events = events.concat(d);
@@ -4906,6 +4906,8 @@ class FunctionsUtil {
     const decimals = (fieldProps && parseInt(fieldProps.decimals)>0) ? fieldProps.decimals : (this.props.isMobile ? 2 : 3);
     const minPrecision = (fieldProps && parseInt(fieldProps.minPrecision)>0) ? fieldProps.minPrecision : (this.props.isMobile ? 3 : 4);
 
+    const multiCallDisabled = !!tokenConfig.multiCallDisabled;
+
     const internal_view = this.getQueryStringParameterByName('internal_view');
     // const stakingRewards = tokenConfig && tranche ? tokenConfig[tranche].CDORewards.stakingRewards : [];
     // const stakingRewardsEnabled = stakingRewards.length>0 ? stakingRewards.filter( t => t.enabled ) : null;
@@ -5179,7 +5181,7 @@ class FunctionsUtil {
           this.getTrancheRewardTokensInfo(tokenConfig,trancheConfig),
           gaugeConfig ? this.getGaugeRewardsTokens(gaugeConfig) : null,
           tokenConfig.curveApyPath ? this.getCurveAPYs(tokenConfig.curveApyPath) : null,
-          this.genericContractCallCached(tokenConfig.CDO.name, 'getApr', [trancheConfig.address])
+          multiCallDisabled ? this.genericContractCallCachedNoMulticall(tokenConfig.CDO.name, 'getApr', [trancheConfig.address]) : this.genericContractCallCached(tokenConfig.CDO.name, 'getApr', [trancheConfig.address])
         ]);
 
         if (trancheApy){

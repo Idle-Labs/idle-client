@@ -81,6 +81,11 @@ class Multicall {
     const callBatchId = this.multiCallsBatchId;
     const callDataHash = JSON.stringify(callData);
 
+    // Skip rejected calls for more than 2 times
+    if (this.checkRejectedHash(callDataHash)>=1){
+      return 'REJECTED';
+    }
+
     if (!this.multiCalls[this.multiCallsBatchId]){
       this.multiCalls[this.multiCallsBatchId] = {};
     }
@@ -167,7 +172,7 @@ class Multicall {
   }
 
   checkRejectedHash = (callHash) => {
-    return !!this.multiCallsStats.rejectedHashes[callHash];
+    return this.multiCallsStats.rejectedHashes[callHash] || false;
   }
 
   addResolvedHash = (callHash) => {

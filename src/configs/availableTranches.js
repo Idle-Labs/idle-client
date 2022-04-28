@@ -795,13 +795,13 @@ const availableTranches = {
         address:'0xFb08404617B6afab0b19f6cEb2Ef9E07058D043C'
       }
     },
-    /*
     PBTCCRV:{
       abi:ERC20,
       decimals:18,
       token:'PBTCCRV',
       protocol:'convex',
       blockNumber:14570195,
+      multiCallDisabled:true,
       autoFarming:['CVX','CRV'],
       address:'0xC9467E453620f16b57a34a770C6bceBECe002587',
       CDO:{
@@ -873,7 +873,6 @@ const availableTranches = {
         address:'0x3872418402d1e967889aC609731fc9E11f438De5'
       }
     }
-    */
   }
 };
 
