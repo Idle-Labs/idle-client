@@ -1069,7 +1069,7 @@ class FunctionsUtil {
       tokenConfigs.push(tokenConfig_filter);
     }
 
-    const tranchesConfig = trancheConfig_filter ? [trancheConfig_filter.tranche] : this.getGlobalConfig(['tranches']);
+    const trancheTypes = trancheConfig_filter ? [trancheConfig_filter.tranche] : Object.keys(this.getGlobalConfig(['tranches']));
 
     // console.log('getEtherscanUserTrancheTxs','firstTrancheBlock',firstTrancheBlock,tokenConfig_filter,trancheConfig_filter);
 
@@ -1078,7 +1078,7 @@ class FunctionsUtil {
     if (etherscanTxlist && etherscanTxlist.data && etherscanTxlist.data.result && typeof etherscanTxlist.data.result.filter === 'function') {
       return etherscanTxlist.data.result.filter(tx => {
         return tokenConfigs.some( tokenConfig => {
-          const trancheTokenAddresses = Object.keys(tranchesConfig).map( trancheType => (tokenConfig[trancheType].address.toLowerCase()) );
+          const trancheTokenAddresses = trancheTypes.map( trancheType => (tokenConfig[trancheType].address.toLowerCase()) );
 
           const defaultEventsConfig = { to: 'to', from: 'from', value: 'value' };
           const underlyingEventsConfig = this.getGlobalConfig(['events', tokenConfig.token, 'fields']) || defaultEventsConfig;
