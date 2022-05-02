@@ -1242,12 +1242,14 @@ class FunctionsUtil {
     let conversionRate = this.BNify(1);
 
     [
+      poolSupply,
       conversionRate,
-      poolSupply
     ] = await Promise.all([
+      this.convertTrancheTokenBalance(poolSupply,poolTokenConfig),
       this.getUniswapConversionRate(DAITokenConfig, govTokenConfig),
-      this.convertTokenBalance(poolSupply,poolTokenConfig.token,poolTokenConfig)
     ]);
+
+    // console.log('getGovTokenApr',govToken,govTokenConfig,poolTokenConfig.token,poolSupply.toFixed(),conversionRate.toFixed());
 
     const tokensPerYear = this.BNify(tokensPerSecond).times(this.getGlobalConfig(['network', 'secondsPerYear']));
     const convertedTokensPerYear = tokensPerYear.times(conversionRate);
@@ -7089,7 +7091,7 @@ class FunctionsUtil {
   getUniswapConversionRate = async (tokenConfigFrom, tokenConfigDest, blockNumber='latest', useWETH=true) => {
 
     if (tokenConfigDest.addressForPrice) {
-      tokenConfigDest = Object.assign({}, tokenConfigDest);
+      tokenConfigDest = {...tokenConfigDest};
       tokenConfigDest.address = tokenConfigDest.addressForPrice;
     }
 
@@ -7102,20 +7104,35 @@ class FunctionsUtil {
 
     try {
       const WETHAddr = this.getContractByName('WETH')._address;
-      const one = this.normalizeTokenDecimals(18);
+      const uniswapRouterMethod = tokenConfigDest.uniswapRouterMethod || 'getAmountsIn';
 
       const path = [];
-      path.push(tokenConfigFrom.address);
+      path.push(uniswapRouterMethod === 'getAmountsIn' ? tokenConfigFrom.address : tokenConfigDest.address);
       // Don't pass through weth if i'm converting weth
       if (useWETH && WETHAddr.toLowerCase() !== tokenConfigFrom.address.toLowerCase() && WETHAddr.toLowerCase() !== tokenConfigDest.address.toLowerCase()) {
         path.push(WETHAddr);
       }
-      path.push(tokenConfigDest.address);
+      path.push(uniswapRouterMethod === 'getAmountsIn' ? tokenConfigDest.address : tokenConfigFrom.address);
 
-      const unires = await this.genericContractCallNoMulticall('UniswapRouter', 'getAmountsIn', [one.toFixed(), path], {}, blockNumber);
+      let decimals = tokenConfigDest.decimals;
+      
+      // Use decimals of underlying token if set
+      if (uniswapRouterMethod === 'getAmountsOut'){
+        if (tokenConfigDest.underlying){
+          const underlyingTokenConfig = this.getTokenConfig(tokenConfigDest.underlying);
+          if (underlyingTokenConfig){
+            decimals = underlyingTokenConfig.decimals;
+          }
+        }
+      }
+      const one = this.normalizeTokenDecimals(decimals);
+      const unires = await this.genericContractCallNoMulticall('UniswapRouter', uniswapRouterMethod, [one.toFixed(), path], {}, blockNumber);
 
       if (unires) {
-        const price = this.BNify(unires[0]).div(one);
+        let price = this.BNify(unires[0]).div(one);
+        if (uniswapRouterMethod === 'getAmountsOut'){
+          price = this.BNify(unires[2]).div(this.normalizeTokenDecimals(18));
+        }
         const TTL = blockNumber === 'latest' ? this.getGlobalConfig(['cache','TTL']) : null;
         return this.setCachedDataWithLocalStorage(cachedDataKey, price, TTL);
       }
@@ -8434,7 +8451,6 @@ class FunctionsUtil {
     return Object.values(govTokens).find(tokenConfig => (tokenConfig.enabled && tokenConfig.address && tokenConfig.address.toLowerCase() === address.toLowerCase()));
   }
   getGovTokensUserTotalBalance = async (account = null, availableTokens = null, convertToken = null, checkShowBalance = true) => {
-
     // Check for cached data
     const cachedDataKey = `govTokensUserTotalBalance_${account}_${availableTokens ? JSON.stringify(Object.keys(availableTokens)) : 'null'}_${convertToken}_${checkShowBalance}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
@@ -9051,7 +9067,7 @@ class FunctionsUtil {
     const DAITokenConfig = {
       address: this.getContractByName('DAI')._address
     };
-    const statsTokenConfig = tokenConfig.token ? this.getGlobalConfig(['stats', 'tokens', tokenConfig.token.toUpperCase()]) : null;
+    const statsTokenConfig = tokenConfig.token ? this.getTokenConfig(tokenConfig.token) : null;
 
     // Replace from token address
     if (statsTokenConfig.addressForPriceFrom){

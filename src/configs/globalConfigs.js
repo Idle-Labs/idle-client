@@ -1248,12 +1248,16 @@ const globalConfigs = {
         enabled: true,
         label: 'PBTCCRV',
         token: 'PBTCCRV',
+        underlying: 'WBTC', // Used for decimals
         color: {
           hex: '#ff6665',
           rgb: [255, 102, 101],
           hsl: ['0', '100%', '70%']
         },
-        address: '0xC9467E453620f16b57a34a770C6bceBECe002587'
+        conversionRateField: 'PBTCDAIPrice',
+        uniswapRouterMethod: 'getAmountsOut',
+        address: '0xC9467E453620f16b57a34a770C6bceBECe002587',
+        addressForPrice: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
       },
       MUSD: {
         decimals: 18,
@@ -1869,6 +1873,7 @@ const globalConfigs = {
     },
     isForked: false, // If TRUE the tx confirmation callback is fired on the receipt
     requiredNetwork: 1, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
+    secondsPerDay: 86400,
     blocksPerYear: 2371428,
     secondsPerYear: 31536000,
     requiredConfirmations: 1,

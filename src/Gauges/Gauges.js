@@ -379,6 +379,8 @@ class Gauges extends Component {
     const gaugesOrderKeys = {};
     const availableGauges = {};
     const veTokenConfig = this.props.toolProps.veToken;
+    const internal_view = this.functionsUtil.getQueryStringParameterByName('internal_view');
+
     await this.functionsUtil.asyncForEach(Object.keys(this.props.toolProps.availableGauges), async (gaugeToken) => {
       const gaugeConfig = this.props.toolProps.availableGauges[gaugeToken];
       if (!availableGauges[gaugeConfig.protocol]){
@@ -402,6 +404,7 @@ class Gauges extends Component {
           gaugeWorkingSupply,
           userWorkingBalance,
           gaugeWeight,
+          trancheTokenPrice
         ] = await Promise.all([
           this.functionsUtil.getGaugeNextWeight(gaugeConfig),
           this.functionsUtil.getTokenTotalSupply(gaugeConfig.name),
@@ -409,7 +412,8 @@ class Gauges extends Component {
           this.functionsUtil.getGaugeRewardsTokens(gaugeConfig,this.props.account),
           this.functionsUtil.genericContractCall(gaugeConfig.name,'working_supply'),
           this.functionsUtil.genericContractCall(gaugeConfig.name,'working_balances',[this.props.account]),
-          this.functionsUtil.genericContractCall('GaugeController','gauge_relative_weight',[gaugeConfig.address])
+          this.functionsUtil.genericContractCall('GaugeController','gauge_relative_weight',[gaugeConfig.address]),
+          this.functionsUtil.genericContractCall(trancheConfig.CDO.name, 'virtualPrice', [trancheConfig.AA.address])
         ]);
 
         const claimableRewardsTokens = Object.keys(rewardsTokens).reduce( (claimableRewards,token) => {
@@ -425,36 +429,39 @@ class Gauges extends Component {
         gaugeWeight = this.functionsUtil.fixTokenDecimals(gaugeWeight,18);
         gaugeNextWeight = this.functionsUtil.fixTokenDecimals(gaugeNextWeight,18);
         gaugeTotalSupply = this.functionsUtil.fixTokenDecimals(gaugeTotalSupply,18);
+        trancheTokenPrice = this.functionsUtil.fixTokenDecimals(trancheTokenPrice,18);
         const gaugeDistributionRate = this.state.distributionRate.times(gaugeWeight);
+
+        // Calculate IDLE apr for internal view
+        const gaugeDistributionRatePerSecond = gaugeDistributionRate.div(this.functionsUtil.getGlobalConfig(['network','secondsPerDay']));
+        const gaugeUnderlyingTokenConfig = this.functionsUtil.getTokenConfig(gaugeToken);
+        const gaugeTotalSupplyUnderlying = gaugeTotalSupply.times(trancheTokenPrice);
+        const idleApr = internal_view ? await this.functionsUtil.getGovTokenApr(veTokenConfig.rewardToken,gaugeUnderlyingTokenConfig,gaugeTotalSupplyUnderlying,gaugeDistributionRatePerSecond) : null;
 
         if (this.props.account){
           gaugeUserShare = this.functionsUtil.BNify(stakedBalance).div(gaugeTotalSupply);
-          // const veTokenShare = this.functionsUtil.BNify(this.functionsUtil.normalizeTokenAmount(this.state.veTokenBalance,18)).div(this.state.veTokenTotalSupply);
-          // const userBaseDistribution = gaugeDistributionRate.times(gaugeUserShare);
 
           const userBoostedShare = this.functionsUtil.BNify(userWorkingBalance).div(gaugeWorkingSupply);
           userBoostedDistribution = gaugeDistributionRate.times(userBoostedShare);
           if (userBoostedDistribution.gt(gaugeDistributionRate)){
             userBoostedDistribution = gaugeDistributionRate;
           }
-          // console.log(gaugeConfig.name,stakedBalance.toFixed(),gaugeTotalSupply.toFixed());
-          // console.log(gaugeConfig.name,'veTokenShare',veTokenShare.toFixed(8),'gaugeUserShare',gaugeUserShare.toFixed(8),'gaugeUserBoostedShare',userBoostedShare.toFixed(8),'userBaseDistribution',userBaseDistribution.toFixed(8),'userBoostedDistribution',userBoostedDistribution.toFixed(8),'gaugeDistributionRate',gaugeDistributionRate.toFixed(8));
         } else {
           stakedBalance = this.functionsUtil.BNify(0);
         }
 
         const claimableTokens = Object.keys(claimableRewardsTokens).length ? Object.keys(claimableRewardsTokens).map( token => {
           const tokenBalance = claimableRewardsTokens[token];
-          let text = `${tokenBalance.toFixed(4)} ${token}`;
+          let text = `${tokenBalance.toFixed(3)} ${token}`;
           if (this.props.account){
             if (!this.functionsUtil.BNify(userBoostedDistribution).isNaN() && token.toLowerCase() === veTokenConfig.rewardToken.toLowerCase()){
-              text += ` (~${userBoostedDistribution.toFixed(4)}/day)`;
+              text += ` (${userBoostedDistribution.toFixed(3)}/day)`;
             } else if (rewardsTokens[token].rate){
               let userDistributionRate = rewardsTokens[token].rate.times(gaugeUserShare);
               if (userDistributionRate.gt(rewardsTokens[token].rate)){
                 userDistributionRate = rewardsTokens[token].rate;
               }
-              text += ` (~${userDistributionRate.toFixed(4)}/day)`;
+              text += ` (${userDistributionRate.toFixed(3)}/day)`;
             }
           }
           return text;
@@ -462,10 +469,19 @@ class Gauges extends Component {
 
         const distributionRate = Object.keys(rewardsTokens).length ? Object.keys(rewardsTokens).map( token => {
           if (token.toLowerCase() === veTokenConfig.rewardToken.toLowerCase()){
-            return `${gaugeDistributionRate.toFixed(4)} ${token}/day`;
+            let text = `${gaugeDistributionRate.toFixed(3)} ${token}/day`;
+            if (idleApr){
+              let idleApy = idleApr.apy.toFixed(2);
+              if (parseFloat(idleApy)>9999){
+                idleApy = '>9999';
+              }
+              text += ` (${idleApy}% APY)`;
+            }
+            return text;
           } else {
+            const tokenApy = rewardsTokens[token].apy;
             const tokenDistributionRate = rewardsTokens[token].rate;
-            return `${tokenDistributionRate.toFixed(4)} ${token}/day`;
+            return `${tokenDistributionRate.toFixed(3)} ${token}/day (${tokenApy.toFixed(2)}% APY)`;
           }
         }).join('<br />') : '-';
 
@@ -1181,7 +1197,7 @@ class Gauges extends Component {
                   {
                     title:'PROTOCOL', 
                     props:{
-                      width:[0.35, 0.12]
+                      width:[0.35, 0.11]
                     },
                     fields:[
                       {
@@ -1242,7 +1258,7 @@ class Gauges extends Component {
                     mobile:false,
                     title:'NEXT WEIGHT',
                     props:{
-                      width:[0.25,0.1],
+                      width:[0.25,0.09],
                     },
                     fields:[
                       {
@@ -1318,7 +1334,7 @@ class Gauges extends Component {
                   {
                     title:'REWARDS',
                     props:{
-                      width:[0.23, 0.08],
+                      width:[0.23, 0.07],
                     },
                     fields:[
                       {
@@ -1336,7 +1352,7 @@ class Gauges extends Component {
                     mobile:false,
                     title:'DISTRIBUTION RATE',
                     props:{
-                      width:[0.15, 0.14],
+                      width:[0.15, 0.19],
                     },
                     fields:[
                       {
@@ -1355,7 +1371,7 @@ class Gauges extends Component {
                     mobile:false,
                     title:'CLAIMABLE REWARDS',
                     props:{
-                      width:[0.25,0.18],
+                      width:[0.25,0.16],
                     },
                     fields:[
                       {
