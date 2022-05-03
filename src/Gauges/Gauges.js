@@ -397,22 +397,22 @@ class Gauges extends Component {
         }
 
         let [
+          gaugeWeight,
           gaugeNextWeight,
           gaugeTotalSupply,
           stakedBalance,
           rewardsTokens,
           gaugeWorkingSupply,
           userWorkingBalance,
-          gaugeWeight,
           trancheTokenPrice
         ] = await Promise.all([
+          this.functionsUtil.getGaugeWeight(gaugeConfig),
           this.functionsUtil.getGaugeNextWeight(gaugeConfig),
           this.functionsUtil.getTokenTotalSupply(gaugeConfig.name),
           this.functionsUtil.getTokenBalance(gaugeConfig.name,this.props.account),
           this.functionsUtil.getGaugeRewardsTokens(gaugeConfig,this.props.account),
           this.functionsUtil.genericContractCall(gaugeConfig.name,'working_supply'),
           this.functionsUtil.genericContractCall(gaugeConfig.name,'working_balances',[this.props.account]),
-          this.functionsUtil.genericContractCall('GaugeController','gauge_relative_weight',[gaugeConfig.address]),
           this.functionsUtil.genericContractCall(trancheConfig.CDO.name, 'virtualPrice', [trancheConfig.AA.address])
         ]);
 
@@ -447,7 +447,7 @@ class Gauges extends Component {
             userBoostedDistribution = gaugeDistributionRate;
           }
         } else {
-          stakedBalance = this.functionsUtil.BNify(0);
+          stakedBalance = '-';
         }
 
         const claimableTokens = Object.keys(claimableRewardsTokens).length ? Object.keys(claimableRewardsTokens).map( token => {

@@ -4760,28 +4760,49 @@ class FunctionsUtil {
       workingBalance:lim
     };
   }
-  getGaugeNextWeight = async (gaugeConfig) => {
-    // const currentGaugeTimestamp = await this.genericContractCall('GaugeController','time_weight',[gaugeConfig.address]);
-    const blockInfo = await this.getBlockInfo();
-    const nextGaugeTimestamp = parseInt(blockInfo.timestamp/604800)*604800+604800;
-    // const gaugeType = await this.genericContractCall('GaugeController','gauge_types',[gaugeConfig.address]);
-    let [
-      // totalWeight,
-      // gaugeTypeWeight,
-      // gaugePointWeight,
-      gaugeWeight
-    ] = await Promise.all([
-      // this.genericContractCall('GaugeController','points_total',[nextGaugeTimestamp]),
-      // this.genericContractCall('GaugeController','points_type_weight',[gaugeType,nextGaugeTimestamp]),
-      // this.genericContractCall('GaugeController','points_weight',[gaugeConfig.address,nextGaugeTimestamp]),
-      this.genericContractCall('GaugeController','gauge_relative_weight',[gaugeConfig.address,nextGaugeTimestamp])
-    ]);
-    // console.log('getGaugeNextWeight',gaugeConfig.name,gaugeType,nextGaugeTimestamp,totalWeight,gaugeTypeWeight,gaugePointWeight,gaugeWeight);
+  getGaugeWeight = async (gaugeConfig) => {
+    let lastGaugeTimestamp = await this.genericContractCall('GaugeController','time_weight',[gaugeConfig.address]);
+    if (!lastGaugeTimestamp){
+      lastGaugeTimestamp = parseInt(Date.now()/1000);
+    }
+    let gaugeWeight = await this.genericContractCall('GaugeController','gauge_relative_weight',[gaugeConfig.address,lastGaugeTimestamp]);
 
     gaugeWeight = this.BNify(gaugeWeight);
     if (gaugeWeight.isNaN()){
       gaugeWeight = this.BNify(0);
     }
+
+    return gaugeWeight;
+  }
+  getGaugeAbsoluteWeight = async (gaugeConfig) => {
+    let [
+      totalWeight,
+      gaugeWeight
+    ] = await Promise.all([
+      this.genericContractCall('GaugeController','get_total_weight'),
+      this.genericContractCall('GaugeController','get_gauge_weight',[gaugeConfig.address])
+    ]);
+
+    gaugeWeight = this.BNify(gaugeWeight);
+    totalWeight = this.fixTokenDecimals(totalWeight,19);
+
+    return this.normalizeTokenAmount(gaugeWeight.div(totalWeight),18);
+  }
+  getGaugeNextWeight = async (gaugeConfig) => {
+    const blockInfo = await this.getBlockInfo();
+    const nextGaugeTimestamp = parseInt(blockInfo.timestamp/604800)*604800+604800;
+    let gaugeWeight = await this.genericContractCall('GaugeController','gauge_relative_weight',[gaugeConfig.address,nextGaugeTimestamp]);
+
+    // console.log('getGaugeNextWeight',gaugeConfig.protocol,gaugeConfig.underlyingToken,gaugeConfig.address,blockInfo.timestamp,nextGaugeTimestamp,gaugeWeight);
+
+    gaugeWeight = this.BNify(gaugeWeight);
+    if (gaugeWeight.isNaN() || gaugeWeight.lte(0)){
+      gaugeWeight = await this.getGaugeAbsoluteWeight(gaugeConfig);
+    }
+
+    // if (gaugeWeight.isNaN()){
+    //   gaugeWeight = await this.getGaugeWeight(gaugeConfig);
+    // }
 
     return gaugeWeight;
   }
