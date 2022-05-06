@@ -4,7 +4,7 @@ import { id as keccak256 } from 'ethers/utils/hash';
 class Multicall {
   web3 = null;
   multiCalls = {};
-  multiCallsMax = 35;
+  multiCallsMax = 50;
   multiCallsStats = {
     endDate:null,
     startDate:null,

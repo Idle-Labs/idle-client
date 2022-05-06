@@ -60,6 +60,13 @@ class StrategyPage extends Component {
     await this.loadPortfolio();
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    const accountChanged = nextProps.account !== this.props.account;
+    const stateChanged = JSON.stringify(this.state) !== JSON.stringify(nextState);
+    const availableTokensChanged = JSON.stringify(nextProps.availableTokens) !== JSON.stringify(this.props.availableTokens);
+    return stateChanged || accountChanged || availableTokensChanged;
+  }
+
   async componentDidUpdate(prevProps, prevState) {
     this.loadUtils();
 
@@ -247,6 +254,7 @@ class StrategyPage extends Component {
   }
 
   render(){
+
     const viewOnly = this.props.connectorName === 'custom';
     const currentNetwork = this.functionsUtil.getRequiredNetwork();
     const govTokens = this.functionsUtil.getGlobalConfig(['govTokens']);

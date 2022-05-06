@@ -69,6 +69,12 @@ class Gauges extends Component {
     this.loadEmptyGauges();
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    const accountChanged = nextProps.account !== this.props.account;
+    const stateChanged = JSON.stringify(this.state) !== JSON.stringify(nextState);
+    return stateChanged || accountChanged;
+  }
+
   async componentDidUpdate(prevProps,prevState){
     this.loadUtils();
 
@@ -707,6 +713,7 @@ class Gauges extends Component {
   }
 
   render() {
+
     return (
       <Flex
         width={1}

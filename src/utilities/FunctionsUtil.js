@@ -3434,6 +3434,31 @@ class FunctionsUtil {
   getGlobalConfigs = () => {
     return globalConfigs;
   }
+  cleanStringify = (object) => {
+    if (object && typeof object === 'object') {
+      object = copyWithoutCircularReferences([object], object);
+    }
+    return JSON.stringify(object);
+
+    function copyWithoutCircularReferences(references, object) {
+      var cleanObject = {};
+      Object.keys(object).forEach(function(key) {
+        var value = object[key];
+        if (value && typeof value === 'object') {
+          if (references.indexOf(value) < 0) {
+            references.push(value);
+            cleanObject[key] = copyWithoutCircularReferences(references, value);
+            references.pop();
+          } else {
+            cleanObject[key] = '###_Circular_###';
+          }
+        } else if (typeof value !== 'function') {
+          cleanObject[key] = value;
+        }
+      });
+      return cleanObject;
+    }
+  }
   getArrayPath = (path, array) => {
     if (!array) {
       return null;
@@ -4030,10 +4055,44 @@ class FunctionsUtil {
     const all_past_events = await Promise.all(calls);
     // console.log('getContractEvents',contractName,eventName,startBlock,endBlock,params,all_past_events);
 
-    return all_past_events.reduce( (events,d) => {
-      events = events.concat(d);
+    return all_past_events.reduce( (events,callEvents) => {
+      callEvents.forEach( e => {
+        if (e){
+          events.push(e);
+        }
+      });
+      // events = events.concat(callEvents);
       return events;
     },[]);
+  }
+
+  getContractPastEvents = async (contractName, methodName, params = {}) => {
+    if (!contractName) {
+      return null;
+    }
+
+    const contract = this.getContractByName(contractName);
+
+    if (!contract) {
+      this.customLogError('Wrong contract name', contractName);
+      return null;
+    }
+
+    const cachedDataKey = `getContractPastEvents_${contractName}_${methodName}_${JSON.stringify(params)}`;
+    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+    if (cachedData) {
+      return cachedData;
+    }
+
+    // Store forever for past block
+    let TTL = this.getGlobalConfig(['cache','TTL']);
+    if (params.toBlock && params.toBlock !== 'latest') {
+      TTL = null;
+    }
+
+    const events = await contract.getPastEvents(methodName, params);
+
+    return this.setCachedDataWithLocalStorage(cachedDataKey, events, TTL);
   }
 
   estimateMethodGasUsage = async (contractName, methodName, methodParams = [], account = null) => {
@@ -6585,35 +6644,6 @@ class FunctionsUtil {
 
     return null;
   }
-  getContractPastEvents = async (contractName, methodName, params = {}) => {
-    if (!contractName) {
-      return null;
-    }
-
-    const contract = this.getContractByName(contractName);
-
-    if (!contract) {
-      this.customLogError('Wrong contract name', contractName);
-      return null;
-    }
-
-    const cachedDataKey = `getContractPastEvents_${contractName}_${methodName}_${JSON.stringify(params)}`;
-    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
-    if (cachedData) {
-      return cachedData;
-    }
-
-    // Store forever for past block
-    let TTL = this.getGlobalConfig(['cache','TTL']);
-    if (params.toBlock && params.toBlock !== 'latest') {
-      TTL = null;
-    }
-
-    const events = await contract.getPastEvents(methodName, params);
-
-    return this.setCachedDataWithLocalStorage(cachedDataKey, events, TTL);
-  }
-
   genericContractCallCachedTTLNoMulticall = async (contractName, methodName, TTL = 180, params = [], callParams = {}, blockNumber = 'latest') => {
     return await this.genericContractCallCachedTTL(contractName, methodName, TTL, params, callParams, blockNumber, false);
   }
@@ -8824,15 +8854,19 @@ class FunctionsUtil {
       networkIds = Object.keys(endpointInfo.endpoint);
     }
 
+    let callsFailed = false;
     let avgAPY = this.BNify(0);
     let totalAUM = this.BNify(0);
+
+    // Add 10s timeout to request
+    // config.timeout = 10000;
 
     await this.asyncForEach(networkIds, async (networkId) => {
       let tvls = null;
       try {
         tvls = await this.makeCachedRequest(endpointInfo.endpoint[networkId], endpointInfo.TTL, true, false, config);
       } catch (err){
-        // console.log('getAggregatedStats - ERROR', err);
+        // callsFailed = true;
       }
 
       if (tvls) {
@@ -8841,13 +8875,14 @@ class FunctionsUtil {
       }
     });
 
-    if (!totalAUM || this.BNify(totalAUM).isNaN() || this.BNify(totalAUM).lte(0)){
+    if (callsFailed || !totalAUM || this.BNify(totalAUM).isNaN() || this.BNify(totalAUM).lte(0)){
       avgAPY = this.BNify(0);
       totalAUM = this.BNify(0);
       let tvls = await this.getAggregatedStats_chain();
       if (tvls) {
-        avgAPY = avgAPY.plus(this.BNify(tvls.avgAPY).times(this.BNify(tvls.totalTVL)));
-        totalAUM = totalAUM.plus(this.BNify(tvls.totalTVL));
+        avgAPY = avgAPY.plus(this.BNify(tvls.avgAPY).times(this.BNify(tvls.totalAUM)));
+        totalAUM = totalAUM.plus(this.BNify(tvls.totalAUM));
+        // console.log('getAggregatedStats',tvls);
       }
     }
 
@@ -8880,49 +8915,68 @@ class FunctionsUtil {
       address: this.getContractByName('DAI')._address
     };
 
+    // const requiredNetworkId = parseInt(this.props.network.required.id);
+
+    // console.log('getAggregatedStats_chain',this.props.availableStrategiesNetworks);
+
     await this.asyncForEach(Object.keys(this.props.availableStrategiesNetworks), async (networkId) => {
+
+      // console.log('START network LOOP - ',networkId);
+
       const strategies = this.props.availableStrategiesNetworks[networkId];
       await this.asyncForEach(Object.keys(strategies), async (strategy) => {
+
+        // console.log('START strategy LOOP - ',networkId,strategy);
+
         const isRisk = strategy === 'risk';
         const availableTokens = strategies[strategy];
         await this.asyncForEach(Object.keys(availableTokens), async (token) => {
+
+          // const props = {...this.props};
+          // props.network.required.id = networkId;
+          // this.setProps(props);
+
           const tokenConfig = availableTokens[token];
           const tokenAllocation = await this.getTokenAllocation(tokenConfig, false, addGovTokens);
           const tokenAprs = await this.getTokenAprs(tokenConfig, tokenAllocation, addGovTokens);
           if (tokenAllocation && tokenAllocation.totalAllocationWithUnlent && !tokenAllocation.totalAllocationWithUnlent.isNaN()) {
             const tokenAUM = await this.convertTokenBalance(tokenAllocation.totalAllocationWithUnlent, token, tokenConfig, isRisk);
             totalAUM = totalAUM.plus(tokenAUM);
-            // console.log(tokenConfig.idle.token+'V4',tokenAUM.toFixed());
             if (tokenAprs && tokenAprs.avgApr && !tokenAprs.avgApr.isNaN()) {
               avgAPR = avgAPR.plus(tokenAUM.times(tokenAprs.avgApr));
               avgAPY = avgAPY.plus(tokenAUM.times(tokenAprs.avgApy));
             }
+            // console.log('START',networkId,strategy,token,tokenConfig.idle.token+'V4',tokenAUM.toFixed(),totalAUM.toFixed());
           }
 
           // Add Gov Tokens
-          const govTokens = this.getTokenGovTokens(tokenConfig);
-          if (govTokens) {
-            await this.asyncForEach(Object.keys(govTokens).filter(govToken => (govTokens[govToken].showAUM)), async (govToken) => {
-              const govTokenConfig = govTokens[govToken];
-              const [
-                tokenBalance,
-                tokenConversionRate
-              ] = await Promise.all([
-                this.getProtocolBalance(govToken, tokenConfig.idle.address),
-                this.getUniswapConversionRate(DAITokenConfig, govTokenConfig)
-              ]);
+          if (parseInt(networkId) === 1) {
+            const govTokens = this.getTokenGovTokens(tokenConfig);
+            if (govTokens) {
+              await this.asyncForEach(Object.keys(govTokens).filter(govToken => (govTokens[govToken].showAUM && (!govTokens[govToken].availableNetworks || govTokens[govToken].availableNetworks.includes(networkId)) )), async (govToken) => {
+                const govTokenConfig = govTokens[govToken];
+                const [
+                  tokenBalance,
+                  tokenConversionRate
+                ] = await Promise.all([
+                  this.getProtocolBalance(govToken, tokenConfig.idle.address),
+                  this.getUniswapConversionRate(DAITokenConfig, govTokenConfig)
+                ]);
 
-              if (tokenBalance && tokenConversionRate) {
-                const tokenBalanceConverted = this.fixTokenDecimals(tokenBalance, govTokenConfig.decimals).times(this.BNify(tokenConversionRate));
-                if (tokenBalanceConverted && !tokenBalanceConverted.isNaN()) {
-                  // console.log(tokenConfig.idle.token+'V4 - COMP',tokenBalanceConverted.toFixed());
-                  totalAUM = totalAUM.plus(tokenBalanceConverted);
+                if (tokenBalance && tokenConversionRate) {
+                  const tokenBalanceConverted = this.fixTokenDecimals(tokenBalance, govTokenConfig.decimals).times(this.BNify(tokenConversionRate));
+                  if (tokenBalanceConverted && !tokenBalanceConverted.isNaN()) {
+                    totalAUM = totalAUM.plus(tokenBalanceConverted);
+                  }
                 }
-              }
-            });
+              });
+            }
           }
 
+          // console.log('END',networkId,strategy,token,tokenConfig.idle.token+'V4',totalAUM.toFixed());
+
           // Get old token allocation
+          /*
           if (tokenConfig.migration && tokenConfig.migration.oldContract) {
             const oldTokenConfig = Object.assign({}, tokenConfig);
             oldTokenConfig.protocols = Object.values(tokenConfig.protocols);
@@ -8946,9 +9000,17 @@ class FunctionsUtil {
               // console.log(oldTokenConfig.idle.name,oldTokenTotalAllocation.toFixed(5));
             }
           }
+          */
         });
+        // console.log('END strategy LOOP - ',networkId,strategy);
       });
+      // console.log('END network LOOP - ',networkId);
     });
+
+    // console.log('getAggregatedStats_chain',totalAUM.toFixed());
+    // const props = {...this.props};
+    // props.network.required.id = requiredNetworkId;
+    // this.setProps(props);
 
     avgAPR = avgAPR.div(totalAUM);
     avgAPY = avgAPY.div(totalAUM);

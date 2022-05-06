@@ -101,8 +101,17 @@ class Tranches extends Component {
   async componentDidMount(){
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    const accountChanged = nextProps.account !== this.props.account;
+    const stateChanged = JSON.stringify(this.state) !== JSON.stringify(nextState);
+    const availableTranchesChanged = JSON.stringify(nextProps.availableTranches) !== JSON.stringify(this.props.availableTranches);
+    return stateChanged || accountChanged || availableTranchesChanged;
+  }
+
   async componentDidUpdate(prevProps, prevState) {
     this.loadUtils();
+
+    // console.log('componentDidUpdate',this.functionsUtil.objectsDiff(prevProps,this.props),this.functionsUtil.objectsDiff(prevState,this.state));
 
     const accountChanged = prevProps.account !== this.props.account;
     const availableTranchesChanged = JSON.stringify(prevProps.availableTranches) !== JSON.stringify(this.props.availableTranches);

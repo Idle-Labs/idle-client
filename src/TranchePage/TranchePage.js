@@ -71,6 +71,7 @@ class TranchePage extends Component {
   }
 
   render() {
+
     const tranchesDetails = this.functionsUtil.getGlobalConfig(['tranches']);
     const filteredTranchesTypes = Object.keys(tranchesDetails).filter( trancheType => !this.props.trancheType || this.props.trancheType === trancheType );
     return (

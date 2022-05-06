@@ -316,6 +316,18 @@ class Dashboard extends Component {
     });
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    const accountChanged = nextProps.account !== this.props.account;
+    const stateChanged = JSON.stringify(this.state) !== JSON.stringify(nextState);
+    const paramsChanged = JSON.stringify(this.props.match.params) !== JSON.stringify(nextProps.match.params);
+    const requiredNetworkChanged = JSON.stringify(nextProps.network.required) !== JSON.stringify(this.props.network.required);
+    const networkChanged = (!this.props.networkInitialized && nextProps.networkInitialized) || requiredNetworkChanged;
+    const accountInizialized = nextProps.accountInizialized && nextProps.accountInizialized !== this.props.accountInizialized;
+    const contractsInitialized = nextProps.contractsInitialized && nextProps.contractsInitialized !== this.props.contractsInitialized;
+    const contractsChanged = this.props.contracts.length !== nextProps.contracts.length || this.props.contracts.map( c => c.name ).filter( contractName => !nextProps.contracts.map( c => c.name ).includes(contractName) ).length>0;
+    return stateChanged || contractsChanged || paramsChanged || accountChanged || networkChanged || requiredNetworkChanged || accountInizialized || contractsInitialized;
+  }
+
   async componentDidUpdate(prevProps,prevState) {
     this.loadUtils();
 
@@ -437,6 +449,7 @@ class Dashboard extends Component {
   }
 
   render() {
+
     const PageComponent = this.state.pageComponent ? this.state.pageComponent : null;
     const availableNetworks = this.functionsUtil.getGlobalConfig(['governance','availableNetworks']);
     const networkInitialized = this.props.networkInitialized && this.props.network.current.id && this.props.network.required.id;

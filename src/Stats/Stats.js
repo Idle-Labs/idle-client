@@ -293,6 +293,17 @@ class Stats extends Component {
     });
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    const versionChanged = nextState.idleVersion !== this.state.idleVersion;
+    const stateChanged = JSON.stringify(this.state) !== JSON.stringify(nextState);
+    const strategyChanged = nextProps.selectedStrategy !== this.props.selectedStrategy;
+    const contractsInitialized = nextProps.contractsInitialized !== this.props.contractsInitialized;
+    const dateChanged = nextState.startTimestamp !== this.state.startTimestamp || nextState.endTimestamp !== this.state.endTimestamp;
+    const tokenChanged = nextProps.selectedToken !== this.props.selectedToken || JSON.stringify(nextProps.tokenConfig) !== JSON.stringify(this.props.tokenConfig);
+
+    return stateChanged || contractsInitialized || tokenChanged || strategyChanged || versionChanged || dateChanged;
+  }
+
   async componentDidUpdate(prevProps,prevState) {
     const contractsInitialized = prevProps.contractsInitialized !== this.props.contractsInitialized;
     const strategyChanged = prevProps.selectedStrategy !== this.props.selectedStrategy;
