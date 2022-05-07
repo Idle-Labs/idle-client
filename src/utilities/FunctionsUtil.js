@@ -1213,7 +1213,7 @@ class FunctionsUtil {
           this.getContractEvents(tokenConfig.token, 'Transfer', parseInt(latestHarvestBlock), parseInt(latestHarvestBlock)+1, {filter: eventFilters })
         ]);
 
-        console.log('getTrancheLastHarvest',tokenConfig.token,parseInt(latestHarvestBlock), parseInt(latestHarvestBlock)+1,eventFilters,transfers);
+        // console.log('getTrancheLastHarvest',tokenConfig.token,parseInt(latestHarvestBlock), parseInt(latestHarvestBlock)+1,eventFilters,transfers);
 
         if (transfers && transfers.length) {
           const totalAmount = transfers.reduce( (amount,t) => {
