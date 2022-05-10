@@ -47,6 +47,7 @@ class TrancheDetails extends Component {
     selectedTranche:null,
     availableTranches:null,
     approveDescription:null,
+    gaugeStakedBalance:null,
     selectedAction:'deposit',
     selectedTrancheOption:null,
     selectedStakeAction:'stake',
@@ -86,11 +87,14 @@ class TrancheDetails extends Component {
 
   async loadData(){
 
+    const gaugeConfig = this.functionsUtil.getGlobalConfig(['tools','gauges','props','availableGauges',this.props.selectedToken]);
+
     const [
       // blockNumber,
       lastHarvest,
       tokenBalance,
       trancheBalance,
+      gaugeStakedBalance,
       stakedBalance,
       trancheAPY,
       tranchePrice,
@@ -100,6 +104,7 @@ class TrancheDetails extends Component {
       this.functionsUtil.getTrancheLastHarvest(this.props.tokenConfig),
       this.functionsUtil.getTokenBalance(this.props.selectedToken,this.props.account),
       this.functionsUtil.getTokenBalance(this.props.trancheConfig.name,this.props.account),
+      gaugeConfig ? this.functionsUtil.getTokenBalance(gaugeConfig.name,this.props.account) : null,
       this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals,this.props.trancheConfig.functions.stakedBalance),
       this.functionsUtil.loadTrancheFieldRaw('trancheApy',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
       this.functionsUtil.loadTrancheFieldRaw('tranchePrice',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
@@ -154,6 +159,7 @@ class TrancheDetails extends Component {
       unstakeEnabled,
       selectedTranche,
       availableTranches,
+      gaugeStakedBalance,
       selectedStakeAction,
       selectedTrancheOption,
       userHasAvailableFunds
@@ -1003,7 +1009,30 @@ class TrancheDetails extends Component {
                 </DashboardCard>
               </Box>
               {
-                this.props.selectedToken === 'stETH' && this.props.selectedTranche === 'AA' && (
+                this.props.selectedTranche === 'AA' && this.functionsUtil.BNify(this.state.gaugeStakedBalance).gt(0) ? (
+                  <IconBox
+                    cardProps={{
+                      p:2,
+                      mt:2,
+                      mb:2,
+                      width:1,
+                    }}
+                    isActive={true}
+                    isInteractive={false}
+                    iconProps={{
+                      size:'1.8em',
+                      color:'flashColor'
+                    }}
+                    icon={'AssignmentLate'}
+                    textProps={{
+                      fontWeight:500,
+                      color:'flashColor',
+                      textAlign:'center',
+                      fontSize:['13px','15px']
+                    }}
+                    text={`To withdraw your ${this.props.selectedToken} you need to unstake the tranche tokens from the <a href="${this.functionsUtil.getDashboardSectionUrl(`gauges/${this.props.selectedToken}`)}" class="link">${this.props.selectedToken} Gauge</a> first.`}
+                  />
+                ) : this.props.selectedToken === 'stETH' && this.props.selectedTranche === 'AA' && (
                   <IconBox
                     cardProps={{
                       p:2,
