@@ -52,6 +52,7 @@ class App extends Component {
     buyModalOpened: false,
     selectedProtocol: null,
     selectedStrategy: null,
+    availableTranches: null,
     toastMessageProps: null,
     callbackAfterLogin: null,
     width: window.innerWidth,
@@ -296,9 +297,8 @@ class App extends Component {
     });
 
     newState.availableStrategies = availableStrategies;
+    newState.availableTranches = availableTranches[requiredNetwork];
     newState.availableStrategiesNetworks = availableStrategiesNetworks;
-
-    // console.log('availableStrategies',this.state.network,availableStrategies);
 
     // Load strategy
     const selectedStrategy = this.state.selectedStrategy;
@@ -346,11 +346,11 @@ class App extends Component {
         if(selectedStrategy==='tranches') {
           // console.log("Step2");
           // console.log(availableTranches);
-          if(availableTranches && Object.keys(availableTranches[selectedProtocol]).includes(selectedToken)) {
+          if(this.state.availableTranches && Object.keys(this.state.availableTranches[selectedProtocol]).includes(selectedToken)) {
             newState.selectedToken = selectedToken;
-            newState.availableTokens = availableTranches;
             newState.selectedProtocol = selectedProtocol;
-            newState.tokenConfig = availableTranches[selectedProtocol][selectedToken];
+            newState.availableTokens = this.state.availableTranches;
+            newState.tokenConfig = this.state.availableTranches[selectedProtocol][selectedToken];
           }
         }
       else if (this.state.availableTokens && Object.keys(this.state.availableTokens).includes(selectedToken.toUpperCase())) {
@@ -790,7 +790,6 @@ class App extends Component {
                     theme={this.state.selectedTheme}
                     cachedData={this.state.cachedData}
                     tokenConfig={this.state.tokenConfig}
-                    availableTranches={availableTranches}
                     callbackWeb3={this.setWeb3.bind(this)}
                     setNetwork={this.setNetwork.bind(this)}
                     customAddress={this.state.customAddress}
@@ -801,6 +800,7 @@ class App extends Component {
                     setConnector={this.setConnector.bind(this)}
                     availableTokens={this.state.availableTokens}
                     setCachedData={this.setCachedData.bind(this)}
+                    availableTranches={this.state.availableTranches}
                     clearCachedData={this.clearCachedData.bind(this)}
                     callbackAfterLogin={this.state.callbackAfterLogin}
                     availableStrategies={this.state.availableStrategies}
@@ -899,7 +899,6 @@ class App extends Component {
                                         rejectValidation={rejectValidation}
                                         tokenConfig={this.state.tokenConfig}
                                         contractsNetworks={contractsNetworks}
-                                        availableTranches={availableTranches}
                                         getAccountBalance={getAccountBalance}
                                         accountBalanceLow={accountBalanceLow}
                                         accountInizialized={accountInizialized}
@@ -925,6 +924,7 @@ class App extends Component {
                                         selectedStrategy={this.state.selectedStrategy}
                                         selectedProtocol={this.state.selectedProtocol}
                                         userRejectedValidation={userRejectedValidation}
+                                        availableTranches={this.state.availableTranches}
                                         clearCachedData={this.clearCachedData.bind(this)}
                                         setStrategyToken={this.setStrategyToken.bind(this)}
                                         accountValidationPending={accountValidationPending}
@@ -1129,7 +1129,6 @@ class App extends Component {
                                               tokenConfig={this.state.tokenConfig}
                                               accountBalanceLow={accountBalanceLow}
                                               getAccountBalance={getAccountBalance}
-                                              availableTranches={availableTranches}
                                               contractsNetworks={contractsNetworks}
                                               networkInitialized={networkInitialized}
                                               customAddress={this.state.customAddress}
@@ -1144,6 +1143,7 @@ class App extends Component {
                                               setCachedData={this.setCachedData.bind(this)}
                                               updateSelectedTab={this.selectTab.bind(this)}
                                               toastMessageProps={this.state.toastMessageProps}
+                                              availableTranches={this.state.availableTranches}
                                               clearCachedData={this.clearCachedData.bind(this)}
                                               availableStrategies={this.state.availableStrategies}
                                               setCurrentSection={this.setCurrentSection.bind(this)}

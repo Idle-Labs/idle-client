@@ -6,7 +6,6 @@ import FunctionsUtil from '../utilities/FunctionsUtil';
 import TrancheField from '../TrancheField/TrancheField';
 import DashboardCard from '../DashboardCard/DashboardCard';
 import { Flex, Text, Link, Icon, Tooltip, Image, Loader } from "rimble-ui";
-import availableTranches from '../configs/availableTranches'
 
 class StrategyBox extends Component {
 
@@ -192,7 +191,7 @@ class StrategyBox extends Component {
     switch (strategyInfo.type){
       case 'tranche':
         if(this.state.protocol && this.state.selectedToken){
-          tokenConfig = availableTranches[this.state.protocol][this.state.selectedToken];
+          tokenConfig = this.props.availableTranches[this.state.protocol][this.state.selectedToken];
         }
       break;
       default:

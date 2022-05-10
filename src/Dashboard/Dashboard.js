@@ -71,25 +71,25 @@ class Dashboard extends Component {
           submenu: [],
           label: 'Stake',
           selected: false,
+          component: Utils,
           color: 'dark-gray',
           route: '/dashboard/stake',
           image: extraicons['stake'].icon,
-          imageDark: extraicons['stake'].iconDark,
-          bgColor: this.props.theme.colors.primary,
-          imageInactive: extraicons['stake'].iconInactive,
-          imageInactiveDark: extraicons['stake'].iconInactiveDark,
-          component: Utils,
           componentProps: {
             showBreadCrumb: false,
             toolProps: stakePolygonConfig.props,
             selectedSubsection: stakePolygonConfig
           },
+          imageDark: extraicons['stake'].iconDark,
+          bgColor: this.props.theme.colors.primary,
+          imageInactive: extraicons['stake'].iconInactive,
+          imageInactiveDark: extraicons['stake'].iconInactiveDark,
         }
       );
     }
 
     const strategies = this.functionsUtil.getGlobalConfig(['strategies']);
-    Object.keys(strategies).filter(s => (!strategies[s].comingSoon && (!strategies[s].availableNetworks || strategies[s].availableNetworks.includes(currentNetwork.id)) && (!strategies[s].enabledEnvs.length || strategies[s].enabledEnvs.includes(this.props.currentEnv)))).forEach(strategy => {
+    Object.keys(strategies).filter( s => (!strategies[s].comingSoon && (!strategies[s].availableNetworks || strategies[s].availableNetworks.includes(currentNetwork.id)) && (!strategies[s].enabledEnvs.length || strategies[s].enabledEnvs.includes(this.props.currentEnv)))).forEach(strategy => {
       const strategyInfo = strategies[strategy];
       const imageInfo = extraicons[strategy];
       menu.push({
@@ -308,17 +308,11 @@ class Dashboard extends Component {
           if (section_is_strategy) {
             pageComponent = AssetPage;
           }
-        }
-        else if(param1==="tranches")
-        {
+        } else if(param1==="tranches") {
           selectedToken=params.param3
           currentRoute+='/'+param2+'/'+param3;
-
         }
-        
-
-      }
-       else {
+      } else {
         currentRoute += '/' + params.section;
 
         if (params.param1 && params.param1.length) {
