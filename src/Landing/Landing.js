@@ -66,9 +66,14 @@ class Landing extends Component {
   }
 
   loadStrategies(){
+    const walletProvider = this.functionsUtil.getWalletProvider();
     const currentNetworkId = this.functionsUtil.getRequiredNetworkId();
-    const landingStrategies = Object.keys(globalConfigs.landingStrategies);
-    const visibleStrategies = landingStrategies.filter(s => globalConfigs.landingStrategies[s].visible && (!globalConfigs.landingStrategies[s].availableNetworks.length || globalConfigs.landingStrategies[s].availableNetworks.includes(currentNetworkId)) && (!globalConfigs.landingStrategies[s].enabledEnvs.length || globalConfigs.landingStrategies[s].enabledEnvs.includes(this.props.currentEnv)) );
+    let landingStrategies = Object.keys(globalConfigs.landingStrategies);
+    // Filter landing strategies for gnosis
+    if (walletProvider === 'gnosis'){
+      landingStrategies = landingStrategies.filter( s => globalConfigs.landingStrategies[s].networkId === currentNetworkId );
+    }
+    const visibleStrategies = landingStrategies.filter(s => globalConfigs.landingStrategies[s].visible && (!globalConfigs.landingStrategies[s].availableNetworks.length || globalConfigs.landingStrategies[s].availableNetworks.includes(currentNetworkId)) && (!globalConfigs.landingStrategies[s].enabledEnvs.length || globalConfigs.landingStrategies[s].enabledEnvs.includes(this.props.currentEnv)) ).map( s => globalConfigs.landingStrategies[s].strategy );
     const carouselMax = landingStrategies.length-1;
     this.setState({
       carouselMax,
@@ -292,6 +297,7 @@ class Landing extends Component {
   }
 
   goToStrategy = async () => {
+    // console.log(this.state.visibleStrategies[0]);
     window.location.hash = this.functionsUtil.getGlobalConfig(['dashboard','baseRoute'])+'/'+this.state.visibleStrategies[0];
   }
 

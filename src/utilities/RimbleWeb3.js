@@ -586,8 +586,18 @@ class RimbleTransaction extends React.Component {
         // console.log('checkNetwork_call');
         // Check network after injected web3 loaded
         const isGnosisSafe = this.props.connectors.gnosis.safeLoaded && !!this.props.connectors.gnosis.provider.safe;
-        if (!this.state.network.isCorrectNetwork && isGnosisSafe){
-          await this.checkNetwork();
+        // console.log('isGnosisSafe',this.state.web3.currentProvider.constructor.name);
+        if (isGnosisSafe){
+          const currentSafeNetworkId = await this.state.web3.eth.net.getId();
+          // console.log('currentSafeNetworkId',currentSafeNetworkId,this.state.network.current.id);
+          if (!this.state.web3 || !this.state.network.current.id || this.state.network.current.id !== currentSafeNetworkId){
+            this.setState({
+              gnosisSafeLoaded:true
+            },() => {
+              this.connectGnosisSafe();
+            });
+            await this.checkNetwork(currentSafeNetworkId);
+          }
         }
 
         if (this.state.network.isSupportedNetwork){
@@ -1292,21 +1302,23 @@ class RimbleTransaction extends React.Component {
     }
   }
 
-  getRequiredNetwork = () => {
-     const networkId = typeof this.props.config !== "undefined" && typeof this.props.config.requiredNetwork !== "undefined" ? this.props.config.requiredNetwork : globalConfigs.network.requiredNetwork;
-     const networkName = networkId && globalConfigs.network.availableNetworks[networkId] ? globalConfigs.network.availableNetworks[networkId].name : 'unknown';
-     return {
-       id: networkId,
-       name: networkName
-     };
+  getRequiredNetwork = (networkId=null) => {
+    const defaultNetworkID = typeof this.props.config !== "undefined" && typeof this.props.config.requiredNetwork !== "undefined" ? this.props.config.requiredNetwork : globalConfigs.network.requiredNetwork;
+    if (!networkId || !globalConfigs.network.enabledNetworks.includes(networkId)){
+      networkId = defaultNetworkID;
+    }
+    const networkName = networkId && globalConfigs.network.availableNetworks[networkId] ? globalConfigs.network.availableNetworks[networkId].name : 'unknown';
+    return {
+      id: networkId,
+      name: networkName
+    };
    }
 
    getCurrentNetwork = async (networkId=null) => {
      const currentWeb3 = this.functionsUtil.getCurrentWeb3();
 
-     // console.log('getCurrentNetwork',this.state.web3,currentWeb3);
-
      networkId = parseInt(networkId) || await currentWeb3.eth.net.getId();
+     
      const networkName = this.functionsUtil.getGlobalConfig(['network','availableNetworks',networkId,'name']) || await currentWeb3.eth.net.getNetworkType();
 
      return {
@@ -1333,7 +1345,7 @@ class RimbleTransaction extends React.Component {
   checkNetwork = async (networkId=null) => {
     const network = {...this.state.network};
 
-    network.required = this.getRequiredNetwork();
+    network.required = this.getRequiredNetwork(networkId);
     network.current = await this.getCurrentNetwork(networkId);
 
     const networkInitialized = !!network.current.id;
@@ -1345,7 +1357,7 @@ class RimbleTransaction extends React.Component {
 
     const updateNetwork = !this.state.network.current.id || currentNetworkChanged || requiredNetworkChanged || !this.state.networkInitialized;
 
-    // console.log('checkNetwork','networkId:'+networkId,', curr: '+this.state.network.current.id,', netID: '+network.current.id,', required: '+network.required.id,', correct: '+network.isCorrectNetwork,', update: '+updateNetwork);
+    // console.log('checkNetwork','networkId:'+networkId,', curr: '+this.state.network.current.id,', netID: '+network.current.id,', required: '+network.required.id,', isCorrectNetwork: '+network.isCorrectNetwork,', update: '+updateNetwork);
     if (updateNetwork){
       this.setState({
         network,

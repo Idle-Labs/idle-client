@@ -1836,12 +1836,12 @@ class FunctionsUtil {
               polygonTx.exited = false;
               polygonTx.networkId = polygonNetworkId;
               polygonTx.bridgeType = tokenConfig.bridgeType;
-              polygonTx.included = await this.props.maticPOSClient.isCheckPointed(polygonTx.hash);
+              polygonTx.included = this.props.maticPOSClient ? await this.props.maticPOSClient.isCheckPointed(polygonTx.hash) : false;
               polygonTx.exited = false;
 
               // console.log('polygonTx',polygonTx);
 
-              if (tokenConfig.rootToken && polygonTx.included){
+              if (tokenConfig.rootToken && polygonTx.included && this.props.maticPOSClient){
                 const erc20RootToken = this.props.maticPOSClient.erc20(tokenConfig.rootToken.address,true);
                 polygonTx.exited = await erc20RootToken.isWithdrawExited(polygonTx.hash);
               }
