@@ -143,19 +143,31 @@ class RimbleTransaction extends React.Component {
 
     window.initWeb3 = this.initWeb3;
     window.initAccount = this.initAccount;
+    window.connectors = this.props.connectors;
+  }
+
+  checkGnosisSafeNetwork = async () => {
+    const isGnosisSafe = this.props.connectors.gnosis.safeLoaded && !!this.props.connectors.gnosis.provider.safe;
+    // console.log('isGnosisSafe',this.state.web3.currentProvider.constructor.name);
+    if (isGnosisSafe){
+      const currentSafeNetworkId = await this.props.connectors.gnosis.getChainId();
+      console.log('currentSafeNetworkId',this.props.connectors.gnosis.provider.safe,currentSafeNetworkId,this.state.network.current.id);
+      if (!this.state.web3 || !this.state.network.current.id || this.state.network.current.id !== currentSafeNetworkId){
+        await this.checkNetwork(currentSafeNetworkId);
+      }
+    }
   }
 
   handleNetworkChanged = async (networkId=null) => {
+    const walletProvider = this.functionsUtil.getWalletProvider();
+    if (walletProvider === 'gnosis'){
+      return false;
+    }
+    
     this.functionsUtil.removeStoredItem('cachedRequests');
     this.functionsUtil.removeStoredItem('cachedRequests_polygon');
     this.functionsUtil.removeStoredItem('transactions');
     await this.props.clearCachedData(async () => {
-      // console.log(networkId,this.state.network);
-      // const network = await this.checkNetwork();
-      // if (network.isCorrectNetwork){
-      //   window.location.reload();
-      // }
-
       if (this.state.network.required && networkId && parseInt(networkId) === parseInt(this.state.network.required.id)){
         window.location.reload();
       } else {
@@ -215,6 +227,10 @@ class RimbleTransaction extends React.Component {
       if (isGnosisSafe){
         // console.log('connectGnosisSafe - select gnosis connector');
         this.props.setConnector('gnosis','gnosis');
+
+        // Check Gnosis Network
+        this.checkGnosisSafeNetwork();
+
       } else if (walletProvider === 'gnosis') {
         // console.log('connectGnosisSafe - Reset to Infura, isGnosisSafe = false');
         this.props.setConnector('Infura',null);
@@ -230,7 +246,7 @@ class RimbleTransaction extends React.Component {
 
     const gnosisSafeLoaded = !this.state.gnosisSafeLoaded && this.props.connectors.gnosis.safeLoaded;
     if (gnosisSafeLoaded){
-      // console.log('gnosisSafeLoaded');
+      // console.log('gnosisSafeLoaded',this.props.connectors.gnosis.provider.safe);
       this.setState({
         gnosisSafeLoaded:true
       },() => {
@@ -585,20 +601,7 @@ class RimbleTransaction extends React.Component {
       try {
         // console.log('checkNetwork_call');
         // Check network after injected web3 loaded
-        const isGnosisSafe = this.props.connectors.gnosis.safeLoaded && !!this.props.connectors.gnosis.provider.safe;
-        // console.log('isGnosisSafe',this.state.web3.currentProvider.constructor.name);
-        if (isGnosisSafe){
-          const currentSafeNetworkId = await this.state.web3.eth.net.getId();
-          // console.log('currentSafeNetworkId',currentSafeNetworkId,this.state.network.current.id);
-          if (!this.state.web3 || !this.state.network.current.id || this.state.network.current.id !== currentSafeNetworkId){
-            this.setState({
-              gnosisSafeLoaded:true
-            },() => {
-              this.connectGnosisSafe();
-            });
-            await this.checkNetwork(currentSafeNetworkId);
-          }
-        }
+        await this.checkGnosisSafeNetwork();
 
         if (this.state.network.isSupportedNetwork){
           await this.initializeContracts();

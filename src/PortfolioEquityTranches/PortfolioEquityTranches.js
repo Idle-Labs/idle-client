@@ -195,7 +195,7 @@ class PortfolioEquityTranches extends Component {
           trancheAAInfos,
           trancheBBInfos
         ] = await Promise.all([
-          this.functionsUtil.getTokenConversionRateUniswap(tokenConfig),
+          conversionRateField ? this.functionsUtil.getTokenConversionRateUniswap(tokenConfig) : this.functionsUtil.BNify(1),
           firstAATokenTx ? this.functionsUtil.getSubgraphTrancheInfo(tokenConfig.AA.address,firstAATokenTx.timeStamp,currTimestamp,['timeStamp','virtualPrice','blockNumber']) : [],
           firstBBTokenTx ? this.functionsUtil.getSubgraphTrancheInfo(tokenConfig.BB.address,firstBBTokenTx.timeStamp,currTimestamp,['timeStamp','virtualPrice','blockNumber']) : [],
         ]);

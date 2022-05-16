@@ -298,7 +298,7 @@ class App extends Component {
     newState.availableStrategies = availableStrategies;
     newState.availableStrategiesNetworks = availableStrategiesNetworks;
 
-    // console.log('availableStrategiesNetworks',availableStrategiesNetworks);
+    // console.log('availableStrategies',this.state.network,availableStrategies);
 
     // Load strategy
     const selectedStrategy = this.state.selectedStrategy;
@@ -392,7 +392,6 @@ class App extends Component {
     const callback = () => {
       this.loadAvailableTokens();
     }
-    console.log("availabble",this.state.availableStrategies)
 
     if (selectedStrategy && selectedStrategy !== this.state.selectedStrategy && (Object.keys(this.state.availableStrategies).includes(selectedStrategy.toLowerCase())||selectedStrategy==='tranches')) {
       selectedStrategy = selectedStrategy.toLowerCase();

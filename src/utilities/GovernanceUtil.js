@@ -603,12 +603,37 @@ class GovernanceUtil {
         this.functionsUtil.getContractPastEvents(governanceContractName,'ProposalExecuted', {fromBlock, toBlock}),
       ]);
 
-      proposals.reverse();
-      proposalStates.reverse();
-      proposalQueuedEvents.reverse();
-      proposalCreatedEvents.reverse();
-      proposalCanceledEvents.reverse();
-      proposalExecutedEvents.reverse();
+      if (proposals){
+        proposals.reverse();
+      } else {
+        proposals = [];
+      }
+      if (proposalStates){
+        proposalStates.reverse();
+      } else {
+        proposalStates = [];
+      }
+      if (proposalQueuedEvents){
+        proposalQueuedEvents.reverse();
+      } else {
+        proposalQueuedEvents = [];
+      }
+      if (proposalCreatedEvents){
+        proposalCreatedEvents.reverse();
+      } else {
+        proposalCreatedEvents = [];
+      }
+      if (proposalCanceledEvents){
+        proposalCanceledEvents.reverse();
+      } else {
+        proposalCanceledEvents = [];
+      }
+      if (proposalExecutedEvents){
+        proposalExecutedEvents.reverse();
+      } else {
+        proposalExecutedEvents = [];
+      }
+
 
       // await this.functionsUtil.asyncForEach(proposals, async (p,i) => {
       await this.functionsUtil.asyncForEach(proposalCreatedEvents, async (createdEvent,i) => {

@@ -7179,6 +7179,8 @@ class FunctionsUtil {
       const one = this.normalizeTokenDecimals(decimals);
       const unires = await this.genericContractCallNoMulticall('UniswapRouter', uniswapRouterMethod, [one.toFixed(), path], {}, blockNumber);
 
+      // console.log('getUniswapConversionRate',path,blockNumber,unires);
+
       if (unires) {
         let price = this.BNify(unires[0]).div(one);
         if (uniswapRouterMethod === 'getAmountsOut'){
@@ -7189,6 +7191,7 @@ class FunctionsUtil {
       }
       return null;
     } catch (error) {
+      // console.log('getUniswapConversionRate - ERROR',tokenConfigFrom,tokenConfigDest);
       return null;
     }
   }
