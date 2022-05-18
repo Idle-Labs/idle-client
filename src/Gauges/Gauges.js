@@ -29,6 +29,7 @@ class Gauges extends Component {
     selectedToken:null,
     rewardsTokens:null,
     veTokenBalance:null,
+    allowZeroValue:null,
     approveEnabled:null,
     claimSucceded:false,
     claimToken:'default',
@@ -203,7 +204,8 @@ class Gauges extends Component {
       trancheTokenBalance,
       votingPowerUsed,
       gaugeWorkingBalances,
-      lastUserVote
+      lastUserVote,
+      voteUserSlope,
     ] = await Promise.all([
       this.functionsUtil.getBlockInfo(),
       this.functionsUtil.getTokenTotalSupply(gaugeConfig.name),
@@ -217,7 +219,8 @@ class Gauges extends Component {
       this.functionsUtil.getTokenBalance(trancheTokenConfig.token,this.props.account),
       this.functionsUtil.genericContractCall('GaugeController','vote_user_power',[this.props.account]),
       this.functionsUtil.genericContractCall(gaugeConfig.name,'working_balances',[this.props.account]),
-      this.functionsUtil.genericContractCall('GaugeController','last_user_vote',[this.props.account,gaugeConfig.address])
+      this.functionsUtil.genericContractCall('GaugeController','last_user_vote',[this.props.account,gaugeConfig.address]),
+      this.functionsUtil.genericContractCall('GaugeController','vote_user_slopes',[this.props.account,gaugeConfig.address])
     ]);
 
     const claimableRewardsTokens = Object.keys(rewardsTokens).filter( token => token !== 'IDLE' ).reduce( (claimableRewards,token) => {
@@ -234,7 +237,14 @@ class Gauges extends Component {
       distributionRate = this.functionsUtil.fixTokenDecimals(distributionRate,18).times(86400);
     }
 
-    votingPowerUsed = this.functionsUtil.BNify(votingPowerUsed).div(10000);
+    votingPowerUsed = this.functionsUtil.BNify(votingPowerUsed);
+    let oldPowerUsed = this.functionsUtil.BNify(voteUserSlope.power);
+    const availableVotingPower = this.functionsUtil.BNify(10000).minus(votingPowerUsed).plus(oldPowerUsed).div(10000);
+
+    votingPowerUsed = votingPowerUsed.div(10000);
+    oldPowerUsed = oldPowerUsed.div(10000);
+
+    // console.log('availableVotingPower',votingPowerUsed.toFixed(),oldPowerUsed.toFixed(),availableVotingPower);
 
     this.setState({
       blockInfo,
@@ -250,6 +260,7 @@ class Gauges extends Component {
       gaugeWorkingSupply,
       veTokenTotalSupply,
       trancheTokenBalance,
+      availableVotingPower,
       gaugeWorkingBalances,
       gaugePeriodTimestamp,
       claimableRewardsTokens
@@ -282,8 +293,8 @@ class Gauges extends Component {
       case 'vote':
         approveEnabled = false;
         tokenConfig = veTokenConfig;
-        const veTokenBalanceUsed = this.functionsUtil.BNify(this.state.veTokenBalance).times(this.state.votingPowerUsed);
-        balanceProp = this.functionsUtil.BNify(this.state.veTokenBalance).minus(veTokenBalanceUsed);
+        // const veTokenBalanceUsed = this.functionsUtil.BNify(this.state.veTokenBalance).times(this.state.votingPowerUsed);
+        balanceProp = this.functionsUtil.BNify(this.state.veTokenBalance).times(this.state.availableVotingPower);
         balanceSelectorInfo = {
           color:`copyColor`,
           text:`Allocated power: ${this.functionsUtil.BNify(this.state.votingPowerUsed).times(100).toFixed(2)}%`
@@ -297,9 +308,9 @@ class Gauges extends Component {
         unlockDate = nextUnlockTime ? this.functionsUtil.strToMoment(nextUnlockTime*1000).utc().format('YYYY-MM-DD HH:mm') : null;
 
         // Unlock total voting balance if nextUnlockTime reached
-        if (canVote){
-          balanceProp = this.state.veTokenBalance;
-        }
+        // if (canVote && this.state.votingPowerUsed.gte(1)){
+        //   balanceProp = this.state.veTokenBalance.times(this.state.availableVotingPower);
+        // }
       break;
       case 'stake':
         switch (this.state.stakeAction){
@@ -640,17 +651,24 @@ class Gauges extends Component {
   async changeInputCallback(inputValue=null){
     let infoBox = null;
     let votingWeight = null;
-    let balanceSelectorInfo = null;
+    let allowZeroValue = false;
+    let balanceSelectorInfo = {...this.state.balanceSelectorInfo};
 
     inputValue = this.functionsUtil.BNify(inputValue);
     switch (this.state.selectedAction){
       case 'vote':
+        allowZeroValue = true;
         if (inputValue.gt(0)){
           const votingPowerPercentage = this.state.veTokenBalance.gt(0) ? inputValue.div(this.state.veTokenBalance).times(100).toFixed(2) : this.functionsUtil.BNify(0);
           votingWeight = this.state.veTokenBalance.gt(0) ? this.functionsUtil.integerValue(inputValue.div(this.state.veTokenBalance).times(10000)) : this.functionsUtil.BNify(0);
           infoBox = {
             icon:'Info',
             text:`You are allocating <strong>${votingPowerPercentage}%</strong> of your voting power to this Gauge`
+          };
+        } else {
+          infoBox = {
+            icon:'Info',
+            text:`You are about to reset your voting power for this Gauge`
           };
         }
       break;
@@ -676,6 +694,7 @@ class Gauges extends Component {
       infoBox,
       inputValue,
       votingWeight,
+      allowZeroValue,
       balanceSelectorInfo
     });
   }
@@ -954,6 +973,27 @@ class Gauges extends Component {
                       }}
                       text={`Your vote has been succesfully broadcasted and will remain registered until you change it.<br />Wait until <strong>${this.state.unlockDate} UTC</strong> to update your vote for this gauge.`}
                     />
+                  ) : this.state.selectedAction === 'vote' && this.functionsUtil.BNify(this.state.availableVotingPower).lte(0) ? (
+                    <IconBox
+                      cardProps={{
+                        mt:1
+                      }}
+                      icon={'Info'}
+                      iconProps={{
+                        color:'cellText'
+                      }}
+                      text={`You already allocated 100% of your voting power, reduce the allocation from one of the gagues you voted for or stake more ${this.functionsUtil.getGlobalConfig(['governance','props','tokenName'])}.`}
+                    >
+                      <RoundButton
+                        buttonProps={{
+                          mt:3,
+                          width:[1,1/2]
+                        }}
+                        handleClick={e => this.props.goToSection(`stake`)}
+                      >
+                        Stake {this.functionsUtil.getGlobalConfig(['governance','props','tokenName'])}
+                      </RoundButton>
+                    </IconBox>
                   ) : (this.state.selectedAction === 'vote' || this.state.stakeAction !== 'claim') && this.state.tokenConfig ? (
                     <SendTxWithBalance
                       error={null}
@@ -963,6 +1003,7 @@ class Gauges extends Component {
                       tokenConfig={this.state.tokenConfig}
                       tokenBalance={this.state.balanceProp}
                       contractInfo={this.state.contractInfo}
+                      allowZeroValue={this.state.allowZeroValue}
                       approveEnabled={this.state.approveEnabled}
                       buttonDisabled={this.state.buttonDisabled}
                       callback={this.transactionSucceeded.bind(this)}
@@ -1004,7 +1045,7 @@ class Gauges extends Component {
                                 }}
                                 handleClick={e => this.props.goToSection(`stake`)}
                               >
-                                Stake
+                                Stake {this.functionsUtil.getGlobalConfig(['governance','props','tokenName'])}
                               </RoundButton>
                             )
                           }
