@@ -184,6 +184,7 @@ const availableTranches = {
       },
       Strategy:{
         abi:IdleStrategy,
+        harvestEnabled:false,
         name:'IdleStrategy_lido_stETH'
       },
       messages:{
@@ -871,6 +872,82 @@ const availableTranches = {
         token:'BB_convex_pbtccrv',
         label:'convex pbtccrv BB',
         address:'0x3872418402d1e967889aC609731fc9E11f438De5'
+      }
+    }
+  },
+  euler:{
+    USDC:{
+      abi:ERC20,
+      decimals:6,
+      token:'USDC',
+      autoFarming:[],
+      protocol:'euler',
+      blockNumber:14785127,
+      multiCallDisabled:true,
+      address:'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+      CDO:{
+        abi:IdleCDO,
+        decimals:18,
+        name:'IdleCDO_euler_USDC',
+        address:'0xf5a3d259bfe7288284bd41823ec5c8327a314054'
+      },
+      Strategy:{
+        abi:IdleStrategy,
+        name:'IdleStrategy_euler_USDC'
+      },
+      AA:{
+        abi:ERC20,
+        decimals:6,
+        tranche:'AA',
+        functions:{
+          stake:'stake',
+          unstake:'exit',
+          rewards:'earned',
+          claim:'getReward',
+          deposit:'depositAA',
+          withdraw:'withdrawAA',
+          rewardsRate:'rewardRate',
+          stakedBalance:'balanceOf'
+        },
+        CDORewards:{
+          decimals:18,
+          stakingRewards:[],
+          unstakeWithBalance:false,
+          abi:TrancheStakingRewards,
+          name:'TrancheStakingRewards_euler_USDC_AA',
+          address:'0x0000000000000000000000000000000000000000'
+        },
+        name:'AA_euler_USDC',
+        blockNumber:14785127,
+        token:'AA_euler_USDC',
+        label:'euler USDC AA',
+        address:'0x1e095cbF663491f15cC1bDb5919E701b27dDE90C'
+      },
+      BB:{
+        abi:ERC20,
+        decimals:6,
+        tranche:'BB',
+        functions:{
+          stake:'stake',
+          claim:'claim',
+          unstake:'unstake',
+          deposit:'depositBB',
+          withdraw:'withdrawBB',
+          stakedBalance:'usersStakes'
+        },
+        CDORewards:{
+          decimals:18,
+          stakingRewards:[],
+          unstakeWithBalance:true,
+          abi:IdleCDOTrancheRewards,
+          name:'IdleCDOTrancheRewards_euler_USDC_BB',
+          address:'0x0000000000000000000000000000000000000000'
+        },
+        blockNumber:14785127,
+        name:'BB_euler_USDC',
+        token:'BB_euler_USDC',
+        label:'euler USDC BB',
+        address:'0xe11679CDb4587FeE907d69e9eC4a7d3F0c2bcf3B'
       }
     }
   }

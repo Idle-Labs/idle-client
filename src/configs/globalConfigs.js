@@ -1699,6 +1699,15 @@ const globalConfigs = {
           hsl: ['0', '0%', '0%']
         }
       },
+      euler: {
+        label: "Euler",
+        legend: false,
+        enabled: true,
+        color: {
+          rgb: [228, 97, 94],
+          hsl: ["1", "71%", "63%"]
+        }
+      },
       fuse: {
         legend: true,
         enabled: true,

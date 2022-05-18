@@ -1194,6 +1194,11 @@ class FunctionsUtil {
   }
   getTrancheLastHarvest = async (tokenConfig) => {
     const strategyConfig = tokenConfig.Strategy;
+    const harvestEnabled = !!strategyConfig.harvestEnabled;
+
+    if (!harvestEnabled){
+      return null;
+    }
     
     // Create Tranche Strategy contract
     const idleStrategyAddress = await this.genericContractCallCachedTTL(tokenConfig.CDO.name, 'strategy', 3600);
