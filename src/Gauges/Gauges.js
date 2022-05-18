@@ -72,7 +72,8 @@ class Gauges extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     const accountChanged = nextProps.account !== this.props.account;
     const stateChanged = JSON.stringify(this.state) !== JSON.stringify(nextState);
-    return stateChanged || accountChanged;
+    const contractsChanged = this.props.contracts.length !== nextProps.contracts.length || this.props.contracts.map( c => c.name ).filter( contractName => !nextProps.contracts.map( c => c.name ).includes(contractName) ).length>0;
+    return stateChanged || accountChanged || contractsChanged;
   }
 
   async componentDidUpdate(prevProps,prevState){
@@ -219,8 +220,6 @@ class Gauges extends Component {
       this.functionsUtil.genericContractCall('GaugeController','last_user_vote',[this.props.account,gaugeConfig.address])
     ]);
 
-    // console.log('distributionRate',distributionRate);
-
     const claimableRewardsTokens = Object.keys(rewardsTokens).filter( token => token !== 'IDLE' ).reduce( (claimableRewards,token) => {
       const tokenConfig = rewardsTokens[token];
       if (tokenConfig.balance.gt(0)){
@@ -296,6 +295,11 @@ class Gauges extends Component {
         canVote = !nextUnlockTime || this.state.blockInfo.timestamp>=nextUnlockTime;
 
         unlockDate = nextUnlockTime ? this.functionsUtil.strToMoment(nextUnlockTime*1000).utc().format('YYYY-MM-DD HH:mm') : null;
+
+        // Unlock total voting balance if nextUnlockTime reached
+        if (canVote){
+          balanceProp = this.state.veTokenBalance;
+        }
       break;
       case 'stake':
         switch (this.state.stakeAction){
