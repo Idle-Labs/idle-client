@@ -137,8 +137,9 @@ class SendTxWithBalance extends Component {
     if (!amount){
       amount = this.state.inputValue;
     }
+    const allowZeroValue = !!this.props.allowZeroValue;
     amount = this.functionsUtil.BNify(amount);
-    const buttonDisabled = amount.isNaN() || amount.lte(0) || amount.gt(this.props.tokenBalance);
+    const buttonDisabled = amount.isNaN() || (allowZeroValue ? amount.lt(0) : amount.lte(0)) || amount.gt(this.props.tokenBalance);
     this.setState({
       buttonDisabled
     });
