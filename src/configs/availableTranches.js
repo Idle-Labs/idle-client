@@ -802,7 +802,7 @@ const availableTranches = {
       protocol:'convex',
       blockNumber:14570195,
       multiCallDisabled:true,
-      autoFarming:['CVX','CRV'],
+      autoFarming:['CVX','CRV','PNT'],
       address:'0xC9467E453620f16b57a34a770C6bceBECe002587',
       CDO:{
         abi:IdleCDO,

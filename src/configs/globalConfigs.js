@@ -1284,6 +1284,18 @@ const globalConfigs = {
         },
         address: '0x31429d1856ad1377a8a0079410b297e1a9e214c2'
       },
+      PNT: {
+        token: 'PNT',
+        decimals: 18,
+        enabled: true,
+        label: 'pNetwork',
+        color: {
+          hex: '#ff6665',
+          rgb: [255, 102, 101],
+          hsl: ['0', '100%', '70%']
+        },
+        address: '0x89ab32156e46f46d02ade3fecbe5fc4243b9aaed'
+      },
       "3EUR": {
         decimals: 18,
         enabled: true,
