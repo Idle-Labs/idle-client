@@ -46,8 +46,6 @@ class ExecuteTransaction extends Component {
 
     const callback = (tx,error) => {
 
-      // console.log('callback',tx,error);
-
       // Send Google Analytics event
       const eventData = {
         eventCategory: 'Transaction',

@@ -1495,17 +1495,17 @@ class RimbleTransaction extends React.Component {
           // Confidence threshold met
         }
 
-
-        if (call_callback){
-          // Update transaction with receipt details
+        // Update transaction with receipt details
+        if (transaction.confirmationCount===1){
           if (receipt){
             transaction.txReceipt = receipt;
           }
           transaction.recentEvent = "confirmation";
           this.updateTransaction(transaction);
-          
-          callback(transaction);
+        }
 
+        if (call_callback){
+          callback(transaction);
           this.functionsUtil.customLog('Confirmed', confirmationNumber, receipt, transaction);
         }
       };
@@ -1687,7 +1687,7 @@ class RimbleTransaction extends React.Component {
     this.setState({ transactions });
 
     // Save transactions in localStorage only if pending or succeeded
-    // console.log('updateTransaction',transaction);
+    // console.log('updateTransaction',transaction,transaction.transactionHash);
     if (transaction.transactionHash){
       // Clear cached data
       this.functionsUtil.clearCachedData();

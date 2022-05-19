@@ -4746,11 +4746,14 @@ class FunctionsUtil {
     }
 
     // Check for cached data
-    const cachedDataKey = `trancheStakedBalance_${contractName}_${walletAddr}_${decimals}`;
-    const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
-    if (cachedData && !this.BNify(cachedData).isNaN()) {
-      return this.BNify(cachedData);
-    }
+    // const cachedDataKey = `trancheStakedBalance_${contractName}_${walletAddr}_${decimals}_${methodName}`;
+    // const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
+
+    // console.log('getTrancheStakedBalance (CACHED)',cachedDataKey,cachedData)
+
+    // if (cachedData && !this.BNify(cachedData).isNaN()) {
+    //   return this.BNify(cachedData);
+    // }
 
     let stakedBalance = await this.genericContractCall(contractName, methodName, [walletAddr]);
     if (stakedBalance) {
@@ -4760,7 +4763,8 @@ class FunctionsUtil {
       stakedBalance = this.BNify(stakedBalance);
 
       if (!stakedBalance.isNaN()) {
-        return this.setCachedDataWithLocalStorage(cachedDataKey, stakedBalance, 30);
+        return stakedBalance;
+        // return this.setCachedDataWithLocalStorage(cachedDataKey, stakedBalance, 30);
       }
     }
     return this.BNify(0);
@@ -6005,7 +6009,6 @@ class FunctionsUtil {
   }
   clearCachedData = (clear_all = false) => {
     if (this.props.clearCachedData && typeof this.props.clearCachedData === 'function') {
-      // this.customLog('clearCachedData',this.props.clearCachedData,typeof this.props.clearCachedData === 'function');
       this.props.clearCachedData(null, clear_all);
     } else {
       // this.customLog('clearCachedData - Function not found!');

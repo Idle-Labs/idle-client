@@ -59,10 +59,11 @@ class TrancheField extends Component {
     const themeModeChanged = prevProps.themeMode !== this.props.themeMode;
     const fieldChanged = prevProps.fieldInfo.name !== this.props.fieldInfo.name;
     const contractsInitialized = !prevProps.contractsInitialized && this.props.contractsInitialized;
+    const portfolioChanged = this.props.portfolio ? ((this.props.portfolio && !prevProps.portfolio) || JSON.stringify(this.props.portfolio) !== JSON.stringify(prevProps.portfolio)) : false;
     const requiredNetworkChanged = (!prevProps.network && this.props.network) || (prevProps.network && this.props.network && JSON.stringify(prevProps.network.required) !== JSON.stringify(this.props.network.required));
     const transactionsChanged = prevProps.transactions && this.props.transactions && Object.values(prevProps.transactions).filter(tx => (tx.status==='success')).length !== Object.values(this.props.transactions).filter(tx => (tx.status==='success')).length;
 
-    if (fieldChanged || tokenChanged || protocolChanged || trancheChanged || accountChanged || transactionsChanged || contractsInitialized || requiredNetworkChanged){
+    if (fieldChanged || tokenChanged || protocolChanged || trancheChanged || portfolioChanged || accountChanged || transactionsChanged || contractsInitialized || requiredNetworkChanged){
       // console.log('componentDidUpdate-1',fieldChanged,tokenChanged,protocolChanged,trancheChanged,accountChanged,transactionsChanged,(contractsInitialized && !this.state.ready));
       this.setStateSafe({
         ready:false

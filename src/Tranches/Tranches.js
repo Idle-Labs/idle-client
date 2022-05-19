@@ -20,6 +20,7 @@ class Tranches extends Component {
 
   state = {
     portfolio:null,
+    lastUpdate:null,
     transactions:[],
     tokenConfig:null,
     trancheType:null,
@@ -263,13 +264,13 @@ class Tranches extends Component {
 
       // console.log('allocationChartData',allocationChartData,'portfolioDonutData',portfolioDonutData);
       
+      const lastUpdate = Date.now();
       const transactions = portfolio.transactions;
       const userHasFunds = portfolio && this.functionsUtil.BNify(portfolio.totalBalance).gt(0);
 
-      // console.log('loadPortfolio - remainingTranches',remainingTranches);
-
       this.setState({
         portfolio,
+        lastUpdate,
         userHasFunds,
         transactions,
         portfolioLoaded,

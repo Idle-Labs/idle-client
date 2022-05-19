@@ -16,6 +16,7 @@ class Multicall {
     resolvedHashes:{},
     rejectedHashes:{},
     totalElapsedTime:0,
+    attempsTimeoutIds:{},
     maxProcessingBatches:0
   };
   processingBatches = 0;
@@ -28,7 +29,7 @@ class Multicall {
   multiCallsResults = {};
   multiCallsTimeoutIds = {};
   maxProcessingBatches = null;
-  multiCallsExecutionInterval = 500;
+  multiCallsExecutionInterval = 1000;
 
   timeLog = (...props) => { console.log(moment().format('HH:mm:ss'), ...props); }
 
@@ -60,6 +61,7 @@ class Multicall {
       resolvedHashes:{},
       rejectedHashes:{},
       totalElapsedTime:0,
+      attempsTimeoutIds:{},
       maxProcessingBatches:0
     };
     this.processingBatches = 0;
@@ -109,61 +111,83 @@ class Multicall {
       this.multiCallsBatchId++;
       this.executeBatch(callBatchId);
     } else {
-      this.multiCallsTimeoutIds[callBatchId] = setTimeout(() => {
+      this.multiCallsTimeoutIds[callBatchId] = window.setTimeout(() => {
         this.multiCallsBatchId++;
         this.executeBatch(callBatchId);
       },this.multiCallsExecutionInterval);
     }
 
-    const checkMulticallData = async (batchId,resultHash) => {
+    const checkMulticallData = async (batchId,resultHash,count=0,maxCount=400) => {
       return new Promise( (resolve, reject) => {
-        const attempt = (count=0,maxCount=2000) => {
 
-          const maxCountReached = maxCount && count>=maxCount;
-          const resultIsDefined = this.multiCallsResults[batchId] && typeof this.multiCallsResults[batchId][resultHash] !== 'undefined';
-
-          if (resultIsDefined || maxCountReached){
-
-            // Force rejected response
-            if (maxCountReached && !resultIsDefined){
-              if (!this.multiCallsResults[batchId]){
-                this.multiCallsResults[batchId] = {};
-              }
-              this.multiCallsResults[batchId][resultHash] = 'REJECTED';
-            }
-
-            // Handle rejection
-            if (this.multiCallsResults[batchId][resultHash] === 'REJECTED'){
-              // this.timeLog('REJECTED',batchId,resultHash);
-
-              // Add hash to rejected hashes
-              this.addRejectedHash(resultHash);
-
-              resolve('REJECTED');
-            } else {
-              // this.timeLog('RESOLVED',batchId,resultHash);
-              this.addResolvedHash(resultHash);
-              resolve(this.multiCallsResults[batchId][resultHash]);
-            }
-
-            // Increment processed count
-            this.multiCallsStats.processedCount++;
-
-            // Remove hash from missing hashes
-            delete this.multiCallsStats.missingHashes[batchId][resultHash];
-          } else {
-            // this.timeLog('checkMulticallData_NOT-FOUND',resultHash);
-            window.setTimeout(()=>{
-              attempt(count+1);
-            },10);
-          }
+        if (!this.multiCallsStats.attempsTimeoutIds[batchId]){
+          this.multiCallsStats.attempsTimeoutIds[batchId] = {};
         }
 
-        attempt(0);
+        if (!this.multiCallsStats.attempsTimeoutIds[batchId][resultHash]){
+          this.multiCallsStats.attempsTimeoutIds[batchId][resultHash] = {
+            count,
+            result:null,
+            timeoutId:null,
+            maxCountReached:false
+          };
+        }
+
+        const maxCountReached = maxCount && count>=maxCount;
+        const resultIsDefined = this.multiCallsResults[batchId] && typeof this.multiCallsResults[batchId][resultHash] !== 'undefined' ? true : false;
+
+        // Update attempt count
+        this.multiCallsStats.attempsTimeoutIds[batchId][resultHash].count = count;
+        this.multiCallsStats.attempsTimeoutIds[batchId][resultHash].maxCountReached = maxCountReached;
+        this.multiCallsStats.attempsTimeoutIds[batchId][resultHash].result = resultIsDefined ? this.multiCallsResults[batchId][resultHash] : 'undefined';
+
+        // console.log('attempt',batchId,resultHash,count,resultIsDefined,maxCountReached,this.multiCallsStats.attempsTimeoutIds[batchId][resultHash].result);
+
+        if (resultIsDefined || maxCountReached) {
+
+          // Force rejected response
+          if (maxCountReached && !resultIsDefined){
+            if (!this.multiCallsResults[batchId]){
+              this.multiCallsResults[batchId] = {};
+            }
+            this.multiCallsResults[batchId][resultHash] = 'REJECTED';
+          }
+
+          // Handle rejection
+          if (this.multiCallsResults[batchId][resultHash] === 'REJECTED'){
+            // this.timeLog('REJECTED',batchId,resultHash);
+
+            // Add hash to rejected hashes
+            this.addRejectedHash(resultHash);
+
+            resolve('REJECTED');
+          } else {
+            // this.timeLog('RESOLVED',batchId,resultHash);
+            this.addResolvedHash(resultHash);
+            resolve(this.multiCallsResults[batchId][resultHash]);
+          }
+
+          // Increment processed count
+          this.multiCallsStats.processedCount++;
+
+          // Remove hash from missing hashes
+          delete this.multiCallsStats.missingHashes[batchId][resultHash];
+          delete this.multiCallsStats.attempsTimeoutIds[batchId][resultHash];
+        } else {
+          // this.timeLog('checkMulticallData_NOT-FOUND',resultHash);
+          this.multiCallsStats.attempsTimeoutIds[batchId][resultHash].timeoutId = window.setTimeout(()=>{
+            resolve(checkMulticallData(batchId,resultHash,count+1,maxCount));
+          },50);
+
+          // console.log('new_attempt',batchId,resultHash,count+1,this.multiCallsStats.attempsTimeoutIds[batchId][resultHash].timeoutId);
+        }
       });
     }
 
+    // console.log('makeMulticall',callBatchId,callDataHash);
+
     const data = await checkMulticallData(callBatchId,callDataHash);
+    // console.log('data',callBatchId,callDataHash,data);
     return data;
   }
 
@@ -200,7 +224,7 @@ class Multicall {
   executeBatch = async (executeBatchId) => {
 
     const asyncTimeout = (ms) => {
-      return new Promise(resolve => setTimeout(resolve, ms));
+      return new Promise(resolve => window.setTimeout(resolve, ms));
     }
 
     if (!this.web3 || !this.selectedNetwork || (this.maxProcessingBatches && this.processingBatches>=this.maxProcessingBatches)){
@@ -263,9 +287,6 @@ class Multicall {
 
     this.multiCallsStats.endDate = new Date();
     this.multiCallsStats.totalElapsedTime = parseFloat(this.multiCallsStats.endDate.getTime()/1000)-parseFloat(this.multiCallsStats.startDate.getTime()/1000);
-
-    // delete this.multiCalls[executeBatchId];
-    // this.timeLog('executeBatch_END',executeBatchId,this.processingBatches,this.multiCalls[executeBatchId],results);
   }
 
   prepareMulticallData = (calls,web3=null) => {
@@ -279,8 +300,6 @@ class Multicall {
     const strip0x = (str) => {
       return str.replace(/^0x/, '');
     }
-
-    // this.timeLog('prepareMulticallData',this.web3,this.props);
 
     const values = [
       calls.map(({ target, method, args, returnTypes }) => [

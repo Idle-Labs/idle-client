@@ -134,8 +134,6 @@ class TrancheDetails extends Component {
     const stakeEnabled = stakingEnabled;
     const unstakeEnabled = stakedBalance && this.functionsUtil.BNify(stakedBalance).gt(0);
 
-    // console.log('stakingRewards',stakingRewards,stakingEnabled,unstakeEnabled);
-
     if (!stakingEnabled && unstakeEnabled){
       stakingEnabled = true;
     }
@@ -334,6 +332,7 @@ class TrancheDetails extends Component {
   }
 
   transactionSucceeded(){
+
     this.loadData();
 
     if (typeof this.props.transactionSucceeded === 'function'){

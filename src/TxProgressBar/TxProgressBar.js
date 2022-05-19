@@ -17,6 +17,7 @@ class TxProgressBar extends Component {
     remainingTime:null
   };
 
+  timeoutIds = [];
   componentUnmounted = false;
 
   // Utils
@@ -34,11 +35,7 @@ class TxProgressBar extends Component {
 
     this.componentUnmounted = true;
 
-    var id = window.setTimeout(function() {}, 0);
-
-    while (id--) {
-        window.clearTimeout(id); // will do nothing if no timeout with id is present
-    }
+    this.timeoutIds.forEach( timeoutId => window.clearTimeout(timeoutId) );
 
     window.initProgressBar = this.initProgressBar;
   }
@@ -216,7 +213,7 @@ class TxProgressBar extends Component {
       percentage
     });
 
-    setTimeout(()=>{this.updateProgressBar()},1000);
+    this.timeoutIds.push(setTimeout(()=>{this.updateProgressBar()},1000));
   }
 
   updateProgressBar = () => {
@@ -240,7 +237,7 @@ class TxProgressBar extends Component {
           percentage,
           remainingTime
         });
-        setTimeout(()=>{this.updateProgressBar()},1000);
+        this.timeoutIds.push(setTimeout(()=>{this.updateProgressBar()},1000));
       }
     } else {
       this.setState({
@@ -326,9 +323,9 @@ class TxProgressBar extends Component {
         this.setState({
           txCount
         },() => {
-          window.setTimeout(() => {
+          this.timeoutIds.push(window.setTimeout(() => {
             this.initProgressBar();
-          },1000);
+          },1000));
         });
       }
     }

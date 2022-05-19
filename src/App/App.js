@@ -144,7 +144,7 @@ class App extends Component {
 
     const requiredNetworkId = this.state.network.required.id;
 
-    const cachedData = { ...this.state.cachedData };
+    const cachedData = clear_all ? {} : { ...this.state.cachedData };
     if (cachedData[requiredNetworkId]){
       Object.keys(cachedData[requiredNetworkId]).forEach(key => {
         const data = cachedData[requiredNetworkId][key];
