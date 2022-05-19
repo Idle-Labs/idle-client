@@ -224,7 +224,7 @@ class Tranches extends Component {
         const tokenPercentage = portfolio.stakingRewards[token].tokenAmountConverted.div(portfolio.totalBalance).times(100);
         const tokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase()]);
         const govTokenConfig = this.functionsUtil.getGlobalConfig(['govTokens',token]);
-        if (govTokenConfig.showBalance){
+        if (govTokenConfig && govTokenConfig.showBalance){
           portfolioDonutData.push({
             id:token,
             name:token,
@@ -1060,8 +1060,7 @@ class Tranches extends Component {
                               props:{
                                 flexProps:{
                                   mr:2
-                                },
-                                height:['1.4em','2em']
+                                }
                               }
                             },
                             

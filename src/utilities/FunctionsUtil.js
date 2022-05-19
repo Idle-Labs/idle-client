@@ -472,7 +472,7 @@ class FunctionsUtil {
     // Get staking rewards conversion rates
     await this.asyncForEach(Object.keys(portfolio.stakingRewards), async (rewardToken) => {
       const rewardTokenConfig = this.getGlobalConfig(['govTokens',rewardToken]);
-      if (rewardTokenConfig.showBalance && portfolio.stakingRewards[rewardToken].tokenAmount.gt(0)){
+      if (rewardTokenConfig && rewardTokenConfig.showBalance && portfolio.stakingRewards[rewardToken].tokenAmount.gt(0)){
         const rewardTokenConversionRate = await this.getTokenConversionRateUniswap(rewardTokenConfig);
         portfolio.stakingRewards[rewardToken].conversionRate = rewardTokenConversionRate;
         portfolio.stakingRewards[rewardToken].tokenAmountConverted = portfolio.stakingRewards[rewardToken].tokenAmount.times(rewardTokenConversionRate);
@@ -1048,8 +1048,10 @@ class FunctionsUtil {
       return false;
     }
 
-    const requiredNetworkId = this.getRequiredNetworkId();
-    const etherscanInfo = this.getGlobalConfig(['network', 'providers', 'etherscan']);
+    const requiredNetwork = this.getRequiredNetwork();
+    const requiredNetworkId = requiredNetwork.id;
+
+    const etherscanInfo = this.getGlobalConfig(['network', 'providers', requiredNetwork.explorer]);
     const etherscanApiUrl = etherscanInfo.endpoints[requiredNetworkId];
 
     const tokenConfigs = [];
@@ -1118,8 +1120,9 @@ class FunctionsUtil {
   }
 
   getEtherscanTokenTransfers = async (tokenName,walletAddr,fromAddress=null,contractAddress,toAddress,fromBlock=0,toBlock='latest',sort='asc',limit=null) => {
-    const requiredNetworkId = this.getRequiredNetworkId();
-    const etherscanInfo = this.getGlobalConfig(['network', 'providers', 'etherscan']);
+    const requiredNetwork = this.getRequiredNetwork();
+    const requiredNetworkId = requiredNetwork.id;
+    const etherscanInfo = this.getGlobalConfig(['network', 'providers', requiredNetwork.explorer]);
     const etherscanApiUrl = etherscanInfo.endpoints[requiredNetworkId];
     let endpoint = `${etherscanApiUrl}?module=account&action=tokentx&address=${walletAddr}&contractaddress=${contractAddress}&startblock=${fromBlock}&endblock=${toBlock}&sort=${sort}`;
     if (limit && parseInt(limit)>0){
@@ -2004,16 +2007,17 @@ class FunctionsUtil {
     const firstIdleBlockNumber = this.getGlobalConfig(['network', 'firstBlockNumber']);
     firstBlockNumber = Math.max(firstIdleBlockNumber, firstBlockNumber);
 
-    const requiredNetwork = this.getRequiredNetworkId();
-    const etherscanInfo = this.getGlobalConfig(['network', 'providers', 'etherscan']);
+    const requiredNetwork = this.getRequiredNetwork();
+    const requiredNetworkId = requiredNetwork.id;
+    const etherscanInfo = this.getGlobalConfig(['network', 'providers', requiredNetwork.explorer]);
 
     let results = [];
     let baseTxs = null;
     let baseEndpoint = null;
 
     // Check if etherscan is enabled for the required network
-    if (etherscanInfo.enabled && etherscanInfo.endpoints[requiredNetwork]) {
-      const etherscanApiUrl = etherscanInfo.endpoints[requiredNetwork];
+    if (etherscanInfo.enabled && etherscanInfo.endpoints[requiredNetworkId]) {
+      const etherscanApiUrl = etherscanInfo.endpoints[requiredNetworkId];
 
       // Get base endpoint cached transactions
       baseEndpoint = `${etherscanApiUrl}?strategy=${selectedStrategy}&module=account&action=tokentx&address=${account}&startblock=${firstIdleBlockNumber}&endblock=${endBlockNumber}&sort=asc`;
@@ -2138,18 +2142,8 @@ class FunctionsUtil {
   }
   getEtherscanTxs = async (account = false, firstBlockNumber = 0, endBlockNumber = 'latest', enabledTokens = [], debug = false) => {
 
-    let resultData = null;
-    const currentNetwork = this.getRequiredNetwork();
-
-    switch (currentNetwork.explorer) {
-      case 'polygon':
-        resultData = await this.getPolygonBaseTxs(account, enabledTokens, debug);
-        break;
-      case 'etherscan':
-      default:
-        resultData = await this.getEtherscanBaseTxs(account, firstBlockNumber, endBlockNumber, enabledTokens, debug);
-        break;
-    }
+    // const currentNetwork = this.getRequiredNetwork();
+    const resultData = await this.getEtherscanBaseTxs(account, firstBlockNumber, endBlockNumber, enabledTokens, debug);
 
     // Initialize prevTxs
     let txs = {};
@@ -2167,17 +2161,8 @@ class FunctionsUtil {
       } else {
         const allAvailableTokens = Object.keys(this.props.availableTokens);
         // Save base endpoint with all available tokens
-        switch (currentNetwork.explorer) {
-          case 'polygon':
-            txs = await this.filterPolygonTxs(results, allAvailableTokens);
-            // console.log('polygon txs',results,allAvailableTokens,txs);
-            break;
-          case 'etherscan':
-          default:
-            txs = await this.filterEthereumTxs(results, allAvailableTokens);
-            break;
-        }
-
+        txs = await this.filterEthereumTxs(results, allAvailableTokens);
+        
         // Store filtered txs
         if (txs && Object.keys(txs).length) {
           this.saveFetchedTransactions(baseEndpoint, txs);
@@ -3247,43 +3232,49 @@ class FunctionsUtil {
     
     const blockInfo = await this.getBlockInfo();
     const timestamp = blockInfo.timestamp-7200;
-    
-    const query=`{
-      trancheInfos(orderBy:"timeStamp", orderDirection:"asc", where:{timeStamp_gt:"${timestamp}"}){
-        id
-        apr
-        timeStamp
-        Tranche{
-          id
-          CDO{
-            id
-          }
-          type
-        }
-      }
-    }`;
+    const networkId = this.getRequiredNetworkId();
 
-    const postData={
-      query
-    };
-
+    let results = [];
     const subgraphConfig = this.getGlobalConfig(['network','providers','subgraph','tranches']);
-    let results = await this.makePostRequest(subgraphConfig.endpoint,postData);
+    if (subgraphConfig.availableNetworks.includes(networkId)){
+      const query=`{
+        trancheInfos(orderBy:"timeStamp", orderDirection:"asc", where:{timeStamp_gt:"${timestamp}"}){
+          id
+          apr
+          timeStamp
+          Tranche{
+            id
+            CDO{
+              id
+            }
+            type
+          }
+        }
+      }`;
 
-    if(!results || !this.getArrayPath(['data','data','trancheInfos'],results)){
-      return false;
-    }
-    
-    results = this.getArrayPath(['data','data','trancheInfos'],results);
-    const size = results.length;
+      const postData={
+        query
+      };
 
-    if (!size){
-      return false;
-    }
+      results = await this.makePostRequest(subgraphConfig.endpoint,postData);
+
+      if(!results || !this.getArrayPath(['data','data','trancheInfos'],results)){
+        return false;
+      }
       
-    // Get only latest results
-    if(results[0].timetamp !== results[size-1].timeStamp){
-      results = results.splice(Math.ceil(size/2));
+      results = this.getArrayPath(['data','data','trancheInfos'],results);
+      const size = results.length;
+      if (!size){
+        return false;
+      }
+      // Get only latest results
+      if(results[0].timetamp !== results[size-1].timeStamp){
+        results = results.splice(Math.ceil(size/2));
+      }
+    }
+
+    if (!results || !results.length){
+      return null;
     }
 
     const trancheTypes = Object.keys(this.getGlobalConfig(['tranches']));
@@ -4969,7 +4960,7 @@ class FunctionsUtil {
     const stakingRewards = {};
 
     await this.asyncForEach(trancheConfig.CDORewards.stakingRewards, async (tokenConfig) => {
-      const tokenGlobalConfig = this.getGlobalConfig(['stats', 'tokens', tokenConfig.token.toUpperCase()]);
+      const tokenGlobalConfig = this.getTokenConfig(tokenConfig.token);
       tokenConfig = { ...tokenConfig, ...tokenGlobalConfig };
 
       const stakingRewardsContract = this.getContractByName(trancheConfig.CDORewards.name);
@@ -4978,6 +4969,9 @@ class FunctionsUtil {
       }
 
       const methodAbi = stakingRewardsContract._jsonInterface.find(f => f.name === methodName);
+      if (!methodAbi){
+        return;
+      }
 
       const methodParams = [account];
       if (methodAbi.inputs.length>1){
@@ -5006,15 +5000,17 @@ class FunctionsUtil {
     const multiCallDisabled = tokenConfig.multiCallDisabled === undefined ? true : tokenConfig.multiCallDisabled;
 
     const internal_view = this.getQueryStringParameterByName('internal_view');
-    // const stakingRewards = tokenConfig && tranche ? tokenConfig[tranche].CDORewards.stakingRewards : [];
-    // const stakingRewardsEnabled = stakingRewards.length>0 ? stakingRewards.filter( t => t.enabled ) : null;
-    // const stakingEnabled = stakingRewardsEnabled && stakingRewardsEnabled.length>0 ? true : false;
+
     const tokenName = this.getGlobalConfig(['stats', 'tokens', token.toUpperCase(), 'label']) || this.capitalize(token);
 
     let gaugeConfig = this.getGlobalConfig(['tools','gauges','props','availableGauges',token]);
     if (gaugeConfig && trancheConfig && gaugeConfig.trancheToken && gaugeConfig.trancheToken.token.toLowerCase() !== trancheConfig.token.toLowerCase()){
       gaugeConfig = null;
     }
+
+    const stakingRewards = tokenConfig && tranche ? tokenConfig[tranche].CDORewards.stakingRewards : [];
+    const stakingRewardsEnabled = stakingRewards.length>0 ? stakingRewards.filter( t => t.enabled ) : null;
+    const stakingEnabled = gaugeConfig || (stakingRewardsEnabled && stakingRewardsEnabled.length>0 ? true : false);
     // console.log('loadTrancheField',protocol,token,tranche,field);
 
     const strategyConfig = tokenConfig.Strategy;
@@ -5128,29 +5124,31 @@ class FunctionsUtil {
       break;
       case 'trancheStaked':
         output = formatValue ? 'N/A' : this.BNify(0);
-        let [
-          gaugeBalance,
-          lastPrice1,
-          staked1
-        ] = await Promise.all([
-          gaugeConfig ? this.getTokenBalance(gaugeConfig.name, account) : null,
-          this.loadTrancheField(`tranchePrice`, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens),
-          this.getTrancheStakedBalance(trancheConfig.CDORewards.name, account, trancheConfig.CDORewards.decimals,trancheConfig.functions.stakedBalance)
-        ]);
+        if (stakingEnabled){
+          let [
+            gaugeBalance,
+            lastPrice1,
+            staked1
+          ] = await Promise.all([
+            gaugeConfig ? this.getTokenBalance(gaugeConfig.name, account) : null,
+            this.loadTrancheField(`tranchePrice`, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens),
+            this.getTrancheStakedBalance(trancheConfig.CDORewards.name, account, trancheConfig.CDORewards.decimals, trancheConfig.functions.stakedBalance)
+          ]);
 
-        let totalStaked = this.BNify(0);
-        if (staked1){
-          totalStaked = totalStaked.plus(staked1);
-        }
-        if (gaugeBalance){
-          totalStaked = totalStaked.plus(gaugeBalance);
-        }
+          let totalStaked = this.BNify(0);
+          if (staked1){
+            totalStaked = totalStaked.plus(staked1);
+          }
+          if (gaugeBalance){
+            totalStaked = totalStaked.plus(gaugeBalance);
+          }
 
-        if (totalStaked.gt(0) && lastPrice1) {
-          output = this.BNify(totalStaked).times(lastPrice1);
-          // console.log('trancheStaked',staked1,gaugeBalance,lastPrice1.toString(),output.toString());
-          if (formatValue) {
-            output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');
+          if (!totalStaked.isNaN() && lastPrice1) {
+            output = this.BNify(totalStaked).times(lastPrice1);
+            // console.log('trancheStaked',staked1,gaugeBalance,lastPrice1.toString(),output.toString());
+            if (formatValue) {
+              output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');
+            }
           }
         }
       break;
@@ -6426,7 +6424,7 @@ class FunctionsUtil {
     // Init token contract if not initialized yet
     const tokenContract = this.getContractByName(contractName);
     if (!tokenContract){
-      const tokenConfig = this.getGlobalConfig(['stats','tokens',contractName.toUpperCase()]);
+      const tokenConfig = this.getTokenConfig(contractName);
       if (tokenConfig){
         await this.props.initContract(contractName, tokenConfig.address, ERC20);
       } else {
@@ -6460,6 +6458,7 @@ class FunctionsUtil {
     } else {
       this.customLogError('Error on getting balance for ', contractName);
     }
+
     return null;
   }
   copyToClipboard = (copyText) => {

@@ -1217,6 +1217,33 @@ const globalConfigs = {
         },
         address: '0x5a6A4D54456819380173272A5E8E9B9904BdF41B'
       },
+      DQUICK:{
+        decimals: 18,
+        enabled: true,
+        label: 'DQUICK',
+        token: 'DQUICK',
+        icon: "images/tokens/DQUICK.png",
+        color: {
+          hex: '#1d8bcf',
+          rgb: [29, 139, 207],
+          hsl: ['203', '75%', '46%']
+        },
+        address: '0xf28164A485B0B2C90639E47b0f377b4a438a16B1'
+      },
+      CXETHWETH: {
+        decimals: 18,
+        enabled: true,
+        label: 'CXETHWETH',
+        token: 'CXETHWETH',
+        conversionRateField: "ETHDAIPrice",
+        icon: "images/tokens/CXETHWETH.png",
+        color: {
+          hex: '#f73bac',
+          rgb: [247, 59, 172],
+          hsl: ['324', '92%', '60%']
+        },
+        address: '0xda7cd765DF426fCA6FB5E1438c78581E4e66bFe7'
+      },
       ALUSD3CRV: {
         decimals: 18,
         enabled: true,
@@ -1681,6 +1708,16 @@ const globalConfigs = {
           hsl: ['202', '100%', '50%']
         }
       },
+      quickswap: {
+        legend: false,
+        enabled: true,
+        label: "QuickSwap",
+        icon: "quickswap.png",
+        color: {
+          rgb: [0, 163, 255],
+          hsl: ['202', '100%', '50%']
+        }
+      },
       convex: {
         legend: false,
         enabled: true,
@@ -1855,9 +1892,9 @@ const globalConfigs = {
         color: '#8247E5',
         network: 'mainnet',
         baseToken: 'MATIC',
-        explorer: 'polygon',
         provider: 'polygon',
         blocksPerCall: 1000000,
+        explorer: 'polygonscan',
         chainName: 'Matic(Polygon) Mainnet',
       },
       5: {
@@ -1886,9 +1923,9 @@ const globalConfigs = {
         version: 'mumbai',
         network: 'testnet',
         baseToken: 'MATIC',
-        explorer: 'polygon',
         provider: 'polygon',
         blocksPerCall: 1000000,
+        explorer: 'polygonscan',
         chainName: 'Matic Testnet Mumbai',
       }
     },
@@ -1980,6 +2017,22 @@ const globalConfigs = {
           80001: 'https://api.covalenthq.com/v1/80001/'
         }
       },
+      polygonscan: {
+        enabled: true, // False for empty txs list (try new wallet)
+        keys: [
+          env.REACT_APP_POLYGONSCAN_KEY,
+          env.REACT_APP_POLYGONSCAN_KEY2,
+          env.REACT_APP_POLYGONSCAN_KEY3,
+        ],
+        endpoints: {
+          137: 'https://api.polygonscan.com/api',
+          80001: 'https://api-testnet.polygonscan.com/api',
+        },
+        baseUrl: {
+          137: 'https://polygonscan.com',
+          80001: 'https://polygonscan.com',
+        }
+      },
       etherscan: {
         enabled: true, // False for empty txs list (try new wallet)
         keys: [
@@ -2004,6 +2057,7 @@ const globalConfigs = {
       subgraph: {
         tranches:{
           enabled:true,
+          availableNetworks:[1],
           endpoint:"https://api.thegraph.com/subgraphs/name/samster91/idle-tranches",
           entities:{
             trancheInfos:[
@@ -2400,8 +2454,7 @@ const globalConfigs = {
             label: "IDLE",
             icon: "images/tokens/IDLE.svg",
             address: "0x875773784Af8135eA0ef43b5a374AaD105c5D39e", // Mainnet
-            poolLink:
-              "https://etherscan.com/address/0x875773784Af8135eA0ef43b5a374AaD105c5D39e"
+            poolLink:"https://etherscan.com/address/0x875773784Af8135eA0ef43b5a374AaD105c5D39e"
           },
           SLP: {
             component: LpStaking,
@@ -2422,8 +2475,7 @@ const globalConfigs = {
             label: "SushiSwap IDLE/ETH LP Token",
             icon: "images/protocols/sushiswap.png",
             address: "0xa7f11e026a0af768d285360a855f2bded3047530", // Mainnet
-            poolLink:
-              "https://analytics.sushi.com/pairs/0xa7f11e026a0af768d285360a855f2bded3047530"
+            poolLink:"https://analytics.sushi.com/pairs/0xa7f11e026a0af768d285360a855f2bded3047530"
           }
         }
       }

@@ -5,7 +5,101 @@ import IdleCDOTrancheRewards from '../contracts/IdleCDOTrancheRewards.json';
 import TrancheStakingRewards from '../contracts/TrancheStakingRewards.json';
 const availableTranches = {
   137:{
-    
+    quickswap:{
+      CXETHWETH:{
+        abi:ERC20,
+        decimals:18,
+        token:'CXETHWETH',
+        protocol:'quickswap',
+        blockNumber:28501471,
+        autoFarming:['WMATIC'],
+        address:'0xda7cd765DF426fCA6FB5E1438c78581E4e66bFe7',
+        CDO:{
+          abi:IdleCDO,
+          decimals:18,
+          name:'IdleCDO_quickswap_CXETHWETH',
+          address:'0xB144eE58679e15f1b25A5F6EfcEBDd0AB8c8BEF5'
+        },
+        Strategy:{
+          abi:IdleStrategy,
+          harvestEnabled:false,
+          name:'IdleStrategy_quickswap_CXETHWETH'
+        },
+        messages:{
+          buyInstructions:'To get CXETHWETH token your have to supply liquidity into the <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://quickswap.exchange/#/add/0xfe4546feFe124F30788c4Cc1BB9AA6907A7987F9/0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619">Quickswap cxETH-ETH pool</a>.',
+        },
+        AA:{
+          abi:ERC20,
+          decimals:18,
+          tranche:'AA',
+          functions:{
+            stake:'stake',
+            unstake:'exit',
+            rewards:'earned',
+            claim:'getReward',
+            deposit:'depositAA',
+            withdraw:'withdrawAA',
+            rewardsRate:'rewardRate',
+            stakedBalance:'balanceOf',
+            periodFinish:'periodFinish',
+          },
+          CDORewards:{
+            decimals:18,
+            stakingRewards:[
+              {
+                enabled:true,
+                token:'DQUICK',
+                address:'0xf28164A485B0B2C90639E47b0f377b4a438a16B1'
+              }
+            ],
+            unstakeWithBalance:false,
+            abi:TrancheStakingRewards,
+            name:'TrancheStakingRewards_quickswap_CXETHWETH_AA',
+            address:'0x466cFDfF869666941CdB89daa412c3CddC55D6c1'
+          },
+          blockNumber:28501471,
+          name:'AA_quickswap_CXETHWETH',
+          token:'AA_quickswap_CXETHWETH',
+          label:'quickswap CXETHWETH AA',
+          address:'0x967b2fdEc06c0178709F1BFf56E0aA9367c3225c'
+        },
+        BB:{
+          abi:ERC20,
+          decimals:18,
+          tranche:'BB',
+          functions:{
+            stake:'stake',
+            unstake:'exit',
+            rewards:'earned',
+            claim:'getReward',
+            deposit:'depositBB',
+            withdraw:'withdrawBB',
+            rewardsRate:'rewardRate',
+            stakedBalance:'balanceOf',
+            periodFinish:'periodFinish'
+          },
+          CDORewards:{
+            decimals:18,
+            stakingRewards:[
+              {
+                enabled:true,
+                token:'DQUICK',
+                address:'0xf28164A485B0B2C90639E47b0f377b4a438a16B1'
+              }
+            ],
+            unstakeWithBalance:true,
+            abi:TrancheStakingRewards,
+            name:'TrancheStakingRewards_quickswap_CXETHWETH_BB',
+            address:'0x727d9c331e9481167Dc61A9289C948da25bE825e'
+          },
+          blockNumber:28501471,
+          label:'quickswap CXETHWETH BB',
+          name:'BB_quickswap_CXETHWETH',
+          token:'BB_quickswap_CXETHWETH',
+          address:'0x1aFf460F388E3822756F5697f05A7E2AEB8Db7ef'
+        }
+      }
+    }
   },
   1:{
     idle:{

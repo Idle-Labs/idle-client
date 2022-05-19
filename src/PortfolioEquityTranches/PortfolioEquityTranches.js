@@ -520,9 +520,10 @@ class PortfolioEquityTranches extends Component {
       const gridYValue = parseFloat(parseFloat(minChartValue+(i*gridYStep)).toFixed(6));
       gridYValues.push(gridYValue);
     }
-    
+      
     const axisBottomMaxValues = 10;
     const daysCount = Object.values(days).length;    
+    const pointSize = chartData[0].data.length === 1 ? 10 : 0;
     const daysFrequency = Math.max(1,Math.ceil(daysCount/axisBottomMaxValues));
 
     const chartProps = {
@@ -548,8 +549,8 @@ class PortfolioEquityTranches extends Component {
         legendPosition: 'middle',
         tickValues:'every '+daysFrequency+' days'
       },
+      pointSize,
       gridYValues,
-      pointSize:0,
       useMesh:true,
       axisLeft: this.props.isMobile ? null : {
         legend: '',

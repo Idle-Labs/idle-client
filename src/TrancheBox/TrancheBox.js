@@ -49,6 +49,12 @@ class Base extends Component {
       const strategyInfo = this.functionsUtil.getGlobalConfig(["strategies","tranches"]);
       token = strategyInfo.token;
       protocol = strategyInfo.protocol;
+
+      // Select first tranche is not available
+      if (!this.functionsUtil.getArrayPath([protocol,token],this.props.availableTranches)){
+        protocol = Object.keys(this.props.availableTranches)[0];
+        token = Object.keys(this.props.availableTranches[protocol])[0];
+      }
     }
     
     const tokenConfig = this.props.availableTranches[protocol][token];

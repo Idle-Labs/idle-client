@@ -63,6 +63,26 @@ class Dashboard extends Component {
     const menu = [];
     const currentNetwork = this.functionsUtil.getRequiredNetwork();
 
+    const strategies = this.functionsUtil.getGlobalConfig(['strategies']);
+    Object.keys(strategies).filter( s => (!strategies[s].comingSoon && (!strategies[s].availableNetworks || strategies[s].availableNetworks.includes(currentNetwork.id)) && (!strategies[s].enabledEnvs.length || strategies[s].enabledEnvs.includes(this.props.currentEnv)))).forEach(strategy => {
+      const strategyInfo = strategies[strategy];
+      const imageInfo = extraicons[strategy];
+      menu.push({
+        submenu: [],
+        color: '#fff',
+        selected: false,
+        image: imageInfo.icon,
+        label: strategyInfo.title,
+        bgColor: strategyInfo.color,
+        route: baseRoute + '/' + strategy,
+        visible: strategyInfo.visible,
+        imageDark: imageInfo.iconDark,
+        component: strategyInfo.component,
+        imageInactive: imageInfo.iconInactive,
+        imageInactiveDark: imageInfo.iconInactiveDark
+      });
+    });
+
     // Add Stake Polygon
     const stakePolygonConfig = this.functionsUtil.getGlobalConfig(['tools', 'stakePolygon']);
     if (stakePolygonConfig.enabled && (!stakePolygonConfig.availableNetworks || stakePolygonConfig.availableNetworks.includes(currentNetwork.id))) {
@@ -87,27 +107,6 @@ class Dashboard extends Component {
         }
       );
     }
-
-    const strategies = this.functionsUtil.getGlobalConfig(['strategies']);
-    Object.keys(strategies).filter( s => (!strategies[s].comingSoon && (!strategies[s].availableNetworks || strategies[s].availableNetworks.includes(currentNetwork.id)) && (!strategies[s].enabledEnvs.length || strategies[s].enabledEnvs.includes(this.props.currentEnv)))).forEach(strategy => {
-      const strategyInfo = strategies[strategy];
-      const imageInfo = extraicons[strategy];
-      menu.push({
-        submenu: [],
-        color: '#fff',
-        selected: false,
-        image: imageInfo.icon,
-        label: strategyInfo.title,
-        bgColor: strategyInfo.color,
-        route: baseRoute + '/' + strategy,
-        visible: strategyInfo.visible,
-        imageDark: imageInfo.iconDark,
-        component: strategyInfo.component,
-        imageInactive: imageInfo.iconInactive,
-        imageInactiveDark: imageInfo.iconInactiveDark
-      });
-    });
-
 
     const curveConfig = this.functionsUtil.getGlobalConfig(['curve']);
 
