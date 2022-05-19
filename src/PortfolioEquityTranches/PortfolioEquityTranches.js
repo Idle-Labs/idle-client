@@ -285,9 +285,9 @@ class PortfolioEquityTranches extends Component {
       }
     });
 
-    // console.log('tokensData',tokensData);
-    // console.log('transactions',transactions);
-    // console.log('tokensBalance',tokensBalance);
+    // console.log('tokensData', tokensData);
+    // console.log('transactions', transactions);
+    // console.log('tokensBalance', tokensBalance);
 
     const tranches = this.functionsUtil.getGlobalConfig(['tranches']);
 
@@ -388,12 +388,12 @@ class PortfolioEquityTranches extends Component {
               }];
             }
           } else {
-            // if (token === 'FEI'){
-              // console.log(this.functionsUtil.strToMoment(timeStamp*1000).format('DD/MM/YYYY HH:mm:ss'),timeStamp,token,tranche,lastTokenData,(lastTokenData ? this.functionsUtil.strToMoment(lastTokenData.timeStamp*1000).format('DD/MM/YYYY HH:mm:ss') : null),(lastTokenData ? lastTokenData.tranchePrice.toFixed(5) : null ));
-            // }
             filteredBalances.forEach(tx => {
               switch (tx.action){
                 case 'Deposit':
+                  // if (token === 'USDC'){
+                  //   console.log(this.functionsUtil.strToMoment(timeStamp*1000).format('DD/MM/YYYY HH:mm:ss'),timeStamp,token,tranche,tx.trancheTokens.toFixed());
+                  // }
                   trancheTokenBalance[token][tranche] = trancheTokenBalance[token][tranche].plus(tx.trancheTokens);
                 break;
                 default:

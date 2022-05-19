@@ -375,9 +375,9 @@ class FunctionsUtil {
           // console.log('trancheTokenBalance',trancheTokenBalance.toString(),'trancheStakedBalance',trancheStakedBalance.toString());
 
           if ((trancheTokenBalance && this.BNify(trancheTokenBalance).gt(0)) || (trancheStakedBalance && this.BNify(trancheStakedBalance).gt(0)) || (gaugeStakedBalance && this.BNify(gaugeStakedBalance).gt(0))) {
-            gaugeStakedBalance = this.fixTokenDecimals(gaugeStakedBalance,trancheConfig.decimals);
-            trancheTokenBalance = this.fixTokenDecimals(trancheTokenBalance,trancheConfig.decimals);
-            trancheStakedBalance = this.fixTokenDecimals(trancheStakedBalance,trancheConfig.decimals).plus(gaugeStakedBalance);
+            gaugeStakedBalance = this.fixTokenDecimals(gaugeStakedBalance,18);
+            trancheTokenBalance = this.fixTokenDecimals(trancheTokenBalance,18);
+            trancheStakedBalance = this.fixTokenDecimals(trancheStakedBalance,18).plus(gaugeStakedBalance);
             trancheTokenBalance = trancheTokenBalance.plus(trancheStakedBalance);
 
             // console.log(protocol,token,tranche,'trancheTokenBalance',trancheTokenBalance.toFixed(5));
@@ -1117,18 +1117,21 @@ class FunctionsUtil {
     return null;
   }
 
-  getEtherscanTokenTransfers = async (tokenName,walletAddr,fromAddress,contractAddress,toAddress,fromBlock=0,toBlock='latest') => {
+  getEtherscanTokenTransfers = async (tokenName,walletAddr,fromAddress=null,contractAddress,toAddress,fromBlock=0,toBlock='latest',sort='asc',limit=null) => {
     const requiredNetworkId = this.getRequiredNetworkId();
     const etherscanInfo = this.getGlobalConfig(['network', 'providers', 'etherscan']);
     const etherscanApiUrl = etherscanInfo.endpoints[requiredNetworkId];
-    const endpoint = `${etherscanApiUrl}?module=account&action=tokentx&address=${walletAddr}&contractaddress=${contractAddress}&startblock=${fromBlock}&endblock=${toBlock}&sort=asc`;
+    let endpoint = `${etherscanApiUrl}?module=account&action=tokentx&address=${walletAddr}&contractaddress=${contractAddress}&startblock=${fromBlock}&endblock=${toBlock}&sort=${sort}`;
+    if (limit && parseInt(limit)>0){
+      endpoint = endpoint+`&limit=${limit}`;
+    }
     const etherscanTxlist = await this.makeEtherscanApiRequest(endpoint, etherscanInfo.keys, 0);
 
     const defaultEventsConfig = { to: 'to', from: 'from', value: 'value' };
     const underlyingEventsConfig = this.getGlobalConfig(['events', tokenName, 'fields']) || defaultEventsConfig;
     if (etherscanTxlist && etherscanTxlist.data && etherscanTxlist.data.result && typeof etherscanTxlist.data.result.filter === 'function') {
 
-      const transferEvents = etherscanTxlist.data.result.filter(tx => (tx.from.toLowerCase() === fromAddress.toLowerCase() && tx.to.toLowerCase() === toAddress.toLowerCase()));
+      const transferEvents = etherscanTxlist.data.result.filter(tx => ((!fromAddress || tx.from.toLowerCase() === fromAddress.toLowerCase()) && tx.to.toLowerCase() === toAddress.toLowerCase()));
       
       transferEvents.forEach( tx => {
         tx.returnValues = {};
@@ -1194,7 +1197,7 @@ class FunctionsUtil {
   }
   getTrancheLastHarvest = async (tokenConfig) => {
     const strategyConfig = tokenConfig.Strategy;
-    const harvestEnabled = !!strategyConfig.harvestEnabled;
+    const harvestEnabled = strategyConfig.harvestEnabled === undefined ? true : strategyConfig.harvestEnabled;
 
     if (!harvestEnabled){
       return null;
@@ -1204,35 +1207,42 @@ class FunctionsUtil {
     const idleStrategyAddress = await this.genericContractCallCachedTTL(tokenConfig.CDO.name, 'strategy', 3600);
     if (idleStrategyAddress) {
       await this.props.initContract(strategyConfig.name, idleStrategyAddress, strategyConfig.abi);
-      const latestHarvestBlock = await this.genericContractCall(strategyConfig.name,'latestHarvestBlock');
-      // console.log('getTrancheLastHarvest',tokenConfig.CDO.name,latestHarvestBlock);
+      let limit = null;
+      let startBlock = tokenConfig.blockNumber;
+      let latestHarvestBlock = await this.genericContractCall(strategyConfig.name,'latestHarvestBlock');
       if (parseInt(latestHarvestBlock)>0){
-        const eventFilters = {
-          to: idleStrategyAddress
-        };
-        const [
-          blockInfo,
-          transfers,
-        ] = await Promise.all([
-          this.getBlockInfo(latestHarvestBlock),
-          this.getContractEvents(tokenConfig.token, 'Transfer', parseInt(latestHarvestBlock), parseInt(latestHarvestBlock)+1, {filter: eventFilters })
-        ]);
+        startBlock = latestHarvestBlock;
+        latestHarvestBlock++;
+      } else {
+        limit = 1;
+        latestHarvestBlock = 'latest';
+      }
 
-        // console.log('getTrancheLastHarvest',tokenConfig.token,parseInt(latestHarvestBlock), parseInt(latestHarvestBlock)+1,eventFilters,transfers);
+      let transfers = await this.getEtherscanTokenTransfers(tokenConfig.token, idleStrategyAddress, null, tokenConfig.address, idleStrategyAddress, startBlock, latestHarvestBlock, 'desc', limit);
 
-        if (transfers && transfers.length) {
-          const totalAmount = transfers.reduce( (amount,t) => {
-            amount = amount.plus(this.BNify(t.returnValues.value));
-            return amount;
-          },this.BNify(0));
+      // console.log('getTrancheLastHarvest',tokenConfig.token,idleStrategyAddress,startBlock,latestHarvestBlock,limit,transfers);
 
-          return {
-            amount:totalAmount,
-            timestamp:blockInfo.timestamp,
-            blockNumber:latestHarvestBlock,
-            transactionHash:transfers[0].transactionHash
-          };
+      if (transfers && transfers.length) {
+
+        if (limit){
+          transfers = transfers.slice(0,limit);
         }
+
+        let timestamp = null;
+        const totalAmount = transfers.reduce( (amount,t) => {
+          if (!timestamp){
+            timestamp = t.timeStamp;
+          }
+          amount = amount.plus(this.BNify(t.returnValues.value));
+          return amount;
+        },this.BNify(0));
+
+        return {
+          timestamp,
+          amount:totalAmount,
+          blockNumber:latestHarvestBlock,
+          transactionHash:transfers[0].transactionHash
+        };
       }
     }
 
@@ -1490,9 +1500,9 @@ class FunctionsUtil {
       }
 
       const tokenAmount = this.fixTokenDecimals(tokenTransferEvent.returnValues[underlyingEventsConfig.value], tokenConfig.decimals);
-      const trancheTokenAmount = this.fixTokenDecimals(trancheTokenTransferEvent.returnValues.value, trancheConfig.decimals);
+      const trancheTokenAmount = this.fixTokenDecimals(trancheTokenTransferEvent.returnValues.value, 18);
+      // console.log('tranchePrice',trancheConfig.token,tokenAmount.toFixed(),trancheTokenAmount.toFixed());
 
-      // console.log('tranchePrice',trancheConfig.token,tokenAmount.toFixed(),trancheTokenAmount.toFixed(),tranchePrice.toFixed());
       const tranchePrice = tokenAmount.div(trancheTokenAmount);
       const blockInfo = blocksInfo[tokenTransferEvent.blockNumber].blockInfo;
       const hashKey = `${trancheConfig.token}_${tokenTransferEvent.transactionHash}`;
@@ -4993,7 +5003,7 @@ class FunctionsUtil {
     const decimals = (fieldProps && parseInt(fieldProps.decimals)>0) ? fieldProps.decimals : (this.props.isMobile ? 2 : 3);
     const minPrecision = (fieldProps && parseInt(fieldProps.minPrecision)>0) ? fieldProps.minPrecision : (this.props.isMobile ? 3 : 4);
 
-    const multiCallDisabled = !!tokenConfig.multiCallDisabled;
+    const multiCallDisabled = tokenConfig.multiCallDisabled === undefined ? true : tokenConfig.multiCallDisabled;
 
     const internal_view = this.getQueryStringParameterByName('internal_view');
     // const stakingRewards = tokenConfig && tranche ? tokenConfig[tranche].CDORewards.stakingRewards : [];
@@ -5031,7 +5041,7 @@ class FunctionsUtil {
       case 'pool':
         let poolSize = await this.genericContractCallCached(tokenConfig.CDO.name, 'getContractValue');
         if (!this.BNify(poolSize).isNaN()) {
-          output = this.fixTokenDecimals(poolSize, tokenConfig.CDO.decimals);
+          output = this.fixTokenDecimals(poolSize, tokenConfig.decimals);
           if (formatValue) {
             output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision);
           }

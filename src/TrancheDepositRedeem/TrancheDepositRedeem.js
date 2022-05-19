@@ -113,7 +113,8 @@ class TrancheDetails extends Component {
 
     const canUnstake = true; // !stakeCoolingPeriod || this.functionsUtil.BNify(userStakeBlock).plus(stakeCoolingPeriod).lt(blockNumber);
     const canWithdraw = true; // !cdoCoolingPeriod || !latestHarvestBlock || this.functionsUtil.BNify(latestHarvestBlock).plus(cdoCoolingPeriod).lt(blockNumber);
-    
+
+    // console.log('lastHarvest',lastHarvest);    
     // console.log('loadData',this.props.trancheConfig.tranche,blockNumber,cdoCoolingPeriod,latestHarvestBlock,stakeCoolingPeriod,userStakeBlock,canUnstake,canWithdraw);
 
     const availableTranches = Object.values(this.functionsUtil.getGlobalConfig(['tranches'])).map( trancheInfo => ({
@@ -910,41 +911,50 @@ class TrancheDetails extends Component {
                     </Flex>
                   </Flex>
                   {
-                    this.props.tokenConfig.description && (
+                    (this.props.tokenConfig.description || this.state.lastHarvest) && (
                       <Flex
-                        pt={2}
                         mb={2}
                         width={1}
                         flexDirection={'column'}
-                        borderTop={`1px solid ${this.props.theme.colors.divider}`}
                       >
-                        <Text
-                          fontSize={[1,2]}
-                          color={'cellText'}
-                          fontWeight={[2,3]}
-                        >
-                          Strategy Description
-                        </Text>
-                        <Flex
-                          mt={1}
-                          alignItems={'center'}
-                          flexDirection={'row'}
-                        >
-                          <Text
-                            fontWeight={2}
-                            fontSize={'15px'}
-                            textAlign={'justify'}
-                          >
-                            {this.props.tokenConfig.description}
-                          </Text>
-                        </Flex>
+                        {
+                          this.props.tokenConfig.description && (
+                            <Flex
+                              pt={2}
+                              width={1}
+                              flexDirection={'column'}
+                              borderTop={`1px solid ${this.props.theme.colors.divider}`}
+                            >
+                              <Text
+                                fontSize={[1,2]}
+                                color={'cellText'}
+                                fontWeight={[2,3]}
+                              >
+                                Strategy Description
+                              </Text>
+                              <Flex
+                                mt={1}
+                                alignItems={'center'}
+                                flexDirection={'row'}
+                              >
+                                <Text
+                                  fontWeight={2}
+                                  fontSize={'15px'}
+                                  textAlign={'justify'}
+                                >
+                                  {this.props.tokenConfig.description}
+                                </Text>
+                              </Flex>
+                            </Flex>
+                          )
+                        }
                         {
                           this.state.lastHarvest && (
                             <Flex
                               pt={2}
-                              mt={2}
                               flexDirection={'column'}
                               alignItems={'flex-start'}
+                              mt={this.props.tokenConfig.description ? 2 : 0}
                               borderTop={`1px solid ${this.props.theme.colors.divider}`}
                             >
                               <Flex
