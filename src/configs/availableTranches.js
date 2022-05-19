@@ -87,7 +87,7 @@ const availableTranches = {
                 address:'0xf28164A485B0B2C90639E47b0f377b4a438a16B1'
               }
             ],
-            unstakeWithBalance:true,
+            unstakeWithBalance:false,
             abi:TrancheStakingRewards,
             name:'TrancheStakingRewards_quickswap_CXETHWETH_BB',
             address:'0x727d9c331e9481167Dc61A9289C948da25bE825e'
