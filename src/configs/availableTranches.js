@@ -1,6 +1,7 @@
 import ERC20 from '../contracts/ERC20.json';
 import IdleCDO from '../contracts/IdleCDO.json';
 import IdleStrategy from '../contracts/IdleStrategy.json';
+import IdleCDOPolygon from '../contracts/IdleCDOPolygon.json';
 import IdleCDOTrancheRewards from '../contracts/IdleCDOTrancheRewards.json';
 import TrancheStakingRewards from '../contracts/TrancheStakingRewards.json';
 const availableTranches = {
@@ -12,11 +13,12 @@ const availableTranches = {
         token:'CXETHWETH',
         protocol:'quickswap',
         blockNumber:28501471,
+        referralEnabled:true,
         autoFarming:['WMATIC'],
         address:'0xda7cd765DF426fCA6FB5E1438c78581E4e66bFe7',
         CDO:{
-          abi:IdleCDO,
           decimals:18,
+          abi:IdleCDOPolygon,
           name:'IdleCDO_quickswap_CXETHWETH',
           address:'0xB144eE58679e15f1b25A5F6EfcEBDd0AB8c8BEF5'
         },
@@ -109,8 +111,8 @@ const availableTranches = {
         blockNumber:13054628,
         address:'0x6b175474e89094c44da98b954eedeac495271d0f',
         CDO:{
-          abi:IdleCDO,
           decimals:18,
+          abi:IdleCDO,
           name:'IdleCDO_idleDAIYield',
           address:'0xd0DbcD556cA22d3f3c142e9a3220053FD7a247BC'
         },

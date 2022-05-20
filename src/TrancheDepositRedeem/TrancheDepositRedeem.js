@@ -279,11 +279,15 @@ class TrancheDetails extends Component {
   getTransactionParams(amount,selectedPercentage){
     let methodName = null;
     let methodParams = null;
+    const _referral = this.getReferralAddress();
+    const referralEnabled = this.props.tokenConfig.referralEnabled;
 
     if (this.props.trancheConfig.functions[this.state.selectedAction]){
       methodName = this.props.trancheConfig.functions[this.state.selectedAction];
 
-      if (this.state.selectedAction === 'withdraw'){
+      if (this.state.selectedAction === 'deposit' && _referral && referralEnabled){
+        methodParams = [amount,_referral];
+      } else if (this.state.selectedAction === 'withdraw'){
         let trancheTokenToRedeem = null;
         if (selectedPercentage) {
           trancheTokenToRedeem = this.functionsUtil.BNify(this.state.trancheBalance).times(this.functionsUtil.BNify(selectedPercentage).div(100));
@@ -309,7 +313,7 @@ class TrancheDetails extends Component {
       }
     }
 
-    // console.log('getTransactionParams',this.state.selectedAction,amount,this.functionsUtil.BNify(this.state.trancheBalance).toFixed(),selectedPercentage,methodParams);
+    // console.log('getTransactionParams',this.state.selectedAction,amount,methodName,methodParams);
 
     return {
       methodName,
@@ -383,6 +387,14 @@ class TrancheDetails extends Component {
     }
   }
 
+  getReferralAddress() {
+    let _referral = this.functionsUtil.getQueryStringParameterByName('_referral');
+    if (!this.functionsUtil.checkAddress(_referral)) {
+      _referral = null;
+    }
+    return _referral;
+  }
+
   render() {
 
     const isStake = this.state.selectedAction === 'stake';
@@ -391,6 +403,9 @@ class TrancheDetails extends Component {
 
     const stakingRewards = this.props.trancheConfig.CDORewards.stakingRewards.filter( t => t.enabled );
     const trancheLimit = this.functionsUtil.formatMoney(this.functionsUtil.BNify(this.props.tokenConfig.limit),0)+' '+this.props.selectedToken;
+
+    const _referral = this.getReferralAddress();
+    const showReferral = this.props.tokenConfig.referralEnabled && this.state.userHasAvailableFunds && _referral && isDeposit;
 
     const CustomOptionValue = props => {
       const selectedOption = props.options.find( option => option.value === props.value );
@@ -1207,6 +1222,50 @@ class TrancheDetails extends Component {
                     icon={'LightbulbOutline'}
                     text={this.state.infoText}
                   />
+                )
+              }
+              {
+                showReferral && (
+                  <IconBox
+                    cardProps={{
+                      py: 3,
+                      px: 2,
+                      mt: 3,
+                      width:1,
+                    }}
+                    icon={'Share'}
+                    isActive={false}
+                    isInteractive={false}
+                    iconProps={{
+                      size:'1.8em',
+                      color:'cellText'
+                    }}
+                  >
+                    <Flex
+                      width={1}
+                      flexDirection={'column'}
+                    >
+                      <Text
+                        mt={1}
+                        px={2}
+                        fontSize={1}
+                        color={'cellText'}
+                        textAlign={'center'}
+                      >
+                        You are depositing with the following referral address:
+                      </Text>
+                      <Text
+                        mt={1}
+                        px={2}
+                        fontSize={1}
+                        fontWeight={500}
+                        textAlign={'center'}
+                        color={this.props.theme.colors.transactions.status.completed}
+                      >
+                        {_referral}
+                      </Text>
+                    </Flex>
+                  </IconBox>
                 )
               }
               <Flex
