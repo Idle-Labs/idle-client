@@ -1169,31 +1169,35 @@ class RimbleTransaction extends React.Component {
       });
     }
 
-    const tranchesConfig = this.functionsUtil.getGlobalConfig(['strategies','tranches']);
-    if (this.props.availableTranches){
-      Object.keys(this.props.availableTranches).forEach( protocol => {
-        const tokens = this.props.availableTranches[protocol];
-        Object.keys(tokens).forEach( token => {
-          const tokenConfig = tokens[token];
-          if (!tranchesConfig.availableNetworks || tranchesConfig.availableNetworks.includes(requiredNetworkId)){
-            if (tokenConfig.abi){
-              contracts.push(this.initContractWithoutSet(tokenConfig.token,tokenConfig.address,tokenConfig.abi));
+    // const tranchesConfig = this.functionsUtil.getGlobalConfig(['strategies','tranches']);
+    if (this.props.availableTranchesNetworks){
+      Object.keys(this.props.availableTranchesNetworks).forEach( networkId => {
+        const protocols = this.props.availableTranchesNetworks[networkId];
+        Object.keys(protocols).forEach( protocol => {
+          const tokens = this.props.availableTranchesNetworks[networkId][protocol];
+          Object.keys(tokens).forEach( token => {
+            const tokenConfig = tokens[token];
+            // if (!tranchesConfig.availableNetworks || tranchesConfig.availableNetworks.includes(requiredNetworkId)){
+            if (parseInt(networkId) === parseInt(requiredNetworkId)){
+              if (tokenConfig.abi){
+                contracts.push(this.initContractWithoutSet(tokenConfig.token,tokenConfig.address,tokenConfig.abi));
+              }
+              contracts.push(this.initContractWithoutSet(tokenConfig.AA.name,tokenConfig.AA.address,tokenConfig.AA.abi));
+              contracts.push(this.initContractWithoutSet(tokenConfig.BB.name,tokenConfig.BB.address,tokenConfig.BB.abi));
+              contracts.push(this.initContractWithoutSet(tokenConfig.CDO.name,tokenConfig.CDO.address,tokenConfig.CDO.abi));
+              contracts.push(this.initContractWithoutSet(tokenConfig.AA.CDORewards.name,tokenConfig.AA.CDORewards.address,tokenConfig.AA.CDORewards.abi));
+              contracts.push(this.initContractWithoutSet(tokenConfig.BB.CDORewards.name,tokenConfig.BB.CDORewards.address,tokenConfig.BB.CDORewards.abi));
             }
-            contracts.push(this.initContractWithoutSet(tokenConfig.AA.name,tokenConfig.AA.address,tokenConfig.AA.abi));
-            contracts.push(this.initContractWithoutSet(tokenConfig.BB.name,tokenConfig.BB.address,tokenConfig.BB.abi));
-            contracts.push(this.initContractWithoutSet(tokenConfig.CDO.name,tokenConfig.CDO.address,tokenConfig.CDO.abi));
-            contracts.push(this.initContractWithoutSet(tokenConfig.AA.CDORewards.name,tokenConfig.AA.CDORewards.address,tokenConfig.AA.CDORewards.abi));
-            contracts.push(this.initContractWithoutSet(tokenConfig.BB.CDORewards.name,tokenConfig.BB.CDORewards.address,tokenConfig.BB.CDORewards.abi));
-          }
 
-          if (tokenConfig.abi){
-            contractsNetworks[1].push(this.initContractWithoutSet(tokenConfig.token,tokenConfig.address,tokenConfig.abi,1));
-          }
-          contractsNetworks[1].push(this.initContractWithoutSet(tokenConfig.AA.name,tokenConfig.AA.address,tokenConfig.AA.abi,1));
-          contractsNetworks[1].push(this.initContractWithoutSet(tokenConfig.BB.name,tokenConfig.BB.address,tokenConfig.BB.abi,1));
-          contractsNetworks[1].push(this.initContractWithoutSet(tokenConfig.CDO.name,tokenConfig.CDO.address,tokenConfig.CDO.abi,1));
-          contractsNetworks[1].push(this.initContractWithoutSet(tokenConfig.AA.CDORewards.name,tokenConfig.AA.CDORewards.address,tokenConfig.AA.CDORewards.abi,1));
-          contractsNetworks[1].push(this.initContractWithoutSet(tokenConfig.BB.CDORewards.name,tokenConfig.BB.CDORewards.address,tokenConfig.BB.CDORewards.abi,1));
+            if (tokenConfig.abi){
+              contractsNetworks[networkId].push(this.initContractWithoutSet(tokenConfig.token,tokenConfig.address,tokenConfig.abi,networkId));
+            }
+            contractsNetworks[networkId].push(this.initContractWithoutSet(tokenConfig.AA.name,tokenConfig.AA.address,tokenConfig.AA.abi,networkId));
+            contractsNetworks[networkId].push(this.initContractWithoutSet(tokenConfig.BB.name,tokenConfig.BB.address,tokenConfig.BB.abi,networkId));
+            contractsNetworks[networkId].push(this.initContractWithoutSet(tokenConfig.CDO.name,tokenConfig.CDO.address,tokenConfig.CDO.abi,networkId));
+            contractsNetworks[networkId].push(this.initContractWithoutSet(tokenConfig.AA.CDORewards.name,tokenConfig.AA.CDORewards.address,tokenConfig.AA.CDORewards.abi,networkId));
+            contractsNetworks[networkId].push(this.initContractWithoutSet(tokenConfig.BB.CDORewards.name,tokenConfig.BB.CDORewards.address,tokenConfig.BB.CDORewards.abi,networkId));
+          });
         });
       });
     }

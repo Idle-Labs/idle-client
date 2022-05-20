@@ -3289,10 +3289,10 @@ class FunctionsUtil {
     });
     
     // const tranches = results.filter( result => (result.Tranche.type==="BBTranche"));
-    Object.keys(this.props.availableTranches).forEach( protocol => {
-      Object.keys(this.props.availableTranches[protocol]).forEach( token => {
+    Object.keys(this.props.availableTranchesNetworks[networkId]).forEach( protocol => {
+      Object.keys(this.props.availableTranchesNetworks[networkId][protocol]).forEach( token => {
 
-        const availableTrancheInfo = this.props.availableTranches[protocol][token];
+        const availableTrancheInfo = this.props.availableTranchesNetworks[networkId][protocol][token];
 
         trancheTypes.forEach( type => {
           const trancheInfo = results.find( tInfo => tInfo.Tranche.id.toLowerCase() === availableTrancheInfo[type].address.toLowerCase() );

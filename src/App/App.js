@@ -61,6 +61,7 @@ class App extends Component {
     config:globalConfigs.network,
     unsubscribeFromHistory: null,
     enableUnderlyingWithdraw: false,
+    availableTranchesNetworks: null,
     availableStrategiesNetworks: null
   };
 
@@ -297,6 +298,7 @@ class App extends Component {
     });
 
     newState.availableStrategies = availableStrategies;
+    newState.availableTranchesNetworks = availableTranches;
     newState.availableTranches = availableTranches[requiredNetwork];
     newState.availableStrategiesNetworks = availableStrategiesNetworks;
 
@@ -806,6 +808,7 @@ class App extends Component {
                     availableStrategies={this.state.availableStrategies}
                     setCallbackAfterLogin={this.setCallbackAfterLogin.bind(this)}
                     enableUnderlyingWithdraw={this.state.enableUnderlyingWithdraw}
+                    availableTranchesNetworks={this.state.availableTranchesNetworks}
                     availableStrategiesNetworks={this.state.availableStrategiesNetworks}
                   >
                     <RimbleWeb3.Consumer>
@@ -935,6 +938,7 @@ class App extends Component {
                                         setRequiredNetwork={this.setRequiredNetwork.bind(this)}
                                         initContractCustomProvider={initContractCustomProvider}
                                         setCallbackAfterLogin={this.setCallbackAfterLogin.bind(this)}
+                                        availableTranchesNetworks={this.state.availableTranchesNetworks}
                                         availableStrategiesNetworks={this.state.availableStrategiesNetworks}
                                       />
                                     </Suspense>
@@ -1019,6 +1023,7 @@ class App extends Component {
                                             contractMethodSendWrapper={contractMethodSendWrapper}
                                             setRequiredNetwork={this.setRequiredNetwork.bind(this)}
                                             setCallbackAfterLogin={this.setCallbackAfterLogin.bind(this)}
+                                            availableTranchesNetworks={this.state.availableTranchesNetworks}
                                             availableStrategiesNetworks={this.state.availableStrategiesNetworks}
                                           />
                                         </Suspense>
@@ -1070,6 +1075,7 @@ class App extends Component {
                                   accountValidationPending={accountValidationPending}
                                   connectAndValidateAccount={connectAndValidateAccount}
                                   setRequiredNetwork={this.setRequiredNetwork.bind(this)}
+                                  availableTranchesNetworks={this.state.availableTranchesNetworks}
                                   availableStrategiesNetworks={this.state.availableStrategiesNetworks}
                                 />
 
@@ -1149,6 +1155,7 @@ class App extends Component {
                                               setCurrentSection={this.setCurrentSection.bind(this)}
                                               connectAndValidateAccount={connectAndValidateAccount}
                                               setRequiredNetwork={this.setRequiredNetwork.bind(this)}
+                                              availableTranchesNetworks={this.state.availableTranchesNetworks}
                                               availableStrategiesNetworks={this.state.availableStrategiesNetworks}
                                             />
                                             <CookieConsent

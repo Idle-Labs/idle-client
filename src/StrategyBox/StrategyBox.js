@@ -191,7 +191,7 @@ class StrategyBox extends Component {
     switch (strategyInfo.type){
       case 'tranche':
         if(this.state.protocol && this.state.selectedToken){
-          tokenConfig = this.props.availableTranches[this.state.protocol][this.state.selectedToken];
+          tokenConfig = this.props.availableTranchesNetworks[strategyInfo.networkId][this.state.protocol][this.state.selectedToken];
         }
       break;
       default:
