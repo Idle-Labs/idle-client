@@ -57,9 +57,9 @@ const availableTranches = {
             address:'0x466cFDfF869666941CdB89daa412c3CddC55D6c1'
           },
           blockNumber:28501471,
+          label:'AA-CXETHWETH-LP',
           name:'AA_quickswap_CXETHWETH',
           token:'AA_quickswap_CXETHWETH',
-          label:'quickswap CXETHWETH AA',
           address:'0x967b2fdEc06c0178709F1BFf56E0aA9367c3225c'
         },
         BB:{
@@ -92,7 +92,7 @@ const availableTranches = {
             address:'0x727d9c331e9481167Dc61A9289C948da25bE825e'
           },
           blockNumber:28501471,
-          label:'quickswap CXETHWETH BB',
+          label:'BB-CXETHWETH-LP',
           name:'BB_quickswap_CXETHWETH',
           token:'BB_quickswap_CXETHWETH',
           address:'0x1aFf460F388E3822756F5697f05A7E2AEB8Db7ef'
