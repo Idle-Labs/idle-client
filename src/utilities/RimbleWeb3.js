@@ -1356,7 +1356,8 @@ class RimbleTransaction extends React.Component {
     network.current = await this.getCurrentNetwork(networkId);
 
     const networkInitialized = !!network.current.id;
-    network.isCorrectNetwork = !networkInitialized || network.current.id === network.required.id;
+    // Network is correct if not connected
+    network.isCorrectNetwork =  !networkInitialized || network.current.id === network.required.id;
     network.isSupportedNetwork = !network.current.id || globalConfigs.network.enabledNetworks.includes(network.current.id);
 
     const currentNetworkChanged = network.current.id && network.current.id !== this.state.network.current.id;

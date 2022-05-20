@@ -952,7 +952,7 @@ class Tranches extends Component {
                         {
                           title:'TOKEN',
                           props:{
-                            width:[0.15, 0.13],
+                            width:[0.15, 0.14],
                           },
                           fields:[
                             {
@@ -995,7 +995,7 @@ class Tranches extends Component {
                         {
                           title:'POOL',
                           props:{
-                            width:[0.25, this.state.useTrancheType ? 0.1 : 0.09],
+                            width:[0.25, this.state.useTrancheType ? 0.09 : 0.08],
                           },
                           fields:[
                             {

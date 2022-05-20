@@ -87,7 +87,7 @@ const env = process.env;
 
 const globalConfigs = {
   appName: "Idle",
-  version: "v6.7",
+  version: "v6.8",
   baseToken: "ETH",
   baseURL: "https://idle.finance",
   forumURL: "https://gov.idle.finance",
@@ -862,8 +862,8 @@ const globalConfigs = {
       strategy: 'tranches',
       component: Tranches,
       iconName: "Whatshot",
-      availableNetworks: [1],
       govTokensEnabled: true,
+      availableNetworks: [1],
       title: "Perpetual Tranches",
       chartColor: "hsl(40,95%,59%)",
       icon: "images/strategies/tranches-on.png",
@@ -873,6 +873,33 @@ const globalConfigs = {
       descShort: "Tranches deposit assets (eg DAI) into yield sources (eg Idle Finance) and split the accrued interest between 2 classes of products with different risk profiles.",
       descLong: "Choose the benefits of high-yield or low-risk, while enjoying the flexibility of Tranches. This comes with auto-compounding for accrued governance tokens and no locking period."
     },
+    /*
+    polygon: {
+      visible: true,
+      networkId: 137,
+      type: "tranche",
+      enabledEnvs: [],
+      color: "#f32121",
+      comingSoon: false,
+      token: "CXETHWETH",
+      addGovTokens: true,
+      titlePostfix: null,
+      strategy: 'tranches',
+      component: Tranches,
+      iconName: "Whatshot",
+      protocol: "quickswap",
+      govTokensEnabled: true,
+      availableNetworks: [137],
+      title: "Perpetual Tranches",
+      chartColor: "hsl(40,95%,59%)",
+      icon: "images/strategies/tranches-on.png",
+      iconInactive: "images/strategies/tranches-off.png",
+      iconInactiveDark: "images/strategies/tranches-white.png",
+      desc: "Diversify your risk profile with dynamic tranched yield derivatives",
+      descShort: "Tranches deposit assets (eg DAI) into yield sources (eg Idle Finance) and split the accrued interest between 2 classes of products with different risk profiles.",
+      descLong: "Choose the benefits of high-yield or low-risk, while enjoying the flexibility of Tranches. This comes with auto-compounding for accrued governance tokens and no locking period."
+    },
+    */
     best: {
       networkId: 1,
       token: "DAI",
@@ -886,7 +913,7 @@ const globalConfigs = {
       titlePostfix: null,
       title: "Best-Yield",
       iconName: "Whatshot",
-      availableNetworks: [],
+      availableNetworks: [1],
       govTokensEnabled: true,
       component: StrategyPage,
       chartColor: "hsl(40,95%,59%)",
@@ -937,6 +964,7 @@ const globalConfigs = {
       component: Tranches,
       iconName: "Whatshot",
       govTokensEnabled: true,
+      enabledStatsNetworks: [1],
       availableNetworks: [1, 137],
       chartColor: "hsl(40,95%,59%)",
       icon: "images/strategies/tranches-on.png",
@@ -1930,7 +1958,7 @@ const globalConfigs = {
       }
     },
     isForked: false, // If TRUE the tx confirmation callback is fired on the receipt
-    requiredNetwork: 1, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
+    requiredNetwork: 137, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
     secondsPerDay: 86400,
     blocksPerYear: 2371428,
     secondsPerYear: 31536000,

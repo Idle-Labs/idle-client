@@ -40,8 +40,10 @@ class Base extends Component {
   async loadData(){
     let token=null;
     let protocol=null;
+    const networkId = this.functionsUtil.getRequiredNetworkId();
 
-    const bestTrancheInfo = await this.functionsUtil.getBestTranche(this.props.trancheDetails.type,9999);
+    const bestTrancheInfo = await this.functionsUtil.getBestTranche(this.props.trancheDetails.type,9999);  
+
     if(bestTrancheInfo){
       token = bestTrancheInfo.token;
       protocol = bestTrancheInfo.protocol;
@@ -51,13 +53,13 @@ class Base extends Component {
       protocol = strategyInfo.protocol;
 
       // Select first tranche is not available
-      if (!this.functionsUtil.getArrayPath([protocol,token],this.props.availableTranches)){
-        protocol = Object.keys(this.props.availableTranches)[0];
-        token = Object.keys(this.props.availableTranches[protocol])[0];
+      if (!this.functionsUtil.getArrayPath([protocol,token],this.props.availableTranchesNetworks[networkId])){
+        protocol = Object.keys(this.props.availableTranchesNetworks[networkId])[0];
+        token = Object.keys(this.props.availableTranchesNetworks[networkId][protocol])[0];
       }
     }
     
-    const tokenConfig = this.props.availableTranches[protocol][token];
+    const tokenConfig = this.props.availableTranchesNetworks[networkId][protocol][token];
 
     return this.setState({
       token,

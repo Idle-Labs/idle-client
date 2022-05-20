@@ -3222,6 +3222,11 @@ class FunctionsUtil {
     return subgraphData;
   }
   getBestTranche = async (trancheType=null,maxApy=null)=>{
+    const networkId = this.getRequiredNetworkId();
+    const subgraphConfig = this.getGlobalConfig(['network','providers','subgraph','tranches']);
+    if (!subgraphConfig.availableNetworks.includes(networkId)){
+      return null;
+    }
 
     const cachedDataKey = `getBestTranche_${trancheType}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
@@ -3231,45 +3236,41 @@ class FunctionsUtil {
     
     const blockInfo = await this.getBlockInfo();
     const timestamp = blockInfo.timestamp-7200;
-    const networkId = this.getRequiredNetworkId();
 
     let results = [];
-    const subgraphConfig = this.getGlobalConfig(['network','providers','subgraph','tranches']);
-    if (subgraphConfig.availableNetworks.includes(networkId)){
-      const query=`{
-        trancheInfos(orderBy:"timeStamp", orderDirection:"asc", where:{timeStamp_gt:"${timestamp}"}){
+    const query=`{
+      trancheInfos(orderBy:"timeStamp", orderDirection:"asc", where:{timeStamp_gt:"${timestamp}"}){
+        id
+        apr
+        timeStamp
+        Tranche{
           id
-          apr
-          timeStamp
-          Tranche{
+          CDO{
             id
-            CDO{
-              id
-            }
-            type
           }
+          type
         }
-      }`;
-
-      const postData={
-        query
-      };
-
-      results = await this.makePostRequest(subgraphConfig.endpoint,postData);
-
-      if(!results || !this.getArrayPath(['data','data','trancheInfos'],results)){
-        return false;
       }
-      
-      results = this.getArrayPath(['data','data','trancheInfos'],results);
-      const size = results.length;
-      if (!size){
-        return false;
-      }
-      // Get only latest results
-      if(results[0].timetamp !== results[size-1].timeStamp){
-        results = results.splice(Math.ceil(size/2));
-      }
+    }`;
+
+    const postData={
+      query
+    };
+
+    results = await this.makePostRequest(subgraphConfig.endpoint,postData);
+
+    if(!results || !this.getArrayPath(['data','data','trancheInfos'],results)){
+      return false;
+    }
+    
+    results = this.getArrayPath(['data','data','trancheInfos'],results);
+    const size = results.length;
+    if (!size){
+      return false;
+    }
+    // Get only latest results
+    if(results[0].timetamp !== results[size-1].timeStamp){
+      results = results.splice(Math.ceil(size/2));
     }
 
     if (!results || !results.length){

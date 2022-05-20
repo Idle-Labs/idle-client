@@ -542,7 +542,7 @@ class Stats extends Component {
     const idleTokenEnabled = this.functionsUtil.getGlobalConfig(['govTokens','IDLE','enabled']) && idleTokenAvailableNetworks.includes(networkId);
 
     const tranchesConfig = this.functionsUtil.getGlobalConfig(['strategies','tranches']);
-    const tranchesEnabled = tranchesConfig.availableNetworks.includes(networkId);
+    const tranchesEnabled = tranchesConfig.availableNetworks.includes(networkId) && (!tranchesConfig.enabledStatsNetworks || tranchesConfig.enabledStatsNetworks.includes(networkId));
     
     const refreshIdleSpeedConfig = this.functionsUtil.getGlobalConfig(['contract','methods','refreshIdleSpeed']);
     const refreshIdleSpeedEnabled = refreshIdleSpeedConfig.enabled && refreshIdleSpeedConfig.availableNetworks.includes(networkId);

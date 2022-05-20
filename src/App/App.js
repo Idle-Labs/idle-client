@@ -517,7 +517,7 @@ class App extends Component {
       // Clear cached data
       this.clearCachedData(() => {
         // Reset Localstorage
-        this.functionsUtil.clearStoredData(['walletProvider', 'connectorName', 'themeMode', 'requiredNetwork']);
+        this.functionsUtil.clearStoredData(['walletProvider', 'connectorName', 'themeMode']);
         this.functionsUtil.setLocalStorage('version', globalConfigs.version);
       }, clearAllCache);
     }

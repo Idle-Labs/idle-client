@@ -770,9 +770,9 @@ class Dashboard extends Component {
 
   render() {
 
-    const networkCorrect = this.props.network.isCorrectNetwork;
     const networkSupported = this.props.network.isSupportedNetwork;
     const PageComponent = this.state.pageComponent ? this.state.pageComponent : null;
+    const networkCorrect = this.props.network.isCorrectNetwork || !this.props.account;
     const networkInitialized = this.props.networkInitialized && this.props.network.current.id && this.props.network.required.id;
 
     if (!this.props.availableStrategies){
