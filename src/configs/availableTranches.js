@@ -22,7 +22,6 @@ const availableTranches = {
         },
         Strategy:{
           abi:IdleStrategy,
-          harvestEnabled:false,
           name:'IdleStrategy_quickswap_CXETHWETH'
         },
         messages:{

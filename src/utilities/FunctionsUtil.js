@@ -1208,6 +1208,7 @@ class FunctionsUtil {
     
     // Create Tranche Strategy contract
     const idleStrategyAddress = await this.genericContractCallCachedTTL(tokenConfig.CDO.name, 'strategy', 3600);
+
     if (idleStrategyAddress) {
       await this.props.initContract(strategyConfig.name, idleStrategyAddress, strategyConfig.abi);
       let limit = null;
@@ -1222,8 +1223,6 @@ class FunctionsUtil {
       }
 
       let transfers = await this.getEtherscanTokenTransfers(tokenConfig.token, idleStrategyAddress, null, tokenConfig.address, idleStrategyAddress, startBlock, latestHarvestBlock, 'desc', limit);
-
-      // console.log('getTrancheLastHarvest',tokenConfig.token,idleStrategyAddress,startBlock,latestHarvestBlock,limit,transfers);
 
       if (transfers && transfers.length) {
 
