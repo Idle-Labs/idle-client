@@ -91,9 +91,9 @@ class TrancheDetails extends Component {
 
     const [
       // blockNumber,
-      lastHarvest,
       tokenBalance,
       trancheBalance,
+      lastHarvest,
       gaugeStakedBalance,
       stakedBalance,
       trancheAPY,
@@ -101,9 +101,9 @@ class TrancheDetails extends Component {
       trancheBaseApy
     ] = await Promise.all([
       // this.functionsUtil.getBlockNumber(),
-      this.functionsUtil.getTrancheLastHarvest(this.props.tokenConfig),
       this.functionsUtil.getTokenBalance(this.props.selectedToken,this.props.account),
       this.functionsUtil.getTokenBalance(this.props.trancheConfig.name,this.props.account),
+      this.functionsUtil.getTrancheLastHarvest(this.props.tokenConfig,this.props.trancheConfig),
       gaugeConfig ? this.functionsUtil.getTokenBalance(gaugeConfig.name,this.props.account) : null,
       this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals,this.props.trancheConfig.functions.stakedBalance),
       this.functionsUtil.loadTrancheFieldRaw('trancheApy',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),

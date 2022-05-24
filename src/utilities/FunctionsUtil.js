@@ -1198,11 +1198,12 @@ class FunctionsUtil {
 
     return harvestsList;
   }
-  getTrancheLastHarvest = async (tokenConfig) => {
+  getTrancheLastHarvest = async (tokenConfig,trancheConfig) => {
     const strategyConfig = tokenConfig.Strategy;
     const harvestEnabled = strategyConfig.harvestEnabled === undefined ? true : strategyConfig.harvestEnabled;
+    const autoFarming = await this.loadTrancheFieldRaw('autoFarming',{},tokenConfig.protocol,tokenConfig.token,trancheConfig.tranche,tokenConfig,trancheConfig);
 
-    if (!harvestEnabled){
+    if (!harvestEnabled || (!autoFarming || !Object.keys(autoFarming).length)){
       return null;
     }
     
@@ -5448,7 +5449,7 @@ class FunctionsUtil {
         }
 
         const stakingRewards = trancheConfig ? trancheConfig.CDORewards.stakingRewards.map(tokenConfig => (tokenConfig.address.toLowerCase())) : null;
-        const govTokens = field === 'stakingRewards' && stakingRewards ? stakingRewards : (field === 'govTokens' ? rewardsTokens : (field === 'autoFarming' && rewardsTokens ? rewardsTokens.filter(rewardTokenAddr => incentiveTokens && !incentiveTokens.map(addr => addr.toLowerCase()).includes(rewardTokenAddr.toLowerCase())) : incentiveTokens));
+        const govTokens = field === 'stakingRewards' && stakingRewards ? stakingRewards : (field === 'govTokens' ? rewardsTokens : (field === 'autoFarming' && rewardsTokens ? rewardsTokens.filter(rewardTokenAddr => incentiveTokens && !incentiveTokens.map(addr => addr.toLowerCase()).includes(rewardTokenAddr.toLowerCase())) : null));
 
         if (govTokens) {
           govTokens.forEach(tokenAddress => {
