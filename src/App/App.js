@@ -299,7 +299,20 @@ class App extends Component {
 
     newState.availableStrategies = availableStrategies;
     newState.availableTranchesNetworks = availableTranches;
-    newState.availableTranches = availableTranches[requiredNetwork];
+    newState.availableTranches = Object.keys(availableTranches[requiredNetwork]).reduce( (output,protocol) => {
+      const tokens = availableTranches[requiredNetwork][protocol];
+      Object.keys(tokens).forEach( token => {
+        const tokenConfig = tokens[token];
+        const envEnabled = !tokenConfig.enabledEnvs || !tokenConfig.enabledEnvs.length || tokenConfig.enabledEnvs.includes(this.state.currentEnv);
+        if (envEnabled){
+          if (!output[protocol]){
+            output[protocol] = {};
+          }
+          output[protocol][token] = tokenConfig;
+        }
+      });
+      return output;
+    },{});
     newState.availableStrategiesNetworks = availableStrategiesNetworks;
 
     // Load strategy
