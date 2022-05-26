@@ -1,25 +1,27 @@
+import Title from '../Title/Title';
 import React, { Component } from 'react';
 import styles from './TableCellHeader.module.scss';
-import { Flex, Heading, Icon, Link, Tooltip } from "rimble-ui";
+import { Flex, Text, Icon, Link, Tooltip } from "rimble-ui";
 
 class TableCellHeader extends Component {
   render() {
 
     const ColTitle = (props) => (
-      <Heading.h4
-        fontWeight={[3,4]}
+      <Text
+        fontSize={0}
+        fontWeight={4}
         color={'cellTitle'}
+        fontFamily={'titles'}
         style={{
           width:'100%',
           whiteSpace:'nowrap'
         }}
-        fontSize={['10px',3]}
         lineHeight={'initial'}
         {...props}
         {...props.colsProps}
       >
         {props.children}
-      </Heading.h4>
+      </Text>
     );
 
     return (

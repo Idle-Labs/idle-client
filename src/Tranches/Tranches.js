@@ -10,10 +10,10 @@ import TrancheWelcome from '../TrancheWelcome/TrancheWelcome';
 import GenericPieChart from '../GenericPieChart/GenericPieChart';
 import GenericSelector from '../GenericSelector/GenericSelector';
 import TransactionsList from '../TransactionsList/TransactionsList';
+import { Box, Flex, Loader, Text, Icon, Tooltip, Image } from "rimble-ui";
 import TotalBalanceCounter from '../TotalBalanceCounter/TotalBalanceCounter';
 import TotalEarningsCounter from '../TotalEarningsCounter/TotalEarningsCounter';
 import AssetsUnderManagement from "../AssetsUnderManagement/AssetsUnderManagement";
-import { Box, Flex, Heading, Loader, Text, Icon, Tooltip, Image } from "rimble-ui";
 import PortfolioEquityTranches from '../PortfolioEquityTranches/PortfolioEquityTranches';
 
 class Tranches extends Component {
@@ -908,20 +908,18 @@ class Tranches extends Component {
                       borderColor={'divider'}
                       borderBottom={'1px solid transparent'}
                     >
-                      <Heading.h4
+                      <Title
+                        as={'h4'}
                         fontSize={[2,4]}
                         fontWeight={[3,4]}
                       >
                         Deposited Tranches
-                      </Heading.h4>
+                      </Title>
                     </Flex>
                     <TranchesList
                       enabledProtocols={[]}
                       trancheType={this.state.trancheType}
                       handleClick={(props) => this.selectTranche(props.protocol,props.token)}
-                      colsProps={{
-                        fontSize:['10px','14px'],
-                      }}
                       cols={[
                         {
                           title:'PROTOCOL', 
@@ -1127,7 +1125,6 @@ class Tranches extends Component {
                                 height:'45px',
                                 borderRadius:4,
                                 boxShadow:null,
-                                mainColor:'redeem',
                                 size: this.props.isMobile ? 'small' : 'medium',
                                 handleClick:(props) => this.selectTranche(props.protocol,props.token)
                               }
@@ -1155,12 +1152,13 @@ class Tranches extends Component {
                     borderColor={'divider'}
                     borderBottom={'1px solid transparent'}
                   >
-                    <Heading.h4
+                    <Title
+                      as={'h4'}
                       fontSize={[2,4]}
                       fontWeight={[3,4]}
                     >
                       Available Tranches
-                    </Heading.h4>
+                    </Title>
                   </Flex>
                   <TranchesList
                     enabledProtocols={[]}

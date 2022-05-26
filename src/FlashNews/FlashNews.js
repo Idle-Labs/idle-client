@@ -119,8 +119,8 @@ class FlashNews extends Component {
             )
           }
           <Text
+            fontSize={2}
             fontWeight={500}
-            fontSize={"15px"}
             color={"flashColor"}
             textAlign={"center"}
           >
@@ -128,9 +128,9 @@ class FlashNews extends Component {
           </Text>
           <ExtLink
             ml={1}
+            fontSize={2}
             fontWeight={500}
             color={"primary"}
-            fontSize={"15px"}
             hoverColor={"primary"}
             href={this.state.activeNews.link.url}
             onClick={e =>

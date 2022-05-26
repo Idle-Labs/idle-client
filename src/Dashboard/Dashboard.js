@@ -834,9 +834,8 @@ class Dashboard extends Component {
                   boxShadow={0}
                   width={'auto'}
                   height={'100vh'}
-                  backgroundColor={'menuBg'}
+                  backgroundColor={'transparent'}
                   borderColor={this.props.theme.colors.menuRightBorder}
-                  borderRight={`1px solid ${this.props.theme.colors.menuRightBorder}`}
                 >
                   <DashboardMenu
                     {...this.props}
@@ -849,6 +848,7 @@ class Dashboard extends Component {
             )
           }
           <Flex
+            pl={[0,3]}
             minHeight={'70vh'}
             width={['100vw', 5 / 6]}
             flexDirection={"column"}
@@ -864,7 +864,7 @@ class Dashboard extends Component {
               py={3}
               mb={0}
               width={1}
-              px={[3, 5]}
+              pr={[3, 5]}
               alignItems={"center"}
               style={{
                 overflowY: 'scroll',

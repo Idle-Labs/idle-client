@@ -5,12 +5,14 @@ class RoundButton extends Component {
   render() {
     const buttonProps = Object.assign({
       width:1,
-      fontWeight:3,
+      fontSize:2,
+      fontWeight:4,
       height:'45px',
-      fontSize:[2,3],
       boxShadow:null,
-      borderRadius:4,
-      mainColor:'blue'
+      borderRadius:1,
+      fontFamily:'ctas',
+      mainColor:'primaryCtaBg',
+      contrastColor:'primaryCtaText'
     },this.props.buttonProps);
 
     return (

@@ -51,9 +51,9 @@ class GenericSelector extends Component {
         (this.props.innerProps ? this.props.innerProps : {})
       );
 
-      if (props.menuIsOpen) {
-        cardProps.boxShadow = this.props.noShadow ? 0 : 4;
-      }
+      // if (props.menuIsOpen) {
+      //   cardProps.boxShadow = this.props.noShadow ? 0 : 4;
+      // }
       return (
         <DashboardCard
           cardProps={cardProps}
@@ -79,7 +79,7 @@ class GenericSelector extends Component {
         zIndex: 1,
         boxShadow: null,
         position: 'absolute',
-        backgroundColor: this.props.outerColor ? this.props.outerColor : "cardBg"
+        backgroundColor: this.props.outerColor ? this.props.outerColor : "dropdownBg"
       });
       return (
         <DashboardCard
@@ -171,7 +171,6 @@ class GenericSelector extends Component {
           style={{ cursor: 'pointer' }}
           justifyContent={'flex-start'}
           className={styles.genericSelector}
-          backgroundColor={this.props.isDashboard ? 'cardBg' : (props.isFocused ? 'selectBgFocused' : 'selectBg')}
         >
           <CustomOptionValue
             {...props}

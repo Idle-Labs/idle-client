@@ -1,9 +1,8 @@
 import ExtLink from "../ExtLink/ExtLink";
 import React, { Component } from "react";
-import HoverImage from "../HoverImage/HoverImage"
+import RoundButton from "../RoundButton/RoundButton";
 import { Link as RouterLink } from "react-router-dom";
 import FunctionsUtil from "../utilities/FunctionsUtil";
-import DashboardCard from "../DashboardCard/DashboardCard";
 import { Flex, Box, Icon, Text, Image, Link } from "rimble-ui";
 import NetworkIndicator from "../NetworkIndicator/NetworkIndicator";
 
@@ -108,7 +107,11 @@ class DashboardMenu extends Component {
     }
 
     return (
-      <Flex p={0} height={"100%"} flexDirection={"column"}>
+      <Flex
+        p={0}
+        height={"100%"}
+        flexDirection={"column"}
+      >
         <Flex
           p={4}
           pb={2}
@@ -127,59 +130,26 @@ class DashboardMenu extends Component {
             />
           </RouterLink>
         </Flex>
-        <Box
-          mb={3}
-          pb={3}
+        <Flex
+          my={3}
           width={1}
+          alignItems={'center'}
           justifyContent={"center"}
-          borderBottom={`1px solid ${this.props.theme.colors.divider}`}
         >
-          <DashboardCard
-            {...this.props}
-            isInteractive={true}
-            cardProps={{
-              py: 1,
-              pr: 1,
-              mx: 'auto',
-              mb: [0, 3],
-              width: 0.8,
-              boxShadow: 0,
-              display: "flex",
-              borderRadius: 1,
-              justifySelf: "center",
-              justifyContent: "center",
+          <RoundButton
+            px={2}
+            py={1}
+            buttonProps={{
+              border:1,
+              width:'auto',
+              mainColor:'secondaryCtaBg',
+              contrastColor:'secondaryCtaText'
             }}
             handleClick={e => this.props.isDashboard ? this.props.goToSection(governanceRoute, false) : this.props.goToSection(dashboardRoute, false) }
           >
-            <Flex
-              px={2}
-              py={1}
-              alignItems={"center"}
-              flexDirection={"row"}
-              onMouseEnter={e => this.setState({ isHover: true })}
-              onMouseLeave={e => this.setState({ isHover: false })}
-            >
-              <HoverImage
-                hoverOn={this.state.isHover}
-                noHover={'images/sidebar/switch.svg'}
-                hover={'images/sidebar/switchHover.svg'}
-                imageProps={{
-                  mr: 2,
-                  width: "16px",
-                  height: "16px",
-                  display: "inline-flex"
-                }}
-              />
-              <Text
-                fontSize={1}
-                color={"text"}
-                fontWeight={500}
-              >
-                Switch to {this.props.isDashboard ? 'Governance' : 'Dashboard'}
-              </Text>
-            </Flex>
-          </DashboardCard>
-        </Box>
+            Switch to {this.props.isDashboard ? 'Governance' : 'Dashboard'}
+          </RoundButton>
+        </Flex>
         {
           this.props.isMobile && (
             <Flex
@@ -225,10 +195,9 @@ class DashboardMenu extends Component {
                       py={2}
                       px={3}
                       borderRadius={2}
-                      flexDirection={"row"}
                       alignItems={"center"}
-                      border={menuLink.selected ? 2 : null}
-                      backgroundColor={menuLink.selected ? "menuHover" : "transparent"}
+                      flexDirection={"row"}
+                      backgroundColor={"transparent"}
                     >
                       <Flex
                         py={1}
@@ -266,12 +235,12 @@ class DashboardMenu extends Component {
                         }
                         <Text
                           fontWeight={3}
-                          color={"text"}
                           fontSize={[1,2]}
-                          textAlign={"center"}
                           style={{
                             whiteSpace: "nowrap"
                           }}
+                          textAlign={"center"}
+                          color={menuLink.selected ? "primary" : "text"}
                         >
                           {menuLink.label}
                         </Text>

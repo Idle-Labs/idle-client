@@ -5,9 +5,10 @@ class Title extends Component {
   render() {
     const props = {
       fontWeight:4,
-      fontSize:[4,6],
-      color:'copyColor',
+      // fontSize:[4,6],
+      color:'primary',
       textAlign:'center',
+      fontFamily:'titles',
       lineHeight:'initial',
     };
 
@@ -18,7 +19,9 @@ class Title extends Component {
       });
     }
 
-    const HeadingComponent = this.props.component ? this.props.component : Heading.h1;
+    const as = this.props.as && Heading[this.props.as] ? this.props.as : 'h1';
+
+    const HeadingComponent =  this.props.component ? this.props.component : Heading[as];
 
     return (
       <HeadingComponent

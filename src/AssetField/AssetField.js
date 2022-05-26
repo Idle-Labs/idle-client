@@ -802,7 +802,7 @@ class AssetField extends Component {
     const loader = showLoader ? (<Loader size="20px" />) : null;
 
     const fieldProps = {
-      fontWeight:3,
+      fontWeight:2,
       fontSize:[0,2],
       color:'cellText',
       flexProps:{

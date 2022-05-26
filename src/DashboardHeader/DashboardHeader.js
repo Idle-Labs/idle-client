@@ -4,7 +4,6 @@ import { Box, Flex, Text, Button } from "rimble-ui";
 import MenuAccount from "../MenuAccount/MenuAccount";
 import GovModal from "../utilities/components/GovModal";
 import GovernanceUtil from "../utilities/GovernanceUtil";
-import DashboardCard from "../DashboardCard/DashboardCard";
 
 class DashboardHeader extends Component {
   state = {
@@ -90,11 +89,9 @@ class DashboardHeader extends Component {
         <Flex
           py={2}
           width={1}
-          bg={"cardBg"}
           flexDirection={"row"}
           justifyContent={"space-between"}
           alignItems={["flex-end", "center"]}
-          borderBottom={`1px solid ${this.props.theme.colors.menuRightBorder}`}
         >
           <MenuAccount
             width={1}
@@ -105,53 +102,46 @@ class DashboardHeader extends Component {
         </Flex>
         {
           this.state.unclaimed && this.state.unclaimed.gt(0) && (
-            <DashboardCard
-              cardProps={{
-                p: 2,
-                mt: 3,
-                width: 1
-              }}
-              isActive={true}
-              isInteractive={false}
+            <Flex
+              p={2}
+              mt={3}
+              width={1}
+              alignItems={"center"}
+              justifyContent={"center"}
+              flexDirection={["column", "row"]}
             >
-              <Flex
-                alignItems={"center"}
-                justifyContent={"center"}
-                flexDirection={["column", "row"]}
+              <Text
+                fontSize={2}
+                fontWeight={500}
+                color={"flashColor"}
+                textAlign={"center"}
               >
-                <Text
+                IDLE Governance Token is now available,
+                <ExtLink
+                  ml={1}
+                  fontSize={2}
                   fontWeight={500}
-                  fontSize={"15px"}
-                  color={"flashColor"}
-                  textAlign={"center"}
+                  color={"primary"}
+                  hoverColor={"primary"}
+                  href={
+                    "https://idlefinance.medium.com/idle-governance-is-live-9b55e8f407d7"
+                  }
                 >
-                  IDLE Governance Token is now available,
-                  <ExtLink
-                    ml={1}
-                    fontWeight={500}
-                    color={"primary"}
-                    fontSize={"15px"}
-                    hoverColor={"primary"}
-                    href={
-                      "https://idlefinance.medium.com/idle-governance-is-live-9b55e8f407d7"
-                    }
-                  >
-                    discover more
-                  </ExtLink>
-                  ! You have {this.state.unclaimed.toFixed(4)} IDLE tokens to
-                  claim.
-                </Text>
-                <Button
-                  ml={[0, 2]}
-                  mt={[2, 0]}
-                  size={"small"}
-                  mainColor={"blue"}
-                  onClick={e => this.setGovModal(true)}
-                >
-                  CLAIM NOW
-                </Button>
-              </Flex>
-            </DashboardCard>
+                  discover more
+                </ExtLink>
+                ! You have {this.state.unclaimed.toFixed(4)} IDLE tokens to
+                claim.
+              </Text>
+              <Button
+                ml={[0, 2]}
+                mt={[2, 0]}
+                size={"small"}
+                mainColor={"blue"}
+                onClick={e => this.setGovModal(true)}
+              >
+                CLAIM NOW
+              </Button>
+            </Flex>
           )
         }
         <GovModal

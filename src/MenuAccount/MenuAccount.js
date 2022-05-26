@@ -126,7 +126,6 @@ class MenuAccount extends Component {
       <Flex
         width={1}
         mr={[0,5]}
-        bg={"cardBg"}
         flexDirection={["column", "row"]}
         alignItems={["flex-start", "center"]}
       >
@@ -156,7 +155,6 @@ class MenuAccount extends Component {
           {
             !this.props.isMobile && (
               <Flex
-                mx={2}
                 width={'fit-content'}
                 alignItems={'center'}
                 flexDirection={'row'}

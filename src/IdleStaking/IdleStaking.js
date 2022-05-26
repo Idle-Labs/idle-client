@@ -797,8 +797,7 @@ class IdleStaking extends Component {
                 this.state.lockedEnd === null ? (
                   <ImageButton
                     buttonProps={{
-                      mx:0,
-                      border:isLock ? 2 : 0
+                      mx:0
                     }}
                     caption={'Lock'}
                     width={[1,'32%']}
@@ -815,8 +814,7 @@ class IdleStaking extends Component {
                 ) : !this.state.lockExpired ? (
                   <ImageButton
                     buttonProps={{
-                      mx:0,
-                      border:isIncrease ? 2 : 0
+                      mx:0
                     }}
                     width={[1,'32%']}
                     isActive={isIncrease}
@@ -832,8 +830,7 @@ class IdleStaking extends Component {
                 ) : (
                   <ImageButton
                     buttonProps={{
-                      mx:0,
-                      border:isUnstake ? 2 : 0
+                      mx:0
                     }}
                     width={[1,'32%']}
                     caption={'Withdraw'}
@@ -851,8 +848,7 @@ class IdleStaking extends Component {
               }
               <ImageButton
                 buttonProps={{
-                  mx:0,
-                  border:isClaim ? 2 : 0
+                  mx:0
                 }}
                 width={[1,'32%']}
                 caption={'Claim'}
@@ -868,8 +864,7 @@ class IdleStaking extends Component {
               />
               <ImageButton
                 buttonProps={{
-                  mx:0,
-                  border:isStats ? 2 : 0
+                  mx:0
                 }}
                 width={[1,'32%']}
                 caption={'Stats'}

@@ -1,6 +1,7 @@
+import Title from '../Title/Title';
 import React, { Component } from 'react';
 import styles from './DashboardCard.module.scss';
-import { Flex, Icon, Heading, Card, Tooltip } from "rimble-ui";
+import { Flex, Icon, Card, Tooltip } from "rimble-ui";
 
 
 class DashboardCard extends Component {
@@ -24,8 +25,7 @@ class DashboardCard extends Component {
 
     const cardProps = {
       p: 0,
-      border: 1,
-      boxShadow: 1,
+      border:0,
       borderRadius: 2,
       borderColor: null,
       position: 'relative',
@@ -40,10 +40,12 @@ class DashboardCard extends Component {
       });
     }
 
-    if (isActive || (isInteractive && this.state.mouseOver)) {
-      cardProps.border = 2;
-      cardProps.boxShadow = null;
+    if (isInteractive && this.state.mouseOver) {
       cardProps.backgroundColor = 'cardBgHover';
+    }
+
+    if (isActive){
+      cardProps.backgroundColor = 'cardBgActive';
     }
 
     const className = [
@@ -76,7 +78,8 @@ class DashboardCard extends Component {
             flexDirection={'row'}
             {...this.props.titleParentProps}
           >
-            <Heading.h4
+            <Title
+              as={'h4'}
               fontWeight={4}
               fontSize={[2, 3]}
               textAlign={'left'}
@@ -85,7 +88,7 @@ class DashboardCard extends Component {
               {...this.props.titleProps}
             >
               {this.props.title}
-            </Heading.h4>
+            </Title>
             {
               this.props.description && this.props.description.length > 0 &&
               <Tooltip

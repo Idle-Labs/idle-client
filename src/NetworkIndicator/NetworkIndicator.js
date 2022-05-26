@@ -110,13 +110,13 @@ class NetworkIndicator extends Component {
       const imageSrc = `images/networks/${selectProps.network}.svg`;
       return (
         <Flex
+          {...props.innerProps}
+          px={0}
           style={{
             flex: '1'
           }}
+          backgroundColor={'transparent'}
           justifyContent={'space-between'}
-          {...props.innerProps}
-          bg={"cardBg"}
-          px={0}
         >
           <Flex
             {...props.innerxProps}
@@ -126,8 +126,6 @@ class NetworkIndicator extends Component {
             flexDirection={'row'}
             style={{ cursor: 'pointer' }}
             justifyContent={'flex-start'}
-            bg={"cardBg"}
-
           >
             <Image
               mr={2}
@@ -158,51 +156,48 @@ class NetworkIndicator extends Component {
     return this.state.defaultNetwork ? (
       <GenericSelector
         {...this.props}
-        outerColor={"cardBg"}
         name={'network'}
-        isDashboard={true}
-        isSearchable={false}
         innerProps={Object.assign({
           px: 1,
           py: 0,
-          height: '42px',
-          boxShadow: 0,
-          borderRadius: 0,
           border: 0,
-          backgroundColor: "cardBg"
-
+          boxShadow: 0,
+          height: '42px',
+          borderRadius: 0,
+          backgroundColor: 'transparent'
         }, this.props.innerProps)}
         customOptionProps={{
           px: 0,
           pl: 3,
           pr: 0
         }}
-        notInteractive="true"
-        noShadow="true"
+        noShadow={"true"}
+        isDashboard={false}
+        isSearchable={false}
+        notInteractive={"true"}
         options={this.state.activeNetworks}
         CustomOptionValue={CustomOptionValue}
-        defaultValue={this.state.defaultNetwork}
         onChange={this.selectNetwork.bind(this)}
+        defaultValue={this.state.defaultNetwork}
         CustomValueContainer={CustomValueContainer}
       />
     ) : (
         <DashboardCard
           {...this.props}
+          isActive={false}
+          isInteractive={false}
           cardProps={{
-            boxShadow: 0,
-            borderRadius: 0,
             border: 0,
             px: [2, 3],
-            display: 'flex',
+            boxShadow: 0,
+            display:'flex',
+            borderRadius: 0,
             width: [1, 'auto'],
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'cardBg',
-
+            backgroundColor: 'transparent',
             height: (this.props.innerProps && this.props.innerProps.height) || '42px',
           }}
-          isInteractive={false}
-          isActive={false}
         >
           <Loader size={'20px'} />
         </DashboardCard>
