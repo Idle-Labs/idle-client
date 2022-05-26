@@ -42,7 +42,7 @@ const ModalCard = ({children, closeFunc, ...props}) => (
         backgroundImage:'url(/images/bg-bottom-right.png)',
         background: props.background ? props.background : null,
       }}
-      backgroundColor={'cardBg'}
+      backgroundColor={'dashboardBg'}
     >
       {children}
     </Flex>
