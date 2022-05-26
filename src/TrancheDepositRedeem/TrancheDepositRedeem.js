@@ -1110,7 +1110,7 @@ class TrancheDetails extends Component {
                   <ImageButton
                     buttonProps={{
                       mx:0,
-                      border:isDeposit ? 2 : 0
+                      border:0
                     }}
                     caption={'Deposit'}
                     width={[1,'32%']}
@@ -1126,7 +1126,7 @@ class TrancheDetails extends Component {
                   <ImageButton
                     buttonProps={{
                       mx:0,
-                      border:isStake ? 2 : 0,
+                      border:0,
                       disabled:!this.state.stakingEnabled
                     }}
                     width={[1,'32%']}
@@ -1143,7 +1143,7 @@ class TrancheDetails extends Component {
                   <ImageButton
                     buttonProps={{
                       mx:0,
-                      border:isWithdraw ? 2 : 0
+                      border:0
                     }}
                     width={[1,'32%']}
                     caption={'Withdraw'}
