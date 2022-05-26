@@ -1,10 +1,10 @@
 import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
+import { Flex, Box, Text, Icon } from "rimble-ui";
 import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import BuyModal from '../utilities/components/BuyModal';
-import { Button, Flex, Box, Text, Icon } from "rimble-ui";
 // import TokenWrapper from '../TokenWrapper/TokenWrapper';
 import AssetSelector from '../AssetSelector/AssetSelector';
 import DashboardCard from '../DashboardCard/DashboardCard';
@@ -725,16 +725,18 @@ class PolygonBridge extends Component {
                                                 ) : (
                                                   <ExecuteTransaction
                                                     action={'Exit'}
-                                                    Component={Button}
+                                                    Component={RoundButton}
                                                     parentProps={{
                                                       mt:3,
                                                       alignItems:'center',
                                                       justifyContent:'center'
                                                     }}
                                                     componentProps={{
-                                                      width:[1,1/3],
-                                                      size:'medium',
-                                                      height:'45px',
+                                                      buttonProps:{
+                                                        width:[1,1/3],
+                                                        size:'medium',
+                                                        height:'45px',
+                                                      },
                                                       value:'Exit Transaction',
                                                     }}
                                                     params={[]}

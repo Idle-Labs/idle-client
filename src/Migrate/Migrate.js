@@ -1097,7 +1097,6 @@ class Migrate extends Component {
                                     buttonProps={{
                                       width:[1,0.5],
                                       disabled:this.state.buttonDisabled,
-                                      mainColor:this.props.theme.colors.migrate
                                     }}
                                     key={`migrate_${i}`}
                                     handleClick={ e => this.migrate(e,functionName) }
@@ -1210,7 +1209,6 @@ class Migrate extends Component {
                                     buttonProps={{
                                       mt:3,
                                       width:[1,0.5],
-                                      mainColor:this.props.theme.colors.migrate
                                     }}
                                     key={`migrate_${i}`}
                                     handleClick={ e => this.migrate(e,functionName) }

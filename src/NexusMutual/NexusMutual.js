@@ -3,6 +3,7 @@ import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
 // import NXMaster from '../abis/nexus/NXMaster.json';
+import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import ButtonLoader from '../ButtonLoader/ButtonLoader';
 import AssetSelector from '../AssetSelector/AssetSelector';
@@ -11,7 +12,7 @@ import CardIconButton from '../CardIconButton/CardIconButton';
 import GenericSelector from '../GenericSelector/GenericSelector';
 import SendTxWithBalance from '../SendTxWithBalance/SendTxWithBalance';
 import ExecuteTransaction from '../ExecuteTransaction/ExecuteTransaction';
-import { Flex, Box, Text, Input, Link, Progress, Button, Icon, Tooltip } from "rimble-ui";
+import { Flex, Box, Text, Input, Link, Progress, Icon, Tooltip } from "rimble-ui";
 
 class NexusMutual extends Component {
 
@@ -777,8 +778,6 @@ class NexusMutual extends Component {
                                   my:2,
                                   mx:[0, 2],
                                   size:'medium',
-                                  borderRadius:4,
-                                  mainColor:'blue',
                                   disabled:(!this.state.amountValid || !this.state.selectedUnderlying || !this.state.periodValue || !this.state.periodValid)
                                 }}
                                 buttonText={'GET QUOTE'}
@@ -999,15 +998,13 @@ class NexusMutual extends Component {
                                     alignItems:'center',
                                     justifyContent:'center'
                                   }}
-                                  Component={Button}
+                                  Component={RoundButton}
                                   componentProps={{
-                                    fontSize:3,
-                                    fontWeight:3,
-                                    size:'medium',
-                                    width:[1,1/2],
-                                    borderRadius:4,
+                                    buttonProps:{
+                                      size:'medium',
+                                      width:[1,1/2],
+                                    },
                                     value:'Approve',
-                                    mainColor:'deposit'
                                   }}
                                   action={'Approve'}
                                   methodName={'approve'}
@@ -1039,16 +1036,14 @@ class NexusMutual extends Component {
                                   alignItems:'center',
                                   justifyContent:'center'
                                 }}
-                                Component={Button}
+                                Component={RoundButton}
                                 componentProps={{
-                                  fontSize:3,
-                                  fontWeight:3,
-                                  size:'medium',
-                                  width:[1,1/2],
-                                  borderRadius:4,
-                                  mainColor:'deposit',
+                                  buttonProps:{
+                                    size:'medium',
+                                    width:[1,1/2],
+                                    disabled:this.state.buttonDisabled
+                                  },
                                   value:'Buy Coverage',
-                                  disabled:this.state.buttonDisabled
                                 }}
                                 action={'Buy Coverage'}
                                 methodName={'buyCover'}

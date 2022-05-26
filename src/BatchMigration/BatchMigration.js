@@ -748,7 +748,6 @@ class BatchMigration extends Component {
                                 buttonProps={{
                                   mt:3,
                                   width:[1,0.5],
-                                  mainColor:this.props.theme.colors.redeem
                                 }}
                                 handleClick={ e => this.claim() }
                               >

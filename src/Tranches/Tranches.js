@@ -1366,9 +1366,7 @@ class Tranches extends Component {
                             label: 'Deposit',
                             props:{
                               width:1,
-                              fontSize:3,
                               height:'45px',
-                              mainColor:'deposit',
                               size: this.props.isMobile ? 'small' : 'medium',
                               handleClick:(props) => this.selectTranche(props.protocol,props.token)
                             }

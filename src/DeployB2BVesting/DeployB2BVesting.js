@@ -7,7 +7,7 @@ import TxProgressBar from '../TxProgressBar/TxProgressBar';
 import CardIconButton from '../CardIconButton/CardIconButton';
 import SendTxWithBalance from '../SendTxWithBalance/SendTxWithBalance';
 import ExecuteTransaction from '../ExecuteTransaction/ExecuteTransaction';
-import { Flex, Text, Heading, Input, Form, Field, Icon, Link, Loader, Button } from "rimble-ui";
+import { Flex, Text, Heading, Input, Form, Field, Icon, Link, Loader } from "rimble-ui";
 
 class DeployB2BVesting extends Component {
 
@@ -1262,9 +1262,11 @@ class DeployB2BVesting extends Component {
                                       <ExecuteTransaction
                                         params={[]}
                                         {...this.props}
-                                        Component={Button}
+                                        Component={RoundButton}
                                         componentProps={{
-                                          size:'medium',
+                                          buttonProps:{
+                                            size:'medium',
+                                          },
                                           value:'Claim',
                                         }}
                                         methodName={'claim'}

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Text, Flex, Button, Icon } from "rimble-ui";
+import { Text, Flex, Icon } from "rimble-ui";
+import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import ExecuteTransaction from '../ExecuteTransaction/ExecuteTransaction';
 
@@ -133,21 +134,21 @@ class IdleStakingDisapprove extends Component {
             !this.state.transactionSucceeded && (
               <ExecuteTransaction
                 {...this.props}
-                Component={Button}
+                Component={RoundButton}
                 parentProps={{
                   width:1,
                   alignItems:'center',
                   justifyContent:'center'
                 }}
                 componentProps={{
-                  fontWeight:3,
-                  size:'small',
-                  width:'auto',
-                  style:{
-                    fontSize:'14px',
+                  buttonProps:{
+                    size:'small',
+                    width:'auto',
+                    style:{
+                      fontSize:'14px',
+                    }
                   },
-                  mainColor:'blue',
-                  value:'Reduce allowance',
+                  value:'Reduce allowance'
                 }}
                 contractName={'IDLE'}
                 methodName={'approve'}

@@ -3,12 +3,13 @@ import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import ConnectBox from '../ConnectBox/ConnectBox';
+import RoundButton from '../RoundButton/RoundButton';
 import ImageButton from '../ImageButton/ImageButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
+import { Flex, Box, Text, Icon, Input } from "rimble-ui";
 import DashboardCard from '../DashboardCard/DashboardCard';
 import StatsCardSmall from '../StatsCardSmall/StatsCardSmall';
 import CardIconButton from '../CardIconButton/CardIconButton';
-import { Flex, Box, Text, Icon, Input, Button } from "rimble-ui";
 import SendTxWithBalance from '../SendTxWithBalance/SendTxWithBalance';
 import ExecuteTransaction from '../ExecuteTransaction/ExecuteTransaction';
 import IdleStakingDisapprove from "../IdleStakingDisapprove/IdleStakingDisapprove";
@@ -1208,16 +1209,14 @@ class IdleStaking extends Component {
                                             alignItems:'center',
                                             justifyContent:'center'
                                           }}
-                                          Component={Button}
+                                          Component={RoundButton}
                                           componentProps={{
-                                            fontSize:3,
-                                            fontWeight:3,
-                                            size:'medium',
-                                            width:[1,1/2],
-                                            borderRadius:4,
-                                            mainColor:'deposit',
+                                            buttonProps:{
+                                              size:'medium',
+                                              width:[1,1/2],
+                                              disabled:this.state.buttonDisabled
+                                            },
                                             value:'Increase Time',
-                                            disabled:this.state.buttonDisabled
                                           }}
                                           action={'Increase Time'}
                                           methodName={'increase_unlock_time'}
@@ -1355,15 +1354,17 @@ class IdleStaking extends Component {
                               <ExecuteTransaction
                                 params={[]}
                                 {...this.props}
-                                Component={Button}
+                                Component={RoundButton}
                                 parentProps={{
                                   width:1,
                                   alignItems:'center',
                                   justifyContent:'center'
                                 }}
                                 componentProps={{
-                                  size:'medium',
-                                  width:[1,1/2],
+                                  buttonProps:{
+                                    size:'medium',  
+                                    width:[1,1/2],
+                                  },
                                   value:'Withdraw',
                                 }}
                                 action={'Withdraw'}
@@ -1428,20 +1429,18 @@ class IdleStaking extends Component {
                                 <ExecuteTransaction
                                   params={[]}
                                   {...this.props}
-                                  Component={Button}
+                                  Component={RoundButton}
                                   parentProps={{
                                     width:1,
                                     alignItems:'center',
                                     justifyContent:'center'
                                   }}
                                   componentProps={{
-                                    fontSize:3,
-                                    fontWeight:3,
-                                    size:'medium',
-                                    width:[1,1/3],
                                     value:'Claim',
-                                    borderRadius:4,
-                                    mainColor:'redeem',
+                                    buttonProps:{
+                                      size:'medium',
+                                      width:[1,1/3],
+                                    }
                                   }}
                                   action={'Claim'}
                                   methodName={'claim'}

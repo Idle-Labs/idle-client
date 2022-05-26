@@ -402,8 +402,6 @@ class GaugesBoostCalculator extends Component {
                 my:2,
                 mx:[0, 2],
                 size:'medium',
-                borderRadius:4,
-                mainColor:'blue',
                 disabled:(this.functionsUtil.BNify(this.state.depositAmount).isNaN() || this.functionsUtil.BNify(this.state.idleAmount).isNaN() || this.functionsUtil.BNify(this.state.depositAmount).lte(0) || this.functionsUtil.BNify(this.state.idleAmount).lte(0) || !this.state.periodValid)
               }}
               buttonText={'CALCULATE BOOST'}
