@@ -271,8 +271,9 @@ const globalConfigs = {
   dashboard: {
     baseRoute: "/dashboard",
     theme: {
-      mode: "light",
-      darkModeEnabled: true
+      mode: "dark",
+      darkModeEnabled: true,
+      themeTogglerEnabled: false
     }
   },
   governance: {

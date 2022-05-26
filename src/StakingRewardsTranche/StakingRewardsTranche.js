@@ -1,7 +1,8 @@
+import { Flex } from "rimble-ui";
 import Title from '../Title/Title';
-import { Button, Flex } from "rimble-ui";
 import React, { Component } from 'react';
 import CustomList from '../CustomList/CustomList';
+import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import ExecuteTransaction from '../ExecuteTransaction/ExecuteTransaction';
 
@@ -212,15 +213,15 @@ class StakingRewardsTranche extends Component {
                       parentProps:{
                         width:1
                       },
-                      Component:Button,
+                      Component:RoundButton,
                       componentProps:{
-                        style:{
-                          width:'100%'
-                        },
                         value:'Claim',
-                        borderRadius:4,
-                        mainColor:'redeem',
-                        size:this.props.isMobile ? 'small' : 'medium'
+                        buttonProps:{
+                          style:{
+                            width:'100%'
+                          },
+                          size:this.props.isMobile ? 'small' : 'medium'
+                        }
                       },
                       value:'Claim',
                       action:'claim',

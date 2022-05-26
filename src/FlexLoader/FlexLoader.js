@@ -3,6 +3,9 @@ import { Flex, Loader, Text } from "rimble-ui";
 
 class FlexLoader extends Component {
   render() {
+    const textProps = Object.assign({
+      fontFamily:'ctas'
+    },this.props.textProps);
     return (
       <Flex
         width={1}
@@ -13,7 +16,7 @@ class FlexLoader extends Component {
         <Loader {...this.props.loaderProps} />
         {
           this.props.text &&
-            <Text {...this.props.textProps}>{this.props.text}</Text>
+            <Text {...textProps}>{this.props.text}</Text>
         }
       </Flex>
     );

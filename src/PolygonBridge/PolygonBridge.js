@@ -732,14 +732,9 @@ class PolygonBridge extends Component {
                                                       justifyContent:'center'
                                                     }}
                                                     componentProps={{
-                                                      fontWeight:3,
                                                       width:[1,1/3],
                                                       size:'medium',
                                                       height:'45px',
-                                                      fontSize:[2,3],
-                                                      boxShadow:null,
-                                                      borderRadius:4,
-                                                      mainColor:'redeem',
                                                       value:'Exit Transaction',
                                                     }}
                                                     params={[]}

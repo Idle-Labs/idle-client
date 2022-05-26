@@ -4,11 +4,12 @@ import React, { Component } from 'react';
 import AssetField from '../AssetField/AssetField';
 import CustomField from '../CustomField/CustomField';
 import TooltipText from '../TooltipText/TooltipText';
+import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import GenericChart from '../GenericChart/GenericChart';
 import CustomTooltip from '../CustomTooltip/CustomTooltip';
 import CustomTooltipRow from '../CustomTooltip/CustomTooltipRow';
-import { Image, Text, Loader, Button, Flex, Icon, Tooltip } from "rimble-ui";
+import { Image, Text, Loader, Flex, Icon, Tooltip } from "rimble-ui";
 
 class TrancheField extends Component {
 
@@ -408,7 +409,7 @@ class TrancheField extends Component {
       case 'button':
         const buttonLabel = typeof fieldInfo.label === 'function' ? fieldInfo.label(this.props) : fieldInfo.label;
         output = (
-          <Button {...fieldProps} onClick={() => fieldProps.handleClick(this.props) }>{buttonLabel}</Button>
+          <RoundButton buttonProps={fieldProps} handleClick={() => fieldProps.handleClick(this.props) }>{buttonLabel}</RoundButton>
         );
       break;
       case 'custom':

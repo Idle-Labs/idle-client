@@ -90,15 +90,12 @@ class DashboardMenu extends Component {
     }
 
     const isDarkTheme = this.props.themeMode === "dark";
-    const darkModeEnabled = this.functionsUtil.getGlobalConfig([
-      "dashboard",
-      "theme",
-      "darkModeEnabled"
-    ]);
+    const themeTogglerEnabled = this.functionsUtil.getGlobalConfig(["dashboard","theme","themeTogglerEnabled"]);
 
     const isProdEnv = this.functionsUtil.checkUrlOrigin();
     const isChristmas = this.functionsUtil.checkChristmas();
-    let logoSrc = isProdEnv ? (!isDarkTheme ? "images/logo-gradient.svg" : "images/logo-dark.svg") : (!isDarkTheme ? "images/logo-gradient-beta.png" : "images/logo-white-beta.png");
+    // let logoSrc = isProdEnv ? (!isDarkTheme ? "images/logo-gradient.svg" : "images/logo-dark.svg") : (!isDarkTheme ? "images/logo-gradient-beta.png" : "images/logo-white-beta.png");
+    let logoSrc = 'images/logo.svg';
 
     let logoHeight = '42px';
     if (isChristmas && isProdEnv){
@@ -141,10 +138,9 @@ class DashboardMenu extends Component {
             py={1}
             buttonProps={{
               border:1,
-              width:'auto',
-              mainColor:'secondaryCtaBg',
-              contrastColor:'secondaryCtaText'
+              width:'auto'
             }}
+            type={'secondary'}
             handleClick={e => this.props.isDashboard ? this.props.goToSection(governanceRoute, false) : this.props.goToSection(dashboardRoute, false) }
           >
             Switch to {this.props.isDashboard ? 'Governance' : 'Dashboard'}
@@ -236,6 +232,7 @@ class DashboardMenu extends Component {
                         <Text
                           fontWeight={3}
                           fontSize={[1,2]}
+                          fontFamily={'titles'}
                           style={{
                             whiteSpace: "nowrap"
                           }}
@@ -253,7 +250,7 @@ class DashboardMenu extends Component {
           }
         </Flex>
 
-        {darkModeEnabled && (
+        {themeTogglerEnabled && (
           <Flex
             my={2}
             width={"auto"}

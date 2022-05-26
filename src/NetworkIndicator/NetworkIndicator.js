@@ -86,16 +86,26 @@ class NetworkIndicator extends Component {
           <Flex
             alignItems={'center'}
           >
-            <Image
+            <Flex
               mr={2}
-              src={imageSrc}
-              width={['1.2em','1.3em']}
-              height={['1.2em','1.3em']}
-            />
+              width={'30px'}
+              height={'30px'}
+              borderRadius={'50%'}
+              alignItems={'center'}
+              justifyContent={'center'}
+              backgroundColor={'primary'}
+            >
+              <Image
+                src={imageSrc}
+                width={['1.2em','1.3em']}
+                height={['1.2em','1.3em']}
+              />
+            </Flex>
             <Text
               fontWeight={3}
               fontSize={[1,2]}
-              color={'copyColor'}
+              color={'primary'}
+              fontFamily={'ctas'}
             >
               {props.label}
             </Text>
@@ -136,7 +146,8 @@ class NetworkIndicator extends Component {
             <Text
               fontWeight={3}
               fontSize={[1,2]}
-              color={'copyColor'}
+              color={'primary'}
+              fontFamily={'ctas'}
             >
               {label}
             </Text>

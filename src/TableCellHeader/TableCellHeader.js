@@ -1,4 +1,3 @@
-import Title from '../Title/Title';
 import React, { Component } from 'react';
 import styles from './TableCellHeader.module.scss';
 import { Flex, Text, Icon, Link, Tooltip } from "rimble-ui";

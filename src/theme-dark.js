@@ -70,10 +70,33 @@ export default {
     /*
     CTAs
     */
-    primaryCtaBg:'#ffffff',
-    primaryCtaText:'#1B1E27',
-    secondaryCtaBg:'#1B1E27',
-    secondaryCtaText:'#ffffff',
+    ctaPrimaryBg:'#1B1E27',
+    ctas:{
+      primary:{
+        default:{
+          border:'none',
+          text:'#1B1E27',
+          background:'#FFFFFF'
+        },
+        hover:{
+          border:'none',
+          text:'#FFFFFF',
+          background:'#2272C8'
+        }
+      },
+      secondary:{
+        default:{
+          text:'#FFFFFF',
+          background:'#1B1E27',
+          border:'1px solid #FFFFFF'
+        },
+        hover:{
+          text:'#FFFFFF',
+          background:'#1B1E27',
+          border:'1px solid #FFFFFF'
+        }
+      }
+    },
     /*
     NEW COLORS
     */
@@ -89,7 +112,7 @@ export default {
     lineChartStroke: '#CDD0D6',
     wrongNetworkBannerBg: '#0e2133',
     dashboardBg: '#1B1E27',
-    statValue: '#CDD0D6',
+    statValue: '#FFFFFF',
     boxBorder: '#eeeeee',
     cellTitle: '#CDD0D6',
     cellText: '#CDD0D6',
@@ -110,7 +133,8 @@ export default {
     pageActive: '#d8d8d8',
     pageInactive: '#4f4f4f',
     menuIconActive: '#2a65d9',
-    cardBgActive: "#04117B",
+    // cardBgActive: "#04117B",
+    cardBgActive: "#081fd6",
     cardBgContrast: "#293243",
     menuRightBorder: '#0d2034',
     experimental: "#8500ff",
@@ -216,15 +240,17 @@ export default {
   },
   buttons: {
     primary: {
-      color: 'black',
+      color: '#1B1E27',
       backgroundColor: 'white',
       // use css custom props
       '--main-color': 'white',
-      '--contrast-color': 'black',
+      '--contrast-color': '#1B1E27',
     },
     normal: {
-      color: baseColors.black,
-      '--contrast-color': baseColors.black,
+      color: '#1B1E27',
+      backgroundColor: 'white',
+      '--main-color': 'white',
+      '--contrast-color': '#1B1E27',
     },
     success: {
       '--main-color': green.base,

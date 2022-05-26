@@ -1,3 +1,4 @@
+import Title from '../Title/Title';
 import React, { Component } from 'react';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import TooltipText from '../TooltipText/TooltipText';
@@ -299,13 +300,13 @@ class TrancheDetails extends Component {
               src={trancheDetails.image}
               size={this.props.isMobile ? '1.6em' : '1.8em'}
             />
-            <Text
+            <Title
+              as={'h4'}
               fontWeight={4}
               fontSize={[3,4]}
-              color={'copyColor'}
             >
               {trancheDetails.name}
-            </Text>
+            </Title>
           </Flex>
           <Flex
             style={{
@@ -326,7 +327,8 @@ class TrancheDetails extends Component {
                 mb={1}
                 fontWeight={3}
                 fontSize={[1,2]}
-                color={'cellText'}
+                color={'primary'}
+                fontFamily={'titles'}
               >
                 Protocol
               </Text>
@@ -353,7 +355,7 @@ class TrancheDetails extends Component {
                   fieldInfo={{
                     name:'protocolName',
                     props:{
-                      fontSize:[2,3],
+                      fontSize:[1,2],
                       color:'copyColor'
                     }
                   }}
@@ -373,7 +375,8 @@ class TrancheDetails extends Component {
                 mb={1}
                 fontWeight={3}
                 fontSize={[1,2]}
-                color={'cellText'}
+                color={'primary'}
+                fontFamily={'titles'}
               >
                 Token
               </Text>
@@ -400,7 +403,7 @@ class TrancheDetails extends Component {
                   fieldInfo={{
                     name:'tokenName',
                     props:{
-                      fontSize:[2,3],
+                      fontSize:[1,2],
                       color:'copyColor'
                     }
                   }}
@@ -419,7 +422,8 @@ class TrancheDetails extends Component {
               <Text
                 fontWeight={3}
                 fontSize={[1,2]}
-                color={'cellText'}
+                color={'primary'}
+                fontFamily={'titles'}
               >
                 Pool Size
               </Text>
@@ -429,7 +433,7 @@ class TrancheDetails extends Component {
                   name:'tranchePool',
                   props:{
                     decimals:2,
-                    fontSize:[2,3],
+                    fontSize:[1,2],
                     color:'copyColor'
                   }
                 }}
@@ -449,6 +453,10 @@ class TrancheDetails extends Component {
               <TooltipText
                 flexProps={{
                   mb:1
+                }}
+                textProps={{
+                  color:'primary',
+                  fontFamily:'titles'
                 }}
                 text={'Auto-Compounding'}
                 tooltipProps={{
@@ -478,6 +486,10 @@ class TrancheDetails extends Component {
                 flexProps={{
                   mb:1
                 }}
+                textProps={{
+                  color:'primary',
+                  fontFamily:'titles'
+                }}
                 text={'Staking Rewards'}
                 tooltipProps={{
                   message:this.functionsUtil.getGlobalConfig(['messages','stakingRewards'])
@@ -489,7 +501,7 @@ class TrancheDetails extends Component {
                   name:'stakingRewards',
                   props:{
                     decimals:2,
-                    fontSize:[2,3],
+                    fontSize:[1,2],
                     color:'copyColor'
                   }
                 }}
@@ -507,6 +519,10 @@ class TrancheDetails extends Component {
             >
               <TooltipText
                 text={'APY'}
+                textProps={{
+                  color:'primary',
+                  fontFamily:'titles'
+                }}
                 tooltipProps={{
                   message:this.functionsUtil.getGlobalConfig(['messages','apyTranches'])
                 }}
@@ -517,7 +533,7 @@ class TrancheDetails extends Component {
                   name:'trancheApyWithTooltip',
                   props:{
                     decimals:2,
-                    fontSize:[2,3],
+                    fontSize:[1,2],
                     color:'copyColor'
                   }
                 }}
@@ -563,6 +579,10 @@ class TrancheDetails extends Component {
               alignItems={'flex-start'}
             >
               <TooltipText
+                textProps={{
+                  color:'primary',
+                  fontFamily:'titles'
+                }}
                 text={'Apr Ratio'}
                 tooltipProps={{
                   message:this.functionsUtil.getGlobalConfig(['messages','aprRatio'])
@@ -574,7 +594,7 @@ class TrancheDetails extends Component {
                   name:'trancheAPRRatio',
                   props:{
                     fontWeight:3,
-                    fontSize:[2,3],
+                    fontSize:[1,2],
                     color:'copyColor'
                   }
                 }}
@@ -594,7 +614,8 @@ class TrancheDetails extends Component {
               <Text
                 fontWeight={3}
                 fontSize={[1,2]}
-                color={'cellText'}
+                color={'primary'}
+                fontFamily={'titles'}
               >
                 Status
               </Text>
@@ -604,7 +625,7 @@ class TrancheDetails extends Component {
                   name:'statusBadge',
                   props:{
                     fontWeight:3,
-                    fontSize:[2,3],
+                    fontSize:[1,2],
                     color:'copyColor'
                   }
                 }}
@@ -626,7 +647,8 @@ class TrancheDetails extends Component {
                   <Text
                     fontWeight={3}
                     fontSize={[1,2]}
-                    color={'cellText'}
+                    color={'primary'}
+                    fontFamily={'titles'}
                   >
                     Limit Cap
                   </Text>
@@ -637,7 +659,7 @@ class TrancheDetails extends Component {
                       props:{
                         decimals:3,
                         fontWeight:3,
-                        fontSize:[2,3],
+                        fontSize:[1,2],
                         color:'copyColor'
                       }
                     }}

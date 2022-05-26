@@ -71,7 +71,7 @@ class TotalBalanceCounter extends Component {
 
     const counterStyle = {
       lineHeight:1,
-      color:this.props.theme.colors.copyColor,
+      color:this.props.theme.colors.primary,
       fontFamily:this.props.theme.fonts.counter,
       fontWeight: this.props.isMobile ? 600 : 700,
       fontSize:this.props.isMobile ? '21px' : '1.7em',

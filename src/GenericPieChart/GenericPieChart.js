@@ -190,6 +190,10 @@ class GenericPieChart extends Component {
                       fontWeight={4}
                       fontSize={[3,4]}
                       maxPrecision={5}
+                      color={'primary'}
+                      unitProps={{
+                        color:'primary'
+                      }}
                       number={this.state.selectedSlice.valueHover || this.state.selectedSlice.value}
                       {...this.state.selectedSlice.valueHoverProps}
                     />
@@ -214,6 +218,7 @@ class GenericPieChart extends Component {
                       src={this.props.defaultImage}
                     />
                     <Text
+                      color={'primary'}
                       fontSize={[3,4]}
                       fontWeight={[3,4]}
                     >

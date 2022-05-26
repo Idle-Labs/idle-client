@@ -271,6 +271,7 @@ class DelegateVote extends Component {
                       justifyContent={'center'}
                     >
                       <RoundButton
+                        type={'secondary'}
                         buttonProps={{
                           mx:1,
                           fontSize:[1,2],
@@ -282,11 +283,11 @@ class DelegateVote extends Component {
                         Delegate
                       </RoundButton>
                       <RoundButton
+                        type={'primary'}
                         buttonProps={{
                           mx:1,
                           fontSize:[1,2],
                           width:['auto','10em'],
-                          mainColor:this.props.theme.colors.redeem,
                           disabled:this.props.currentDelegate.toLowerCase() === this.props.account.toLowerCase()
                         }}
                         handleClick={ e => this.setDelegate(this.props.account) }

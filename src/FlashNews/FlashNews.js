@@ -120,7 +120,7 @@ class FlashNews extends Component {
           }
           <Text
             fontSize={2}
-            fontWeight={500}
+            fontWeight={3}
             color={"flashColor"}
             textAlign={"center"}
           >
@@ -129,7 +129,7 @@ class FlashNews extends Component {
           <ExtLink
             ml={1}
             fontSize={2}
-            fontWeight={500}
+            fontWeight={3}
             color={"primary"}
             hoverColor={"primary"}
             href={this.state.activeNews.link.url}

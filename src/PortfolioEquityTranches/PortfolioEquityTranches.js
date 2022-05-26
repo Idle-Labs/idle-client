@@ -580,9 +580,9 @@ class PortfolioEquityTranches extends Component {
         axis: {
           ticks: {
             text: {
-              fontSize:12,
               fontWeight:600,
               fill:this.props.theme.colors.legend,
+              fontSize:this.props.theme.fontSizes[0],
               fontFamily:this.props.theme.fonts.sansSerif
             }
           }

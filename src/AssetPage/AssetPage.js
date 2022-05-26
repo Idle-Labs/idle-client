@@ -310,7 +310,6 @@ class AssetPage extends Component {
                                 mt:1,
                                 width:'auto',
                                 minHeight:'40px',
-                                mainColor:'redeem',
                                 size:this.props.isMobile ? 'small' : 'medium'
                               }}
                               handleClick={ e => this.props.goToSection(`tools/${nexusMutualConfig.route}/deposit/${this.props.tokenConfig.idle.token}`) }

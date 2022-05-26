@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import TableRow from '../../TableRow/TableRow';
+import { Flex, Text, Link, Icon } from "rimble-ui";
 import FlexLoader from '../../FlexLoader/FlexLoader';
 import TableHeader from '../../TableHeader/TableHeader';
 import FunctionsUtil from '../../utilities/FunctionsUtil';
 import ProposalField from '../ProposalField/ProposalField';
-import { Flex, Heading, Text, Link, Icon } from "rimble-ui";
 import ProposalListFilters from '../ProposalListFilters/ProposalListFilters';
 
 class ProposalsList extends Component {
@@ -252,15 +252,14 @@ class ProposalsList extends Component {
                     </Flex>
                   </Flex>
                 ) : (
-                  <Heading.h3
+                  <Text
                     fontWeight={2}
                     fontSize={[2,3]}
-                    color={'dark-gray'}
+                    color={'copyColor'}
                     textAlign={'center'}
-                    fontFamily={'sansSerif'}
                   >
                     There are no proposals
-                  </Heading.h3>
+                  </Text>
                 )
               }
             </Flex>

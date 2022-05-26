@@ -564,9 +564,10 @@ class TrancheDetails extends Component {
                       flexDirection={'column'}
                     >
                       <Text
+                        fontWeight={3}
                         fontSize={[1,2]}
-                        color={'cellText'}
-                        fontWeight={[2,3]}
+                        color={'primary'}
+                        fontFamily={'titles'}
                       >
                         Protocol
                       </Text>
@@ -594,7 +595,7 @@ class TrancheDetails extends Component {
                           fieldInfo={{
                             name:'protocolName',
                             props:{
-                              fontSize:[2,3],
+                              fontSize:[1,2],
                               color:'copyColor'
                             }
                           }}
@@ -611,9 +612,10 @@ class TrancheDetails extends Component {
                       flexDirection={'column'}
                     >
                       <Text
+                        fontWeight={3}
                         fontSize={[1,2]}
-                        color={'cellText'}
-                        fontWeight={[2,3]}
+                        color={'primary'}
+                        fontFamily={'titles'}
                       >
                         Token
                       </Text>
@@ -641,7 +643,7 @@ class TrancheDetails extends Component {
                           fieldInfo={{
                             name:'tokenName',
                             props:{
-                              fontSize:[2,3],
+                              fontSize:[1,2],
                               color:'copyColor'
                             }
                           }}
@@ -658,9 +660,10 @@ class TrancheDetails extends Component {
                       flexDirection={'column'}
                     >
                       <Text
+                        fontWeight={3}
                         fontSize={[1,2]}
-                        color={'cellText'}
-                        fontWeight={[2,3]}
+                        color={'primary'}
+                        fontFamily={'titles'}
                       >
                         Pool Size
                       </Text>
@@ -675,7 +678,7 @@ class TrancheDetails extends Component {
                             name:'tranchePool',
                             props:{
                               decimals:2,
-                              fontSize:[2,3],
+                              fontSize:[1,2],
                               color:'copyColor'
                             }
                           }}
@@ -695,7 +698,9 @@ class TrancheDetails extends Component {
                       <TooltipText
                         textProps={{
                           fontSize:[1,2],
-                          fontWeight:[2,3]
+                          color:'primary',
+                          fontWeight:[2,3],
+                          fontFamily:'ctas',
                         }}
                         text={'Auto-Compounding'}
                         message={this.functionsUtil.getGlobalConfig(['messages','autoFarming'])}
@@ -711,7 +716,7 @@ class TrancheDetails extends Component {
                             name:'autoFarming',
                             props:{
                               decimals:2,
-                              fontSize:[2,3],
+                              fontSize:[1,2],
                               color:'copyColor'
                             }
                           }}
@@ -731,7 +736,9 @@ class TrancheDetails extends Component {
                       <TooltipText
                         textProps={{
                           fontSize:[1,2],
-                          fontWeight:[2,3]
+                          color:'primary',
+                          fontWeight:[2,3],
+                          fontFamily:'ctas',
                         }}
                         text={'Staking Rewards'}
                         message={this.functionsUtil.getGlobalConfig(['messages','stakingRewards'])}
@@ -747,7 +754,7 @@ class TrancheDetails extends Component {
                             name:'stakingRewards',
                             props:{
                               decimals:2,
-                              fontSize:[2,3],
+                              fontSize:[1,2],
                               color:'copyColor'
                             }
                           }}
@@ -767,7 +774,9 @@ class TrancheDetails extends Component {
                       <TooltipText
                         textProps={{
                           fontSize:[1,2],
-                          fontWeight:[2,3]
+                          color:'primary',
+                          fontWeight:[2,3],
+                          fontFamily:'ctas',
                         }}
                         text={'APY'}
                         message={this.functionsUtil.getGlobalConfig(['messages','apyTranches'])}
@@ -783,7 +792,7 @@ class TrancheDetails extends Component {
                             name:'trancheApyWithTooltip',
                             props:{
                               decimals:2,
-                              fontSize:[2,3],
+                              fontSize:[1,2],
                               color:'copyColor'
                             }
                           }}
@@ -831,7 +840,9 @@ class TrancheDetails extends Component {
                       <TooltipText
                         textProps={{
                           fontSize:[1,2],
-                          fontWeight:[2,3]
+                          color:'primary',
+                          fontWeight:[2,3],
+                          fontFamily:'ctas',
                         }}
                         text={'Apr Ratio'}
                         message={this.functionsUtil.getGlobalConfig(['messages','aprRatio'])}
@@ -846,7 +857,7 @@ class TrancheDetails extends Component {
                           fieldInfo={{
                             name:'trancheAPRRatio',
                             props:{
-                              fontSize:[2,3],
+                              fontSize:[1,2],
                               color:'copyColor'
                             }
                           }}
@@ -864,9 +875,10 @@ class TrancheDetails extends Component {
                       flexDirection={'column'}
                     >
                       <Text
+                        fontWeight={3}
                         fontSize={[1,2]}
-                        color={'cellText'}
-                        fontWeight={[2,3]}
+                        color={'primary'}
+                        fontFamily={'titles'}
                       >
                         Status
                       </Text>
@@ -894,9 +906,10 @@ class TrancheDetails extends Component {
                       flexDirection={'column'}
                     >
                       <Text
+                        fontWeight={2}
                         fontSize={[1,2]}
-                        color={'cellText'}
-                        fontWeight={[2,3]}
+                        color={'primary'}
+                        fontFamily={'titles'}
                       >
                         Limit Cap
                       </Text>
@@ -911,7 +924,7 @@ class TrancheDetails extends Component {
                             name:'trancheLimit',
                             props:{
                               decimals:3,
-                              fontSize:[2,3],
+                              fontSize:[1,2],
                               color:'copyColor'
                             }
                           }}
@@ -1349,20 +1362,18 @@ class TrancheDetails extends Component {
                         <ExecuteTransaction
                           params={[]}
                           {...this.props}
-                          Component={Button}
+                          Component={RoundButton}
                           parentProps={{
                             width:1,
                             alignItems:'center',
                             justifyContent:'center'
                           }}
                           componentProps={{
-                            fontSize:3,
-                            fontWeight:3,
-                            size:'medium',
-                            width:[1,1/3],
-                            borderRadius:4,
                             value:'Unstake',
-                            mainColor:'redeem',
+                            buttonProps:{
+                              size:'medium',
+                              width:[1,1/3],
+                            }
                           }}
                           action={'Unstake'}
                           contractName={this.state.contractInfo.name}

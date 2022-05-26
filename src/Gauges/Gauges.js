@@ -6,9 +6,9 @@ import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import TranchesList from '../TranchesList/TranchesList';
 import AssetSelector from '../AssetSelector/AssetSelector';
+import { Flex, Box, Text, Icon, Heading } from "rimble-ui";
 import DashboardCard from '../DashboardCard/DashboardCard';
 import CardIconButton from '../CardIconButton/CardIconButton';
-import { Flex, Box, Text, Icon, Heading, Button } from "rimble-ui";
 import SendTxWithBalance from '../SendTxWithBalance/SendTxWithBalance';
 import ExecuteTransaction from '../ExecuteTransaction/ExecuteTransaction';
 
@@ -971,7 +971,7 @@ class Gauges extends Component {
                       iconProps={{
                         color:'tick'
                       }}
-                      text={`Your vote has been succesfully broadcasted and will remain registered until you change it.<br />Wait until <strong>${this.state.unlockDate} UTC</strong> to update your vote for this gauge.`}
+                      text={`Your vote has been succesfully  and will remain registered until you change it.<br />Wait until <strong>${this.state.unlockDate} UTC</strong> to update your vote for this gauge.`}
                     />
                   ) : this.state.selectedAction === 'vote' && this.functionsUtil.BNify(this.state.availableVotingPower).lte(0) ? (
                     <IconBox
@@ -1103,20 +1103,18 @@ class Gauges extends Component {
                               <ExecuteTransaction
                                 params={[]}
                                 {...this.props}
-                                Component={Button}
+                                Component={RoundButton}
                                 parentProps={{
                                   width:1,
                                   alignItems:'center',
                                   justifyContent:'center'
                                 }}
                                 componentProps={{
-                                  fontSize:3,
-                                  fontWeight:3,
-                                  size:'medium',
-                                  width:[1,1/3],
                                   value:'Claim',
-                                  borderRadius:4,
-                                  mainColor:'redeem',
+                                  buttonProps:{
+                                    size:'medium',
+                                    width:[1,1/3],
+                                  }
                                 }}
                                 action={'Claim'}
                                 methodName={'distribute'}
@@ -1177,20 +1175,18 @@ class Gauges extends Component {
                               <ExecuteTransaction
                                 params={[]}
                                 {...this.props}
-                                Component={Button}
+                                Component={RoundButton}
                                 parentProps={{
                                   width:1,
                                   alignItems:'center',
                                   justifyContent:'center'
                                 }}
                                 componentProps={{
-                                  fontSize:3,
-                                  fontWeight:3,
-                                  size:'medium',
-                                  width:[1,1/3],
                                   value:'Claim',
-                                  borderRadius:4,
-                                  mainColor:'redeem',
+                                  buttonProps:{
+                                    size:'medium',
+                                    width:[1,1/3],
+                                  }
                                 }}
                                 action={'Claim'}
                                 methodName={'claim_rewards'}

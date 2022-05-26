@@ -232,7 +232,8 @@ class MenuAccount extends Component {
                           fontSize={2}
                           fontWeight={3}
                           {...this.props}
-                          color={"copyColor"}
+                          color={"primary"}
+                          fontFamily={'ctas'}
                           hash={this.props.account}
                         />
                       </Flex>
@@ -319,7 +320,8 @@ class MenuAccount extends Component {
                           fontSize={2}
                           fontWeight={3}
                           {...this.props}
-                          color={"copyColor"}
+                          color={"primary"}
+                          fontFamily={'ctas'}
                           hash={this.props.account}
                         />
                       </Flex>
@@ -352,7 +354,8 @@ class MenuAccount extends Component {
                       <Text
                         fontWeight={3}
                         fontSize={[1, 2]}
-                        color={"copyColor"}
+                        color={"primary"}
+                        fontFamily={'ctas'}
                       >
                         {this.state.idleTokenBalance.toFixed(2)} IDLE
                       </Text>
@@ -464,7 +467,6 @@ class MenuAccount extends Component {
             {...this.props}
             buttonProps={{
               width:'auto',
-              boxShadow: "none",
               style: {
                 display: "flex",
                 justifyContent: "flex-start"
@@ -490,8 +492,8 @@ class MenuAccount extends Component {
                 pr={1}
                 mr={2}
                 fontWeight={3}
-                color={"white"}
                 fontSize={[2]}
+                color={"ctaPrimaryBg"}
                 alignContent={"center"}
                 justifyContent={"center"}
               >

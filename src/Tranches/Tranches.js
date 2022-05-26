@@ -208,7 +208,8 @@ class Tranches extends Component {
             unitProps:{
               mr:2,
               fontWeight:4,
-              fontSize:[3,4]
+              fontSize:[3,4],
+              color:'primary'
             }
           },
           valueHover:balanceValue,
@@ -236,7 +237,8 @@ class Tranches extends Component {
               unitProps:{
                 mr:2,
                 fontWeight:4,
-                fontSize:[3,4]
+                fontSize:[3,4],
+                color:'primary'
               }
             },
             valueHover:balanceValue,
@@ -539,8 +541,8 @@ class Tranches extends Component {
                               this.state.portfolio.avgAPY ? (
                                 <Text
                                   lineHeight={1}
+                                  color={'primary'}
                                   fontWeight={[3,4]}
-                                  color={'copyColor'}
                                   fontFamily={'counter'}
                                   fontSize={[4,'1.7em']}
                                   dangerouslySetInnerHTML={{ __html: this.state.portfolio.avgAPY.toFixed(2)+'<small>%</small>' }}
@@ -649,7 +651,7 @@ class Tranches extends Component {
                                         unit={'+$'}
                                         decimals={5}
                                         counterStyle={{
-                                          fontSize:14,
+                                          fontSize:16,
                                           fontWeight:600,
                                           color:this.props.theme.colors.transactions.status.completed
                                         }}
@@ -801,7 +803,7 @@ class Tranches extends Component {
                             showLegend={true}
                             showLoader={false}
                             legendProps={{
-                              itemWidth:80,
+                              itemWidth:70,
                               itemsSpacing:8
                             }}
                             tooltipFormat={v => v+'%'}
@@ -911,7 +913,6 @@ class Tranches extends Component {
                       <Title
                         as={'h4'}
                         fontSize={[2,4]}
-                        fontWeight={[3,4]}
                       >
                         Deposited Tranches
                       </Title>
@@ -1121,10 +1122,7 @@ class Tranches extends Component {
                               props:{
                                 width:1,
                                 fontSize:3,
-                                fontWeight:3,
                                 height:'45px',
-                                borderRadius:4,
-                                boxShadow:null,
                                 size: this.props.isMobile ? 'small' : 'medium',
                                 handleClick:(props) => this.selectTranche(props.protocol,props.token)
                               }
@@ -1369,10 +1367,7 @@ class Tranches extends Component {
                             props:{
                               width:1,
                               fontSize:3,
-                              fontWeight:3,
                               height:'45px',
-                              borderRadius:4,
-                              boxShadow:null,
                               mainColor:'deposit',
                               size: this.props.isMobile ? 'small' : 'medium',
                               handleClick:(props) => this.selectTranche(props.protocol,props.token)

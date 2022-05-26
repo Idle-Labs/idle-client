@@ -547,7 +547,8 @@ class App extends Component {
         this.setThemeMode('light', false);
       } else {
         // Get stored Mode
-        const themeMode = this.functionsUtil.getStoredItem('themeMode', false) || this.functionsUtil.getGlobalConfig(['dashboard', 'theme', 'mode']);
+        // const themeMode = this.functionsUtil.getStoredItem('themeMode', false) || this.functionsUtil.getGlobalConfig(['dashboard', 'theme', 'mode']);
+        const themeMode = this.functionsUtil.getGlobalConfig(['dashboard', 'theme', 'mode']);
         this.setThemeMode(themeMode);
       }
     }

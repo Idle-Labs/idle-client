@@ -1362,12 +1362,8 @@ class IdleStaking extends Component {
                                   justifyContent:'center'
                                 }}
                                 componentProps={{
-                                  fontSize:3,
-                                  fontWeight:3,
                                   size:'medium',
                                   width:[1,1/2],
-                                  borderRadius:4,
-                                  mainColor:'redeem',
                                   value:'Withdraw',
                                 }}
                                 action={'Withdraw'}

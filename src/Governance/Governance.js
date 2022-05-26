@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import styles from './Governance.module.scss';
 import FlexLoader from "../FlexLoader/FlexLoader";
 import { Flex, Card, Icon, Text } from "rimble-ui";
 import GovernanceUtil from "../utilities/GovernanceUtil";
@@ -463,7 +464,7 @@ class Dashboard extends Component {
           alignItems={'center'}
           flexDirection={'column'}
           justifyContent={'center'}
-          backgroundColor={'selectBg'}
+          backgroundColor={'dashboardBg'}
         >
           <FlexLoader
             textProps={{
@@ -494,7 +495,7 @@ class Dashboard extends Component {
           position={'fixed'}
           flexDirection={'row'}
           backgroundColor={'dashboardBg'}
-          className={this.props.themeMode}
+          className={[this.props.themeMode,styles.bg]}
           width={this.props.isMobile && this.state.menuOpened ? '180vw' : '100vw'}
         >
           {
@@ -509,11 +510,10 @@ class Dashboard extends Component {
                 <Card
                   p={0}
                   border={0}
+                  boxShadow={0}
                   width={'auto'}
                   height={'100vh'}
-                  backgroundColor={'menuBg'}
-                  borderColor={this.props.theme.colors.menuRightBorder}
-                  borderRight={`1px solid ${this.props.theme.colors.menuRightBorder}`}
+                  backgroundColor={'transparent'}
                   >
                   <DashboardMenu
                     {...this.props}
@@ -547,7 +547,6 @@ class Dashboard extends Component {
               }}
               flexDirection={'column'}
               minHeight={['92vh','auto']}
-              backgroundColor={'dashboardBg'}
             >
               {
                 this.state.governanceEnabled && this.props.accountInizialized && this.props.networkInitialized && this.props.web3 && (

@@ -26,10 +26,12 @@ class DashboardCard extends Component {
     const cardProps = {
       p: 0,
       border:0,
+      display:'flex',
       borderRadius: 2,
       borderColor: null,
       position: 'relative',
       minHeight: 'initial',
+      flexDirection:'column',
       backgroundColor: 'cardBg'
     };
 

@@ -263,12 +263,7 @@ class Base extends Component {
                       },
                       props:{
                         width:1,
-                        fontSize:3,
-                        fontWeight:3,
                         height:'45px',
-                        borderRadius:4,
-                        boxShadow:null,
-                        mainColor:'redeem',
                         size: this.props.isMobile ? 'small' : 'medium',
                         handleClick:(props) => props.row.status!=='Expired' && props.row.actionUrl && this.functionsUtil.openWindow(props.row.actionUrl)
                       }

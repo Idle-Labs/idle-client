@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import styles from './Dashboard.module.scss';
 import FlashNews from '../FlashNews/FlashNews';
 import FlexLoader from '../FlexLoader/FlexLoader';
 import { Flex, Card, Icon, Text } from 'rimble-ui';
@@ -783,7 +784,7 @@ class Dashboard extends Component {
           alignItems={'center'}
           flexDirection={'column'}
           justifyContent={'center'}
-          backgroundColor={'selectBg'}
+          backgroundColor={'dashboardBg'}
         >
           <FlexLoader
             textProps={{
@@ -816,7 +817,7 @@ class Dashboard extends Component {
           position={'fixed'}
           flexDirection={'row'}
           backgroundColor={'dashboardBg'}
-          className={this.props.themeMode}
+          className={[this.props.themeMode,styles.bg]}
           width={this.props.isMobile && this.state.menuOpened ? '180vw' : '100vw'}
         >
           {
@@ -835,7 +836,6 @@ class Dashboard extends Component {
                   width={'auto'}
                   height={'100vh'}
                   backgroundColor={'transparent'}
-                  borderColor={this.props.theme.colors.menuRightBorder}
                 >
                   <DashboardMenu
                     {...this.props}
@@ -865,6 +865,7 @@ class Dashboard extends Component {
               mb={0}
               width={1}
               pr={[3, 5]}
+              pl={[3, 0]}
               alignItems={"center"}
               style={{
                 overflowY: 'scroll',
@@ -873,7 +874,6 @@ class Dashboard extends Component {
               justifyItems={"center"}
               flexDirection={'column'}
               height={['100vh', '100%']}
-              backgroundColor={'dashboardBg'}
             >
               {
                 this.props.isDashboard && (

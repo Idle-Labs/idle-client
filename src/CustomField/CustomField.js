@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import AssetField from '../AssetField/AssetField';
 import SmartNumber from '../SmartNumber/SmartNumber';
+import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
-import { Text, Icon, Image, Button, Link, Flex, Loader } from "rimble-ui";
+import { Text, Icon, Image, Link, Flex, Loader } from "rimble-ui";
 
 class CustomField extends Component {
 
@@ -120,10 +121,11 @@ class CustomField extends Component {
         fieldProps.name = customValue;
       break;
       case 'button':
-        CustomComponent = Button;
         componentHasChildren = true;
+        CustomComponent = RoundButton;
         customValue = fieldInfo.label || fieldProps.label;
         fieldProps.onClick=() => fieldProps.handleClick(this.props)
+        fieldProps.buttonProps = fieldProps;
       break;
       case 'html':
         output = (<Text {...fieldProps} dangerouslySetInnerHTML={{

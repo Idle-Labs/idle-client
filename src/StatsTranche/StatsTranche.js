@@ -621,6 +621,7 @@ render() {
                       precision={2}
                       type={'money'}
                       {...valueProps}
+                      color={'primary'}
                       unitProps={unitProps}
                       number={this.state.aum}
                       flexProps={{
@@ -711,11 +712,11 @@ render() {
                 </Flex>
               </Flex>
               <DashboardCard
-                title={'Historical Performance'}
-                description={performanceTooltip}
                 cardProps={{
                   mb:[3,4]
                 }}
+                title={'Historical Performance'}
+                description={performanceTooltip}
               >
                 <Flex
                   mb={3}

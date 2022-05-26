@@ -1266,7 +1266,6 @@ class DeployB2BVesting extends Component {
                                         componentProps={{
                                           size:'medium',
                                           value:'Claim',
-                                          mainColor:'redeem',
                                         }}
                                         methodName={'claim'}
                                         action={this.state.action}

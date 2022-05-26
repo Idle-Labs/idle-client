@@ -3,13 +3,14 @@ import CountUp from 'react-countup';
 import React, { Component } from 'react';
 import { linearGradientDef } from '@nivo/core'
 import SmartNumber from '../SmartNumber/SmartNumber';
+import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import GenericChart from '../GenericChart/GenericChart';
 import CustomTooltip from '../CustomTooltip/CustomTooltip';
 import VariationNumber from '../VariationNumber/VariationNumber';
 import AllocationChart from '../AllocationChart/AllocationChart';
 import CustomTooltipRow from '../CustomTooltip/CustomTooltipRow';
-import { Image, Text, Loader, Button, Tooltip, Icon, Flex, Link } from "rimble-ui";
+import { Image, Text, Loader, Tooltip, Icon, Flex, Link } from "rimble-ui";
 
 class AssetField extends Component {
 
@@ -802,13 +803,16 @@ class AssetField extends Component {
     const loader = showLoader ? (<Loader size="20px" />) : null;
 
     const fieldProps = {
-      fontWeight:2,
-      fontSize:[0,2],
       color:'cellText',
       flexProps:{
         justifyContent:'flex-start'
       }
     };
+
+    if (fieldInfo.name !== 'button'){
+      fieldProps.fontWeight = 2;
+      fieldProps.fontSize = [0,2];
+    }
 
     // Replace props
     if (fieldInfo.props && Object.keys(fieldInfo.props).length){
@@ -1195,7 +1199,7 @@ class AssetField extends Component {
       case 'button':
         const buttonLabel = typeof fieldInfo.label === 'function' ? fieldInfo.label(this.props) : fieldInfo.label;
         output = (
-          <Button {...fieldProps} onClick={() => fieldProps.handleClick(this.props) }>{buttonLabel}</Button>
+          <RoundButton buttonProps={fieldProps} handleClick={() => fieldProps.handleClick(this.props) }>{buttonLabel}</RoundButton>
         );
       break;
       case 'performanceChart':

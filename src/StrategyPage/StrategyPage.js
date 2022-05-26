@@ -8,10 +8,10 @@ import DashboardCard from '../DashboardCard/DashboardCard';
 import PortfolioDonut from '../PortfolioDonut/PortfolioDonut';
 import GenericSelector from '../GenericSelector/GenericSelector';
 import PortfolioEquity from '../PortfolioEquity/PortfolioEquity';
+import { Flex, Box, Text, Tooltip, Icon, Loader } from "rimble-ui";
 // import ActiveCoverages from '../ActiveCoverages/ActiveCoverages';
 import TransactionsList from '../TransactionsList/TransactionsList';
 import EarningsEstimation from '../EarningsEstimation/EarningsEstimation';
-import { Flex, Box, Heading, Text, Tooltip, Icon, Loader } from "rimble-ui";
 import DashboardIconButton from '../DashboardIconButton/DashboardIconButton';
 import TotalBalanceCounter from '../TotalBalanceCounter/TotalBalanceCounter';
 import TotalEarningsCounter from '../TotalEarningsCounter/TotalEarningsCounter';
@@ -385,8 +385,8 @@ class StrategyPage extends Component {
                               this.state.avgAPY ? (
                                 <Text
                                   lineHeight={1}
+                                  color={'primary'}
                                   fontWeight={[3,4]}
-                                  color={'copyColor'}
                                   fontFamily={'counter'}
                                   fontSize={[4,'1.7em']}
                                   dangerouslySetInnerHTML={{ __html: this.state.avgAPY.toFixed(2)+'<small>%</small>' }}
@@ -563,8 +563,8 @@ class StrategyPage extends Component {
                               this.state.portfolio ? (
                                 <Text
                                   lineHeight={1}
+                                  color={'primary'}
                                   fontWeight={[3,4]}
-                                  color={'copyColor'}
                                   fontFamily={'counter'}
                                   fontSize={[4,'1.7em']}
                                   dangerouslySetInnerHTML={{ __html: '<small>+</small>'+this.state.portfolio.totalEarningsPerc.toFixed(2)+'<small>%</small>' }}
@@ -647,7 +647,6 @@ class StrategyPage extends Component {
                               justifyContent={'flex-start'}
                             >
                               <Title
-                                fontWeight={4}
                                 fontSize={[2,3]}
                                 textAlign={'left'}
                               >
@@ -737,12 +736,12 @@ class StrategyPage extends Component {
                       borderColor={'divider'}
                       borderBottom={'1px solid transparent'}
                     >
-                      <Heading.h4
+                      <Title
+                        as={'h4'}
                         fontSize={[2,4]}
-                        fontWeight={[3,4]}
                       >
                         Tools
-                      </Heading.h4>
+                      </Title>
                     </Flex>
                     <Flex
                       flexDirection={['column','row']}
@@ -921,12 +920,7 @@ class StrategyPage extends Component {
                                 },
                                 props:{
                                   width:1,
-                                  fontSize:3,
-                                  fontWeight:3,
                                   height:'45px',
-                                  borderRadius:4,
-                                  boxShadow:null,
-                                  mainColor:'migrate',
                                   size: this.props.isMobile ? 'small' : 'medium',
                                   handleClick:(props) => this.props.goToSection(`tools/${batchDepositConfig.route}/${props.tokenConfig.token}`)
                                 }
@@ -967,12 +961,12 @@ class StrategyPage extends Component {
                         borderColor={'divider'}
                         borderBottom={'1px solid transparent'}
                       >
-                        <Heading.h4
+                        <Title
+                          as={'h4'}
                           fontSize={[2,4]}
-                          fontWeight={[3,4]}
                         >
                           Assets to migrate
-                        </Heading.h4>
+                        </Title>
                       </Flex>
                       <AssetsList
                         enabledTokens={Object.keys(this.state.tokensToMigrate)}
@@ -1095,12 +1089,7 @@ class StrategyPage extends Component {
                                 label: 'Migrate',
                                 props:{
                                   width:1,
-                                  fontSize:3,
-                                  fontWeight:3,
                                   height:'45px',
-                                  borderRadius:4,
-                                  boxShadow:null,
-                                  mainColor:'migrate',
                                   size: this.props.isMobile ? 'small' : 'medium',
                                   handleClick:(props) => this.props.changeToken(props.token)
                                 }
@@ -1127,12 +1116,12 @@ class StrategyPage extends Component {
                         borderColor={'divider'}
                         borderBottom={'1px solid transparent'}
                       >
-                        <Heading.h4
+                        <Title
+                          as={'h4'}
                           fontSize={[2,4]}
-                          fontWeight={[3,4]}
                         >
                           Deposited assets
-                        </Heading.h4>
+                        </Title>
                       </Flex>
                       <AssetsList
                         enabledTokens={this.state.depositedTokens}
@@ -1282,12 +1271,7 @@ class StrategyPage extends Component {
                                 label:'Manage',
                                 props:{
                                   width:1,
-                                  fontSize:3,
-                                  fontWeight:3,
                                   height:'45px',
-                                  borderRadius:4,
-                                  boxShadow:null,
-                                  mainColor:'redeem',
                                   size: this.props.isMobile ? 'small' : 'medium',
                                   handleClick:(props) => this.props.changeToken(props.token)
                                 }
@@ -1309,12 +1293,12 @@ class StrategyPage extends Component {
                         borderColor={'divider'}
                         borderBottom={'1px solid transparent'}
                       >
-                        <Heading.h4
+                        <Title
+                          as={'h4'}
                           fontSize={[2,4]}
-                          fontWeight={[3,4]}
                         >
                           Available assets
-                        </Heading.h4>
+                        </Title>
                       </Flex>
                       <AssetsList
                         enabledTokens={this.state.remainingTokens}
@@ -1435,18 +1419,9 @@ class StrategyPage extends Component {
                                 },
                                 props:{
                                   width:1,
-                                  fontSize:3,
-                                  fontWeight:3,
                                   height:'45px',
-                                  borderRadius:4,
-                                  boxShadow:null,
                                   size: this.props.isMobile ? 'small' : 'medium',
                                   handleClick:(props) => this.props.changeToken(props.token)
-                                },
-                                funcProps:{
-                                  mainColor: (props) => {
-                                    return Object.keys(this.state.tokensToMigrate).includes(props.token) ? 'migrate' : 'deposit'
-                                  }
                                 }
                               }
                             ]

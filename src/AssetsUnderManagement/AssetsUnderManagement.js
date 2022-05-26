@@ -90,8 +90,8 @@ class AssetsUnderManagement extends Component {
             <span
               style={ this.props.counterStyle ? this.props.counterStyle : {
                 display:'block',
-                color:'dark-gray',
                 whiteSpace:'nowrap',
+                color:this.props.theme.colors.primary,
                 fontFamily:this.props.theme.fonts.counter,
                 fontWeight:this.props.theme.fontWeights[5],
                 textAlign: this.props.isMobile ? 'center' : 'right',
@@ -104,8 +104,8 @@ class AssetsUnderManagement extends Component {
         {
           (typeof this.props.subtitle === 'undefined' || this.props.subtitle) && (
             <Title
+              fontSize={2}
               fontWeight={3}
-              fontSize={[2,2]}
               color={'cellTitle'}
               textAlign={['center','right']}
               {...this.props.subtitleProps}
