@@ -66,10 +66,10 @@ ModalCard.Header = (props) => (
       <Heading.h3
         mb={0}
         fontSize={[3,3]}
-        color={'copyColor'}
+        color={'primary'}
         textAlign={'center'}
+        fontFamily={'titles'}
         mt={props.icon ? 2 : 0}
-        fontFamily={'sansSerif'}
         {...props.titleProps}
       >
         {props.title}
