@@ -226,7 +226,7 @@ class AllocationChart extends Component {
                       mb={1}
                       width={['1.8em','2em']}
                       height={['1.8em','2em']}
-                      src={`/images/idle-mark.png`}
+                      src={`/images/idle-mark.svg`}
                     />
                     <SmartNumber
                       unitProps={{

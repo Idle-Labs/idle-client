@@ -87,12 +87,12 @@ export default {
       secondary:{
         default:{
           text:'#FFFFFF',
-          background:'#1B1E27',
+          background:'#FFFFFF',
           border:'1px solid #FFFFFF'
         },
         hover:{
           text:'#FFFFFF',
-          background:'#1B1E27',
+          background:'#FFFFFF',
           border:'1px solid #FFFFFF'
         }
       }
@@ -127,14 +127,16 @@ export default {
     menuBg: '#293243',
     menuHover: '#293243',
     dropdownBg: '#4C5976',
-    flashColor: '#CDD0D6',
+    flashBg: '#04117B',
+    flashColor: '#FFFFFF',
     cardBgHover: '#4b5a76',
     cardBorder: '#0d2034',
     pageActive: '#d8d8d8',
     pageInactive: '#4f4f4f',
     menuIconActive: '#2a65d9',
     // cardBgActive: "#04117B",
-    cardBgActive: "#081fd6",
+    // cardBgActive: "#0c48a4",
+    cardBgActive: "#2272C8",
     cardBgContrast: "#293243",
     menuRightBorder: '#0d2034',
     experimental: "#8500ff",

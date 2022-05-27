@@ -13,6 +13,11 @@ class CardIconButton extends Component {
       this.props.cardProps
     );
 
+    const textProps = {...this.props.textProps};
+    if (this.props.isActive){
+      textProps.color = 'primary';
+    }
+
     return (
       <DashboardCard
         cardProps={cardProps}
@@ -88,7 +93,7 @@ class CardIconButton extends Component {
               />
             </Flex>
           )}
-          <Text fontWeight={3} fontSize={[1, 3]} {...this.props.textProps}>
+          <Text fontWeight={3} fontSize={[1, 3]} {...textProps}>
             {this.props.text}
           </Text>
         </Flex>

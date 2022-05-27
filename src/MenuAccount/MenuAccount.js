@@ -474,32 +474,7 @@ class MenuAccount extends Component {
             }}
             handleClick={this.props.account ? e => this.logout() : this.props.connectAndValidateAccount}
           >
-            <Flex
-              mr={2}
-              width={1}
-              alignItems={"center"}
-              justifyContent={"flex-start"}
-            >
-              <Image
-                ml={0}
-                pl={0}
-                mr={[2, 3]}
-                align={"center"}
-                height={"1.4em"}
-                src={"images/sidebar/plug_white.svg"}
-              />
-              <Text
-                pr={1}
-                mr={2}
-                fontWeight={3}
-                fontSize={[2]}
-                color={"ctaPrimaryBg"}
-                alignContent={"center"}
-                justifyContent={"center"}
-              >
-                Connect to Idle
-              </Text>
-            </Flex>
+            Connect to Idle
           </RoundButton>
           <Notifications
             {...this.props}

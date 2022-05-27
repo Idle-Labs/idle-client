@@ -62,7 +62,7 @@ ModalCard.Header = (props) => (
       alignItems={'center'}
       flexDirection={'column'}
     >
-      { props.icon && <Image width={ props.iconHeight ? props.iconHeight : '50px' } src={props.icon} /> }
+      { props.icon && <Image width={ props.iconHeight ? props.iconHeight : '40px' } src={props.icon} /> }
       <Heading.h3
         mb={0}
         fontSize={[3,3]}

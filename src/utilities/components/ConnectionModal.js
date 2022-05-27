@@ -356,7 +356,7 @@ class ConnectionModal extends React.Component {
     if (showConnectionButtons) {
       return (
         <Box>
-          <ModalCard.Header title={'Select your Wallet'} subtitle={'And get started with Idle.'} icon={'images/idle-mark.png'}></ModalCard.Header>
+          <ModalCard.Header title={'Select your Wallet'} subtitle={'And get started with Idle.'} icon={'images/idle-mark-white.svg'}></ModalCard.Header>
           <ModalCard.Body>
             <Flex width={1} px={[0,5]} flexDirection={'column'} justifyContent={'center'}>
               <Web3ConnectionButtons

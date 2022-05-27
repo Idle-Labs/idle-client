@@ -817,9 +817,25 @@ class Dashboard extends Component {
           position={'fixed'}
           flexDirection={'row'}
           backgroundColor={'dashboardBg'}
-          className={[this.props.themeMode,styles.bg]}
+          className={[this.props.themeMode]}
           width={this.props.isMobile && this.state.menuOpened ? '180vw' : '100vw'}
         >
+          <Flex
+            zIndex={1}
+            width={'100%'}
+            height={'100%'}
+            position={'absolute'}
+          >
+            <Flex
+              className={[styles.bg,styles['bg-top-left']]}
+            />
+            <Flex
+              className={[styles.bg,styles['bg-bottom-right']]}
+            />
+            <Flex
+              className={[styles.bg,styles['bg-noise']]}
+            />
+          </Flex>
           {
             (!this.props.isMobile || this.state.menuOpened) && (
               <Flex
@@ -849,7 +865,9 @@ class Dashboard extends Component {
           }
           <Flex
             pl={[0,3]}
+            zIndex={2}
             minHeight={'70vh'}
+            position={'relative'}
             width={['100vw', 5 / 6]}
             flexDirection={"column"}
           >

@@ -42,12 +42,13 @@ class DashboardCard extends Component {
       });
     }
 
-    if (isInteractive && this.state.mouseOver) {
-      cardProps.backgroundColor = 'cardBgHover';
-    }
-
-    if (isActive){
-      cardProps.backgroundColor = 'cardBgActive';
+    if (!this.props.cardProps || !this.props.cardProps.backgroundColor){
+      if (isInteractive && this.state.mouseOver) {
+        cardProps.backgroundColor = 'cardBgHover';
+      }
+      if (isActive){
+        cardProps.backgroundColor = 'cardBgActive';
+      }
     }
 
     const className = [

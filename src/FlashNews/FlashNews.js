@@ -91,7 +91,8 @@ class FlashNews extends Component {
         cardProps={{
           p: 2,
           mb: 3,
-          width: 1
+          width: 1,
+          backgroundColor:'flashBg'
         }}
         isActive={true}
         isInteractive={false}

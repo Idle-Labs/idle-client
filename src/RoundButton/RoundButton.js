@@ -23,8 +23,10 @@ class RoundButton extends Component {
       mainColor:theme.colors.ctas[ctaType][this.state.buttonState].background
     },this.props.buttonProps);
 
+    const ButtonComponent = ctaType === 'secondary' ? Button.Outline : Button;
+
     return (
-       <Button
+       <ButtonComponent
         {...buttonProps}
         onMouseEnter={(data, e) => {
           this.setState({
@@ -39,7 +41,7 @@ class RoundButton extends Component {
         onClick={this.props.handleClick || this.props.onClick}
        >
         {this.props.children}
-       </Button>
+       </ButtonComponent>
     );
   }
 }
