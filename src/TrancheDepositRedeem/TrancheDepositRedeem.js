@@ -906,7 +906,7 @@ class TrancheDetails extends Component {
                       flexDirection={'column'}
                     >
                       <Text
-                        fontWeight={2}
+                        fontWeight={3}
                         fontSize={[1,2]}
                         color={'primary'}
                         fontFamily={'titles'}
@@ -1058,7 +1058,7 @@ class TrancheDetails extends Component {
                     isInteractive={false}
                     iconProps={{
                       size:'1.8em',
-                      color:'flashColor'
+                      color:'primary'
                     }}
                     icon={'AssignmentLate'}
                     textProps={{
@@ -1081,7 +1081,7 @@ class TrancheDetails extends Component {
                     isInteractive={false}
                     iconProps={{
                       size:'1.8em',
-                      color:'flashColor'
+                      color:'primary'
                     }}
                     icon={'AssignmentLate'}
                     textProps={{
@@ -1224,7 +1224,7 @@ class TrancheDetails extends Component {
                     isInteractive={false}
                     iconProps={{
                       size:'1.2em',
-                      color:'flashColor'
+                      color:'primary'
                     }}
                     textProps={{
                       fontWeight:500,

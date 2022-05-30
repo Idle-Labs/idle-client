@@ -810,7 +810,7 @@ class AssetField extends Component {
     };
 
     if (fieldInfo.name !== 'button'){
-      fieldProps.fontWeight = 2;
+      fieldProps.fontWeight = 3;
       fieldProps.fontSize = [0,2];
     }
 
@@ -828,6 +828,11 @@ class AssetField extends Component {
           fieldProps[p] = fieldInfo.funcProps[p](this.props);
         }
       });
+    }
+
+    // Highlight text color on hover
+    if (!!this.props.mouseOver){
+      fieldProps.color = 'primary';
     }
 
     const tokenConfigStats = this.props.token ? this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token.toUpperCase()]) : null;

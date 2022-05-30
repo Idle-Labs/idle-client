@@ -1,8 +1,9 @@
 import Title from '../Title/Title';
 import React, { Component } from 'react';
+import { Flex, Text, Image } from "rimble-ui";
 import FlexLoader from '../FlexLoader/FlexLoader';
+import RoundButton from '../RoundButton/RoundButton';
 import TooltipText from '../TooltipText/TooltipText';
-import { Flex, Text, Image, Button } from "rimble-ui";
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import TrancheField from '../TrancheField/TrancheField';
 import DashboardCard from '../DashboardCard/DashboardCard';
@@ -245,8 +246,8 @@ class TrancheDetails extends Component {
 
   render() {
     const trancheDetails = this.functionsUtil.getGlobalConfig(['tranches',this.props.selectedTranche]);
-    const otherTrancheType = this.props.selectedTranche === 'AA' ? 'BB' : 'AA';
-    const otherTrancheDetails = this.functionsUtil.getGlobalConfig(['tranches',otherTrancheType]);
+    // const otherTrancheType = this.props.selectedTranche === 'AA' ? 'BB' : 'AA';
+    // const otherTrancheDetails = this.functionsUtil.getGlobalConfig(['tranches',otherTrancheType]);
     const trancheLimit = this.functionsUtil.formatMoney(this.functionsUtil.BNify(this.props.tokenConfig.limit),0)+' '+this.props.selectedToken;
     const stakingRewards = this.props.trancheConfig.CDORewards.stakingRewards.filter( t => t.enabled );
     return (
@@ -258,6 +259,7 @@ class TrancheDetails extends Component {
         maxWidth={['100%','45em']}
       >
         {
+          /*
           !this.props.showSelectButton && (
             <Flex
               width={1}
@@ -277,6 +279,7 @@ class TrancheDetails extends Component {
               </Button>
             </Flex>
           )
+          */
         }
         <DashboardCard
           cardProps={{
@@ -293,7 +296,7 @@ class TrancheDetails extends Component {
             mb={2}
             alignItems={'center'}
             flexDirection={'row'}
-            borderBottom={`1px solid ${trancheDetails.color.hex}`}
+            borderBottom={`1px solid ${this.props.theme.colors.divider}`}
           > 
             <Image
               mr={2}
@@ -675,18 +678,19 @@ class TrancheDetails extends Component {
           </Flex>
           {
             this.props.showSelectButton ? (
-                <Button
-                  mt={3}
-                  width={1}
-                  contrastColor={'cardBg'}
-                  icon={trancheDetails.icon}
-                  mainColor={trancheDetails.color.hex}
-                  onClick={e => this.props.selectTrancheType(trancheDetails.route)}
+                <RoundButton
+                  type={'primary'}
+                  buttonProps={{
+                    mt:3,
+                    icon:trancheDetails.icon,
+                    contrastColor:'ctaPrimaryText',
+                  }}
+                  handleClick={e => this.props.selectTrancheType(trancheDetails.route)}
                 >
                   {
                     this.props.tokenConfig ? `Go to ${trancheDetails.name}` : `Start with ${trancheDetails.name}`
                   }
-                </Button>
+                </RoundButton>
             ) : (
               <FlexLoader
                 flexProps={{

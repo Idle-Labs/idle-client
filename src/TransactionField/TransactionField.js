@@ -98,6 +98,11 @@ class TransactionField extends Component {
       });
     }
 
+    // Highlight text color on hover
+    if (!!this.props.mouseOver){
+      fieldProps.color = 'primary';
+    }
+
     switch (fieldInfo.name){
       case 'icon':
         if (transaction.action){

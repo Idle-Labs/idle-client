@@ -254,18 +254,16 @@ class EstimatedEarnings extends Component {
             >
               <Input
                 min={0}
+                border={0}
                 type={"number"}
                 required={true}
-                borderRadius={2}
                 fontWeight={500}
                 textAlign={'center'}
                 height={['3em','3.4em']}
-                borderColor={'cardBorder'}
                 boxShadow={'none !important'}
                 max={this.state.maxInputValue}
                 backgroundColor={'cardBgHover'}
                 onChange={this.changeInputValue.bind(this)}
-                border={`1px solid ${theme.colors.divider}`}
                 placeholder={`Insert ${this.props.selectedToken.toUpperCase()} amount`}
                 value={this.state.inputValue && !isNaN(this.state.inputValue) ? this.state.inputValue : ''}
               />

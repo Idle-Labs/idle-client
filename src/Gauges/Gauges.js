@@ -1,12 +1,13 @@
+import Title from '../Title/Title';
 import IconBox from '../IconBox/IconBox';
 import React, { Component } from 'react';
 import ConnectBox from '../ConnectBox/ConnectBox';
 import FlexLoader from '../FlexLoader/FlexLoader';
+import { Flex, Box, Text, Icon } from "rimble-ui";
 import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import TranchesList from '../TranchesList/TranchesList';
 import AssetSelector from '../AssetSelector/AssetSelector';
-import { Flex, Box, Text, Icon, Heading } from "rimble-ui";
 import DashboardCard from '../DashboardCard/DashboardCard';
 import CardIconButton from '../CardIconButton/CardIconButton';
 import SendTxWithBalance from '../SendTxWithBalance/SendTxWithBalance';
@@ -802,14 +803,13 @@ class Gauges extends Component {
                       cardProps={{
                         px:3,
                         py:2,
-                        width:0.49
+                        width:0.49,
+                        height:'55px'
                       }}
                       textProps={{
                         fontSize:[1,2]
                       }}
                       text={'Vote'}
-                      iconColor={'redeem'}
-                      iconBgColor={'#3f5fff'}
                       image={'images/vote.svg'}
                       isActive={ this.state.selectedAction === 'vote' }
                       handleClick={ e => this.setSelectedAction('vote') }
@@ -819,15 +819,15 @@ class Gauges extends Component {
                       cardProps={{
                         px:3,
                         py:2,
-                        width:0.49
+                        width:0.49,
+                        height:'55px'
                       }}
                       textProps={{
                         fontSize:[1,2]
                       }}
                       text={'Stake'}
                       icon={'Layers'}
-                      iconColor={'deposit'}
-                      iconBgColor={'#ced6ff'}
+                      iconColor={'primary'}
                       isActive={ this.state.selectedAction === 'stake' }
                       handleClick={ e => this.setSelectedAction('stake') }
                     />
@@ -1228,15 +1228,17 @@ class Gauges extends Component {
                 borderColor={'divider'}
                 borderBottom={'1px solid transparent'}
               >
-                <Heading.h4
+                <Title
+                  as={'h4'}
                   fontSize={[2,4]}
                   fontWeight={[3,4]}
                 >
                   Available Gauges
-                </Heading.h4>
+                </Title>
               </Flex>
               <TranchesList
                 handleClick={null}
+                isInteractive={true}
                 enabledProtocols={[]}
                 colsProps={{
                   fontSize:['10px','14px'],

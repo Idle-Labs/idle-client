@@ -662,7 +662,8 @@ class StrategyPage extends Component {
                               <GenericSelector
                                 innerProps={{
                                   p:0,
-                                  px:1
+                                  px:1,
+                                  border:1
                                 }}
                                 defaultValue={
                                   {value:'week',label:'1W'}

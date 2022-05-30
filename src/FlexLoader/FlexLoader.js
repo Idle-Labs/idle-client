@@ -4,6 +4,7 @@ import { Flex, Loader, Text } from "rimble-ui";
 class FlexLoader extends Component {
   render() {
     const textProps = Object.assign({
+      color:'primary',
       fontFamily:'ctas'
     },this.props.textProps);
     return (

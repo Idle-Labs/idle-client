@@ -32,8 +32,9 @@ class Breadcrumb extends Component {
              ml={[2,3]}
              fontSize={[1,2]}
              fontWeight={3}
-             color={'cellText'}
-             hoverColor={'copyColor'}
+             color={'primary'}
+             fontFamily={'titles'}
+             hoverColor={'primary'}
              onClick={this.props.handleClick}
            >
             {this.props.text}
@@ -50,7 +51,8 @@ class Breadcrumb extends Component {
                   ml={[1,3]}
                   fontWeight={3}
                   fontSize={[1,2]}
-                  hoverColor={'copyColor'}
+                  fontFamily={'titles'}
+                  hoverColor={'primary'}
                   style={ !this.props.isMobile ? {
                     maxWidth:'30%',
                     overflow: 'hidden',
@@ -59,7 +61,7 @@ class Breadcrumb extends Component {
                     borderLeft: `1px solid ${this.props.theme.colors.divider}`
                   } : null }
                   key={`breadcrumb_path_${index}`}
-                  color={link ? 'cellText' : 'statValue'}
+                  color={link ? 'primary' : 'statValue'}
                   onClick={link ? e => this.props.goToSection(link) : null}
                 >
                   {path}

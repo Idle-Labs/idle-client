@@ -2392,7 +2392,8 @@ class DepositRedeem extends Component {
                                     cardProps={{
                                       py: 2,
                                       px: [2, 3],
-                                      width: 0.48
+                                      width: 0.48,
+                                      border:this.state.erc20ForwarderEnabled ? 0 : 1
                                     }}
                                     textProps={{
                                       ml: [1, 2],
@@ -2411,7 +2412,8 @@ class DepositRedeem extends Component {
                                     cardProps={{
                                       py: 2,
                                       px: [2, 3],
-                                      width: 0.48
+                                      width: 0.48,
+                                      border:!this.state.erc20ForwarderEnabled ? 0 : 1
                                     }}
                                     textProps={{
                                       ml: [1, 2],
@@ -2913,17 +2915,16 @@ class DepositRedeem extends Component {
                                         }
                                         <Input
                                           min={0}
+                                          border={0}
                                           type={"number"}
                                           required={true}
                                           height={'3.4em'}
-                                          borderRadius={2}
                                           fontWeight={500}
                                           borderColor={'cardBorder'}
                                           backgroundColor={'cardBg'}
                                           boxShadow={'none !important'}
                                           placeholder={`Insert amount`}
                                           onChange={this.changeInputValue.bind(this)}
-                                          border={`1px solid ${this.props.theme.colors.divider}`}
                                           value={this.state.inputValue[this.state.action] !== null ? this.functionsUtil.BNify(this.state.inputValue[this.state.action]).toFixed() : ''}
                                         />
                                         <Flex

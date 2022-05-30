@@ -717,7 +717,7 @@ const globalConfigs = {
   tranches: {
     AA: {
       color: {
-        hex: "#337de5",
+        hex: "#2272C8",
         rgb: [51, 125, 229],
         hsl: ["215", "77%", "55%"]
       },
@@ -748,7 +748,7 @@ const globalConfigs = {
     },
     BB: {
       color: {
-        hex: "#FAB325",
+        hex: "#FFD15C",
         rgb: [250, 179, 37],
         hsl: ["40", "95%", "56%"]
       },

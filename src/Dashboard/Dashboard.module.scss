@@ -34,3 +34,13 @@
 .submenu.opened{
   max-height:200px;
 }
+
+@media (max-width: 31em) {
+  .bg-top-left{
+    width: 100%;
+    background-position: 0 -100px !important;
+  }
+  .bg-bottom-right{
+    display:none;
+  }
+}

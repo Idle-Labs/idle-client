@@ -716,6 +716,7 @@ class SendTxWithBalance extends Component {
                       </Flex>
                       <Input
                         min={0}
+                        border={0}
                         type={"number"}
                         required={true}
                         height={'3.4em'}
@@ -726,7 +727,6 @@ class SendTxWithBalance extends Component {
                         boxShadow={'none !important'}
                         placeholder={`Insert amount`}
                         onChange={this.changeInputValue.bind(this)}
-                        border={`1px solid ${this.props.theme.colors.divider}`}
                         value={this.state.inputValue !== null ? this.functionsUtil.BNify(this.state.inputValue).toFixed() : ''}
                       />
                       <Flex

@@ -8,7 +8,8 @@ class CardIconButton extends Component {
       {
         py: 1,
         width: "auto",
-        px: ["12px", 3]
+        px: ["12px", 3],
+        justifyContent:'center'
       },
       this.props.cardProps
     );
@@ -20,80 +21,75 @@ class CardIconButton extends Component {
 
     return (
       <DashboardCard
-        cardProps={cardProps}
         isInteractive={true}
+        cardProps={cardProps}
+        backgroundColor={"blue"}
         isActive={this.props.isActive}
         isDisabled={this.props.isDisabled}
         handleClick={this.props.handleClick}
-        backgroundColor={"blue"}
       >
         <Flex
-          mx={this.props.margin ? this.props.margin : 0}
           my={1}
           alignItems={"center"}
           flexDirection={"row"}
-          justifyContent={this.props.align ? this.props.align : "center"}
+          justifyContent={this.props.align || "center"}
+          mx={this.props.margin ? this.props.margin : 0}
         >
-          {this.props.image ? this.props.iconBgColor ? (
+          {
+            this.props.iconBgColor && !this.props.useIconOnly ? (
               <Flex
-                mr={this.props.isSidebar ? 0 : 2}
-                p={this.props.isSidebar ? 0 : ["4px", "7px"]}
                 borderRadius={"50%"}
                 alignItems={"center"}
                 justifyContent={"center"}
-                backgroundColor={
-                  this.props.iconBgColor
-                    ? this.props.iconBgColor
-                    : this.props.theme.colors.transactions.actionBg.redeem
-                }
+                mr={this.props.isSidebar ? 0 : 2}
+                p={this.props.isSidebar ? 0 : ["4px", "7px"]}
+                backgroundColor={this.props.iconBgColor ? this.props.iconBgColor : this.props.theme.colors.transactions.actionBg.redeem}
               >
-                <Image
-                  align={"center"}
-                  src={this.props.image}
-                  height={this.props.isMobile ? "1.2em" : "1.4em"}
-                  width={this.props.isMobile ? "1.2em" : "1.4em"}
-                  {...this.props.imageProps}
-                />
+                {
+                  this.props.image ? (
+                    <Image
+                      align={"center"}
+                      src={this.props.image}
+                      height={this.props.isMobile ? "1.2em" : "1.4em"}
+                      width={this.props.isMobile ? "1.2em" : "1.4em"}
+                      {...this.props.imageProps}
+                    />
+                  ) : (
+                    <Icon
+                      align={"center"}
+                      name={this.props.icon}
+                      size={this.props.isMobile ? "1.2em" : "1.4em"}
+                      color={this.props.iconColor ? this.props.iconColor : "redeem"}
+                      {...this.props.iconProps}
+                    />
+                  )
+                }
               </Flex>
-            ) : (
-            <Image
-              align={"center"}
-              src={this.props.image}
-              height={this.props.isMobile ? "1.2em" : "1.4em"}
-              width={this.props.isMobile ? "1.2em" : "1.4em"}
-              {...this.props.imageProps}
-            />
-          ) : this.props.useIconOnly ? (
-            <Icon
-              align={"center"}
-              name={this.props.icon}
-              size={this.props.isMobile ? "1.2em" : "1.4em"}
-              color={this.props.iconColor ? this.props.iconColor : "redeem"}
-              {...this.props.iconProps}
-            />
-          ) : (
-            <Flex
-              mr={this.props.isSidebar ? 0 : 2}
-              p={this.props.isSidebar ? 0 : ["4px", "7px"]}
-              borderRadius={"50%"}
-              alignItems={"center"}
-              justifyContent={"center"}
-              backgroundColor={
-                this.props.iconBgColor
-                  ? this.props.iconBgColor
-                  : this.props.theme.colors.transactions.actionBg.redeem
-              }
-            >
+            ) : this.props.image ? (
+              <Image
+                mr={1}
+                align={"center"}
+                src={this.props.image}
+                height={this.props.isMobile ? "1.2em" : "1.4em"}
+                width={this.props.isMobile ? "1.2em" : "1.4em"}
+                {...this.props.imageProps}
+              />
+            ) : this.props.icon && (
               <Icon
+                mr={1}
                 align={"center"}
                 name={this.props.icon}
                 size={this.props.isMobile ? "1.2em" : "1.4em"}
                 color={this.props.iconColor ? this.props.iconColor : "redeem"}
                 {...this.props.iconProps}
               />
-            </Flex>
-          )}
-          <Text fontWeight={3} fontSize={[1, 3]} {...textProps}>
+            )
+          }
+          <Text
+            fontWeight={3}
+            fontSize={[1, 3]}
+            {...textProps}
+          >
             {this.props.text}
           </Text>
         </Flex>

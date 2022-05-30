@@ -57,7 +57,7 @@ class TrancheWelcome extends Component {
           {!this.props.tokenConfig ? (
             <>
               <Title
-                fontSize={[5,6]}
+                as={'h1'}
               >
                 Perpetual Yield Tranches
               </Title>

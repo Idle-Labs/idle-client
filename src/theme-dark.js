@@ -5,7 +5,7 @@ import { tint, shade } from 'polished';
 export default {
   breakpoints: ['52em', '64em'],
   // breakpoints: ['40em', '52em', '64em', '80em'],
-  fontSizes: [14, 16, 16, 20, 20, 36, 36, 48, 54, 64, 72, 84],
+  fontSizes: [14, 16, 16, 20, 20, 28, 36, 48, 54, 64, 72, 84],
   fontWeights: [0, 300, 400, 600, 700, 800],
   letterSpacings: [0, 1, 2, 4, 8],
   lineHeights: {
@@ -28,7 +28,7 @@ export default {
   heights: [0, 16, 32, 64, 128, 256],
   minHeights: [0, 16, 32, 64, 128, 256],
   maxHeights: [0, 16, 32, 64, 128, 256],
-  borders: [0, '1px solid #ffffff', '1px solid #475d7c'],
+  borders: [0, '1px solid #C6CBD2', '1px solid #475d7c'],
   borderWidths: ['0', '1px', '2px', '4px'],
   shadows: [
     '0',
@@ -70,7 +70,7 @@ export default {
     /*
     CTAs
     */
-    ctaPrimaryBg:'#1B1E27',
+    ctaPrimaryText:'#1B1E27',
     ctas:{
       primary:{
         default:{
@@ -108,27 +108,27 @@ export default {
     arrowInactive: '#4f4f4f',
     selectBgFocused: '#293243',
     selectBg: '#293243',
-    backButtonBg: '#293243',
+    backButtonBg: '#FFFFFF',
     lineChartStroke: '#CDD0D6',
     wrongNetworkBannerBg: '#0e2133',
     dashboardBg: '#1B1E27',
     statValue: '#FFFFFF',
     boxBorder: '#eeeeee',
-    cellTitle: '#CDD0D6',
+    cellTitle: '#FFFFFF',
     cellText: '#CDD0D6',
     divider: '#CDD0D6',
     counter: '#CDD0D6',
     redeem: '#00a9fe',
-    link: '#00a9fe',
+    link: '#FFFFFF',
     deposit: '#0239ff',
     migrate: '#00a9fe',
-    legend: '#c9c9c9',
+    legend: '#C6CBD2',
     cardBg: '#293243',
     menuBg: '#293243',
     menuHover: '#293243',
     dropdownBg: '#4C5976',
     flashBg: '#04117B',
-    flashColor: '#FFFFFF',
+    flashColor: '#eeeeee',
     cardBgHover: '#4b5a76',
     cardBorder: '#0d2034',
     pageActive: '#d8d8d8',

@@ -84,6 +84,11 @@ class CustomField extends Component {
       }
     }
 
+    // Highlight text color on hover
+    if (!!this.props.mouseOver){
+      fieldProps.color = 'primary';
+    }
+
     switch (fieldType){
       case 'image':
         CustomComponent = Image;

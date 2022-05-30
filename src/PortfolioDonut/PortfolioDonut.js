@@ -235,6 +235,7 @@ class PortfolioDonut extends Component {
                       decimals={2}
                       fontSize={[3,4]}
                       maxPrecision={5}
+                      color={'primary'}
                       fontWeight={[3,4]}
                       unit={ convertToken ? '$' : null}
                       number={this.state.portfolio[this.state.selectedToken]}
@@ -264,6 +265,7 @@ class PortfolioDonut extends Component {
                       decimals={2}
                       fontSize={[3,4]}
                       maxPrecision={5}
+                      color={'primary'}
                       fontWeight={[3,4]}
                       number={this.state.totalFunds}
                     />

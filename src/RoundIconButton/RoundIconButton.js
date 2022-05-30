@@ -10,19 +10,22 @@ class RoundIconButton extends Component {
       width:'40px',
       height:'40px',
       borderRadius:'50%',
+      justifyContent:'center',
       mainColor:'backButtonBg',
-      disabled:this.props.disabled
+      disabled:this.props.disabled,
+      contrastColor:'ctaPrimaryText'
     },this.props.buttonProps);
 
     buttonProps.minWidth = buttonProps.width;
 
     return (
        <RoundButton
-         buttonProps={buttonProps}
-         handleClick={this.props.handleClick}
+        type={'primary'}
+        buttonProps={buttonProps}
+        handleClick={this.props.handleClick}
        >
          <Icon
-           color={'copyColor'}
+           color={'ctaPrimaryText'}
            name={this.props.iconName}
            size={ this.props.iconSize ? this.props.iconSize : '1.3em'}
          />

@@ -295,6 +295,8 @@ class TrancheField extends Component {
       }
     };
 
+    // console.log('mouseOver',fieldInfo.name,this.props.mouseOver);
+
     // Replace props
     if (fieldInfo.props && Object.keys(fieldInfo.props).length){
       Object.keys(fieldInfo.props).forEach(p => {
@@ -309,6 +311,11 @@ class TrancheField extends Component {
           fieldProps[p] = fieldInfo.funcProps[p](this.props);
         }
       });
+    }
+
+    // Highlight text color on hover
+    if (!!this.props.mouseOver){
+      fieldProps.color = 'primary';
     }
 
     // const tokenName = this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token,'label']) || this.functionsUtil.capitalize(this.props.token);
@@ -417,6 +424,7 @@ class TrancheField extends Component {
           <CustomField
             row={this.props}
             fieldInfo={fieldInfo}
+            mouseOver={this.props.mouseOver}
           />
         );
       break;

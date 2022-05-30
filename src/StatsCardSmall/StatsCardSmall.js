@@ -51,7 +51,7 @@ class Base extends Component {
             <Text
               mt={1}
               fontSize={[2,3]}
-              color={'statValue'}
+              color={'copyColor'}
               {...this.props.textProps}
             >
               {this.props.value}

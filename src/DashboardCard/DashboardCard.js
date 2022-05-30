@@ -3,8 +3,11 @@ import React, { Component } from 'react';
 import styles from './DashboardCard.module.scss';
 import { Flex, Icon, Card, Tooltip } from "rimble-ui";
 
+const DashboardCardContext = React.createContext();
 
 class DashboardCard extends Component {
+
+  static Consumer = DashboardCardContext.Consumer;
 
   state = {
     mouseOver: false
@@ -20,6 +23,7 @@ class DashboardCard extends Component {
     const isDisabled = this.props.isDisabled;
     const isActive = this.props.isActive && !isDisabled;
     const isInteractive = this.props.isInteractive && !isDisabled;
+    const isClickable = typeof this.props.handleClick === 'function';
     const isVisible = typeof this.props.isVisible !== 'undefined' ? this.props.isVisible : true;
     const isRainbow = typeof this.props.isRainbow !== 'undefined' ? this.props.isRainbow : false;
 
@@ -57,12 +61,20 @@ class DashboardCard extends Component {
       !isVisible ? styles.hidden : null,
       isRainbow ? styles.rainbow : null,
       isDisabled ? styles.disabled : null,
+      isClickable ? styles.clickable : null,
       isInteractive ? styles.interactive : null,
     ];
 
     if (this.props.className && styles[this.props.className]) {
       className.push(styles[this.props.className]);
     }
+
+    // const childrenWithProps = React.Children.map(this.props.children, child => {
+    //   if (React.isValidElement(child)) {
+    //     return React.cloneElement(child, { mouseOver:this.state.mouseOver });
+    //   }
+    //   return child;
+    // });
 
     return (
       <Card
@@ -109,7 +121,11 @@ class DashboardCard extends Component {
 
           </Flex>
         }
-        {this.props.children}
+        {/*{this.props.children}*/}
+        <DashboardCardContext.Provider
+          {...this.props}
+          value={this.state}
+        />
       </Card>
     );
   }

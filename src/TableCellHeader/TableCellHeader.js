@@ -7,9 +7,9 @@ class TableCellHeader extends Component {
 
     const ColTitle = (props) => (
       <Text
-        fontSize={0}
         fontWeight={4}
         color={'cellTitle'}
+        fontSize={['12px',0]}
         fontFamily={'titles'}
         style={{
           width:'100%',

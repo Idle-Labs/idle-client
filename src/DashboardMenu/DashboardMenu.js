@@ -9,8 +9,8 @@ import NetworkIndicator from "../NetworkIndicator/NetworkIndicator";
 class DashboardMenu extends Component {
   state = {
     logout: false,
+    overMenuIndex: false,
     buyModalOpened: false,
-    isHover: false
   };
 
   // Utils
@@ -55,6 +55,12 @@ class DashboardMenu extends Component {
   setBuyModalOpened(buyModalOpened) {
     this.setState({
       buyModalOpened
+    });
+  }
+
+  setMenuIndexOver(overMenuIndex) {
+    this.setState({
+      overMenuIndex
     });
   }
 
@@ -173,6 +179,8 @@ class DashboardMenu extends Component {
             visibleLinks.map((menuLink, menuIndex) => {
               const isExternalLink = menuLink.isExternalLink;
               const LinkComponent = isExternalLink ? ExtLink : RouterLink;
+              const menuSelected = menuLink.selected;
+              const menuOverSelected = menuSelected || this.state.overMenuIndex === menuIndex;
               const activeImage = isDarkTheme && menuLink.imageDark ? menuLink.imageDark : menuLink.image;
               const inactiveImage = isDarkTheme && menuLink.imageInactiveDark ? menuLink.imageInactiveDark : menuLink.imageInactive;
               return (
@@ -180,6 +188,8 @@ class DashboardMenu extends Component {
                   width={"auto"}
                   my={[1, "8px"]}
                   key={`menu-${menuIndex}`}
+                  onMouseOut={(e) => this.setMenuIndexOver(null)}
+                  onMouseOver={(e) => this.setMenuIndexOver(menuIndex)}
                 >
                   <LinkComponent
                     to={menuLink.route}
@@ -210,34 +220,28 @@ class DashboardMenu extends Component {
                               mb={0}
                               align={"center"}
                               height={["1.2em","1.6em"]}
-                              src={menuLink.selected ? activeImage : inactiveImage}
+                              src={menuSelected ? activeImage : inactiveImage}
                             />
                           ) : menuLink.icon && (
                             <Icon
-                              name={menuLink.icon}
-                              color={
-                                menuLink.selected
-                                  ? "menuIconActive"
-                                  : isDarkTheme
-                                    ? "white"
-                                    : "dark-gray"
-                              }
                               mr={3}
                               ml={2}
                               mb={0}
+                              name={menuLink.icon}
                               size={ this.props.isMobile ? "1.2em" : "1.6em"}
+                              color={menuSelected ? "menuIconActive" : isDarkTheme ? "white" : "dark-gray"}
                             />
                           )
                         }
                         <Text
                           fontWeight={3}
                           fontSize={[1,2]}
+                          textAlign={"center"}
                           fontFamily={'titles'}
                           style={{
                             whiteSpace: "nowrap"
                           }}
-                          textAlign={"center"}
-                          color={menuLink.selected ? "primary" : "text"}
+                          color={menuOverSelected ? "primary" : "text"}
                         >
                           {menuLink.label}
                         </Text>
@@ -249,64 +253,65 @@ class DashboardMenu extends Component {
             })
           }
         </Flex>
-
-        {themeTogglerEnabled && (
-          <Flex
-            my={2}
-            width={"auto"}
-            height={"auto"}
-            flexDirection={"column"}
-            justifyContent={"flex-end"}
-          >
-            <Link
-              style={{ textDecoration: "none" }}
-              onClick={e =>
-                this.props.setThemeMode(
-                  this.props.themeMode === "light" ? "dark" : "light"
-                )
-              }
+        {
+          themeTogglerEnabled && (
+            <Flex
+              my={2}
+              width={"auto"}
+              height={"auto"}
+              flexDirection={"column"}
+              justifyContent={"flex-end"}
             >
-              <Flex
-                p={2}
-                alignItems={"center"}
-                flexDirection={"row"}
-                justifyContent={"flex-end"}
+              <Link
+                style={{ textDecoration: "none" }}
+                onClick={e =>
+                  this.props.setThemeMode(
+                    this.props.themeMode === "light" ? "dark" : "light"
+                  )
+                }
               >
-                <Icon
-                  mr={2}
-                  ml={2}
-                  size={"1.4em"}
-                  align={"center"}
-                  color={"copyColor"}
-                  name={"Brightness2"}
-                />
                 <Flex
-                  px={"0.2em"}
-                  width={"3.4em"}
-                  height={"1.6em"}
+                  p={2}
                   alignItems={"center"}
-                  borderRadius={"1.6em"}
-                  backgroundColor={"cellText"}
-                  justifyContent={this.props.themeMode === "light" ? "flex-end" : "flex-start"}
+                  flexDirection={"row"}
+                  justifyContent={"flex-end"}
                 >
-                  <Box
-                    width={"1.3em"}
-                    height={"1.3em"}
-                    borderRadius={"1.3em"}
-                    backgroundColor={"copyColor"}
-                  ></Box>
+                  <Icon
+                    mr={2}
+                    ml={2}
+                    size={"1.4em"}
+                    align={"center"}
+                    color={"copyColor"}
+                    name={"Brightness2"}
+                  />
+                  <Flex
+                    px={"0.2em"}
+                    width={"3.4em"}
+                    height={"1.6em"}
+                    alignItems={"center"}
+                    borderRadius={"1.6em"}
+                    backgroundColor={"cellText"}
+                    justifyContent={this.props.themeMode === "light" ? "flex-end" : "flex-start"}
+                  >
+                    <Box
+                      width={"1.3em"}
+                      height={"1.3em"}
+                      borderRadius={"1.3em"}
+                      backgroundColor={"copyColor"}
+                    ></Box>
+                  </Flex>
+                  <Icon
+                    ml={2}
+                    size={"1.4em"}
+                    align={"center"}
+                    name={"WbSunny"}
+                    color={"copyColor"}
+                  />
                 </Flex>
-                <Icon
-                  ml={2}
-                  size={"1.4em"}
-                  align={"center"}
-                  name={"WbSunny"}
-                  color={"copyColor"}
-                />
-              </Flex>
-            </Link>
-          </Flex>
-        )}
+              </Link>
+            </Flex>
+          )
+        }
       </Flex>
     );
   }

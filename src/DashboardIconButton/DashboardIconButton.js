@@ -1,3 +1,4 @@
+import Title from '../Title/Title';
 import React, { Component } from 'react';
 import { Flex, Icon, Text, Image } from "rimble-ui";
 import FunctionsUtil from '../utilities/FunctionsUtil';
@@ -67,12 +68,12 @@ class DashboardIconButton extends Component {
             alignItems={'flex-start'}
             justifyContent={'center'}
           >
-            <Text
-              fontWeight={3}
+            <Title
+              as={'h4'}
               fontSize={[1,3]}
             >
               {this.props.title}
-            </Text>
+            </Title>
             <Text
               fontWeight={2}
               fontSize={[0,2]}

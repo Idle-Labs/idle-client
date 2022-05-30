@@ -26,7 +26,8 @@ class TableRow extends Component {
 
   render() {
     const FieldComponent = this.props.fieldComponent;
-    const isInteractive = typeof this.props.handleClick === 'function';
+    const hasClickFunction = typeof this.props.handleClick === 'function';
+    const isInteractive = hasClickFunction || !!this.props.isInteractive;
     return (
       <DashboardCard
         cardProps={{
@@ -39,82 +40,92 @@ class TableRow extends Component {
         {...this.props.rowProps}
         className={this.props.token}
         isInteractive={isInteractive}
-        handleClick={isInteractive ? e => this.props.handleClick(this.props) : null}
+        handleClick={hasClickFunction ? e => this.props.handleClick(this.props) : null}
       >
-        <Flex
-          flexDirection={'row'}
-          id={this.props.rowId}
-        >
-          {
-            this.props.cols.map((colInfo,colIndex) => {
-              const visibleOnDesktop = colInfo.visibleOnDesktop || false;
-              if (colInfo.visible === false || (colInfo.mobile === false && this.props.isMobile) || (colInfo.mobile === true && !visibleOnDesktop && !this.props.isMobile)){
-                return null;
-              }
-              return (
-                <Flex
-                  key={`col-${colIndex}`}
-                  {...colInfo.props}
-                >
-                  <Flex
-                    width={1}
-                    alignItems={'center'}
-                    flexDirection={'row'}
-                    {...colInfo.parentProps}
-                  >
-                    {
-                      colInfo.fields.map((fieldInfo,fieldIndex) => {
-                        if (!fieldInfo || fieldInfo.visible === false || (fieldInfo.mobile === false && this.props.isMobile)){
-                          return null;
-                        }
-                        const CustomComponent = fieldInfo.fieldComponent;
-
-                        let fieldProps = fieldInfo.props;
-
-                        // Merge with funcProps
-                        if (fieldInfo.funcProps && Object.keys(fieldInfo.funcProps).length>0){
-                          fieldProps = this.functionsUtil.replaceArrayPropsRecursive(fieldProps,fieldInfo.funcProps,this.props);
-                        }
-
-                        return (
-                          <Flex
-                            height={'100%'}
-                            flexDirection={'column'}
-                            alignItems={'flex-start'}
-                            justifyContent={'center'}
-                            {...fieldInfo.parentProps}
-                            style={fieldInfo.style || {
-                              overflow:'hidden'
-                            }}
-                            width={colInfo.fields.length>1 ? 'auto' : 1}
-                            id={`field-${colIndex}-${fieldIndex}-${fieldInfo.name}`}
-                            key={`field-${colIndex}-${fieldIndex}-${fieldInfo.name}`}
-                          >
-                            {
-                              CustomComponent ? (
-                                <CustomComponent
-                                  {...this.props}
-                                  {...fieldProps}
-                                />
-                              ) : (
-                                <FieldComponent
-                                  {...this.props}
-                                  fieldInfo={fieldInfo}
-                                  colProps={colInfo.props}
-                                  parentId={`field-${colIndex}-${fieldIndex}-${fieldInfo.name}`}
-                                />
-                              )
-                            }
-                          </Flex>
-                        );
-                      })
+        <DashboardCard.Consumer>
+          {({
+            mouseOver
+          }) => {
+            return (
+              <Flex
+                flexDirection={'row'}
+                id={this.props.rowId}
+              >
+                {
+                  this.props.cols.map((colInfo,colIndex) => {
+                    const visibleOnDesktop = colInfo.visibleOnDesktop || false;
+                    if (colInfo.visible === false || (colInfo.mobile === false && this.props.isMobile) || (colInfo.mobile === true && !visibleOnDesktop && !this.props.isMobile)){
+                      return null;
                     }
-                  </Flex>
-                </Flex>
-              )
-            })
-          }
-        </Flex>
+                    return (
+                      <Flex
+                        key={`col-${colIndex}`}
+                        {...colInfo.props}
+                      >
+                        <Flex
+                          width={1}
+                          alignItems={'center'}
+                          flexDirection={'row'}
+                          {...colInfo.parentProps}
+                        >
+                          {
+                            colInfo.fields.map((fieldInfo,fieldIndex) => {
+                              if (!fieldInfo || fieldInfo.visible === false || (fieldInfo.mobile === false && this.props.isMobile)){
+                                return null;
+                              }
+                              const CustomComponent = fieldInfo.fieldComponent;
+
+                              let fieldProps = fieldInfo.props;
+
+                              // Merge with funcProps
+                              if (fieldInfo.funcProps && Object.keys(fieldInfo.funcProps).length>0){
+                                fieldProps = this.functionsUtil.replaceArrayPropsRecursive(fieldProps,fieldInfo.funcProps,this.props);
+                              }
+
+                              return (
+                                <Flex
+                                  height={'100%'}
+                                  flexDirection={'column'}
+                                  alignItems={'flex-start'}
+                                  justifyContent={'center'}
+                                  {...fieldInfo.parentProps}
+                                  style={fieldInfo.style || {
+                                    overflow:'hidden'
+                                  }}
+                                  width={colInfo.fields.length>1 ? 'auto' : 1}
+                                  id={`field-${colIndex}-${fieldIndex}-${fieldInfo.name}`}
+                                  key={`field-${colIndex}-${fieldIndex}-${fieldInfo.name}`}
+                                >
+                                  {
+                                    CustomComponent ? (
+                                      <CustomComponent
+                                        {...this.props}
+                                        {...fieldProps}
+                                        mouseOver={mouseOver}
+                                      />
+                                    ) : (
+                                      <FieldComponent
+                                        {...this.props}
+                                        mouseOver={mouseOver}
+                                        fieldInfo={fieldInfo}
+                                        colProps={colInfo.props}
+                                        parentId={`field-${colIndex}-${fieldIndex}-${fieldInfo.name}`}
+                                      />
+                                    )
+                                  }
+                                </Flex>
+                              );
+                            })
+                          }
+                        </Flex>
+                      </Flex>
+                    )
+                  })
+                }
+              </Flex>
+            );
+          }}
+          </DashboardCard.Consumer>
       </DashboardCard>
     );
   }

@@ -307,12 +307,12 @@ class UpgradeModal extends React.Component {
                           justifyContent={'center'}
                         >
                           <RoundButton
-                            handleClick={ e => this.migrate(token,strategy) }
+                            type={'primary'}
                             buttonProps={{
                               size:'small',
                               width:'100%',
-                              className:header_styles.gradientButton
                             }}
+                            handleClick={ e => this.migrate(token,strategy) }
                           >
                             MIGRATE
                           </RoundButton>
@@ -451,7 +451,6 @@ class UpgradeModal extends React.Component {
                 <RoundButton
                   handleClick={this.closeModal}
                   buttonProps={{
-                    fontSize:[2,3],
                     width:['100%','40%'],
                   }}
                 >
