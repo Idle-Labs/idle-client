@@ -1,8 +1,7 @@
+import Title from "../Title/Title";
 import React, { Component } from "react";
 import { Link, Flex, Text, Image } from "rimble-ui";
 import FunctionsUtil from "../utilities/FunctionsUtil";
-
-//import DashboardCard from "../DashboardCard/DashboardCard";
 
 class TrancheFlash extends Component {
   // Utils
@@ -35,16 +34,11 @@ class TrancheFlash extends Component {
       >
         <Flex mx={2} my={[2, 4]} width={[1, 0.4]} flexDirection={"column"}>
           <Flex justifyContent={"left"} my={3} width={[1, 0.7]}>
-            <Text
-              bold={"true"}
-              fontWeight={4}
-              lineHeight={1}
-              color={"white"}
-              fontSize={[5, 6]}
-              textAlign={"left"}
+            <Title
+              textAlign={'left'}
             >
               {flashData.subtitle}
-            </Text>
+            </Title>
           </Flex>
           <Flex
             mt={2}
@@ -53,10 +47,10 @@ class TrancheFlash extends Component {
             justifyContent={"left"}
           >
             <Text
-              color={"white"}
-              textAlign={"left"}
-              fontWeight={2}
               fontSize={2}
+              fontWeight={2}
+              color={"primary"}
+              textAlign={"left"}
             >
               {flashData.desc}
             </Text>
@@ -78,7 +72,7 @@ class TrancheFlash extends Component {
                     fontSize={2}
                     fontWeight={2}
                     opacity={"50%"}
-                    color={"white"}
+                    color={"primary"}
                     textAlign={"left"}
                     onClick={e =>
                       this.props.openTooltipModal(question.desc, question.msg)
@@ -113,17 +107,13 @@ class TrancheFlash extends Component {
             <Image
               my={[0, 2]}
               width={["2.4em", "4.7em"]}
-              src={this.functionsUtil.getGlobalConfig([
-                "tranches",
-                "AA",
-                "bubble"
-              ])}
+              src={this.functionsUtil.getGlobalConfig(["tranches","AA","bubble"])}
             />
             <Text
               mt={[0, 2]}
               mx={2}
               mb={[2, 1]}
-              color={"white"}
+              color={"primary"}
               textAlign={"left"}
               fontWeight={2}
               fontSize={2}
@@ -137,20 +127,16 @@ class TrancheFlash extends Component {
               my={[0, 2]}
               ml={[0, 4]}
               width={["2.4em", "4.7em"]}
-              src={this.functionsUtil.getGlobalConfig([
-                "tranches",
-                "BB",
-                "bubble"
-              ])}
+              src={this.functionsUtil.getGlobalConfig(["tranches","BB","bubble"])}
             />
             <Text
-              mt={[0, 2]}
               mx={2}
+              mt={[0, 2]}
               mb={[2, 1]}
-              color={"white"}
-              textAlign={"left"}
-              fontWeight={2}
               fontSize={2}
+              fontWeight={2}
+              color={"primary"}
+              textAlign={"left"}
               dangerouslySetInnerHTML={{
                 __html: flashData.juniorinfo
               }}

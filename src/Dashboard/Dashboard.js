@@ -94,7 +94,7 @@ class Dashboard extends Component {
           selected: false,
           component: Utils,
           color: 'dark-gray',
-          route: '/dashboard/stake',
+          route: `${baseRoute}/stake`,
           image: extraicons['stake'].icon,
           componentProps: {
             showBreadCrumb: false,
@@ -131,7 +131,7 @@ class Dashboard extends Component {
           label: 'Stake',
           selected: false,
           color: 'dark-gray',
-          route: '/dashboard/stake',
+          route: `${baseRoute}/stake`,
           image: extraicons['stake'].icon,
           imageDark: extraicons['stake'].iconDark,
           bgColor: this.props.theme.colors.primary,
@@ -156,7 +156,7 @@ class Dashboard extends Component {
           label: 'Gauges',
           selected: false,
           color: 'dark-gray',
-          route: '/dashboard/gauges',
+          route: `${baseRoute}/gauges`,
           image: extraicons['gauges'].icon,
           bgColor: this.props.theme.colors.primary,
           imageDark: extraicons['gauges'].iconDark,
@@ -182,7 +182,7 @@ class Dashboard extends Component {
           component: Stats,
           bgColor: '#21f36b',
           color: 'dark-gray',
-          route: '/dashboard/stats',
+          route: `${baseRoute}/stats`,
           image: extraicons['stats'].icon,
           imageDark: extraicons['stats'].iconDark,
           imageInactive: extraicons['stats'].iconInactive,
@@ -198,7 +198,7 @@ class Dashboard extends Component {
         selected: false,
         component: Utils,
         color: 'dark-gray',
-        route: '/dashboard/tools',
+        route: `${baseRoute}/tools`,
         image: extraicons['tools'].icon,
         imageDark: extraicons['tools'].iconDark,
         bgColor: this.props.theme.colors.primary,
@@ -229,6 +229,7 @@ class Dashboard extends Component {
 
     await this.setState({
       menu,
+      baseRoute,
       currentNetwork
     });
   }
@@ -269,7 +270,7 @@ class Dashboard extends Component {
 
     const { match: { params } } = this.props;
 
-    const baseRoute = this.functionsUtil.getGlobalConfig(['dashboard', 'baseRoute']);
+    const baseRoute = this.state.baseRoute;// this.functionsUtil.getGlobalConfig(['dashboard', 'baseRoute']);
     let currentRoute = baseRoute;
 
     let pageComponent = null;
@@ -298,8 +299,8 @@ class Dashboard extends Component {
         currentRoute += '/' + selectedStrategy;
         
         // Set token
-        const param1_is_token = param1==="tranches" ? null : param1 && Object.keys(this.props.availableStrategies[selectedStrategy]).includes(param1.toUpperCase());
-        const param2_is_token = param1==="tranches" ? null : param2 && Object.keys(this.props.availableStrategies[selectedStrategy]).includes(param2.toUpperCase());
+        const param1_is_token = param1 === "tranches" ? null : param1 && Object.keys(this.props.availableStrategies[selectedStrategy]).includes(param1.toUpperCase());
+        const param2_is_token = param1 === "tranches" ? null : param2 && Object.keys(this.props.availableStrategies[selectedStrategy]).includes(param2.toUpperCase());
 
         if (param1_is_token || param2_is_token) {
           selectedToken = param1_is_token ? param1.toUpperCase() : param2.toUpperCase();
@@ -308,7 +309,7 @@ class Dashboard extends Component {
           if (section_is_strategy) {
             pageComponent = AssetPage;
           }
-        } else if(param1==="tranches") {
+        } else if (param1==="tranches") {
           selectedToken=params.param3
           currentRoute+='/'+param2+'/'+param3;
         }
@@ -377,7 +378,7 @@ class Dashboard extends Component {
 
     // Exit if no strategy and token selected
     if (!pageComponent){
-      return this.goToSection('',false);
+      return this.goToSection(menu[0].route);
     }
 
     // console.log('loadParams',selectedStrategy,selectedToken);
@@ -394,7 +395,6 @@ class Dashboard extends Component {
     const newState = {
       menu,
       params,
-      baseRoute,
       currentRoute,
       pageComponent,
       currentSection,
@@ -681,6 +681,7 @@ class Dashboard extends Component {
     }
 
     const newRoute = isDashboard ? this.state.baseRoute + '/' + section : section;
+    
     window.location.hash = newRoute;
 
     // Send GA event

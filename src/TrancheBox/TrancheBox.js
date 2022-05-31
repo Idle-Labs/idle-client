@@ -1,3 +1,4 @@
+import Title from "../Title/Title";
 import React, { Component } from "react";
 import RoundButton from "../RoundButton/RoundButton";
 import FunctionsUtil from "../utilities/FunctionsUtil";
@@ -101,23 +102,28 @@ class Base extends Component {
               my={3}
               flexDirection={"column"}
             >
-              <Flex mt={3} alignItems={"center"}>
+              <Flex
+                mt={2}
+                mb={3}
+                alignItems={"center"}
+              >
                 <Image
                   ml={3}
-                  mr={1}
+                  mr={2}
                   alt={trancheDetails.name}
                   src={trancheDetails.image}
                   size={this.props.isMobile ? "2em" : "2.4em"}
                 />
-                <Flex mx={1}>
-                  <Text
+                <Flex
+                  mx={1}
+                >
+                  <Title
+                    as={'h2'}
                     ml={[2, 0]}
-                    fontWeight={4}
-                    fontSize={[4, 5]}
                     lineHeight={1}
                   >
                     {trancheDetails.name}
-                  </Text>
+                  </Title>
                 </Flex>
               </Flex>
               <Box
@@ -140,12 +146,12 @@ class Base extends Component {
                         decimals: 2,
                         fontWeight: 4,
                         lineHeight: "1",
+                        color: 'primary',
                         fontSize: [3, 4],
                         textAlign: "center",
                         flexProps: {
                           justifyItems: "flex-end"
-                        },
-                        color: this.props.trancheDetails.color.hex
+                        }
                       }
                     }}
                     {...this.props}
@@ -156,13 +162,14 @@ class Base extends Component {
                   />
                   <Text
                     my={1}
-                    ml={[2, 3]}
+                    ml={2}
                     fontSize={1}
+                    fontWeight={3}
                     lineHeight={"1"}
                     textAlign={"left"}
                     color={"cellText"}
                   >
-                    Current APY for {this.state.token}
+                    Current APY for <strong>{this.state.token}</strong>
                   </Text>
                 </Flex>
                 <Text
@@ -185,8 +192,7 @@ class Base extends Component {
             justifyContent={'space-between'}
           >
             <Box
-              mt={3}
-              my={3}
+              mb={3}
               pl={2}
               width={1}
             >
@@ -223,17 +229,10 @@ class Base extends Component {
                 buttonProps={{
                   my: 3,
                   width: 0.85,
-                  fontSize: 2,
-                  contrastColor: "white",
-                  mainColor: trancheDetails.color.hex
                 }}
-                handleClick={e =>
-                  this.props.selectTrancheType(trancheDetails.route)
-                }
+                handleClick={e => this.props.selectTrancheType(trancheDetails.route)}
               >
-                {this.props.tokenConfig
-                  ? `Go to ${trancheDetails.name}`
-                  : `Enter the ${trancheDetails.name}`}
+                {this.props.tokenConfig ? `Go to ${trancheDetails.name}` : `Enter the ${trancheDetails.name}`}
               </RoundButton>
             </Flex>
           </Flex>

@@ -102,7 +102,7 @@ export default {
     */
     text: "#C6CBD2",
     border: "#546278",
-    newblue: "#2B65D9",
+    newblue: "#2272C8",
     alert: '#ff9900',
     arrowActive: '#d8d8d8',
     arrowInactive: '#4f4f4f',
@@ -114,7 +114,7 @@ export default {
     dashboardBg: '#1B1E27',
     statValue: '#FFFFFF',
     boxBorder: '#eeeeee',
-    cellTitle: '#FFFFFF',
+    cellTitle: '#CDD0D6',
     cellText: '#CDD0D6',
     divider: '#CDD0D6',
     counter: '#CDD0D6',

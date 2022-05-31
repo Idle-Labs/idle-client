@@ -1,31 +1,27 @@
 import Web3 from "web3";
 import jQuery from "jquery";
 import theme from "../theme";
-import Tos from "../Tos/Tos";
 import themeDark from "../theme-dark";
 import connectors from "./connectors";
 import Web3Provider from "web3-react";
 import { Web3Consumer } from "web3-react";
 import Multicall from '../utilities/Multicall';
-import CookieConsent from "react-cookie-consent";
 import RimbleWeb3 from "../utilities/RimbleWeb3";
 import FlexLoader from "../FlexLoader/FlexLoader";
 import React, { Component, Suspense } from "react";
 import GeneralUtil from "../utilities/GeneralUtil";
-import Header from "../utilities/components/Header";
+import { ThemeProvider, Box, Flex } from "rimble-ui";
 import globalConfigs from "../configs/globalConfigs";
 import ScrollToTop from "../ScrollToTop/ScrollToTop";
 import FunctionsUtil from "../utilities/FunctionsUtil";
 import PageNotFound from "../PageNotFound/PageNotFound";
-import Web3Debugger from "../Web3Debugger/Web3Debugger";
 import availableTokens from "../configs/availableTokens";
 import availableTranches from "../configs/availableTranches";
 import TransactionToastUtil from "../utilities/TransactionToastUtil";
 import { HashRouter as Router, Switch, Route } from "react-router-dom";
-import { ThemeProvider, Box, Text, Link, Image, Flex } from "rimble-ui";
 
 // Lazy Loading
-const Landing = React.lazy(() => import("../Landing/Landing"));
+// const Landing = React.lazy(() => import("../Landing/Landing"));
 const Dashboard = React.lazy(() => import("../Dashboard/Dashboard"));
 const Governance = React.lazy(() => import("../Governance/Governance"));
 
@@ -956,7 +952,6 @@ class App extends Component {
                                         availableStrategiesNetworks={this.state.availableStrategiesNetworks}
                                       />
                                     </Suspense>
-
                                 }
                               >
                               </Route>
@@ -1047,155 +1042,94 @@ class App extends Component {
                                 )
                               }
                               <Route>
-                                <Header
-                                  modals={modals}
-                                  network={network}
-                                  context={context}
-                                  account={account}
-                                  initWeb3={initWeb3}
-                                  isMobile={isMobile}
-                                  contracts={contracts}
-                                  initAccount={initAccount}
-                                  multiCall={this.multiCall}
-                                  initContract={initContract}
-                                  buyToken={this.state.buyToken}
-                                  accountBalance={accountBalance}
-                                  logout={this.logout.bind(this)}
-                                  validateAccount={validateAccount}
-                                  connecting={this.state.connecting}
-                                  accountValidated={accountValidated}
-                                  getTokenDecimals={getTokenDecimals}
-                                  rejectValidation={rejectValidation}
-                                  setToken={e => { this.setToken(e) }}
-                                  tokenConfig={this.state.tokenConfig}
-                                  contractsNetworks={contractsNetworks}
-                                  getAccountBalance={getAccountBalance}
-                                  accountBalanceLow={accountBalanceLow}
-                                  networkInitialized={networkInitialized}
-                                  selectedToken={this.state.selectedToken}
-                                  connectorName={this.state.connectorName}
-                                  userRejectedConnect={userRejectedConnect}
-                                  accountBalanceToken={accountBalanceToken}
-                                  walletProvider={this.state.walletProvider}
-                                  buyModalOpened={this.state.buyModalOpened}
-                                  contractsInitialized={contractsInitialized}
-                                  openBuyModal={this.openBuyModal.bind(this)}
-                                  rejectAccountConnect={rejectAccountConnect}
-                                  handleMenuClick={this.selectTab.bind(this)}
-                                  setConnector={this.setConnector.bind(this)}
-                                  availableTokens={this.state.availableTokens}
-                                  closeBuyModal={this.closeBuyModal.bind(this)}
-                                  userRejectedValidation={userRejectedValidation}
-                                  accountValidationPending={accountValidationPending}
-                                  connectAndValidateAccount={connectAndValidateAccount}
-                                  setRequiredNetwork={this.setRequiredNetwork.bind(this)}
-                                  availableTranchesNetworks={this.state.availableTranchesNetworks}
-                                  availableStrategiesNetworks={this.state.availableStrategiesNetworks}
-                                />
-
-                                {
-                                  this.state.route === "onboarding" && (
-                                    <Web3Debugger
-                                      web3={web3}
-                                      account={account}
-                                      accountBalance={accountBalance}
-                                      accountBalanceToken={accountBalanceToken}
-                                      accountBalanceLow={accountBalanceLow}
-                                      initAccount={initAccount}
-                                      rejectAccountConnect={rejectAccountConnect}
-                                      userRejectedConnect={userRejectedConnect}
-                                      accountValidated={accountValidated}
-                                      accountValidationPending={accountValidationPending}
-                                      rejectValidation={rejectValidation}
-                                      userRejectedValidation={userRejectedValidation}
-                                      validateAccount={validateAccount}
-                                      connectAndValidateAccount={connectAndValidateAccount}
-                                      modals={modals}
-                                      network={network}
-                                      transaction={transaction}
-                                    />
-                                  )
-                                }
-
                                 {
                                   this.state.route === "default" && (
                                     <Switch>
-                                      <Route exact path="/"
+                                      <Route
+                                        path="/:section?/:param1?/:param2?/:param3?"
                                         render={(props) =>
                                           <Suspense
                                             fallback={SuspenseLoader}
                                           >
-                                            <Landing
+                                            <Dashboard
                                               {...props}
                                               web3={web3}
+                                              modals={modals}
                                               network={network}
+                                              context={context}
                                               account={account}
+                                              isDashboard={true}
+                                              initWeb3={initWeb3}
+                                              biconomy={biconomy}
                                               isMobile={isMobile}
                                               simpleID={simpleID}
                                               contracts={contracts}
+                                              web3Infura={web3Infura}
+                                              web3Polygon={web3Polygon}
+                                              initAccount={initAccount}
                                               multiCall={this.multiCall}
+                                              permitClient={permitClient}
+                                              initSimpleID={initSimpleID}
                                               initContract={initContract}
-                                              innerWidth={this.state.width}
+                                              transactions={transactions}
+                                              buyToken={this.state.buyToken}
                                               logout={this.logout.bind(this)}
-                                              innerHeight={this.state.height}
+                                              maticPOSClient={maticPOSClient}
                                               accountBalance={accountBalance}
                                               themeMode={this.state.themeMode}
                                               theme={this.state.selectedTheme}
-                                              setToken={e => {this.setToken(e)}}
-                                              cachedData={this.state.cachedData}
+                                              validateAccount={validateAccount}
                                               currentEnv={this.state.currentEnv}
                                               connecting={this.state.connecting}
-                                              selectedTab={this.state.selectedTab}
+                                              cachedData={this.state.cachedData}
+                                              setToken={this.setToken.bind(this)}
+                                              accountValidated={accountValidated}
+                                              getTokenDecimals={getTokenDecimals}
+                                              rejectValidation={rejectValidation}
                                               tokenConfig={this.state.tokenConfig}
-                                              accountBalanceLow={accountBalanceLow}
-                                              getAccountBalance={getAccountBalance}
                                               contractsNetworks={contractsNetworks}
+                                              getAccountBalance={getAccountBalance}
+                                              accountBalanceLow={accountBalanceLow}
+                                              accountInizialized={accountInizialized}
                                               networkInitialized={networkInitialized}
-                                              customAddress={this.state.customAddress}
                                               selectedToken={this.state.selectedToken}
+                                              connectorName={this.state.connectorName}
+                                              setStrategy={this.setStrategy.bind(this)}
+                                              userRejectedConnect={userRejectedConnect}
                                               accountBalanceToken={accountBalanceToken}
-                                              closeToastMessage={this.closeToastMessage}
+                                              initializeContracts={initializeContracts}
+                                              walletProvider={this.state.walletProvider}
+                                              buyModalOpened={this.state.buyModalOpened}
+                                              erc20ForwarderClient={erc20ForwarderClient}
                                               contractsInitialized={contractsInitialized}
                                               openBuyModal={this.openBuyModal.bind(this)}
+                                              rejectAccountConnect={rejectAccountConnect}
+                                              handleMenuClick={this.selectTab.bind(this)}
+                                              setConnector={this.setConnector.bind(this)}
                                               setThemeMode={this.setThemeMode.bind(this)}
-                                              processCustomParam={this.processCustomParam}
                                               availableTokens={this.state.availableTokens}
+                                              closeBuyModal={this.closeBuyModal.bind(this)}
                                               setCachedData={this.setCachedData.bind(this)}
-                                              updateSelectedTab={this.selectTab.bind(this)}
-                                              toastMessageProps={this.state.toastMessageProps}
+                                              selectedStrategy={this.state.selectedStrategy}
+                                              selectedProtocol={this.state.selectedProtocol}
+                                              userRejectedValidation={userRejectedValidation}
                                               availableTranches={this.state.availableTranches}
                                               clearCachedData={this.clearCachedData.bind(this)}
+                                              setStrategyToken={this.setStrategyToken.bind(this)}
+                                              accountValidationPending={accountValidationPending}
                                               availableStrategies={this.state.availableStrategies}
                                               setCurrentSection={this.setCurrentSection.bind(this)}
                                               connectAndValidateAccount={connectAndValidateAccount}
+                                              contractMethodSendWrapper={contractMethodSendWrapper}
                                               setRequiredNetwork={this.setRequiredNetwork.bind(this)}
+                                              initContractCustomProvider={initContractCustomProvider}
+                                              setCallbackAfterLogin={this.setCallbackAfterLogin.bind(this)}
                                               availableTranchesNetworks={this.state.availableTranchesNetworks}
                                               availableStrategiesNetworks={this.state.availableStrategiesNetworks}
                                             />
-                                            <CookieConsent
-                                              expires={365}
-                                              buttonText={"Ok"}
-                                              location={"bottom"}
-                                              acceptOnScroll={true}
-                                              cookieName={"cookieAccepted"}
-                                              acceptOnScrollPercentage={5}
-                                              style={{ background: "rgba(255,255,255,0.95)", zIndex: '9999999' }}
-                                              buttonStyle={{ display: isMobile ? "block" : "none", backgroundColor: '#0036ff', color: 'white', marginTop: isMobile ? "0px" : "15px" }}
-                                            >
-                                              <Flex flexDirection={'row'} alignItems={['flex-start', 'center']} justifyContent={'flex-start'} maxHeight={['150px', 'initial']} style={isMobile ? { overflowY: 'scroll' } : null}>
-                                                <Image display={['none', 'block']} src={'images/cookie.svg'} width={'42px'} height={'42px'} />
-                                                <Text pl={[0, 3]} color={'dark-gray'} fontSize={1} textAlign={'justify'}>
-                                                  This website or its third-party tools process personal data (e.g. browsing data or IP addresses) and use cookies or other identifiers, which are necessary for its functioning and required to achieve the purposes illustrated in the cookie policy. To learn more, please refer to the <Link href={'https://www.iubenda.com/privacy-policy/61211749/cookie-policy'} target={'_blank'} rel="nofollow noopener noreferrer" hoverColor={'blue'}>cookie policy</Link>.
-                                                  You accept the use of cookies or other identifiers by closing or dismissing this notice, by scrolling this page, by clicking a link or button or by continuing to browse otherwise.
-                                              </Text>
-                                              </Flex>
-                                            </CookieConsent>
                                           </Suspense>
                                         }
                                       ></Route>
-                                      <Route exact path="/terms-of-service">
-                                        <Tos />
-                                      </Route>
                                       <Route>
                                         <PageNotFound />
                                       </Route>

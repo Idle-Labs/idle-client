@@ -2500,7 +2500,7 @@ class DepositRedeem extends Component {
                                 <Link
                                   textAlign={'center'}
                                   hoverColor={'primary'}
-                                  href={`/#/dashboard/tools/${batchDepositInfo.route}/${this.props.tokenConfig.idle.token}`}
+                                  href={`/tools/${batchDepositInfo.route}/${this.props.tokenConfig.idle.token}`}
                                 >
                                   Gas fees too high? Save gas with our Batch Deposit!
                                 </Link>
@@ -2577,7 +2577,7 @@ class DepositRedeem extends Component {
                                   <Link
                                     textAlign={'center'}
                                     hoverColor={'primary'}
-                                    href={`/#/dashboard/tools/${polygonBridgeInfo.route}/${this.props.selectedToken}`}
+                                    href={`/tools/${polygonBridgeInfo.route}/${this.props.selectedToken}`}
                                   >
                                     Use the {polygonBridgeInfo.label} to deposit your {this.props.selectedToken}
                                   </Link>

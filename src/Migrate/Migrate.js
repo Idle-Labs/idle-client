@@ -958,7 +958,7 @@ class Migrate extends Component {
                         <Link
                           textAlign={'center'}
                           hoverColor={'primary'}
-                          href={`/#/dashboard/tools/${batchMigrationInfo.route}/${this.props.tokenConfig.idle.token}`}
+                          href={`/tools/${batchMigrationInfo.route}/${this.props.tokenConfig.idle.token}`}
                         >
                           Gas fees too high? Save gas with our Batch Migrator!
                         </Link>

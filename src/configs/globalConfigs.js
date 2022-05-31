@@ -235,12 +235,12 @@ const globalConfigs = {
     riskScoreShort: "It's a single, consistently, comparable value for measuring protocol risk, based on factors including smart contract risk, collateralization and liquidity.",
     redeemSkipGov: "This feature allows you to save some gas by skipping the redeem of all or some of your accrued governance tokens, the skipped governance tokens will be given away to the entire pool",
     batchDepositExecutionSchedule: "Batches are executed twice a week, usually on Sunday and Wednesday, and only when the pool size reaches at least 20,000$. The time of each execution will vary depending on the gas price of the Ethereum network.",
-    riskAdjustedDisabledMessageDeposit: `The Risk Adjusted strategy is no longer available.<br />Please consider to deposit in the <a target="_blank" rel="nofollow noopener noreferrer" href="https://beta.idle.finance/#/dashboard/tranches/senior/idle" class="link">Senior Tranche</a> to have a similar risk profile.`,
+    riskAdjustedDisabledMessageDeposit: `The Risk Adjusted strategy is no longer available.<br />Please consider to deposit in the <a target="_blank" rel="nofollow noopener noreferrer" href="https://beta.idle.finance/#/tranches/senior/idle" class="link">Senior Tranche</a> to have a similar risk profile.`,
     apyLong: "APY is based on (I) the current yield advertised by the underlying protocol, (II) the current distribution rate of governance tokens provided by underlying lending protocols (III) the current estimated price of governance tokens from Uniswap spot prices. (IV) IDLE token distribution is referred to the entire pool.",
     riskScore: `It's a single, consistently, comparable value for measuring protocol risk, based on factors including smart contract risk, collateralization and liquidity.<br /><br />The model outputs a 0-10 score, where <strong>0 is the most risky and 10 is the most safe.</strong> Visit <a target="_blank" rel="nofollow noopener noreferrer" href="https://defiscore.io/overview">https://defiscore.io/overview</a> for further information.`,
     curveInstructions: `<strong>Depositing into the pool:</strong><br />By depositing your funds into the Curve Pool you may incur in slippage or bonus depending on if the coin is low or high in the pool.<br /><br /><strong>Withdrawing share from the pool:</strong><br />When you redeem your tokens previously deposited in the Curve Pool you get back an uneven amounts of tokens, that can give slippage or bonus depending on if the coin is low or high in the pool.`,
     yieldFarming: 'Strategies in Idle now will be able to support and distribute a vast range of yield opportunities across multiple protocols. Users will be able to receive their equivalent share of governance token that the protocol is receiving while allocating liquidity to yield farming opportunities. <a target="_blank" rel="nofollow noopener noreferrer" href="https://idlefinance.medium.com/idle-yield-farming-upgrade-18e4bc483c8f" class="link">Read more here</a>.',
-    riskAdjustedDisabledMessageRedeem: `The Risk Adjusted strategy is no longer available, please redeem your funds from this strategy. You can deposit in the <a target="_blank" rel="nofollow noopener noreferrer" href="https://beta.idle.finance/#/dashboard/tranches/senior/idle" class="link">Senior Tranche</a> to maintain a similar risk profile and receive an incentive. <a target="_blank" rel="nofollow noopener noreferrer" href="https://gov.idle.finance/t/risk-adjusted-removal-for-tranches-migration/673" class="link">Read more here</a>.`,
+    riskAdjustedDisabledMessageRedeem: `The Risk Adjusted strategy is no longer available, please redeem your funds from this strategy. You can deposit in the <a target="_blank" rel="nofollow noopener noreferrer" href="https://beta.idle.finance/#/tranches/senior/idle" class="link">Senior Tranche</a> to maintain a similar risk profile and receive an incentive. <a target="_blank" rel="nofollow noopener noreferrer" href="https://gov.idle.finance/t/risk-adjusted-removal-for-tranches-migration/673" class="link">Read more here</a>.`,
   },
   analytics: {
     google: {
@@ -269,7 +269,7 @@ const globalConfigs = {
     }
   },
   dashboard: {
-    baseRoute: "/dashboard",
+    baseRoute: "",
     theme: {
       mode: "dark",
       darkModeEnabled: true,
@@ -331,7 +331,7 @@ const globalConfigs = {
     params: {
       n_coins: 3,
       label: "Curve",
-      route: "/dashboard/curve",
+      route: "/curve",
       image: "images/protocols/curve.svg",
       imageInactive: "images/protocols/curve-off.svg"
     },
@@ -718,8 +718,8 @@ const globalConfigs = {
     AA: {
       color: {
         hex: "#2272C8",
-        rgb: [51, 125, 229],
-        hsl: ["215", "77%", "55%"]
+        rgb: [34, 114, 200],
+        hsl: ["211", "71%", "46%"]
       },
       type: "AA",
       route: "senior",
@@ -749,8 +749,8 @@ const globalConfigs = {
     BB: {
       color: {
         hex: "#FFD15C",
-        rgb: [250, 179, 37],
-        hsl: ["40", "95%", "56%"]
+        rgb: [255, 209, 92],
+        hsl: ["43", "100%", "68%"]
       },
       type: "BB",
       route: "junior",
@@ -2242,7 +2242,7 @@ const globalConfigs = {
       date: "Apr 06, 2022 16:18 UTC",
       image: "/images/tokens/LDO.svg",
       title: "LDO rewards migration to Gauges",
-      hash: "/dashboard/tranches/senior/lido/stETH",
+      hash: "/tranches/senior/lido/stETH",
       text: "The LDO rewards distribution is migrating from stETH senior tranche to stETH Gauge"
     },
     */
@@ -2252,7 +2252,7 @@ const globalConfigs = {
       start: 1611677841027,
       date: "Jan 26, 2021 16:18 UTC",
       title: "Cover Protocol Available",
-      hash: "/dashboard/tools/cover-protocol",
+      hash: "/tools/cover-protocol",
       image: "/images/protocols/cover-logo.svg",
       text: "Protect your portfolio with Cover Protocol"
     }

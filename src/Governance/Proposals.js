@@ -3,6 +3,7 @@ import { Box, Flex } from "rimble-ui";
 import React, { Component } from 'react';
 import Breadcrumb from '../Breadcrumb/Breadcrumb';
 import NewProposal from './NewProposal/NewProposal';
+import RoundButton from '../RoundButton/RoundButton';
 import GovernanceUtil from '../utilities/GovernanceUtil';
 import ProposalsList from './ProposalsList/ProposalsList';
 import CardIconButton from '../CardIconButton/CardIconButton';
@@ -137,12 +138,17 @@ class Proposals extends Component {
                 alignItems={'center'}
                 justifyContent={'flex-end'}
               >
-                <CardIconButton
-                  icon={'Add'}
+                <RoundButton
                   {...this.props}
-                  text={'New Proposal'}
+                  buttonProps={{
+                    icon:'Add',
+                    width:'auto'
+                  }}
+                  type={'secondary'}
                   handleClick={ e => this.props.goToSection(`proposals/new`) }
-                />
+                >
+                  New Proposal
+                </RoundButton>
               </Flex>
           }
         </Flex>

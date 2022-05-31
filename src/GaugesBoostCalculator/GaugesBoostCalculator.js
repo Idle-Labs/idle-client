@@ -1,9 +1,10 @@
+import Title from '../Title/Title';
 import React, { Component } from 'react';
+import { Flex, Box, Text, Input } from "rimble-ui";
 import FunctionsUtil from '../utilities/FunctionsUtil';
 import ButtonLoader from '../ButtonLoader/ButtonLoader';
 import TranchesList from '../TranchesList/TranchesList';
 import DashboardCard from '../DashboardCard/DashboardCard';
-import { Flex, Box, Text, Input, Heading } from "rimble-ui";
 
 class GaugesBoostCalculator extends Component {
 
@@ -382,7 +383,7 @@ class GaugesBoostCalculator extends Component {
                         fontSize={2}
                         fontWeight={3}
                         textAlign={'center'}
-                        color={this.props.isActive ? 'copyColor' : 'legend'}
+                        color={isActive ? 'primary' : 'legend'}
                       >
                         {periodInfo.label}
                       </Text>
@@ -425,12 +426,13 @@ class GaugesBoostCalculator extends Component {
                 borderColor={'divider'}
                 borderBottom={'1px solid transparent'}
               >
-                <Heading.h4
+                <Title
+                  as={'h4'}
                   fontSize={[2,4]}
                   fontWeight={[3,4]}
                 >
                   Available Gauges
-                </Heading.h4>
+                </Title>
               </Flex>
               <TranchesList
                 handleClick={null}

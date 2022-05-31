@@ -1,4 +1,28 @@
 .bg{
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  position:absolute;
+}
+.bg-top-left{
+  z-index:1;
+  width:55%;
+  background:url(/images/ellipse-topleft.svg) no-repeat 0 -200px;
+  background-size:cover;
+}
+.bg-bottom-right{
+  right:0;
+  bottom:0;
+  z-index:1;
+  width:55%;
+  top:initial;
+  left:initial;
+  background:url(/images/ellipse-bottomright.svg) no-repeat 200px 300px;
+  background-size:cover;
+}
+.bg-noise{
+  z-index:9;
 	background-repeat:repeat;
 	background-image:url(/images/bg-noise.png);
 }
@@ -9,4 +33,14 @@
 }
 .submenu.opened{
   max-height:200px;
+}
+
+@media (max-width: 31em) {
+  .bg-top-left{
+    width: 100%;
+    background-position: 0 -100px !important;
+  }
+  .bg-bottom-right{
+    display:none;
+  }
 }
