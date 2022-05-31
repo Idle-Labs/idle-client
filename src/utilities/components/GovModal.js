@@ -154,7 +154,6 @@ class GovModal extends React.Component {
         isOpen={this.props.isOpen}
       >
         <ModalCard
-          bgLayer={true}
           mainColor={'white'}
           maxWidth={['auto','420px']}
           closeFunc={this.props.closeModal}

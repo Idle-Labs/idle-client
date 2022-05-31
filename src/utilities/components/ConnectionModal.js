@@ -15,6 +15,7 @@ import {
 import ModalCard from './ModalCard.js';
 import styles from './Header.module.scss';
 import FunctionsUtil from '../FunctionsUtil.js';
+import RoundButton from '../../RoundButton/RoundButton.js';
 import ImageButton from '../../ImageButton/ImageButton.js';
 import TransactionFeeModal from "./TransactionFeeModal.js";
 import Web3ConnectionButtons from "../../Web3ConnectionButtons/Web3ConnectionButtons.js";
@@ -221,7 +222,7 @@ class ConnectionModal extends React.Component {
                     size="4em"
                   />
                 </Flex>
-                <Heading fontSize={2} textAlign={'center'}>The blockchain is public</Heading>
+                <Heading color={'primary'} fontSize={2} textAlign={'center'}>The blockchain is public</Heading>
                 <Text fontSize={1} textAlign={'center'}>
                   Your Ethereum account activity is public on the
                   blockchain. Choose an account you don’t mind being
@@ -236,19 +237,18 @@ class ConnectionModal extends React.Component {
                     size="4em"
                   />
                 </Flex>
-                <Heading fontSize={2} textAlign={'center'}>Have some Ether for fees</Heading>
+                <Heading color={'primary'} fontSize={2} textAlign={'center'}>Have some Ether for fees</Heading>
                 <Text fontSize={1} mb={3} textAlign={'center'}>
                   You’ll need Ether to pay transaction fees. Buy Ether
                   from exchanges like Coinbase or directly via enabled wallet
                   such as Portis or Dapper.<br />
                   <Link
-                    title="Learn about Ethereum transaction fees"
-                    fontWeight={'0'}
+                    href={"#"}
                     color={'blue'}
+                    fontWeight={'0'}
                     textAlign={'center'}
-                    hoverColor={'blue'}
-                    href="#"
                     onClick={this.toggleShowTxFees}
+                    title={"Learn about Ethereum transaction fees"}
                   >
                     What are transaction fees?
                   </Link>
@@ -262,7 +262,7 @@ class ConnectionModal extends React.Component {
                     size="4em"
                   />
                 </Flex>
-                <Heading fontSize={2} textAlign={'center'}>Have the right account ready</Heading>
+                <Heading color={'primary'} fontSize={2} textAlign={'center'}>Have the right account ready</Heading>
                 <Text fontSize={1} textAlign={'center'}>
                   If you have multiple Ethereum accounts, check that the
                   one you want to use is active in your browser.
@@ -340,7 +340,6 @@ class ConnectionModal extends React.Component {
               justifyContent={'center'}
             >
               <Link
-                hoverColor={'blue'}
                 textAlign={'center'}
                 onClick={ e => this.setCustomAddress(false) }
               >
@@ -369,7 +368,7 @@ class ConnectionModal extends React.Component {
               />
             </Flex>
             <Flex pt={3} alignItems={'center'} justifyContent={'center'}>
-              <Link textAlign={'center'} hoverColor={'blue'} onClick={ e => this.setCurrentSection(e,'new') }>I don't have a wallet</Link>
+              <Link textAlign={'center'} onClick={ e => this.setCurrentSection(e,'new') }>I don't have a wallet</Link>
             </Flex>
             { TOSacceptance }
           </ModalCard.Body>
@@ -415,7 +414,7 @@ class ConnectionModal extends React.Component {
                     />
                   </Flex>
                   <Flex alignItems={'center'} justifyContent={'center'}>
-                    <Link textAlign={'center'} hoverColor={'blue'} onClick={ e => this.setCurrentSection(e,'wallet') }>I already have a wallet</Link>
+                    <Link textAlign={'center'} onClick={ e => this.setCurrentSection(e,'wallet') }>I already have a wallet</Link>
                   </Flex>
                 </Flex>
               ) : (
@@ -495,7 +494,6 @@ class ConnectionModal extends React.Component {
               >
                 <Link
                   color={'primary'}
-                  hoverColor={'primary'}
                   onClick={ e => this.setCustomAddress(true) }
                 >
                   Watch Ethereum Address
@@ -518,33 +516,24 @@ class ConnectionModal extends React.Component {
     return (
       <ModalCard.Footer>
         { !this.state.currentSection ? (
-            <Button
-              className={[styles.gradientButton,styles.empty]}
-              onClick={ e => this.setCurrentSection(e,'instructions') }
-              size={'medium'}
-              borderRadius={4}
-              contrastColor={'blue'}
-              fontWeight={3}
-              fontSize={[2,2]}
-              mx={'auto'}
+            <RoundButton
               px={[4,5]}
+              mx={'auto'}
+              size={'medium'}
+              handleClick={ e => this.setCurrentSection(e,'instructions') }
             >
               READ INSTRUCTIONS
-            </Button>
+            </RoundButton>
           ) : (!this.state.askCustomAddress || this.state.currentSection==='instructions') && (
-            <Button
+            <RoundButton
               className={[styles.gradientButton,styles.empty]}
-              onClick={this.resetModal}
-              size={'medium'}
-              borderRadius={4}
-              contrastColor={'blue'}
-              fontWeight={3}
-              fontSize={[2,2]}
-              mx={'auto'}
               px={[4,5]}
+              mx={'auto'}
+              size={'medium'}
+              handleClick={this.resetModal}
             >
               BACK
-            </Button>
+            </RoundButton>
           )
         }
       </ModalCard.Footer>

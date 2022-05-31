@@ -6,3 +6,33 @@
   position: absolute;
   background-size: contain;
 }
+.bg{
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  position:absolute;
+}
+.bg-bottom-right{
+  right:0;
+  bottom:0;
+  z-index:1;
+  width:55%;
+  top:initial;
+  left:initial;
+  background:url(/images/ellipse-bottomright.svg) no-repeat 100px 200px;
+  background-size:cover;
+}
+.bg-noise{
+  z-index:9;
+  background-repeat:repeat;
+  background-image:url(/images/bg-noise.png);
+}
+
+/*
+@media (max-width: 31em) {
+  .bg-bottom-right{
+    display:none;
+  }
+}
+*/

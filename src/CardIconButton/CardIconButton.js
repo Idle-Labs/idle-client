@@ -59,7 +59,7 @@ class CardIconButton extends Component {
                       align={"center"}
                       name={this.props.icon}
                       size={this.props.isMobile ? "1.2em" : "1.4em"}
-                      color={this.props.iconColor ? this.props.iconColor : "redeem"}
+                      color={this.props.iconColor ? this.props.iconColor : "primary"}
                       {...this.props.iconProps}
                     />
                   )
@@ -80,14 +80,14 @@ class CardIconButton extends Component {
                 align={"center"}
                 name={this.props.icon}
                 size={this.props.isMobile ? "1.2em" : "1.4em"}
-                color={this.props.iconColor ? this.props.iconColor : "redeem"}
+                color={this.props.iconColor ? this.props.iconColor : "primary"}
                 {...this.props.iconProps}
               />
             )
           }
           <Text
             fontWeight={3}
-            fontSize={[1, 3]}
+            fontSize={[1, 2]}
             {...textProps}
           >
             {this.props.text}

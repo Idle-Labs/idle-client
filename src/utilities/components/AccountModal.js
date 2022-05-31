@@ -252,13 +252,16 @@ class AccountModal extends React.Component {
                 }
               </Flex>
             </ModalCard.Body>
-
             <ModalCard.Footer>
               <ButtonLoader
                 buttonText={'Logout wallet'}
                 isLoading={this.state.logout}
                 handleClick={ async () => { await this.logout() } }
-                buttonProps={{className:styles.gradientButton,borderRadius:'2rem',mt:[4,8],minWidth:['95px','145px'],size:['auto','medium']}}
+                buttonProps={{
+                  mt:[4,8],
+                  size:['auto','medium'],
+                  minWidth:['95px','145px']
+                }}
               >
               </ButtonLoader>
             </ModalCard.Footer>

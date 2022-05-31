@@ -36,26 +36,45 @@ const ModalCard = ({children, closeFunc, ...props}) => (
       className={[ props.bgLayer ? styles.bg : null]}
       style={{
         overflow: 'auto',
-        backgroundRepeat:'no-repeat',
-        backgroundPosition:'bottom right',
-        backgroundSize: !props.background ? '65%' : null,
-        backgroundImage:'url(/images/bg-bottom-right.png)',
         background: props.background ? props.background : null,
       }}
       backgroundColor={'dashboardBg'}
     >
-      {children}
+      <Flex
+        zIndex={1}
+        width={'100%'}
+        height={'100%'}
+        position={'absolute'}
+      >
+        <Flex
+          className={[styles.bg,styles['bg-bottom-right']]}
+        />
+        <Flex
+          className={[styles.bg,styles['bg-noise']]}
+        />
+      </Flex>
+      <Flex
+        zIndex={2}
+        height={'100%'}
+        flex={'1 1 auto'}
+        style={{
+          overflow: 'auto',
+        }}
+        position={'relative'}
+        flexDirection={'column'}
+      >
+        {children}
+      </Flex>
     </Flex>
   </Card>
 );
 
 ModalCard.Header = (props) => (
   <Box
+    mb={2}
     width={1}
-    mb={[2,3]}
     pb={[2,2]}
     pt={ props.pt ? props.pt : (props.icon ? 3 : [5,3]) }
-    borderBottom={ props.borderBottom ? props.borderBottom : '1px solid #eee' }
   >
     <Flex
       px={[1,2]}
@@ -119,12 +138,12 @@ ModalCard.Body = ({children, ...props}) => (
 
 ModalCard.Footer = ({children, ...props}) => (
   <Flex
+    py={3}
+    px={[0,3]}
+    borderTop={0}
     flex={'1 0 auto'}
     justifyContent={'center'}
-    borderTop={1}
     borderColor={'light-gray'}
-    px={[0,3]}
-    py={3}
   >
     {children}
   </Flex>

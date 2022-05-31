@@ -860,9 +860,9 @@ class Gauges extends Component {
                           text={'Deposit'}
                           iconColor={'deposit'}
                           icon={'ArrowDownward'}
-                          iconBgColor={'#ced6ff'}
                           isActive={ this.state.stakeAction === 'deposit' }
                           handleClick={ e => this.setStakeAction('deposit') }
+                          iconBgColor={this.state.stakeAction === 'deposit' ? '#ffffff' : '#ced6ff'}
                         />
                         <CardIconButton
                           {...this.props}
@@ -877,9 +877,9 @@ class Gauges extends Component {
                           text={'Claim'}
                           iconColor={'#dd0000'}
                           icon={'CardGiftcard'}
-                          iconBgColor={'#ffd979'}
                           isActive={ this.state.stakeAction === 'claim' }
                           handleClick={ e => this.setStakeAction('claim') }
+                          iconBgColor={this.state.stakeAction === 'claim' ? '#ffffff' : '#ffd979'}
                         />
                         <CardIconButton
                           {...this.props}
@@ -894,9 +894,9 @@ class Gauges extends Component {
                           text={'Withdraw'}
                           icon={'ArrowUpward'}
                           iconColor={'redeem'}
-                          iconBgColor={'#ceeff6'}
                           isActive={ this.state.stakeAction === 'withdraw' }
                           handleClick={ e => this.setStakeAction('withdraw') }
+                          iconBgColor={this.state.stakeAction === 'withdraw' ? '#ffffff' : '#ceeff6'}
                         />
                       </Flex>
                     </Box>

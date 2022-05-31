@@ -1131,11 +1131,11 @@ class TrancheDetails extends Component {
                     }}
                     width={[1,'32%']}
                     caption={'Stake / Unstake'}
-                    imageSrc={'images/mint.svg'}
+                    imageSrc={'images/stake.svg'}
                     isMobile={this.props.isMobile}
                     imageProps={{
                       mb:[0,2],
-                      height:this.props.isMobile ? '42px' : '52px'
+                      height:this.props.isMobile ? '42px' : '45px'
                     }}
                     isActive={isStake}
                     handleClick={ e => this.setSelectedAction('stake') }

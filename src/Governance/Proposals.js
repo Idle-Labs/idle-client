@@ -6,7 +6,6 @@ import NewProposal from './NewProposal/NewProposal';
 import RoundButton from '../RoundButton/RoundButton';
 import GovernanceUtil from '../utilities/GovernanceUtil';
 import ProposalsList from './ProposalsList/ProposalsList';
-import CardIconButton from '../CardIconButton/CardIconButton';
 import ProposalDetails from './ProposalDetails/ProposalDetails';
 
 class Proposals extends Component {

@@ -11,8 +11,8 @@ class RoundButton extends Component {
     const ctaType = this.props.type || 'primary';
 
     const buttonProps = Object.assign({
-      width:1,
       fontSize:2,
+      width:'auto',
       fontWeight:4,
       height:'45px',
       boxShadow:null,

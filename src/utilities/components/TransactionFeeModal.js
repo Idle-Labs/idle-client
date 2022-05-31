@@ -18,7 +18,7 @@ function TransactionFeeModal(props) {
                 size="4em"
               />
             </Flex>
-            <Heading fontSize={2} textAlign={'center'}>Undeniable proof</Heading>
+            <Heading color={'primary'} fontSize={2} textAlign={'center'}>Undeniable proof</Heading>
             <Text fontSize={1} textAlign={'center'}>
               You get a public record of any funds you send or receive, a bit like
               a deed for a house.
@@ -32,7 +32,7 @@ function TransactionFeeModal(props) {
                 size="4em"
               />
             </Flex>
-            <Heading fontSize={2} textAlign={'center'}>Unbreakable encryption</Heading>
+            <Heading color={'primary'} fontSize={2} textAlign={'center'}>Unbreakable encryption</Heading>
             <Text fontSize={1} textAlign={'center'}>
               Your funds can only ever go to your intended recipients.
             </Text>
@@ -50,7 +50,7 @@ function TransactionFeeModal(props) {
                 size="4em"
               />
             </Flex>
-            <Heading fontSize={2} textAlign={'center'}>Unparalleled control</Heading>
+            <Heading color={'primary'} fontSize={2} textAlign={'center'}>Unparalleled control</Heading>
             <Text fontSize={1} textAlign={'center'}>
               You can pay or get paid without using any banks or companies.
             </Text>
