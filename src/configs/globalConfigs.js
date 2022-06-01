@@ -77,6 +77,7 @@ import SushiLiquidityPool from "../abis/sushiswap/SushiLiquidityPool.json";
 import NexusMutualIncidents from "../abis/nexus/NexusMutualIncidents.json";
 import GaugeDistributorProxy from '../contracts/GaugeDistributorProxy.json';
 import StakingFeeDistributor from "../contracts/StakingFeeDistributor.json";
+import QuickswapV2Router02 from "../abis/quickswap/QuickswapV2Router02.json";
 import NexusMutualDistributor from "../abis/nexus/NexusMutualDistributor.json";
 import BalancerExchangeProxy from "../abis/balancer/BalancerExchangeProxy.json";
 import GaugesBoostCalculator from "../GaugesBoostCalculator/GaugesBoostCalculator";
@@ -574,6 +575,10 @@ const globalConfigs = {
       SushiswapRouter: {
         abi: SushiV2Router02,
         address: '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
+      },
+      QuickswapRouter: {
+        abi: QuickswapV2Router02,
+        address: '0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff'
       },
     },
     1: {
@@ -1256,6 +1261,8 @@ const globalConfigs = {
           rgb: [29, 139, 207],
           hsl: ['203', '75%', '46%']
         },
+        conversionRateInvertTokens:true,
+        conversionRateProtocolContract: 'QuickswapRouter',
         address: '0xf28164A485B0B2C90639E47b0f377b4a438a16B1'
       },
       CXETHWETH: {
@@ -1270,7 +1277,8 @@ const globalConfigs = {
           rgb: [247, 59, 172],
           hsl: ['324', '92%', '60%']
         },
-        address: '0xda7cd765DF426fCA6FB5E1438c78581E4e66bFe7'
+        address: '0xda7cd765DF426fCA6FB5E1438c78581E4e66bFe7',
+        addressForPrice: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
       },
       ALUSD3CRV: {
         decimals: 18,
@@ -1310,7 +1318,7 @@ const globalConfigs = {
           hsl: ['0', '100%', '70%']
         },
         conversionRateField: 'PBTCDAIPrice',
-        uniswapRouterMethod: 'getAmountsOut',
+        conversionRouterMethod: 'getAmountsOut',
         address: '0xC9467E453620f16b57a34a770C6bceBECe002587',
         addressForPrice: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
       },

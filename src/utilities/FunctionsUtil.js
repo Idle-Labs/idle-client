@@ -473,7 +473,7 @@ class FunctionsUtil {
     await this.asyncForEach(Object.keys(portfolio.stakingRewards), async (rewardToken) => {
       const rewardTokenConfig = this.getGlobalConfig(['govTokens',rewardToken]);
       if (rewardTokenConfig && rewardTokenConfig.showBalance && portfolio.stakingRewards[rewardToken].tokenAmount.gt(0)){
-        const rewardTokenConversionRate = await this.getTokenConversionRateUniswap(rewardTokenConfig);
+        const rewardTokenConversionRate = await this.getOnChainTokenConversionRate(rewardTokenConfig);
         portfolio.stakingRewards[rewardToken].conversionRate = rewardTokenConversionRate;
         portfolio.stakingRewards[rewardToken].tokenAmountConverted = portfolio.stakingRewards[rewardToken].tokenAmount.times(rewardTokenConversionRate);
 
@@ -1285,9 +1285,9 @@ class FunctionsUtil {
     await this.asyncForEach(Object.keys(stakingRewards), async (token) => {
 
       let firstHarvest = null;
-      let prevBlockInfo = null;
       let lastBlockInfo = null;
       let latestHarvest = null;
+      let firstBlockInfo = null;
       let tokenApr = this.BNify(0);
       let tokenApy = this.BNify(0);
       let distributionEnded = null;
@@ -1302,9 +1302,10 @@ class FunctionsUtil {
       let tokensPerSecond = this.BNify(0);
       let lastBlockPoolSize = this.BNify(0);
       let distributionSpeed = this.BNify(0);
+      let firstBlockPoolSize = this.BNify(0);
       let convertedTokensPerYear = this.BNify(0);
 
-      const govTokenConfig = this.getGlobalConfig(['stats', 'tokens', token]);
+      const govTokenConfig = this.getTokenConfig(token);
       const DAITokenConfig = {
         address: this.getContractByName('DAI')._address
       };
@@ -1372,21 +1373,26 @@ class FunctionsUtil {
           const latestHarvest = transfers[transfers.length - 1];
           const firstBlock = firstHarvest ? firstHarvest.blockNumber : tokenConfig.blockNumber;
           [
-            prevBlockInfo,
+            firstBlockInfo,
             lastBlockInfo,
             conversionRate,
+            firstBlockPoolSize,
             lastBlockPoolSize
           ] = await Promise.all([
             this.getBlockInfo(firstBlock),
             this.getBlockInfo(latestHarvest.blockNumber),
-            this.getUniswapConversionRate(DAITokenConfig, govTokenConfig),
+            this.getOnChainTokenConversionRate(govTokenConfig),
+            this.genericContractCallCached(tokenConfig.CDO.name, 'getContractValue', [], {}, firstBlock),
             this.genericContractCallCached(tokenConfig.CDO.name, 'getContractValue', [], {}, latestHarvest.blockNumber)
           ]);
 
-          if (prevBlockInfo && lastBlockInfo) {
-            let poolSize = this.fixTokenDecimals(lastBlockPoolSize, tokenConfig.CDO.decimals);
+          if (firstBlockInfo && lastBlockInfo) {
+            lastBlockPoolSize = this.fixTokenDecimals(lastBlockPoolSize, tokenConfig.CDO.decimals);
+            firstBlockPoolSize = this.fixTokenDecimals(firstBlockPoolSize, tokenConfig.CDO.decimals);
+            let poolSize = firstBlockPoolSize.plus(lastBlockPoolSize).div(2);
+
             const elapsedBlocks = latestHarvest.blockNumber - firstBlock;
-            const elapsedSeconds = lastBlockInfo.timestamp - prevBlockInfo.timestamp;
+            const elapsedSeconds = lastBlockInfo.timestamp - firstBlockInfo.timestamp;
 
             lastAmount = this.fixTokenDecimals(latestHarvest.returnValues.value, govTokenConfig.decimals);
             totalAmount = transfers.reduce((total, t) => {
@@ -1422,6 +1428,8 @@ class FunctionsUtil {
               distributionSpeedUnit,
               convertedTokensPerYear
             };
+
+            // console.log(token, (conversionRate? conversionRate.toFixed():null), totalAmount.toFixed(),elapsedSeconds,tokensPerYear.toFixed(),convertedTokensPerYear.toFixed(),poolSize.toFixed(),tokenApr.toFixed());
           }
         }
       }
@@ -3182,9 +3190,10 @@ class FunctionsUtil {
   }
 
   getSubgraphTrancheInfo = async (trancheAddress,startTimestamp=null,endTimestamp=null,fields=null) => {
+    const requiredNetworkId = this.getRequiredNetworkId();
     const subgraphConfig = this.getGlobalConfig(['network','providers','subgraph','tranches']);
 
-    if (!subgraphConfig.enabled){
+    if (!subgraphConfig.enabled || !subgraphConfig.availableNetworks.includes(requiredNetworkId)){
       return false;
     }
 
@@ -7122,7 +7131,7 @@ class FunctionsUtil {
 
     return null;
   }
-  getSushiswapConversionRate = async (tokenConfigFrom, tokenConfigDest) => {
+  getSushiswapConversionRate_old = async (tokenConfigFrom, tokenConfigDest) => {
 
     // Check for cached data
     const cachedDataKey = `sushiswapConversionRate_${tokenConfigFrom.address}_${tokenConfigDest.address}`;
@@ -7157,7 +7166,8 @@ class FunctionsUtil {
       return null;
     }
   }
-  getUniswapConversionRate = async (tokenConfigFrom, tokenConfigDest, blockNumber='latest', useWETH=true) => {
+
+  getCustomProtocolConversionRate = async (tokenConfigFrom, tokenConfigDest, protocolContract=null, blockNumber='latest', useWETH=true) => {
 
     if (tokenConfigDest.addressForPrice) {
       tokenConfigDest = {...tokenConfigDest};
@@ -7165,7 +7175,7 @@ class FunctionsUtil {
     }
 
     // Check for cached data
-    const cachedDataKey = `uniswapConversionRate_${tokenConfigFrom.address}_${tokenConfigDest.address}_${blockNumber}`;
+    const cachedDataKey = `customProtocolConversionRate_${tokenConfigFrom.address}_${tokenConfigDest.address}_${blockNumber}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData && !this.BNify(cachedData).isNaN()) {
       return this.BNify(cachedData);
@@ -7173,20 +7183,21 @@ class FunctionsUtil {
 
     try {
       const WETHAddr = this.getContractByName('WETH')._address;
-      const uniswapRouterMethod = tokenConfigDest.uniswapRouterMethod || 'getAmountsIn';
+      const invertTokens = !!tokenConfigDest.conversionRateInvertTokens;
+      const routerMethod = tokenConfigDest.conversionRouterMethod || 'getAmountsIn';
 
       const path = [];
-      path.push(uniswapRouterMethod === 'getAmountsIn' ? tokenConfigFrom.address : tokenConfigDest.address);
+      path.push(routerMethod === 'getAmountsOut' || invertTokens ? tokenConfigDest.address : tokenConfigFrom.address);
       // Don't pass through weth if i'm converting weth
       if (useWETH && WETHAddr.toLowerCase() !== tokenConfigFrom.address.toLowerCase() && WETHAddr.toLowerCase() !== tokenConfigDest.address.toLowerCase()) {
         path.push(WETHAddr);
       }
-      path.push(uniswapRouterMethod === 'getAmountsIn' ? tokenConfigDest.address : tokenConfigFrom.address);
+      path.push(routerMethod === 'getAmountsOut' || invertTokens ? tokenConfigFrom.address : tokenConfigDest.address);
 
       let decimals = tokenConfigDest.decimals;
       
       // Use decimals of underlying token if set
-      if (uniswapRouterMethod === 'getAmountsOut'){
+      if (routerMethod === 'getAmountsOut'){
         if (tokenConfigDest.underlying){
           const underlyingTokenConfig = this.getTokenConfig(tokenConfigDest.underlying);
           if (underlyingTokenConfig){
@@ -7195,14 +7206,15 @@ class FunctionsUtil {
         }
       }
       const one = this.normalizeTokenDecimals(decimals);
-      const unires = await this.genericContractCallNoMulticall('UniswapRouter', uniswapRouterMethod, [one.toFixed(), path], {}, blockNumber);
-
-      // console.log('getUniswapConversionRate',path,blockNumber,unires);
+      const unires = await this.genericContractCallNoMulticall(protocolContract, routerMethod, [one.toFixed(), path], {}, blockNumber);
 
       if (unires) {
         let price = this.BNify(unires[0]).div(one);
-        if (uniswapRouterMethod === 'getAmountsOut'){
+        if (routerMethod === 'getAmountsOut'){
           price = this.BNify(unires[2]).div(this.normalizeTokenDecimals(18));
+        }
+        if (invertTokens){
+          price = this.BNify(1).div(price);
         }
         const TTL = blockNumber === 'latest' ? this.getGlobalConfig(['cache','TTL']) : null;
         return this.setCachedDataWithLocalStorage(cachedDataKey, price, TTL);
@@ -7212,6 +7224,18 @@ class FunctionsUtil {
       // console.log('getUniswapConversionRate - ERROR',tokenConfigFrom,tokenConfigDest);
       return null;
     }
+  }
+
+  getQuickswapConversionRate = async (tokenConfigFrom, tokenConfigDest, blockNumber='latest', useWETH=true) => {
+    return await this.getCustomProtocolConversionRate(tokenConfigFrom, tokenConfigDest, 'QuickswapRouter', blockNumber, useWETH);
+  }
+
+  getSushiswapConversionRate = async (tokenConfigFrom, tokenConfigDest, blockNumber='latest', useWETH=true) => {
+    return await this.getCustomProtocolConversionRate(tokenConfigFrom, tokenConfigDest, 'SushiswapRouter', blockNumber, useWETH);
+  }
+
+  getUniswapConversionRate = async (tokenConfigFrom, tokenConfigDest, blockNumber='latest', useWETH=true) => {
+    return await this.getCustomProtocolConversionRate(tokenConfigFrom, tokenConfigDest, 'UniswapRouter', blockNumber, useWETH);
   }
   /*
   getUniswapConversionRate_old = async (tokenConfigFrom,tokenConfigDest) => {
@@ -9131,7 +9155,7 @@ class FunctionsUtil {
       return tokenBalance;
     }
     if (tokenBalance.gt(0)){
-      const tokenUsdConversionRate = await this.getTokenConversionRateUniswap(tokenConfig,blockNumber);
+      const tokenUsdConversionRate = await this.getOnChainTokenConversionRate(tokenConfig,blockNumber);
       if (tokenUsdConversionRate) {
         tokenBalance = tokenBalance.times(tokenUsdConversionRate);
       }
@@ -9167,28 +9191,49 @@ class FunctionsUtil {
 
     return this.BNify(0);
   }
-  getTokenConversionRateUniswap = async (tokenConfig, blockNumber='latest') => {
+  getOnChainTokenConversionRate = async (tokenConfig, blockNumber='latest', protocolContract=null) => {
     const DAITokenConfig = {
       address: this.getContractByName('DAI')._address
     };
     const statsTokenConfig = tokenConfig.token ? this.getTokenConfig(tokenConfig.token) : null;
+
+    let useWETH = true;
 
     // Replace from token address
     if (statsTokenConfig.addressForPriceFrom){
       DAITokenConfig.address = statsTokenConfig.addressForPriceFrom;
     }
 
-    const ToTokenConfig = statsTokenConfig || tokenConfig;
-
-    // Don't use WETH in the path
-    const useWETH = !statsTokenConfig.addressForPriceFrom;
-
-    const conversionRate = await this.getUniswapConversionRate(DAITokenConfig, ToTokenConfig, blockNumber, useWETH);
-    if (!this.BNify(conversionRate).isNaN()) {
-      return conversionRate;
+    // Set custom protocol (uniswap, sushiswap, quickswap)
+    if (!protocolContract && statsTokenConfig.conversionRateProtocolContract){
+      protocolContract = statsTokenConfig.conversionRateProtocolContract;
     }
 
-    return null;
+    // Override useWETH based on token config
+    if (typeof statsTokenConfig.conversionRateUseWETH !== 'undefined'){
+      useWETH = statsTokenConfig.conversionRateUseWETH;
+    } else {
+      // Don't use WETH in the path
+      useWETH = !statsTokenConfig.addressForPriceFrom;
+    }
+
+    const ToTokenConfig = statsTokenConfig || tokenConfig;
+
+    let conversionRate = null;
+    const currentNetworkId = this.getRequiredNetworkId();
+    if (protocolContract){
+      conversionRate = await this.getCustomProtocolConversionRate(DAITokenConfig, ToTokenConfig, protocolContract, blockNumber, useWETH);
+    } else {
+      conversionRate = currentNetworkId === 1 ? await this.getUniswapConversionRate(DAITokenConfig, ToTokenConfig, blockNumber, useWETH) : await this.getSushiswapConversionRate(DAITokenConfig, ToTokenConfig, blockNumber, useWETH);
+    }
+
+    // console.log('getOnChainTokenConversionRate',currentNetworkId,protocolContract,ToTokenConfig.address,blockNumber, useWETH, conversionRate);
+
+    if (this.BNify(conversionRate).isNaN()) {
+      conversionRate = this.BNify(1);
+    }
+
+    return conversionRate
   }
   /*
   Get idleToken conversion rate

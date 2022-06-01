@@ -167,6 +167,9 @@ class PortfolioEquityTranches extends Component {
     const tokensBalancesPerDate = {};
     const aggregatedBalancesKeys = {};
     const walletProvider = this.functionsUtil.getWalletProvider();
+    const requiredNetworkId = this.functionsUtil.getRequiredNetworkId();
+    const subgraphConfig = this.functionsUtil.getGlobalConfig(['network','providers','subgraph','tranches']);
+    const subgraphEnabled = subgraphConfig.enabled && subgraphConfig.availableNetworks.includes(requiredNetworkId);
     const currTimestamp = parseInt(this.functionsUtil.strToMoment(this.functionsUtil.strToMoment().format('YYYY-MM-DD')+' 23:59:59','YYYY-MM-DD HH:mm:ss')._d.getTime()/1000);
 
     const trancheTokenBalance = {};
@@ -184,6 +187,7 @@ class PortfolioEquityTranches extends Component {
         const firstTokenTx = tokensBalance[token][0];
         const firstAATokenTx = tokensBalance[token].find( tx => tx.tranche==='AA' ) || null;
         const firstBBTokenTx = tokensBalance[token].find( tx => tx.tranche==='BB' ) || null;
+        const tokenDecimals = this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase(),'decimals']);
 
         // const firstBlockNumber = firstTokenTx.blockNumber;
 
@@ -195,40 +199,49 @@ class PortfolioEquityTranches extends Component {
           trancheAAInfos,
           trancheBBInfos
         ] = await Promise.all([
-          conversionRateField ? this.functionsUtil.getTokenConversionRateUniswap(tokenConfig) : this.functionsUtil.BNify(1),
+          conversionRateField ? this.functionsUtil.getOnChainTokenConversionRate(tokenConfig) : this.functionsUtil.BNify(1),
           firstAATokenTx ? this.functionsUtil.getSubgraphTrancheInfo(tokenConfig.AA.address,firstAATokenTx.timeStamp,currTimestamp,['timeStamp','virtualPrice','blockNumber']) : [],
           firstBBTokenTx ? this.functionsUtil.getSubgraphTrancheInfo(tokenConfig.BB.address,firstBBTokenTx.timeStamp,currTimestamp,['timeStamp','virtualPrice','blockNumber']) : [],
         ]);
 
-        const timeStamp_start = Math.min(firstAATokenTx ? firstAATokenTx.timeStamp : firstTokenTx.timeStamp,firstBBTokenTx ? firstBBTokenTx.timeStamp : firstTokenTx.timeStamp);
+        const timeStamp_start = Math.min(firstAATokenTx ? firstAATokenTx.timeStamp : firstTokenTx.timeStamp,firstBBTokenTx ? firstBBTokenTx.timeStamp : firstTxTimestamp);
 
-        const trancheInfos = trancheAAInfos.concat(trancheBBInfos).sort((a, b) => (parseInt(a.timeStamp) > parseInt(b.timeStamp) ? 1 : -1));
+        const trancheInfos = trancheAAInfos ? trancheAAInfos.concat(trancheBBInfos).sort((a, b) => (parseInt(a.timeStamp) > parseInt(b.timeStamp) ? 1 : -1)) : null;
 
+        const blocksTimestamps = {};
+        const conversionRateBlocksCalls = {};
         const conversionRatesTimestamps = {};
+
         if (conversionRateField){
-          const blocksTimestamps = {};
-          const conversionRateBlocksCalls = {};
           for (let timeStamp=timeStamp_start;timeStamp<=currTimestamp;timeStamp+=this.props.frequencySeconds) {
-            const blockInfo = trancheInfos.reduce( (blockInfo,trancheInfo) => {
-              const distance = Math.abs(parseInt(trancheInfo.timeStamp)-parseInt(timeStamp));
-              if (blockInfo.distance === null || distance<blockInfo.distance){
-                blockInfo.distance = distance;
-                blockInfo.trancheInfo = trancheInfo;
-              }
-              return blockInfo;
-            },{
-              distance:null,
-              trancheInfo:null
-            });
+            if (subgraphEnabled && trancheInfos){
+              const blockInfo = trancheInfos.reduce( (blockInfo,trancheInfo) => {
+                const distance = Math.abs(parseInt(trancheInfo.timeStamp)-parseInt(timeStamp));
+                if (blockInfo.distance === null || distance<blockInfo.distance){
+                  blockInfo.distance = distance;
+                  blockInfo.trancheInfo = trancheInfo;
+                }
+                return blockInfo;
+              },{
+                distance:null,
+                trancheInfo:null
+              });
 
-            if (blockInfo && blockInfo.trancheInfo){
-              if (!blocksTimestamps[blockInfo.trancheInfo.blockNumber]){
-                blocksTimestamps[blockInfo.trancheInfo.blockNumber] = [];
-              }
-              blocksTimestamps[blockInfo.trancheInfo.blockNumber].push(blockInfo.trancheInfo.timeStamp);
+              if (blockInfo && blockInfo.trancheInfo){
+                if (!blocksTimestamps[blockInfo.trancheInfo.blockNumber]){
+                  blocksTimestamps[blockInfo.trancheInfo.blockNumber] = [];
+                }
+                blocksTimestamps[blockInfo.trancheInfo.blockNumber].push(blockInfo.trancheInfo.timeStamp);
 
-              // Gnosis cannot fetch past blocks data
-              conversionRateBlocksCalls[blockInfo.trancheInfo.blockNumber] = walletProvider === 'gnosis' ? new Promise(resolve => resolve(lastConversionRate)) : this.functionsUtil.getTokenConversionRateUniswap(tokenConfig,blockInfo.trancheInfo.blockNumber);
+                // Gnosis cannot fetch past blocks data
+                conversionRateBlocksCalls[blockInfo.trancheInfo.blockNumber] = walletProvider === 'gnosis' ? new Promise(resolve => resolve(lastConversionRate)) : this.functionsUtil.getOnChainTokenConversionRate(tokenConfig,blockInfo.trancheInfo.blockNumber);
+              }
+            } else {
+              if (!blocksTimestamps[timeStamp]){
+                blocksTimestamps[timeStamp] = [];
+              }
+              blocksTimestamps[timeStamp].push(timeStamp);
+              conversionRateBlocksCalls[timeStamp] = new Promise(resolve => resolve(lastConversionRate));
             }
           }
 
@@ -244,7 +257,6 @@ class PortfolioEquityTranches extends Component {
               conversionRatesTimestamps[momentDate] = conversionRate;
             });
           });
-
         }
 
         // console.log(token,startTokenConversionRate ? startTokenConversionRate.toString() : null,lastTokenConversionRate ? lastTokenConversionRate.toString() : null);
@@ -253,33 +265,59 @@ class PortfolioEquityTranches extends Component {
           tokensData[token] = [];
         }
 
-        if (trancheAAInfos){
-          trancheAAInfos.forEach( (trancheInfo,index) => {
-            const tokenDataAA = {
-              tranche:'AA',
-              timeStamp:trancheInfo.timeStamp,
-              tranchePrice:this.functionsUtil.BNify(trancheInfo.virtualPrice)
-            };
-            const momentDate = this.functionsUtil.strToMoment(trancheInfo.timeStamp*1000).format('YYYY-MM-DD');
-            if (conversionRateField && conversionRatesTimestamps[momentDate]){
-              tokenDataAA[conversionRateField] = conversionRatesTimestamps[momentDate];
-            }
-            tokensData[token].push(tokenDataAA);
-          });
-        }
+        if (subgraphEnabled){
+          if (trancheAAInfos){
+            trancheAAInfos.forEach( (trancheInfo,index) => {
+              const tokenDataAA = {
+                tranche:'AA',
+                timeStamp:trancheInfo.timeStamp,
+                tranchePrice:this.functionsUtil.BNify(trancheInfo.virtualPrice)
+              };
+              const momentDate = this.functionsUtil.strToMoment(trancheInfo.timeStamp*1000).format('YYYY-MM-DD');
+              if (conversionRateField && conversionRatesTimestamps[momentDate]){
+                tokenDataAA[conversionRateField] = conversionRatesTimestamps[momentDate];
+              }
+              tokensData[token].push(tokenDataAA);
+            });
+          }
 
-        if (trancheBBInfos){
-          trancheBBInfos.forEach( (trancheInfo,index) => {
-            const tokenDataBB = {
-              tranche:'BB',
-              timeStamp:trancheInfo.timeStamp,
-              tranchePrice:this.functionsUtil.BNify(trancheInfo.virtualPrice)
-            };
-            const momentDate = this.functionsUtil.strToMoment(trancheInfo.timeStamp*1000).format('YYYY-MM-DD');
-            if (conversionRateField && conversionRatesTimestamps[momentDate]){
-              tokenDataBB[conversionRateField] = conversionRatesTimestamps[momentDate];
-            }
-            tokensData[token].push(tokenDataBB);
+          if (trancheBBInfos){
+            trancheBBInfos.forEach( (trancheInfo,index) => {
+              const tokenDataBB = {
+                tranche:'BB',
+                timeStamp:trancheInfo.timeStamp,
+                tranchePrice:this.functionsUtil.BNify(trancheInfo.virtualPrice)
+              };
+              const momentDate = this.functionsUtil.strToMoment(trancheInfo.timeStamp*1000).format('YYYY-MM-DD');
+              if (conversionRateField && conversionRatesTimestamps[momentDate]){
+                tokenDataBB[conversionRateField] = conversionRatesTimestamps[momentDate];
+              }
+              tokensData[token].push(tokenDataBB);
+            });
+          }
+        } else {
+          Object.keys(conversionRateBlocksCalls).forEach( blockNumber => {
+            blocksTimestamps[blockNumber].forEach( timeStamp => {
+              const momentDate = this.functionsUtil.strToMoment(timeStamp*1000).format('YYYY-MM-DD');
+
+              const tokenDataAA = {
+                tranche:'AA',
+                timeStamp:timeStamp,
+                tranchePrice:this.functionsUtil.normalizeTokenDecimals(tokenDecimals)
+              };
+              const tokenDataBB = {
+                tranche:'BB',
+                timeStamp:timeStamp,
+                tranchePrice:this.functionsUtil.normalizeTokenDecimals(tokenDecimals)
+              };
+
+              if (conversionRateField && conversionRatesTimestamps[momentDate]){
+                tokenDataAA[conversionRateField] = conversionRatesTimestamps[momentDate];
+                tokenDataBB[conversionRateField] = conversionRatesTimestamps[momentDate];
+              }
+              tokensData[token].push(tokenDataAA);
+              tokensData[token].push(tokenDataBB);
+            });
           });
         }
       }
