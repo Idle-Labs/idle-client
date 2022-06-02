@@ -1277,8 +1277,10 @@ const globalConfigs = {
           rgb: [247, 59, 172],
           hsl: ['324', '92%', '60%']
         },
+        isPoolToken: true, // Get Pool Token price for conversion rate
+        conversionRateProtocolContract: 'QuickswapRouter',
         address: '0xda7cd765DF426fCA6FB5E1438c78581E4e66bFe7',
-        addressForPrice: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
+        // addressForPrice: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
       },
       ALUSD3CRV: {
         decimals: 18,

@@ -199,7 +199,7 @@ class PortfolioEquityTranches extends Component {
           trancheAAInfos,
           trancheBBInfos
         ] = await Promise.all([
-          conversionRateField ? this.functionsUtil.getOnChainTokenConversionRate(tokenConfig) : this.functionsUtil.BNify(1),
+          conversionRateField ? this.functionsUtil.getTrancheTokenConversionRate(tokenConfig) : this.functionsUtil.BNify(1),
           firstAATokenTx ? this.functionsUtil.getSubgraphTrancheInfo(tokenConfig.AA.address,firstAATokenTx.timeStamp,currTimestamp,['timeStamp','virtualPrice','blockNumber']) : [],
           firstBBTokenTx ? this.functionsUtil.getSubgraphTrancheInfo(tokenConfig.BB.address,firstBBTokenTx.timeStamp,currTimestamp,['timeStamp','virtualPrice','blockNumber']) : [],
         ]);
@@ -234,7 +234,7 @@ class PortfolioEquityTranches extends Component {
                 blocksTimestamps[blockInfo.trancheInfo.blockNumber].push(blockInfo.trancheInfo.timeStamp);
 
                 // Gnosis cannot fetch past blocks data
-                conversionRateBlocksCalls[blockInfo.trancheInfo.blockNumber] = walletProvider === 'gnosis' ? new Promise(resolve => resolve(lastConversionRate)) : this.functionsUtil.getOnChainTokenConversionRate(tokenConfig,blockInfo.trancheInfo.blockNumber);
+                conversionRateBlocksCalls[blockInfo.trancheInfo.blockNumber] = walletProvider === 'gnosis' ? new Promise(resolve => resolve(lastConversionRate)) : this.functionsUtil.getTrancheTokenConversionRate(tokenConfig,blockInfo.trancheInfo.blockNumber);
               }
             } else {
               if (!blocksTimestamps[timeStamp]){

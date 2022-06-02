@@ -7082,17 +7082,62 @@ class FunctionsUtil {
 
     return this.setCachedData(cachedDataKey, tokenAllocation);
   }
-  getSushiswapPoolTokenPrice = async (contractName) => {
+  getPoolTokenPrice = async (contractName, protocolContract=null) => {
     const [
+      totalSupply,
       token0_address,
       token1_address,
-      poolReserves,
-      totalSupply
+      poolReserves
     ] = await Promise.all([
+      this.getTokenTotalSupply(contractName),
       this.genericContractCallCached(contractName, 'token0'),
       this.genericContractCallCached(contractName, 'token1'),
-      this.genericContractCallCached(contractName, 'getReserves'),
-      this.getTokenTotalSupply(contractName)
+      this.genericContractCallCached(contractName, 'getReserves')
+    ]);
+
+    if (token0_address && token1_address && poolReserves && totalSupply) {
+      const token0_config = {
+        address: token0_address
+      };
+      const token1_config = {
+        address: token1_address
+      };
+
+      let [
+        token0_price,
+        token1_price
+      ] = await Promise.all([
+        this.getOnChainTokenConversionRate(token0_config, 'latest', protocolContract),
+        this.getOnChainTokenConversionRate(token1_config, 'latest', protocolContract)
+      ]);
+
+      if (token0_price && token1_price) {
+
+        const token0_pool = token0_price.times(this.fixTokenDecimals(poolReserves[0], 18));
+        const token1_pool = token1_price.times(this.fixTokenDecimals(poolReserves[1], 18));
+
+        const totalPoolSize = token0_pool.plus(token1_pool);
+        const poolTokenPrice = totalPoolSize.div(this.fixTokenDecimals(totalSupply, 18));
+
+        // console.log('getPoolTokenPrice',contractName,protocolContract,token0_address,token1_address,token0_price.toFixed(),token1_price.toFixed(),poolTokenPrice.toFixed());
+
+        return poolTokenPrice;
+      }
+    }
+
+    return null;
+  }
+  getSushiswapPoolTokenPrice = async (contractName) => {
+    const [
+      totalSupply,
+      token0_address,
+      token1_address,
+      poolReserves
+    ] = await Promise.all([
+      this.getTokenTotalSupply(contractName),
+      this.genericContractCallCached(contractName, 'token0'),
+      this.genericContractCallCached(contractName, 'token1'),
+      this.genericContractCallCached(contractName, 'getReserves')
     ]);
 
     if (token0_address && token1_address && poolReserves && totalSupply) {
@@ -7115,16 +7160,12 @@ class FunctionsUtil {
       ]);
 
       if (token0_price && token1_price) {
-        // token0_price = this.BNify(1).div(this.BNify(token0_price));
-        // token1_price = this.BNify(1).div(this.BNify(token1_price));
 
         const token0_pool = token0_price.times(this.fixTokenDecimals(poolReserves[0], 18));
         const token1_pool = token1_price.times(this.fixTokenDecimals(poolReserves[1], 18));
 
         const totalPoolSize = token0_pool.plus(token1_pool);
         const poolTokenPrice = totalPoolSize.div(this.fixTokenDecimals(totalSupply, 18));
-
-        // console.log(parseFloat(token0_price),parseFloat(token1_price),parseFloat(poolTokenPrice));
 
         return poolTokenPrice;
       }
@@ -7195,7 +7236,7 @@ class FunctionsUtil {
       }
       path.push(routerMethod === 'getAmountsOut' || invertTokens ? tokenConfigFrom.address : tokenConfigDest.address);
 
-      let decimals = tokenConfigDest.decimals;
+      let decimals = tokenConfigDest.decimals || 18;
       
       // Use decimals of underlying token if set
       if (routerMethod === 'getAmountsOut'){
@@ -7208,6 +7249,8 @@ class FunctionsUtil {
       }
       const one = this.normalizeTokenDecimals(decimals);
       const unires = await this.genericContractCallNoMulticall(protocolContract, routerMethod, [one.toFixed(), path], {}, blockNumber);
+
+      // console.log('getCustomProtocolConversionRate',protocolContract, routerMethod, [one.toFixed(), path], unires);
 
       if (unires) {
         let price = this.BNify(unires[0]).div(one);
@@ -9147,21 +9190,33 @@ class FunctionsUtil {
   getTokenConversionRateField = (token) => {
     return this.getGlobalConfig(['stats', 'tokens', token.toUpperCase(), 'conversionRateField']);
   }
-  convertTrancheTokenBalance = async (tokenBalance, tokenConfig, blockNumber='latest') => {
+  getTrancheTokenConversionRate = async (trancheTokenConfig, blockNumber='latest') => {
     // Check for USD conversion rate
-    tokenBalance = this.BNify(tokenBalance);
+    let trancheTokenConversionRate = this.BNify(1);
 
-    const conversionRateField = this.getTokenConversionRateField(tokenConfig.token);
-    if (!conversionRateField) {
-      return tokenBalance;
-    }
-    if (tokenBalance.gt(0)){
-      const tokenUsdConversionRate = await this.getOnChainTokenConversionRate(tokenConfig,blockNumber);
-      if (tokenUsdConversionRate) {
-        tokenBalance = tokenBalance.times(tokenUsdConversionRate);
+    // Get pool token price
+    const tokenConfig = this.getTokenConfig(trancheTokenConfig.token);
+    if (!!tokenConfig.isPoolToken){
+      // Get custom protocol for conversion rate
+      const protocolContract = tokenConfig.conversionRateProtocolContract;
+      trancheTokenConversionRate = await this.getPoolTokenPrice(trancheTokenConfig.token, protocolContract);
+    // Convert underlying token
+    } else {
+      const conversionRateField = this.getTokenConversionRateField(trancheTokenConfig.token);
+      if (conversionRateField) {
+        trancheTokenConversionRate = await this.getOnChainTokenConversionRate(trancheTokenConfig,blockNumber);
       }
     }
-    return tokenBalance;
+
+    if (!trancheTokenConversionRate || this.BNify(trancheTokenConversionRate).isNaN()){
+      trancheTokenConversionRate = this.BNify(1);
+    }
+
+    return trancheTokenConversionRate;
+  }
+  convertTrancheTokenBalance = async (tokenBalance, trancheTokenConfig, blockNumber='latest') => {
+    const trancheTokenConversionRate = await this.getTrancheTokenConversionRate(trancheTokenConfig, blockNumber);
+    return tokenBalance = this.BNify(tokenBalance).times(trancheTokenConversionRate);
   }
   /*
   Convert token Balance
@@ -9200,23 +9255,26 @@ class FunctionsUtil {
 
     let useWETH = true;
 
-    // Replace from token address
-    if (statsTokenConfig.addressForPriceFrom){
-      DAITokenConfig.address = statsTokenConfig.addressForPriceFrom;
+    if (statsTokenConfig){
+      // Replace from token address
+      if (statsTokenConfig.addressForPriceFrom){
+        DAITokenConfig.address = statsTokenConfig.addressForPriceFrom;
+      }
+
+      // Set custom protocol (uniswap, sushiswap, quickswap)
+      if (!protocolContract && statsTokenConfig.conversionRateProtocolContract){
+        protocolContract = statsTokenConfig.conversionRateProtocolContract;
+      }
+
+      // Override useWETH based on token config
+      if (typeof statsTokenConfig.conversionRateUseWETH !== 'undefined'){
+        useWETH = statsTokenConfig.conversionRateUseWETH;
+      } else {
+        // Don't use WETH in the path
+        useWETH = !statsTokenConfig.addressForPriceFrom;
+      }
     }
 
-    // Set custom protocol (uniswap, sushiswap, quickswap)
-    if (!protocolContract && statsTokenConfig.conversionRateProtocolContract){
-      protocolContract = statsTokenConfig.conversionRateProtocolContract;
-    }
-
-    // Override useWETH based on token config
-    if (typeof statsTokenConfig.conversionRateUseWETH !== 'undefined'){
-      useWETH = statsTokenConfig.conversionRateUseWETH;
-    } else {
-      // Don't use WETH in the path
-      useWETH = !statsTokenConfig.addressForPriceFrom;
-    }
 
     const ToTokenConfig = statsTokenConfig || tokenConfig;
 
