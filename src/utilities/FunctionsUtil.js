@@ -1302,7 +1302,7 @@ class FunctionsUtil {
       let tokensPerSecond = this.BNify(0);
       let lastBlockPoolSize = this.BNify(0);
       let distributionSpeed = this.BNify(0);
-      let firstBlockPoolSize = this.BNify(0);
+      // let firstBlockPoolSize = this.BNify(0);
       let convertedTokensPerYear = this.BNify(0);
 
       const govTokenConfig = this.getTokenConfig(token);
@@ -1368,37 +1368,38 @@ class FunctionsUtil {
 
         const transfers = await this.getEtherscanTokenTransfers(token, tokenConfig.CDO.address, tokenConfig.CDO.address, govTokenConfig.address, trancheConfig.CDORewards.address, tokenConfig.blockNumber);
 
-        if (transfers && transfers.length > 0) {
-          const firstHarvest = transfers.length ? transfers[0] : null;
+        if (transfers && transfers.length >= 2) {
+          const prevHarvest = transfers[transfers.length - 2];
           const latestHarvest = transfers[transfers.length - 1];
-          const firstBlock = firstHarvest ? firstHarvest.blockNumber : tokenConfig.blockNumber;
+          
+          const firstBlock = prevHarvest.blockNumber;
           [
             firstBlockInfo,
             lastBlockInfo,
             conversionRate,
-            firstBlockPoolSize,
+            // firstBlockPoolSize,
             lastBlockPoolSize
           ] = await Promise.all([
             this.getBlockInfo(firstBlock),
             this.getBlockInfo(latestHarvest.blockNumber),
             this.getOnChainTokenConversionRate(govTokenConfig),
-            this.genericContractCallCached(tokenConfig.CDO.name, 'getContractValue', [], {}, firstBlock),
+            // this.genericContractCallCached(tokenConfig.CDO.name, 'getContractValue', [], {}, firstBlock),
             this.genericContractCallCached(tokenConfig.CDO.name, 'getContractValue', [], {}, latestHarvest.blockNumber)
           ]);
 
           if (firstBlockInfo && lastBlockInfo) {
             lastBlockPoolSize = this.fixTokenDecimals(lastBlockPoolSize, tokenConfig.CDO.decimals);
-            firstBlockPoolSize = this.fixTokenDecimals(firstBlockPoolSize, tokenConfig.CDO.decimals);
-            let poolSize = firstBlockPoolSize.plus(lastBlockPoolSize).div(2);
+            let poolSize = lastBlockPoolSize;
 
             const elapsedBlocks = latestHarvest.blockNumber - firstBlock;
             const elapsedSeconds = lastBlockInfo.timestamp - firstBlockInfo.timestamp;
 
             lastAmount = this.fixTokenDecimals(latestHarvest.returnValues.value, govTokenConfig.decimals);
-            totalAmount = transfers.reduce((total, t) => {
-              total = total.plus(this.fixTokenDecimals(t.returnValues.value, govTokenConfig.decimals));
-              return total;
-            }, this.BNify(0));
+            totalAmount = this.fixTokenDecimals(latestHarvest.returnValues.value, govTokenConfig.decimals);
+            // totalAmount = transfers.reduce((total, t) => {
+            //   total = total.plus(this.fixTokenDecimals(t.returnValues.value, govTokenConfig.decimals));
+            //   return total;
+            // }, this.BNify(0));
 
             poolSize = await this.convertTrancheTokenBalance(poolSize,tokenConfig);
 
@@ -1417,7 +1418,7 @@ class FunctionsUtil {
               lastAmount,
               totalAmount,
               tokensPerDay,
-              firstHarvest,
+              prevHarvest,
               apr: tokenApr,
               apy: tokenApy,
               tokensPerYear,
@@ -1429,7 +1430,7 @@ class FunctionsUtil {
               convertedTokensPerYear
             };
 
-            // console.log(token, (conversionRate? conversionRate.toFixed():null), totalAmount.toFixed(),elapsedSeconds,tokensPerYear.toFixed(),convertedTokensPerYear.toFixed(),poolSize.toFixed(),tokenApr.toFixed());
+            // console.log(token, prevHarvest.hash, latestHarvest.hash, (conversionRate? conversionRate.toFixed():null), totalAmount.toFixed(),elapsedSeconds,tokensPerYear.toFixed(),convertedTokensPerYear.toFixed(),poolSize.toFixed(),tokenApr.toFixed());
           }
         }
       }
