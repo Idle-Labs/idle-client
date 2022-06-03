@@ -1,6 +1,5 @@
 import React from 'react'
 import moment from 'moment';
-import connectors from '../App/connectors';
 import { useWeb3Context } from 'web3-react';
 import GeneralUtil from "../utilities/GeneralUtil";
 import ImageButton from '../ImageButton/ImageButton';
@@ -56,24 +55,24 @@ export default function Web3ConnectionButtons(props) {
   const isDapper = GeneralUtil.hasDapper();
   const isMetamask = GeneralUtil.hasMetaMask();
   const isTrustWallet = GeneralUtil.isTrustWallet();
-  const isGnosisSafe = !!connectors.gnosis.provider.safe;
   const isCoinbaseWallet = GeneralUtil.isCoinbaseWallet();
+  const isGnosisSafe = !!props.connectors.gnosis.provider.safe;
   const browserWalletDetected = isMetamask || isOpera || isDapper || isCoinbaseWallet || isTrustWallet;
   
   const allowedConnectors = props.allowedConnectors;
   const registerPage = props.registerPage;
 
-  if (connectors.Portis) {
+  if (props.connectors.Portis) {
     if (registerPage) {
-      connectors.Portis.options = connectors.Portis.options || {};
-      connectors.Portis.options.registerPageByDefault = true;
+      props.connectors.Portis.options = props.connectors.Portis.options || {};
+      props.connectors.Portis.options.registerPageByDefault = true;
     } else {
-      connectors.Portis.options = connectors.Portis.options || {};
-      connectors.Portis.options.registerPageByDefault = false;
+      props.connectors.Portis.options = props.connectors.Portis.options || {};
+      props.connectors.Portis.options.registerPageByDefault = false;
     }
   }
 
-  let basicConnectorsName = Object.keys(connectors).filter(c => c !== 'Infura');
+  let basicConnectorsName = Object.keys(props.connectors).filter(c => c !== 'Infura');
 
   if (allowedConnectors) {
     basicConnectorsName = basicConnectorsName.filter(n => allowedConnectors.map((v) => { return v.toLowerCase(); }).indexOf(n.toLowerCase()) !== -1 );

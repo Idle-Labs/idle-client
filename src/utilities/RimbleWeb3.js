@@ -256,7 +256,7 @@ class RimbleTransaction extends React.Component {
 
     if ((prevProps.connectorName !== this.props.connectorName && this.props.connectorName) || (this.props.context.active && prevProps.context.active !== this.props.context.active)){
       // console.log('componentDidUpdate',prevProps.connectorName,this.props.connectorName,prevProps.context.active,this.props.context.active,this.state.networkInitialized);
-      this.initWeb3();
+      this.checkNetwork(null,this.initWeb3);
     } else if ( prevProps.context !== this.props.context ){
       if (this.props.context.error instanceof Error && this.props.context.error.message.length){
         const errorMessage = this.props.context.error.message;
@@ -273,17 +273,17 @@ class RimbleTransaction extends React.Component {
         } else if (!isWalletConnectClosedModalError) {
           this.openConnectionErrorModal(null,errorMessage);
         } else {
+          this.checkNetwork(null,this.initWeb3);
           // console.log('initWeb3_2',prevProps.connectorName,this.props.connectorName,prevProps.context.active,this.props.context.active);
-          this.initWeb3();
         }
       // WalletConnect double trigger initWeb3
       } else if (this.props.context.active && this.props.context.connectorName!=='WalletConnect' && this.props.connectorName==='WalletConnect'){
         // console.log('initWeb3_3',prevProps.context.connectorName,this.props.context.connectorName,prevProps.context.active,this.props.context.active);
-        this.initWeb3();
+        this.checkNetwork(null,this.initWeb3);
       }
     } else if ((this.props.context.connectorName && this.props.context.connectorName !== this.props.connectorName) || prevProps.customAddress !== this.props.customAddress){
       // console.log('initWeb3_4',prevProps.context.connectorName,this.props.context.connectorName,prevProps.context.active,this.props.context.active);
-      this.initWeb3();
+      this.checkNetwork(null,this.initWeb3);
     }
 
     const currentNetworkChanged = this.state.networkInitialized && prevState.network.current.id !== this.state.network.current.id;
@@ -425,6 +425,9 @@ class RimbleTransaction extends React.Component {
     // if (metamaskProvider && (!window.ethereum || window.ethereum !== metamaskProvider)){
     //   window.ethereum = metamaskProvider;
     // }
+
+    // console.log('initWeb3','networkInitialized',this.state.networkInitialized);
+
     if (!this.state.networkInitialized){
       return false;
     }
@@ -469,6 +472,7 @@ class RimbleTransaction extends React.Component {
     }
 
     let web3 = useWeb3Provider ? context.library : null;
+    // let web3 = context.library;
 
     // 0x Instant Wallet Provider Injection
     if (!window.RimbleWeb3_context || context.connectorName !== window.RimbleWeb3_context.connectorName){
@@ -572,12 +576,10 @@ class RimbleTransaction extends React.Component {
       web3 = web3Providers[networkId];
     }
 
-    // console.log('initWeb3',connectorName,web3,context,web3Provider/*,web3Provider===context.library.currentProvider*/);
-
-    const web3Callback = async (initWeb3Index) => {
+    const web3Callback = async (initWeb3Index=null) => {
 
       // console.log('web3Callback - CHECK INDEX',initWeb3Index,this.state.initWeb3Index,initWeb3Index === this.state.initWeb3Index);
-      if (initWeb3Index !== this.state.initWeb3Index){
+      if (initWeb3Index && initWeb3Index !== this.state.initWeb3Index){
         return false;
       }
 
@@ -593,7 +595,7 @@ class RimbleTransaction extends React.Component {
         this.props.callbackWeb3(this.state.web3);
       }
 
-      // console.log('web3Callback',this.state.network,this.state.biconomy,this.state.web3);
+      // console.log('web3Callback',initWeb3Index,this.state.network.current.id,this.state.network.required.id,this.state.web3);
 
       // console.log(this.functionsUtil.strToMoment().format('HH:mm:ss'),'initWeb3 - web3Callback');
 
@@ -654,18 +656,17 @@ class RimbleTransaction extends React.Component {
     const originalWeb3 = web3;
     const initWeb3Index = parseInt(this.state.initWeb3Index)+1;
 
-
     this.setState({
       web3Infura,
       web3Polygon,
       initWeb3Index,
       web3Providers,
-    },() => {
-      // this.checkNetwork();
     });
 
     const currentNetworkId = this.state.network.current.id;
     const biconomyInfo = globalConfigs.network.providers.biconomy;
+
+    // console.log('initWeb3',initWeb3Index,connectorName,web3,context,web3Provider);
 
     // console.log('check biconomy enabled',this.state.network,currentNetworkId,biconomyInfo.supportedNetworks.includes(currentNetworkId));
 
@@ -726,7 +727,8 @@ class RimbleTransaction extends React.Component {
     } else {
       if (web3 !== this.state.web3){
         this.setState({
-          web3
+          web3,
+          biconomy:false
         }, () => web3Callback(initWeb3Index) );
       } else if (context.account || forceCallback){
         web3Callback(initWeb3Index);
@@ -1321,8 +1323,8 @@ class RimbleTransaction extends React.Component {
     };
    }
 
-   getCurrentNetwork = async (networkId=null) => {
-     const currentWeb3 = this.functionsUtil.getCurrentWeb3();
+   getCurrentNetwork = async (networkId=null,defaultWeb3=null) => {
+     const currentWeb3 = defaultWeb3 || this.functionsUtil.getCurrentWeb3();
 
      networkId = parseInt(networkId) || await currentWeb3.eth.net.getId();
      
@@ -1349,11 +1351,14 @@ class RimbleTransaction extends React.Component {
     }
   }
 
-  checkNetwork = async (networkId=null) => {
+  checkNetwork = async (networkId=null,callback=null) => {
     const network = {...this.state.network};
 
+    // Get selected web3 provider
+    const defaultWeb3 = this.props.context && this.props.context.active && this.props.context.library ? this.props.context.library : null;
+
     network.required = this.getRequiredNetwork(networkId);
-    network.current = await this.getCurrentNetwork(networkId);
+    network.current = await this.getCurrentNetwork(networkId,defaultWeb3);
 
     const networkInitialized = !!network.current.id;
     // Network is correct if not connected
@@ -1365,12 +1370,21 @@ class RimbleTransaction extends React.Component {
 
     const updateNetwork = !this.state.network.current.id || currentNetworkChanged || requiredNetworkChanged || !this.state.networkInitialized;
 
-    // console.log('checkNetwork','networkId:'+networkId,', curr: '+this.state.network.current.id,', netID: '+network.current.id,', required: '+network.required.id,', isCorrectNetwork: '+network.isCorrectNetwork,', update: '+updateNetwork);
+    // console.log('checkNetwork','defaultWeb3:',defaultWeb3,'networkId:'+networkId,', curr: '+this.state.network.current.id,', netID: '+network.current.id,', required: '+network.required.id,', isCorrectNetwork: '+network.isCorrectNetwork,'networkInitialized: '+networkInitialized,', update: '+updateNetwork);
+
     if (updateNetwork){
       this.setState({
         network,
         networkInitialized
+      },()=>{
+        if (typeof callback === 'function'){
+          callback();
+        }
       });
+    } else {
+      if (typeof callback === 'function'){
+        callback();
+      }
     }
 
     return network;
@@ -2014,6 +2028,7 @@ class RimbleTransaction extends React.Component {
           network={this.state.network}
           account={this.state.account}
           isMobile={this.props.isMobile}
+          connectors={this.props.connectors}
           initAccount={this.state.initAccount}
           setConnector={this.props.setConnector}
           validateAccount={this.state.validateAccount}

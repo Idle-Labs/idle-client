@@ -2187,7 +2187,7 @@ const globalConfigs = {
         enabled: true,
         enableLogin: false,
         supportedNetworks: [1, 42],
-        disabledWallets: ["authereum","gnosis"],
+        disabledWallets: ["authereum","gnosis","walletconnect"],
         endpoints: {
           limits: "https://api.biconomy.io/api/v1/dapp/checkLimits"
         },

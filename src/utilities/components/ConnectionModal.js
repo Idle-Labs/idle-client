@@ -363,6 +363,7 @@ class ConnectionModal extends React.Component {
                 width={1/2}
                 isMobile={this.props.isMobile}
                 setConnector={this.setConnector}
+                connectors={this.props.connectors}
                 connectionCallback={this.closeModal}
                 size={this.props.isMobile ? 'medium' : 'large'}
                 setCustomAddress={this.setCustomAddress.bind(this)}

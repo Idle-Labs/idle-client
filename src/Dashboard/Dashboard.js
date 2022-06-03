@@ -453,15 +453,16 @@ class Dashboard extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     const accountChanged = nextProps.account !== this.props.account;
     const stateChanged = JSON.stringify(this.state) !== JSON.stringify(nextState);
+    const networkInitializedChanged = this.props.networkInitialized !== nextProps.networkInitialized;
+    const networkChanged = JSON.stringify(this.props.network) !== JSON.stringify(nextProps.network)
     const paramsChanged = JSON.stringify(this.props.match.params) !== JSON.stringify(nextProps.match.params);
     const strategyChanged = nextProps.selectedStrategy && nextProps.selectedStrategy !== this.props.selectedStrategy;
     const availableTokensChanged = JSON.stringify(nextProps.availableTokens) !== JSON.stringify(this.props.availableTokens);
     const requiredNetworkChanged = JSON.stringify(nextProps.network.required) !== JSON.stringify(this.props.network.required);
-    const networkChanged = (!this.props.networkInitialized && nextProps.networkInitialized) || requiredNetworkChanged;
     const accountInizialized = nextProps.accountInizialized && nextProps.accountInizialized !== this.props.accountInizialized;
     const contractsInitialized = nextProps.contractsInitialized && nextProps.contractsInitialized !== this.props.contractsInitialized;
     const contractsChanged = this.props.contracts.length !== nextProps.contracts.length || this.props.contracts.map( c => c.name ).filter( contractName => !nextProps.contracts.map( c => c.name ).includes(contractName) ).length>0;
-    return stateChanged || contractsChanged || paramsChanged || accountChanged || networkChanged || strategyChanged || availableTokensChanged || requiredNetworkChanged || accountInizialized || contractsInitialized;
+    return stateChanged || contractsChanged || paramsChanged || accountChanged || networkInitializedChanged || networkChanged || strategyChanged || availableTokensChanged || requiredNetworkChanged || accountInizialized || contractsInitialized;
   }
 
   async componentDidUpdate(prevProps, prevState) {

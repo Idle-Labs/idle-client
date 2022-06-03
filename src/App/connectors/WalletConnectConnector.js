@@ -3,19 +3,24 @@ import Connector from 'web3-react/dist/connectors/connector';
 export default class WalletConnectConnector extends Connector {
 
   constructor(kwargs) {
-    const { api: WalletConnectProvider, defaultNetwork, infuraId, ...rest } = kwargs;
+    const { api: WalletConnectProvider, defaultNetwork, infuraId, rpc, ...rest } = kwargs;
     super(rest);
 
+    this.rpc = rpc;
     this.provider = null;
-    this.WalletConnectProvider = WalletConnectProvider;
     this.infuraId = infuraId;
+    this.WalletConnectProvider = WalletConnectProvider;
   }
 
   async onActivation() {
     if (!this.provider) {
-      this.provider = new this.WalletConnectProvider({
+      const params = {
         infuraId:this.infuraId
-      });
+      };
+      if (this.rpc){
+        params.rpc = this.rpc;
+      }
+      this.provider = new this.WalletConnectProvider(params);
     }
 
     if (this.provider){
